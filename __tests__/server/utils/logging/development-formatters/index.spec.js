@@ -14,50 +14,41 @@
  * permissions and limitations under the License.
  */
 
-import yargs from 'yargs';
-
-jest.mock('yargs', () => ({ argv: {} }));
+jest.mock('../../../../../src/server/utils/logging/development-formatters/verbose', () => 'verbose export');
+jest.mock('../../../../../src/server/utils/logging/development-formatters/friendly', () => 'friendly export');
 
 describe('index', () => {
   let index;
-  let verbose;
-  let friendly;
+
+  beforeEach(() => {
+    jest.resetModules();
+  });
 
   function load(logFormat = '') {
-    jest.resetModules();
-    yargs.argv = { logFormat };
-    jest.mock('../../../../../src/server/utils/logging/development-formatters/verbose', () => ({
-      formatter: jest.fn(),
-      beforeWrite: jest.fn(),
-      afterWrite: jest.fn(),
+    jest.doMock('yargs', () => ({
+      argv: {
+        logFormat,
+      },
     }));
-    jest.mock('../../../../../src/server/utils/logging/development-formatters/friendly', () => ({
-      formatter: jest.fn(),
-      beforeWrite: jest.fn(),
-      afterWrite: jest.fn(),
-    }));
-
-    verbose = require('../../../../../src/server/utils/logging/development-formatters/verbose').default;
-    friendly = require('../../../../../src/server/utils/logging/development-formatters/friendly').default;
-    index = require('../../../../../src/server/utils/logging/development-formatters').default;
+    index = require('../../../../../src/server/utils/logging/development-formatters');
   }
 
   it('returns the friendly formatter by default', () => {
     process.stdout.clearLine = jest.fn();
     load();
-    expect(index).toBe(friendly);
+    expect(index).toBe('friendly export');
   });
 
   it('returns the verbose formatter when give CLI argument logging=verbose', () => {
     process.stdout.clearLine = jest.fn();
     load('verbose');
-    expect(index).toBe(verbose);
+    expect(index).toBe('verbose export');
   });
 
   it('returns the verbose formatter when stdout does not support fancy CLIs', () => {
     // ex: being piped to a file, we don't need/want the spinners
     delete process.stdout.clearLine;
     load('verbose');
-    expect(index).toBe(verbose);
+    expect(index).toBe('verbose export');
   });
 });
