@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`verbose formatter pretty-prints an incoming request 1`] = `"<red>error</red>: 🌍 ➡ 💻 <green>200</green> OK GET https://example.com/resource 12/13ms"`;
+
+exports[`verbose formatter pretty-prints an outgoing request 1`] = `"<red>error</red>: 💻 ➡ 🗄️ <green>200</green> OK GET https://example.com/resource <green>13</green>ms"`;
+
+exports[`verbose formatter prints the level with color 1`] = `"<red>error</red>: hello"`;
+
+exports[`verbose formatter unknown type is formatted by util.format 1`] = `"<red>error</red>: hello, world"`;

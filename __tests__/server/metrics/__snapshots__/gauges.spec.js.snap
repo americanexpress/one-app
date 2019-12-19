@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`gauges incrementGauge throws an error if the gauge does not exist 1`] = `"unable to find gauge nope, please create it first"`;
+
+exports[`gauges resetGauge throws an error if the gauge does not exist 1`] = `"unable to find gauge nope, please create it first"`;
+
+exports[`gauges setGauge throws an error if the gauge does not exist 1`] = `"unable to find gauge nope, please create it first"`;

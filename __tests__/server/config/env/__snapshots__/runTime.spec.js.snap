@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`runTime NODE_ENV only allows for values to be set to either development or production 1`] = `
+Array [
+  "development",
+  "production",
+]
+`;
+
+exports[`runTime ONE_CLIENT_ROOT_MODULE_NAME validates that environment value is defined 1`] = `"The \`ONE_CLIENT_ROOT_MODULE_NAME\` environment variable must be defined."`;

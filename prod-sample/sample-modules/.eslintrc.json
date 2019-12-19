@@ -1,0 +1,6 @@
+{
+  "extends": "amex",
+  "rules": {
+    "import/no-unresolved": "warn"
+  }
+}

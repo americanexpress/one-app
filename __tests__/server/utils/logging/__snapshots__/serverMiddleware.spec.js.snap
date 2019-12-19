@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`serverMiddleware logs the request & response when the response cannot finish 1`] = `
+Array [
+  Object {
+    "request": Object {
+      "address": Object {
+        "uri": "https://example.com/resource",
+      },
+      "direction": "in",
+      "metaData": Object {
+        "correlationId": "123",
+        "forwarded": null,
+        "forwardedFor": null,
+        "host": "example.com",
+        "locale": undefined,
+        "location": undefined,
+        "method": "GET",
+        "referrer": "https://example.com/other-place",
+        "userAgent": "Browser/8.0 (compatible; WXYZ 100.0; Doors LQ 81.4; Boat/1.0)",
+      },
+      "protocol": "https",
+      "statusCode": undefined,
+      "statusText": undefined,
+      "timings": Object {
+        "duration": 12,
+        "ttfb": 0,
+      },
+    },
+    "type": "request",
+  },
+]
+`;
+
+exports[`serverMiddleware logs the request & response when the response finishes 1`] = `
+Array [
+  Object {
+    "request": Object {
+      "address": Object {
+        "uri": "https://example.com/resource",
+      },
+      "direction": "in",
+      "metaData": Object {
+        "correlationId": "123",
+        "forwarded": null,
+        "forwardedFor": null,
+        "host": "example.com",
+        "locale": undefined,
+        "location": undefined,
+        "method": "GET",
+        "referrer": "https://example.com/other-place",
+        "userAgent": "Browser/8.0 (compatible; WXYZ 100.0; Doors LQ 81.4; Boat/1.0)",
+      },
+      "protocol": "https",
+      "statusCode": undefined,
+      "statusText": undefined,
+      "timings": Object {
+        "duration": 12,
+        "ttfb": 0,
+      },
+    },
+    "type": "request",
+  },
+]
+`;
+
+exports[`serverMiddleware setConfigureRequestLog updates configureRequestLog function 1`] = `
+Object {
+  "request": Object {
+    "address": Object {
+      "uri": "https://example.com/resource",
+    },
+    "direction": "in",
+    "metaData": Object {
+      "correlationId": "123",
+      "forwarded": null,
+      "forwardedFor": null,
+      "host": "example.com",
+      "locale": undefined,
+      "location": undefined,
+      "method": "GET",
+      "referrer": "https://example.com/other-place",
+      "userAgent": "Browser/8.0 (compatible; WXYZ 100.0; Doors LQ 81.4; Boat/1.0)",
+    },
+    "protocol": "https",
+    "statusCode": undefined,
+    "statusText": undefined,
+    "timings": Object {
+      "duration": 12,
+      "ttfb": 0,
+    },
+  },
+  "type": "request",
+}
+`;

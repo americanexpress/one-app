@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Tests that require Docker setup one-app successfully started holocron needy frank can make universal requests to an api with iguazu with ssr disabled should timeout on client if request exceeds six seconds 1`] = `
+Object {
+  "procedures": Object {
+    "pendingCalls": Object {
+      "readPosts": Object {},
+    },
+    "procedureCaches": Object {
+      "readPosts": Object {
+        "de48373b416b8d2af053d04402c35d194568ffdd": Object {
+          "message": "https://extra-slow.api.frank/posts after 6000ms",
+          "name": "TimeoutError",
+          "stack": StringContaining "Error: https://extra-slow.api.frank/posts after 6000ms",
+        },
+      },
+    },
+  },
+  "resources": Object {},
+}
+`;
+
+exports[`Tests that require Docker setup one-app successfully started holocron needy frank can make universal requests to an api with iguazu with ssr enabled should have SSR preload module state with readPosts 1`] = `
+Object {
+  "procedures": Object {
+    "pendingCalls": Object {
+      "readPosts": Object {},
+    },
+    "procedureCaches": Object {
+      "readPosts": Object {
+        "1f6e715c92acdef7d4af0940981c09e450a52324": Array [
+          Object {
+            "author": "typicode",
+            "id": 1,
+            "title": "json-server",
+          },
+        ],
+      },
+    },
+  },
+  "resources": Object {},
+}
+`;

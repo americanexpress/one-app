@@ -1,0 +1,155 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`stateConfig methods stateConfig with dev endpoint config should show dev endpoint supplied config 1`] = `
+Object {
+  "someOtherApiUrl": "http://127.0.0.1:3002/some-other-api",
+}
+`;
+
+exports[`stateConfig methods stateConfig with dev endpoint config should show dev endpoint supplied config 2`] = `
+Object {
+  "someOtherApiUrl": "http://127.0.0.1:3002/some-other-api",
+}
+`;
+
+exports[`stateConfig methods stateConfig with env vars should ignore env vars not prefixed with ONE 1`] = `Object {}`;
+
+exports[`stateConfig methods stateConfig with env vars should ignore env vars not prefixed with ONE 2`] = `Object {}`;
+
+exports[`stateConfig methods stateConfig with env vars should parse string undefined as js undefined 1`] = `
+Object {
+  "fakeSetting": undefined,
+}
+`;
+
+exports[`stateConfig methods stateConfig with env vars should parse string undefined as js undefined 2`] = `
+Object {
+  "fakeSetting": undefined,
+}
+`;
+
+exports[`stateConfig methods stateConfig with env vars should set client and server config from env var and merge with other variables 1`] = `
+Object {
+  "anotherSetting": "another-fake-setting",
+  "fakeSetting": "client-fake-setting",
+}
+`;
+
+exports[`stateConfig methods stateConfig with env vars should set client and server config from env var and merge with other variables 2`] = `
+Object {
+  "anotherSetting": "another-fake-setting",
+  "fakeSetting": "server-fake-setting",
+}
+`;
+
+exports[`stateConfig methods stateConfig with env vars should set client env var to client config but not override server config if var already exists 1`] = `
+Object {
+  "fakeSetting": "client-fake-setting",
+}
+`;
+
+exports[`stateConfig methods stateConfig with env vars should set client env var to client config but not override server config if var already exists 2`] = `
+Object {
+  "fakeSetting": "server-fake-setting",
+}
+`;
+
+exports[`stateConfig methods stateConfig with env vars should set client env var to server and client config 1`] = `
+Object {
+  "fakeSetting": "client-fake-setting",
+}
+`;
+
+exports[`stateConfig methods stateConfig with env vars should set client env var to server and client config 2`] = `
+Object {
+  "fakeSetting": "client-fake-setting",
+}
+`;
+
+exports[`stateConfig methods stateConfig with env vars should set server env var to just server config not client config 1`] = `Object {}`;
+
+exports[`stateConfig methods stateConfig with env vars should set server env var to just server config not client config 2`] = `
+Object {
+  "fakeSetting": "server-fake-setting",
+}
+`;
+
+exports[`stateConfig methods stateConfig with module config should backup and restore process module config 1`] = `
+Object {
+  "someApiUrl": "https://internet-origin-qa.example.com/some-api/v1",
+}
+`;
+
+exports[`stateConfig methods stateConfig with module config should backup and restore process module config 2`] = `
+Object {
+  "someApiUrl": "https://intranet-origin-qa.example.com/some-api/v1",
+}
+`;
+
+exports[`stateConfig methods stateConfig with module config should not set config if provided not a string or object 1`] = `Object {}`;
+
+exports[`stateConfig methods stateConfig with module config should not set config if provided not a string or object 2`] = `Object {}`;
+
+exports[`stateConfig methods stateConfig with module config should set config if provided a string 1`] = `
+Object {
+  "someApiUrl": "https://internet-origin-string.example.com/some-api/v1",
+}
+`;
+
+exports[`stateConfig methods stateConfig with module config should set config if provided a string 2`] = `
+Object {
+  "someApiUrl": "https://internet-origin-string.example.com/some-api/v1",
+}
+`;
+
+exports[`stateConfig methods stateConfig with module config should set config with matching client server variables 1`] = `
+Object {
+  "someApiUrl": "https://internet-origin-qa.example.com/some-api/v1",
+}
+`;
+
+exports[`stateConfig methods stateConfig with module config should set config with matching client server variables 2`] = `
+Object {
+  "someApiUrl": "https://intranet-origin-qa.example.com/some-api/v1",
+}
+`;
+
+exports[`stateConfig methods stateConfig with module config should throw if ONE_CONFIG_ENV is not set on parsing client 1`] = `"Failed to parse an object in the tenant root configuration due to missing ONE_CONFIG_ENV."`;
+
+exports[`stateConfig methods stateConfig with module config should throw if ONE_CONFIG_ENV is not set on parsing server 1`] = `"Failed to parse an object in the tenant root configuration due to missing ONE_CONFIG_ENV."`;
+
+exports[`stateConfig methods stateConfig with module config should throw if client variables are supplied without server variables 1`] = `
+"Root module attempted to set the following non-overrideable options for the client but not the server:
+  someApiUrl"
+`;
+
+exports[`stateConfig methods stateConfig with module config should throw if server variables are supplied without client variables 1`] = `
+"Root module attempted to set the following non-overrideable options for the server but not the client:
+  someApiUrl"
+`;
+
+exports[`stateConfig methods stateConfig with priorities of should prioritize dev endpoint over env 1`] = `
+Object {
+  "anotherSetting": "another-fake-setting",
+  "fakeSetting": "client-fake-setting",
+  "someOtherApiUrl": "http://127.0.0.1:3002/some-other-api",
+}
+`;
+
+exports[`stateConfig methods stateConfig with priorities of should prioritize dev endpoint over env 2`] = `
+Object {
+  "anotherSetting": "another-fake-setting",
+  "fakeSetting": "server-fake-setting",
+  "someOtherApiUrl": "http://127.0.0.1:3002/some-other-api",
+}
+`;
+
+exports[`stateConfig methods stateConfig with priorities of should throw if env overrides module config 1`] = `
+"Root module attempted to set the following non-overrideable options that have been set by env var:
+  someOtherApiUrl"
+`;
+
+exports[`stateConfig methods stateConfig with priorities of should throw if module config tries to override env var 1`] = `
+"Root module attempted to set the following non-overrideable options that have been set by env var:
+  someOtherApiUrl"
+`;

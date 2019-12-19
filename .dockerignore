@@ -1,0 +1,35 @@
+# node & npm
+node_modules
+*.log
+
+# project
+.dev
+static
+__mocks__
+__tests__
+vendors
+.editorconfig
+.gitignore
+.git
+Dockerfile
+.dockerignore
+build
+one*.tgz
+lib
+.webpack-stats*
+.build-meta.json
+bundle.integrity.manifest.json
+*.md
+test-setup.js
+renovate.json
+dangerfile.js
+.github
+CODEOWNERS
+
+# test
+test-results
+.jest-cache
+prod-sample
+
+# env
+.env*

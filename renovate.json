@@ -1,0 +1,19 @@
+{
+  "semanticCommits": true,
+  "major": {
+    "ignoreDeps": [
+      "@americanexpress/one-app-ducks",
+      "@americanexpress/one-app-router",
+      "holocron",
+      "holocron-module-route",
+      "immutable",
+      "prop-types",
+      "react",
+      "react-dom",
+      "react-helmet",
+      "react-redux",
+      "redux",
+      "reselect"
+    ]
+  }
+}

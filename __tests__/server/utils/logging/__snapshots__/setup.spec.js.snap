@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`setup logging outgoing requests is level info 1`] = `
+Array [
+  Object {
+    "request": Object {
+      "address": Object {
+        "uri": "https://example.com/place",
+      },
+      "direction": "out",
+      "metaData": Object {
+        "correlationId": "123",
+        "method": "GET",
+      },
+      "protocol": "https",
+      "statusCode": 200,
+      "statusText": "OK",
+      "timings": Object {
+        "duration": 12,
+      },
+    },
+    "type": "request",
+  },
+]
+`;

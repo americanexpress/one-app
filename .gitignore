@@ -1,0 +1,33 @@
+# node/npm
+node_modules
+*.log
+
+# build
+build
+static
+mocks
+lib
+dist
+lastBuild.json
+stats.json
+.dev
+.sass_cache
+.webpack-stats*
+.build-meta.json
+bundle.integrity.manifest.json
+*.tgz
+
+# test
+test-results
+.jest-cache
+
+# sample prod setup
+prod-sample/nginx/origin-statics
+*.pem
+*.crt
+*.key
+sample-module-bundles
+
+# misc
+.DS_Store
+.idea

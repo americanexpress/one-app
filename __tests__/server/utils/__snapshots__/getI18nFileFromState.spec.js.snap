@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getI18nFileFromState intl global duck locale en-BH has the right file 1`] = `"i18n/en.js"`;
+
+exports[`getI18nFileFromState intl global duck locale en-XA has the right file 1`] = `"i18n/en.js"`;
+
+exports[`getI18nFileFromState intl global duck locale en-XB has the right file 1`] = `"i18n/en.js"`;
+
+exports[`getI18nFileFromState intl global duck locale es-ES has the right file 1`] = `"i18n/es-ES.js"`;
+
+exports[`getI18nFileFromState intl global duck locale nb-NO has the right file 1`] = `"i18n/nb-NO.js"`;
+
+exports[`getI18nFileFromState intl global duck locale nl-BE has the right file 1`] = `"i18n/nl-BE.js"`;
+
+exports[`getI18nFileFromState intl global duck locale nl-NL has the right file 1`] = `"i18n/nl-NL.js"`;
+
+exports[`getI18nFileFromState intl global duck locale zh-TW has the right file 1`] = `"i18n/zh.js"`;

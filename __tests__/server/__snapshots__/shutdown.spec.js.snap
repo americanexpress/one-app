@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`shutdown SIGINT forcibly exits if still running later on 1`] = `10000`;
+
+exports[`shutdown SIGINT writes an error message if still running later on 1`] = `
+Array [
+  Array [
+    "still running after 10s, forcibly shutting down",
+  ],
+  Array [
+    "shutting down, forcibly stopping node",
+  ],
+]
+`;
+
+exports[`shutdown SIGINT writes an error message when calling process.exit 1`] = `
+Array [
+  Array [
+    "shutting down, forcibly stopping node",
+  ],
+]
+`;
+
+exports[`shutdown SIGTERM forcibly exits if still running later on 1`] = `10000`;
+
+exports[`shutdown SIGTERM writes an error message if still running later on 1`] = `
+Array [
+  Array [
+    "still running after 10s, forcibly shutting down",
+  ],
+  Array [
+    "shutting down, forcibly stopping node",
+  ],
+]
+`;
+
+exports[`shutdown SIGTERM writes an error message when calling process.exit 1`] = `
+Array [
+  Array [
+    "shutting down, forcibly stopping node",
+  ],
+]
+`;
+
+exports[`shutdown shutdown logs to the console 1`] = `
+Array [
+  Array [
+    "shutting down, closing servers",
+  ],
+]
+`;

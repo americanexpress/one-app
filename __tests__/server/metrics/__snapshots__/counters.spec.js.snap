@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`counters incrementCounter throws an error if the counter does not exist 1`] = `"unable to find counter nope, please create it first"`;

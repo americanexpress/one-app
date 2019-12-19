@@ -1,0 +1,8 @@
+{
+  "rules": {
+    // these scripts should be used only during development
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": true, "optionalDependencies": true, "peerDependencies": false}],
+    // we need to message the user for DX
+    "no-console": 0
+  }
+}

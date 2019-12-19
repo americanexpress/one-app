@@ -1,0 +1,24 @@
+{
+  "name": "preview-frank",
+  "version": "0.0.0",
+  "description": "Module to allow for the standalone rendering of another module.",
+  "scripts": {
+    "prebuild": "npm run clean",
+    "build": "bundle-module",
+    "clean": "rimraf build"
+  },
+  "dependencies": {
+    "@americanexpress/one-app-ducks": "^4.0.0",
+    "holocron": "^1.0.0",
+    "lodash.get": "^4.4.2",
+    "prop-types": "^15.5.9",
+    "react": "^16.0.0",
+    "react-redux": "^7.1.1",
+    "redux": "^4.0.4"
+  },
+  "devDependencies": {
+    "@americanexpress/one-app-bundler": "^6.0.0",
+    "babel-preset-amex": "^3.1.0",
+    "rimraf": "^2.5.2"
+  }
+}

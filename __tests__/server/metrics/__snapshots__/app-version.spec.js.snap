@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app-version creates a gauge named info 1`] = `
+Array [
+  Object {
+    "help": "One App version info",
+    "labelNames": Array [
+      "version",
+      "major",
+      "minor",
+      "patch",
+      "prerelease",
+      "build",
+    ],
+    "name": "oneapp_version_info",
+  },
+]
+`;
+
+exports[`app-version exports the metric names 1`] = `
+Object {
+  "info": "oneapp_version_info",
+}
+`;

@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createRequestHtmlFragment should catch any errors and call the next middleware 1`] = `
+Array [
+  "error creating request HTML fragment for http://example.com/request",
+  [TypeError: Cannot read property 'dispatch' of undefined],
+]
+`;
+
+exports[`createRequestHtmlFragment should preload data for matched route components 1`] = `
+Array [
+  Object {
+    "name": "root",
+    "props": Object {
+      "location": Url {
+        "auth": null,
+        "hash": null,
+        "host": "example.com",
+        "hostname": "example.com",
+        "href": "http://example.com/request",
+        "path": "/request",
+        "pathname": "/request",
+        "port": null,
+        "protocol": "http:",
+        "query": null,
+        "search": null,
+        "slashes": true,
+      },
+      "params": Object {
+        "hi": "there?",
+      },
+      "route": Object {
+        "moduleName": "root",
+        "path": "/",
+      },
+      "router": Object {
+        "createHref": [Function],
+        "createKey": [Function],
+        "createLocation": [Function],
+        "createPath": [Function],
+        "getCurrentLocation": [Function],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "listen": [Function],
+        "listenBefore": [Function],
+        "push": [Function],
+        "replace": [Function],
+        "transitionTo": [Function],
+      },
+      "routes": Array [
+        Object {
+          "moduleName": "root",
+          "path": "/",
+        },
+      ],
+    },
+  },
+]
+`;

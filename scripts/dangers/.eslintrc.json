@@ -1,0 +1,11 @@
+{
+  "globals": {
+    "danger": "readonly",
+    "fail": "readonly",
+    "markdown": "readonly",
+    "message": "readonly",
+    "peril": "readonly",
+    "schedule": "readonly",
+    "warn": "readonly"
+  }
+}

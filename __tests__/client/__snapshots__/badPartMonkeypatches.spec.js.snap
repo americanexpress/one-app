@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`badPartMonkeypatches document.write stream family should monkeypatch document.close to throw 1`] = `"document.close disabled"`;
+
+exports[`badPartMonkeypatches document.write stream family should monkeypatch document.open to throw 1`] = `"document.open disabled"`;
+
+exports[`badPartMonkeypatches document.write stream family should monkeypatch document.write to throw 1`] = `"document.write disabled"`;
+
+exports[`badPartMonkeypatches document.write stream family should monkeypatch document.writeln to throw 1`] = `"document.writeln disabled"`;
+
+exports[`badPartMonkeypatches explicit eval should monkeypatch eval to throw 1`] = `"eval is disabled"`;
+
+exports[`badPartMonkeypatches explicit eval should monkeypatch execScript to throw 1`] = `"execScript is disabled"`;
+
+exports[`badPartMonkeypatches implicit eval monkeypatch setInterval should throw on string first argument 1`] = `"eval form of setInterval used, this is disabled"`;
+
+exports[`badPartMonkeypatches implicit eval monkeypatch setTimeout should throw on string first argument 1`] = `"eval form of setTimeout used, this is disabled"`;

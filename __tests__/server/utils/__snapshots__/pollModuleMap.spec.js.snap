@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`pollModuleMap polling monitor logs when polling is considered stopped 1`] = `
+Array [
+  "pollModuleMap: running polling monitor",
+]
+`;
+
+exports[`pollModuleMap polling monitor logs when polling is considered stopped 2`] = `
+Array [
+  "pollModuleMap: polling has unexpectedly stopped. Last poll: 11000ms ago, Max poll: 10000ms.",
+]
+`;
+
+exports[`pollModuleMap polling monitor logs when polling is considered stopped 3`] = `
+Array [
+  "pollModuleMap: restarted polling",
+]
+`;
+
+exports[`pollModuleMap polling monitor logs when polling is not considered stopped 1`] = `
+Array [
+  "pollModuleMap: running polling monitor",
+]
+`;
+
+exports[`pollModuleMap polling monitor logs when polling is not considered stopped 2`] = `
+Array [
+  "pollModuleMap: polling is working as expected. Last poll: 2000ms ago, Max poll: 10000ms.",
+]
+`;
+
+exports[`pollModuleMap restores the state config on poll failure 1`] = `
+Array [
+  Array [
+    Object {
+      "client": Object {
+        "someUrl": "http://client.com",
+      },
+      "server": Object {
+        "someUrl": "http://server.com",
+      },
+    },
+  ],
+]
+`;

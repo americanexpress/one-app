@@ -1,0 +1,23 @@
+{
+  "name": "vitruvius-franklin",
+  "version": "0.0.0",
+  "description": "Module to demo vitruvius capabilities",
+  "scripts": {
+    "prebuild": "npm run clean",
+    "build": "bundle-module",
+    "clean": "rimraf build",
+    "postinstall": "npm run build"
+  },
+  "dependencies": {
+    "holocron": "^1.0.0",
+    "immutable": "^4.0.0-rc.12",
+    "prop-types": "^15.6.2",
+    "react": "^16.6.3",
+    "redux": "^4.0.4"
+  },
+  "devDependencies": {
+    "@americanexpress/one-app-bundler": "^6.0.0",
+    "babel-preset-amex": "^3.1.0",
+    "rimraf": "^2.6.2"
+  }
+}

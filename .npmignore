@@ -1,0 +1,18 @@
+# misc
+.DS_Store
+.idea
+.sass_cache
+
+# node/npm
+node_modules
+*.log
+
+# build
+# KEEP
+#lib
+#dist
+
+prod-sample/**/build
+prod-sample/**/node_modules
+# test
+test-results

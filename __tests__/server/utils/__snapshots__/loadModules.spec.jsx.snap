@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`loadModules doesnt update caches when there are no changes 1`] = `
+Object {
+  "browser": Object {
+    "modules": Object {},
+  },
+  "legacyBrowser": Object {
+    "modules": Object {},
+  },
+}
+`;
+
+exports[`loadModules updates the client module map cache 1`] = `
+Object {
+  "browser": Object {
+    "key": "123",
+    "modules": Object {
+      "some-root": Object {
+        "baseUrl": "https://example.com/cdn/some-root/2.2.2/",
+        "browser": Object {
+          "integrity": "nggdfhr34",
+          "url": "https://example.com/cdn/some-root/2.2.2/some-root.browser.js",
+        },
+      },
+    },
+  },
+  "legacyBrowser": Object {
+    "key": "123",
+    "modules": Object {
+      "some-root": Object {
+        "baseUrl": "https://example.com/cdn/some-root/2.2.2/",
+        "legacyBrowser": Object {
+          "integrity": "7567ee",
+          "url": "https://example.com/cdn/some-root/2.2.2/some-root.legacy.browser.js",
+        },
+      },
+    },
+  },
+}
+`;

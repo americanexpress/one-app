@@ -1,0 +1,23 @@
+{
+  "name": "ssr-frank",
+  "version": "0.0.0",
+  "description": "A module to validate doing 'stuff' (could be anything) on the server prior to rendering.",
+  "scripts": {
+    "prebuild": "npm run clean",
+    "build": "bundle-module",
+    "clean": "rimraf build",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "prop-types": "^15.5.9",
+    "react": "^16.4.2",
+    "react-helmet": "^5.2.1",
+    "holocron": "^1.0.0",
+    "immutable": "^3.8.2"
+  },
+  "devDependencies": {
+    "@americanexpress/one-app-bundler": "^6.0.0",
+    "babel-preset-amex": "^3.1.0",
+    "rimraf": "^2.5.2"
+  }
+}

@@ -1,0 +1,27 @@
+# misc
+.DS_Store
+.idea
+.sass_cache
+
+# node/npm
+node_modules/**
+*.log
+
+# Vendors
+vendors
+
+# KEEP
+build/**
+lib/**
+static/**
+#dist
+
+# production sample
+prod-sample/*
+!prod-sample/api
+!prod-sample/sample-modules
+prod-sample/**/build/**
+prod-sample/**/node_modules/**
+
+# test
+test-results

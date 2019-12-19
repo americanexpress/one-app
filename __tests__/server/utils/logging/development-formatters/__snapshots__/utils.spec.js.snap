@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`utils coloredLevels has a blue log 1`] = `"<blue>log</blue>"`;
+
+exports[`utils coloredLevels has a gray info 1`] = `"<gray>info</gray>"`;
+
+exports[`utils coloredLevels has a red error 1`] = `"<red>error</red>"`;
+
+exports[`utils coloredLevels has a yellow warn 1`] = `"<yellow>warn</yellow>"`;
+
+exports[`utils printDurationTime prints acceptable times in yellow 1`] = `"<yellow>999</yellow>"`;
+
+exports[`utils printDurationTime prints good times in green 1`] = `"<green>99</green>"`;
+
+exports[`utils printDurationTime prints long times in red 1`] = `"<red>5999</red>"`;
+
+exports[`utils printDurationTime prints unacceptable times in black on a red background 1`] = `"<black><bgRed>6000</bgRed></black>"`;
+
+exports[`utils printStatusCode prints a 200 status code as green 1`] = `"<green>200</green>"`;
+
+exports[`utils printStatusCode prints a 300 status code as blue 1`] = `"<blue>300</blue>"`;
+
+exports[`utils printStatusCode prints a 400 status code as yellow 1`] = `"<yellow>400</yellow>"`;
+
+exports[`utils printStatusCode prints a 500 status code as red 1`] = `"<red>500</red>"`;
+
+exports[`utils printStatusCode prints a null status code as black text on red background 1`] = `"<black><bgRed>null</bgRed></black>"`;
+
+exports[`utils printStatusMessage returns a black on red background timed out message when the text and code do not map to text 1`] = `"<black><bgRed>Timed Out?</bgRed></black>"`;

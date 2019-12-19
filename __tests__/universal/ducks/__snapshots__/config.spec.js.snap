@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config duck reducer should return immutable config if action type is SET_CONFIG 1`] = `
+Immutable.Map {
+  "isTestConfig": true,
+  "configUrl": "https://example.com/something",
+}
+`;
+
+exports[`config duck setConfig action creator returns action with passed in config 1`] = `
+Object {
+  "config": Object {
+    "configUrl": "https://example.com/something",
+    "isTestConfig": true,
+  },
+  "type": "global/config/SET_CONFIG",
+}
+`;
