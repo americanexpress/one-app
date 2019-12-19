@@ -14,7 +14,7 @@
     "clean:test": "rimraf test-results",
     "prebuild": "npm run clean:build",
     "build:bundle": "cross-env NODE_OPTIONS=--max-old-space-size=4096 bundle-one-app",
-    "build:server": "cross-env babel src --out-dir lib --ignore \"**/__mocks__\"",
+    "build:server": "babel src --out-dir lib --ignore \"**/__mocks__\"",
     "build:artifacts:statics": "node scripts/build-static-assets-artifact.js",
     "build": "concurrently \"npm run build:bundle\" \"npm run build:server\" -n build:bundle,build:server --kill-others-on-fail",
     "build:prod-sample": "concurrently \"npm run build:sample-modules\" \"node scripts/build-one-app-docker-setup.js\" -n build-modules,build-app",
