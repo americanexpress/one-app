@@ -15,5 +15,5 @@ jobs:
     - stage: "Tests"
       name: "Unit Tests"
       script: npm run test:lint && npm run test:unit && npm run test:danger && npm run test:git-history
-    - script: npm run test:integration
-      name: "Integration Tests"
+    - name: "Integration Tests"
+      script: npm run test:integration

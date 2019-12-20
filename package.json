@@ -24,7 +24,7 @@
     "start:prod-sample": "docker-compose -f ./prod-sample/docker-compose.yml up --abort-on-container-exit",
     "test:lint": "eslint --ext js,jsx,md,snap .",
     "start": "node lib/server/index.js",
-    "test:unit": "cross-env NODE_ENV=development jest --testPathIgnorePatterns integration --config jest.config.js",
+    "test:unit": "jest --testPathIgnorePatterns integration --config jest.config.js",
     "pretest:integration": "concurrently \"npm run build:prod-sample\" \"docker-compose -f ./prod-sample/docker-compose.yml pull nginx selenium-chrome\" --kill-others-on-fail -n build-prod-sample,build-dependency-images",
     "test:integration": "JEST_TEST_REPORT_PATH=./test-results/integration-test-report.html jest integration --config jest.integration.config.js --forceExit",
     "test:danger": "if-env NODE_ENV=production && danger ci || danger local",
