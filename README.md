@@ -26,6 +26,7 @@ Want to get paid for your contributions to `one-app`?
 * [Features](#-features)
 * [Usage](#-usage)
 * [Recipes](#-recipes)
+* [API](#-API)
 * [License](#-license)
 * [Code Of Conduct](#-code-of-conduct)
 * [Contributing](#-contributing)
@@ -90,87 +91,6 @@ For a module to act as the root module the only requirements are:
 
 
 ## 👩‍🍳 Recipes
-
-### Configuration with appConfig
-
-`appConfig` allows a module to specify a selection of configuration options:
-
-> \* Root modules only
-
-#### csp * [required]
-
-The `csp` static is required to set a valid [content security policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)(csp) for your application which will be passed on to the client.
-
-```js
-YourRootModule.appConfig = {
-  csp: 'default: self;',
-};
-```
-
-> We recommend using something like [content-security-policy-builder](https://www.npmjs.com/package/content-security-policy-builder) to create your CSP string.
-
-For an idea of how to get started building a CSP take a look at the integration test module [frank-lloyd-root's CSP](./prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/csp.js)
-
-
-#### createSsrFetch *
-
-You may wish to provide your own fetch client for server side requests.
-For example you may wish to forward cookies or headers from the initial page load
-request to all the requisite SSR API requests.
-
-```js
-// Make sure to prevent createSsrFetch from being part of your client bundle
-if (!global.BROWSER) {
-  // ({ req: ExpressRequest, res: ExpressResponse}) => (fetch: ES6 Fetch) => (fetchUrl, fetchOpts )
-  const createSsrFetch = ({ req, res }) => (fetch) => (fetchUrl, fetchOpts = {}) => {
-    const fullOpts = { ...fetchOpts };
-    fullOpts.headers = {
-      ...fetchOpts.headers,
-      // forwarding on initial request header to following API requests
-      'auth-token': req.headers['auth-token'],
-    };
-    // adding short timeout for SSR API requests
-    const timeout = 1e3;
-    return Promise.race([
-      fetch(fetchUrl, fullOpts),
-      new Promise((_, rej) => {
-        setTimeout(
-          () => rej(new Error(`Request to ${path} was too slow`)),
-          timeout
-        );
-      }),
-    ]);
-  };
-
-  YourRootModule.appConfig = {
-    // ..
-    createSsrFetch,
-  };
-}
-```
-
-The configured fetch client is then available as a named argument to `loadModuleData`
-
-```js
-YourModule.loadModuleData = async ({ store, fetchClient }) => {
-  store.dispatch({ type: FAKE_REQUEST });
-  const request = await fetchClient('https://fast.api.frank/posts');
-  const posts = await request.json();
-  store.dispatch({
-    type: FAKE_SUCCESS,
-    data: {
-      posts,
-      secretMessage,
-    },
-  });
-};
-```
-
-#### corsOrigins *
-
-#### configureRequestLog *
-
-#### extendSafeRequestRestrictedAttributes *
 
 ### Creating a Holocron Module
 
@@ -434,6 +354,347 @@ One App can be started via docker or if built from source by running `node lib/s
 #### Monitoring One App
 
 <!-- TODO talk about prometheus and logging schema here -->
+
+## 🎛️ API
+
+### Overview
+
+#### [Modules](#modules)
+
+**Holoron Modules** or "Modules" are self contained Web Experiences that consist of React Components with Redux-compatible Reducers and Actions. In practice, Modules are developed and bundled in isolation to one another. The One App Server uses a Module Map containing URLs to Module bundles (e.g. `my-module.browser.js`) to load and serve bundles upon request. When the Server receives an HTTP request, it renders one or more Modules on the Server. Similar to React Components, Modules are composable (e.g. Modules may load other Modules). The first or entrypoint Module is called the "Root Module". The Root Module loads other "Child Modules". Overall, this development pattern in One App may be characterized as the [Micro Front End](https://martinfowler.com/articles/micro-frontends.html) pattern.
+
+**API**
+* [loadModuleData](#loadmoduledata)
+* [childRoutes](#childroutes)
+* [appConfig](#appconfig)
+
+#### [Server](#-server)
+
+TBD
+
+**API**
+* [TBD](#)
+
+---
+
+### Modules
+
+#### `loadModuleData`
+
+TBD
+
+#### `childRoutes`
+
+TBD
+
+#### `appConfig`
+
+`appConfig` allows a module to specify a selection of configuration options for Modules.
+
+```js
+// Force tree shaking appConfig away in client bundles
+if (!global.BROWSER) {
+  MyModule.appConfig = {
+    /* Tenant Root Specific */
+    provideStateConfig,
+    csp,
+    corsOrigins,
+    configureRequestLog,
+    extendSafeRequestRestrictedAttributes,
+    createSsrFetch,
+    /* Child Module Specific */
+    validateStateConfig,
+    requiredSafeRequestRestrictedAttributes,
+    /* All Modules */
+    appCompatibility,
+  };
+}
+```
+
+**Contents**
+* [provideStateConfig](#providestateconfig)
+* [csp](#csp)
+* [corsOrigins](#corsorigins)
+* [configureRequestLog](#configurerequestlog)
+* [extendSafeRequestRestrictedAttributes](#extendsaferequestrestrictedattributes)
+* [createSsrFetch](#createssrfetch)
+* [validateStateConfig](#validatestateconfig)
+* [requiredSafeRequestRestrictedAttributes](#requiredsaferequestrestrictedattributes)
+* [appCompatibility](#appcompatibility)
+
+##### `provideStateConfig`
+**Module Type**
+* ✅ Root Module 
+* 🚫 Child Module  
+
+**Shape**
+```js
+Module.appConfig = {
+  provideStateConfig: {
+    server: {
+      [settingName]: {
+        [environmentLevel]: String,
+      },
+    },
+    client: {
+      [settingName]: {
+        [environmentLevel]: String,
+      },
+    },
+  },
+};
+```
+
+The `provideStateConfig` directive is useful for supplying string-based key value settings per runtime (e.g. `client` or `server`) and per `environmentLevel` (e.g. QA, Prod, etc).
+
+ These values are injected into the exported React Components in *every* loaded Module:
+
+```js
+function MyModule({ config }) {
+  // Returns JSX
+}
+
+MyModule.propTypes = {
+  config: PropTypes.shape({
+    [settingName]: PropTypes.string,
+  }),
+};
+
+MyModule.appConfig = {
+  provideStateConfig,
+};
+
+export default MyModule;
+```
+
+**📘 More Information**
+* Example: [Frank Lloyd Root's `appConfig`](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
+* [`validateStateConfig`](#validatestateconfig)
+
+##### `csp`
+**Module Type**
+* ✅ Root Module 
+* 🚫 Child Module  
+
+**Shape**
+```js
+RootModule.appConfig = {
+  csp: String,
+};
+```
+
+The `csp` static `String` should be a valid [Content Security Policy (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) for your application which will be passed on to the HTML markup rendered by the Browser.
+
+> We recommend using something like [content-security-policy-builder](https://www.npmjs.com/package/content-security-policy-builder) to create your CSP string.
+
+**📘 More Information**
+* Example: [Frank Lloyd Root's CSP](./prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/csp.js)
+* [content-security-policy-builder](https://www.npmjs.com/package/content-security-policy-builder)
+
+##### `corsOrigins`
+**Module Type**
+* ✅ Root Module 
+* 🚫 Child Module  
+
+**Shape**
+```js
+Module.appConfig = {
+  corsOrigins: [String],
+};
+```
+
+The `corsOrigins` directive accepts an array of `String` URL origin domains.
+This will allow requests from those origins to make POST requests to the server.
+
+In practice, this allows POST requests from given origins to return partially rendered Modules.
+
+**📘 More Information**
+* [Frank Lloyd Root's `appConfig`](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
+* In Practice: [Partial Rendering](#partial-rendering)
+
+##### `configureRequestLog`
+**Module Type**
+* ✅ Root Module 
+* 🚫 Child Module  
+
+**Shape**
+```js
+Module.appConfig = {
+  configureRequestLog: ({
+    req, // Express req
+    log, // One App Log Shape
+  }) => ({
+    // returns reshaped log object
+  }),
+};
+```
+
+The `configureRequestLog` directive a callback that takes Express's `req` and One App's `log` object. This allows for customizing the `log` object based on `req` parameters to add additional metadata to the logger.
+
+**Log Shape**
+```
+{
+  type: 'request',
+  request: {
+    direction,
+    protocol,
+    address: {
+      uri,
+    },
+    metaData: {
+      method,
+      correlationId,
+      host,
+      referrer,
+      userAgent,
+      location,
+      forwarded,
+      forwardedFor,
+      locale,
+    },
+    timings: {
+      // See values in https://www.w3.org/TR/navigation-timing/
+    },
+    statusCode,
+    statusText,
+  },
+};
+```
+
+**📘 More Information**
+* Example: [Frank Lloyd Root's `appConfig`](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
+
+##### `extendSafeRequestRestrictedAttributes`
+**Module Type**
+* ✅ Root Module 
+* 🚫 Child Module  
+
+**Shape**
+```js
+Module.appConfig = {
+  extendSafeRequestRestrictedAttributes: {
+    headers: [String],
+    cookies: [String],
+  },
+};
+```
+
+The `extendSafeRequestRestrictedAttributes` directive accepts a list of cookie names in `cookies` and header identifiers in `headers`. These will allow specified cookies and headers to be whitelisted and attached to the Express `req` object.
+
+**📘 More Information**
+* [`requiredSafeRequestRestrictedAttributes`](#requiredsaferequestrestrictedattributes)
+* [Frank Lloyd Root's `appConfig`](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
+
+##### `createSsrFetch`
+**Module Type**
+* ✅ Root Module 
+* 🚫 Child Module  
+
+**Shape**
+```js
+RootModule.appConfig = {
+  createSsrFetch: ({
+    req, // Express req
+    res, // Express res
+  }) => (fetch) => (fetchUrl, fetchOpts) => Promise,
+};
+``` 
+
+`createSsrFetch` allows for customizing the fetch client used in `one-app` to perform server-side requests. 
+
+For example, you may wish to forward cookies or headers from the initial page load request to all the requisite SSR API requests.
+
+**📘 More Information**
+* Example: [Frank Lloyd Root's `appConfig`](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
+* Example: [An SSR Fetch Client](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/createFrankLikeFetch.js)
+* Using SSR Fetch Client with [`loadModuleData`](#loadModuleData)
+
+##### `validateStateConfig`
+**Module Type**
+* 🚫 Root Module 
+* ✅ Child Module 
+
+**Shape**
+```js
+Module.appConfig = {
+  validateStateConfig: {
+    server: {
+      [settingName]: {
+        validate(settingValue) {
+          // Throw an error or return undefined
+        },
+      },
+    },
+    client: {
+      [settingName]: {
+        validate(settingValue) {
+          // Throw an error or return undefined
+        },
+      },
+    },
+  },
+};
+```
+
+The `validateStateConfig` allows a Child Module to validate settings passed from `provideStateConfig`. Each `settingName` object accepts a `validate(settingValue)` method. The `validate` function may throw an `Error` or return `undefined` depending on validity of the value supplied to the Module on load.
+
+If an `Error` is thrown, the server will prevent the child module from being loaded.
+
+**📘 More Information**
+* [`provideStateConfig`](#providestateconfig)
+* Example: [Picky Frank's `appConfig`](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/picky-frank/0.0.0/src/components/PickyFrank.jsx)
+
+##### `requiredSafeRequestRestrictedAttributes`
+**Module Type**
+* 🚫 Root Module 
+* ✅ Child Module 
+
+**Shape**
+```js
+Module.appConfig = {
+  requiredSafeRequestRestrictedAttributes: {
+    headers: [String],
+    cookies: [String],
+  },
+};
+```
+
+The `requiredSafeRequestRestrictedAttributes` allows a Child Module to validate settings passed from `extendSafeRequestRestrictedAttributes`. Each whitelisted header in `headers` array and cookie in `cookies` array will be checked against the Root Module's `extendSafeRequestRestrictedAttributes` on the loading of the Child Module. If this does not match entries previously made in Root Module's `extendSafeRequestRestrictedAttributes`, the Child Module will fail to load.
+
+**📘 More Information**
+* [`extendSafeRequestRestrictedAttributes`](#extendsaferequestrestrictedattributes)
+* Example: [Vitruvius Franklin's `appConfig`](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/vitruvius-franklin/0.0.0/src/components/VitruviusFranklin.jsx)
+
+##### `appCompatibility`
+**Module Type**
+* ✅ Root Module 
+* ✅ Child Module  
+
+**Shape**
+```js
+Module.appConfig = {
+  appCompatibility: String,
+};
+```
+
+The `appCompatibility` directive accepts a valid Semantic Version string specifying compatibility with specific One App versions.
+
+For example, we may specify Modules to be compatible with all `v5` releases of One App:
+
+```js
+Module.appConfig = {
+  appCompatibility: '5.x.x',
+};
+```
+
+**📘 More Information**
+* [Node Semver](https://github.com/npm/node-semver)
+
+---
+
+### Server
+
+---
 
 ## 🏆 Contributing
 
