@@ -14,6 +14,117 @@
  * permissions and limitations under the License.
  */
 
+import {
+  ValidateHost,
+  ValidateHttps,
+  ValidateScheme,
+  ParseLockfile,
+} from 'lockfile-lint-api';
+
+const defaultLockfilePath = `${process.cwd()}/package-lock.json`;
+const defaultSchemes = ['npm'];
+
+export function lockFileLint(
+  pathToLockFile = defaultLockfilePath,
+  {
+    schemes = defaultSchemes,
+    scheme = false,
+    host = true,
+    protocol = true,
+    basePath = pathToLockFile,
+  } = {}
+) {
+  const options = {
+    lockfilePath: pathToLockFile,
+  };
+
+  const parser = new ParseLockfile(options);
+  const lockfile = parser.parseSync();
+  const validators = [];
+
+  if (host) {
+    validators.push(
+      [new ValidateHost({
+        packages: lockfile.object,
+      }), {
+        onSuccess() {
+          message(`[lock-files] ${basePath} has passed host validation`);
+        },
+      }]
+    );
+  }
+
+  if (protocol) {
+    validators.push(
+      [new ValidateHttps({
+        packages: lockfile.object,
+      }), {
+        onSuccess() {
+          message(`[lock-files] ${basePath} has passed protocol validation`);
+        },
+      }]
+    );
+  }
+
+  if (scheme) {
+    validators.push(
+      [new ValidateScheme({
+        packages: lockfile.object,
+      }), {
+        onSuccess() {
+          message(`[lock-files] ${basePath} has passed scheme validation`);
+        },
+      }]
+    );
+  }
+
+  validators.forEach(([validator, {
+    validate = (opts) => validator.validate(opts),
+    onWarn = (...args) => warn(...args),
+    onError = (...args) => fail(...args),
+    onSuccess = (...args) => message(...args),
+  }]) => {
+    let result;
+    try {
+      result = validate(schemes);
+    } catch (error) {
+      onWarn(error);
+    }
+
+    if (result.type === 'success') {
+      onSuccess();
+    } else if (result.type === 'error') {
+      result.errors.forEach((error) => onError(
+        `\n${error.message}\n\nat ${basePath}\n`,
+        basePath,
+        1
+      ));
+    }
+  });
+}
+
+export function runLockFilesValidation({ linting = true } = {}) {
+  const cwd = process.cwd();
+  const lockfiles = danger.git.fileMatch('**/package-lock.json');
+
+  if (linting) {
+    const {
+      modified,
+      created,
+      // TODO: pair each package-lock.with package.json, make sure they are not deleted
+      // deleted,
+      edited,
+      validate = new Set([].concat(modified, created, edited)),
+    } = lockfiles.getKeyedPaths();
+
+    validate.forEach((basePath) => {
+      lockFileLint(`${cwd}/${basePath}`, {
+        basePath,
+      });
+    });
+  }
+}
+
 export default function keepPackageAndLockInSync() {
   const changedFiles = [
     ...danger.git.modified_files,
@@ -39,4 +150,6 @@ export default function keepPackageAndLockInSync() {
     const worry = 'Are you reverting package-lock to the npm v5 format?';
     warn(`${message} - _${worry}_`, 'package-lock.json');
   }
+
+  runLockFilesValidation();
 }
