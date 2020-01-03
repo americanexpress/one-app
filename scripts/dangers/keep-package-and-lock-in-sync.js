@@ -91,7 +91,7 @@ export function lockFileLint(
       onWarn(error);
     }
 
-    if (result.type === 'success') {
+    if (result && result.type === 'success') {
       onSuccess();
     } else if (result.type === 'error') {
       result.errors.forEach((error) => onError(
