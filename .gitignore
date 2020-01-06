@@ -27,6 +27,7 @@ prod-sample/nginx/origin-statics
 *.crt
 *.key
 sample-module-bundles
+docker-compose.test.yml
 
 # misc
 .DS_Store
