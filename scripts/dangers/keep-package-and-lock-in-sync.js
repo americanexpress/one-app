@@ -93,7 +93,7 @@ export function lockFileLint(
 
     if (result && result.type === 'success') {
       onSuccess();
-    } else if (result.type === 'error') {
+    } else if (result  && result.type === 'error') {
       result.errors.forEach((error) => onError(
         `\n${error.message}\n\nat ${basePath}\n`,
         basePath,
