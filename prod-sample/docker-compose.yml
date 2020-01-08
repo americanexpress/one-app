@@ -4,7 +4,12 @@ networks:
   one-app-at-test-network:
 services:
   one-app:
-    build: ../
+    build:
+      context: ../
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
     # tags the built image as:
     image: one-app:at-test
     volumes:
@@ -23,7 +28,12 @@ services:
       - "nginx"
     entrypoint: sh -c 'sleep 2s && node lib/server'
   fast-api:
-    build: ./api
+    build:
+      context: ./api
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
     ports:
       - "8000:80"
     networks:
@@ -31,7 +41,12 @@ services:
         aliases:
           - fast.api.frank
   slow-api:
-    build: ./api
+    build:
+      context: ./api
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
     ports:
       - "8001:80"
     entrypoint:
@@ -44,7 +59,12 @@ services:
         aliases:
           - slow.api.frank
   extra-slow-api:
-    build: ./api
+    build:
+      context: ./api
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
     ports:
       - "8002:80"
     entrypoint:

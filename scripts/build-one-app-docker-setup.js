@@ -38,10 +38,7 @@ const buildDockerImages = async () => {
   console.time('Docker Images Build');
   console.log('🛠  Building One App Docker, fast-api, slow-api, and extra-slow-api images');
   try {
-    await Promise.all([
-      promisifySpawn('docker build . -t one-app:at-test', { shell: true }),
-      promisifySpawn('docker-compose build --no-cache fast-api slow-api extra-slow-api', { shell: true, cwd: sampleProdDir, env: { ...sanitizedEnvVars } }),
-    ]);
+    await promisifySpawn('docker-compose build --no-cache --parallel one-app fast-api slow-api extra-slow-api', { shell: true, cwd: sampleProdDir, env: { ...sanitizedEnvVars } });
   } catch (error) {
     console.log('🚨 Docker images could not be built!\n');
     throw error;
