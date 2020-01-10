@@ -26,7 +26,7 @@ Want to get paid for your contributions to `one-app`?
 * [Features](#-features)
 * [Usage](#-usage)
 * [Recipes](#-recipes)
-* [API](#-api)
+* [API](#%EF%B8%8F-api)
 * [License](#-license)
 * [Code Of Conduct](#-code-of-conduct)
 * [Contributing](#-contributing)
