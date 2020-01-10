@@ -737,6 +737,8 @@ if (!global.BROWSER) {
 }
 ```
 
+If the One App version fails a Module's `appCompatibility` check, the Server will fail to startup or if already running will prevent [Holocron](https://github.com/americanexpress/holocron) from loading the Module dynamically.
+
 **📘 More Information**
 * [Node Semver](https://github.com/npm/node-semver)
 
