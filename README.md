@@ -466,14 +466,14 @@ if (!global.BROWSER) {
     provideStateConfig: {
       server: {
         myApiHostname: {
-          development: 'qa.api.intranet.example.com',
+          development: 'dev.api.intranet.example.com',
           qa: 'qa.api.intranet.example.com',
           production: 'prod.api.intranet.example.com',
         },
       },
       client: {
         myApiHostname: {
-          development: 'qa.api.external.example.com',
+          development: 'dev.api.external.example.com',
           qa: 'qa.api.external.example.com',
           production: 'prod.api.external.example.com',
         },
@@ -497,6 +497,8 @@ Based on `environmentLevel`, the String values are injected into the global [`co
 
 ⚠️ Required Directive
 
+> 👮**Security Feature**: Limits the scripts and assets allowed to load.
+
 **Shape**
 ```js
 if (!global.BROWSER) {
@@ -510,8 +512,6 @@ The `csp` static `String` should be a valid [Content Security Policy (CSP)](http
 
 > We recommend using something like [content-security-policy-builder](https://www.npmjs.com/package/content-security-policy-builder) to create your CSP string.
 
-> 👮**Security Feature**: Limits the scripts and assets allowed to load.
-
 **📘 More Information**
 * Example: [Frank Lloyd Root's CSP](./prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/csp.js)
 * [content-security-policy-builder](https://www.npmjs.com/package/content-security-policy-builder)
@@ -520,6 +520,8 @@ The `csp` static `String` should be a valid [Content Security Policy (CSP)](http
 **Module Type**
 * ✅ Root Module 
 * 🚫 Child Module  
+
+> 👮**Security Feature**: Limits the reachable origins for fetching data and assets.
 
 **Shape**
 ```js
@@ -534,8 +536,6 @@ The `corsOrigins` directive accepts an array of `String` URL origin domains.
 This will allow requests from those origins to make POST requests to the server.
 
 In practice, this allows POST requests from given origins to return partially rendered Modules.
-
-> 👮**Security Feature**: Limits the reachable origins for fetching data and assets.
 
 **📘 More Information**
 * [Frank Lloyd Root's `appConfig`](./prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
@@ -600,6 +600,8 @@ The `configureRequestLog` directive accepts a callback that takes Express's `req
 * ✅ Root Module 
 * 🚫 Child Module  
 
+> 👮**Security Feature**: Limits headers and cookies from being passed to Redux's initial state.
+
 **Shape**
 ```js
 if (!global.BROWSER) {
@@ -613,8 +615,6 @@ if (!global.BROWSER) {
 ```
 
 The `extendSafeRequestRestrictedAttributes` directive accepts a list of cookie names in `cookies` and header identifiers in `headers`. By default all cookies and headers are removed from the Express `req` object as a security precaution. Named cookie and header identifiers may be added to `extendSafeRequestRestrictedAttributes` to allow whitelisted cookies and headers to remain on the Express `req` object. The sanitized `req` object will be passed into the [Vitruvius](https://github.com/americanexpress/vitruvius) method, `buildInitialState` when constructing Redux's initial state on server-side render.
-
-> 👮**Security Feature**: Limits headers and cookies from being passed to Redux's initial state.
 
 **📘 More Information**
 * [`requiredSafeRequestRestrictedAttributes`](#requiredsaferequestrestrictedattributes)
@@ -689,6 +689,8 @@ If an `Error` is thrown, the Server will fail to startup or if already running w
 * 🚫 Root Module 
 * ✅ Child Module 
 
+> 👮**Security Feature**: Limits headers and cookies from being passed to Redux's initial state.
+
 **Shape**
 ```js
 if (!global.BROWSER) {
@@ -704,8 +706,6 @@ if (!global.BROWSER) {
 The `requiredSafeRequestRestrictedAttributes` allows a Child Module to validate settings passed from `extendSafeRequestRestrictedAttributes`. Each whitelisted header in `headers` array and cookie in `cookies` array will be checked against the Root Module's `extendSafeRequestRestrictedAttributes` on the loading of the Child Module. If this does not match entries previously made in Root Module's `extendSafeRequestRestrictedAttributes`, the Child Module will fail to load.
 
 If an `Error` is thrown due to missing required cookies or headers, the Server will either 1) fail to startup or 2) if already running will prevent [Holocron](https://github.com/americanexpress/holocron) from loading the Module dynamically.
-
-> 👮**Security Feature**: Limits headers and cookies from being passed to Redux's initial state.
 
 **📘 More Information**
 * [`extendSafeRequestRestrictedAttributes`](#extendsaferequestrestrictedattributes)
