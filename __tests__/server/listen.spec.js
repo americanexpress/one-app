@@ -32,6 +32,7 @@ const origEnvVarVals = {};
   'HTTPS_PUBLIC_CERT_CHAIN_PATH',
   'HTTPS_TRUSTED_CA_PATH',
   'HTTPS_PRIVATE_KEY_PASS_FILE_PATH',
+
 ]
   .forEach((name) => { origEnvVarVals[name] = process.env[name]; });
 
@@ -47,6 +48,7 @@ function clearAllEnvVars() {
   Object
     .keys(origEnvVarVals)
     .forEach((name) => delete process.env[name]);
+  process.env.HTTP_PORT = 3000;
 }
 
 describe('server listen', () => {
@@ -110,18 +112,6 @@ describe('server listen', () => {
       expect(http.mock.servers[0].listen).toHaveBeenCalledTimes(1);
       expect(http.mock.servers[0].listen.mock.calls[0][0]).toEqual('8998');
       expect(cb).toHaveBeenCalledWith(null, { port: '8998' });
-    });
-
-    it('uses a default port if HTTP_PORT env var not given', () => {
-      const cb = jest.fn();
-      delete process.env.HTTP_PORT;
-      http.mock.listenError = null;
-      listenHttp(app, cb);
-      expect(http.createServer).toHaveBeenCalledTimes(1);
-      expect(http.createServer).toHaveBeenCalledWith(app);
-      expect(http.mock.servers[0].listen).toHaveBeenCalledTimes(1);
-      expect(http.mock.servers[0].listen.mock.calls[0][0]).toEqual(`${3000}`);
-      expect(cb).toHaveBeenCalledWith(null, { port: `${3000}` });
     });
 
     it('passes the error to the callback', (done) => {

@@ -52,16 +52,26 @@ const runTime = [
   {
     name: 'HTTP_PORT',
     normalize: (input) => {
-      const parsed = parseInt(input, 10);
-      // make sure the parsed value is the same value as input
-      // input may be a string or a number, we don't want === in this case, just ==
-      if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
-        throw new Error(`env var HTTP_PORT needs to be a valid integer, given "${input}"`);
-      } else {
-        return parsed;
+      if (input) {
+        const parsed = parseInt(input, 10);
+        // make sure the parsed value is the same value as input
+        // input may be a string or a number, we don't want === in this case, just ==
+        if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
+          throw new Error(`env var HTTP_PORT needs to be a valid integer, given "${input}"`);
+        } else {
+          return parsed;
+        }
+      }
+      return undefined;
+    },
+    validate: (value) => {
+      if (!process.env.HTTPS_PORT && !value) {
+        throw new Error('Either of the `HTTP_PORT` or `HTTPS_PORT` environment variables must be defined');
       }
     },
-    defaultValue: () => 3000,
+    defaultValue: () => (process.env.NODE_ENV === 'development'
+      ? 3000
+      : undefined),
   },
   // IPv4 port for the health and metrics server to bind on
   {
@@ -78,11 +88,49 @@ const runTime = [
     },
     defaultValue: () => 3005,
   },
-  // holocron config, the modules and versions to use
+  {
+    name: 'HTTP_ONE_APP_DEV_CDN_PORT',
+    normalize: (input) => {
+      if (input) {
+        const parsed = parseInt(input, 10);
+        // make sure the parsed value is the same value as input
+        // input may be a string or a number, we don't want === in this case, just ==
+        if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
+          throw new Error(`env var HTTP_ONE_APP_DEV_CDN_PORT needs to be a valid integer, given "${input}"`);
+        } else {
+          return parsed;
+        }
+      }
+      return undefined;
+    },
+    defaultValue: () => (process.env.NODE_ENV === 'development'
+      ? 3001
+      : undefined),
+  },
+  {
+    name: 'HTTP_ONE_APP_DEV_PROXY_SERVER_PORT',
+    normalize: (input) => {
+      if (input) {
+        const parsed = parseInt(input, 10);
+        // make sure the parsed value is the same value as input
+        // input may be a string or a number, we don't want === in this case, just ==
+        if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
+          throw new Error(`env var HTTP_ONE_APP_DEV_PROXY_SERVER_PORT needs to be a valid integer, given "${input}"`);
+        } else {
+          return parsed;
+        }
+      }
+      return undefined;
+    },
+    defaultValue: () => (process.env.NODE_ENV === 'development'
+      ? 3002
+      : undefined),
+  },
+  // holocron config, the modules to use
   {
     name: 'HOLOCRON_MODULE_MAP_URL',
     defaultValue: () => (process.env.NODE_ENV === 'development'
-      ? `http://${ip}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}/static/module-map.json`
+      ? `http://${ip}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}/static/module-map.json`
       : undefined),
     validate: isFetchableUrlInNode,
   },

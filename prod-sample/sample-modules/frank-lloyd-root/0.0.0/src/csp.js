@@ -26,8 +26,8 @@ export default contentSecurityPolicyBuilder({
     scriptSrc: [
       "'self'",
       'https://sample-cdn.frank',
-      `${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
-      `localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
+      `${ip.address()}:3001`,
+      `localhost:3001`,
     ],
     imgSrc: [
       "'self'",
@@ -40,8 +40,8 @@ export default contentSecurityPolicyBuilder({
     connectSrc: [
       "'self'",
       '*.api.frank',
-      `${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
-      `localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
+      `${ip.address()}:3001`,
+      `localhost:3001`,
       'https://sample-cdn.frank',
     ],
   },
