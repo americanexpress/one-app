@@ -4,7 +4,7 @@
 # builds as we do not have to run apk installs for alpine.
 FROM node:12 as builder
 WORKDIR /opt/build
-RUN npm install -g npm@6.3.0 --registry=https://registry.npmjs.org
+RUN npm install -g npm@6.12.1 --registry=https://registry.npmjs.org
 COPY --chown=node:node ./ /opt/build
 # npm ci does not run postinstall with root account
 RUN NODE_ENV=development npm ci --build-from-source
@@ -33,6 +33,7 @@ RUN NODE_ENV=production npm run build && \
 FROM node:12-alpine as development
 ENV NODE_ENV=development \
     HTTP_PORT=3000 \
+    HTTP_ONE_APP_DEV_CDN_PORT=3001 \
     HTTP_ONE_APP_DEV_PROXY_SERVER_PORT=3002 \
     HTTP_METRICS_PORT=3005
 EXPOSE 3000
@@ -48,10 +49,7 @@ COPY --from=builder --chown=node:node /opt/one-app/development ./
 # production image
 # last so that it's the default image artifact
 FROM node:12-alpine as production
-ENV NODE_ENV=production \
-    HTTPS_PORT=8443 \
-    HTTP_PORT=8443 \
-    HTTP_METRICS_PORT=3005
+ENV NODE_ENV=production
 EXPOSE 8443
 EXPOSE 3005
 USER node
