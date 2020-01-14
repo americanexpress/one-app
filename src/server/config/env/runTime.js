@@ -118,9 +118,7 @@ const runTime = [
   // locale folder env level
   {
     name: 'ONE_CLIENT_LOCALE_FILENAME',
-    // dev, qa, staging and production (in production use the moduleName)
     valid: ['integration', 'qa', undefined],
-    // turn '' into undefined
     normalize: (input) => input || undefined,
     defaultValue: () => (process.env.NODE_ENV === 'development' ? 'integration' : undefined),
   },
