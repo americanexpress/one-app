@@ -361,7 +361,7 @@ One App can be started via docker or if built from source by running `node lib/s
 
 #### [Modules](#modules)
 
-**Holoron Modules** or "Modules" are self contained Web Experiences that consist of React Components with Redux-compatible Reducers and Actions. In practice, Modules are developed, bundled, and operate in isolation to one another. The One App Server uses a Module Map containing URLs to Module bundles (e.g. `my-module.browser.js`) to load and serve bundles upon request. When the Server receives an HTTP request, it renders one or more Modules on the Server. Similar to React Components, Modules are composable (e.g. Modules may load other Modules). The first or entrypoint Module is called the "Root Module". The Root Module loads other "Child Modules". Overall, this development pattern in One App may be characterized as the [Micro Front End](https://martinfowler.com/articles/micro-frontends.html) pattern.
+**Holocron Modules** or "Modules" are self contained Web Experiences that consist of React Components with Redux-compatible Reducers and Actions. In practice, Modules are developed, bundled, and operate in isolation to one another. The One App Server uses a [Module Map](#building-and-deploying-a-holocron-module-map) containing URLs to Module bundles (e.g. `my-module.browser.js`) to load and serve bundles upon request. When the Server receives an HTTP request, it renders one or more Modules on the Server. Similar to React Components, Modules are composable (e.g. Modules may load other Modules). The first or entrypoint Module is called the "Root Module". The Root Module loads other "Child Modules". Overall, this development pattern in One App may be characterized as the [Micro Front End](https://martinfowler.com/articles/micro-frontends.html) pattern.
 
 **API**
 * [loadModuleData](#loadmoduledata)
@@ -725,7 +725,7 @@ if (!global.BROWSER) {
 }
 ```
 
-The `appCompatibility` directive accepts a valid Semantic Version string specifying compatibility with specific One App versions.
+The `appCompatibility` directive accepts a valid [Semantic Version](https://github.com/npm/node-semver) string specifying compatibility with specific One App versions.
 
 For example, we may specify Modules to be compatible with all `v5` releases of One App:
 
