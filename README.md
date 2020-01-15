@@ -119,7 +119,7 @@ import { setRenderPartialOnly } from '@americanexpress/one-app-ducks';
 dispatch(setRenderPartialOnly(true));
 ```
 
-See the [`Partial` component](./prod-sample/sample-modules/frank-lloyd-root/src/components/Partial.jsx)
+See the [`Partial` component](./prod-sample/sample-modules/frank-lloyd-root/0.0.2/src/components/Partial.jsx)
 in the `frank-lloyd-root` module for an example implementation.
 
 > Note: for the use case of rendering a complete document (like an email), the top-level component
