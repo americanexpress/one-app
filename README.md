@@ -394,7 +394,7 @@ export default HelloWorldModule;
 ```
 
 **Contents**
-* [Loading Modules](##loading-modules)
+* [Loading Modules](#loading-modules)
 * [Loading Async Data](#loading-async-data)
 * [Routing](#routing)
 * [State Management](#)
@@ -431,22 +431,29 @@ A parent Module may add the `ModuleRoute` routing component to the [`childRoutes
 
 ###### `ModuleRoute`
 
+<!-- ONE-MARKDOWN:START url="https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md" selector="### `ModuleRoute`" -->
 Please see [`ModuleRoute`](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route#-usage) in the Holocron Module Route API.
+<!-- ONE-MARKDOWN:END -->
 
 ##### Dispatch and Render
 We may use the `holocronModule` Higher Order Component to dispatch Holocron Redux Actions. Using the `load` argument in `holocronModule` we dispatch `composeModules` to retrieve a child Module bundle (e.g. `mymodule.browser.js`) and pass React `props` to it. Once loaded, a parent Module may add the `RenderModule` React Component into their JSX to render loaded Holocron Modules.
 
 ###### `RenderModule`
-
+<!-- ONE-MARKDOWN:START url="https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md" selector="### `RenderModule`" -->
 Please see [`RenderModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#rendermodule) in the Holocron API.
+<!-- ONE-MARKDOWN:END -->
 
 ###### `holocronModule`
 
-Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule) in the Holocron API
+<!-- ONE-MARKDOWN:START url="https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md" selector="### `holocronModule`" -->
+Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule) in the Holocron API.
+<!-- ONE-MARKDOWN:END -->
 
 ###### `composeModules`
 
+<!-- ONE-MARKDOWN:START url="https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md" selector="### Compose Modules" -->
 Please see [`composeModules`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#composemodules) in the Holocron API.
+<!-- ONE-MARKDOWN:END -->
 
 #### Loading Data
 
