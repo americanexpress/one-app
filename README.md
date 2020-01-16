@@ -378,7 +378,7 @@ HelloWorldModule.childRoutes = (store) => {
   // return Route Components
 };
 
-// See "Loading Async Data" section
+// See "Loading Data" section
 HelloWorldModule.loadModuleData = async ({ store, fetchClient }) => {
   // Async Requests on Module Load
 };
@@ -394,11 +394,11 @@ export default HelloWorldModule;
 ```
 
 **Contents**
-* [Loading Modules](#loadingmodules)
-* [Loading Async Data](#loadingasyncdata)
+* [Loading Modules](##loading-modules)
+* [Loading Async Data](#loading-async-data)
 * [Routing](#routing)
 * [State Management](#)
-* [App Configuration](#appconfiguration)
+* [App Configuration](#app-configuration)
 
 #### [Server](#-server)
 
@@ -425,11 +425,16 @@ Documentation Forthcoming
 
 ##### React Router Component
 
+> 👍 Most commonly used method to load Holocron Modules
+
+A parent Module may add the `ModuleRoute` routing component to the [`childRoutes` Module Lifecycle Hook](#routing) to load a child Module dynamically on the server or browser when matching a route path. Once the Module is loaded, it is injected as a JSX element into the `children` prop of the parent Module.
+
 ###### `ModuleRoute`
 
 Please see [`ModuleRoute`](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route#-usage) in the Holocron Module Route API.
 
 ##### Dispatch and Render
+We may use the `holocronModule` Higher Order Component to dispatch Holocron Redux Actions. Using the `load` argument in `holocronModule` we dispatch `composeModules` to retrieve a child Module bundle (e.g. `mymodule.browser.js`) and pass React `props` to it. Once loaded, a parent Module may add the `RenderModule` React Component into their JSX to render loaded Holocron Modules.
 
 ###### `RenderModule`
 
@@ -443,14 +448,18 @@ Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/m
 
 Please see [`composeModules`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#composemodules) in the Holocron API.
 
-#### Loading Async Data
+#### Loading Data
 
-When [Holocron Modules](#modules) are composed and loaded on the Server or Client, the `loadModuleData` Module Lifecycle Hook is called to load any async requests.
+When [Holocron Modules](#modules) are composed and loaded on the Server and Client, the `loadModuleData` Module Lifecycle Hook is called to load any async requests.
 
 **Contents**
 * [`loadModuleData`](#loadmoduledata)
 
 ##### `loadModuleData`
+
+**Runs On**
+* ✅ Server
+* ✅ Browser
 
 **Shape**
 ```js
@@ -469,6 +478,7 @@ The `loadModuleData` Module Lifecycle Hook, is executed on the 1) Server and 2) 
 In practice, we may [`dispatch`](https://redux.js.org/api/store/#dispatchaction) Redux actions and make [`async/await`](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Async_await) requests to populate our Module's reducers before any React Components are rendered:
 
 ```js
+// Runs on both Server and Browser
 HelloWorldModule.loadModuleData = async ({ store, fetchClient }) => {
   store.dispatch({ type: 'LOADING_API' });
   const response = await fetchClient('https://api.example.com');
@@ -479,6 +489,8 @@ HelloWorldModule.loadModuleData = async ({ store, fetchClient }) => {
 
 **📘 More Information**
 * Example: [SSR Frank](./prod-sample/sample-modules/ssr-frank/0.0.0/src/components/SsrFrank.jsx)
+* Docs: [Redux Store](https://redux.js.org/api/store)
+* Docs: [ES6 Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch)
 
 #### Routing
 
