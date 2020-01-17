@@ -413,7 +413,9 @@ Documentation Forthcoming
 
 #### Loading Modules
 
-[Holocron Modules](#modules) are loaded on 1) the server when serving the initial HTML and 2) in the Browser when the client JavaScript takes over and the [Single Page App](https://developer.mozilla.org/en-US/docs/Glossary/SPA) is initialized. Holocron Modules are loaded either when a path is matched to a URL using the [child routes configuration](#routing), or when a React component uses the [Holocron API](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md) to load and render a module.
+In both the Server and the Browser, the Holocron Modules loaded depends on which path is matched to a URL using the [child routes configuration](#routing), or when a React component uses the [Holocron API](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md).
+
+Both methods are described in the following.
 
 **Contents**
 * React Router Component
