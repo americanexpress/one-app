@@ -24,7 +24,7 @@ const corsOptions = {
 export const setCorsOrigins = (newCorsOrigins = []) => {
   corsOptions.origin = process.env.NODE_ENV === 'development'
     ? [...newCorsOrigins, devOrigin]
-    : [newCorsOrigins];
+    : newCorsOrigins;
 };
 
 setCorsOrigins();

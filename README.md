@@ -119,6 +119,8 @@ import { setRenderPartialOnly } from '@americanexpress/one-app-ducks';
 dispatch(setRenderPartialOnly(true));
 ```
 
+[CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) is enabled for partial requests and by default there are no allowed origins. Add origins in the root module [corsOrigins](#corsorigins) in the [appConfig](#app-configuration)
+
 See the [`Partial` component](./prod-sample/sample-modules/frank-lloyd-root/0.0.2/src/components/Partial.jsx)
 in the `frank-lloyd-root` module for an example implementation.
 
@@ -551,8 +553,8 @@ security and bundle size considerations.
 
 ##### `provideStateConfig`
 **Module Type**
-* ✅ Root Module 
-* 🚫 Child Module  
+* ✅ Root Module
+* 🚫 Child Module
 
 **Shape**
 ```js
@@ -610,8 +612,8 @@ Based on `environmentLevel`, the String values are injected into the global [`co
 
 ##### `csp`
 **Module Type**
-* ✅ Root Module 
-* 🚫 Child Module  
+* ✅ Root Module
+* 🚫 Child Module
 
 ⚠️ Required Directive
 
@@ -636,8 +638,8 @@ The `csp` static `String` should be a valid [Content Security Policy (CSP)](http
 
 ##### `corsOrigins`
 **Module Type**
-* ✅ Root Module 
-* 🚫 Child Module  
+* ✅ Root Module
+* 🚫 Child Module
 
 > 👮**Security Feature**: Limits the reachable origins for fetching data and assets.
 
@@ -661,8 +663,8 @@ In practice, this allows POST requests from given origins to return partially re
 
 ##### `configureRequestLog`
 **Module Type**
-* ✅ Root Module 
-* 🚫 Child Module  
+* ✅ Root Module
+* 🚫 Child Module
 
 **Shape**
 ```js
@@ -715,8 +717,8 @@ The `configureRequestLog` directive accepts a callback that takes Express's `req
 
 ##### `extendSafeRequestRestrictedAttributes`
 **Module Type**
-* ✅ Root Module 
-* 🚫 Child Module  
+* ✅ Root Module
+* 🚫 Child Module
 
 > 👮**Security Feature**: Limits headers and cookies from being passed to Redux's initial state.
 
@@ -741,8 +743,8 @@ The `extendSafeRequestRestrictedAttributes` directive accepts a list of cookie n
 
 ##### `createSsrFetch`
 **Module Type**
-* ✅ Root Module 
-* 🚫 Child Module  
+* ✅ Root Module
+* 🚫 Child Module
 
 **Shape**
 ```js
@@ -754,9 +756,9 @@ if (!global.BROWSER) {
     }) => (fetch) => (fetchUrl, fetchOpts) => Promise,
   };
 }
-``` 
+```
 
-`createSsrFetch` allows for customizing the fetch client used in `one-app` to perform server-side requests. 
+`createSsrFetch` allows for customizing the fetch client used in `one-app` to perform server-side requests.
 
 For example, you may wish to forward cookies or headers from the initial page load request to all the requisite SSR API requests.
 
@@ -767,8 +769,8 @@ For example, you may wish to forward cookies or headers from the initial page lo
 
 ##### `validateStateConfig`
 **Module Type**
-* 🚫 Root Module 
-* ✅ Child Module 
+* 🚫 Root Module
+* ✅ Child Module
 
 **Shape**
 ```js
@@ -804,8 +806,8 @@ If an `Error` is thrown, the Server will fail to startup or if already running w
 
 ##### `requiredSafeRequestRestrictedAttributes`
 **Module Type**
-* 🚫 Root Module 
-* ✅ Child Module 
+* 🚫 Root Module
+* ✅ Child Module
 
 > 👮**Security Feature**: Limits headers and cookies from being passed to Redux's initial state.
 
@@ -831,8 +833,8 @@ If an `Error` is thrown due to missing required cookies or headers, the Server w
 
 ##### `appCompatibility`
 **Module Type**
-* ✅ Root Module 
-* ✅ Child Module  
+* ✅ Root Module
+* ✅ Child Module
 
 **Shape**
 ```js
