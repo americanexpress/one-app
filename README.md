@@ -363,10 +363,42 @@ One App can be started via docker or if built from source by running `node lib/s
 
 **Holocron Modules** or "Modules" are self contained Web Experiences that consist of React Components with Redux-compatible Reducers and Actions. In practice, Modules are developed, bundled, and operate in isolation to one another. The One App Server uses a [Module Map](#building-and-deploying-a-holocron-module-map) containing URLs to Module bundles (e.g. `my-module.browser.js`) to load and serve bundles upon request. When the Server receives an HTTP request, it renders one or more Modules on the Server. Similar to React Components, Modules are composable (e.g. Modules may load other Modules). The first or entrypoint Module is called the "Root Module". The Root Module loads other "Child Modules". Overall, this development pattern in One App may be characterized as the [Micro Front End](https://martinfowler.com/articles/micro-frontends.html) pattern.
 
-**API**
-* [loadModuleData](#loadmoduledata)
-* [childRoutes](#childroutes)
-* [appConfig](#appconfig)
+Holocron Modules have their own *Module Lifecycle Hooks*:
+
+**Shape**
+```js
+function HelloWorldModule() {
+  return (
+    <h1>Hello World</h1>
+  );
+}
+
+// See "Routing" section
+HelloWorldModule.childRoutes = (store) => {
+  // return Route Components
+};
+
+// See "Loading Data" section
+HelloWorldModule.loadModuleData = async ({ store, fetchClient }) => {
+  // Async Requests on Module Load
+};
+
+// See "App Configuration" section
+if (!global.BROWSER) {
+  HelloWorldModule.appConfig = {
+    // appConfig directives
+  };
+}
+
+export default HelloWorldModule;
+```
+
+**Contents**
+* [Loading Modules](#loading-modules)
+* [Loading Data](#loading-data)
+* [Routing](#routing)
+* [State Management](#)
+* [App Configuration](#app-configuration)
 
 #### [Server](#-server)
 
@@ -379,17 +411,103 @@ Documentation Forthcoming
 
 ### Modules
 
-#### `loadModuleData`
+#### Loading Modules
+
+In either the Server or the Browser, there are two methods to select and load specific Holocron Modules: 1) Use Routes defined in the [child routes configuration](#routing) to match a URL path to a Holocron Module. 2) Or use dispatch-able methods in the [Holocron API](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md) to load Holocron Modules and render their contents with a React Component.
+
+Both methods are described in the following.
+
+**Contents**
+* Route Component
+  * [`ModuleRoute`](#moduleroute)
+* Load and Render
+  * [`RenderModule`](#rendermodule)
+  * [`holocronModule`](#holocronmodule)
+  * [`composeModules`](#composemodules)
+
+##### Route Component
+
+> 👍 Most commonly used method to load Holocron Modules
+
+A parent Module may add the `ModuleRoute` routing component to the [`childRoutes` Module Lifecycle Hook](#routing) to load a child Module dynamically on the server or browser when matching a route path. Once the Module is loaded, it is injected as a JSX element into the `children` prop of the parent Module.
+
+###### `ModuleRoute`
+
+Please see [`ModuleRoute`](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route#-usage) in the Holocron Module Route API.
+
+##### Dispatch and Render
+
+We may use the `holocronModule` Higher Order Component to dispatch Holocron Redux Actions. Using the `load` argument in `holocronModule` we dispatch `composeModules` to retrieve a child Module bundle (e.g. `mymodule.browser.js`) and pass React `props` to it. Once loaded, a parent Module may add the `RenderModule` React Component into their JSX to render loaded Holocron Modules.
+
+###### `RenderModule`
+
+Please see [`RenderModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#rendermodule) in the Holocron API.
+
+###### `holocronModule`
+
+Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule) in the Holocron API.
+
+###### `composeModules`
+
+Please see [`composeModules`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#composemodules) in the Holocron API.
+
+#### Loading Data
+
+When [Holocron Modules](#modules) are composed and loaded on the Server and Client, the `loadModuleData` Module Lifecycle Hook is called to load any async requests. On the Server only, the `fetchClient` injected into the `loadModuleData` Hook may be customized using [`createSsrFetch`](#createssrfetch).
+
+**Contents**
+* [`loadModuleData`](#loadmoduledata)
+* [`createSsrFetch`](#createssrfetch)
+
+##### `loadModuleData`
+
+**Runs On**
+* ✅ Server
+* ✅ Browser
+
+**Shape**
+```js
+HelloWorldModule.loadModuleData = async ({ store, fetchClient }) => {};
+```
+
+**Arguments**
+
+| Argument | Type     | Description                     |
+|----------|----------|---------------------------------|
+| `store`   | [`Redux Store`](https://redux.js.org/api/store/) | Redux store containing `getState`, `dispatch` and [other methods](https://redux.js.org/api/store/). |
+| `fetchClient`   | [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) | [ES6 Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) Compatible Client. |
+
+The `loadModuleData` Module Lifecycle Hook, is executed on the 1) Server and 2) Browser when a Module is loaded in either environment. This method is executed and resolved before any React Components are rendered inside a Holocron Module.
+
+In practice, we may [`dispatch`](https://redux.js.org/api/store/#dispatchaction) Redux actions and make [`async/await`](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Async_await) requests to populate our Module's reducers before any React Components are rendered:
+
+```js
+// Runs on both Server and Browser
+HelloWorldModule.loadModuleData = async ({ store, fetchClient }) => {
+  store.dispatch({ type: 'LOADING_API' });
+  const response = await fetchClient('https://api.example.com');
+  const data = await response.json();
+  store.dispatch({ type: 'LOADED_API', data });
+};
+```
+
+**📘 More Information**
+* Example: [SSR Frank](./prod-sample/sample-modules/ssr-frank/0.0.0/src/components/SsrFrank.jsx)
+* Customize SSR Fetch Client: [`createSsrFetch`](#createssrfetch)
+* Docs: [Redux Store](https://redux.js.org/api/store)
+* Docs: [ES6 Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch)
+
+##### `createSsrFetch`
+
+Please see [`createSsrFetch`](#createssrfetch-1) in the [App Configuration](#app-configuration) section.
+
+#### Routing
 
 Documentation Forthcoming
 
-#### `childRoutes`
+#### App Configuration
 
-Documentation Forthcoming
-
-#### `appConfig`
-
-`appConfig` allows a module to specify a selection of configuration options for Modules.
+The App Configuration API, `appConfig` allows a module to specify a selection of configuration options for [Holocron Modules](#modules).
 
 ```js
 // Force tree shaking appConfig away in client bundles
@@ -426,7 +544,7 @@ security and bundle size considerations.
 * [corsOrigins](#corsorigins)
 * [configureRequestLog](#configurerequestlog)
 * [extendSafeRequestRestrictedAttributes](#extendsaferequestrestrictedattributes)
-* [createSsrFetch](#createssrfetch)
+* [createSsrFetch](#createssrfetch-1)
 * [validateStateConfig](#validatestateconfig)
 * [requiredSafeRequestRestrictedAttributes](#requiredsaferequestrestrictedattributes)
 * [appCompatibility](#appcompatibility)
@@ -645,7 +763,7 @@ For example, you may wish to forward cookies or headers from the initial page lo
 **📘 More Information**
 * Example: [Frank Lloyd Root's `appConfig`](./prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
 * Example: [An SSR Fetch Client](./prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/createFrankLikeFetch.js)
-* Using SSR Fetch Client with [`loadModuleData`](#loadModuleData)
+* Using SSR Fetch Client with [`loadModuleData`](#loadmoduledata)
 
 ##### `validateStateConfig`
 **Module Type**
