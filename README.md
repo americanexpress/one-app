@@ -43,7 +43,17 @@ Want to get paid for your contributions to `one-app`?
 
 ### Quick Start
 
-**Clone and Install One App:**
+**Build a Module with [generator-one-app-module](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module)**
+
+The easiest way to do this is via [npx](https://blog.npmjs.org/post/162869356040/introducing-npx-an-npm-package-runner) (comes with `npm` versions 5.2.0 and above). Run the following command in the directory you want your module to live:
+
+```bash
+npx -p yo -p @americanexpress/generator-one-app-module -- yo one-app-module
+```
+
+This will kick off the yeoman generator to scaffold your module.
+
+**Clone and Install One App**
 
 ```bash
 export NODE_ENV=development
@@ -52,25 +62,29 @@ cd one-app
 npm ci --no-optional
 ```
 
-**Build a Module:**
+**Serve your Module to One App**
+
+At the root of your `one-app` repo, run:
 
 ```bash
-cd prod-sample/sample-modules/frank-lloyd-root/0.0.0
-npm ci
-cd ../../../..
-npm run serve-module prod-sample/sample-modules/frank-lloyd-root/0.0.0
-# this is used by the frank-lloyd-root module
-export ONE_CONFIG_ENV=development
+npm run serve-module <local-path-to-generated-module>
+# e.g. npm run serve-module ../my-first-module
 ```
 
-**Declare a Root Module and Start One App:**
+The `serve-module` command generates a `static` folder in the `one-app` root directory, containing a `module-map.json` and a `modules` folder with your bundled module code. Paired with the built-in [one-app-dev-cdn](https://github.com/americanexpress/one-app-dev-cdn) library, you're able to utilize [holocron]() while running your entire One App instance locally. No need to deploy and fetch remote assets from a CDN at this step.
+
+**Declare the module as your Root Module and start One App:**
+
+Start up One App and declare your new module as the [Root Module](#-the-root-module):
 
 ```bash
-npm start -- --root-module-name=frank-lloyd-root
+npm start -- --root-module-name=<module-name>
+# e.g. npm start -- --root-module-name=my-first-module
 ```
 
-This starts One App and makes it available at http://localhost:3000/success where you can see it in action!
+This starts One App and makes it available at http://localhost:3000/success where you can see it in action! 
 
+Open another terminal window, run `npm run watch:build` in your module's directory and make some edits to the module. One App will pick up these changes and update the module bundles accordingly. When you reload your browser window, One App will be displaying your updated module.
 
 ### The Root Module
 
@@ -82,7 +96,7 @@ The root module serves as the entry point for one-app to load an application.
           | ------------------------------- |
 ```
 
-It is possible for your application to consist of only the root module, however most application will want to take advantage of code splitting using [Holocron](https://github.com/americanexpress/holocron) and have the root module load other modules.
+It is possible for your application to consist of only the root module, however most application will want to take advantage of code splitting using [Holocron](https://github.com/americanexpress/holocron) and have the root module load other modules. More on this in [routing](#-routing).
 
 For a module to act as the root module the only requirements are:
 
