@@ -158,7 +158,7 @@ ONE_CLIENT_CDN_URL=https://app-cdn.com/statics/
 Additionally the following environment variables are available in order to fine tune your production
 set up:
 
-** `ONE_CONFIG_ENV`**
+**`ONE_CONFIG_ENV`**
 
 String key that is used to look up values provided by a root module to provide state configuration
 for its children modules.
