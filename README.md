@@ -413,12 +413,12 @@ Documentation Forthcoming
 
 #### Loading Modules
 
-In both the Server and the Browser, the Holocron Modules loaded depends on which path is matched to a URL using the [child routes configuration](#routing), or when a React component uses the [Holocron API](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md).
+In either the Server or the Browser, there are two methods to select and load specific Holocron Modules: 1) Use Routes defined in the [child routes configuration](#routing) to match a URL path to a Holocron Module. 2) Or use dispatch-able methods in the [Holocron API](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md) to load Holocron Modules and render their contents with a React Component.
 
 Both methods are described in the following.
 
 **Contents**
-* React Router Component
+* Route Component
   * [`ModuleRoute`](#moduleroute)
 * Load and Render
   * [`RenderModule`](#rendermodule)
@@ -453,7 +453,7 @@ Please see [`composeModules`](https://github.com/americanexpress/holocron/blob/m
 
 #### Loading Data
 
-When [Holocron Modules](#modules) are composed and loaded on the Server and Client, the `loadModuleData` Module Lifecycle Hook is called to load any async requests. The `fetchClient` injected into the `loadModuleData` Hook may be customized using [`createSsrFetch`](#createssrfetch).
+When [Holocron Modules](#modules) are composed and loaded on the Server and Client, the `loadModuleData` Module Lifecycle Hook is called to load any async requests. On the Server only, the `fetchClient` injected into the `loadModuleData` Hook may be customized using [`createSsrFetch`](#createssrfetch).
 
 **Contents**
 * [`loadModuleData`](#loadmoduledata)
