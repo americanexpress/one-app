@@ -425,7 +425,7 @@ Both methods are described in the following.
   * [`holocronModule`](#holocronmodule)
   * [`composeModules`](#composemodules)
 
-##### React Router Component
+##### Route Component
 
 > 👍 Most commonly used method to load Holocron Modules
 
