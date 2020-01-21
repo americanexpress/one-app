@@ -119,7 +119,7 @@ import { setRenderPartialOnly } from '@americanexpress/one-app-ducks';
 dispatch(setRenderPartialOnly(true));
 ```
 
-[CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) is enabled for partial requests and by default there are no allowed origins. Add origins in the root module [corsOrigins](#corsorigins) in the [appConfig](#appconfig)
+[CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) is enabled for partial requests and by default there are no allowed origins. Add origins in the root module [corsOrigins](#corsorigins) in the [appConfig](#app-configuration)
 
 See the [`Partial` component](./prod-sample/sample-modules/frank-lloyd-root/0.0.2/src/components/Partial.jsx)
 in the `frank-lloyd-root` module for an example implementation.
