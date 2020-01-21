@@ -467,7 +467,9 @@ When [Holocron Modules](#modules) are composed and loaded on the Server and Clie
 
 **Shape**
 ```js
-HelloWorldModule.loadModuleData = async ({ store, fetchClient }) => {};
+HelloWorldModule.loadModuleData = async ({ store, fetchClient }) => {
+  await Promise.resolve();
+};
 ```
 
 **Arguments**
