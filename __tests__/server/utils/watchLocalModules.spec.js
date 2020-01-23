@@ -28,7 +28,6 @@ import watchLocalModules from '../../../src/server/utils/watchLocalModules';
 
 const ip = address();
 
-
 jest.mock('chokidar', () => {
   const listeners = {};
   const watcher = () => null;
