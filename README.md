@@ -27,8 +27,8 @@ Want to get paid for your contributions to `one-app`?
 * [Usage](#-usage)
 * [Recipes](#-recipes)
 * [API](#%EF%B8%8F-api)
-* [License](#-license)
-* [Code Of Conduct](#-code-of-conduct)
+* [License](#%EF%B8%8F-license)
+* [Code Of Conduct](#%EF%B8%8F-code-of-conduct)
 * [Contributing](#-contributing)
 
 ## ✨ Features
@@ -90,7 +90,7 @@ Paired with the built-in [one-app-dev-cdn](https://github.com/americanexpress/on
 
 #### Declare the module as your Root Module and start One App:
 
-Start up One App and declare your new module as the [Root Module](#-the-root-module):
+Start up One App and declare your new module as the [Root Module](#the-root-module):
 
 ```bash
 npm start -- --root-module-name=<module-name>
@@ -115,14 +115,14 @@ It is possible for your application to consist of only the root module, however 
 
 For a module to act as the root module the only requirements are:
 
-- Returns a React component bundled with [one-app-bundler](https://github.com/americanexpress/one-app-cli).
-- Provides a valid [content security policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) though the [appConfig](#-configuration-with-app-config) static.
+- Returns a React component bundled with [one-app-bundler](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler).
+- Provides a valid [content security policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) though the [appConfig](#app-configuration) static.
 
 **📘 More Information**
 * Root Module example: [frank-lloyd-root](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/components/FrankLloydRoot.jsx)
-* [App Configuration in your Root Module](#-app-configuration)
-* [What are Holocron Modules?](#-modules)
-* [Useful Local Development Commands / Options](#-useful-local-development-commands-options)
+* [App Configuration in your Root Module](#app-configuration)
+* [What are Holocron Modules?](#modules)
+* [Useful Local Development Commands / Options](#useful-local-development-commands--options)
 
 
 ## 👩‍🍳 Recipes
