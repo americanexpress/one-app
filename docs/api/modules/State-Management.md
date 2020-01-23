@@ -2,7 +2,7 @@
 
 # State Management
 
-[Holocron Modules](../API.md#modules) rely on one Store provided by [Redux](https://redux.js.org/) used primarily to cache the results of loaded data and Modules. Every Module may add their own [Reducers](https://redux.js.org/basics/reducers/) to the shared Store (through [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule)) and may dispatch actions to transform the Store. Redux provides a simple way to store data on the Server and [preload the store](https://redux.js.org/recipes/server-rendering#inject-initial-component-html-and-state) used by the Browser. This is commonly referred to as [Server Side Rendering](https://redux.js.org/recipes/server-rendering). One App employs the [Ducks Specification](https://github.com/erikras/ducks-modular-redux) design pattern for logical grouping Reducers, Action Creators, and Selectors (e.g. the `error` ducks contains reducers, actions, and selectors for storing error data in the Redux Store).
+[Holocron Modules](../API.md#modules) rely on one Store provided by [Redux](https://redux.js.org/) used primarily to cache the results of loaded data and Modules. Every Module may add their own [Reducers](https://redux.js.org/basics/reducers/) to the shared Store (through [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule)) and may dispatch actions to transform the Store. Redux provides a simple way to store data on the Server and [preload the store](https://redux.js.org/recipes/server-rendering#inject-initial-component-html-and-state) used by the Browser. This is commonly referred to as [Server Side Rendering](https://redux.js.org/recipes/server-rendering). One App employs the [Ducks Specification](https://github.com/erikras/ducks-modular-redux) design pattern for the logical grouping of Reducers, Action Creators, and Selectors (e.g. the `error` ducks contains reducers, actions, and selectors for storing error data in the Redux Store).
 
 **Contents**
 * [Globals](#globals)
@@ -26,6 +26,15 @@ global.BROWSER; // Boolean
 The `global.BROWSER` is provided in the Server and Browser environments to determine if the code is currently being executed on the Server or the Browser.
 
 ## Higher Order Components
+
+[Holocron Modules](../API.md#modules) use [Higher Order Components (HOC)](https://reactjs.org/docs/higher-order-components.html) to add behaviors regarding 1) when a Module loads, 2) connecting a Module with its [Reducer(s)](https://redux.js.org/basics/reducers/) to a Redux Store (similar to [Redux `connect`](https://react-redux.js.org/api/connect)) and 3) adding runtime validations for a Module.
+
+**Contents**
+* [`holocronModule`](#holocronmodule)
+
+### `holocronModule`
+
+Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule) in the Holocron API.
 
 ## Shared Ducks
 
@@ -59,35 +68,59 @@ The following API definitions describe the Ducks responsible for the state shape
 * [`holocron`](#holocron-duck)
 * [`intl`](#intl-duck)
 
-### `config`
+### `config` Duck
 The `config` Duck lists a subset of the environment variables set on the Server.
+
+**Contents:**
+* [State Shape](#state-shape)
+* Action Creators
+  * [`setConfig`](#setconfig)
 
 #### State Shape
 
-| Reducer Object Property | Description                                                                                                              |
-|-------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| `reportingUrl`          | URL where the Browser sends client side errors to. (See [`ONE_CLIENT_REPORTING_URL`](#)).                                |
-| `cdnUrl`                | URL where the One App static assets are located. (See [`ONE_CLIENT_CDN_URL`](#))                                         |
-| `localeFilename`        | The exact filename for the locale file used in the Browser. (See [`ONE_CLIENT_LOCALE_FILENAME`](#))                      |
-| `rootModuleName`        | Name of the Holocron Module that serves as the entry point to your application. (See [`ONE_CLIENT_ROOT_MODULE_NAME`](#)) |
+```js
+const state = new Map({
+  config: new Map({
+    // URL where the Browser sends client side errors to.
+    reportingUrl: String,
+    // URL where the One App static assets are located.
+    cdnUrl: String,
+    // The exact filename for the locale file used in the Browser.
+    localeFilename: String,
+    // Name of the Holocron Module that serves as the entry point to your application.
+    rootModuleName: String,
+    // ... Settings from provideStateConfig key values will land here.
+    [provideStateConfigSettingName]: String,
+  }),
+  // ... Rest of Redux State
+});
+```
 
-
-#### Selectors
-
-*No Selectors Available*
+**📘 More Information**
+* Adding values to `config` state with [`provideStateConfig`](./App-Configuration.md#providestateconfig) from [App Configuration API](./App-Configuration.md).
+* Learn more about [Environment Variables](#):
+  * [`ONE_CLIENT_REPORTING_URL`](#),
+  * [`ONE_CLIENT_CDN_URL`](#),
+  * [`ONE_CLIENT_LOCALE_FILENAME`](#),
+  * [`ONE_CLIENT_ROOT_MODULE_NAME`](#)
 
 #### Action Creators
 
-`setConfig(config)`
+##### `setConfig`
+
+> ⚠️ For Internal Use
+
+**Shape**
+
+```js
+dispatch(setConfig(config));
+```
 
 | Argument | Type     | Description                                                |
 |----------|----------|------------------------------------------------------------|
 | `config` | `Object` | An object with the properties listed in the Reducer below. |
 
 This `config` passed to `setConfig` replaces the contents of the `config` state object in the Redux Store.
-
-**📘 More Information**
-* Server API Docs: [Environment Variables](../API.md)
 
 ### `errorReporting` Duck
 

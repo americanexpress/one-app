@@ -96,7 +96,7 @@ if (!global.BROWSER) {
 }
 ```
 
-Based on `environmentLevel`, the String values are injected into the global [`config` reducer](../../../src/universal/ducks/config.js) in One App's global Redux state. These values may be accessed by Modules using Redux's `mapStateToProps`.
+Based on `environmentLevel`, the String values are injected into the global [`config` reducer](./State-Management.md#config) in One App's global Redux state. These values may be accessed by Modules using Redux's `mapStateToProps`.
 
 **📘 More Information**
 * Example: [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
