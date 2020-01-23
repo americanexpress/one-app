@@ -24,7 +24,6 @@ RUN NODE_ENV=production npm run build && \
     mv /opt/build/package.json /opt/one-app/production && \
     mv /opt/build/lib /opt/one-app/production && \
     mv /opt/build/build /opt/one-app/production && \
-    mv /opt/build/.webpack-stats* /opt/one-app/production && \
     mv /opt/build/bundle.integrity.manifest.json /opt/one-app/production && \
     mv /opt/build/.build-meta.json /opt/one-app/production
 

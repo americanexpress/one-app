@@ -114,6 +114,19 @@ describe('server listen', () => {
       expect(cb).toHaveBeenCalledWith(null, { port: '8998' });
     });
 
+    it('uses the PORT env var if given and HTTP_PORT is not given', () => {
+      const cb = jest.fn();
+      delete process.env.HTTP_PORT;
+      process.env.PORT = '1111';
+      http.mock.listenError = null;
+      listenHttp(app, cb);
+      expect(http.createServer).toHaveBeenCalledTimes(1);
+      expect(http.createServer).toHaveBeenCalledWith(app);
+      expect(http.mock.servers[0].listen).toHaveBeenCalledTimes(1);
+      expect(http.mock.servers[0].listen.mock.calls[0][0]).toEqual('1111');
+      expect(cb).toHaveBeenCalledWith(null, { port: '1111' });
+    });
+
     it('passes the error to the callback', (done) => {
       process.env.HTTP_PORT = 8998;
       const listenError = new Error('port taken or such');

@@ -27,7 +27,7 @@ export default contentSecurityPolicyBuilder({
       "'self'",
       'https://sample-cdn.frank',
       `${ip.address()}:3001`,
-      `localhost:3001`,
+      'localhost:3001',
     ],
     imgSrc: [
       "'self'",
@@ -41,7 +41,7 @@ export default contentSecurityPolicyBuilder({
       "'self'",
       '*.api.frank',
       `${ip.address()}:3001`,
-      `localhost:3001`,
+      'localhost:3001',
       'https://sample-cdn.frank',
     ],
   },

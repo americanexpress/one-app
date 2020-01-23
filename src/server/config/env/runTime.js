@@ -65,7 +65,7 @@ const runTime = [
       return undefined;
     },
     validate: (value) => {
-      if (!process.env.HTTPS_PORT && !value  && !process.env.PORT) {
+      if (!process.env.HTTPS_PORT && !value && !process.env.PORT) {
         throw new Error('Either of the `HTTP_PORT` or `HTTPS_PORT` or `PORT` environment variables must be defined');
       }
     },

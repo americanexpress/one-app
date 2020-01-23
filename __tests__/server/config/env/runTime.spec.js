@@ -145,6 +145,10 @@ describe('runTime', () => {
       expect(() => httpPort.normalize('0002345a')).toThrow();
     });
 
+    it('does not normalize if no value is given', () => {
+      expect(httpPort.normalize()).toEqual(undefined);
+    });
+
     it('has a default value for development', () => {
       process.env.NODE_ENV = 'development';
       delete process.env.HTTP_PORT;
@@ -183,6 +187,10 @@ describe('runTime', () => {
       expect(() => devCdnPort.normalize('0002345a')).toThrowErrorMatchingSnapshot();
     });
 
+    it('does not normalize if no value is given', () => {
+      expect(devCdnPort.normalize()).toEqual(undefined);
+    });
+
     it('has a default value for development', () => {
       process.env.NODE_ENV = 'development';
       delete process.env.HTTP_ONE_APP_DEV_CDN_PORT;
@@ -206,6 +214,10 @@ describe('runTime', () => {
       );
       expect(devProxyPort.normalize('0002345')).toEqual(2345);
       expect(() => devProxyPort.normalize('0002345a')).toThrow();
+    });
+
+    it('does not normalize if no value is given', () => {
+      expect(devProxyPort.normalize()).toEqual(undefined);
     });
 
     it('has a default value for development', () => {

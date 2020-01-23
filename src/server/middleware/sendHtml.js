@@ -40,8 +40,8 @@ function getChunkAssets(assetsByChunkName) {
     .map(([, assets]) => (typeof assets === 'string' ? assets : assets[0]));
 }
 
-const modernBrowserChunkAssets = getChunkAssets(readJsonFile('../../../.webpack-stats.browser.json').assetsByChunkName);
-const legacyBrowserChunkAssets = getChunkAssets(readJsonFile('../../../.webpack-stats.legacyBrowser.json').assetsByChunkName)
+const modernBrowserChunkAssets = getChunkAssets(readJsonFile('../../../.build-meta.json').modernBrowserChunkAssets);
+const legacyBrowserChunkAssets = getChunkAssets(readJsonFile('../../../.build-meta.json').legacyBrowserChunkAssets)
   .map((chunkAsset) => `legacy/${chunkAsset}`);
 
 export function safeSend(res, ...payload) {

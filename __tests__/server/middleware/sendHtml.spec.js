@@ -41,20 +41,9 @@ jest.mock('../../../src/server/utils/stateConfig');
 jest.mock('../../../src/server/utils/readJsonFile', () => (filePath) => {
   switch (filePath) {
     case '../../../.build-meta.json':
-      return { buildVersion: '1.2.3-rc.4-abc123' };
-    case '../../../bundle.integrity.manifest.json':
       return {
-        'app.js': '098',
-        'bundle~common.js': '1234',
-        'vendors.js': '5678',
-        'legacy/app.js': 'zyx',
-        'legacy/bundle~common.js': 'abc',
-        'legacy/vendors.js': 'def',
-      };
-    case '../../../.webpack-stats.browser.json':
-    case '../../../.webpack-stats.legacyBrowser.json':
-      return {
-        assetsByChunkName: {
+        buildVersion: '1.2.3-rc.4-abc123',
+        modernBrowserChunkAssets: {
           'i18n/en': 'i18n/en.js',
           'bundle~common': 'bundle~common.js',
           vendors: ['vendors.js', 'vendors.js.map'],
@@ -66,6 +55,27 @@ jest.mock('../../../src/server/utils/readJsonFile', () => (filePath) => {
             'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA.js.map',
           ],
         },
+        legacyBrowserChunkAssets: {
+          'i18n/en': 'i18n/en.js',
+          'bundle~common': 'bundle~common.js',
+          vendors: ['vendors.js', 'vendors.js.map'],
+          'i18n/en-US': 'i18n/en-US.js',
+          'i18n/tk-TM': 'i18n/tk-TM.js',
+          'i18n/am': ['i18n/am.js', 'i18n/am.js.map'],
+          'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA': [
+            'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA.js',
+            'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA.js.map',
+          ],
+        },
+      };
+    case '../../../bundle.integrity.manifest.json':
+      return {
+        'app.js': '098',
+        'bundle~common.js': '1234',
+        'vendors.js': '5678',
+        'legacy/app.js': 'zyx',
+        'legacy/bundle~common.js': 'abc',
+        'legacy/vendors.js': 'def',
       };
     default:
       throw new Error('Couldn\'t find JSON file to read');

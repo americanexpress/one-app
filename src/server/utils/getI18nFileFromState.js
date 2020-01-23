@@ -17,7 +17,7 @@
 import readJsonFile from './readJsonFile';
 
 // `require` has a cache, avoid retaining the full file in memory
-const { assetsByChunkName } = readJsonFile('../../../.webpack-stats.browser.json');
+const assetsByChunkName = readJsonFile('../../../.build-meta.json').modernBrowserChunkAssets;
 
 const i18nFiles = new Map(
   Object

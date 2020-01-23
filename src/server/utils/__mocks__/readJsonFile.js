@@ -17,7 +17,33 @@
 export default function readJsonFile(filePath) {
   switch (filePath.split('/').pop()) {
     case '.build-meta.json':
-      return { buildVersion: '1.2.3-rc.4-abc123' };
+      return {
+        buildVersion: '1.2.3-rc.4-abc123',
+        modernBrowserChunkAssets: {
+          'i18n/en': 'i18n/en.js',
+          'bundle~common': 'bundle~common.js',
+          vendors: ['vendors.js', 'vendors.js.map'],
+          'i18n/en-US': 'i18n/en-US.js',
+          'i18n/tk-TM': 'i18n/tk-TM.js',
+          'i18n/am': ['i18n/am.js', 'i18n/am.js.map'],
+          'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA': [
+            'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA.js',
+            'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA.js.map',
+          ],
+        },
+        legacyBrowserChunkAssets: {
+          'i18n/en': 'i18n/en.js',
+          'bundle~common': 'bundle~common.js',
+          vendors: ['vendors.js', 'vendors.js.map'],
+          'i18n/en-US': 'i18n/en-US.js',
+          'i18n/tk-TM': 'i18n/tk-TM.js',
+          'i18n/am': ['i18n/am.js', 'i18n/am.js.map'],
+          'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA': [
+            'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA.js',
+            'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA.js.map',
+          ],
+        },
+      };
     case 'bundle.integrity.manifest.json':
       return {
         'web.js': '123',
@@ -26,39 +52,6 @@ export default function readJsonFile(filePath) {
         'legacy/web.js': 'abc',
         'legacy/named-chunk.js': 'def',
         'legacy/other-chunk.js': 'ghi',
-      };
-    case '.webpack-stats.browser.json':
-    case '.webpack-stats.legacyBrowser.json':
-      return {
-        version: '0.0.1', // Version of webpack used for the compilation
-        hash: '11593e3b3ac85436984a', // Compilation specific hash
-        time: 2469, // Compilation time in milliseconds
-        filteredModules: 0, // A count of excluded modules when exclude is passed to toJson
-        outputPath: '/', // path to webpack output directory
-        assetsByChunkName: {
-          // Chunk name to emitted asset(s) mapping
-          main: 'web.js?h=11593e3b3ac85436984a',
-          'named-chunk': 'named-chunk.web.js',
-          'other-chunk': [
-            'other-chunk.js',
-            'other-chunk.css',
-          ],
-        },
-        assets: [
-          // A list of asset objects
-        ],
-        chunks: [
-          // A list of chunk objects
-        ],
-        modules: [
-          // A list of module objects
-        ],
-        errors: [
-          // A list of error strings
-        ],
-        warnings: [
-          // A list of warning strings
-        ],
       };
     default:
       throw new Error('Couldn\'t find JSON file to read');
