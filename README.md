@@ -43,9 +43,9 @@ Want to get paid for your contributions to `one-app`?
 
 ### Quick Start
 
-**Build a Module with [generator-one-app-module](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module)**
+#### Build a Module with [generator-one-app-module](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module)
 
-The easiest way to do this is via [npx](https://blog.npmjs.org/post/162869356040/introducing-npx-an-npm-package-runner) (comes with `npm` versions 5.2.0 and above). Run the following command in the directory you want your module to live:
+The easiest way to do this is via [`npx`](https://blog.npmjs.org/post/162869356040/introducing-npx-an-npm-package-runner) (comes with `npm` versions 5.2.0 and above). Run the following command in the directory you want your module to live:
 
 ```bash
 npx -p yo -p @americanexpress/generator-one-app-module -- yo one-app-module
@@ -53,7 +53,7 @@ npx -p yo -p @americanexpress/generator-one-app-module -- yo one-app-module
 
 This will use the [One App Module Generator](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module) to generate a basic One App module.
 
-**Clone and Install One App**
+#### Clone and Install One App
 
 ```bash
 export NODE_ENV=development
@@ -62,7 +62,7 @@ cd one-app
 npm ci --no-optional
 ```
 
-**Serve your Module to One App**
+#### Serve your Module to One App
 
 At the root of your `one-app` repo, run:
 
@@ -71,9 +71,24 @@ npm run serve-module <local-path-to-generated-module>
 # e.g. npm run serve-module ../my-first-module
 ```
 
-The `serve-module` command generates a `static` folder in the `one-app` root directory, containing a `module-map.json` and a `modules` folder with your bundled module code. Paired with the built-in [one-app-dev-cdn](https://github.com/americanexpress/one-app-dev-cdn) library, you're able to utilize the [Holocron Module Map](#-building-and-deploying-a-holocron-module-map) while running your entire One App instance locally. No need to deploy and fetch remote assets from a CDN at this step.
+The `serve-module` command generates a `static` folder in the `one-app` root directory, containing a `module-map.json` and a `modules` folder with your bundled module code: 
+```
+one-app/static
+├── module-map.json
+└── modules
+    └── my-first-module
+        └── 1.0.0
+            ├── my-first-module.browser.js
+            ├── my-first-module.browser.js.map
+            ├── my-first-module.legacy.browser.js
+            ├── my-first-module.legacy.browser.js.map
+            ├── my-first-module.node.js
+            └── my-first-module.node.js.map
+```
 
-**Declare the module as your Root Module and start One App:**
+Paired with the built-in [one-app-dev-cdn](https://github.com/americanexpress/one-app-dev-cdn) library, you're able to utilize the [Holocron Module Map](#-building-and-deploying-a-holocron-module-map) while running your entire One App instance locally. No need to deploy and fetch remote assets from a CDN at this step.
+
+#### Declare the module as your Root Module and start One App:
 
 Start up One App and declare your new module as the [Root Module](#-the-root-module):
 
@@ -96,12 +111,18 @@ The root module serves as the entry point for one-app to load an application.
           | ------------------------------- |
 ```
 
-It is possible for your application to consist of only the root module, however most application will want to take advantage of code splitting using [Holocron](https://github.com/americanexpress/holocron) and have the root module load other modules. More on this in [routing](#-routing).
+It is possible for your application to consist of only the root module, however most application will want to take advantage of code splitting using [Holocron](https://github.com/americanexpress/holocron) and have the root module load other modules. More on this in the [Routing](#-routing) section in the API docs.
 
 For a module to act as the root module the only requirements are:
 
 - Returns a React component bundled with [one-app-bundler](https://github.com/americanexpress/one-app-cli).
 - Provides a valid [content security policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) though the [appConfig](#-configuration-with-app-config) static.
+
+**📘 More Information**
+* Root Module example: [frank-lloyd-root](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/components/FrankLloydRoot.jsx)
+* [App Configuration in your Root Module](#-app-configuration)
+* [What are Holocron Modules?](#-modules)
+* [Useful Local Development Commands / Options](#-useful-local-development-commands-options)
 
 
 ## 👩‍🍳 Recipes
