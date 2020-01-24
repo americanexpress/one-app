@@ -544,6 +544,26 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
+    test('app calls loadModuleData to run async requests using Tenant provided fetchClient', async () => {
+      const response = await fetch(`${appAtTestUrls.fetchUrl}/demo/ssr-frank`, {
+        ...defaultFetchOptions,
+      });
+      const htmlData = await response.text();
+      const scriptContents = htmlData.match(/<script id="initial-state" nonce=\S+>([^<]+)<\/script>/)[1];
+      const initialState = scriptContents.match(/window\.__INITIAL_STATE__ = "([^<]+)";/)[1];
+      const state = transit.fromJSON(initialState.replace(/\\/g, ''));
+      expect(state.getIn(['modules', 'ssr-frank', 'data'])).toEqual({
+        posts: [
+          {
+            author: 'typicode',
+            id: 1,
+            title: 'json-server',
+          },
+        ],
+        secretMessage: 'you are being watched',
+      });
+    });
+
     describe('tentant root configureRequestLog', () => {
       it('has included userId from cookies in request log', async () => {
         const requestLogRegex = /some-user-id-1234/;
@@ -678,7 +698,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             params: {
               0: '/vitruvius',
             },
-            protocol: 'https',
+            protocol: expect.any(String),
             query: {},
             url: '/vitruvius',
           },
@@ -707,26 +727,6 @@ describe('Tests that can run against either local Docker setup or remote One App
         expect(data.req.body).toEqual({
           legacy: 'application',
           sendingData: 'in POSTs',
-        });
-      });
-
-      test('app calls loadModuleData to run async requests using Tenant provided fetchClient', async () => {
-        const response = await fetch(`${appInstanceUrls.fetchUrl}/demo/ssr-frank`, {
-          ...defaultFetchOpts,
-        });
-        const htmlData = await response.text();
-        const scriptContents = htmlData.match(/<script id="initial-state" nonce=\S+>([^<]+)<\/script>/)[1];
-        const initialState = scriptContents.match(/window\.__INITIAL_STATE__ = "([^<]+)";/)[1];
-        const state = transit.fromJSON(initialState.replace(/\\/g, ''));
-        expect(state.getIn(['modules', 'ssr-frank', 'data'])).toEqual({
-          posts: [
-            {
-              author: 'typicode',
-              id: 1,
-              title: 'json-server',
-            },
-          ],
-          secretMessage: 'you are being watched',
         });
       });
 
