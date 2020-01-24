@@ -23,7 +23,10 @@ import {
   getModules,
   resetModuleRegistry,
 } from 'holocron/moduleRegistry';
+import { address } from 'ip';
 import watchLocalModules from '../../../src/server/utils/watchLocalModules';
+
+const ip = address();
 
 jest.mock('chokidar', () => {
   const listeners = {};
@@ -64,6 +67,13 @@ jest.mock('fs', () => {
 
 describe('watchLocalModules', () => {
   beforeEach(() => jest.clearAllMocks());
+  let origOneAppDevCDNPort;
+  beforeAll(() => {
+    origOneAppDevCDNPort = process.env.HTTP_ONE_APP_DEV_CDN_PORT;
+  });
+  afterAll(() => {
+    process.env.HTTP_ONE_APP_DEV_CDN_PORT = origOneAppDevCDNPort;
+  });
 
   it('should watch the modules directory', () => {
     watchLocalModules();
@@ -128,5 +138,68 @@ describe('watchLocalModules', () => {
     const changeListener = chokidar.getListeners().change;
     await changeListener(changedPath);
     expect(loadModule).not.toHaveBeenCalled();
+  });
+
+  it('should replace [one-app-dev-cdn-url] with correct ip and port', async () => {
+    const moduleName = 'some-module';
+    const moduleVersion = '1.0.1';
+    process.env.HTTP_ONE_APP_DEV_CDN_PORT = 3002;
+    const moduleMapSample = {
+      key: '123',
+      modules: {
+        [moduleName]: {
+          node: {
+            integrity: '133',
+            url: `[one-app-dev-cdn-url]/cdn/${moduleName}/${moduleVersion}/${moduleName}-node.js`,
+          },
+          browser: {
+            integrity: '234',
+            url: `[one-app-dev-cdn-url]/cdn/${moduleName}/${moduleVersion}/${moduleName}-browser.js`,
+          },
+          legacyBrowser: {
+            integrity: '134633',
+            url: `[one-app-dev-cdn-url]/cdn/${moduleName}/${moduleVersion}/${moduleName}-legacy.browser.js`,
+          },
+        },
+      },
+    };
+    const oneAppDevCdnAddress = `http://${ip}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`;
+    const updatedModuleMapSample = {
+      key: '123',
+      modules: {
+        [moduleName]: {
+          node: {
+            integrity: '133',
+            url: `${oneAppDevCdnAddress}/cdn/${moduleName}/${moduleVersion}/${moduleName}-node.js`,
+          },
+          browser: {
+            integrity: '234',
+            url: `${oneAppDevCdnAddress}/cdn/${moduleName}/${moduleVersion}/${moduleName}-browser.js`,
+          },
+          legacyBrowser: {
+            integrity: '134633',
+            url: `${oneAppDevCdnAddress}/cdn/${moduleName}/${moduleVersion}/${moduleName}-legacy.browser.js`,
+          },
+        },
+      },
+    };
+    fs.readFileSync.mockImplementationOnce(() => JSON.stringify(moduleMapSample));
+    const modulePath = path.resolve(__dirname, `../../../static/modules/${moduleName}/${moduleVersion}/${moduleName}.node.js`);
+    const originalModule = () => null;
+    const updatedModule = () => null;
+    const modules = fromJS({ [moduleName]: originalModule });
+    const moduleMap = fromJS(moduleMapSample);
+    resetModuleRegistry(modules, moduleMap);
+    watchLocalModules();
+    const changeListener = chokidar.getListeners().change;
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
+    await changeListener(modulePath);
+    expect(loadModule).toHaveBeenCalledWith(
+      moduleName,
+      updatedModuleMapSample.modules[moduleName],
+      require('../../../src/server/utils/onModuleLoad').default
+    );
+    expect(getModules().get(moduleName)).toBe(updatedModule);
   });
 });
