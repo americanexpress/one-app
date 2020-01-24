@@ -10,7 +10,7 @@ if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "feature/add
   docker tag one-app:at-test registry.heroku.com/one-app-sample/web && \
   docker push registry.heroku.com/one-app-sample/web && \
   npx heroku container:release web -a one-app-sample && \
-  npm run test:integration -- --remote-one-app-environment=https://one-app-sample.herokuapp.com
+  ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true ONE_DANGEROUSLY_SKIP_SAMPLE_MODULES_BUILD=true npm run test:integration -- --remote-one-app-environment=https://one-app-sample.herokuapp.com
 else
   ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true npm run test:integration
 fi
