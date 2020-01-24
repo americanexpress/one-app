@@ -2,7 +2,9 @@
 
 # Loading Modules
 
-In either the Server or the Browser, there are two methods to select and load specific [Holocron Modules](../API.md#modules): 1) Use Routes defined in the [child routes configuration](./Routing.md#routing) to match a URL path to a Holocron Module. 2) Or use dispatch-able methods in the [Holocron API](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md) to load Holocron Modules and render their contents with a React Component.
+In either the Server or the Browser, there are two methods to select and load specific [Holocron Modules](../API.md#modules): 
+* Use Routes defined in the [child routes configuration](./Routing.md#routing) to match a URL path to a Holocron Module. 
+* Use dispatch-able methods in the [Holocron API](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md) to load Holocron Modules and render their contents with a React Component.
 
 Both methods are described in the following.
 

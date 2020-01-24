@@ -318,7 +318,7 @@ if (!global.BROWSER) {
 
 The `requiredSafeRequestRestrictedAttributes` allows a Child Module to validate settings passed from `extendSafeRequestRestrictedAttributes`. Each whitelisted header in `headers` array and cookie in `cookies` array will be checked against the Root Module's `extendSafeRequestRestrictedAttributes` on the loading of the Child Module. If this does not match entries previously made in Root Module's `extendSafeRequestRestrictedAttributes`, the Child Module will fail to load.
 
-If an `Error` is thrown due to missing required cookies or headers, the Server will either 1) fail to startup or 2) if already running will prevent [Holocron](https://github.com/americanexpress/holocron) from loading the Module dynamically.
+If an `Error` is thrown due to missing required cookies or headers, the Server will either fail to startup or if already running will prevent [Holocron](https://github.com/americanexpress/holocron) from loading the Module dynamically.
 
 **📘 More Information**
 * [`extendSafeRequestRestrictedAttributes`](#extendsaferequestrestrictedattributes)

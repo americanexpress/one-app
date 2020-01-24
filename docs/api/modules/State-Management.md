@@ -2,7 +2,7 @@
 
 # State Management
 
-[Holocron Modules](../API.md#modules) rely on one Store provided by [Redux](https://redux.js.org/) used primarily to cache the results of loaded data and Modules. Every Module may add their own [Reducers](https://redux.js.org/basics/reducers/) to the shared Store (through [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule)) and may dispatch actions to transform the Store. Redux provides a simple way to store data on the Server and [preload the store](https://redux.js.org/recipes/server-rendering#inject-initial-component-html-and-state) used by the Browser. This is commonly referred to as [Server Side Rendering](https://redux.js.org/recipes/server-rendering). One App employs the [Ducks Specification](https://github.com/erikras/ducks-modular-redux) design pattern for the logical grouping of Reducers, Action Creators, and Selectors (e.g. the `error` ducks contains reducers, actions, and selectors for storing error data in the Redux Store).
+[Holocron Modules](../API.md#modules) rely on one Store provided by [Redux](https://redux.js.org/) used primarily to cache the results of loaded data and Modules. Every Module may add their own [Reducers](https://redux.js.org/basics/reducers/) to the shared Store (through [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule)) and may dispatch actions to transform the Store. Redux provides a simple way to store data on the Server and [preload the store](https://redux.js.org/recipes/server-rendering#inject-initial-component-html-and-state) used by the Browser. This is commonly referred to as [Server Side Rendering](https://redux.js.org/recipes/server-rendering). One App employs the [Ducks Specification](https://github.com/erikras/ducks-modular-redux) design pattern for the logical grouping of Reducers, Action Creators, and Selectors (e.g. the `error` duck contains reducers, actions, and selectors for storing error data in the Redux Store).
 
 **Contents**
 * [Globals](#globals)
@@ -23,11 +23,11 @@
 global.BROWSER; // Boolean
 ```
 
-The `global.BROWSER` is provided in the Server and Browser environments to determine if the code is currently being executed on the Server or the Browser.
+`global.BROWSER` is provided in the Server and Browser environments to determine if the code is currently being executed on the Server or the Browser.
 
 ## Higher Order Components
 
-[Holocron Modules](../API.md#modules) use [Higher Order Components (HOC)](https://reactjs.org/docs/higher-order-components.html) to add behaviors regarding 1) when a Module loads, 2) connecting a Module with its [Reducer(s)](https://redux.js.org/basics/reducers/) to a Redux Store (similar to [Redux `connect`](https://react-redux.js.org/api/connect)) and 3) adding runtime validations for a Module.
+[Holocron Modules](../API.md#modules) use [Higher Order Components (HOC)](https://reactjs.org/docs/higher-order-components.html) to add behaviors regarding when a Module loads, connecting a Module with its [Reducer(s)](https://redux.js.org/basics/reducers/) to a Redux Store (similar to [Redux `connect`](https://react-redux.js.org/api/connect)) and adding runtime validations for a Module.
 
 **Contents**
 * [`holocronModule`](#holocronmodule)
@@ -116,6 +116,8 @@ const state = new Map({
 dispatch(setConfig(config));
 ```
 
+**Arguments**
+
 | Argument | Type     | Description                                                |
 |----------|----------|------------------------------------------------------------|
 | `config` | `Object` | An object with the properties listed in the Reducer below. |
@@ -124,23 +126,23 @@ This `config` passed to `setConfig` replaces the contents of the `config` state 
 
 ### `errorReporting` Duck
 
-Please see the [`errorReporting` Duck](https://github.com/americanexpress/one-app-ducks#reducers) in the One App Ducks API.
+Please see the [`errorReporting` Duck](https://github.com/americanexpress/one-app-ducks#errorreporting-duck) in the One App Ducks API.
 
 ### `error` Duck
 
-Please see the [`error` Duck](https://github.com/americanexpress/one-app-ducks#reducers) in the One App Ducks API.
+Please see the [`error` Duck](https://github.com/americanexpress/one-app-ducks#error-duck) in the One App Ducks API.
 
 ### `browser` Duck
 
-Please see the [`browser` Duck](https://github.com/americanexpress/one-app-ducks#reducers) in the One App Ducks API.
+Please see the [`browser` Duck](https://github.com/americanexpress/one-app-ducks#browser-duck) in the One App Ducks API.
 
 ### `rendering` Duck
 
-Please see the [`rendering` Duck](https://github.com/americanexpress/one-app-ducks#reducers) in the One App Ducks API.
+Please see the [`rendering` Duck](https://github.com/americanexpress/one-app-ducks#rendering-duck) in the One App Ducks API.
 
 ### `redirection` Duck
 
-Please see the [`redirection` Duck](https://github.com/americanexpress/one-app-ducks#reducers) in the One App Ducks API.
+Please see the [`redirection` Duck](https://github.com/americanexpress/one-app-ducks#redirection-duck) in the One App Ducks API.
 
 ### `holocron` Duck
 
@@ -148,6 +150,6 @@ Please see the [`holocron` Duck](https://github.com/americanexpress/holocron/blo
 
 ### `intl` Duck
 
-Please see the [`intl` Duck](https://github.com/americanexpress/one-app-ducks#reducers) in the One App Ducks API.
+Please see the [`intl` Duck](https://github.com/americanexpress/one-app-ducks#intl-duck) in the One App Ducks API.
 
 [☝️ Return To Top](#state-management)

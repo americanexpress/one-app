@@ -26,7 +26,7 @@ HelloWorldModule.loadModuleData = async ({ store, fetchClient }) => {};
 | `store`   | [`Redux Store`](https://redux.js.org/api/store/) | Redux store containing `getState`, `dispatch` and [other methods](https://redux.js.org/api/store/). |
 | `fetchClient`   | [`fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) | [ES6 Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) Compatible Client. |
 
-The `loadModuleData` Module Lifecycle Hook, is executed on the 1) Server and 2) Browser when a Module is loaded in either environment. This method is executed and resolved before any React Components are rendered inside a Holocron Module.
+The `loadModuleData` Module Lifecycle Hook, is executed on the Server and Browser when a Module is loaded in either environment. This method is executed and resolved before any React Components are rendered inside a Holocron Module.
 
 In practice, we may [`dispatch`](https://redux.js.org/api/store/#dispatchaction) Redux actions and make [`async/await`](https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Async_await) requests to populate our Module's reducers before any React Components are rendered:
 
