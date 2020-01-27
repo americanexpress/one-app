@@ -71,7 +71,7 @@ npm run serve-module <local-path-to-generated-module>
 # e.g. npm run serve-module ../my-first-module
 ```
 
-The `serve-module` command generates a `static` folder in the `one-app` root directory, containing a `module-map.json` and a `modules` folder with your bundled module code: 
+The `serve-module` command generates a `static` folder in the `one-app` root directory, containing a `module-map.json` and a `modules` folder with your bundled module code:
 ```
 one-app/static
 ├── module-map.json
@@ -97,7 +97,7 @@ npm start -- --root-module-name=<module-name>
 # e.g. npm start -- --root-module-name=my-first-module
 ```
 
-This starts One App and makes it available at http://localhost:3000/ where you can see it in action! 
+This starts One App and makes it available at http://localhost:3000/ where you can see it in action!
 
 Open another terminal window, run `npm run watch:build` in your module's directory and make some edits to the module. One App will pick up these changes and update the module bundles accordingly. When you reload your browser window, One App will be displaying your updated module.
 
@@ -133,7 +133,75 @@ For a module to act as the root module the only requirements are:
 
 ### Making an API call
 
-### Adding a Route
+### Routing and Navigation
+
+One App contains a single route `<ModuleRoute moduleName={root-module-name}/>` which loads the
+root-module configured by `root-module-name`. This is what makes the root module the entry
+point to your application. As One App does not set a path for the root module the root module
+itself is required to have at least a single route with a path.
+
+```js
+import { Route } from '@americanexpress/one-app-router';
+
+export function RootModule({ children, config }) {
+  return <h1>Hello World!</h1>;
+}
+RootModule.childRoutes = [
+  <Route path="/" />,
+];
+```
+
+As your application grows you can also take advantage of holocron's [`ModuleRoute`](./docs/api/modules/loading-modules.md#moduleroute)
+to load other modules.
+
+```js
+import { Route } from '@americanexpress/one-app-router';
+import ModuleRoute from 'holocron-module-route';
+
+export function RootModule({ children, config }) {
+  return (
+    <React.Fragment>
+      { /* Root module UI */ }
+      { children }
+    </React.Fragment>
+  );
+}
+RootModule.childRoutes = [
+  <Route path="/" component={() => <h1>Hello World</h1>} />,
+  <ModuleRoute path="child" moduleName="child-module" />,
+];
+```
+
+To allow users to navigate around your application you can use `Link`
+provided by One App Router.
+
+```js
+import { Link, Route } from '@americanexpress/one-app-router';
+import ModuleRoute from 'holocron-module-route';
+
+export function RootModule({ children, config }) {
+  return (
+    <React.Fragment>
+      <nav>
+        <Link to="/">
+          Home
+        </Link>
+        <Link to="/child">
+          Home
+        </Link>
+      </nav>
+      { children }
+    </React.Fragment>
+  );
+}
+RootModule.childRoutes = [
+  <Route path="/" component={() => <h1>Hello World</h1>} />,
+  <ModuleRoute path="child" moduleName="child-module" />,
+];
+```
+
+**📘 More Information**
+* See One App Router for more docs related to routing: [One App Router](https://github.com/americanexpress/one-app-router)
 
 ### Code Splitting using Holocron
 
