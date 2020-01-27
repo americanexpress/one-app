@@ -781,6 +781,7 @@ describe('Tests that can run against either local Docker setup or remote One App
         test('uses language from the language pack to render on the initial page load', async () => {
           await browser.url(`${appInstanceUrls.browserUrl}/demo/cultured-frankie`);
           const greetingMessage = await browser.$('#greeting-message');
+          await waitFor(200);
           expect(await greetingMessage.getText()).toBe(
             'Hello, my name is Frankie and I am in the United States!'
           );
