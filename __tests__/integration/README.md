@@ -54,7 +54,7 @@ To make it easier for you to deploy all the sample modules to a remote environme
 to build and bundle the modules and module map for you:
 
 ```bash
-npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-hostname=https://example.cdn.com
+npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-hostname=https://cdn.example.com
 ```
 
 This will produce a `sample-module-bundles` directory with all the sample modules and a module map.
