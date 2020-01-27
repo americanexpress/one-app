@@ -32,7 +32,6 @@ const origEnvVarVals = {};
   'HTTPS_PUBLIC_CERT_CHAIN_PATH',
   'HTTPS_TRUSTED_CA_PATH',
   'HTTPS_PRIVATE_KEY_PASS_FILE_PATH',
-
 ]
   .forEach((name) => { origEnvVarVals[name] = process.env[name]; });
 
