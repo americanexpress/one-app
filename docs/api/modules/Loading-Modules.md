@@ -2,8 +2,8 @@
 
 # Loading Modules
 
-In either the Server or the Browser, there are two methods to select and load specific [Holocron Modules](../API.md#modules): 
-* Use Routes defined in the [child routes configuration](./Routing.md#routing) to match a URL path to a Holocron Module. 
+In either the Server or the Browser, there are two methods to select and load specific [Holocron Modules](../API.md#modules):
+* Use Routes defined in the [child routes configuration](./Routing.md#routing) to match a URL path to a Holocron Module.
 * Use dispatch-able methods in the [Holocron API](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md) to load Holocron Modules and render their contents with a React Component.
 
 Both methods are described in the following.
@@ -20,9 +20,16 @@ Both methods are described in the following.
 
 > 👍 Most commonly used method to load Holocron Modules
 
-A parent Module may add the `ModuleRoute` routing component to the [`childRoutes` Module Lifecycle Hook](#routing) to load a child Module dynamically on the server or browser when matching a route path. Once the Module is loaded, it is injected as a JSX element into the `children` prop of the parent Module.
+A parent Module may add the `ModuleRoute` routing component to the [`childRoutes` Module Lifecycle Hook](./Routing.md) to load a child Module dynamically on the server or browser when matching a route path. Once the Module is loaded, it is injected as a JSX element into the `children` prop of the parent Module.
 
 ### `ModuleRoute`
+
+Similar to One App Router's `<Route>` with an additional prop, `moduleName`, [`ModuleRoute`](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route#moduleroute) loads
+a Holocron Module when the URL matches the given path.
+
+```js
+<ModuleRoute path="/home" module-name="my-module" />;
+```
 
 Please see [`ModuleRoute`](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route#-usage) in the Holocron Module Route API.
 
