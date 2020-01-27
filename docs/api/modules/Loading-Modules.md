@@ -20,11 +20,11 @@ Both methods are described in the following.
 
 > 👍 Most commonly used method to load Holocron Modules
 
-A parent Module may add the `ModuleRoute` routing component to the [`childRoutes` Module Lifecycle Hook](#./Routing.md) to load a child Module dynamically on the server or browser when matching a route path. Once the Module is loaded, it is injected as a JSX element into the `children` prop of the parent Module.
+A parent Module may add the `ModuleRoute` routing component to the [`childRoutes` Module Lifecycle Hook](./Routing.md) to load a child Module dynamically on the server or browser when matching a route path. Once the Module is loaded, it is injected as a JSX element into the `children` prop of the parent Module.
 
 ### `ModuleRoute`
 
-Similar to One App Router's `<Route>` with an additional prop, `moduleName`, [ModuleRoute](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route#moduleroute) loads
+Similar to One App Router's `<Route>` with an additional prop, `moduleName`, [`ModuleRoute`](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route#moduleroute) loads
 a Holocron Module when the URL matches the given path.
 
 ```js

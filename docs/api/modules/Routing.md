@@ -71,7 +71,7 @@ MyModule.onEnterRouteHook = (nextState, replace, callback) => {
 };
 ```
 
-Please see the [Holcoron Module Route docs](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route#onenterroutehook) for information.
+Please see the [Holocron Module Route docs](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route#onenterroutehook) for information.
 
 ## ModuleRoute
 

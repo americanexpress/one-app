@@ -151,7 +151,7 @@ RootModule.childRoutes = [
 ];
 ```
 
-As your application grows you can also take advantage of holocron's [`ModuleRoute`](./docs/api/modules/loading-modules.md#moduleroute)
+As your application grows, you can also take advantage of Holocron's [`ModuleRoute`](./docs/api/modules/loading-modules.md#moduleroute)
 to load other modules.
 
 ```js
