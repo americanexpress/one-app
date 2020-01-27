@@ -158,7 +158,7 @@ specific language pack feature as described in the previous section*.
 `ONE_CLIENT_LOCALE_FILENAME` must be one of `integration`, `qa`, or
 be `undefined` (for production).
 
-By default `ONE_CLIENT_LOCALE_FILENAME` will be `undefined` unless `NODE_ENV === 'development'`
+By default, `ONE_CLIENT_LOCALE_FILENAME` will be `undefined` unless `NODE_ENV === 'development'`
 which will result it in being set to `integration`.
 
 Example:
@@ -181,29 +181,29 @@ Please see the documentation on [Shared Ducks](./state-management.md#intl-duck) 
 
 Used for fetching a module's language pack.
 
-Please see One App Duck's [loadLanguagePack](https://github.com/americanexpress/one-app-ducks#loadlanguagepack) for information.
+Please see One App Duck's [`loadLanguagePack`](https://github.com/americanexpress/one-app-ducks#loadlanguagepack) for information.
 
 #### `queryLanguagePack`
 
 The [Iguazu](https://github.com/americanexpress/iguazu) equivalent of [`loadLanguagePack`](#loadlanguagepack).
 
-Please see One App Duck's [queryLanguagePack](https://github.com/americanexpress/one-app-ducks#querylanguagepack) for information.
+Please see One App Duck's [`queryLanguagePack`](https://github.com/americanexpress/one-app-ducks#querylanguagepack) for information.
 
 #### `updateLocale`
 
 Used to set the active locale for One App.
 
-Please see One App Duck's [updateLocale](https://github.com/americanexpress/one-app-ducks#updatelocale) for information.
+Please see One App Duck's [`updateLocale`](https://github.com/americanexpress/one-app-ducks#updatelocale) for information.
 
 #### `getLocalePack`
 
 Loads the locale of the requested country closest to the active locale. Used directly by One App.
 
-Please see One App Duck's [getLocalePack](https://github.com/americanexpress/one-app-ducks#getlocalepack) for information.
+Please see One App Duck's [`getLocalePack`](https://github.com/americanexpress/one-app-ducks#getlocalepack) for information.
 
 
 **📘 More Information**
-* To see an example of using [`react-intl`](https://github.com/formatjs/react-intl) within a module see [`CulturedFrankie`](../../../prod-sample/sample-modules/cultured-frankie/0.0.0/src/components/CulturedFrankie.jsx),
+* To see an example of using [`react-intl`](https://github.com/formatjs/react-intl) within a module, see [`CulturedFrankie`](../../../prod-sample/sample-modules/cultured-frankie/0.0.0/src/components/CulturedFrankie.jsx),
 
 
 [☝️ Return To Top](#internationalization)
