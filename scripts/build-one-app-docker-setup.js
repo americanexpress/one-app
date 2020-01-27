@@ -34,11 +34,11 @@ const nginxOriginStaticsAppDir = path.resolve(nginxOriginStaticsRootDir, 'app');
 const userIntendsToSkipOneAppImageBuild = process.env.ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD;
 const sanitizedEnvVars = sanitizeEnvVars();
 
-const buildDockerImages = async () => {
+const buildDockerImages = async (skipOneAppImageBuild) => {
   console.time('Docker Images Build');
-  console.log('🛠  Building One App Docker, fast-api, slow-api, and extra-slow-api images');
+  console.log(`🛠  Building ${skipOneAppImageBuild ? ' ' : 'one-app, '}fast-api, slow-api, and extra-slow-api Docker images`);
   try {
-    await promisifySpawn('docker-compose build --no-cache --parallel one-app fast-api slow-api extra-slow-api', { shell: true, cwd: sampleProdDir, env: { ...sanitizedEnvVars } });
+    await promisifySpawn(`docker-compose build --no-cache --parallel ${skipOneAppImageBuild ? '' : 'one-app'} fast-api slow-api extra-slow-api`, { shell: true, cwd: sampleProdDir, env: { ...sanitizedEnvVars } });
   } catch (error) {
     console.log('🚨 Docker images could not be built!\n');
     throw error;
@@ -82,14 +82,13 @@ const collectOneAppStaticFiles = async () => {
 
 const doWork = async () => {
   const oneAppImageAlreadyBuilt = execSync('docker images one-app:at-test', { encoding: 'utf8' }).includes('at-test');
-
-  if (userIntendsToSkipOneAppImageBuild && oneAppImageAlreadyBuilt) {
+  const skipOneAppImageBuild = userIntendsToSkipOneAppImageBuild && oneAppImageAlreadyBuilt;
+  if (skipOneAppImageBuild) {
     console.warn(
       '⚠️  Skipping One App Docker image build since the "ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD"'
       + 'environment variable is set.\n\nNote that your tests **may** be running against an out of date '
       + 'version of One App that does not reflect changes you have made to the source code.'
     );
-    process.exit(0);
   }
 
   await Promise.all([
@@ -115,8 +114,7 @@ const doWork = async () => {
     generateCertsFor('api', '*.api.frank'),
   ]);
 
-  await buildDockerImages();
-
+  await buildDockerImages(skipOneAppImageBuild);
   await collectOneAppStaticFiles();
 };
 
