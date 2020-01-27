@@ -2,18 +2,18 @@
 
 # Routing
 
-One App uses **[@americanexpress/one-app-router](https://github.com/americanexpress/one-app-router)**, a fork of **`react-router@3`**
+One App uses **[@americanexpress/one-app-router](https://github.com/americanexpress/one-app-router)**, a fork of **[`react-router@3`](https://github.com/ReactTraining/react-router/tree/v3)**
 uplifted to work with React@^17, for its client and server side routing.
 
 **Contents**
-* [Router](#router)
-* [Route](#route)
-* [childRoutes](#childroutes)
-* [Link](#link)
-* [onEnterRouteHook](#onenterroutehook)
+* [`Router`](#router)
+* [`Route`](#route)
+* [`childRoutes`](#childroutes)
+* [`Link`](#link)
+* [`onEnterRouteHook`](#onenterroutehook)
 
 **📘 More Information**
-* Loading Holocron Module via Route: [ModuleRoute](./loading-modules.md#moduleroute)
+* Loading Holocron Module via Route: [`ModuleRoute`](./Loading-Modules.md#moduleroute)
 
 ## `Router`
 
@@ -32,7 +32,8 @@ Please see One App Router's [Route API docs](https://github.com/americanexpress/
 ## `childRoutes`
 
 Enables components and modules to define their own child routes. `childRoutes` can be either a single
-route, array of routes or a function which accepts the Redux store as the sole argument.
+route, array of routes or a function which accepts the Redux store as the sole argument and returns
+a single route or array of routes.
 
 One App requires the Root Module to have at least one child route defined. This can be either `<Route>` or `<ModuleRoute>` with a `path`.
 
@@ -56,7 +57,6 @@ rendered.
 
 Please see One App Router's [`onEnter` API](https://github.com/americanexpress/one-app-router/blob/master/docs/API.md#onenternextstate-replace-callback)  for more information.
 
-
 ## `onEnterRouteHook`
 
 `onEnterRouteHook` is similar to the `onEnter` hook however it is defined by the module rather than on
@@ -71,7 +71,13 @@ MyModule.onEnterRouteHook = (nextState, replace, callback) => {
 };
 ```
 
-See the [Holcoron Module Route docs](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route/README.md#onEnterRouteHook) for information.
+Please see the [Holcoron Module Route docs](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route#onenterroutehook) for information.
 
+## ModuleRoute
+
+Please see [ModuleRoute](./Loading-Modules.md#moduleroute) for more information.
+
+**📘 More Information**
+* For an root module implementation example see [`FrankLloydRoot`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/components/FrankLloydRoot.jsx)
 
 [☝️ Return To Top](#routing)
