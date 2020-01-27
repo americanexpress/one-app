@@ -44,6 +44,7 @@ export default HelloWorldModule;
 * [Routing](./modules/Routing.md)
 * [State Management](./modules/State-Management.md)
 * [App Configuration](./modules/App-Configuration.md)
+* [Internationalization](./modules/Internationalization.md)
 
 ---
 
