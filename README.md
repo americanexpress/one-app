@@ -137,7 +137,7 @@ For a module to act as the root module the only requirements are:
 
 One App contains a single route `<ModuleRoute moduleName={root-module-name}/>` which loads the
 root-module configured by `root-module-name`. This is what makes the root module the entry
-point to your application. As One App does not set a path for the root module the root module
+point to your application. As One App does not set a path by default, the root module
 itself is required to have at least a single route with a path.
 
 ```js
