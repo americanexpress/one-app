@@ -28,7 +28,7 @@ Module Root:
 module
 ├── README.md
 ├── locale
-|   └── en-US.json
+|   ├── en-US.json
 |   └── es-MX.json
 ├── package.json
 └── src
@@ -78,16 +78,18 @@ Module Root:
 module
 ├── README.md
 ├── locale
-|   └── en-US
+|   ├── en-US
 |   |   ├── links
 |   |   |   └── production.json
 |   |   |   └── qa.json
 |   |   |   └── integration.json
 |   |   └── copy.json
-|   └── es-mx.json
-|       ├── <moduleName>.json
-|       ├── integration.json
-|       └── qa.json
+|   └── es-mx
+|       ├── links
+|       |   └── production.json
+|       |   └── qa.json
+|       |   └── integration.json
+|       └── copy.json
 ├── package.json
 └── src
     └── index.js
