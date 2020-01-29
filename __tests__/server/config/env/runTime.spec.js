@@ -161,7 +161,7 @@ describe('runTime', () => {
       expect(httpPort.defaultValue()).not.toBeDefined();
     });
 
-    it('throws if neither of HTTP_PORT or HTTPS_PORT are not defined', () => {
+    it('throws if neither of HTTP_PORT or HTTPS_PORT are defined', () => {
       delete process.env.HTTPS_PORT;
       delete process.env.HTTP_PORT;
       expect(() => httpPort.validate()).toThrowErrorMatchingSnapshot();

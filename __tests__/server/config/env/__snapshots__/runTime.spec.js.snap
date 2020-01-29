@@ -4,7 +4,7 @@ exports[`runTime HTTP_ONE_APP_DEV_CDN_PORT normalizes numeric input 1`] = `"env 
 
 exports[`runTime HTTP_ONE_APP_DEV_PROXY_SERVER_PORT normalizes numeric input: env var HTTP_ONE_APP_DEV_PROXY_SERVER_PORT needs to be a valid integer, given "r00t" 1`] = `"env var HTTP_ONE_APP_DEV_PROXY_SERVER_PORT needs to be a valid integer, given \\"r00t\\""`;
 
-exports[`runTime HTTP_PORT throws if neither of HTTP_PORT or HTTPS_PORT are not defined 1`] = `"Either of the \`HTTP_PORT\` or \`HTTPS_PORT\` or \`PORT\` environment variables must be defined"`;
+exports[`runTime HTTP_PORT throws if neither of HTTP_PORT or HTTPS_PORT are defined 1`] = `"Either of the \`HTTP_PORT\` or \`HTTPS_PORT\` or \`PORT\` environment variables must be defined"`;
 
 exports[`runTime NODE_ENV only allows for values to be set to either development or production 1`] = `
 Array [
