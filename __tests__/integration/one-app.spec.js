@@ -564,7 +564,7 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
-    describe('tentant root configureRequestLog', () => {
+    describe('module root configureRequestLog', () => {
       it('has included userId from cookies in request log', async () => {
         const requestLogRegex = /some-user-id-1234/;
         const searchForRequerstLog = searchForNextLogMatch(requestLogRegex);
