@@ -698,7 +698,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             params: {
               0: '/vitruvius',
             },
-            protocol: expect.any(String),
+            protocol: expect.toMatch(/https?/);
             query: {},
             url: '/vitruvius',
           },
