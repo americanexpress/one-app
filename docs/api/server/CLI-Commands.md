@@ -5,7 +5,7 @@
 `one-app` Server consists of [NPM Script Commands](https://docs.npmjs.com/misc/scripts) that determine its runtime configuration and behaviors. 
 
 ```sh
-npm run <one-app-npm-command>
+npm run <one-app-npm-command> [--] [--some-flag]
 # e.g. npm run test:unit -- --watch
 ```
 
@@ -29,6 +29,8 @@ We describe each command and a description of its usage below.
 * Start Commands
   * [`start`](#start-commands)
   * [`start:watch`](#start-commands)
+  * [`prestart:prod-sample`](#start-commands)
+  * [`start:prod-sample`](#start-commands)
 * Test Commands
   * [`test`](#test-commands)
   * [`test:unit`](#test-commands)
@@ -38,8 +40,6 @@ We describe each command and a description of its usage below.
   * [`test:danger`](#test-commands)
   * [`test:git-history`](#test-commands)
   * [`test:lockfile`](#test-commands)
-  * [`prestart:prod-sample`](#test-commands)
-  * [`start:prod-sample`](#test-commands)
 * Development Commands
   * [`serve-module`](#test-commands)
   * [`drop-module`](#test-commands)
@@ -70,11 +70,20 @@ We describe each command and a description of its usage below.
 | `build:bundle` | Executes [One App Bundler] to build Browser assets |
 | `build:artifacts:statics` | Runs [Static Assets Script](../../../scripts/build-static-assets-artifact.js) for [Integration Tests] |
 | `build:prod-sample` | Runs `build:sample-modules` and runs the [Build One App Docker Setup Script](../../../scripts/build-one-app-docker-setup.js) for [Integration Tests] |
-| `build:sample-modules` | Builds the [Holocron Modules] in [`prod-sample/sample-modules`] folder for [Integration Tests] |
+| `build:sample-modules` | Builds the [Holocron Modules] in [`prod-sample/sample-modules`] folder for [Integration Tests]. *See [`build:sample-modules` Usage](#buildsample-modules-usage).* |
 
+### `build:sample-modules` Usage
+
+```sh
+npm run build:sample-modules [--] [--archive-built-artifacts]
+# e.g. npm run build:sample-modules -- --archive-built-artifacts
 ```
-npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-hostname=https://cdn.example.com
-```
+
+#### Flags
+
+| Flag       | Description                                                                                    |
+|---------------|------------------------------------------------------------------------------------------------|
+| `--archive-built-artifacts`  | Runs `tar` and `gzip` on the the built sample [Holocron Modules] bundles. *Used in [Integration Test Suite]* |
 
 ## Start Commands
 
@@ -82,11 +91,13 @@ npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-hostn
 |---------------|------------------------------------------------------------------------------------------------|
 | `start`  | Runs `one-app` Server and accepts the [flags listed below](#start-usage). |
 | `start:watch` | Executes `one-app` Server and watches Server source files with [`nodemon`](https://nodemon.io/). When source changes, `one-app` reloads with the `npm start`. This command [accepts all the flags as `start`](#start-usage). |
+| `prestart:prod-sample` | Runs [`build:sample-modules`](#build-commands) before `start:prod-sample`. |
+| `start:prod-sample` | Runs a [Docker Compose](https://docs.docker.com/compose/compose-file/) file to start up the [Integration Test Suite] containers. |
 
 ### Start Usage
 
 ```sh
-SOME_ENV_VAR=value npm run start -- <flags>
+[ONE_CONFIG_ENV=<runtime-level>] npm run start (--) (--root-module-name=<root-module-name>) [--module-map-url=<module-map-url>] [--use-middleware]
 # e.g. ONE_CONFIG_ENV=development npm run start -- --root-module-name=my-root-module
 ```
 
@@ -114,31 +125,29 @@ Please see the [Environment Variables](./Environment-Variables.md) API docs.
 | `test:danger` | Runs the [DangerJS tool](https://danger.systems/js/) that returns bundle size stats and a preflight checklist for PRs. |
 | `test:git-history` | Validates the Git commit message format using the [`commitlint`](https://github.com/conventional-changelog/commitlint) tool. |
 | `test:lockfile` | Validates that the `package-lock.json` file contains valid NPM registry URLs using the [`lockfile-lint`](https://github.com/lirantal/lockfile-lint) tool. |
-| `prestart:prod-sample` | Runs [`build:sample-modules`](#build-commands) before `start:prod-sample`. |
-| `start:prod-sample` | Runs a [Docker Compose](https://docs.docker.com/compose/compose-file/) file to start up the [Integration Test Suite] containers. |
 
 ## Development Commands
 
 > 💬 These commands only work in Development
 
-| Flag | Description |
+| Command | Description |
 |------|-------------|
 | `serve-module` | Accepts a path to a [Holocron Module] and adds it to the local development CDN. *See [`serve-module` Arguments](#serve-module-arguments).*  |
 | `drop-module` | Accepts a [Holocron Module] name and removes the Module from the local development CDN. *See [`drop-module` Arguments](#drop-module-arguments).* |
-| `set-middleware` | Accepts a Node JS file that defines custom [Express Middleware](http://expressjs.com/en/guide/writing-middleware.html#writing-middleware-for-use-in-express-apps) for the development proxy. *See [`set-middleware` Arguments](#set-middleware-arguments).* |
+| `set-middleware` | Accepts a file path to JS file that defines custom [Express Middleware](http://expressjs.com/en/guide/writing-middleware.html#writing-middleware-for-use-in-express-apps) for the development proxy. *See [`set-middleware` Arguments](#set-middleware-arguments).* |
 | `set-dev-endpoints`| Accepts a Node file containing development endpoints for the development proxy. *See [`set-dev-endpoints` Arguments](#set-dev-endpoints-arguments).* |
 
 ### `serve-module` Arguments
 
 ```sh
-npm run serve-module <path-to-module-folder>
+npm run serve-module <path-to-module-folder>...
 # e.g. npm run serve-module ../../my-module
 ```
 
 ### `drop-module` Arguments
 
 ```sh
-npm run drop-module <module-name>
+npm run drop-module <module-name>...
 # e.g. npm run drop-module my-module
 ```
 
@@ -163,7 +172,7 @@ module.exports = (app) => (req, res, next) => {
 ### `set-dev-endpoints` Arguments
 
 ```sh
-npm run set-dev-endpoints <path-to-endpoints-js>
+npm run set-dev-endpoints <path-to-endpoints-js>...
 # e.g. npm run set-dev-endpoints ../dev.endpoints.js
 ```
 
