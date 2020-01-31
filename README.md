@@ -133,7 +133,7 @@ Please visit our [Recipe Docs](./docs/recipes/Recipes.md).
 
 ## 🎛️ API
 
-Our API Documentation break down each part of our public APIs for One App and its supporting libraries (e.g. Holocron, `one-app-ducks`, etc).
+Our API Docs break down each part of our public APIs for One App and its supporting libraries (e.g. Holocron, `one-app-ducks`, etc).
 
 Please visit our [API Docs](./docs/api/API.md).
 
