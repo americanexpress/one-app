@@ -58,7 +58,7 @@ npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-hostn
 ```
 
 This will produce a `sample-module-bundles` directory with all the sample modules and a module map.
-The `bundle-statics-hostname` allows you to specify the location the module bundles will be published
+The `bundle-statics-origin` allows you to specify the location the module bundles will be published
 to so that the generated [module map](../../README.md#building-and-deploying-a-holocron-module-map)
 has correct bundle URLs for the sample modules.
 

@@ -37,7 +37,7 @@ const pathToNginxOriginModuleMap = path.resolve(nginxOriginStaticsRootDir, 'modu
 const pathToAssets = path.resolve(sampleProdDir, 'assets');
 const userIntendsToSkipSampleModulesBuild = process.env.ONE_DANGEROUSLY_SKIP_SAMPLE_MODULES_BUILD;
 const archiveBuiltArtifacts = argv.archiveBuiltArtifacts || '';
-const bundleStaticsHostname = argv.bundleStaticsHostname || 'https://sample-cdn.frank';
+const bundleStaticsOrigin = argv.bundleStaticsOrigin || 'https://sample-cdn.frank';
 
 const sanitizedEnvVars = sanitizeEnvVars();
 
@@ -182,15 +182,15 @@ const doWork = async () => {
 
     moduleMapContent.modules[moduleName] = {
       browser: {
-        url: `${bundleStaticsHostname}/modules/${gitSha}/${moduleName}/${moduleVersion}/${moduleName}.browser.js`,
+        url: `${bundleStaticsOrigin}/modules/${gitSha}/${moduleName}/${moduleVersion}/${moduleName}.browser.js`,
         integrity: integrityDigests.browser,
       },
       legacyBrowser: {
-        url: `${bundleStaticsHostname}/modules/${gitSha}/${moduleName}/${moduleVersion}/${moduleName}.legacy.browser.js`,
+        url: `${bundleStaticsOrigin}/modules/${gitSha}/${moduleName}/${moduleVersion}/${moduleName}.legacy.browser.js`,
         integrity: integrityDigests.legacyBrowser,
       },
       node: {
-        url: `${bundleStaticsHostname}/modules/${gitSha}/${moduleName}/${moduleVersion}/${moduleName}.node.js`,
+        url: `${bundleStaticsOrigin}/modules/${gitSha}/${moduleName}/${moduleVersion}/${moduleName}.node.js`,
         integrity: integrityDigests.node,
       },
     };
@@ -205,12 +205,12 @@ const doWork = async () => {
   if (archiveBuiltArtifacts) {
     const sampleModuleBundlesDirname = 'sample-module-bundles';
     const pathToBundles = path.join(process.cwd(), sampleModuleBundlesDirname);
-    fs.emptyDir(pathToBundles);
-
-    Promise.all([
-      await fs.move(nginxOriginStaticsModulesDir, path.join(pathToBundles, 'modules'), { overwrite: true }),
-      await fs.move(pathToNginxOriginModuleMap, path.join(pathToBundles, 'module-map.json'), { overwrite: true }),
+    await fs.emptyDir(pathToBundles);
+    await Promise.all([
+      fs.move(nginxOriginStaticsModulesDir, path.join(pathToBundles, 'modules')),
+      fs.move(pathToNginxOriginModuleMap, path.join(pathToBundles, 'module-map.json')),
     ]);
+
 
     console.log(`✅ Bundled One App Sample Modules and Module Map created at ${pathToBundles}`);
   }
