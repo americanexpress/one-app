@@ -55,7 +55,7 @@ We describe each command and a description of its usage below.
 
 ## Development Commands
 
-> 💬 These commands only work in Development
+> 💬 These commands are for Development only
 
 | Command | Description |
 |------|-------------|
