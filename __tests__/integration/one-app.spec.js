@@ -145,6 +145,67 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
+    describe('one-app server provides reporting routes', () => {
+      describe('client reported errors', () => {
+        let reportedErrorSearch;
+        const errorMessage = 'reported client error';
+        const clientReportedErrorLog = new RegExp(errorMessage);
+
+        beforeAll(() => {
+          reportedErrorSearch = searchForNextLogMatch(clientReportedErrorLog);
+        });
+
+        test('logs errors when reported to /_/report/errors', async () => {
+          const resp = await fetch(
+            `${appAtTestUrls.fetchUrl}/_/report/errors`,
+            {
+              ...defaultFetchOptions,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify([{ msg: errorMessage }]),
+            }
+          );
+
+          expect(resp.status).toEqual(204);
+
+          await expect(reportedErrorSearch).resolves.toMatchSnapshot();
+        });
+      });
+
+      describe('csp-violations reported to server', () => {
+        let reportedCspViolationSearch;
+        // const violation = 'csp violation';
+        const cspViolationLog = /CSP Violation: {.*document-uri.*bad.example.com/;
+
+        beforeAll(() => {
+          reportedCspViolationSearch = searchForNextLogMatch(cspViolationLog);
+        });
+
+        test('logs violations reported to /_/report/errors', async () => {
+          const resp = await fetch(
+            `${appAtTestUrls.fetchUrl}/_/report/security/csp-violation`,
+            {
+              ...defaultFetchOptions,
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                'csp-report': {
+                  'document-uri': 'bad.example.com',
+                },
+              }),
+            }
+          );
+
+          expect(resp.status).toEqual(204);
+          await expect(reportedCspViolationSearch).resolves.toMatchSnapshot();
+        });
+      });
+    });
+
     describe('holocron', () => {
       let sampleModuleVersion;
 
