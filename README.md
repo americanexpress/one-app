@@ -86,7 +86,7 @@ one-app/static
             └── my-first-module.node.js.map
 ```
 
-Paired with the built-in [one-app-dev-cdn](https://github.com/americanexpress/one-app-dev-cdn) library, you're able to utilize the [Holocron Module Map](#-building-and-deploying-a-holocron-module-map) while running your entire One App instance locally. No need to deploy and fetch remote assets from a CDN at this step.
+Paired with the built-in [one-app-dev-cdn](https://github.com/americanexpress/one-app-dev-cdn) library, you're able to utilize the [Holocron Module Map](./docs/api/server/Module-Map-Schema.md) while running your entire One App instance locally. No need to deploy and fetch remote assets from a CDN at this step.
 
 #### Declare the module as your Root Module and start One App:
 
@@ -111,18 +111,18 @@ The root module serves as the entry point for one-app to load an application.
           | ------------------------------- |
 ```
 
-It is possible for your application to consist of only the root module, however most application will want to take advantage of code splitting using [Holocron](https://github.com/americanexpress/holocron) and have the root module load other modules. More on this in the [Routing](#-routing) section in the API docs.
+It is possible for your application to consist of only the root module, however most application will want to take advantage of code splitting using [Holocron](https://github.com/americanexpress/holocron) and have the root module load other modules. More on this in the [Routing](./docs/api/modules/Routing.md) section in the API docs.
 
 For a module to act as the root module the only requirements are:
 
 - Returns a React component bundled with [one-app-bundler](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler).
-- Provides a valid [content security policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) though the [appConfig](#app-configuration) static.
+- Provides a valid [content security policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) though the [appConfig](./docs/api/modules/App-Configuration.md) static.
 
 **📘 More Information**
 * Root Module example: [frank-lloyd-root](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/components/FrankLloydRoot.jsx)
-* [App Configuration in your Root Module](#app-configuration)
-* [What are Holocron Modules?](#modules)
-* [Useful Local Development Commands / Options](#useful-local-development-commands--options)
+* [App Configuration in your Root Module](./docs/api/modules/App-Configuration.md)
+* [What are Holocron Modules?](./docs/api/API.md)
+* [Useful Local Development Commands / Options](./docs/recipes/Running-Existing-App-Locally.md)
 
 
 ## 👩‍🍳 Recipes
