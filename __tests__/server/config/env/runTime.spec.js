@@ -145,33 +145,19 @@ describe('runTime', () => {
       expect(() => httpPort.normalize('0002345a')).toThrow();
     });
 
-    it('does not normalize if no value is given', () => {
-      expect(httpPort.normalize()).toEqual(undefined);
-    });
-
-    it('has a default value for development', () => {
+    it('has a default value', () => {
       process.env.NODE_ENV = 'development';
       delete process.env.HTTP_PORT;
       expect(httpPort.defaultValue()).toBeDefined();
       expect(httpPort.defaultValue()).toBe(3000);
     });
 
-    it('has no default value for production', () => {
-      process.env.NODE_ENV = 'production';
-      expect(httpPort.defaultValue()).not.toBeDefined();
-    });
-
-    it('throws if neither of HTTP_PORT or HTTPS_PORT are defined', () => {
-      delete process.env.HTTPS_PORT;
+    it('uses the value of the `PORT` env var as a default if defined', () => {
+      process.env.NODE_ENV = 'development';
       delete process.env.HTTP_PORT;
-      expect(() => httpPort.validate()).toThrowErrorMatchingSnapshot();
-
-      process.env.HTTPS_PORT = 1234;
-      expect(() => httpPort.validate()).not.toThrow();
-
-      delete process.env.HTTPS_PORT;
-      process.env.HTTP_PORT = 3000;
-      expect(() => httpPort.validate(3000)).not.toThrow();
+      process.env.PORT = 5000;
+      expect(httpPort.defaultValue()).toBeDefined();
+      expect(httpPort.defaultValue()).toBe('5000');
     });
   });
 

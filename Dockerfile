@@ -30,11 +30,9 @@ RUN NODE_ENV=production npm run build && \
 # development image
 # docker build . --target=development
 FROM node:12-alpine as development
-ENV NODE_ENV=development \
-    HTTP_PORT=3000 \
-    HTTP_ONE_APP_DEV_CDN_PORT=3001 \
-    HTTP_ONE_APP_DEV_PROXY_SERVER_PORT=3002 \
-    HTTP_METRICS_PORT=3005
+ENV NODE_ENV=development
+# exposing these ports as they are default for all the local dev servers
+# see src/server/config/env/runtime.js
 EXPOSE 3000
 EXPOSE 3001
 EXPOSE 3002
@@ -49,7 +47,9 @@ COPY --from=builder --chown=node:node /opt/one-app/development ./
 # last so that it's the default image artifact
 FROM node:12-alpine as production
 ENV NODE_ENV=production
-EXPOSE 8443
+# exposing these ports as they are defaults for one app and the prom metrics server
+# see src/server/config/env/runtime.js
+EXPOSE 3000
 EXPOSE 3005
 USER node
 WORKDIR /opt/one-app

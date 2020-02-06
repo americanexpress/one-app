@@ -52,26 +52,19 @@ const runTime = [
   {
     name: 'HTTP_PORT',
     normalize: (input) => {
-      if (input) {
-        const parsed = parseInt(input, 10);
-        // make sure the parsed value is the same value as input
-        // input may be a string or a number, we don't want === in this case, just ==
-        if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
-          throw new Error(`env var HTTP_PORT needs to be a valid integer, given "${input}"`);
-        } else {
-          return parsed;
-        }
-      }
-      return undefined;
-    },
-    validate: (value) => {
-      if (!process.env.HTTPS_PORT && !value && !process.env.PORT) {
-        throw new Error('Either of the `HTTP_PORT` or `HTTPS_PORT` or `PORT` environment variables must be defined');
+      const parsed = parseInt(input, 10);
+      // make sure the parsed value is the same value as input
+      // input may be a string or a number, we don't want === in this case, just ==
+      if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
+        throw new Error(`env var HTTP_PORT needs to be a valid integer, given "${input}"`);
+      } else {
+        return parsed;
       }
     },
-    defaultValue: () => (process.env.NODE_ENV === 'development'
-      ? 3000
-      : undefined),
+    defaultValue: () => {
+      if (process.env.PORT) { return process.env.PORT; }
+      return 3000;
+    },
   },
   // IPv4 port for the health and metrics server to bind on
   {
