@@ -41,3 +41,7 @@ Object {
   "resources": Object {},
 }
 `;
+
+exports[`Tests that require Docker setup one-app successfully started one-app server provides reporting routes client reported errors logs errors when reported to /_/report/errors 1`] = `"reported client error"`;
+
+exports[`Tests that require Docker setup one-app successfully started one-app server provides reporting routes csp-violations reported to server logs violations reported to /_/report/errors 1`] = `"CSP Violation: {\\\\n  \\\\\\"csp-report\\\\\\": {\\\\n    \\\\\\"document-uri\\\\\\": \\\\\\"bad.example.com"`;
