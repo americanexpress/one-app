@@ -23,7 +23,6 @@ import http from 'http';
 import https from 'https';
 
 function listenHttp(app, cb) {
-  // when `undefined` is passed to process.env it sets it to the string undefined...
   const port = process.env.HTTP_PORT;
   return http
     .createServer(app)
