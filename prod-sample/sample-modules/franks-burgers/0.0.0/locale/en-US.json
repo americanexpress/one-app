@@ -1,0 +1,22 @@
+{
+  "loading": "Loading...",
+  "franks-opening-line": "Welcome to Franks Burgers! The best burgers in town.",
+  "franks-menu": "Our menu is just a burger, but you can choose the ingredients.",
+  "franks-ingredients": "We serve the freshest ingredients from our fram lands upstate and our livestock graze on real grass. View all our ingredients and choose what you want on your burger.",
+  "franks-cta": "Want to taste a famous American burger?",
+  "franks-cta-action": "Order one now!",
+  "franks-guarantee": "Expect Pizza at Franks Burgers in the near future!",
+  "franks-delivery-policy": "For local deliveries within a 5 mile radius, we estimate an arrival time of thirty minutes by our drone delivery bot. For aynthing further, we use the postage service for delivery.",
+  "Bacon": "Bacon",
+  "BunTop": "Bun Top",
+  "BunBottom": "Bun Bottom",
+  "Cheese": "Cheese",
+  "Ketchup": "Ketchup",
+  "Lettuce": "Lettuce",
+  "Mustard": "Mustard",
+  "Onions": "Onions",
+  "Patty": "Patty",
+  "Pickles": "Pickles",
+  "Tomato": "Tomato",
+  "VeggiePatty": "Veggie Patty"
+}

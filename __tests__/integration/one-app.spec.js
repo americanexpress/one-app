@@ -874,6 +874,42 @@ describe('Tests that can run against either local Docker setup or remote One App
         });
       });
 
+      describe('code-splitting', () => {
+        test('successfully loads a code-split module with a loanguage pack', async () => {
+          await browser.url(`${appInstanceUrls.browserUrl}/demo/franks-burgers`);
+          const openerMessage = await browser.$('#franks-opening-line');
+          expect(await openerMessage.getText()).toBe(
+            'Welcome to Franks Burgers! The best burgers in town.'
+          );
+        });
+
+        test('loads up all the chunks that were code-split and uses the language pack for their content', async () => {
+          await browser.url(`${appInstanceUrls.browserUrl}/demo/franks-burgers`);
+
+          const ingredients = [
+            // selector-ID, text-content
+            ['#ingredient-bacon', 'Bacon'],
+            ['#ingredient-cheese', 'Cheese'],
+            ['#ingredient-ketchup', 'Ketchup'],
+            ['#ingredient-lettuce', 'Lettuce'],
+            ['#ingredient-mustard', 'Mustard'],
+            ['#ingredient-onions', 'Onions'],
+            ['#ingredient-patty', 'Patty'],
+            ['#ingredient-pickles', 'Pickles'],
+            ['#ingredient-tomato', 'Tomato'],
+            ['#ingredient-veggie-patty', 'Veggie Patty'],
+          ];
+
+          await Promise.all(ingredients.map(
+            ([id, expected]) => browser.$(id)
+              .then((selector) => selector.getText()
+                .then((text) => {
+                  expect(text).toEqual(expected);
+                }))
+          ));
+        });
+      });
+
       describe('HTML rendering', () => {
         describe('partial only', () => {
           test('responds with an incomplete HTML document', async () => {
