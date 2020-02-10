@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`serializeClientInitialState should fail to serialize state and fallback to defaults 1`] = `"{\\"config\\":{\\"rootModuleName\\":\\"test-root\\"},\\"holocron\\":{\\"loaded\\":[]}}"`;
+
+exports[`serializeClientInitialState should serialize state 1`] = `"{\\"holocron\\":{\\"loaded\\":[]}}"`;

@@ -14,46 +14,43 @@
  * permissions and limitations under the License.
  */
 
-export default function readJsonFile(filePath) {
+const fs = require('fs');
+const bundle = require('../../../../bundle.integrity.manifest.json');
+const { buildVersion } = require('../../../../.build-meta.json');
+
+const bundleKeys = Object.keys(bundle);
+const appFiles = bundleKeys.filter((route) => !route.startsWith('legacy')).reduce((map, route) => ({
+  ...map,
+  [route.replace('.js', '')]: [route, `${route}.map`],
+}), {});
+
+const intl = fs.readdirSync(`build/app/${buildVersion}/i18n`).reduce((map, lang) => {
+  if (lang.endsWith('.map')) {
+    map[`i18n/${lang.replace('.js.map', '')}`].push(`i18n/${lang}`);
+  } else {
+    return { ...map, [`i18n/${lang.replace('.js', '')}`]: [`i18n/${lang}`] };
+  }
+  return map;
+}, {});
+
+// eslint-disable-next-line prefer-arrow-callback
+export default jest.fn(function readJsonFile(filePath) {
   switch (filePath.split('/').pop()) {
     case '.build-meta.json':
       return {
         buildVersion: '1.2.3-rc.4-abc123',
         modernBrowserChunkAssets: {
-          'i18n/en': 'i18n/en.js',
-          'bundle~common': 'bundle~common.js',
-          vendors: ['vendors.js', 'vendors.js.map'],
-          'i18n/en-US': 'i18n/en-US.js',
-          'i18n/tk-TM': 'i18n/tk-TM.js',
-          'i18n/am': ['i18n/am.js', 'i18n/am.js.map'],
-          'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA': [
-            'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA.js',
-            'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA.js.map',
-          ],
+          ...intl,
+          ...appFiles,
         },
         legacyBrowserChunkAssets: {
-          'i18n/en': 'i18n/en.js',
-          'bundle~common': 'bundle~common.js',
-          vendors: ['vendors.js', 'vendors.js.map'],
-          'i18n/en-US': 'i18n/en-US.js',
-          'i18n/tk-TM': 'i18n/tk-TM.js',
-          'i18n/am': ['i18n/am.js', 'i18n/am.js.map'],
-          'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA': [
-            'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA.js',
-            'i18n/bs~i18n/bs-Cyrl~i18n/bs-Cyrl-BA~i18n/bs-Latn~i18n/bs-Latn-BA.js.map',
-          ],
+          ...intl,
+          ...appFiles,
         },
       };
     case 'bundle.integrity.manifest.json':
-      return {
-        'web.js': '123',
-        'named-chunk.js': '456',
-        'other-chunk.js': '789',
-        'legacy/web.js': 'abc',
-        'legacy/named-chunk.js': 'def',
-        'legacy/other-chunk.js': 'ghi',
-      };
+      return bundle;
     default:
       throw new Error('Couldn\'t find JSON file to read');
   }
-}
+});

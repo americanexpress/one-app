@@ -1,0 +1,103 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getModules should load legacy modules 1`] = `
+Array [
+  Array [
+    Object {
+      "baseUrl": "https://example.com/cdn/test-root/2.2.2/",
+      "legacyBrowser": Object {
+        "integrity": "567ty",
+        "url": "https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js",
+      },
+    },
+    "test-root",
+  ],
+  Array [
+    Object {
+      "baseUrl": "https://example.com/cdn/a/2.2.2/",
+      "legacyBrowser": Object {
+        "integrity": "7567ee",
+        "url": "https://example.com/cdn/a/2.2.2/a.legacy.browser.js",
+      },
+    },
+    "a",
+  ],
+  Array [
+    Object {
+      "baseUrl": "https://example.com/cdn/b/2.2.2/",
+      "legacyBrowser": Object {
+        "integrity": "7567ee",
+        "url": "https://example.com/cdn/b/2.2.2/b.legacy.browser.js",
+      },
+    },
+    "b",
+  ],
+]
+`;
+
+exports[`getModules should prep modules for consumption 1`] = `
+Array [
+  Array [
+    Object {
+      "baseUrl": "https://example.com/cdn/test-root/2.2.2/",
+      "browser": Object {
+        "integrity": "dhhfsdfwer",
+        "url": "https://example.com/cdn/test-root/2.2.2/test-root.browser.js",
+      },
+    },
+    "test-root",
+  ],
+  Array [
+    Object {
+      "baseUrl": "https://example.com/cdn/a/2.2.2/",
+      "browser": Object {
+        "integrity": "fhgnt543",
+        "url": "https://example.com/cdn/a/2.2.2/a.browser.js",
+      },
+    },
+    "a",
+  ],
+  Array [
+    Object {
+      "baseUrl": "https://example.com/cdn/b/2.2.2/",
+      "browser": Object {
+        "integrity": "yhrtrhw3",
+        "url": "https://example.com/cdn/b/2.2.2/b.browser.js",
+      },
+    },
+    "b",
+  ],
+]
+`;
+
+exports[`renderInitialStateScriptTag should render initial state inside a script tag body 1`] = `
+"<script id=\\"initial-state\\" nonce=\\"19219fb1-8768-4ffa-983c-742b3608589b\\">
+	window.__render_mode__ = 'hydrate';
+	window.__webpack_public_path__ = \\"/\\";
+	window.__holocron_module_bundle_type__ = 'browser';
+	window.__CLIENT_HOLOCRON_MODULE_MAP__ = {\\"browser\\":{\\"key\\":\\"123\\",\\"modules\\":{\\"test-root\\":{\\"baseUrl\\":\\"https://example.com/cdn/test-root/2.2.2/\\",\\"browser\\":{\\"url\\":\\"https://example.com/cdn/test-root/2.2.2/test-root.browser.js\\",\\"integrity\\":\\"dhhfsdfwer\\"}},\\"a\\":{\\"baseUrl\\":\\"https://example.com/cdn/a/2.2.2/\\",\\"browser\\":{\\"url\\":\\"https://example.com/cdn/a/2.2.2/a.browser.js\\",\\"integrity\\":\\"fhgnt543\\"}},\\"c\\":{\\"baseUrl\\":\\"https://example.com/cdn/c/2.2.2/\\",\\"browser\\":{\\"url\\":\\"https://example.com/cdn/c/2.2.2/c.browser.js\\",\\"integrity\\":\\"323egdsbf\\"}},\\"b\\":{\\"baseUrl\\":\\"https://example.com/cdn/b/2.2.2/\\",\\"browser\\":{\\"url\\":\\"https://example.com/cdn/b/2.2.2/b.browser.js\\",\\"integrity\\":\\"yhrtrhw3\\"}}}},\\"legacyBrowser\\":{\\"key\\":\\"123\\",\\"modules\\":{\\"test-root\\":{\\"baseUrl\\":\\"https://example.com/cdn/test-root/2.2.2/\\",\\"legacyBrowser\\":{\\"url\\":\\"https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js\\",\\"integrity\\":\\"567ty\\"}},\\"a\\":{\\"baseUrl\\":\\"https://example.com/cdn/a/2.2.2/\\",\\"legacyBrowser\\":{\\"url\\":\\"https://example.com/cdn/a/2.2.2/a.legacy.browser.js\\",\\"integrity\\":\\"7567ee\\"}},\\"c\\":{\\"baseUrl\\":\\"https://example.com/cdn/c/2.2.2/\\",\\"legacyBrowser\\":{\\"url\\":\\"https://example.com/cdn/c/2.2.2/c.legacy.browser.js\\",\\"integrity\\":\\"d8vdfdfv\\"}},\\"b\\":{\\"baseUrl\\":\\"https://example.com/cdn/b/2.2.2/\\",\\"legacyBrowser\\":{\\"url\\":\\"https://example.com/cdn/b/2.2.2/b.legacy.browser.js\\",\\"integrity\\":\\"7567ee\\"}}}}};
+	window.__INITIAL_STATE__ = [\\"~#iM\\",[\\"intl\\",[\\"^0\\",[\\"activeLocale\\",\\"en-US\\"]],\\"config\\",[\\"^0\\",[\\"rootModuleName\\",\\"test-root\\"]],\\"holocron\\",[\\"^0\\",[\\"loaded\\",[\\"~#iS\\",[\\"test-root\\"]]]]]];
+</script>"
+`;
+
+exports[`renderScriptTag should render bare bones script tag 1`] = `"<script></script>"`;
+
+exports[`renderScriptTag should render script tag with src 1`] = `"<script src=\\"/app.js\\"></script>"`;
+
+exports[`renderScriptTag should render script tag with src and attrs 1`] = `"<script src=\\"/app.js\\" crossorigin=\\"anonymous\\"></script>"`;
+
+exports[`renderScriptTag should render script tag with src, attrs and body 1`] = `
+"<script src=\\"/app.js\\" crossorigin=\\"anonymous\\">
+console.log(this);
+</script>"
+`;
+
+exports[`renderScripts should render scripts without defaults 1`] = `
+"<script id=\\"initial-state\\">
+	window.__render_mode__ = 'hydrate';
+	window.__webpack_public_path__ = ;
+	window.__holocron_module_bundle_type__ = 'browser';
+	window.__CLIENT_HOLOCRON_MODULE_MAP__ = {};
+	window.__INITIAL_STATE__ = \\"[\\\\\\"~#iM\\\\\\",[\\\\\\"intl\\\\\\",[\\\\\\"^0\\\\\\",[\\\\\\"activeLocale\\\\\\",\\\\\\"en-US\\\\\\"]],\\\\\\"config\\\\\\",[\\\\\\"^0\\\\\\",[\\\\\\"rootModuleName\\\\\\",\\\\\\"test-root\\\\\\"]],\\\\\\"holocron\\\\\\",[\\\\\\"^0\\\\\\",[\\\\\\"loaded\\\\\\",[\\\\\\"~#iS\\\\\\",[]]]]]]\\";
+</script>"
+`;

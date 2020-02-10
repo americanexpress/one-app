@@ -15,16 +15,8 @@
  */
 
 import { fromJS } from 'immutable';
-import sendHtml, {
-  renderStaticErrorPage,
-  renderModuleScripts,
-  safeSend,
-} from '../../../src/server/middleware/sendHtml';
-// _client is a method to control the mock
-// eslint-disable-next-line import/named
+import sendHtml, { renderStaticErrorPage, safeSend } from '../../../src/server/middleware/sendHtml';
 import { getClientStateConfig } from '../../../src/server/utils/stateConfig';
-// _setVars is a method to control the mock
-// eslint-disable-next-line import/named
 import transit from '../../../src/universal/utils/transit';
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
 
@@ -545,106 +537,6 @@ describe('sendHtml', () => {
         sendHtml(req, res);
         expect(res.send.mock.calls[0][0]).not.toContain('<style');
       });
-    });
-  });
-
-  describe('renderModuleScripts', () => {
-    let clientModuleMapCache;
-
-    beforeEach(() => {
-      setClientModuleMapCache({
-        key: '123',
-        modules: {
-          'test-root': {
-            node: {
-              url: 'https://example.com/cdn/test-root/2.2.2/test-root.node.js',
-              integrity: '4y45hr',
-            },
-            browser: {
-              url: 'https://example.com/cdn/test-root/2.2.2/test-root.browser.js',
-              integrity: 'nggdfhr34',
-            },
-            legacyBrowser: {
-              url: 'https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js',
-              integrity: '7567ee',
-            },
-          },
-        },
-      });
-      clientModuleMapCache = getClientModuleMapCache();
-    });
-
-    it('adds cache busting key from module map to each module script src if NODE_ENV is production', () => {
-      expect(renderModuleScripts({
-        clientInitialState: req.store.getState(),
-        moduleMap: clientModuleMapCache.browser,
-        isDevelopmentEnv: false,
-        bundle: 'browser',
-      })).toMatchSnapshot();
-    });
-
-    it('does not add cache busting key from module map to each module script src if NODE_ENV is development', () => {
-      expect(renderModuleScripts({
-        clientInitialState: req.store.getState(),
-        moduleMap: clientModuleMapCache.browser,
-        isDevelopmentEnv: true,
-        bundle: 'browser',
-      })).toMatchSnapshot();
-    });
-
-    it('sends a rendered page with cross origin scripts', () => {
-      expect(renderModuleScripts({
-        clientInitialState: req.store.getState(),
-        moduleMap: clientModuleMapCache.browser,
-        isDevelopmentEnv: true,
-        bundle: 'browser',
-      })).toMatchSnapshot();
-    });
-
-    it('send a rendered page with correctly ordered modules', () => {
-      setFullMap();
-
-      const holocronState = fromJS({
-        holocron: {
-          loaded: ['a', 'b', 'test-root', 'c'],
-        },
-      });
-      expect(renderModuleScripts({
-        clientInitialState: holocronState,
-        moduleMap: getClientModuleMapCache().browser,
-        isDevelopmentEnv: false,
-        bundle: 'browser',
-      })).toMatchSnapshot();
-    });
-
-    it('send a rendered page keeping correctly ordered modules', () => {
-      setFullMap();
-
-      const holocronState = fromJS({
-        holocron: fromJS({
-          loaded: ['test-root', 'a', 'b', 'c'],
-        }),
-      });
-      expect(renderModuleScripts({
-        clientInitialState: holocronState,
-        moduleMap: getClientModuleMapCache().browser,
-        isDevelopmentEnv: false,
-        bundle: 'browser',
-      })).toMatchSnapshot();
-    });
-
-    it('send a rendered page with module script tags with integrity attribute if NODE_ENV is production', () => {
-      const holocronState = fromJS({
-        holocron: fromJS({
-          loaded: ['test-root'],
-        }),
-      });
-      expect(renderModuleScripts({
-        clientInitialState: holocronState,
-        moduleMap: clientModuleMapCache.browser,
-        isDevelopmentEnv: false,
-        bundle: 'browser',
-      })).toMatchSnapshot();
     });
   });
 

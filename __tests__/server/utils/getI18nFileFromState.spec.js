@@ -16,15 +16,13 @@
 
 import { fromJS } from 'immutable';
 
-const mockBuildMetaFile = require.requireActual('../../../.build-meta.json');
-
 describe('getI18nFileFromState', () => {
   let getI18nFileFromState;
   let readJsonFile;
 
   function load() {
-    jest.mock('../../../src/server/utils/readJsonFile', () => jest.fn(() => mockBuildMetaFile));
-    readJsonFile = require('../../../src/server/utils/readJsonFile');
+    jest.mock('../../../src/server/utils/readJsonFile');
+    readJsonFile = require('../../../src/server/utils/readJsonFile').default;
 
     getI18nFileFromState = require('../../../src/server/utils/getI18nFileFromState').default;
   }

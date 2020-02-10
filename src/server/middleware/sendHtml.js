@@ -18,31 +18,16 @@
 /* eslint-disable es/no-arrow-functions */
 import { matchesUA } from 'browserslist-useragent';
 import { browserList } from 'babel-preset-amex/browserlist';
-import { Set as iSet, Map as iMap } from 'immutable';
 
-import transit from '../../universal/utils/transit';
 import { setConfig } from '../../universal/ducks/config';
-import jsonStringifyForScript from '../utils/jsonStringifyForScript';
 import { getClientStateConfig } from '../utils/stateConfig';
-import getI18nFileFromState from '../utils/getI18nFileFromState';
 import renderModuleStyles from '../utils/renderModuleStyles';
+import { renderScripts } from '../utils/renderScripts';
+import { renderShell } from '../utils/shell';
 import readJsonFile from '../utils/readJsonFile';
 
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
-const integrityManifest = readJsonFile('../../../bundle.integrity.manifest.json');
 const nodeEnvIsDevelopment = process.env.NODE_ENV === 'development';
-
-function getChunkAssets(assetsByChunkName) {
-  return Object
-    .entries(assetsByChunkName)
-    // i18n is different per request, app needs to be the last chunk loaded
-    .filter(([chunkName]) => !chunkName.startsWith('i18n/') && chunkName !== 'app')
-    .map(([, assets]) => (typeof assets === 'string' ? assets : assets[0]));
-}
-
-const modernBrowserChunkAssets = getChunkAssets(readJsonFile('../../../.build-meta.json').modernBrowserChunkAssets);
-const legacyBrowserChunkAssets = getChunkAssets(readJsonFile('../../../.build-meta.json').legacyBrowserChunkAssets)
-  .map((chunkAsset) => `legacy/${chunkAsset}`);
 
 export function safeSend(res, ...payload) {
   if (!res.headersSent) {
@@ -87,68 +72,6 @@ export function renderStaticErrorPage(res) {
           </body>
         </html>`);
 }
-
-function renderI18nScript(clientInitialState, appBundlesURLPrefix) {
-  const i18nFile = getI18nFileFromState(clientInitialState);
-  if (!i18nFile) {
-    return '';
-  }
-
-  return `<script src="${appBundlesURLPrefix}/${i18nFile}" crossorigin="anonymous"></script>`;
-}
-
-export function renderModuleScripts({
-  clientInitialState, moduleMap, isDevelopmentEnv, bundle,
-}) {
-  const clientConfig = getClientStateConfig();
-  const { rootModuleName } = clientConfig;
-  // Sorting to ensure that the rootModule is the first script to load,
-  // this is required to correctly provide external dependencies.
-  const orderedLoadedModules = clientInitialState.getIn(['holocron', 'loaded'], iSet())
-    .sort((currentModule, nextModule) => {
-      if (currentModule === rootModuleName) { return -1; }
-      if (nextModule === rootModuleName) { return 1; }
-      return 0;
-    });
-
-  return orderedLoadedModules.map((moduleName) => {
-    const { integrity, url: src } = moduleMap.modules[moduleName][bundle];
-    const { key } = moduleMap;
-    const additionalAttributes = isDevelopmentEnv ? '' : `integrity="${integrity}"`;
-    const scriptSource = isDevelopmentEnv ? src : `${src}?key=${key}`;
-    return `<script src="${scriptSource}" crossorigin="anonymous" ${additionalAttributes}></script>`;
-  }).join(isDevelopmentEnv ? '\n          ' : '');
-}
-
-function serializeClientInitialState(clientInitialState) {
-  // try to build the full state, this _might_ fail (ex: 'Error serializing unrecognized object')
-  try {
-    return transit.toJSON(clientInitialState);
-  } catch (err) {
-    console.error('encountered an error serializing full client initial state', err);
-
-    // clear out an internal cache that corrupts the serialization generated on the next call
-    // TODO: understand transit-js and transit-immutable-js internals to properly fix the bug
-    // for now stop the bleeding
-    transit.toJSON('clear out an internal cache');
-  }
-
-  // can't send all the work we've done to build the state, but we can still give the app what it
-  // needs to start in the browser
-  // this _shouldn't_ ever throw, but just in case...
-  try {
-    return transit.toJSON(iMap({
-      config: clientInitialState.get('config'),
-      holocron: clientInitialState.get('holocron'),
-    }));
-  } catch (err) {
-    transit.toJSON('clear out an internal cache, again');
-    // something is really wrong
-    console.error('unable to build the most basic initial state for a client to startup', err);
-    throw err;
-  }
-}
-
 function getHelmetData(data, fallback = '') {
   return (data && data.toString()) || fallback;
 }
@@ -183,60 +106,6 @@ export function getHtmlAttributesString(helmetInfo) {
   return (htmlAttributes && ` ${htmlAttributes.toString()}`) || '';
 }
 
-export function getHead({
-  helmetInfo,
-  store,
-  disableStyles,
-}) {
-  return `
-    <head>
-      ${getHelmetString(helmetInfo, disableStyles)}
-      ${disableStyles ? '' : `
-      ${renderModuleStyles(store)}
-      `}
-    </head>
-  `;
-}
-
-export function getBody({
-  isLegacy,
-  helmetInfo,
-  assets,
-  appHtml,
-  appBundlesURLPrefix,
-  clientInitialState,
-  disableScripts,
-  clientModuleMapCache,
-  scriptNonce,
-}) {
-  const bundle = isLegacy ? 'legacyBrowser' : 'browser';
-  const { bodyAttributes, script } = helmetInfo;
-  const bundlePrefixForBrowser = isLegacy ? `${appBundlesURLPrefix}/legacy` : appBundlesURLPrefix;
-  return `
-    <body${(bodyAttributes && ` ${bodyAttributes.toString()}`) || ''}>
-      <div id="root">${appHtml || ''}</div>
-      ${disableScripts ? '' : `
-      <script id="initial-state" ${scriptNonce ? `nonce="${scriptNonce}"` : ''}>
-        window.__webpack_public_path__ = ${jsonStringifyForScript(`${appBundlesURLPrefix}/`)};
-        window.__CLIENT_HOLOCRON_MODULE_MAP__ = ${jsonStringifyForScript(clientModuleMapCache[bundle])};
-        window.__INITIAL_STATE__ = ${jsonStringifyForScript(serializeClientInitialState(clientInitialState))};
-        window.__holocron_module_bundle_type__ = '${bundle}';
-      </script>
-      ${assets}
-      ${renderI18nScript(clientInitialState, bundlePrefixForBrowser)}
-      ${renderModuleScripts({
-    clientInitialState,
-    moduleMap: clientModuleMapCache[bundle],
-    isDevelopmentEnv: nodeEnvIsDevelopment,
-    bundle,
-  })}
-      <script src="${bundlePrefixForBrowser}/app.js" integrity="${integrityManifest[isLegacy ? 'legacy/app.js' : 'app.js']}" crossorigin="anonymous"></script>
-      ${(script && script.toString()) || ''}
-      `}
-    </body>
-  `;
-}
-
 export function renderPartial({
   html: initialHtml,
   store,
@@ -264,72 +133,109 @@ export function renderPartial({
   return styles + html;
 }
 
+export function renderHtml({
+  clientModuleMapCache,
+  cdnUrl = '/_/static/',
+  userAgent,
+  store,
+  helmetInfo,
+  appHtml,
+  rootModuleName,
+  scriptNonce,
+}) {
+  // replace server specific config with client specific config (api urls and such)
+  const clientConfig = getClientStateConfig();
+  store.dispatch(setConfig(clientConfig));
+
+  const clientInitialState = store.getState();
+  const publicPath = `${cdnUrl}app/${buildVersion}`;
+  const isLegacy = !matchesUA(userAgent, {
+    browsers: browserList,
+    allowHigherVersions: true,
+  });
+  const bundle = isLegacy ? 'legacyBrowser' : 'browser';
+  const lang = clientInitialState.getIn(['intl', 'activeLocale'], 'en-US');
+  const disableScripts = clientInitialState.getIn(['rendering', 'disableScripts'], false);
+  const disableStyles = clientInitialState.getIn(['rendering', 'disableStyles'], false);
+  const {
+    bodyAttributes,
+    script,
+  } = helmetInfo;
+
+  const scripts = [
+    renderScripts({
+      devMode: nodeEnvIsDevelopment,
+      legacy: isLegacy,
+      isStatic: false,
+      publicPath,
+      crossOrigin: 'anonymous',
+      scriptNonce,
+      bundle,
+      rootModuleName,
+      clientInitialState,
+      moduleMap: clientModuleMapCache,
+    }),
+  ];
+
+  if (script) scripts.push(script.toString());
+
+  return renderShell({
+    lang,
+    appHtml,
+    head: [getHelmetString(helmetInfo, disableStyles)].join('\n'),
+    styles: !disableStyles ? renderModuleStyles(store) : '',
+    scripts: !disableScripts ? scripts.join('\n') : '',
+    bodyAttrs: (bodyAttributes && ` ${bodyAttributes.toString()}`),
+    htmlAttrs: getHtmlAttributesString(helmetInfo),
+    rootAttrs: 'id="root"',
+  });
+}
+
 // TODO add additional client side scripts
 export default function sendHtml(req, res) {
   let body;
   try {
     const {
-      appHtml, clientModuleMapCache, store, headers, helmetInfo = {},
+      appHtml,
+      clientModuleMapCache,
+      store,
+      headers,
+      helmetInfo = {},
     } = req;
-    const { scriptNonce } = res;
-    const userAgent = headers['user-agent'];
-    const isLegacy = !matchesUA(userAgent, {
-      browsers: browserList,
-      allowHigherVersions: true,
-    });
+    const {
+      scriptNonce,
+    } = res;
 
     console.info(`sendHtml, have store? ${!!store}, have appHtml? ${!!appHtml}`);
     if (appHtml && typeof appHtml !== 'string') {
       throw new Error(`appHtml was not a string, was ${typeof appHtml}`, appHtml);
     }
+
     // replace server specific config with client specific config (api urls and such)
     const clientConfig = getClientStateConfig();
     store.dispatch(setConfig(clientConfig));
-    const cdnUrl = clientConfig.cdnUrl || '/_/static/';
-    const clientInitialState = store.getState();
-    const appBundlesURLPrefix = `${cdnUrl}app/${buildVersion}`;
 
-    const disableScripts = clientInitialState.getIn(['rendering', 'disableScripts']);
-    const disableStyles = clientInitialState.getIn(['rendering', 'disableStyles']);
+    const clientInitialState = store.getState();
     const renderPartialOnly = clientInitialState.getIn(['rendering', 'renderPartialOnly']);
 
     if (renderPartialOnly) {
-      return safeSend(res, renderPartial({ html: req.appHtml, store }));
+      return safeSend(res, renderPartial({
+        html: req.appHtml,
+        store,
+      }));
     }
 
-    const chunkAssets = isLegacy ? legacyBrowserChunkAssets : modernBrowserChunkAssets;
+    const userAgent = headers['user-agent'];
 
-    const assets = chunkAssets
-      .map((chunkAsset) => `<script src="${appBundlesURLPrefix}/${chunkAsset}" integrity="${integrityManifest[chunkAsset]}" crossorigin="anonymous"></script>`)
-      .join('\n          ');
-
-    const headSectionArgs = {
-      helmetInfo,
-      store,
-      disableScripts,
-      disableStyles,
-      scriptNonce,
-    };
-
-    const bodySectionArgs = {
-      helmetInfo,
-      isLegacy,
-      assets,
-      appHtml,
-      appBundlesURLPrefix,
-      clientInitialState,
-      disableScripts,
+    body = renderHtml({
+      ...clientConfig,
       clientModuleMapCache,
+      userAgent,
+      store,
+      helmetInfo,
+      appHtml,
       scriptNonce,
-    };
-
-    body = `
-      <!DOCTYPE html>
-      <html${getHtmlAttributesString(helmetInfo)}>
-        ${getHead(headSectionArgs)}
-        ${getBody(bodySectionArgs)}
-      </html>
-    `;
+    });
   } catch (err) {
     console.error('sendHtml had an error, sending static error page', err);
     return renderStaticErrorPage(res);

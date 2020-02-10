@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`shell rendering should not render attributes 1`] = `
+"<!DOCTYPE html><html><head><title>One App</title></head><body><div></div></body></html>
+"
+`;
+
+exports[`shell rendering should not render attributes 2`] = `
+"<!DOCTYPE html><html><head><title>One App</title></head><body><div></div></body></html>
+"
+`;
+
+exports[`shell rendering should render added replacements 1`] = `
+"<!DOCTYPE html><html><head><link rel=\\"favicon\\" href=\\"favicon.ico\\"/></head><body><div id=\\"root\\"><p>hi</p></div></body></html>
+"
+`;
+
+exports[`shell rendering should render attributes 1`] = `
+"<!DOCTYPE html><html lang=\\"en-US\\"><head class=\\"no-js\\"><title>One App</title></head><body class=\\"sparkle\\"><div id=\\"test-root\\"></div></body></html>
+"
+`;
+
+exports[`shell rendering should render attributes 2`] = `
+"<!DOCTYPE html><html lang=\\"en-US\\"><head class=\\"no-js\\"><title>One App</title></head><body class=\\"sparkle\\"><div id=\\"test-root\\"></div></body></html>
+"
+`;
+
+exports[`shell rendering should render default html template and save it to memory 1`] = `
+Object {
+  "tags": Array [
+    "doctype",
+    "appHtml",
+    "lang",
+    "htmlAttrs",
+    "headAttrs",
+    "bodyAttrs",
+    "rootAttrs",
+    "head",
+    "title",
+    "base",
+    "meta",
+    "links",
+    "manifest",
+    "styles",
+    "initialState",
+    "scripts",
+  ],
+  "template": "{{{DOC_TYPE}}}
+<html {{{HTML_ATTRS}}}><head {{{HEAD_ATTRS}}}>{{{HEAD}}}{{{DOCUMENT_TITLE}}}{{{BASE_TAG}}}{{{META}}}{{{LINKS}}}{{{MANIFEST}}}{{{STYLE_TAGS}}}</head><body {{{BODY_ATTRS}}}><div {{{ROOT_ATTRS}}}>{{{APP_HTML}}}</div>{{{INITIAL_STATE}}}{{{SCRIPT_TAGS}}}</body></html>",
+}
+`;
+
+exports[`shell rendering should render standard html 1`] = `
+"<!DOCTYPE html><html><head><link rel=\\"favicon\\" href=\\"favicon.ico\\"/></head><body><div id=\\"root\\"></div></body></html>
+"
+`;
+
+exports[`shell rendering should renderToStaticMarkup 1`] = `""`;
