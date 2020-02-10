@@ -33,8 +33,7 @@ _All questions must be addressed before this PR can be merged._
 - Does the change have any new infrastructure requirements?
 - Does the change affect other versions of the app?
 - Does the change require additional environment variables?
-- What is the impact to tenants?
-- What is the impact to individual users?
+- What is the impact to developers using the app?
 - What is the change to the size of assets?
 - Should integration tests be added to protect against future regressions on this change?
 `);
