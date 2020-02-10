@@ -20,10 +20,25 @@
 
 import React from 'react';
 import ModuleRoute from 'holocron-module-route';
+import { Route } from '@americanexpress/one-app-router';
+import { applicationError } from '@americanexpress/one-app-ducks';
 
 const createRoutes = (store) => {
   const rootModuleName = store.getState().getIn(['config', 'rootModuleName']);
-  return <ModuleRoute moduleName={rootModuleName} store={store} />;
+  return [
+    <ModuleRoute moduleName={rootModuleName} store={store} />,
+    <Route
+      path="*"
+      component={() => 'Not found'}
+      onEnter={({ location }) => {
+        store.dispatch(applicationError(
+          404,
+          new Error('404: Not found'),
+          { location }
+        ));
+      }}
+    />,
+  ];
 };
 
 export default createRoutes;

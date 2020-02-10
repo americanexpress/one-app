@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`routes should set the status to 404 1`] = `
+Object {
+  "code": 404,
+  "error": Any<Error>,
+  "otherData": Object {
+    "location": Object {
+      "pathname": "missing",
+    },
+  },
+  "type": "APPLICATION_ERROR",
+}
+`;
