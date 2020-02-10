@@ -118,7 +118,9 @@ export default function onModuleLoad({
   }
 
   if (providedExternals) {
-    throw new Error(`Module ${moduleName} attempted to provide externals, but it is not the root module.`);
+    console.warn(
+      `Module ${moduleName} attempted to provide externals. Only the root module can provide externals.`
+    );
   }
 
   if (requiredExternals) {

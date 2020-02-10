@@ -568,6 +568,41 @@ describe('Tests that require Docker setup', () => {
           });
         });
       });
+
+      describe('child module warnings from invalid appConfig usage', () => {
+        const moduleName = 'late-frank';
+        const version = '0.0.1';
+        const faultyChildModuleValidation = /Module late-frank attempted to provide externals/;
+
+        let faultyChildModuleSearch;
+        let moduleDetails;
+
+        beforeAll(async () => {
+          faultyChildModuleSearch = searchForNextLogMatch(faultyChildModuleValidation);
+          moduleDetails = {
+            moduleName,
+            version,
+            integrityDigests: retrieveModuleIntegrityDigests({
+              moduleName,
+              version,
+            }),
+          };
+          await addModuleToModuleMap(moduleDetails);
+          // not ideal but need to wait for app to poll;
+          await waitFor(5000);
+        });
+
+        afterAll(() => {
+          writeModuleMap(originalModuleMap);
+        });
+
+        test(
+          'writes a warning to log if a child module has set `providedExternals` in `appConfig`',
+          async () => {
+            await expect(faultyChildModuleSearch).resolves.toMatch(
+              faultyChildModuleValidation);
+          });
+      });
     });
 
     describe('module requires SafeRequest Restricted Attributes not provided by tenant module', () => {
