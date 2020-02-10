@@ -60,7 +60,6 @@ function validateConfig(configValidators, config) {
 
 export const CONFIGURATION_KEY = 'appConfig';
 
-// eslint-disable-next-line complexity
 export default function onModuleLoad({
   module,
   moduleName,

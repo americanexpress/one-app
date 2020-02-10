@@ -45,7 +45,11 @@ const retrieveModuleIntegrityDigests = ({ moduleName, version }) => {
   return integrityDigests;
 };
 
-const addModuleToModuleMap = async ({ moduleName, version, integrityDigests }) => {
+const addModuleToModuleMap = async ({
+  moduleName,
+  version,
+  integrityDigests = retrieveModuleIntegrityDigests({ moduleName, version }),
+}) => {
   const gitSha = await retrieveGitSha();
   const moduleMap = readModuleMap();
   moduleMap.modules[moduleName] = {

@@ -14,10 +14,19 @@
  * permissions and limitations under the License.
  */
 
-import React from 'react';
+/** @jsx jsx */
 
-export function LateFrank() {
-  return <div><h1 className="lateFrank">Sorry Im late!</h1></div>;
+import { jsx, css } from '@emotion/core';
+
+const styles = css`
+  background-color: grey;
+  color: pink;
+  font-size: 24px;
+  font-family: system;
+`;
+
+export function FashionablyLateFrank() {
+  return <div><h1 className="lateFrank" css={styles}>Sorry Im late!</h1></div>;
 }
 
-export default LateFrank;
+export default FashionablyLateFrank;
