@@ -23,7 +23,7 @@ import http from 'http';
 import https from 'https';
 
 function listenHttp(app, cb) {
-  const port = process.env.HTTP_PORT || '3000';
+  const port = process.env.HTTP_PORT;
   return http
     .createServer(app)
     .listen(port, (err) => cb(err, { port }));

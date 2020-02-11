@@ -16,14 +16,14 @@
 
 import { fromJS } from 'immutable';
 
-const mockClientWebpackStats = require.requireActual('../../../.webpack-stats.browser.json');
+const mockBuildMetaFile = require.requireActual('../../../.build-meta.json');
 
 describe('getI18nFileFromState', () => {
   let getI18nFileFromState;
   let readJsonFile;
 
   function load() {
-    jest.mock('../../../src/server/utils/readJsonFile', () => jest.fn(() => mockClientWebpackStats));
+    jest.mock('../../../src/server/utils/readJsonFile', () => jest.fn(() => mockBuildMetaFile));
     readJsonFile = require('../../../src/server/utils/readJsonFile');
 
     getI18nFileFromState = require('../../../src/server/utils/getI18nFileFromState').default;
@@ -40,10 +40,10 @@ describe('getI18nFileFromState', () => {
   // it's different than our instance and it's not a global
   // switching from `readJsonFile` to `require` still results in `require.cache` as an empty object
 
-  it('uses one-app/.webpack-stats.browser.json', () => {
+  it('uses one-app/.build-meta.json', () => {
     load();
     expect(readJsonFile).toHaveBeenCalledTimes(1);
-    expect(readJsonFile.mock.calls[0]).toEqual(['../../../.webpack-stats.browser.json']);
+    expect(readJsonFile.mock.calls[0]).toEqual(['../../../.build-meta.json']);
   });
 
   it('returns null when the active locale is not in the list of i18n files', () => {

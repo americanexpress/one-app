@@ -12,6 +12,8 @@ services:
         - no_proxy
     # tags the built image as:
     image: one-app:at-test
+    expose:
+      - "8443"
     volumes:
       - ./one-app/one-app-cert.pem:/opt/cert.pem
       - ./one-app/one-app-privkey.pem:/opt/key.pem

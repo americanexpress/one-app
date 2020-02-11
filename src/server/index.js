@@ -28,8 +28,6 @@ import { addServer, shutdown } from './shutdown';
 import pollModuleMap from './utils/pollModuleMap';
 import loadModules from './utils/loadModules';
 
-const ONE_APP_DEV_PROXY_PORT = process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT || 3002;
-
 function ssrServerStart() {
   // need to load _some_ locale so that react-intl does not prevent modules from loading
   // eslint-disable-next-line no-underscore-dangle
@@ -50,7 +48,7 @@ function ssrServerStart() {
 
 function metricsServerStart() {
   return new Promise((res, rej) => {
-    const port = process.env.HTTP_METRICS_PORT || 3005;
+    const port = process.env.HTTP_METRICS_PORT;
     addServer(metricsServer.listen(port, (err) => (err ? rej(err) : res(port))));
   })
     .then(
@@ -94,7 +92,9 @@ if (process.env.NODE_ENV === 'development') {
   const watchLocalModules = require('./utils/watchLocalModules').default;
   const devHolocronCDN = require('./devHolocronCDN').default;
   const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy');
-  const oneAppDevCdnPort = process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001;
+  const oneAppDevCdnPort = process.env.HTTP_ONE_APP_DEV_CDN_PORT;
+  const oneAppDevProxyPort = process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT;
+
   serverChain = Promise.resolve()
     .then(() => new Promise((res, rej) => addServer(
       devHolocronCDN.listen(oneAppDevCdnPort, (err) => {
@@ -111,11 +111,11 @@ if (process.env.NODE_ENV === 'development') {
         useMiddleware: argv.m,
         pathToMiddleware: path.join(__dirname, '../../.dev/middleware'),
         remotes: getRemotesFromDevEndpointsFile(),
-      }).listen(ONE_APP_DEV_PROXY_PORT, (err) => {
+      }).listen(oneAppDevProxyPort, (err) => {
         if (err) {
           rej(err);
         } else {
-          console.log(`👖 one-app-dev-proxy server listening on port ${ONE_APP_DEV_PROXY_PORT}`);
+          console.log(`👖 one-app-dev-proxy server listening on port ${oneAppDevProxyPort}`);
           res();
         }
       })

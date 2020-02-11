@@ -20,6 +20,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const util = require('util');
 const childProcess = require('child_process');
+const { argv } = require('yargs');
 
 const promisifiedExec = util.promisify(childProcess.exec);
 
@@ -35,7 +36,8 @@ const nginxOriginStaticsModulesDir = path.resolve(nginxOriginStaticsRootDir, 'mo
 const pathToNginxOriginModuleMap = path.resolve(nginxOriginStaticsRootDir, 'module-map.json');
 const pathToAssets = path.resolve(sampleProdDir, 'assets');
 const userIntendsToSkipSampleModulesBuild = process.env.ONE_DANGEROUSLY_SKIP_SAMPLE_MODULES_BUILD;
-const archiveBuiltArtifacts = process.argv.includes('--archiveBuiltArtifacts');
+const archiveBuiltArtifacts = argv.archiveBuiltArtifacts || '';
+const bundleStaticsOrigin = argv.bundleStaticsOrigin || 'https://sample-cdn.frank';
 
 const sanitizedEnvVars = sanitizeEnvVars();
 
@@ -180,15 +182,15 @@ const doWork = async () => {
 
     moduleMapContent.modules[moduleName] = {
       browser: {
-        url: `https://sample-cdn.frank/modules/${gitSha}/${moduleName}/${moduleVersion}/${moduleName}.browser.js`,
+        url: `${bundleStaticsOrigin}/modules/${gitSha}/${moduleName}/${moduleVersion}/${moduleName}.browser.js`,
         integrity: integrityDigests.browser,
       },
       legacyBrowser: {
-        url: `https://sample-cdn.frank/modules/${gitSha}/${moduleName}/${moduleVersion}/${moduleName}.legacy.browser.js`,
+        url: `${bundleStaticsOrigin}/modules/${gitSha}/${moduleName}/${moduleVersion}/${moduleName}.legacy.browser.js`,
         integrity: integrityDigests.legacyBrowser,
       },
       node: {
-        url: `https://sample-cdn.frank/modules/${gitSha}/${moduleName}/${moduleVersion}/${moduleName}.node.js`,
+        url: `${bundleStaticsOrigin}/modules/${gitSha}/${moduleName}/${moduleVersion}/${moduleName}.node.js`,
         integrity: integrityDigests.node,
       },
     };
@@ -203,34 +205,12 @@ const doWork = async () => {
   if (archiveBuiltArtifacts) {
     const sampleModuleBundlesDirname = 'sample-module-bundles';
     const pathToBundles = path.join(process.cwd(), sampleModuleBundlesDirname);
-    fs.emptyDir(pathToBundles);
-    const moduleBundles = await fs.readdir(nginxOriginStaticsModulesDir, { withFileTypes: true });
-    moduleBundles
-      .filter((item) => item.isDirectory())
-      .forEach(async (item) => {
-        const moduleArchiveName = `${item.name}.tgz`;
+    await fs.emptyDir(pathToBundles);
+    await Promise.all([
+      fs.move(nginxOriginStaticsModulesDir, path.join(pathToBundles, 'modules')),
+      fs.move(pathToNginxOriginModuleMap, path.join(pathToBundles, 'module-map.json')),
+    ]);
 
-        await promisifySpawn(
-          'tar',
-          ['-zcvf', moduleArchiveName, item.name],
-          { cwd: nginxOriginStaticsModulesDir }
-        );
-
-        // eslint has conflicting rules
-        // eslint-disable-next-line max-len
-        await fs.move(path.join(nginxOriginStaticsModulesDir, moduleArchiveName), path.join(pathToBundles, 'modules', moduleArchiveName), { overwrite: true });
-      });
-
-    const moduleMapArchiveName = 'module-map.tgz';
-    await promisifySpawn(
-      'tar',
-      ['-zcvf', moduleMapArchiveName, path.basename(pathToNginxOriginModuleMap)],
-      { cwd: nginxOriginStaticsRootDir }
-    );
-
-    // eslint has conflicting rules
-    // eslint-disable-next-line max-len
-    await fs.move(path.join(nginxOriginStaticsRootDir, moduleMapArchiveName), path.join(pathToBundles, moduleMapArchiveName), { overwrite: true });
 
     console.log(`✅ Bundled One App Sample Modules and Module Map created at ${pathToBundles}`);
   }
