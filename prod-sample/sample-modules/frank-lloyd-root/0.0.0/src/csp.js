@@ -25,13 +25,21 @@ export default contentSecurityPolicyBuilder({
     ],
     scriptSrc: [
       "'self'",
+      // used by integration tests running in docker where domain names are aliased
       'https://sample-cdn.frank',
-      `${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
-      `localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
+      // used for our sample app deployment in heroku
+      'https://one-app-statics.surge.sh',
+      // used for local development
+      `${ip.address()}:3001`,
+      // used for local development
+      'localhost:3001',
     ],
     imgSrc: [
       "'self'",
+      // used by integration tests running in docker
       'https://sample-cdn.frank',
+      // used for our sample app deployment in heroku
+      'https://one-app-statics.surge.sh',
     ],
     styleSrc: [
       "'self'",
@@ -40,9 +48,14 @@ export default contentSecurityPolicyBuilder({
     connectSrc: [
       "'self'",
       '*.api.frank',
-      `${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
-      `localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
+      // used for local development
+      `${ip.address()}:3001`,
+      // used for local development
+      'localhost:3001',
+      // used by integration tests running in docker where domain names are aliased
       'https://sample-cdn.frank',
+      // used for our sample app deployment in heroku
+      'https://one-app-statics.surge.sh',
     ],
   },
 });
