@@ -23,20 +23,13 @@ import { compose } from 'redux';
 import { holocronModule } from 'holocron';
 import { fromJS } from 'immutable';
 
-import {
-  Bacon,
-  Cheese,
-  Ketchup,
-  Lettuce,
-  Mustard,
-  Onions,
-  Patty,
-  Pickles,
-  Tomato,
-  VeggiePatty,
-} from './ingredients';
+let OrderModuleChunk;
 
-const FranksBurgers = ({ languageData, localeName }) => (Object.keys(languageData).length > 0 ? (
+const FranksBurgers = ({
+  languageData,
+  localeName,
+  moduleLoadStatus,
+}) => (Object.keys(languageData).length > 0 ? (
   <IntlProvider locale={localeName} messages={languageData}>
     <main>
       <header>
@@ -45,71 +38,9 @@ const FranksBurgers = ({ languageData, localeName }) => (Object.keys(languageDat
         </h1>
       </header>
 
-      <section>
-        <header>
-          <h2 id="franks-menu">
-            <FormattedMessage id="franks-menu" />
-          </h2>
-
-        </header>
-
-        <article>
-          <header>
-            <h3 id="franks-ingredients">
-              <FormattedMessage id="franks-ingredients" />
-            </h3>
-          </header>
-
-          <button id="ingredient-bun-top" type="button">
-            <FormattedMessage id="BunTop" />
-          </button>
-
-          <ul id="ingredients-list">
-            {React.Children.toArray([
-              <Mustard />,
-              <Ketchup />,
-              <Cheese />,
-              <Bacon />,
-              <Lettuce />,
-              <Tomato />,
-              <Onions />,
-              <Pickles />,
-              <VeggiePatty />,
-              <Patty />,
-            ].map((child) => (
-              <li>
-                {child}
-              </li>
-            )))}
-          </ul>
-
-          <button id="ingredient-bun-bottom" type="button">
-            <FormattedMessage id="BunBottom" />
-          </button>
-        </article>
-
-        <footer>
-          <header>
-            <h4 id="franks-cta">
-              <FormattedMessage id="franks-cta" />
-            </h4>
-
-            <button id="franks-cta-action" type="button">
-              <FormattedMessage id="franks-cta-action" />
-            </button>
-          </header>
-        </footer>
-      </section>
-
-      <footer>
-        <h3 id="franks-guarantee">
-          <FormattedMessage id="franks-guarantee" />
-        </h3>
-
-        <h4 id="franks-delivery-policy">
-          <FormattedMessage id="franks-delivery-policy" />
-        </h4>
-      </footer>
+      {moduleLoadStatus === 'loaded' ? (
+        <OrderModuleChunk />
+      ) : null}
     </main>
   </IntlProvider>
 ) : (
@@ -117,30 +48,25 @@ const FranksBurgers = ({ languageData, localeName }) => (Object.keys(languageDat
 ));
 
 FranksBurgers.propTypes = {
+  moduleLoadStatus: PropTypes.string.isRequired,
+  localeName: PropTypes.string.isRequired,
   languageData: PropTypes.shape({
     loading: PropTypes.string,
+    ketchup: PropTypes.string,
+    mustard: PropTypes.string,
+    pickles: PropTypes.string,
+    onions: PropTypes.string,
+    tomato: PropTypes.string,
+    lettuce: PropTypes.string,
+    'american-cheese': PropTypes.string,
+    'beef-patty': PropTypes.string,
+    'veggie-patty': PropTypes.string,
     'franks-opening-line': PropTypes.string,
     'franks-menu': PropTypes.string,
     'franks-ingredients': PropTypes.string,
     'franks-cta': PropTypes.string,
-    'franks-cta-action': PropTypes.string,
-    'franks-guarantee': PropTypes.string,
     'franks-delivery-policy': PropTypes.string,
-    Bacon: PropTypes.string,
-    BunTop: PropTypes.string,
-    BunBottom: PropTypes.string,
-    Cheese: PropTypes.string,
-    Ketchup: PropTypes.string,
-    Lettuce: PropTypes.string,
-    Mustard: PropTypes.string,
-    Onions: PropTypes.string,
-    Patty: PropTypes.string,
-    Pickles: PropTypes.string,
-    SourCream: PropTypes.string,
-    Tomato: PropTypes.string,
-    VeggiePatty: PropTypes.string,
   }).isRequired,
-  localeName: PropTypes.string.isRequired,
 };
 
 const mapStateToProps = (state) => {
@@ -160,7 +86,14 @@ export default compose(
   connect(mapStateToProps),
   holocronModule({
     name: 'franks-burgers',
-    load: () => (dispatch) => dispatch(loadLanguagePack('franks-burgers', { fallbackLocale: 'en-US' })),
+    load: () => (dispatch) => Promise.all([
+      import(/* webpackChunkName: 'Order' */ './ordering')
+        .then((imported) => imported.default || imported)
+        .then((Component) => {
+          OrderModuleChunk = Component;
+        }),
+      dispatch(loadLanguagePack('franks-burgers', { fallbackLocale: 'en-US' })),
+    ]),
     options: { ssr: true },
   })
 )(FranksBurgers);

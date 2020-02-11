@@ -888,15 +888,14 @@ describe('Tests that can run against either local Docker setup or remote One App
 
           const ingredients = [
             // selector-ID, text-content
-            ['#ingredient-bacon', 'Bacon'],
-            ['#ingredient-cheese', 'Cheese'],
             ['#ingredient-ketchup', 'Ketchup'],
-            ['#ingredient-lettuce', 'Lettuce'],
             ['#ingredient-mustard', 'Mustard'],
-            ['#ingredient-onions', 'Onions'],
-            ['#ingredient-patty', 'Patty'],
             ['#ingredient-pickles', 'Pickles'],
+            ['#ingredient-onions', 'Onions'],
+            ['#ingredient-lettuce', 'Lettuce'],
             ['#ingredient-tomato', 'Tomato'],
+            ['#ingredient-beef-patty', 'Patty'],
+            ['#ingredient-american-cheese', 'Cheese'],
             ['#ingredient-veggie-patty', 'Veggie Patty'],
           ];
 
