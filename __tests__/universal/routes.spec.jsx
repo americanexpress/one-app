@@ -20,12 +20,11 @@ import { fromJS } from 'immutable';
 import createRoutes from '../../src/universal/routes';
 
 jest.mock('holocron-module-route', () => () => null);
-jest.mock('@americanexpress/one-app-ducks', () => ({
-  applicationError: jest.fn((code, error, otherData) => ({
-    type: 'APPLICATION_ERROR',
-    code,
+jest.mock('@americanexpress/one-app-ducks/lib/errorReporting', () => ({
+  addErrorToReport: jest.fn((error, meta) => ({
+    type: 'ADD_ERROR_TO_REPORT',
     error,
-    otherData,
+    meta,
   })),
 }));
 
@@ -36,7 +35,11 @@ describe('routes', () => {
         rootModuleName: 'fakeRootModule',
       },
     }),
-    dispatch: jest.fn(),
+    dispatch: jest.fn((action) => {
+      if (typeof action === 'function') {
+        action(store.dispatch);
+      }
+    }),
   };
 
   beforeEach(() => jest.clearAllMocks());
@@ -55,7 +58,12 @@ describe('routes', () => {
   it('should set up a default 404', () => {
     const NotFoundRoute = createRoutes(store)[1];
     expect(ReactTestUtils.isElement(NotFoundRoute)).toBe(true);
-    expect(NotFoundRoute.props).toEqual({ path: '*', component: expect.any(Function), onEnter: expect.any(Function) });
+    expect(NotFoundRoute.props).toEqual({
+      path: '*',
+      component: expect.any(Function),
+      onEnter: expect.any(Function),
+      onLeave: expect.any(Function),
+    });
   });
 
   it('should display a simple message on 404', () => {
@@ -66,6 +74,13 @@ describe('routes', () => {
   it('should set the status to 404', () => {
     const NotFoundRoute = createRoutes(store)[1];
     NotFoundRoute.props.onEnter({ location: { pathname: 'missing' } });
-    expect(store.dispatch.mock.calls[0][0]).toMatchSnapshot({ error: expect.any(Error) });
+    expect(store.dispatch.mock.calls[1][0]).toMatchSnapshot({ error: expect.any(Error) });
+    expect(store.dispatch.mock.calls[2][0]).toMatchSnapshot();
+  });
+
+  it('should clear the 404 status when leaving the unmatched route', () => {
+    const NotFoundRoute = createRoutes(store)[1];
+    NotFoundRoute.props.onLeave();
+    expect(store.dispatch.mock.calls[0][0]).toMatchSnapshot();
   });
 });
