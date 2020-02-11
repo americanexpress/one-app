@@ -22,6 +22,7 @@ Sets the port on which One App will listen for requests. It defaults to `3000` i
 
 Example:
 ```bash
+# PORT can be used an an alias for HTTP_PORT, ex: `PORT=3000`
 HTTP_PORT=3000
 ```
 

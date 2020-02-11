@@ -137,13 +137,6 @@ describe('server index', () => {
       expect(yargs.getOptions().string).toMatchSnapshot();
     });
 
-    it('starts devHolocronCDN on port 3001 when no env variable is set', async () => {
-      await load();
-      const devHolocronCDNListen = require('../../src/server/devHolocronCDN').default.listen;
-
-      expect(devHolocronCDNListen.mock.calls[0][0]).toBe(3001);
-    });
-
     it('starts devHolocronCDN on port 4011', async () => {
       process.env.HTTP_ONE_APP_DEV_CDN_PORT = 4011;
       await load();
@@ -399,7 +392,7 @@ describe('server index', () => {
 
     it('logs when metrics server is successfully listening on the port', async () => {
       console.log.mockClear();
-      delete process.env.HTTP_METRICS_PORT;
+      process.env.HTTP_METRICS_PORT = 3005;
       try {
         await load();
       } catch (error) {

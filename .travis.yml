@@ -16,4 +16,4 @@ jobs:
       name: "Unit Tests"
       script: npm run test:lint && npm run test:unit && npm run test:danger && npm run test:git-history
     - name: "Integration Tests"
-      script: npm run test:integration
+      script: ./scripts/run-integration-tests.travis.sh
