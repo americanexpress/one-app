@@ -836,6 +836,13 @@ describe('Tests that can run against either local Docker setup or remote One App
             },
           });
         });
+
+        test('not found requests are caught', async () => {
+          const response = await fetch(`${appInstanceUrls.fetchUrl}/this-route-does-not-exist`, defaultFetchOpts);
+          const body = await response.text();
+          expect(response.status).toBe(404);
+          expect(body).toContain('<div id="root">Not found</div>');
+        });
       });
 
       describe('internationalization', () => {
