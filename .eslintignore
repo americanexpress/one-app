@@ -22,6 +22,7 @@ prod-sample/*
 !prod-sample/sample-modules
 prod-sample/**/build/**
 prod-sample/**/node_modules/**
+sample-module-bundles
 
 # test
 test-results

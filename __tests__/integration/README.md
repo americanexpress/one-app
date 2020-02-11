@@ -54,13 +54,15 @@ To make it easier for you to deploy all the sample modules to a remote environme
 to build and bundle the modules and module map for you:
 
 ```bash
-npm run build:sample-modules -- --archiveBuiltArtifacts
+npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=https://cdn.example.com
 ```
 
-This will produce a `tgz` file for each sample module bundle and the module map inside the
-`sample-module-bundles` directory.
+This will produce a `sample-module-bundles` directory with all the sample modules and a module map.
+The `bundle-statics-origin` allows you to specify the location the module bundles will be published
+to so that the generated [module map](../../README.md#building-and-deploying-a-holocron-module-map)
+has correct bundle URLs for the sample modules.
 
-Your CI/CD process can then use those archives to deploy those bundles to your CDN of choice without it
+Your CI/CD process can publish the contents of that directory to your CDN of choice without it
 having to know anything about the sample modules or how to build them.
 
 ## Test Structure
