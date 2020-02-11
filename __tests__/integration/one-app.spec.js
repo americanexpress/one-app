@@ -40,6 +40,7 @@ import getRandomPortNumber from './helpers/getRandomPortNumber';
 import transit from '../../src/universal/utils/transit';
 
 yargs.array('remoteOneAppEnvironment');
+yargs.array('scanEnvironment');
 
 jest.setTimeout(95000);
 
@@ -891,4 +892,47 @@ describe('Tests that can run against either local Docker setup or remote One App
       });
     });
   });
+});
+
+describe('Scan app instance for console errors', () => {
+  const oneAppLocalPortToUse = getRandomPortNumber();
+  const { scanEnvironment } = argv;
+  const environmentsToScan = scanEnvironment || ['https://one-app:8443/success'];
+
+  let browser;
+
+  beforeAll(async () => {
+    if (scanEnvironment) {
+      ({ browser } = await setUpTestRunner());
+    } else {
+      ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse }));
+    }
+  });
+
+  afterAll(async () => {
+    await tearDownTestRunner({ browser });
+    await waitFor(500);
+  });
+
+  describe('scanning forward', () => {
+    environmentsToScan.forEach((url) => {
+      test(`browser visits ${url} successfully with no console errors`, async () => {
+        await browser.url(url);
+        const consoleLogs = await browser.getLogs('browser');
+        expect(consoleLogs).toEqual([]);
+      });
+    });
+  });
+
+  if (environmentsToScan.length > 1) {
+    describe('scanning in reverse', () => {
+      environmentsToScan.reverse().forEach((url) => {
+        test(`browser visits ${url} successfully with no console errors`, async () => {
+          await browser.url(url);
+          const consoleLogs = await browser.getLogs('browser');
+          expect(consoleLogs).toEqual([]);
+        });
+      });
+    });
+  }
 });
