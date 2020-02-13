@@ -34,15 +34,16 @@ Node Bundle (e.g.`mymodule.node.js`) rather than the Browser Bundles (e.g.
 security and bundle size considerations.
 
 **Contents**
-* [provideStateConfig](#providestateconfig)
-* [csp](#csp)
-* [corsOrigins](#corsorigins)
-* [configureRequestLog](#configurerequestlog)
-* [extendSafeRequestRestrictedAttributes](#extendsaferequestrestrictedattributes)
-* [createSsrFetch](#createssrfetch)
-* [validateStateConfig](#validatestateconfig)
-* [requiredSafeRequestRestrictedAttributes](#requiredsaferequestrestrictedattributes)
-* [appCompatibility](#appcompatibility)
+- [App Configuration](#app-configuration)
+  - [`provideStateConfig`](#providestateconfig)
+  - [`csp`](#csp)
+  - [`corsOrigins`](#corsorigins)
+  - [`configureRequestLog`](#configurerequestlog)
+  - [`extendSafeRequestRestrictedAttributes`](#extendsaferequestrestrictedattributes)
+  - [`createSsrFetch`](#createssrfetch)
+  - [`validateStateConfig`](#validatestateconfig)
+  - [`requiredSafeRequestRestrictedAttributes`](#requiredsaferequestrestrictedattributes)
+  - [`appCompatibility`](#appcompatibility)
 
 ## `provideStateConfig`
 **Module Type**
@@ -54,13 +55,11 @@ security and bundle size considerations.
 if (!global.BROWSER) {
   Module.appConfig = {
     provideStateConfig: {
-      server: {
-        [settingName]: {
+      [settingName]: {
+        client: {
           [environmentLevel]: String,
         },
-      },
-      client: {
-        [settingName]: {
+        server: {
           [environmentLevel]: String,
         },
       },
@@ -77,18 +76,16 @@ In practice, the state config supplied by a Root Module may look like this shape
 if (!global.BROWSER) {
   Module.appConfig = {
     provideStateConfig: {
-      server: {
-        myApiHostname: {
-          development: 'dev.api.intranet.example.com',
-          qa: 'qa.api.intranet.example.com',
-          production: 'prod.api.intranet.example.com',
+      someApiUrl: {
+        client: {
+          development: 'https://internet-origin-dev.example.com/some-api/v1',
+          qa: 'https://internet-origin-qa.example.com/some-api/v1',
+          production: 'https://internet-origin.example.com/some-api/v1',
         },
-      },
-      client: {
-        myApiHostname: {
-          development: 'dev.api.external.example.com',
-          qa: 'qa.api.external.example.com',
-          production: 'prod.api.external.example.com',
+        server: {
+          development: 'https://intranet-origin-dev.example.com/some-api/v1',
+          qa: 'https://intranet-origin-qa.example.com/some-api/v1',
+          production: 'https://intranet-origin.example.com/some-api/v1',
         },
       },
     },
