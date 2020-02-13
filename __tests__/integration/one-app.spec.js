@@ -909,20 +909,20 @@ describe('Scan app instance for console errors', () => {
 
   let browser;
 
-  beforeAll(async () => {
-    if (scanEnvironment) {
-      ({ browser } = await setUpTestRunner());
-    } else {
-      ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse }));
-    }
-  });
-
-  afterAll(async () => {
-    await tearDownTestRunner({ browser });
-    await waitFor(500);
-  });
-
   describe('scanning forward', () => {
+    beforeAll(async () => {
+      if (scanEnvironment) {
+        ({ browser } = await setUpTestRunner());
+      } else {
+        ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse }));
+      }
+    });
+
+    afterAll(async () => {
+      await tearDownTestRunner({ browser });
+      await waitFor(500);
+    });
+
     environmentsToScan.forEach((url) => {
       test(`browser visits ${url} successfully with no console errors`, async () => {
         await browser.url(url);
@@ -934,6 +934,19 @@ describe('Scan app instance for console errors', () => {
 
   if (environmentsToScan.length > 1) {
     describe('scanning in reverse', () => {
+      beforeAll(async () => {
+        if (scanEnvironment) {
+          ({ browser } = await setUpTestRunner());
+        } else {
+          ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse }));
+        }
+      });
+
+      afterAll(async () => {
+        await tearDownTestRunner({ browser });
+        await waitFor(500);
+      });
+
       environmentsToScan.reverse().forEach((url) => {
         test(`browser visits ${url} successfully with no console errors`, async () => {
           await browser.url(url);
