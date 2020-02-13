@@ -143,11 +143,11 @@ the supported `import()` syntax to divide up our module bundle into logical chun
 our chunk using the _magic comments_ `/* webpackChunkName: "..." */`:
 
 ```js
-import(/* webpackChunkName: "<chunkName>" */ './Chunk');
-
 // compared to traditional imports, which adds to the main bundle
 
 import './Chunk';
+
+import(/* webpackChunkName: "<chunkName>" */ './Chunk');
 ```
 
 Our _chunk_ can be anything from a component to a `node_modules` package. Once we run `bundle-module` from `one-app-bundler`, our output in `build/<version>` will contain
@@ -191,10 +191,10 @@ export default holocronModule({
       .then((Component) => {
         Chunk = Component;
       })
-      .catch(error => {
+      .catch((error) => {
         Chunk = () => <p>{error.message}</p>;
       }),
-      //  ... load language packs, etc
+    //  ... load language packs, etc
   ]),
   options: { ssr: true },
 })(MyHolocronModule);
@@ -207,9 +207,8 @@ export default holocronModule({
 ```jsx
 import React from 'react';
 
-const Chunk = React.lazy(() =>
-  import(/* webpackChunkName: "<chunkName>" */ './Chunk')
-    .then((importedChunk) => importedChunk.default || importedChunk));
+const Chunk = React.lazy(() => import(/* webpackChunkName: "<chunkName>" */ './Chunk')
+  .then((importedChunk) => importedChunk.default || importedChunk));
 
 export default function MyHolocronModule() {
   return (
