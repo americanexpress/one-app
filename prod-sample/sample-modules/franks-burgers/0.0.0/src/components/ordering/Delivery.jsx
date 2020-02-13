@@ -17,7 +17,7 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
 
-export default function OrderCountDown() {
+export default function OrderDelivery() {
   const [timer, setTimer] = React.useState(30 * 60);
 
   React.useState(() => {
@@ -31,7 +31,7 @@ export default function OrderCountDown() {
   }, []);
 
   return (
-    <section>
+    <section id="delivery-time">
       <h3>
         <FormattedMessage id="arrival-time" />
       </h3>

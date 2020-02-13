@@ -43,6 +43,7 @@ function orderReducer(state = { ingredients: [], date: new Date() }, action) {
       return { ...state, date: new Date(action.date) };
   }
 }
+
 export default function Order() {
   const [state, dispatch] = React.useReducer(orderReducer, { ingredients: [], date: new Date() });
   const context = {
@@ -60,7 +61,6 @@ export default function Order() {
       dispatch({ type: 'clear-ingredients' });
     },
   };
-  console.log(context);
 
   return (
     <OrderContext.Provider
@@ -76,7 +76,7 @@ export default function Order() {
               render={({ next }) => (
                 <div>
                   <Menu />
-                  <button type="button" onClick={next} disabled={state.ingredients.length === 0}>
+                  <button id="next-btn" type="button" onClick={next} disabled={state.ingredients.length === 0}>
                     <FormattedMessage id="franks-cta" />
                   </button>
                 </div>
@@ -89,10 +89,10 @@ export default function Order() {
                   <Suspense fallback={<p><FormattedMessage id="loading" /></p>}>
                     <Calendar />
                   </Suspense>
-                  <button type="button" onClick={previous}>
+                  <button id="prev-btn" type="button" onClick={previous}>
                     <FormattedMessage id="btn-previous" />
                   </button>
-                  <button type="button" onClick={next}>
+                  <button id="next-btn" type="button" onClick={next}>
                     <FormattedMessage id="btn-next" />
                   </button>
                 </div>
@@ -103,10 +103,10 @@ export default function Order() {
               render={({ next, previous }) => (
                 <div>
                   <Confirmation />
-                  <button type="button" onClick={next}>
+                  <button id="next-btn" type="button" onClick={next}>
                     <FormattedMessage id="btn-confirm" />
                   </button>
-                  <button type="button" onClick={previous}>
+                  <button id="prev-btn" type="button" onClick={previous}>
                     <FormattedMessage id="btn-previous" />
                   </button>
                 </div>

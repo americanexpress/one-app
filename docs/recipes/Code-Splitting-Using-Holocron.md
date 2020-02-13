@@ -60,7 +60,7 @@ export const childRoutes = () => (
 );
 ```
 
-or can be an elaborate:
+or can be an elaborate route configuration:
 
 ```jsx
 import React from 'react';
@@ -144,7 +144,6 @@ our chunk using the _magic comments_ `/* webpackChunkName: "..." */`:
 
 ```js
 // compared to traditional imports, which adds to the main bundle
-
 import './Chunk';
 
 import(/* webpackChunkName: "<chunkName>" */ './Chunk');

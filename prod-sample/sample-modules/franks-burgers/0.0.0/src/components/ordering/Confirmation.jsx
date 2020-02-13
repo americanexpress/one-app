@@ -22,7 +22,7 @@ import { OrderContext } from './context';
 export default function OrderConfirmation() {
   const { ingredients, date } = React.useContext(OrderContext);
   return (
-    <section>
+    <section id="order-confirmation">
       <header>
         <h2>
           <FormattedMessage id="order-confirmation" />

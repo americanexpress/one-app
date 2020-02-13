@@ -23,9 +23,9 @@ import { OrderContext } from './context';
 export default function BurgerCalendar() {
   const { date, setDate } = React.useContext(OrderContext);
   return (
-    <section>
+    <section id="delivery-calendar">
       <header>
-        <h2>
+        <h2 id="delivery-date">
           <FormattedMessage id="date-to-deliver" />
         </h2>
       </header>

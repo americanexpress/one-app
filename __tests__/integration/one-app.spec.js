@@ -875,6 +875,18 @@ describe('Tests that can run against either local Docker setup or remote One App
       });
 
       describe('code-splitting', () => {
+        const ingredients = [
+          ['#ingredient-ketchup', 'Ketchup'],
+          ['#ingredient-mustard', 'Mustard'],
+          ['#ingredient-pickles', 'Pickles'],
+          ['#ingredient-onions', 'Onions'],
+          ['#ingredient-lettuce', 'Lettuce'],
+          ['#ingredient-tomato', 'Tomato'],
+          ['#ingredient-american-cheese', 'American Cheese'],
+          ['#ingredient-beef-patty', 'Beef Patty'],
+          ['#ingredient-veggie-patty', 'Veggie Patty'],
+        ];
+
         test('successfully loads a code-split module with a loanguage pack', async () => {
           await browser.url(`${appInstanceUrls.browserUrl}/demo/franks-burgers`);
           const openerMessage = await browser.$('#franks-opening-line');
@@ -883,21 +895,8 @@ describe('Tests that can run against either local Docker setup or remote One App
           );
         });
 
-        test('loads up all the chunks that were code-split and uses the language pack for their content', async () => {
+        test('loads up the Order chunk and uses the language pack for their content', async () => {
           await browser.url(`${appInstanceUrls.browserUrl}/demo/franks-burgers`);
-
-          const ingredients = [
-            // selector-ID, text-content
-            ['#ingredient-ketchup', 'Ketchup'],
-            ['#ingredient-mustard', 'Mustard'],
-            ['#ingredient-pickles', 'Pickles'],
-            ['#ingredient-onions', 'Onions'],
-            ['#ingredient-lettuce', 'Lettuce'],
-            ['#ingredient-tomato', 'Tomato'],
-            ['#ingredient-beef-patty', 'Patty'],
-            ['#ingredient-american-cheese', 'Cheese'],
-            ['#ingredient-veggie-patty', 'Veggie Patty'],
-          ];
 
           await Promise.all(ingredients.map(
             ([id, expected]) => browser.$(id)
@@ -906,6 +905,22 @@ describe('Tests that can run against either local Docker setup or remote One App
                   expect(text).toEqual(expected);
                 }))
           ));
+        });
+
+        test('loads up the Order chunk and then lazy loads Calendar chunk with "react-calendar" on next', async () => {
+          await browser.url(`${appInstanceUrls.browserUrl}/demo/franks-burgers`);
+
+          await Promise.all(ingredients.map(
+            ([id]) => browser.$(id)
+              .then((selector) => selector.click())
+          ));
+
+          const nextBtn = await browser.$('#next-btn');
+          await nextBtn.click();
+          await waitFor(1e3);
+
+          const deliveryDate = await browser.$('#delivery-date');
+          await expect(deliveryDate.getText()).resolves.toBeDefined();
         });
       });
 

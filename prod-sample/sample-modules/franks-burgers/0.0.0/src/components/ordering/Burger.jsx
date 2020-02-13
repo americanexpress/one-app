@@ -21,7 +21,7 @@ import { OrderContext } from './context';
 export default function Burger() {
   const { ingredients } = React.useContext(OrderContext);
   return (
-    <ul>
+    <ul id="current-burger">
       {React.Children.toArray(ingredients.map((ingredient) => (
         <li>{ingredient}</li>
       )))}
