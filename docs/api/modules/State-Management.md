@@ -69,7 +69,8 @@ The following API definitions describe the Ducks responsible for the state shape
 * [`intl`](#intl-duck)
 
 ### `config` Duck
-The `config` Duck lists a subset of the environment variables set on the Server.
+The `config` Duck lists a subset of the environment variables set on the Server as well as all values set by
+[`provideStateConfig`](./App-Configuration.md#providestateconfig) from the [App Configuration API](./App-Configuration.md).
 
 **Contents:**
 * [State Shape](#state-shape)
@@ -108,7 +109,7 @@ const state = new Map({
 
 ##### `setConfig`
 
-> ⚠️ For Internal Use
+> ⚠️ For Internal Use by One App. Modules need not dispatch this action creator.
 
 **Shape**
 
