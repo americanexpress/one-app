@@ -149,7 +149,8 @@ import './Chunk';
 import(/* webpackChunkName: "<chunkName>" */ './Chunk');
 ```
 
-Our _chunk_ can be anything from a component to a `node_modules` package. Once we run `bundle-module` from `one-app-bundler`, our output in `build/<version>` will contain
+Our _chunk_ can be anything from a component to a `node_modules` package. Once we run
+`bundle-module` from `one-app-bundler`, our output in `build/<version>` will contain
 additional JavaScript files based on the number of chunks we have dynamically split
 from our module.
 
