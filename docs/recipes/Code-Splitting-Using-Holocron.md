@@ -234,6 +234,7 @@ as a `webpack_require` call.
 
 ### Include your existing tools to the pipeline
 
-It can be helpful to test your current apps for migration, supporting react-loadable and @loadable/component. Extend the webpack config if you need.
+It can be helpful to test your current apps for migration, supporting react-loadable and
+@loadable/component. Extend the webpack config if you need.
 
 [☝️ Return To Top](#code-splitting-using-holocron)
