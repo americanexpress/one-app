@@ -14,6 +14,6 @@
  * permissions and limitations under the License.
  */
 
-import Module from './components';
+import ModuleContainer from './components';
 
-export default Module;
+export default ModuleContainer;

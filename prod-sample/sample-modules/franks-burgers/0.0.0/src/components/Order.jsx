@@ -14,26 +14,27 @@
  * permissions and limitations under the License.
  */
 
-import React from 'react';
-import Calendar from 'react-calendar';
+import React, { Suspense } from 'react';
 import { FormattedMessage } from 'react-intl';
 
-import { OrderContext } from './context';
+const Burger = React.lazy(() => import(/* webpackChunkName: 'Burger' */ './Burger'));
 
-export default function BurgerCalendar() {
-  const { date, setDate } = React.useContext(OrderContext);
+export default function Order() {
+  const [loadBurger, setBurgerLoad] = React.useState(false);
+
   return (
-    <section id="delivery-calendar">
-      <header>
-        <h2 id="delivery-date">
-          <FormattedMessage id="date-to-deliver" />
-        </h2>
-      </header>
+    <section>
+      {loadBurger ? (
+        <Suspense fallback={<p><FormattedMessage id="loading" /></p>}>
+          <Burger />
+        </Suspense>
+      ) : null}
 
-      <Calendar
-        onChange={setDate}
-        value={date}
-      />
+      <footer>
+        <button id="order-burger-btn" type="button" onClick={() => setBurgerLoad((state) => !state)}>
+          <FormattedMessage id="franks-cta" />
+        </button>
+      </footer>
     </section>
   );
 }

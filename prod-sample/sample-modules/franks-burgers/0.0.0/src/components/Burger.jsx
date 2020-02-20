@@ -14,4 +14,15 @@
  * permissions and limitations under the License.
  */
 
-export { default } from './Order';
+import React from 'react';
+import { FormattedMessage } from 'react-intl';
+
+export default function Burger() {
+  return (
+    <article id="franks-burger">
+      <p>
+        <FormattedMessage id="franks-burger" />
+      </p>
+    </article>
+  );
+}

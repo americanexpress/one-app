@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import PropTypes from 'prop-types';
 import { loadLanguagePack } from '@americanexpress/one-app-ducks';
 import { FormattedMessage, IntlProvider } from 'react-intl';
@@ -23,49 +23,40 @@ import { compose } from 'redux';
 import { holocronModule } from 'holocron';
 import { fromJS } from 'immutable';
 
-let OrderModuleChunk;
+const OrderModuleChunk = React.lazy(() => import(/* webpackChunkName: 'Order' */ './Order'));
 
 const FranksBurgers = ({
   languageData,
   localeName,
   moduleLoadStatus,
-}) => (Object.keys(languageData).length > 0 ? (
+}) => (
   <IntlProvider locale={localeName} messages={languageData}>
-    <main>
-      <header>
-        <h1 id="franks-opening-line">
-          <FormattedMessage id="franks-opening-line" />
-        </h1>
-      </header>
+    {(moduleLoadStatus === 'loaded' ? (
+      <main>
+        <header>
+          <h1 id="franks-opening-line">
+            <FormattedMessage id="franks-opening-line" />
+          </h1>
+        </header>
 
-      {moduleLoadStatus === 'loaded' ? (
-        <OrderModuleChunk />
-      ) : null}
-    </main>
+        <Suspense fallback={<p><FormattedMessage id="loading" /></p>}>
+          <OrderModuleChunk />
+        </Suspense>
+      </main>
+    ) : (
+      <p><FormattedMessage id="loading" /></p>
+    ))}
   </IntlProvider>
-) : (
-  <p>Loading...</p>
-));
+);
 
 FranksBurgers.propTypes = {
   moduleLoadStatus: PropTypes.string.isRequired,
   localeName: PropTypes.string.isRequired,
   languageData: PropTypes.shape({
     loading: PropTypes.string,
-    ketchup: PropTypes.string,
-    mustard: PropTypes.string,
-    pickles: PropTypes.string,
-    onions: PropTypes.string,
-    tomato: PropTypes.string,
-    lettuce: PropTypes.string,
-    'american-cheese': PropTypes.string,
-    'beef-patty': PropTypes.string,
-    'veggie-patty': PropTypes.string,
     'franks-opening-line': PropTypes.string,
-    'franks-menu': PropTypes.string,
-    'franks-ingredients': PropTypes.string,
     'franks-cta': PropTypes.string,
-    'franks-delivery-policy': PropTypes.string,
+    'franks-burger': PropTypes.string,
   }).isRequired,
 };
 
@@ -86,14 +77,7 @@ export default compose(
   connect(mapStateToProps),
   holocronModule({
     name: 'franks-burgers',
-    load: () => (dispatch) => Promise.all([
-      import(/* webpackChunkName: 'Order' */ './ordering')
-        .then((imported) => imported.default || imported)
-        .then((Component) => {
-          OrderModuleChunk = Component;
-        }),
-      dispatch(loadLanguagePack('franks-burgers', { fallbackLocale: 'en-US' })),
-    ]),
+    load: () => (dispatch) => dispatch(loadLanguagePack('franks-burgers', { fallbackLocale: 'en-US' })),
     options: { ssr: true },
   })
 )(FranksBurgers);

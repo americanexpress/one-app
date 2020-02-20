@@ -1,23 +1,6 @@
 {
   "loading": "Loading...",
-  "ketchup": "Ketchup",
-  "mustard": "Mustard",
-  "pickles": "Pickles",
-  "lettuce": "Lettuce",
-  "onions": "Onions",
-  "tomato": "Tomato",
-  "american-cheese": "American Cheese",
-  "beef-patty": "Beef Patty",
-  "veggie-patty": "Veggie Patty",
   "franks-opening-line": "Welcome to Franks Burgers! The best burgers in town.",
-  "franks-menu": "Our menu is just a burger, but you can choose the ingredients.",
-  "franks-ingredients": "View them all and choose what you want on your burger stack.",
   "franks-cta": "Order Burger",
-  "date-to-deliver": "Choose A Date Of Delivery",
-  "order-confirmation": "Order Confirmation",
-  "arrival-time": "Time Until Arrival",
-  "btn-next": "Next",
-  "btn-confirm": "Place Order",
-  "btn-previous": "Previous",
-  "time-units": "seconds"
+  "franks-burger": "Burger"
 }
