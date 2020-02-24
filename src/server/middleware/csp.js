@@ -15,6 +15,7 @@
  */
 
 import uuidV4 from 'uuid/v4';
+import ip from 'ip';
 
 function parsePolicy(headerValue) {
   const policy = {};
@@ -58,7 +59,17 @@ export function getCSP() {
 const csp = () => (req, res, next) => {
   const { policy } = cspCache;
   const scriptNonce = uuidV4();
-  const updatedPolicy = insertSource(policy, 'script-src', `'nonce-${scriptNonce}'`);
+  let updatedPolicy;
+  if (process.env.NODE_ENV === 'development') {
+    updatedPolicy = insertSource(
+      insertSource(policy, 'script-src', `'nonce-${scriptNonce}' ${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT} localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}`),
+      'connect-src',
+      `${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT} localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}`
+    );
+  } else {
+    updatedPolicy = insertSource(policy, 'script-src', `'nonce-${scriptNonce}'`);
+  }
+
   res.scriptNonce = scriptNonce;
   res.setHeader('Content-Security-Policy', updatedPolicy);
   next();
