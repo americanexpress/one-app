@@ -103,7 +103,7 @@ Contains a hash [SRI](https://developer.mozilla.org/en-US/docs/Web/Security/Subr
 * [Environment Variables](./Environment-Variables.md)
 * [Development Tools](./Development-Tools.md)
 
-[☝️ Return To Top](#module-map)
+[☝️ Return To Top](#module-map-schema)
 
 [Holocron Module Registry]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#module-registry
 [Holocron Module]: ../API.md#modules
