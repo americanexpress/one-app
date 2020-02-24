@@ -34,7 +34,6 @@ Node Bundle (e.g.`mymodule.node.js`) rather than the Browser Bundles (e.g.
 security and bundle size considerations.
 
 **Contents**
-- [App Configuration](#app-configuration)
   - [`provideStateConfig`](#providestateconfig)
   - [`csp`](#csp)
   - [`corsOrigins`](#corsorigins)
@@ -51,6 +50,7 @@ security and bundle size considerations.
 * 🚫 Child Module
 
 **Shape**
+
 ```js
 if (!global.BROWSER) {
   Module.appConfig = {
@@ -86,6 +86,22 @@ if (!global.BROWSER) {
           development: 'https://intranet-origin-dev.example.com/some-api/v1',
           qa: 'https://intranet-origin-qa.example.com/some-api/v1',
           production: 'https://intranet-origin.example.com/some-api/v1',
+        },
+      },
+      someBooleanValue: {
+        client: true,
+        server: true,
+      },
+      someNumberValue: {
+        client: {
+          development: 480000,
+          qa: 480000,
+          production: 480000,
+        },
+        server: {
+          development: 480000,
+          qa: 480000,
+          production: 480000,
         },
       },
     },
