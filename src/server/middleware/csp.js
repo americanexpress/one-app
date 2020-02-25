@@ -61,8 +61,9 @@ const csp = () => (req, res, next) => {
   const scriptNonce = uuidV4();
   let updatedPolicy;
   if (process.env.NODE_ENV === 'development') {
+    const updatedScriptSrc = insertSource(policy, 'script-src', `'nonce-${scriptNonce}' ${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT} localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}`);
     updatedPolicy = insertSource(
-      insertSource(policy, 'script-src', `'nonce-${scriptNonce}' ${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT} localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}`),
+      updatedScriptSrc,
       'connect-src',
       `${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT} localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}`
     );

@@ -99,9 +99,9 @@ describe('csp', () => {
       const headers = res._getHeaders();
       expect(headers).toHaveProperty('content-security-policy');
       const cspString = headers['content-security-policy'];
-      const ipFound = cspString.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:3001/);
+      const ipFound = cspString.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
       expect(ipFound).toBeNull();
-      const localhostFound = cspString.match(/localhost:3001/);
+      const localhostFound = cspString.match(/localhost/);
       expect(localhostFound).toBeNull();
     });
 
