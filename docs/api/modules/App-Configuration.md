@@ -136,7 +136,9 @@ if (!global.BROWSER) {
 
 The `csp` static `String` should be a valid [Content Security Policy (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) for your application which will be passed on to the HTML markup rendered by the Browser.
 
-> We recommend using something like [content-security-policy-builder](https://www.npmjs.com/package/content-security-policy-builder) to create your CSP string.
+> We recommend using something like [content-security-policy-builder](https://www.npmjs.com/package/content-security-policy-builder) to create your CSP string. This is set up automatically when you use the [One App module generator](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module).
+
+You'll still want the ability to run One App and serve modules locally without running into CSP errors. When `NODE_ENV=development`, One App will dynamically add both your computer's IP address and `localhost` to the root module's CSP. Please note that the `script-src` and `connect-src` directives must already be defined in your CSP in order for this to work properly.
 
 **📘 More Information**
 * Example: [Frank Lloyd Root's CSP](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/csp.js)
