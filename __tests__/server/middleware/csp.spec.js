@@ -16,6 +16,11 @@
 
 import httpMocks from 'node-mocks-http';
 
+const sanitizeCspString = (cspString) => cspString
+// replaces dynamic ip and nonce to prevent snapshot failures
+  .replace(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g, '0.0.0.0')
+  .replace(/nonce-[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}/, 'nonce-00000000-0000-0000-0000-000000000000');
+
 describe('csp', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -48,7 +53,7 @@ describe('csp', () => {
     });
 
     it('sets a csp header in development', () => {
-      process.env.NODE_ENV = 'production';
+      process.env.NODE_ENV = 'development';
       const cspMiddleware = requireCSP().default;
       cspMiddleware()(req, res, next);
       // eslint-disable-next-line no-underscore-dangle
@@ -65,6 +70,39 @@ describe('csp', () => {
       const headers = res._getHeaders();
       expect(headers).toHaveProperty('content-security-policy');
       expect(headers).not.toHaveProperty('content-security-policy-report-only');
+    });
+
+    it('adds ip and localhost to csp in development', () => {
+      process.env.NODE_ENV = 'development';
+      process.env.HTTP_ONE_APP_DEV_CDN_PORT = 5000;
+      const requiredCsp = requireCSP();
+      const cspMiddleware = requiredCsp.default;
+      const { updateCSP } = requiredCsp;
+      updateCSP("default-src 'none'; script-src 'self'; connect-src 'self';");
+      cspMiddleware()(req, res, next);
+      // eslint-disable-next-line no-underscore-dangle
+      const headers = res._getHeaders();
+      expect(headers).toHaveProperty('content-security-policy');
+      const cspString = headers['content-security-policy'];
+      expect(sanitizeCspString(cspString)).toMatchSnapshot();
+    });
+
+    it('does not add ip and localhost to csp in production', () => {
+      process.env.NODE_ENV = 'production';
+      delete process.env.HTTP_ONE_APP_DEV_CDN_PORT;
+      const requiredCsp = requireCSP();
+      const cspMiddleware = requiredCsp.default;
+      const { updateCSP } = requiredCsp;
+      updateCSP("default-src 'none'; script-src 'self'; connect-src 'self';");
+      cspMiddleware()(req, res, next);
+      // eslint-disable-next-line no-underscore-dangle
+      const headers = res._getHeaders();
+      expect(headers).toHaveProperty('content-security-policy');
+      const cspString = headers['content-security-policy'];
+      const ipFound = cspString.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
+      expect(ipFound).toBeNull();
+      const localhostFound = cspString.match(/localhost/);
+      expect(localhostFound).toBeNull();
     });
 
     it('sets script nonce', () => {
