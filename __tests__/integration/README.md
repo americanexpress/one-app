@@ -65,6 +65,20 @@ has correct bundle URLs for the sample modules.
 Your CI/CD process can publish the contents of that directory to your CDN of choice without it
 having to know anything about the sample modules or how to build them.
 
+### Simple domain scanning
+
+The One App integration test suite includes a simple test to check for browser console errors.
+To provide your own environments you can run `npm run test:integration -- --scan-environment=https://[url-running-one-app-instance]`,  where `--scan-environment` is the domain.
+
+Running a scan across multiple targets is supported by passing multiple `--scan-environment` flags:
+
+```bash
+npm run test:integration -- --scan-environment=https://[url-running-one-app-instance] --scan-environment=https://[another-url-running-one-app-instance]
+```
+
+This provides a simple way to simulate a user traversing across different instances of One App
+running different versions.
+
 ## Test Structure
 
 Within [one-app.spec.js](./one-app.spec.js) most tests are assumed to be able to run both within the local

@@ -21,7 +21,7 @@ const fs = require('fs-extra');
 const yaml = require('js-yaml');
 
 const { waitUntilServerIsUp } = require('./wait');
-const { logWatcherDuplex } = require('./logging');
+const { createLogWatcherDuplex } = require('./logging');
 const getRandomPortNumber = require('./getRandomPortNumber');
 const deepMergeObjects = require('../../../src/server/utils/deepMergeObjects');
 
@@ -61,6 +61,7 @@ const setUpTestRunner = async ({ oneAppLocalPortToUse } = {}) => {
   const dockerComposeUpProcess = childProcess.spawn(`${dockerComposeUpCommand}`, { shell: true });
   const serverStartupTimeout = 90000;
 
+  const logWatcherDuplex = createLogWatcherDuplex();
   // logWatcherDuplex enables the testing of logs without preventing logging to stdout and stderr
   dockerComposeUpProcess.stdout.pipe(logWatcherDuplex);
   dockerComposeUpProcess.stderr.pipe(logWatcherDuplex);
@@ -74,7 +75,7 @@ const setUpTestRunner = async ({ oneAppLocalPortToUse } = {}) => {
       waitUntilServerIsUp(`http://localhost:${seleniumServerPort}`, serverStartupTimeout),
     ]);
   } catch (err) {
-    // logWatcherDuplex will buffer the logs untill piped out.
+    // logWatcherDuplex will buffer the logs until piped out.
     logWatcherDuplex.pipe(process.stdout);
     throw new Error(
       '🚨 Either of the One App, Selenium, or Nginx servers failed to be pulled, built, and started '
