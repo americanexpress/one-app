@@ -67,7 +67,7 @@ const searchForNextLogMatch = async (regex, timeout = 10000) => {
   return matchedChunk;
 };
 
-const logWatcherDuplex = new Duplex({
+const createLogWatcherDuplex = () => new Duplex({
   write(chunk, encoding, callback) {
     this.push(chunk);
     Object.values(watchers).forEach((watcher) => watcher(chunk));
@@ -79,6 +79,6 @@ const logWatcherDuplex = new Duplex({
 });
 
 module.exports = {
-  logWatcherDuplex,
+  createLogWatcherDuplex,
   searchForNextLogMatch,
 };
