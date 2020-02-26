@@ -123,8 +123,7 @@ export const setStateConfig = (providedStateConfig) => {
             throw makeConfigEnvError();
           }
           acc.client[key] = client[configEnv];
-        }
-        if (typeof client === 'string') {
+        } else {
           acc.client[key] = client;
         }
       }
@@ -134,8 +133,7 @@ export const setStateConfig = (providedStateConfig) => {
             throw makeConfigEnvError();
           }
           acc.server[key] = server[configEnv];
-        }
-        if (typeof server === 'string') {
+        } else {
           acc.server[key] = server;
         }
       }
