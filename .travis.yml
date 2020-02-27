@@ -17,6 +17,8 @@ jobs:
       os: osx
       script: npm run test:lint && npm run test:unit && npm run test:danger && npm run test:git-history
     - name: "Unit Tests on Windows"
+      git:
+        autocrlf: input
       os: windows
       script: npm run test:lint && npm run test:unit && npm run test:danger && npm run test:git-history
     - name: "Unit Tests on Linux"
