@@ -48,6 +48,7 @@ Want to get paid for your contributions to `one-app`?
 The easiest way to do this is via [`npx`](https://blog.npmjs.org/post/162869356040/introducing-npx-an-npm-package-runner) (comes with `npm` versions 5.2.0 and above). Run the following command in the directory you want your module to live:
 
 ```bash
+export NODE_ENV=development
 npx -p yo -p @americanexpress/generator-one-app-module -- yo @americanexpress/one-app-module
 ```
 
