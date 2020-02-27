@@ -187,9 +187,6 @@
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
-  "optionalDependencies": {
-    "heapdump": "^0.3.15"
-  },
   "standard-version": {
     "bumpFiles": [
       "package.json",
