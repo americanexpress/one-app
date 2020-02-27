@@ -16,10 +16,10 @@ We describe each command and a description of its usage below.
   * [`preinstall`](#install-commands)
   * [`postinstall`](#install-commands)
 * Development Commands
-  * [`serve-module`](#test-commands)
-  * [`drop-module`](#test-commands)
-  * [`set-middleware`](#test-commands)
-  * [`set-dev-endpoints`](#test-commands)
+  * [`serve-module`](#development-commands)
+  * [`drop-module`](#development-commands)
+  * [`set-middleware`](#development-commands)
+  * [`set-dev-endpoints`](#development-commands)
 * Start Commands
   * [`start`](#start-commands)
   * [`start:watch`](#start-commands)
