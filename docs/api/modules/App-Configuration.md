@@ -34,15 +34,15 @@ Node Bundle (e.g.`mymodule.node.js`) rather than the Browser Bundles (e.g.
 security and bundle size considerations.
 
 **Contents**
-* [provideStateConfig](#providestateconfig)
-* [csp](#csp)
-* [corsOrigins](#corsorigins)
-* [configureRequestLog](#configurerequestlog)
-* [extendSafeRequestRestrictedAttributes](#extendsaferequestrestrictedattributes)
-* [createSsrFetch](#createssrfetch)
-* [validateStateConfig](#validatestateconfig)
-* [requiredSafeRequestRestrictedAttributes](#requiredsaferequestrestrictedattributes)
-* [appCompatibility](#appcompatibility)
+  - [`provideStateConfig`](#providestateconfig)
+  - [`csp`](#csp)
+  - [`corsOrigins`](#corsorigins)
+  - [`configureRequestLog`](#configurerequestlog)
+  - [`extendSafeRequestRestrictedAttributes`](#extendsaferequestrestrictedattributes)
+  - [`createSsrFetch`](#createssrfetch)
+  - [`validateStateConfig`](#validatestateconfig)
+  - [`requiredSafeRequestRestrictedAttributes`](#requiredsaferequestrestrictedattributes)
+  - [`appCompatibility`](#appcompatibility)
 
 ## `provideStateConfig`
 **Module Type**
@@ -50,17 +50,16 @@ security and bundle size considerations.
 * 🚫 Child Module
 
 **Shape**
+
 ```js
 if (!global.BROWSER) {
   Module.appConfig = {
     provideStateConfig: {
-      server: {
-        [settingName]: {
+      [settingName]: {
+        client: {
           [environmentLevel]: String,
         },
-      },
-      client: {
-        [settingName]: {
+        server: {
           [environmentLevel]: String,
         },
       },
@@ -77,18 +76,32 @@ In practice, the state config supplied by a Root Module may look like this shape
 if (!global.BROWSER) {
   Module.appConfig = {
     provideStateConfig: {
-      server: {
-        myApiHostname: {
-          development: 'dev.api.intranet.example.com',
-          qa: 'qa.api.intranet.example.com',
-          production: 'prod.api.intranet.example.com',
+      someApiUrl: {
+        client: {
+          development: 'https://internet-origin-dev.example.com/some-api/v1',
+          qa: 'https://internet-origin-qa.example.com/some-api/v1',
+          production: 'https://internet-origin.example.com/some-api/v1',
+        },
+        server: {
+          development: 'https://intranet-origin-dev.example.com/some-api/v1',
+          qa: 'https://intranet-origin-qa.example.com/some-api/v1',
+          production: 'https://intranet-origin.example.com/some-api/v1',
         },
       },
-      client: {
-        myApiHostname: {
-          development: 'dev.api.external.example.com',
-          qa: 'qa.api.external.example.com',
-          production: 'prod.api.external.example.com',
+      someBooleanValue: {
+        client: true,
+        server: true,
+      },
+      someNumberValue: {
+        client: {
+          development: 480000,
+          qa: 480000,
+          production: 480000,
+        },
+        server: {
+          development: 480000,
+          qa: 480000,
+          production: 480000,
         },
       },
     },
@@ -123,7 +136,9 @@ if (!global.BROWSER) {
 
 The `csp` static `String` should be a valid [Content Security Policy (CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) for your application which will be passed on to the HTML markup rendered by the Browser.
 
-> We recommend using something like [content-security-policy-builder](https://www.npmjs.com/package/content-security-policy-builder) to create your CSP string.
+> We recommend using something like [content-security-policy-builder](https://www.npmjs.com/package/content-security-policy-builder) to create your CSP string. This is set up automatically when you use the [One App module generator](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module).
+
+You'll still want the ability to run One App and serve modules locally without running into CSP errors. When `NODE_ENV=development`, One App will dynamically add both your computer's IP address and `localhost` to the root module's CSP. Please note that the `script-src` and `connect-src` directives must already be defined in your CSP in order for this to work properly.
 
 **📘 More Information**
 * Example: [Frank Lloyd Root's CSP](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/csp.js)
