@@ -44,6 +44,10 @@ export default {
         production: 'https://intranet-origin.example.com/some-api/v1',
       },
     },
+    someBooleanValue: {
+      client: true,
+      server: true,
+    },
   },
   extendSafeRequestRestrictedAttributes: {
     cookies: [

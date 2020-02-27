@@ -90,6 +90,30 @@ exports[`stateConfig methods stateConfig with module config should not set confi
 
 exports[`stateConfig methods stateConfig with module config should not set config if provided not a string or object 2`] = `Object {}`;
 
+exports[`stateConfig methods stateConfig with module config should set config if provided a boolean 1`] = `
+Object {
+  "enableTest": true,
+}
+`;
+
+exports[`stateConfig methods stateConfig with module config should set config if provided a boolean 2`] = `
+Object {
+  "enableTest": true,
+}
+`;
+
+exports[`stateConfig methods stateConfig with module config should set config if provided a number 1`] = `
+Object {
+  "timeout": 600000,
+}
+`;
+
+exports[`stateConfig methods stateConfig with module config should set config if provided a number 2`] = `
+Object {
+  "timeout": 600000,
+}
+`;
+
 exports[`stateConfig methods stateConfig with module config should set config if provided a string 1`] = `
 Object {
   "someApiUrl": "https://internet-origin-string.example.com/some-api/v1",
