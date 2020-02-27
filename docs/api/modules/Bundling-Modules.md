@@ -121,8 +121,8 @@ Please see `one-app-bundlers`'s [`purgecss`](https://github.com/americanexpress/
 `one-app` modules consists of [NPM Script Commands](https://docs.npmjs.com/misc/scripts) that are used to bundle and test the module. These scripts are provided from generating a module with [generator-one-app-module](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module) and can be expanded on depending on the functionality that is needed.
 
 ```sh
-npm run <one-app-module-npm-command> [--] [--some-flag]
-# e.g. npm run test:unit -- --watch
+npm run <one-app-module-npm-command> 
+# e.g. npm run build
 ```
 
 We describe each command and a description of its usage below. 
