@@ -44,6 +44,22 @@ if (!global.BROWSER) {
           },
         },
       },
+      someBooleanValue: {
+        client: {
+          validate(value) {
+            if (typeof value !== 'boolean') {
+              throw new TypeError('Failed to pass correct boolean on client');
+            }
+          },
+        },
+        server: {
+          validate(value) {
+            if (typeof value !== 'boolean') {
+              throw new TypeError('Failed to pass correct boolean on server');
+            }
+          },
+        },
+      },
     },
   };
 }
