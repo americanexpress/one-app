@@ -140,6 +140,28 @@ describe('stateConfig methods', () => {
         expect(getClientStateConfig()).toMatchSnapshot();
         expect(getServerStateConfig()).toMatchSnapshot();
       });
+      it('should set config if provided a number', () => {
+        provideStateConfig = {
+          timeout: {
+            client: 600000,
+            server: 600000,
+          },
+        };
+        setStateConfig(provideStateConfig);
+        expect(getClientStateConfig()).toMatchSnapshot();
+        expect(getServerStateConfig()).toMatchSnapshot();
+      });
+      it('should set config if provided a boolean', () => {
+        provideStateConfig = {
+          enableTest: {
+            client: true,
+            server: true,
+          },
+        };
+        setStateConfig(provideStateConfig);
+        expect(getClientStateConfig()).toMatchSnapshot();
+        expect(getServerStateConfig()).toMatchSnapshot();
+      });
       it('should not set config if provided not a string or object', () => {
         provideStateConfig = {
           someApiUrl: {
