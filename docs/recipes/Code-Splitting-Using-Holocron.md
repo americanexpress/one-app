@@ -219,7 +219,7 @@ export default function MyHolocronModule() {
 }
 ```
 
-### How it works
+### How It Works
 
 One App uses [`one-app-bundler`][one-app-bundler-readme] to support dynamic importing and code
 plitting on the module level. Out of the box, [`one-app-bundler`][one-app-bundler-readme] uses
