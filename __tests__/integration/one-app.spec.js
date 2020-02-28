@@ -875,24 +875,30 @@ describe('Tests that can run against either local Docker setup or remote One App
       });
 
       describe('code-splitting', () => {
-        test('successfully loads a code-split module with a language pack', async () => {
+        test('successfully loads a code-split module chunk with a language pack', async () => {
           await browser.url(`${appInstanceUrls.browserUrl}/demo/franks-burgers`);
+
           const openerMessage = await browser.$('#franks-opening-line');
           await openerMessage.waitForExist();
+
           expect(await openerMessage.getText()).toBe(
             'Welcome to Franks Burgers! The best burgers in town.'
           );
         });
-
-        test('loads up the Order chunk and then lazy loads Calendar chunk with "react-calendar" on next', async () => {
+        test('loads up the Order chunk and then lazy loads `franks-burger` chunk', async () => {
           await browser.url(`${appInstanceUrls.browserUrl}/demo/franks-burgers`);
 
           const btn = await browser.$('#order-burger-btn');
           await btn.waitForExist();
+          // before clicking to lazy load our chunk, ensure `franks-burger` does not exist
+          const franksBurgerNonExistent = await browser.$('#franks-burger');
+          await franksBurgerNonExistent.waitForExist(undefined, true);
+          // once confirmed chunk does not exist, click to load it
           await btn.click();
-          await waitFor(1e3);
-
+          // grab the chunk and wait for it to load
           const franksBurger = await browser.$('#franks-burger');
+          await franksBurger.waitForExist();
+
           await expect(franksBurger.getText()).resolves.toEqual('Burger');
         });
       });
