@@ -78,7 +78,7 @@ export const childRoutes = () => (
 );
 ```
 
-## Holocron module chunks _via_ `import()`
+## Holocron Module Chunks _Via_ `import()`
 
 > To view a module chunks example using dynamic importing, [check out the sample module "Franks Burgers"][franks-burgers]
 
