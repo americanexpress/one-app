@@ -232,7 +232,7 @@ with two additional JavaScript files per chunk (modern `browser` and `legacy.row
 For the `node` build output, all the dynamic imports have been imported, bundled and treated
 as a `webpack_require` call.
 
-### Include your existing tools to the pipeline
+### Including Existing Tools Into The Pipeline
 
 It can be helpful to test your current apps for migration, supporting react-loadable and
 @loadable/component. Extend the webpack config if you need.
