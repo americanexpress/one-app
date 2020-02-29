@@ -18,7 +18,7 @@ import fs from 'fs';
 import { exec } from 'child_process';
 import path from 'path';
 import zlib from 'zlib';
-import { Writable } from 'stream';
+import { Writable, pipeline } from 'stream';
 import { promisify } from 'util';
 
 import glob from 'glob';
@@ -70,11 +70,18 @@ function getGzipSize(filePath) {
   });
 
   return new Promise((res, rej) => {
-    fs.createReadStream(filePath)
-      .pipe(zlib.createGzip({ level: 9 }))
-      .on('end', () => res(bytesWritten))
-      .pipe(byteCounter)
-      .on('error', rej);
+    pipeline(
+      fs.createReadStream(filePath),
+      zlib.createGzip({ level: 9 }),
+      byteCounter,
+      (err) => {
+        if (err) {
+          // eslint-disable-next-line no-unused-expressions
+          rej;
+        }
+        res(bytesWritten);
+      }
+    );
   });
 }
 
