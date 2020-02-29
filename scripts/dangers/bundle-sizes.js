@@ -76,8 +76,7 @@ function getGzipSize(filePath) {
       byteCounter,
       (err) => {
         if (err) {
-          // eslint-disable-next-line no-unused-expressions
-          rej;
+          rej(err);
         }
         res(bytesWritten);
       }
