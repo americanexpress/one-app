@@ -1,0 +1,32 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [ '12.x', '12.16.1' ]
+    name: Node ${{ matrix.node }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node }}
+    - name: Cache NPM Dependencies
+      uses: actions/cache@v1
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - name: Install Dependencies
+      run: npm install
+      env:
+        NODE_ENV: development
+    - name: Unit Tests
+      run: npm run test:lint && npm run test:unit && npm run test:danger && npm run test:git-history
+    - name: Integration Tests
+      run: ./scripts/run-integration-tests.travis.sh
