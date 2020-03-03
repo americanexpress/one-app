@@ -9,8 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      docker:
     strategy:
       matrix:
         node: [ '12.x', '12.16.1' ]
@@ -41,7 +39,18 @@ jobs:
         NODE_ENV: production
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Integration Tests
-      run: ./scripts/run-integration-tests.travis.sh
+      run: |
+        npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=https://one-app-statics.surge.sh
+        echo 'https://one-app-sample.herokuapp.com' >> sample-module-bundles/CORS
+        npx surge teardown one-app-statics.surge.sh
+        npx surge sample-module-bundles one-app-statics.surge.sh
+        docker login -u="$HEROKU_DOCKER_USERNAME" -p="$HEROKU_API_KEY" registry.heroku.com
+        docker tag one-app:at-test registry.heroku.com/one-app-sample/web
+        docker push registry.heroku.com/one-app-sample/web
+        npx heroku container:release web -a one-app-sample
+        ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true npm run test:integration -- --remote-one-app-environment=https://one-app-sample.herokuapp.com
       env:
         NODE_ENV: production
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        HEROKU_DOCKER_USERNAME: ${{ secrets.HEROKU_DOCKER_USERNAME }}
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
