@@ -54,3 +54,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         HEROKU_DOCKER_USERNAME: ${{ secrets.HEROKU_DOCKER_USERNAME }}
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
+        SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
