@@ -30,10 +30,16 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
     - name: Install Dependencies
-      run: npm install
+      run: npm ci
       env:
         NODE_ENV: development
     - name: Unit Tests
       run: npm run test:lint && npm run test:unit && npm run test:danger && npm run test:git-history
+      env:
+        NODE_ENV: production
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Integration Tests
       run: ./scripts/run-integration-tests.travis.sh
+      env:
+        NODE_ENV: production
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
