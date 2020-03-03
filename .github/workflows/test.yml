@@ -9,6 +9,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      - docker
     strategy:
       matrix:
         node: [ '12.x', '12.16.1' ]
