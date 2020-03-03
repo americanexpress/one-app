@@ -28,7 +28,6 @@
 - [ ] Performance tests should be ran against the server prior to merging.
 - [ ] This change impacts caching for client browsers.
 - [ ] This change impacts HTTP headers.
-- [ ] This change has new infrastructure requirements.
 - [ ] This change adds additional environment variable requirements for One App users.
 - [ ] I have added the Apache 2.0 license header to any new files created.
 
