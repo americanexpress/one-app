@@ -14,10 +14,8 @@
  * permissions and limitations under the License.
  */
 
-import preflightChecklist from './scripts/dangers/preflight-checklist';
 import checkPackageFiles from './scripts/dangers/keep-package-and-lock-in-sync';
 import reportBundleSizes from './scripts/dangers/bundle-sizes';
 
-preflightChecklist();
 checkPackageFiles();
 reportBundleSizes();
