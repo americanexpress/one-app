@@ -18,7 +18,7 @@ import fs from 'fs';
 import { exec } from 'child_process';
 import path from 'path';
 import zlib from 'zlib';
-import { Writable } from 'stream';
+import { Writable, pipeline } from 'stream';
 import { promisify } from 'util';
 
 import glob from 'glob';
@@ -68,14 +68,19 @@ function getGzipSize(filePath) {
       callback();
     },
   });
+
   return new Promise((res, rej) => {
-    fs.createReadStream(filePath)
-      .pipe(zlib.createGzip({ level: 9 }))
-      // writable streams do not fire the 'close' event anymore
-      // https://github.com/nodejs/node/issues/21122#issuecomment-414622251
-      .on('close', () => res(bytesWritten))
-      .pipe(byteCounter)
-      .on('error', rej);
+    pipeline(
+      fs.createReadStream(filePath),
+      zlib.createGzip({ level: 9 }),
+      byteCounter,
+      (err) => {
+        if (err) {
+          rej(err);
+        }
+        res(bytesWritten);
+      }
+    );
   });
 }
 
