@@ -17,6 +17,7 @@
 import ip from 'ip';
 import fs from 'fs';
 import path from 'path';
+import url from 'url';
 import envVarAllowList from './envVarAllowList';
 import snakeCaseToCamelCase from './snakeCaseToCamelCase';
 
@@ -76,7 +77,12 @@ if (process.env.NODE_ENV === 'development' && fs.existsSync(pathToDevEndpoints))
   // eslint-disable-next-line global-require,import/no-dynamic-require
   const devEndpoints = require(pathToDevEndpoints)();
   Object.entries(devEndpoints).forEach(([configName, { devProxyPath }]) => {
-    const value = `http://${ipAddress}:${SERVICES_PORT}/${devProxyPath}`;
+    const value = url.format({
+      protocol: 'http',
+      hostname: ipAddress,
+      port: SERVICES_PORT,
+      pathname: devProxyPath,
+    });
     stateConfigFromDevEndpoints[configName] = value;
   });
 }
