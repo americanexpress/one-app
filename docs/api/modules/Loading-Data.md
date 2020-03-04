@@ -5,8 +5,9 @@
 When [Holocron Modules](#modules) are composed and loaded on the Server and Client, the `loadModuleData` Module Lifecycle Hook is called to load any async requests. On the Server only, the `fetchClient` injected into the `loadModuleData` Hook may be customized using [`createSsrFetch`](#createssrfetch).
 
 **Contents**
-- [loadModuleData](#loadmoduledata)
-- [createSsrFetch](#createssrfetch)
+- [Loading Data](#loading-data)
+  - [`loadModuleData`](#loadmoduledata)
+  - [`createSsrFetch`](#createssrfetch)
 
 ## `loadModuleData`
 
@@ -16,7 +17,9 @@ When [Holocron Modules](#modules) are composed and loaded on the Server and Clie
 
 **Shape**
 ```js
-HelloWorldModule.loadModuleData = async ({ store, fetchClient, ownProps, module }) => {};
+HelloWorldModule.loadModuleData = async ({
+  store, fetchClient, ownProps, module,
+}) => {};
 ```
 
 **Arguments**
