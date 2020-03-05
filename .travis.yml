@@ -17,3 +17,9 @@ jobs:
       script: npm run test:lint && npm run test:unit && npm run test:danger && npm run test:git-history
     - name: "Integration Tests"
       script: ./scripts/run-integration-tests.travis.sh
+    - stage: release
+      if: branch = master
+      script:
+       - export REPO=oneamex/one-app
+       - docker build -f Dockerfile -t $REPO .
+       - npx semantic-release
