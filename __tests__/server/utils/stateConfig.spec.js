@@ -195,6 +195,22 @@ describe('stateConfig methods', () => {
         expect(getClientStateConfig()).toMatchSnapshot();
         expect(getServerStateConfig()).toMatchSnapshot();
       });
+      it('dev endpoint should not have doubled slash in path', () => {
+        process.env.NODE_ENV = 'development';
+        // eslint-disable-next-line unicorn/import-index, import/no-unresolved
+        require('fake/path/.dev/endpoints/index.js').mockImplementation(() => ({
+          leadingSlashApiUrl: {
+            devProxyPath: '/leading-slash-api',
+            destination: 'https://intranet-origin-dev.example.com/some-other-api/v1',
+          },
+        }));
+        ({
+          setStateConfig,
+          getClientStateConfig,
+          getServerStateConfig,
+        } = require('../../../src/server/utils/stateConfig'));
+        expect(getClientStateConfig().leadingSlashApiUrl).toEqual('http://127.0.0.1:3002/leading-slash-api');
+      });
     });
     describe('with env vars', () => {
       it('should parse string undefined as js undefined', () => {
