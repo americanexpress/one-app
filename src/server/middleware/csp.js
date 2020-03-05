@@ -65,7 +65,12 @@ const csp = () => (req, res, next) => {
     updatedPolicy = insertSource(
       updatedScriptSrc,
       'connect-src',
-      `${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT} localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}`
+      [
+        `${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}`,
+        `localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}`,
+        `${ip.address()}:${process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT}`,
+        `localhost:${process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT}`,
+      ].join(' ')
     );
   } else {
     updatedPolicy = insertSource(policy, 'script-src', `'nonce-${scriptNonce}'`);
