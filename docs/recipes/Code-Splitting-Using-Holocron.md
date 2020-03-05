@@ -79,7 +79,7 @@ export const childRoutes = () => (
 );
 ```
 
-> To view a root Holocron module with a childConfig, [check out the sample module "Frank Lloyd Root"][frank-lloyd-root]
+> To view a root Holocron module with a childRoutes config, [check out the sample module "Frank Lloyd Root"][frank-lloyd-root]
 
 **📘 More Information**
 
@@ -110,28 +110,38 @@ import HolocronModule from './Module';
 export default HolocronModule;
 ```
 
+> It's important to mention, when we are code splitting with dynamic `import`s, we
+> must rely on user actions to load module chunks dynamically.
+
 `src/Module.jsx`
 ```jsx
 import React from 'react';
 
 export default function MyHolocronModule() {
+  const [loadModule, setLoadModule] =
   const [Component, setComponent] = React.useState(null);
 
   React.useEffect(() => {
-    import(/* webpackChunkName: "<chunkName>" */ './Chunk')
-      // the multi-line comment /* webpackChunkName: "..." */ is used by webpack to name your chunk
-      .then((importedChunk) => importedChunk.default || importedChunk)
-      // when we convert ES modules to common/supported formats,
-      // we might need to interop the `default` property to get the export
-      .then((chunk) => {
-        // ... do things with the chunk once we have what we want
-        setComponent(chunk);
-      });
-  }, []);
+    if (loadModule) {
+      import(/* webpackChunkName: "<chunkName>" */ './Chunk')
+        // the multi-line comment /* webpackChunkName: "..." */ is used by webpack to name your chunk
+        .then((importedChunk) => importedChunk.default || importedChunk)
+        // when we convert ES modules to common/supported formats,
+        // we might need to interop the `default` property to get the export
+        .then((chunk) => {
+          // ... do things with the chunk once we have what we want
+          setComponent(chunk);
+        });
+    }
+  }, [loadModule]);
 
   if (Component) return <Component />;
 
-  return null;
+  return (
+    <button type="button" onClick={() => setLoadModule(true)}>
+      Load Module
+    </button>
+  );
 }
 ```
 

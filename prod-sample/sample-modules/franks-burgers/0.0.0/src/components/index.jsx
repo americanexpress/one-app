@@ -23,31 +23,44 @@ import { compose } from 'redux';
 import { holocronModule } from 'holocron';
 import { fromJS } from 'immutable';
 
-const OrderModuleChunk = React.lazy(() => import(/* webpackChunkName: 'Order' */ './Order'));
+const Burger = React.lazy(() => import(/* webpackChunkName: 'Burger' */ './Burger'));
 
 const FranksBurgers = ({
   languageData,
   localeName,
   moduleLoadStatus,
-}) => (
-  <IntlProvider locale={localeName} messages={languageData}>
-    {(moduleLoadStatus === 'loaded' ? (
-      <main>
-        <header>
-          <h1 id="franks-opening-line">
-            <FormattedMessage id="franks-opening-line" />
-          </h1>
-        </header>
+}) => {
+  // we rely on user interaction to load our chunk and render it afterwards
+  const [loadBurger, setBurgerLoad] = React.useState(false);
 
-        <Suspense fallback={<p><FormattedMessage id="loading" /></p>}>
-          <OrderModuleChunk />
-        </Suspense>
-      </main>
-    ) : (
-      <p><FormattedMessage id="loading" /></p>
-    ))}
-  </IntlProvider>
-);
+  return (
+    <IntlProvider locale={localeName} messages={languageData}>
+      {(moduleLoadStatus === 'loaded' ? (
+        <section>
+          <header>
+            <h1 id="franks-opening-line">
+              <FormattedMessage id="franks-opening-line" />
+            </h1>
+          </header>
+
+          {loadBurger ? (
+            <Suspense fallback={<p><FormattedMessage id="loading" /></p>}>
+              <Burger />
+            </Suspense>
+          ) : null}
+
+          <footer>
+            <button id="order-burger-btn" type="button" onClick={() => setBurgerLoad((state) => !state)}>
+              <FormattedMessage id="franks-cta" />
+            </button>
+          </footer>
+        </section>
+      ) : (
+        <p><FormattedMessage id="loading" /></p>
+      ))}
+    </IntlProvider>
+  );
+};
 
 FranksBurgers.propTypes = {
   moduleLoadStatus: PropTypes.string.isRequired,
