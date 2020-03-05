@@ -118,13 +118,14 @@ export default HolocronModule;
 import React from 'react';
 
 export default function MyHolocronModule() {
-  const [loadModule, setLoadModule] =
+  const [loadModule, setLoadModule] = React.useState(false);
   const [Component, setComponent] = React.useState(null);
 
   React.useEffect(() => {
     if (loadModule) {
       import(/* webpackChunkName: "<chunkName>" */ './Chunk')
-        // the multi-line comment /* webpackChunkName: "..." */ is used by webpack to name your chunk
+        // the multi-line comment /* webpackChunkName: "..." */
+        // is used by webpack to name your chunk
         .then((importedChunk) => importedChunk.default || importedChunk)
         // when we convert ES modules to common/supported formats,
         // we might need to interop the `default` property to get the export
