@@ -75,6 +75,7 @@ describe('csp', () => {
     it('adds ip and localhost to csp in development', () => {
       process.env.NODE_ENV = 'development';
       process.env.HTTP_ONE_APP_DEV_CDN_PORT = 5000;
+      process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT = 3001;
       const requiredCsp = requireCSP();
       const cspMiddleware = requiredCsp.default;
       const { updateCSP } = requiredCsp;
@@ -90,6 +91,7 @@ describe('csp', () => {
     it('does not add ip and localhost to csp in production', () => {
       process.env.NODE_ENV = 'production';
       delete process.env.HTTP_ONE_APP_DEV_CDN_PORT;
+      delete process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT;
       const requiredCsp = requireCSP();
       const cspMiddleware = requiredCsp.default;
       const { updateCSP } = requiredCsp;

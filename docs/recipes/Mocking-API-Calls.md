@@ -25,13 +25,12 @@ $ npm run set-dev-endpoints ../[module-name]/dev.endpoints.js
 A `dev.endpoints.js` file looks like:
 
 ```js
-module.exports = () => [
-  {
-    envVarName: 'ONE_CLIENT_APP_API_URL',
-    oneAppDevProxyPath: 'api',
-    destination: 'https://api.com',
+module.exports = () => ({
+  apiUrl: {
+    devProxyPath: 'api',
+    destination: 'https://example.com',
   },
-];
+});
 ```
 
 [☝️ Return To Top](#mocking-your-api-calls-for-local-development)
