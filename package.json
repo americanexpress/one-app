@@ -181,6 +181,13 @@
         "path": "semantic-release-docker",
         "name": "oneamex/one-app"
       }
+    ],
+    "branches": [
+      "master",
+      {
+        "name": "beta",
+        "prerelease": true
+      }
     ]
   },
   "optionalDependencies": {

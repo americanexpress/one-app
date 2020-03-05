@@ -107,3 +107,8 @@ To auto fix eslint rule failures that are autofixable run `npm run test:lint -- 
 We follow precise rules for git commit message formatting. These rules make it easier to review commit logs and improve contextual understanding of code changes. This also allows us to auto-generate the CHANGELOG from commit messages and automatically version One App during releases.
 
 For more information on the commit message guidelines we follow see [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
+### Creating a new release
+
+Once your changes are merged to master a new release would be triggered. This project uses [semantic-release](https://semantic-release.gitbook.io/) to automate the release process. A new docker images is publish once the release process finishes.
+If the changes are raised against the **beta** branch this would trigger a prerelease.
