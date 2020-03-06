@@ -6,6 +6,10 @@ on:
       - master
   pull_request:
 
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -39,12 +43,10 @@ jobs:
         NODE_ENV: production
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Integration Tests
-      runs:
-        using: 'docker'
-        image: 'Dockerfile'
       run: |
         docker build -t one-app:at-test .
         npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=https://one-app-statics.surge.sh
+        docker-compose build --no-cache --parallel fast-api slow-api extra-slow-api
         echo 'https://one-app-sample.herokuapp.com' >> sample-module-bundles/CORS
         npx surge teardown one-app-statics.surge.sh
         npx surge sample-module-bundles one-app-statics.surge.sh
