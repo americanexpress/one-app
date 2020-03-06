@@ -6,10 +6,6 @@ on:
       - master
   pull_request:
 
-runs:
-  using: 'docker'
-  image: 'Dockerfile'
-
 jobs:
   test:
     runs-on: ubuntu-latest
