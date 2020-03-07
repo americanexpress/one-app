@@ -30,6 +30,6 @@ describe('readJsonFile', () => {
     fs.readFileSync.mockReturnValueOnce(JSON.stringify(testData));
     expect(readJsonFile('../file.json')).toEqual(testData);
     expect(fs.readFileSync).toHaveBeenCalledTimes(1);
-    expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringMatching(/src\/server\/file\.json$/), 'utf8');
+    expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringMatching(/src\\server\\file\.json$/), 'utf8');
   });
 });
