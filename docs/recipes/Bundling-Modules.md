@@ -1,4 +1,4 @@
-[👈 Return to Overview](../API.md)
+[👈 Return to Overview](./Recipes.md)
 
 # Bundling
 
@@ -21,7 +21,7 @@ module
 |   ├── components
 |   |    └── <NameOfComponent.jsx>
 |   |
-|   └── csp.js
+|   |
 |   └── index.js
 ```
 
@@ -64,8 +64,8 @@ module
 | `<module-name>.browser.js `| This build is loaded on modern browsers. We use [babel-preset-amex](https://github.com/americanexpress/babel-preset-amex) to determine which modern browsers are supported. Generated using [one-app-bundler](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler) which uses [webpack](https://webpack.js.org/) under the hood. |
 | `<module-name>.browser.js.map` | Contains the [source map](https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/) which has details about the origin source code. This is loaded on modern browsers to aid in debugging and it is only generated when the `process.env.NODE_ENV` is set to `development`.|
 | `<module-name>.legacy.browser.js` | This build is loaded on legacy browsers. We use [babel-preset-amex](https://github.com/americanexpress/babel-preset-amex) to determine which legacy browsers are supported. Generated using [one-app-bundler](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler) which uses [webpack](https://webpack.js.org/) under the hood.|
-| `<module-name>.legacy.browser.js.map` | Contains the [source map](https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/)  which has details about the origin source code. This is loaded on legacy browsers to aid in debugging. it is only generated when the `process.env.NODE_ENV` is set to `development`.|
-| `<module-name>.node.js` | This build is loaded on `one-app` . Anything set to be server side rendered would executed once this file is loaded on one-app. |
+| `<module-name>.legacy.browser.js.map` | Contains the [source map](https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/) which has details about the origin source code. This is loaded on legacy browsers to aid in debugging. It is only generated when the `process.env.NODE_ENV` is set to `development`.|
+| `<module-name>.node.js` | This build is loaded on `one-app`. Anything set to be server side rendered would executed once this file is loaded on one-app. |
 | `<module-name>.node.js.map` | Contains the [source map](https://www.html5rocks.com/en/tutorials/developertools/sourcemaps/)  which has details about the origin source code. This allows you to debug code running on one-app. This is only generated when the `process.env.NODE_ENV` is set to `development`. |
 
 ### Bundler options
@@ -146,7 +146,7 @@ We describe each command and a description of its usage below.
 | `prepare` | Runs `build` before the the module is packed and published. |
 | `prebuild` | Cleans the build directory before a build is done. |
 | `build` | Builds the `one-app` modules.|
-| `watch:build` | Builds the `one-app` modules and watches source files with [`nodemon`](https://nodemon.io/).When source changes, the `one-app` module  runs `npm run build`. *See [`build` Usage](#build-usage).* |
+| `watch:build` | Builds the `one-app` modules and watches source files with [`nodemon`](https://nodemon.io/). When source changes, the `one-app` module runs `npm run build`. *See [`build` Usage](#build-usage).* |
 
 ### `build` Usage
 
@@ -170,7 +170,7 @@ npm run watch:build
 
 ## Bundling Locales
 
- > Looking for internationalization please refer to this resources [Internationalization](./Internationalization.md)
+ > Looking for internationalization please refer to this resources [Internationalization](../api/modules/Internationalization.md)
 
 Use [one-app-locale-bundler](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-locale-bundler#readme) to generate locale files for modules.
 
