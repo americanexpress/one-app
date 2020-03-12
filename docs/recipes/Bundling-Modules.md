@@ -45,7 +45,7 @@ module
 |   ├── components
 |   |    └── <NameOfComponent.jsx>
 |   |
-|   └── csp.js
+|   |
 |   └── index.js
 ├── build
 |   ├── <semantic-version-number>
