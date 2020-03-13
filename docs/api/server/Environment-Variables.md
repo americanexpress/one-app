@@ -196,6 +196,8 @@ HTTPS_PRIVATE_KEY_PATH=./some-private-key.pem
 
 ## `HTTPS_PUBLIC_CERT_CHAIN_PATH`
 
+> ⚠️ Required by [`HTTPS_PORT`]
+
 **Runs In**
 * ✅ Production 
 * ✅ Development
@@ -213,6 +215,8 @@ HTTPS_PUBLIC_CERT_CHAIN_PATH=./some-cert.pem
 ```
 
 ## `HTTPS_TRUSTED_CA_PATH`
+
+> ⚠️ Required by [`HTTPS_PORT`]
 
 **Runs In**
 * ✅ Production 
