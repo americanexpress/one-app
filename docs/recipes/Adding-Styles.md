@@ -2,26 +2,6 @@
 
 # Adding Styles
 
-## Adding a CSS File to Root Module
-
-In order to access styles within your application, you will need to add the stylesheet to the `<head>`. You can achieve this by using [react-helmet](https://github.com/nfl/react-helmet).
-
-```jsx
-import React, { Fragment } from 'react';
-import { Helmet } from 'react-helmet';
-
-const MyRoot = ({ children }) => (
-  <Fragment>
-    <Helmet>
-      <link rel="stylesheet" href="https://www.example.com/styles.min.css" />
-    </Helmet>
-    {children}
-  </Fragment>
-);
-```
-
-*Note:* Keep in mind that the domain in the stylesheet needs to be added to the [csp](../api/modules/App-Configuration.md#csp).
-
 ## CSS Modules
 
 Since CSS is global, One App uses the [CSS Modules](https://github.com/css-modules/css-modules) pattern to avoid class name collisions. This pattern should not be too different than what you are already used to. The main differences will be the strict use of camelCased class names and the way you import the class names.
@@ -51,6 +31,30 @@ const MyModule = () => (
   </div>
 );
 ```
+
+## Adding a CSS File to Root Module
+
+In order to provide global styles within your application, you can add a stylesheet to the `<head>` within your root module. You can achieve this by using [react-helmet](https://github.com/nfl/react-helmet).
+
+```jsx
+import React, { Fragment } from 'react';
+import { Helmet } from 'react-helmet';
+
+const MyRoot = ({ children }) => (
+  <Fragment>
+    <Helmet>
+      <link rel="stylesheet" href="https://www.example.com/styles.min.css" />
+    </Helmet>
+    {children}
+  </Fragment>
+);
+```
+
+*Note:* Keep in mind that the domain in the stylesheet needs to be added to the [csp](../api/modules/App-Configuration.md#csp).
+
+## Adding a CSS File to Child Module
+
+This is done the same way as with the Root Module. However, keep in mind that if you add a stylesheet in the Root Module as well as a Child Module, this can cause collisions as well as multiple loads of the same styles.
 
 ## Using Reakit with One App
 
@@ -97,7 +101,7 @@ Since `reakit-system-bootstrap` was added in the root module, you do not need to
 
 ```jsx
 import React, { Fragment } from 'react';
-import { Button } from 'reakit/Button';
+import { Button } from 'reakit';
 
 
 const MyModule = ({ children }) => (
@@ -109,7 +113,7 @@ export default MyModule;
 
 ### Share Reakit across all your modules
 
-You can use [one-app-bundler's](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler) `providedExternals` and `requiredExternals` to avoid duplicating Reakit across all your modules.
+You can use [one-app-bundler's](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler) `providedExternals` and `requiredExternals` to avoid duplicating Reakit across all your modules. Furthermore, due to Reakit using React's context API, in order for your child modules to leverage this, you **MUST** add it to `providedExternals` as well as `requiredExternals`.
 
 #### Add Reakit as a `providedExternals` in your Root Module
 
