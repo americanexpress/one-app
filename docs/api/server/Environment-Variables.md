@@ -4,6 +4,8 @@
 
 One App can be configured via Environment Variables:
 
+## 📖 Table of Contents
+
 **By Topic**
 * Network & Protocol Settings
   * [`HTTPS_PORT`](#https_port)
@@ -101,7 +103,7 @@ Maximum amount of times One App should retry on failed module fetches.
 
 **Shape**
 ```bash
-HOLOCRON_SERVER_MAX_MODULES_RETRY=Integer
+HOLOCRON_SERVER_MAX_MODULES_RETRY=Number
 ```
 
 **Default Value**
@@ -121,7 +123,7 @@ Useful to configure in case of a large module map and/or a bad network connectio
 
 **Shape**
 ```bash
-HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH=Integer
+HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH=Number
 ```
 
 **Default Value**
@@ -141,7 +143,7 @@ Sets the port on which One App will listen for requests.
 
 **Shape**
 ```bash
-HTTPS_PORT=Integer
+HTTPS_PORT=Number
 ```
 
 **Example**
@@ -235,7 +237,7 @@ Sets the port on which One App's metrics server (e.g. [Prometheus](https://prome
 
 **Shape**
 ```bash
-HTTP_METRICS_PORT=Integer
+HTTP_METRICS_PORT=Number
 ```
 
 **Default Value**
@@ -254,7 +256,7 @@ is `development`, otherwise it is `undefined` as it is only used for local devel
 
 **Shape**
 ```bash
-HTTP_ONE_APP_DEV_CDN_PORT=Integer
+HTTP_ONE_APP_DEV_CDN_PORT=Number
 ```
 
 **Default Value**
@@ -276,7 +278,7 @@ is `development`, otherwise it is undefined as it is only used for local develop
 
 **Shape**
 ```bash
-HTTP_ONE_APP_DEV_PROXY_SERVER_PORT=Integer
+HTTP_ONE_APP_DEV_PROXY_SERVER_PORT=Number
 ```
 
 **Default Value**
@@ -297,7 +299,7 @@ Sets the port on which One App will listen for requests.
 
 **Shape**
 ```bash
-HTTP_PORT=Integer
+HTTP_PORT=Number
 ```
 
 **Default Value**
@@ -496,7 +498,7 @@ Maximum time allowed between module map polls for new modules from One App (in s
 
 **Shape**
 ```bash
-ONE_MAP_POLLING_MAX=Integer
+ONE_MAP_POLLING_MAX=Number
 ```
 
 **Default Value**
@@ -515,7 +517,7 @@ seconds).
 
 **Shape**
 ```bash
-ONE_MAP_POLLING_MIN=Integer
+ONE_MAP_POLLING_MIN=Number
 ```
 
 **Default Value**
