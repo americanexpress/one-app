@@ -15,7 +15,6 @@
  */
 
 jest.mock('fs', () => ({ existsSync: jest.fn() }));
-jest.mock('ip', () => ({ address: jest.fn() }));
 jest.mock('fake/path/.dev/endpoints/index.js', () => jest.fn(), { virtual: true });
 jest.mock('../../../src/server/utils/envVarAllowList', () => [
   'ONE_CLIENT_FAKE_SETTING',
