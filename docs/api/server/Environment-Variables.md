@@ -4,7 +4,47 @@
 
 One App can be configured via Environment Variables:
 
-**Contents**
+**By Topic**
+* Network & Protocol Settings
+  * [`HTTPS_PORT`](#https_port)
+  * [`HTTPS_PRIVATE_KEY_PASS_FILE_PATH`](#https_private_key_pass_file_path)
+  * [`HTTPS_PRIVATE_KEY_PATH`](#https_private_key_path)
+  * [`HTTPS_PUBLIC_CERT_CHAIN_PATH`](#https_public_cert_chain_path)
+  * [`HTTPS_TRUSTED_CA_PATH`](#https_trusted_ca_path)
+  * [`HTTPS_PORT`](#https_port)
+  * [`HTTPS_PRIVATE_KEY_PASS_FILE_PATH`](#https_private_key_pass_file_path)
+  * [`HTTPS_PRIVATE_KEY_PATH`](#https_private_key_path)
+  * [`HTTPS_PUBLIC_CERT_CHAIN_PATH`](#https_public_cert_chain_path)
+  * [`HTTPS_TRUSTED_CA_PATH`](#https_trusted_ca_path)
+  * [`HTTP_METRICS_PORT`](#http_metrics_port)
+  * [`HTTP_ONE_APP_DEV_CDN_PORT`](#http_one_app_dev_cdn_port)
+  * [`HTTP_ONE_APP_DEV_PROXY_SERVER_PORT`](#http_one_app_dev_proxy_server_port)
+  * [`HTTP_PORT`](#http_port)
+  * [`HTTP_METRICS_PORT`](#http_metrics_port)
+  * [`HTTP_ONE_APP_DEV_CDN_PORT`](#http_one_app_dev_cdn_port)
+  * [`HTTP_ONE_APP_DEV_PROXY_SERVER_PORT`](#http_one_app_dev_proxy_server_port)
+  * [`HTTP_PORT`](#http_port)
+  * [`IP_ADDRESS`](#ip_address)
+* Running in Production
+  * [`HOLOCRON_MODULE_MAP_URL`](#holocron_module_map_url) ⚠️
+  * [`NODE_ENV`](#node_env)
+  * [`ONE_CLIENT_LOCALE_FILENAME`](#one_client_locale_filename)
+  * [`ONE_CLIENT_REPORTING_URL`](#one_client_reporting_url) ⚠️
+  * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
+  * [`ONE_CLIENT_CDN_URL`](#one_client_cdn_url) ⚠️
+  * [`ONE_CONFIG_ENV`](#one_config_env)
+* Running in Development
+  * [`NODE_ENV`](#node_env)
+  * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
+  * [`ONE_CONFIG_ENV`](#one_config_env)
+* Server Settings
+  * [`HOLOCRON_SERVER_MAX_MODULES_RETRY`](#holocron_server_max_modules_retry)
+  * [`HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`](#holocron_server_max_sim_modules_fetch)
+  * [`ONE_ENABLE_POST_TO_MODULE_ROUTES`](#one_enable_post_to_module_routes)
+  * [`ONE_MAP_POLLING_MAX`](#one_map_polling_max)
+  * [`ONE_MAP_POLLING_MIN`](#one_map_polling_min)
+
+**Alphabetical Contents**
 * [`HOLOCRON_MODULE_MAP_URL`](#holocron_module_map_url)
 * [`HOLOCRON_SERVER_MAX_MODULES_RETRY`](#holocron_server_max_modules_retry)
 * [`HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`](#holocron_server_max_sim_modules_fetch)
@@ -28,7 +68,11 @@ One App can be configured via Environment Variables:
 * [`ONE_MAP_POLLING_MAX`](#one_map_polling_max)
 * [`ONE_MAP_POLLING_MIN`](#one_map_polling_min)
 
+> ⚠️ = Required
+
 ## `HOLOCRON_MODULE_MAP_URL`
+
+⚠️ Required In Production
 
 **Runs In**
 * ✅ Production
@@ -48,22 +92,30 @@ HOLOCRON_MODULE_MAP_URL=String
 HOLOCRON_MODULE_MAP_URL=https://my-cdn.com/module-map.json
 ```
 
+**Default Value**
+```bash
+# if NODE_ENV=development
+HOLOCRON_MODULE_MAP_URL=http://localhost:3001/static/module-map.json
+# else
+HOLOCRON_MODULE_MAP_URL=undefined
+```
+
 ## `HOLOCRON_SERVER_MAX_MODULES_RETRY`
 
 **Runs In**
 * ✅ Production
 * ✅ Development
 
-Maximum amount of times One App should retry on failed module fetches. Defaults to `3`.
+Maximum amount of times One App should retry on failed module fetches.
 
 **Shape**
 ```bash
 HOLOCRON_SERVER_MAX_MODULES_RETRY=Integer
 ```
 
-**Example**
+**Default Value**
 ```bash
-HOLOCRON_SERVER_MAX_MODULES_RETRY=10
+HOLOCRON_SERVER_MAX_MODULES_RETRY=3
 ```
 
 ## `HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`
@@ -74,16 +126,16 @@ HOLOCRON_SERVER_MAX_MODULES_RETRY=10
 
 Maximum number of [Holocron Modules] One App will try to load at a time when new Modules are found in [Module Map].
 
-Useful to configure in case of a large module map and/or a bad network connection. Defaults to `30`.
+Useful to configure in case of a large module map and/or a bad network connection.
 
 **Shape**
 ```bash
 HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH=Integer
 ```
 
-**Example**
+**Default Value**
 ```bash
-HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH=10
+HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH=30
 ```
 
 ## `HTTPS_PORT`
@@ -94,7 +146,7 @@ HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH=10
 * ✅ Production 
 * ✅ Development
 
-Sets the port on which One App will listen for requests. It defaults to undefined.
+Sets the port on which One App will listen for requests.
 
 **Shape**
 ```bash
@@ -184,18 +236,17 @@ HTTPS_TRUSTED_CA_PATH=./some-extra-certs.pem
 * ✅ Production
 * ✅ Development
 
-Sets the port on which One App's metrics server (e.g. [Prometheus](https://prometheus.io/)) will listen for requests. Defaults to `3005`.
+Sets the port on which One App's metrics server (e.g. [Prometheus](https://prometheus.io/)) will listen for requests.
 
 **Shape**
 ```bash
 HTTP_METRICS_PORT=Integer
 ```
 
-**Example**
+**Default Value**
 ```bash
 HTTP_METRICS_PORT=3005
 ```
-
 
 ## `HTTP_ONE_APP_DEV_CDN_PORT`
 
@@ -204,16 +255,19 @@ HTTP_METRICS_PORT=3005
 * ✅ Development
 
 Sets the port on which the [One App Dev CDN] server will listen for requests. It defaults to `3001` if `NODE_ENV`
-is `development`, otherwise it is undefined as it is only used for local development.
+is `development`, otherwise it is `undefined` as it is only used for local development.
 
 **Shape**
 ```bash
 HTTP_ONE_APP_DEV_CDN_PORT=Integer
 ```
 
-**Example**
+**Default Value**
 ```bash
+# if NODE_ENV=development
 HTTP_ONE_APP_DEV_CDN_PORT=3001
+# else
+HTTP_ONE_APP_DEV_CDN_PORT=undefined
 ```
 
 ## `HTTP_ONE_APP_DEV_PROXY_SERVER_PORT`
@@ -230,9 +284,12 @@ is `development`, otherwise it is undefined as it is only used for local develop
 HTTP_ONE_APP_DEV_PROXY_SERVER_PORT=Integer
 ```
 
-**Example**
+**Default Value**
 ```bash
+# if NODE_ENV=development
 HTTP_ONE_APP_DEV_PROXY_SERVER_PORT=3002
+# else
+HTTP_ONE_APP_DEV_PROXY_SERVER_PORT=undefined
 ```
 
 ## `HTTP_PORT`
@@ -241,14 +298,14 @@ HTTP_ONE_APP_DEV_PROXY_SERVER_PORT=3002
 * ✅ Production 
 * ✅ Development
 
-Sets the port on which One App will listen for requests. It defaults to `3000` if not defined.
+Sets the port on which One App will listen for requests.
 
 **Shape**
 ```bash
-HTTP_ONE_APP_DEV_CDN_PORT=Integer
+HTTP_PORT=Integer
 ```
 
-**Example**
+**Default Value**
 ```bash
 HTTP_PORT=3000
 ```
@@ -284,18 +341,20 @@ by default.
 Setting this to `development` will set a lot of the other environment variables for you to provide
 sane development time defaults.
 
-Example:
+**Example**
 ```bash
 NODE_ENV=production
 ```
 
 ## `ONE_CLIENT_CDN_URL`
 
+⚠️ Required In Production
+
 **Runs In**
 * ✅ Production
 * ✅ Development
 
-Fully qualified base path URL where the Module Bundle folders are located (See [Module Map]). Defaults to `/_/static/`.
+Fully qualified base path URL where the Module Bundle folders are located (See [Module Map]).
 
 **Shape**
 ```bash
@@ -307,6 +366,14 @@ ONE_CLIENT_CDN_URL=String
 ONE_CLIENT_CDN_URL=https://app-cdn.com/statics/
 ```
 
+**Default Value**
+```bash
+# if NODE_ENV=development
+ONE_CLIENT_CDN_URL=/_/static/
+# else
+ONE_CLIENT_CDN_URL=undefined
+```
+
 ## `ONE_CLIENT_LOCALE_FILENAME`
 
 **Runs In**
@@ -316,7 +383,7 @@ ONE_CLIENT_CDN_URL=https://app-cdn.com/statics/
 Locale file name for module language packs. Modifying this per environment allows for modules to have
 different language packs in different environments.
 
-Must be one of `integration`, `qa`, or be undefined (for production). It is undefined by default.
+Must be one of `integration`, `qa`, or be `undefined` (for production). It is `undefined` by default.
 
 **Shape**
 ```bash
@@ -328,7 +395,14 @@ ONE_CLIENT_LOCALE_FILENAME=String
 ONE_CLIENT_LOCALE_FILENAME=integration
 ```
 
+**Default Value**
+```bash
+ONE_CLIENT_LOCALE_FILENAME=undefined
+```
+
 ## `ONE_CLIENT_REPORTING_URL`
+
+⚠️ Required In Production
 
 **Runs In**
 * ✅ Production
@@ -347,9 +421,17 @@ ONE_CLIENT_REPORTING_URL=String
 ONE_CLIENT_REPORTING_URL=https://my-app-errors.com/client
 ```
 
+**Default Value**
+```bash
+# if NODE_ENV=development
+ONE_CLIENT_REPORTING_URL=/_
+# else
+ONE_CLIENT_REPORTING_URL=undefined
+```
+
 ## `ONE_CLIENT_ROOT_MODULE_NAME`
 
-⚠️ Required In Production
+⚠️ Required In Production & Development
 
 **Runs In**
 * ✅ Production
@@ -386,22 +468,27 @@ ONE_CONFIG_ENV=String
 ONE_CONFIG_ENV=staging
 ```
 
+**Default Value**
+```bash
+ONE_CONFIG_ENV=undefined
+```
+
 ## `ONE_ENABLE_POST_TO_MODULE_ROUTES`
 
 **Runs In**
 * ✅ Production
 * ✅ Development
 
-Set if One App should respond to POST requests. It is undefined by default.
+Set if One App should respond to POST requests.
 
 **Shape**
 ```bash
 ONE_ENABLE_POST_TO_MODULE_ROUTES=Boolean
 ```
 
-**Example**
+**Default Value**
 ```bash
-ONE_ENABLE_POST_TO_MODULE_ROUTES=true
+ONE_ENABLE_POST_TO_MODULE_ROUTES=false
 ```
 
 ## `ONE_MAP_POLLING_MAX`
@@ -410,17 +497,16 @@ ONE_ENABLE_POST_TO_MODULE_ROUTES=true
 * ✅ Production
 * ✅ Development
 
-Maximum time allowed between module map polls for new modules from One App (in seconds). Defaults
-to `300`.
+Maximum time allowed between module map polls for new modules from One App (in seconds).
 
 **Shape**
 ```bash
 ONE_MAP_POLLING_MAX=Integer
 ```
 
-**Example**
+**Default Value**
 ```bash
-ONE_MAP_POLLING_MAX=10
+ONE_MAP_POLLING_MAX=300
 ```
 
 ## `ONE_MAP_POLLING_MIN`
@@ -429,17 +515,17 @@ ONE_MAP_POLLING_MAX=10
 * ✅ Production
 * ✅ Development
 
-Minimum time allowed between [Module Map] polls for new modules from One App (in seconds). Defaults
-to `0`.
+Minimum time allowed between [Module Map] polls for new modules from One App (in
+seconds).
 
 **Shape**
 ```bash
 ONE_MAP_POLLING_MIN=Integer
 ```
 
-**Example**
+**Default Value**
 ```bash
-ONE_MAP_POLLING_MIN=5
+ONE_MAP_POLLING_MIN=0
 ```
 
 **📘 More Information**

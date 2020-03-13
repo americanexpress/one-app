@@ -23,7 +23,7 @@
 
 ```js
 ({
-  key: String, // required
+  key: String, // optional
   modules: {
     [moduleName]: { // required
       browser: {
@@ -47,7 +47,7 @@
 ## Example
 ```json
 {
-  "key": "<redacted>",
+  "key": "<any-string>",
   "modules": {
     "cultured-frankie": {
       "browser": {
