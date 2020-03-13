@@ -209,7 +209,7 @@ describe('stateConfig methods', () => {
           getClientStateConfig,
           getServerStateConfig,
         } = require('../../../src/server/utils/stateConfig'));
-        expect(getClientStateConfig().leadingSlashApiUrl).toEqual('http://127.0.0.1:3002/leading-slash-api');
+        expect(getClientStateConfig().leadingSlashApiUrl).toEqual('http://localhost:3002/leading-slash-api');
       });
     });
     describe('with env vars', () => {
