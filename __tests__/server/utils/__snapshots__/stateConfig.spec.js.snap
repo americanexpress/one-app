@@ -2,13 +2,13 @@
 
 exports[`stateConfig methods stateConfig with dev endpoint config should show dev endpoint supplied config 1`] = `
 Object {
-  "someOtherApiUrl": "http://127.0.0.1:3002/some-other-api",
+  "someOtherApiUrl": "http://localhost:3002/some-other-api",
 }
 `;
 
 exports[`stateConfig methods stateConfig with dev endpoint config should show dev endpoint supplied config 2`] = `
 Object {
-  "someOtherApiUrl": "http://127.0.0.1:3002/some-other-api",
+  "someOtherApiUrl": "http://localhost:3002/some-other-api",
 }
 `;
 
@@ -156,7 +156,7 @@ exports[`stateConfig methods stateConfig with priorities of should prioritize de
 Object {
   "anotherSetting": "another-fake-setting",
   "fakeSetting": "client-fake-setting",
-  "someOtherApiUrl": "http://127.0.0.1:3002/some-other-api",
+  "someOtherApiUrl": "http://localhost:3002/some-other-api",
 }
 `;
 
@@ -164,7 +164,7 @@ exports[`stateConfig methods stateConfig with priorities of should prioritize de
 Object {
   "anotherSetting": "another-fake-setting",
   "fakeSetting": "server-fake-setting",
-  "someOtherApiUrl": "http://127.0.0.1:3002/some-other-api",
+  "someOtherApiUrl": "http://localhost:3002/some-other-api",
 }
 `;
 

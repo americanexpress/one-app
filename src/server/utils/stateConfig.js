@@ -14,7 +14,6 @@
  * permissions and limitations under the License.
  */
 
-import ip from 'ip';
 import fs from 'fs';
 import path from 'path';
 import url from 'url';
@@ -72,14 +71,13 @@ const pathToDevEndpoints = path.join(process.cwd(), '.dev', 'endpoints', 'index.
 const stateConfigFromDevEndpoints = {};
 
 if (process.env.NODE_ENV === 'development' && fs.existsSync(pathToDevEndpoints)) {
-  const ipAddress = ip.address();
   const { SERVICES_PORT = 3002 } = process.env;
   // eslint-disable-next-line global-require,import/no-dynamic-require
   const devEndpoints = require(pathToDevEndpoints)();
   Object.entries(devEndpoints).forEach(([configName, { devProxyPath }]) => {
     const value = url.format({
       protocol: 'http',
-      hostname: ipAddress,
+      hostname: 'localhost',
       port: SERVICES_PORT,
       pathname: devProxyPath,
     });
