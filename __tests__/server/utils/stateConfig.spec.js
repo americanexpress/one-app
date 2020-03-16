@@ -15,7 +15,6 @@
  */
 
 jest.mock('fs', () => ({ existsSync: jest.fn() }));
-jest.mock('ip', () => ({ address: jest.fn() }));
 jest.mock('fake/path/.dev/endpoints/index.js', () => jest.fn(), { virtual: true });
 jest.mock('../../../src/server/utils/envVarAllowList', () => [
   'ONE_CLIENT_FAKE_SETTING',
@@ -33,15 +32,12 @@ describe('stateConfig methods', () => {
   let restoreModuleStateConfig;
   let backupModuleStateConfig;
   let fs;
-  let ip;
 
   const originalEnvVars = process.env;
 
   const reloadMocks = () => {
     fs = require('fs');
-    ip = require('ip');
     jest.spyOn(process, 'cwd').mockImplementation(() => 'fake/path/');
-    ip.address.mockImplementation(() => '127.0.0.1');
     fs.existsSync.mockImplementation(() => false);
     process.env.ONE_CONFIG_ENV = 'qa';
     provideStateConfig = {
@@ -209,7 +205,7 @@ describe('stateConfig methods', () => {
           getClientStateConfig,
           getServerStateConfig,
         } = require('../../../src/server/utils/stateConfig'));
-        expect(getClientStateConfig().leadingSlashApiUrl).toEqual('http://127.0.0.1:3002/leading-slash-api');
+        expect(getClientStateConfig().leadingSlashApiUrl).toEqual('http://localhost:3002/leading-slash-api');
       });
     });
     describe('with env vars', () => {
