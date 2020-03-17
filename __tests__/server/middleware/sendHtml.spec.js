@@ -592,6 +592,17 @@ describe('sendHtml', () => {
       })).toMatchSnapshot();
     });
 
+    it('does not add cache busting key if not present', () => {
+      const moduleMap = { ...clientModuleMapCache.browser };
+      delete moduleMap.key;
+      expect(renderModuleScripts({
+        clientInitialState: req.store.getState(),
+        moduleMap,
+        isDevelopmentEnv: false,
+        bundle: 'browser',
+      })).toMatchSnapshot();
+    });
+
     it('sends a rendered page with cross origin scripts', () => {
       expect(renderModuleScripts({
         clientInitialState: req.store.getState(),
