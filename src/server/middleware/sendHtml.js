@@ -115,7 +115,7 @@ export function renderModuleScripts({
     const { integrity, url: src } = moduleMap.modules[moduleName][bundle];
     const { key } = moduleMap;
     const additionalAttributes = isDevelopmentEnv ? '' : `integrity="${integrity}"`;
-    const scriptSource = isDevelopmentEnv ? src : `${src}?key=${key}`;
+    const scriptSource = isDevelopmentEnv || !key ? src : `${src}?key=${key}`;
     return `<script src="${scriptSource}" crossorigin="anonymous" ${additionalAttributes}></script>`;
   }).join(isDevelopmentEnv ? '\n          ' : '');
 }
