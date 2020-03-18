@@ -18,7 +18,9 @@
 
 ## CSS Modules
 
-Since CSS is global, One App uses the [CSS Modules](https://github.com/css-modules/css-modules) pattern to avoid class name collisions. The main differences will be the strict use of camelCased class names and the way you import the class names.
+Since CSS is global, One App uses the [CSS Modules](https://github.com/css-modules/css-modules)
+pattern to avoid class name collisions. The main differences will be the strict use of camelCased
+class names and the way you import the class names.
 
 ### Example Class Names
 
@@ -48,7 +50,8 @@ const MyModule = () => (
 
 ## Adding a CSS File to Root Module
 
-In order to provide global styles within your application, you can add a stylesheet to the `<head>` within your root module. You can achieve this by using [react-helmet](https://github.com/nfl/react-helmet).
+In order to provide global styles within your application, you can add a stylesheet to the
+`<head>` within your root module. You can achieve this by using [react-helmet](https://github.com/nfl/react-helmet).
 
 ```jsx
 import React, { Fragment } from 'react';
@@ -64,11 +67,14 @@ const MyRoot = ({ children }) => (
 );
 ```
 
-*Note:* Keep in mind that the domain in the stylesheet needs to be added to the [csp](../api/modules/App-Configuration.md#csp).
+*Note:* Keep in mind that the domain in the stylesheet needs to be added to the
+[csp](../api/modules/App-Configuration.md#csp).
 
 ## Adding a CSS File to Child Module
 
-This is done the same way as with the Root Module. However, keep in mind that if you add a stylesheet in the Root Module as well as a Child Module, this can cause collisions as well as multiple loads of the same styles.
+This is done the same way as with the Root Module. However, keep in mind that if you add a
+stylesheet in the Root Module as well as a Child Module, this can cause collisions as well as
+multiple loads of the same styles.
 
 ## Using Reakit with One App
 
@@ -111,7 +117,8 @@ Wrapping your children with Reakit's `Provider` will make the styles accessible 
 npm install --save reakit
 ```
 
-Since `reakit-system-bootstrap` was added in the root module, you do not need to `npm install` it in your child modules.
+Since `reakit-system-bootstrap` was added in the root module, you do not need to `npm install` it
+in your child modules.
 
 ```jsx
 import React, { Fragment } from 'react';
@@ -127,7 +134,10 @@ export default MyModule;
 
 ### Share Reakit Across Your Modules
 
-You can use [one-app-bundler's](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler) `providedExternals` and `requiredExternals` to avoid duplicating Reakit across all your modules. Furthermore, due to Reakit using React's context API, in order for your child modules to leverage this, you **MUST** add it to `providedExternals` as well as `requiredExternals`.
+You can use [one-app-bundler's](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler)
+`providedExternals` and `requiredExternals` to avoid duplicating Reakit across all your modules.
+Furthermore, due to Reakit using React's context API, in order for your child modules to leverage
+this, you **MUST** add it to `providedExternals` as well as `requiredExternals`.
 
 #### Add Reakit as a `providedExternals` in your Root Module
 
