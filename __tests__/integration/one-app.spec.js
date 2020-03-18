@@ -638,7 +638,7 @@ describe('Tests that require Docker setup', () => {
         await expect(searchForRequerstLog).resolves.toMatch(requestLogRegex);
       });
 
-      it('log gets updated when Application Root module gets updated', async () => {
+      it('log gets updated when Root module gets updated', async () => {
         await addModuleToModuleMap({
           moduleName: 'frank-lloyd-root',
           version: '0.0.2',
