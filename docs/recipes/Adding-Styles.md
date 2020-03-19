@@ -30,7 +30,7 @@ class names and the way you import the class names.
   color: red;
 }
 
-/* bad, won't work */
+/* not currently supported due to purge-css */
 .my-class {
   color: red;
 }
