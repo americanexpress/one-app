@@ -36,7 +36,7 @@ function createSpinner(opts) {
 const oneAppDevCdnSpinner = createSpinner({
   text: 'Starting one-app-dev-cdn server...',
   spinner: 'bouncingBar',
-}).start();
+});
 
 const oneAppDevProxySpinner = createSpinner({
   text: 'Starting local services server',
