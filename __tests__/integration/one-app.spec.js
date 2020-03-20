@@ -570,12 +570,12 @@ describe('Tests that require Docker setup', () => {
         });
       });
 
-      describe('providedExternals module configuration', () => {
+      describe('`providedExternals` and `requiredExternals` module configuration', () => {
         afterAll(() => {
           removeModuleFromModuleMap('late-frank');
         });
 
-        describe('root module providedExternals usage', () => {
+        describe('root module `providedExternals` usage', () => {
           const providedExternalsModuleValidation = /Module frank-lloyd-root attempted to provide externals/;
 
           const moduleName = 'frank-lloyd-root';
@@ -650,9 +650,44 @@ describe('Tests that require Docker setup', () => {
               const headerText = await headerBody.getText();
               const headerColor = await headerBody.getCSSProperty('color');
               expect(headerText.includes('Sorry Im late!')).toBe(true);
-              expect(headerColor.value).toEqual(
-                'rgba(255,192,203,1)'); // color: pink;
+              expect(headerColor.value).toEqual('rgba(255,192,203,1)'); // color: pink;
             });
+        });
+
+        describe('child module `requiredExternals` invalid usage', () => {
+          const requiredExternalsErrorMatch = /Failed to get external react-intl from root module/;
+
+          const moduleName = 'cultured-frankie';
+          const version = '0.0.1';
+
+          let requiredExternalsError;
+
+          beforeAll(async () => {
+            requiredExternalsError = searchForNextLogMatch(requiredExternalsErrorMatch);
+            await addModuleToModuleMap({
+              moduleName,
+              version,
+            });
+            // not ideal but need to wait for app to poll;
+
+            await waitFor(5000);
+          });
+
+          afterAll(() => {
+            writeModuleMap(originalModuleMap);
+          });
+
+          test('fails to get external `react-intl` for child module as an unsupplied `requiredExternal`', async () => {
+            await expect(requiredExternalsError).resolves.toMatch(requiredExternalsErrorMatch);
+          });
+
+          test('does not modify the original version "0.0.0" of the failing module', async () => {
+            const response = await fetch(`${appAtTestUrls.fetchUrl}/demo/${moduleName}`, {
+              ...defaultFetchOptions,
+            });
+            const htmlData = await response.text();
+            expect(/<script.*cultured-frankie\/0\.0\.0.*>/.test(htmlData)).toBe(true);
+          });
         });
 
         describe('child module `requiredExternals` valid usage', () => {
