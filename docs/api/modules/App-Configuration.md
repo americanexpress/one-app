@@ -68,7 +68,7 @@ if (!global.BROWSER) {
 }
 ```
 
-The `provideStateConfig` directive is useful for supplying string-based key value settings per runtime (e.g. `client` or `server`) and per `environmentLevel` (e.g. QA, Prod, etc). The `environmentLevel` is specified in the `ONE_CONFIG_ENV` environment variable when running the Server.
+The `provideStateConfig` directive is useful for supplying string-based key value settings per runtime (e.g. `client` or `server`) and per `environmentLevel` (e.g. QA, Prod, etc). The `environmentLevel` is specified in the [`ONE_CONFIG_ENV` environment variable](../server/Environment-Variables.md#one_config_env) when running the Server.
 
 In practice, the state config supplied by a Root Module may look like this shape:
 
