@@ -2,7 +2,7 @@
 
 # 👩‍🍳 Recipes
 
-* [Adding Styles](./Adding-Styles.md) 📌
+* [Adding Styles](./Adding-Styles.md) 🔨
 * [Making an API call](./Making-An-API-Call.md) 📌
 * [Mocking your API calls for Local Development](./Mocking-API-Calls.md) 🔨
 * [Routing and Navigation](./Routing-and-Navigation.md)
