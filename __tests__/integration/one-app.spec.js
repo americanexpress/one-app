@@ -802,16 +802,22 @@ describe('Tests that can run against either local Docker setup or remote One App
         test('data loads when navigating to module on client', async () => {
           // start by navigating to ssr-frank without prefetch
           await browser.url(`${appInstanceUrls.browserUrl}/healthy-frank`);
-          const prefetchLink = await browser.$('.prefetch-ssr-frank');
-          await prefetchLink.click();
+          const regularLink = await browser.$('.ssr-frank-link');
+          await regularLink.click();
+          // need to wait for regular loading to finish;
+          await waitFor(1e3);
           const renderedModuleData = await browser.$('.ssr-frank-loaded-data');
           const moduleStateAsText = await renderedModuleData.getText();
           const moduleState = JSON.parse(moduleStateAsText);
+          // calling loadModuleData calls https://fast.api.frank/posts
           expect(moduleState).toEqual({
-            isLoading: true,
-            isComplete: false,
+            isLoading: false,
+            isComplete: true,
             error: null,
-            data: null,
+            data: {
+              posts: [{ id: 1, title: 'json-server', author: 'typicode' }],
+              secretMessage: null,
+            },
           });
         });
 
