@@ -14,15 +14,6 @@
  * permissions and limitations under the License.
  */
 
-/** @jsx jsx */
+import ModuleContainer from './components/CulturedFrankie';
 
-import { jsx, css } from '@emotion/core';
-import styles from './styles.scss';
-
-const HelloMessage = () => (
-  <h1 className={`helloMessage ${styles.stylish}`} css={css`background-color: blue;`}>
-    Hello! One App is successfully rendering its Modules!
-  </h1>
-);
-
-export default HelloMessage;
+export default ModuleContainer;
