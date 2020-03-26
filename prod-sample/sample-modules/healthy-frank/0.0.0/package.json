@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@americanexpress/one-app-router": "^1.0.0",
+    "holocron": "file:../../../../holocron-1.0.0.tgz",
     "holocron-module-route": "^1.0.0",
     "prop-types": "^15.5.9",
     "react": "^16.4.2",

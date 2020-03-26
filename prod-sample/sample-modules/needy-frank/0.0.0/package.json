@@ -9,7 +9,7 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "holocron": "^1.0.0",
+    "holocron": "file:../../../../holocron-1.0.0.tgz",
     "iguazu": "3.0.0-3",
     "iguazu-holocron": "^1.0.0",
     "iguazu-rest": "^1.7.0",

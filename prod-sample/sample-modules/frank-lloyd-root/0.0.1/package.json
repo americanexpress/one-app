@@ -11,6 +11,7 @@
   "dependencies": {
     "@americanexpress/one-app-ducks": "^4.0.0",
     "content-security-policy-builder": "^2.1.0",
+    "holocron": "file:../../../../holocron-1.0.0.tgz",
     "holocron-module-route": "^1.0.0",
     "immutable": "^3.8.2",
     "ip": "^1.1.5",

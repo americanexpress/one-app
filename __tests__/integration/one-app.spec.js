@@ -799,30 +799,29 @@ describe('Tests that can run against either local Docker setup or remote One App
           expect(url).toMatch(/healthy-frank\/simple/);
         });
 
-        test('loadModuleData is not called when navigating to module on client', async () => {
+        test('data loads when navigating to module on client', async () => {
           // start by navigating to ssr-frank without prefetch
           await browser.url(`${appInstanceUrls.browserUrl}/healthy-frank`);
-          const noPrefetchLink = await browser.$('.ssr-frank-link');
-          await noPrefetchLink.click();
+          const prefetchLink = await browser.$('.prefetch-ssr-frank');
+          await prefetchLink.click();
           const renderedModuleData = await browser.$('.ssr-frank-loaded-data');
           const moduleStateAsText = await renderedModuleData.getText();
           const moduleState = JSON.parse(moduleStateAsText);
           expect(moduleState).toEqual({
-            isLoading: false,
+            isLoading: true,
             isComplete: false,
             error: null,
             data: null,
           });
         });
 
-        test('moduleRoutePrefetch calls loadModuleData', async () => {
+        test('moduleRoutePrefetch loads data in ssr frank on hover', async () => {
           await browser.url(`${appInstanceUrls.browserUrl}/healthy-frank`);
-          const prefetchButton = await browser.$('.prefetch-ssr-frank');
-          const ssrFrankLink = await browser.$('.ssr-frank-link');
-          await prefetchButton.click();
+          const prefetchLink = await browser.$('.prefetch-ssr-frank');
+          await prefetchLink.moveTo();
           // need to wait for prefetching to finish;
           await waitFor(1e3);
-          await ssrFrankLink.click();
+          await prefetchLink.click();
           const loadedData = await browser.$('.ssr-frank-loaded-data');
           const moduleStateAsText = await loadedData.getText();
           const moduleState = JSON.parse(moduleStateAsText);

@@ -9,6 +9,7 @@
     "prepare": "npm run build"
   },
   "dependencies": {
+    "holocron": "file:../../../../holocron-1.0.0.tgz",
     "prop-types": "^15.5.9",
     "react": "^16.4.2"
   },
