@@ -52,6 +52,7 @@ const RootModule = () => <h1>Hello, world</h1>;
 const csp = "default: 'none'";
 describe('onModuleLoad', () => {
   const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => null);
+  const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => null);
 
   beforeEach(() => {
     global.getTenantRootModule = () => RootModule;
@@ -184,7 +185,7 @@ describe('onModuleLoad', () => {
     expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.7' } }, moduleName: 'my-awesome-module' })).not.toThrow();
   });
 
-  it('throws if a modules that isn\'t the tenant root module attempts to provide externals', () => {
+  it('warns if a module that isn\'t the tenant root module attempts to provide externals', () => {
     const configuration = {
       providedExternals: {
         'dep-b': {
@@ -194,7 +195,8 @@ describe('onModuleLoad', () => {
       },
 
     };
-    expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.8' } }, moduleName: 'my-awesome-module' })).toThrowErrorMatchingSnapshot();
+    onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.8' } }, moduleName: 'my-awesome-module' });
+    expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
   });
 
   it('throws if the tenant root module does not provide the expected external', () => {
