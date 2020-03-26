@@ -67,7 +67,7 @@ export default function onModuleLoad({
 }) {
   const {
     [CONFIGURATION_KEY]: {
-      // Application Root Specific
+      // Root Module Specific
       providedExternals,
       provideStateConfig,
       csp,

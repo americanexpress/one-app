@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`safeRequest validateSafeRequestRestrictedAttributes throws error when missing in safeRequest 1`] = `
-"Application root must extendSafeRequestRestrictedAttributes with cookies: [jaffa-cake]
-Application root must extendSafeRequestRestrictedAttributes with headers: [secret-id]"
+"Root Module must extendSafeRequestRestrictedAttributes with cookies: [jaffa-cake]
+Root Module must extendSafeRequestRestrictedAttributes with headers: [secret-id]"
 `;

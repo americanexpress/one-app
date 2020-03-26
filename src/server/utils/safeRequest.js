@@ -114,7 +114,7 @@ export const validateSafeRequestRestrictedAttributes = (requiredAttributes, modu
 
       if (!requestItemsIncluded) {
         missingRequestItemsMessages.push(
-          `Application root must extendSafeRequestRestrictedAttributes with ${key}: [${requiredItems}]`
+          `Root Module must extendSafeRequestRestrictedAttributes with ${key}: [${requiredItems}]`
         );
       }
     });

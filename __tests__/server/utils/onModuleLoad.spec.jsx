@@ -269,7 +269,7 @@ describe('onModuleLoad', () => {
     expect(getModulesUsingExternals()).toEqual([]);
   });
 
-  it('validates csp added to the module', () => {
+  it('validates csp added to the root module', () => {
     const callOnModuleLoad = () => (onModuleLoad({
       module: {},
       moduleName: 'some-root',
@@ -278,7 +278,7 @@ describe('onModuleLoad', () => {
     expect(callOnModuleLoad).toThrowErrorMatchingSnapshot();
   });
 
-  it('updates createSsrFetch when added on the module', () => {
+  it('updates createSsrFetch when added on the root module', () => {
     const fakeCreateSsrFetch = jest.fn();
     onModuleLoad({
       module: {
@@ -294,7 +294,7 @@ describe('onModuleLoad', () => {
     expect(setCreateSsrFetch).toHaveBeenCalledWith(fakeCreateSsrFetch);
   });
 
-  it('sets CORS origins from the module', () => {
+  it('sets CORS origins from the root module', () => {
     const corsOrigins = ['example.com'];
     onModuleLoad({
       module: {
@@ -327,7 +327,7 @@ describe('onModuleLoad', () => {
     expect(consoleInfoSpy).toHaveBeenCalledWith('Loaded module not-the-root-module@1.0.16');
   });
 
-  it('updates allowed safeRequest values from the root', () => {
+  it('updates allowed safeRequest values from the root module', () => {
     onModuleLoad({
       module: {
         [CONFIGURATION_KEY]: {
@@ -359,7 +359,7 @@ describe('onModuleLoad', () => {
     });
   });
 
-  it('sets configureRequestLog when given on the root', () => {
+  it('sets configureRequestLog when given on the root module', () => {
     const configureRequestLog = jest.fn();
     onModuleLoad({
       module: {
