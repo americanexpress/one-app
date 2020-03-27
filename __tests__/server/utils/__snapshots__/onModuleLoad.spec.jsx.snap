@@ -6,8 +6,6 @@ dep-b@~5.8.0 is required by my-awesome-module, but tenant root module provides 5
 External 'dep-d' is required by my-awesome-module, but is not provided by tenant root module"
 `;
 
-exports[`onModuleLoad throws if a modules that isn't the tenant root module attempts to provide externals 1`] = `"Module my-awesome-module attempted to provide externals, but it is not the root module."`;
-
 exports[`onModuleLoad throws if the tenant root module does not provide the expected external 1`] = `"External 'dep-b' is required by my-awesome-module, but is not provided by tenant root module"`;
 
 exports[`onModuleLoad throws if the tenant root module provides an incompatible version of a required external 1`] = `"dep-a@^2.1.1 is required by my-awesome-module, but tenant root module provides 2.1.0"`;
