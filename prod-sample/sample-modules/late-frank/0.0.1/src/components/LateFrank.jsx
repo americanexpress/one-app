@@ -17,12 +17,16 @@
 /** @jsx jsx */
 
 import { jsx, css } from '@emotion/core';
-import styles from './styles.scss';
 
-const HelloMessage = () => (
-  <h1 className={`helloMessage ${styles.stylish}`} css={css`background-color: blue;`}>
-    Hello! One App is successfully rendering its Modules!
-  </h1>
-);
+const styles = css`
+  background-color: grey;
+  color: pink;
+  font-size: 24px;
+  font-family: system;
+`;
 
-export default HelloMessage;
+export function FashionablyLateFrank() {
+  return <div><h1 className="lateFrank" css={styles}>Sorry Im late!</h1></div>;
+}
+
+export default FashionablyLateFrank;
