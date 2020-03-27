@@ -1,0 +1,27 @@
+{
+  "name": "late-frank",
+  "version": "0.0.1",
+  "description": "a frank who can turn up late",
+  "scripts": {
+    "prebuild": "npm run clean",
+    "build": "bundle-module",
+    "clean": "rimraf build",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@emotion/core": "^10.0.27",
+    "react": "^16.4.2"
+  },
+  "devDependencies": {
+    "@americanexpress/one-app-bundler": "^6.0.0",
+    "babel-preset-amex": "^3.1.0",
+    "rimraf": "^2.5.2"
+  },
+  "one-amex": {
+    "bundler": {
+      "providedExternals": [
+        "@emotion/core"
+      ]
+    }
+  }
+}
