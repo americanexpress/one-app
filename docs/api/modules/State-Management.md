@@ -2,7 +2,7 @@
 
 # State Management
 
-[Holocron Modules](../API.md#modules) rely on one Store provided by [Redux](https://redux.js.org/) used primarily to cache the results of loaded data and Modules. Every Module may add their own [Reducers](https://redux.js.org/basics/reducers/) to the shared Store (through [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule)) and may dispatch actions to transform the Store. Redux provides a simple way to store data on the Server and [preload the store](https://redux.js.org/recipes/server-rendering#inject-initial-component-html-and-state) used by the Browser. This is commonly referred to as [Server Side Rendering](https://redux.js.org/recipes/server-rendering). One App employs the [Ducks Specification](https://github.com/erikras/ducks-modular-redux) design pattern for the logical grouping of Reducers, Action Creators, and Selectors (e.g. the `error` duck contains reducers, actions, and selectors for storing error data in the Redux Store).
+[Holocron Modules](../API.md#modules) rely on one Store provided by [Redux](https://redux.js.org/) used primarily to cache the results of loaded data and Modules. Every Module may add their own [Reducers](https://redux.js.org/basics/reducers/) to the shared Store (through [Holocron Module Configuration]) and may dispatch actions to transform the Store. Redux provides a simple way to store data on the Server and [preload the store](https://redux.js.org/recipes/server-rendering#inject-initial-component-html-and-state) used by the Browser. This is commonly referred to as [Server Side Rendering](https://redux.js.org/recipes/server-rendering). One App employs the [Ducks Specification](https://github.com/erikras/ducks-modular-redux) design pattern for the logical grouping of Reducers, Action Creators, and Selectors (e.g. the `error` duck contains reducers, actions, and selectors for storing error data in the Redux Store).
 
 **Contents**
 * [Globals](#globals)
@@ -33,6 +33,8 @@ global.BROWSER; // Boolean
 * [`holocronModule`](#holocronmodule)
 
 ### `holocronModule`
+
+> ☠ `holocronModule` has been deprecated and will be removed in the next major version of Holocron. Please see [Holocron Module Configuration].
 
 Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule) in the Holocron API.
 
@@ -154,3 +156,5 @@ Please see the [`holocron` Duck](https://github.com/americanexpress/holocron/blo
 Please see the [`intl` Duck](https://github.com/americanexpress/one-app-ducks#intl-duck) in the One App Ducks API.
 
 [☝️ Return To Top](#state-management)
+
+[Holocron Module Configuration]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocron-module-configuration
