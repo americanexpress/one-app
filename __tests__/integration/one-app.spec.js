@@ -485,7 +485,7 @@ describe('Tests that require Docker setup', () => {
           expect(consoleLogs).toEqual(
             expect.arrayContaining([{
               level: 'SEVERE',
-              message: expect.stringMatching(/https:\/\/one-app:8443\/demo\/healthy-frank - Failed to find a valid digest in the 'integrity' attribute for resource 'https:\/\/sample-cdn\.frank\/modules\/.+\/healthy-frank\/0\.0\.0\/healthy-frank.browser.js\?key=not-used-in-development' with computed SHA-256 integrity '.+'\. The resource has been blocked\./),
+              message: expect.stringMatching(/https:\/\/one-app:8443\/demo\/healthy-frank - Failed to find a valid digest in the 'integrity' attribute for resource 'https:\/\/sample-cdn\.frank\/modules\/.+\/healthy-frank\/0\.0\.0\/healthy-frank.browser.js' with computed SHA-256 integrity '.+'\. The resource has been blocked\./),
               source: 'security',
               timestamp: expect.any(Number),
             }])
