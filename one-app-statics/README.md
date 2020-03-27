@@ -6,7 +6,7 @@
 
 ## 🚨 Important 🚨  
 
-This Package is not meant to be installed using npm, it only serves as the CDN for the static client assets for `one-app`,
+This Package is not meant to be installed using npm, it only serves as the origin for the CDN for the static client assets for `one-app` once published to npm,
 if you are looking for `one-app` follow this link: [https://github.com/americanexpress/one-app](https://github.com/americanexpress/one-app)
 
 
@@ -32,8 +32,7 @@ Want to get paid for your contributions to `one-app`?
 
 Static assets are created for the correct docker image version in Docker Hub:
 
-[//]: # (TODO: point at the live docker image once pushed)
-[One App Production Docker Image](https://hub.docker.com/r/infoxicator/one-app-test) 
+[One App Production Docker Image](https://hub.docker.com/r/oneamex/one-app) 
 
 Configure your `ONE_CLIENT_URL` environment variable to point at the correct version of the assets in JSDelivr
 
