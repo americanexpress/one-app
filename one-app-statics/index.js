@@ -14,4 +14,4 @@
  * permissions and limitations under the License.
  */
 
-throw new Error('one-app-statics is not intended to be installed using npm, please refer to the README for more details');
+throw new Error('one-app-statics is not intended to be required, please refer to the README for more details');
