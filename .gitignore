@@ -16,6 +16,7 @@ stats.json
 .build-meta.json
 bundle.integrity.manifest.json
 *.tgz
+one-app-statics/package.json
 
 # test
 test-results

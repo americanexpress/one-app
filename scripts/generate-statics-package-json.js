@@ -23,7 +23,7 @@ const { version, contributors, license } = require('../package.json');
 
 const pathToStaticsPackageJson = path.resolve(oneAppStaticsDir, 'package.json');
 
-const doWork = async () => {
+const writeStaticPackageJson = async () => {
   const staticsPackageJson = {
     name: '@americanexpress/one-app-statics',
     version,
@@ -34,12 +34,14 @@ const doWork = async () => {
     },
     license,
     contributors,
+    homepage: 'https://github.com/americanexpress/one-app',
+    bugs: { url: 'https://github.com/americanexpress/one-app/issues' },
   };
   await fs.writeFile(pathToStaticsPackageJson, JSON.stringify(staticsPackageJson, null, 2)
   );
 };
 
-doWork().catch((e) => {
-  console.error(e);
+writeStaticPackageJson().catch((e) => {
+  console.error(`Error generating statics package.json: ${e}`);
   process.exit(1);
 });
