@@ -1,0 +1,37 @@
+name: one-app-release
+on:
+  schedule:
+  - cron: "0 16 * * 3"
+jobs:
+  one-app-release-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: One App release
+        id: vars
+        run: |
+          NODE_ENV=development npm ci
+          git config --local user.email "one.amex@aexp.com"
+          git config --local user.name "OneAmexBot"
+          npm run release
+      - name: Create release pull request
+        uses: peter-evans/create-pull-request@v2
+        with:
+          token: ${{ secrets.PA_TOKEN }}
+          commit-message: One App prerelease
+          committer: 'OneAmexBot <one.amex@aexp.com>'
+          author: 'OneAmexBot <one.amex@aexp.com>'
+          title: 'One App prerelease'
+          body: 'This is an auto-generated pull request for One App release changes. Please review this PR and merge it for a release to be initiated. Please close this PR to stop a release from being initiated.'
+          labels: release,automated pr,skip-release-drafter
+          branch: prerelease
+          base: master

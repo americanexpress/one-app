@@ -1,0 +1,43 @@
+name: Tagging release
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - master
+jobs:
+  tagging-release:
+    name: Tagging release
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged && github.head_ref == 'release-automated' && github.base_ref == 'master'
+    steps:
+      - uses: actions/checkout@v2
+      - name: get commit message
+        shell: bash
+        run: |
+          echo ::set-env name=commitmsg::$(git log --format=%B -n 1 ${{ github.event.after }})
+          echo $commitmsg
+      - name: get tag version
+        run: |
+          echo ::set-env name=tagversion::$( sed -e 's#.*: \(\)#\1#' <<< ${commitmsg} )
+          echo $tagversion
+      - name: set tag version
+        id: set_tag_version
+        run: |
+          git config --local user.email "one.amex@aexp.com"
+          git config --local user.name "OneAmexBot"
+          echo ${tagversion}
+          git tag ${tagversion}
+          git push origin --tag
+          echo ::set-output name=action_tag::${tagversion}
+      - name: Trigger Image Publishing
+        uses: octokit/request-action@v2.x
+        id: dispatch_one-app-docker-release
+        with:
+          route: POST /repos/:repository/dispatches
+          repository: ${{ github.repository }}
+          mediaType: '{"previews": ["everest"]}'
+          event_type: "one-app-docker-release"
+          client_payload: '{"tagversion": "${{ steps.set_tag_version.outputs.action_tag }}"}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}
