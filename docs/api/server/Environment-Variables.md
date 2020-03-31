@@ -435,7 +435,7 @@ ONE_CLIENT_REPORTING_URL=undefined
 * ✅ Production
 * ✅ Development
 
-URL where browser should send client side errors to. Defaults to `/_/report/security/csp-violation` if `NODE_ENV` is set to
+URL where browser should send [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) errors to. Defaults to `/_/report/security/csp-violation` if `NODE_ENV` is set to
 `development` and is undefined otherwise.
 
 **Shape**
@@ -451,10 +451,9 @@ ONE_CLIENT_CSP_REPORTING_URL=https://my-app-csp-violations.example.com/client
 **Default Value**
 ```bash
 # if NODE_ENV=development
-ONE_CLIENT_REPORTING_URL=/_/report/security/csp-violation
+ONE_CLIENT_CSP_REPORTING_URL=/_/report/security/csp-violation
 # else
-ONE_CLIENT_REPORTING_URL=undefined
-```
+ONE_CLIENT_CSP_REPORTING_URL=undefined
 
 
 ## `ONE_CLIENT_ROOT_MODULE_NAME`
