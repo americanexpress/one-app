@@ -1,0 +1,38 @@
+name: One App Docker Release
+on:
+  push:
+    tags:
+      - '*'
+  repository_dispatch:
+    types: [one-app-docker-release]
+jobs:
+  one-app-docker-release:
+    name: Build and Deploy to Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set env
+        id: set_tag_version
+        run: |
+          if [ "${{ github.event.client_payload.tagversion }}" != "" ]; then
+          echo ::set-output name=tagversion::${{ github.event.client_payload.tagversion }}
+          else
+          echo ::set-output name=tagversion::$(echo $GITHUB_REF | cut -d / -f 3)
+          fi
+          echo $tagversion
+      - name: Docker login
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
+      - name: Build production docker image
+        run: docker build -t prod .
+      - name: Docker build prod statics
+        run: docker cp $(docker create prod):opt/one-app/build ./one-app-statics
+      - name: Build development docker image
+        run: docker build -t dev . --target=development
+      - name: Tags
+        run: |
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_tag_version.outputs.tagversion }}
+          docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_tag_version.outputs.tagversion }}
+      - name: Push
+        run: |
+          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_tag_version.outputs.tagversion }}
+          docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_tag_version.outputs.tagversion }}

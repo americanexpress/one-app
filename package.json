@@ -35,7 +35,8 @@
     "drop-module": "drop-module",
     "set-middleware": "set-middleware",
     "set-dev-endpoints": "node scripts/set-dev-endpoints.js",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "release": "standard-version"
   },
   "repository": {
     "type": "git",
@@ -152,6 +153,7 @@
     "ora": "^4.0.3",
     "react-test-renderer": "^16.13.0",
     "rimraf": "^3.0.0",
+    "standard-version": "^7.1.0",
     "supertest": "^4.0.2",
     "surge": "^0.21.3",
     "tar": "^5.0.5",
@@ -161,6 +163,11 @@
     "hooks": {
       "pre-commit": "npm run test:lint && npm run test:unit",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "standard-version": {
+    "skip": {
+      "tag": true
     }
   },
   "optionalDependencies": {

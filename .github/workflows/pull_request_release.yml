@@ -1,0 +1,38 @@
+name: one-app-release
+on:
+  push:
+    branches:
+      - release-test
+jobs:
+  one-app-release-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: new one-app release
+        id: vars
+        run: |
+          NODE_ENV=development npm ci
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          npm run release
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: One App Release Changes
+          committer: GitHub Action <action@github.com>
+          title: One App Release Changes
+          body: This is an auto-generated PR for One App release changes. Please review this PR and merge it using this convention for a release to be initiated. Please close this PR to stop a release from being initiated
+          labels: release, automated pr,skip-release-drafter
+          reviewers: americanexpress/one, americanexpress/one-amex-admins
+          branch: release-automated
+          base: release-test
