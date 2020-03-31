@@ -569,6 +569,167 @@ describe('Tests that require Docker setup', () => {
           });
         });
       });
+
+      describe('`providedExternals` and `requiredExternals` module configuration', () => {
+        afterAll(() => {
+          removeModuleFromModuleMap('late-frank');
+        });
+
+        describe('root module `providedExternals` usage', () => {
+          const providedExternalsModuleValidation = /Module frank-lloyd-root attempted to provide externals/;
+
+          const moduleName = 'frank-lloyd-root';
+          const version = '0.0.2';
+
+          let providedExternalsWarning;
+
+          beforeAll(async () => {
+            providedExternalsWarning = searchForNextLogMatch(providedExternalsModuleValidation);
+            await addModuleToModuleMap({
+              moduleName,
+              version,
+            });
+            // not ideal but need to wait for app to poll;
+            await waitFor(5000);
+          });
+
+          afterAll(() => {
+            writeModuleMap(originalModuleMap);
+          });
+
+          test('no warnings written to log if a root module is configured with `providedExternals`', async () => {
+            await expect(providedExternalsWarning).rejects.toEqual(
+              new Error('Failed to match: /Module frank-lloyd-root attempted to provide externals/ in logs')
+            );
+          });
+
+          test('loads root module correctly with styles from @emotion/core when the root module `providesExternals`',
+            async () => {
+              await browser.url(`${appAtTestUrls.browserUrl}/success`);
+              const headerBody = await browser.$('.helloMessage');
+              const headerText = await headerBody.getText();
+              const headerColor = await headerBody.getCSSProperty('background-color');
+              expect(headerText.includes('Hello! One App is successfully rendering its Modules!')).toBe(true);
+              expect(headerColor.value).toEqual('rgba(0,0,255,1)'); // color: blue;
+            });
+        });
+
+        describe('child module `providedExternals` invalid usage', () => {
+          const providedExternalsModuleValidation = /Module late-frank attempted to provide externals/;
+
+          const moduleName = 'late-frank';
+          const version = '0.0.1';
+
+          let providedExternalsWarning;
+
+          beforeAll(async () => {
+            providedExternalsWarning = searchForNextLogMatch(providedExternalsModuleValidation);
+            await addModuleToModuleMap({
+              moduleName,
+              version,
+            });
+            // not ideal but need to wait for app to poll;
+            await waitFor(5000);
+          });
+
+          afterAll(() => {
+            writeModuleMap(originalModuleMap);
+          });
+
+          test(
+            'writes a warning to log if a child module is configured with `providedExternals`',
+            async () => {
+              await expect(providedExternalsWarning).resolves
+                .toMatch(providedExternalsModuleValidation);
+            });
+
+          test('loads child module correctly with styles from @emotion/core regardless of mis-configuration',
+            async () => {
+              await browser.url(`${appAtTestUrls.browserUrl}/demo/late-frank`);
+              const headerBody = await browser.$('.lateFrank');
+              const headerText = await headerBody.getText();
+              const headerColor = await headerBody.getCSSProperty('color');
+              expect(headerText.includes('Sorry Im late!')).toBe(true);
+              expect(headerColor.value).toEqual('rgba(255,192,203,1)'); // color: pink;
+            });
+        });
+
+        describe('child module `requiredExternals` invalid usage', () => {
+          const requiredExternalsErrorMatch = /Failed to get external react-intl from root module/;
+
+          const moduleName = 'cultured-frankie';
+          const version = '0.0.1';
+
+          let requiredExternalsError;
+
+          beforeAll(async () => {
+            requiredExternalsError = searchForNextLogMatch(requiredExternalsErrorMatch);
+            await addModuleToModuleMap({
+              moduleName,
+              version,
+            });
+            // not ideal but need to wait for app to poll;
+
+            await waitFor(5000);
+          });
+
+          afterAll(() => {
+            writeModuleMap(originalModuleMap);
+          });
+
+          test('fails to get external `react-intl` for child module as an unsupplied `requiredExternal`', async () => {
+            await expect(requiredExternalsError).resolves.toMatch(requiredExternalsErrorMatch);
+          });
+
+          test('does not modify the original version "0.0.0" of the failing module', async () => {
+            const response = await fetch(`${appAtTestUrls.fetchUrl}/demo/${moduleName}`, {
+              ...defaultFetchOptions,
+            });
+            const htmlData = await response.text();
+            expect(/<script.*cultured-frankie\/0\.0\.0.*>/.test(htmlData)).toBe(true);
+          });
+        });
+
+        describe('child module `requiredExternals` valid usage', () => {
+          const providedExternalsModuleValidation = /Module late-frank attempted to provide externals/;
+
+          const moduleName = 'late-frank';
+          const version = '0.0.2';
+
+          let providedExternalsWarning;
+
+          beforeAll(async () => {
+            providedExternalsWarning = searchForNextLogMatch(providedExternalsModuleValidation);
+            await addModuleToModuleMap({
+              moduleName,
+              version,
+            });
+            // not ideal but need to wait for app to poll;
+            await waitFor(5000);
+          });
+
+          afterAll(() => {
+            writeModuleMap(originalModuleMap);
+          });
+
+          test('does not write a warning to log if a child module is configured with `requiredExternals`', async () => {
+            await expect(providedExternalsWarning).rejects.toEqual(
+              new Error(
+                'Failed to match: /Module late-frank attempted to provide externals/ in logs'
+              )
+            );
+          });
+
+          test('loads child module correctly with styles from @emotion/core', async () => {
+            await browser.url(`${appAtTestUrls.browserUrl}/demo/late-frank`);
+            const headerBody = await browser.$('.lateFrank');
+            const headerText = await headerBody.getText();
+            const headerColor = await headerBody.getCSSProperty('color');
+            expect(headerText.includes('Sorry Im late!')).toBe(true);
+            expect(headerColor.value).toEqual('rgba(255,192,203,1)'); // color: pink;
+          });
+        });
+      });
     });
 
     describe('module requires SafeRequest Restricted Attributes not provided by the root module', () => {

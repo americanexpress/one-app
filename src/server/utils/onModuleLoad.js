@@ -60,7 +60,6 @@ function validateConfig(configValidators, config) {
 
 export const CONFIGURATION_KEY = 'appConfig';
 
-// eslint-disable-next-line complexity
 export default function onModuleLoad({
   module,
   moduleName,
@@ -118,7 +117,9 @@ export default function onModuleLoad({
   }
 
   if (providedExternals) {
-    throw new Error(`Module ${moduleName} attempted to provide externals, but it is not the root module.`);
+    console.warn(
+      `Module ${moduleName} attempted to provide externals. Only the root module can provide externals.`
+    );
   }
 
   if (requiredExternals) {
