@@ -34,6 +34,6 @@ jobs:
           title: One App prerelease
           body: This is an auto-generated PR for One App release changes. Please review this PR and merge it for a release to be initiated. Please close this PR to stop a release from being initiated.
           labels: release,automated pr,skip-release-drafter
-          team-reviewers: one,one-amex-admins
+          team-reviewers: one
           branch: release-automated
           base: release-test
