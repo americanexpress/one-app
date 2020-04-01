@@ -115,11 +115,11 @@ const state = new Map({
 
 **📘 More Information**
 * Adding values to `config` state with [`provideStateConfig`](./App-Configuration.md#providestateconfig) from [App Configuration API](./App-Configuration.md).
-* Learn more about [Environment Variables](#):
-  * [`ONE_CLIENT_REPORTING_URL`](#),
-  * [`ONE_CLIENT_CDN_URL`](#),
-  * [`ONE_CLIENT_LOCALE_FILENAME`](#),
-  * [`ONE_CLIENT_ROOT_MODULE_NAME`](#)
+* Learn more about [Environment Variables](../server/Environment-Variables.md):
+  * [`ONE_CLIENT_REPORTING_URL`](../server/Environment-Variables.md#one_client_reporting_url),
+  * [`ONE_CLIENT_CDN_URL`](../server/Environment-Variables.md#one_client_cdn_url),
+  * [`ONE_CLIENT_LOCALE_FILENAME`](../server/Environment-Variables.md#one_client_locale_filename),
+  * [`ONE_CLIENT_ROOT_MODULE_NAME`](../server/Environment-Variables.md#one_client_root_module_name)
 
 #### Action Creators
 
