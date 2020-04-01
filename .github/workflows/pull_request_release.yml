@@ -21,8 +21,8 @@ jobs:
         id: vars
         run: |
           NODE_ENV=development npm ci
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "oneamexbot@users.noreply.github.com"
+          git config --local user.name "OneAmexBot"
           npm run release
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v2
