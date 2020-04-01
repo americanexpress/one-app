@@ -21,7 +21,7 @@ jobs:
         id: vars
         run: |
           NODE_ENV=development npm ci
-          git config --local user.email "oneamexbot@users.noreply.github.com"
+          git config --local user.email "one.amex@aexp.com"
           git config --local user.name "OneAmexBot"
           npm run release
       - name: Create Pull Request
@@ -29,10 +29,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: One App prerelease
-          committer: OneAmexBot <oneamexbot@users.noreply.github.com>
-          author: OneAmexBot <oneamexbot@users.noreply.github.com>
-          title: One App prerelease
-          body: This is an auto-generated PR for One App release changes. Please review this PR and merge it for a release to be initiated. Please close this PR to stop a release from being initiated.
+          committer: 'OneAmexBot <one.amex@aexp.com>'
+          author: 'OneAmexBot <one.amex@aexp.com>'
+          title: 'One App prerelease'
+          body: 'This is an auto-generated PR for One App release changes. Please review this PR and merge it for a release to be initiated. Please close this PR to stop a release from being initiated.'
           labels: release,automated pr,skip-release-drafter
           team-reviewers: one
           branch: release-automated
