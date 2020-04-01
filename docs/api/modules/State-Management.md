@@ -6,6 +6,7 @@
 
 **Contents**
 * [Globals](#globals)
+* [Holocron Module Configuration](#holocron-module-configuration)
 * [Higher Order Components](#higher-order-components)
 * [Shared Ducks](#shared-ducks)
 
@@ -25,6 +26,15 @@ global.BROWSER; // Boolean
 
 `global.BROWSER` is provided in the Server and Browser environments to determine if the code is currently being executed on the Server or the Browser.
 
+## Holocron Module Configuration
+
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@one-doc-templating/packages/holocron/API.md" id="Module.holocron" parentHeaderLevel="2" start-->
+
+Please see [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocron-module-configuration) in the Holocron API.
+
+<!--ONE-DOCS end-->
+
+
 ## Higher Order Components
 
 [Holocron Modules](../API.md#modules) use [Higher Order Components (HOC)](https://reactjs.org/docs/higher-order-components.html) to add behaviors regarding when a Module loads, connecting a Module with its [Reducer(s)](https://redux.js.org/basics/reducers/) to a Redux Store (similar to [Redux `connect`](https://react-redux.js.org/api/connect)) and adding runtime validations for a Module.
@@ -32,11 +42,15 @@ global.BROWSER; // Boolean
 **Contents**
 * [`holocronModule`](#holocronmodule)
 
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@one-doc-templating/packages/holocron/API.md" id="holocronModule" parentHeaderLevel="2" start-->
+
 ### `holocronModule`
 
 > ☠ `holocronModule` has been deprecated and will be removed in the next major version of Holocron. Please see [Holocron Module Configuration].
 
 Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule) in the Holocron API.
+
+<!--ONE-DOCS end-->
 
 ## Shared Ducks
 
