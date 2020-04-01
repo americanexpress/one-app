@@ -1,0 +1,26 @@
+{
+  "name": "@americanexpress/one-app-statics",
+  "version": "5.0.0-rc1",
+  "description": "One App Static Assets",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  },
+  "license": "Apache-2.0",
+  "contributors": [
+    "Andres Escobar <Andres.Escobar@aexp.com> (https://github.com/anescobar1991)",
+    "James Singleton <James.Singleton1@aexp.com> (https://github.com/JamesSingleton)",
+    "Jimmy King  <Jimmy.King@aexp.com> (https://github.com/10xLaCroixDrinker)",
+    "Jonathan Adshead <Jonathan.Adshead@aexp.com> (https://github.com/JAdshead)",
+    "Michael Tobia <Michael.M.Tobia@aexp.com> (https://github.com/Francois-Esquire)",
+    "Michael Tomcal <Michael.A.Tomcal@aexp.com> (https://github.com/mtomcal)",
+    "Stephanie Coates  <Stephanie.Coates1@aexp.com> (https://github.com/stephaniecoates)",
+    "Nelly Kiboi <Nelly.J.Kiboi@aexp.com> (https://github.com/nellyk)",
+    "Nickolas Oliver <nickolas.oliver@aexp.com> (https://github.com/PixnBits)",
+    "Ruben Casas <ruben.casas@aexp.com> (https://github.com/infoxicator)"
+  ],
+  "homepage": "https://github.com/americanexpress/one-app",
+  "bugs": {
+    "url": "https://github.com/americanexpress/one-app/issues"
+  }
+}

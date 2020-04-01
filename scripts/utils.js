@@ -20,7 +20,6 @@ const { spawn } = require('child_process');
 const sampleProdDir = resolve('./prod-sample/');
 const sampleModulesDir = resolve(sampleProdDir, 'sample-modules');
 const nginxOriginStaticsRootDir = resolve(sampleProdDir, 'nginx', 'origin-statics');
-const oneAppStaticsDir = resolve('./one-app-statics');
 
 const sanitizeEnvVars = () => {
   const sanitizedEnvVars = {};
@@ -59,7 +58,6 @@ module.exports = {
   sampleProdDir,
   sampleModulesDir,
   nginxOriginStaticsRootDir,
-  oneAppStaticsDir,
   sanitizeEnvVars,
   promisifySpawn,
 };
