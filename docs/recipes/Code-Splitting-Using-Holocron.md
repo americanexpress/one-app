@@ -3,7 +3,7 @@
 [one-app-bundler-readme]: https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler/README.md
 [one-app-router-readme]: https://github.com/americanexpress/one-app-router/README.md
 
-[holocron-module-api]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule
+[holocron-module-api]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocron-module-configuration
 [bundler-webpack-config]: https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler#webpackconfigpath-webpackclientconfigpath--webpackserverconfigpath
 
 [frank-lloyd-root]: ../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/README.md
@@ -21,7 +21,7 @@
 **Contents**
 * [Route Based Code Splitting](#route-based-code-splitting)
 * [Holocron Module Chunks _Via_ `import()`](#holocron-module-chunks-via-import())
-  * [Using `holocronModule`](#using-holocronModule)
+  * [Using `Module.holocron`](#using-moduleholocron)
   * [Using `Suspense` and `lazy`](#using-suspense-and-lazy)
   * [How It Works](#how-it-works)
   * [Performance Considerations](#performance-considerations)
@@ -189,12 +189,11 @@ root
 
 > To view a module chunks example using dynamic importing, [check out the sample module "Franks Burgers"][franks-burgers]
 
-### Using `holocronModule`
+### Using `Module.holocron`
 
 `src/Module.jsx`
 ```jsx
 import React from 'react';
-import { holocronModule } from 'holocron';
 
 let Chunk = () => <p>Loading...</p>;
 
@@ -202,27 +201,23 @@ export function MyHolocronModule() {
   return <Chunk />;
 }
 
-export default holocronModule({
+MyHolocronModule.holocron = {
   name: 'holocron-module-name',
-  // the load property allows us to load our chunk with our module
-  load: () => () => Promise.all([
-    // the same dynamic import is used to create a promise with our chunk
-    import(/* webpackChunkName: '<chunkName>' */ './Chunk')
-      // we check if our chunk has a `default` export or not
-      .then((imported) => imported.default || imported)
-      // and assign the exported chunk to memory
-      .then((Component) => {
-        Chunk = Component;
-      })
-      // in the event of failure
-      .catch((error) => {
-        Chunk = () => <p>{error.message}</p>;
-      }),
-  ]),
+  // the loadModuleData property allows us to load our chunk with our module
+  loadModuleData: async () => {
+    try {
+      // the same dynamic import is used to create a promise with our chunk
+      const imported = await import(/* webpackChunkName: '<chunkName>' */ './Chunk');
+      Chunk = imported.default || imported;
+    } catch (error) {
+      Chunk = () => <p>{error.message}</p>;
+    }
+  },
   // we can wait for our holocron module to load the chunk during server-side rendering
   // and render the module with the loaded chunk
-  options: { ssr: true },
-})(MyHolocronModule);
+};
+
+export default MyHolocronModule;
 ```
 
 ### Using `Suspense` and `lazy`
