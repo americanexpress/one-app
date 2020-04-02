@@ -11,6 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+          registry-url: 'https://registry.npmjs.org'
       - name: Set env
         id: set_tag_version
         run: |
@@ -24,15 +29,41 @@ jobs:
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Build production docker image
         run: docker build -t prod .
-      - name: Docker build prod statics
-        run: docker cp $(docker create prod):opt/one-app/build ./one-app-statics
+      - name: Extract and zip production statics
+        run: |
+          docker cp $(docker create prod):opt/one-app/build ./one-app-statics
+          zip -r one-app-static-assets one-app-statics/build
+      - name: Publish statics to NPM
+        run: npm publish ./one-app-statics --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
       - name: Build development docker image
         run: docker build -t dev . --target=development
-      - name: Tags
+      - name: Tag Docker Images
         run: |
           docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_tag_version.outputs.tagversion }}
           docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_tag_version.outputs.tagversion }}
-      - name: Push
+      - name: Push Docker Images
         run: |
           docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_tag_version.outputs.tagversion }}
           docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_tag_version.outputs.tagversion }}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.set_tag_version.outputs.tagversion }}
+          release_name: Release ${{ steps.set_tag_version.outputs.tagversion }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Assets
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./one-app-static-assets.zip
+          asset_name: one-app-static-assets.zip
+          asset_content_type: application/zip

@@ -1,4 +1,4 @@
-name: one-app-release
+name: One App Release Pull Request
 on:
   schedule:
   - cron: "0 16 * * 3"
