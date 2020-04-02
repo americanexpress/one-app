@@ -44,12 +44,14 @@ jest.mock('holocron/moduleRegistry', () => {
   let modules = immutable.fromJS();
   let moduleMap = immutable.fromJS();
   const mockGetModules = () => modules;
+  const mockAddHigherOrderComponent = (module) => module;
   const mockResetModuleRegistry = (modulesToSet, moduleMapToSet) => {
     modules = modulesToSet;
     moduleMap = moduleMapToSet;
   };
   const mockGetModuleMap = () => moduleMap;
   return {
+    addHigherOrderComponent: mockAddHigherOrderComponent,
     getModules: mockGetModules,
     resetModuleRegistry: mockResetModuleRegistry,
     getModuleMap: mockGetModuleMap,
