@@ -34,6 +34,7 @@ Node Bundle (e.g.`mymodule.node.js`) rather than the Browser Bundles (e.g.
 security and bundle size considerations.
 
 **Contents**
+- `Module.appConfig`
   - [`provideStateConfig`](#providestateconfig)
   - [`csp`](#csp)
   - [`corsOrigins`](#corsorigins)
@@ -273,7 +274,7 @@ For example, you may wish to forward cookies or headers from the initial page lo
 **📘 More Information**
 * Example: [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
 * Example: [An SSR Fetch Client](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/createFrankLikeFetch.js)
-* Using SSR Fetch Client with [`loadModuleData`](./Loading-Data.md#loadmoduledata)
+* Using SSR Fetch Client with [`Module.holocron.loadModuleData`](./Loading-Data.md#moduleholocronloadmoduledata)
 
 ## `validateStateConfig`
 **Module Type**

@@ -13,7 +13,7 @@ Both methods are described in the following.
   * [`ModuleRoute`](#moduleroute)
 * Load and Render
   * [`RenderModule`](#rendermodule)
-  * [`holocronModule`](#holocronmodule)
+  * [`Module.holocron`](#moduleholocron)
   * [`composeModules`](#composemodules)
 
 ## Route Component
@@ -35,18 +35,20 @@ Please see [`ModuleRoute`](https://github.com/americanexpress/holocron/tree/mast
 
 ## Dispatch and Render
 
-We may use the `holocronModule` Higher Order Component to dispatch Holocron Redux Actions. Using the `load` argument in `holocronModule` we dispatch `composeModules` to retrieve a child Module bundle (e.g. `mymodule.browser.js`) and pass React `props` to it. Once loaded, a parent Module may add the `RenderModule` React Component into their JSX to render loaded Holocron Modules.
+We may use the [Holocron Module Configuration] to dispatch Holocron Redux Actions. Using the `loadModuleData` function  we dispatch `composeModules` to retrieve a child Module bundle (e.g. `mymodule.browser.js`) and pass React `props` to it. Once loaded, a parent Module may add the `RenderModule` React Component into their JSX to render loaded Holocron Modules.
 
 ### `RenderModule`
 
 Please see [`RenderModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#rendermodule) in the Holocron API.
 
-### `holocronModule`
+### `Module.holocron`
 
-Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule) in the Holocron API.
+Please see [Holocron Module Configuration] in the Holocron API.
 
 ### `composeModules`
 
 Please see [`composeModules`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#composemodules) in the Holocron API.
 
 [☝️ Return To Top](#loading-modules)
+
+[Holocron Module Configuration]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocron-module-configuration

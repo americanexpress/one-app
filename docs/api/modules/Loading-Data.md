@@ -6,10 +6,24 @@ When [Holocron Modules](#modules) are composed and loaded on the Server and Clie
 
 **Contents**
 - [Loading Data](#loading-data)
-  - [`loadModuleData`](#loadmoduledata)
-  - [`createSsrFetch`](#createssrfetch)
+  - [`Module.loadModuleData`](#moduleloadmoduledata)
+  - [`Module.appConfig.createSsrFetch`](#moduleappconfigcreatessrfetch)
+  - [Holocron Module Configuration](#holocron-module-configuration)
+    - [`Module.holocron.loadModuleData`](#moduleholocronloadmoduledata)
 
-## `loadModuleData`
+## `Module.loadModuleData`
+
+> ☠ `Module.loadModuleData` has been relocated to [`Module.holocron.loadModuleData`](#moduleholocronloadmoduledata)
+
+## `Module.appConfig.createSsrFetch`
+
+Please see [`createSsrFetch`](./App-Configuration.md#createssrfetch) in the [App Configuration](./App-Configuration.md) section.
+
+## Holocron Module Configuration
+
+Please see the [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocron-module-configuration) from the Holocron API Docs for more information about other properties.
+
+### `Module.holocron.loadModuleData`
 
 **Runs On**
 * ✅ Server
@@ -17,9 +31,11 @@ When [Holocron Modules](#modules) are composed and loaded on the Server and Clie
 
 **Shape**
 ```js
-HelloWorldModule.loadModuleData = async ({
-  store, fetchClient, ownProps, module,
-}) => {};
+HelloWorldModule.holocron = {
+  loadModuleData: async ({
+    store, fetchClient, ownProps, module,
+  }) => {},
+};
 ```
 
 **Arguments**
@@ -37,22 +53,20 @@ In practice, we may [`dispatch`](https://redux.js.org/api/store/#dispatchaction)
 
 ```js
 // Runs on both Server and Browser
-HelloWorldModule.loadModuleData = async ({ store, fetchClient, ownProps }) => {
-  store.dispatch({ type: 'LOADING_API' });
-  const response = await fetchClient('https://api.example.com', ownProps.options);
-  const data = await response.json();
-  store.dispatch({ type: 'LOADED_API', data });
+HelloWorldModule.holocron = {
+  loadModuleData: async ({ store, fetchClient, ownProps }) => {
+    store.dispatch({ type: 'LOADING_API' });
+    const response = await fetchClient('https://api.example.com', ownProps.options);
+    const data = await response.json();
+    store.dispatch({ type: 'LOADED_API', data });
+  },
 };
 ```
 
 **📘 More Information**
 * Example: [SSR Frank](../../../prod-sample/sample-modules/ssr-frank/0.0.0/src/components/SsrFrank.jsx)
-* Customize SSR Fetch Client: [`createSsrFetch`](#createssrfetch)
+* Customize SSR Fetch Client: [`Module.appConfig.createSsrFetch`](#moduleappconfigcreatessrfetch)
 * Docs: [Redux Store](https://redux.js.org/api/store)
 * Docs: [ES6 Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch)
-
-## `createSsrFetch`
-
-Please see [`createSsrFetch`](./App-Configuration.md#createssrfetch) in the [App Configuration](./App-Configuration.md) section.
 
 [☝️ Return To Top](#loading-data)
