@@ -34,6 +34,16 @@ jest.mock('../../src/server/middleware/addFrameOptionsHeader');
 jest.mock('../../src/server/middleware/forwardedHeaderParser');
 jest.mock('../../src/server/utils/logging/serverMiddleware', () => (req, res, next) => setImmediate(next));
 jest.mock('../../src/universal/index');
+jest.mock('../../src/server/middleware/pwa', () => {
+  const serviceWorker = jest.fn((req, res, next) => next());
+  const manifest = jest.fn((req, res, next) => next());
+  return ({
+    serviceWorker,
+    manifest,
+    serviceWorkerMiddleware: () => serviceWorker,
+    webmanifestMiddleware: () => manifest,
+  });
+});
 jest.mock('../../mocks/scenarios', () => ({
   scenarios: true,
 }), { virtual: true });
@@ -97,6 +107,8 @@ describe('ssrServer', () => {
     let addCacheHeaders;
     let json;
     let forwardedHeaderParser;
+    let manifest;
+    let serviceWorker;
 
     function loadServer() {
       ({ json } = require('body-parser'));
@@ -116,6 +128,7 @@ describe('ssrServer', () => {
       addFrameOptionsHeader = require('../../src/server/middleware/addFrameOptionsHeader').default;
       addCacheHeaders = require('../../src/server/middleware/addCacheHeaders').default;
       forwardedHeaderParser = require('../../src/server/middleware/forwardedHeaderParser').default;
+      ({ manifest, serviceWorker } = require('../../src/server/middleware/pwa'));
       const server = require('../../src/server/ssrServer').default;
 
       return server;
@@ -223,6 +236,24 @@ describe('ssrServer', () => {
         .get('/route')
         .end(() => {
           expect(addCacheHeaders).toBeCalled();
+          done();
+        });
+    });
+
+    it('should call manifest middleware', (done) => {
+      request(loadServer())
+        .get('/_/pwa/manifest.webmanifest')
+        .end(() => {
+          expect(manifest).toBeCalled();
+          done();
+        });
+    });
+
+    it('should call service worker middleware', (done) => {
+      request(loadServer())
+        .get('/_/pwa/service-worker.js')
+        .end(() => {
+          expect(serviceWorker).toBeCalled();
           done();
         });
     });

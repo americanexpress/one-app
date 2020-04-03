@@ -117,7 +117,7 @@ describe('webmanifest middleware', () => {
       configureWebmanifest({ enabled: true, manifest: { name: 'One App Test' } });
       expect(middleware(null, { type, send }, next)).toBeUndefined();
       expect(next).not.toHaveBeenCalled();
-      expect(type).toHaveBeenCalledWith('json');
+      expect(type).toHaveBeenCalledWith('application/manifest+json');
       expect(send).toHaveBeenCalledWith(getWebmanifest());
     });
   });

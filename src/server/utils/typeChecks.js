@@ -23,5 +23,5 @@ export function isBoolean(value) {
 }
 
 export function isPlainObject(value) {
-  return value && typeof value === 'object' && Array.isArray(value) === false;
+  return !!value && typeof value === 'object' && Array.isArray(value) === false;
 }

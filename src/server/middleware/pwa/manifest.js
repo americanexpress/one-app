@@ -49,7 +49,7 @@ export function webmanifestMiddleware() {
   return function webmanifestMiddlewareHandler(req, res, next) {
     if (!webmanifestEnabled) return next();
     return res
-      .type('json')
+      .type('application/manifest+json')
       .send(getWebmanifest());
   };
 }

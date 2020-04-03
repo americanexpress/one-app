@@ -73,7 +73,7 @@ describe('PWA router', () => {
 
   [
     [workerPath, 'application/javascript; charset=utf-8', mockWorker],
-    [manifestPath, 'application/json; charset=utf-8', JSON.stringify(mockManifest)],
+    [manifestPath, 'application/manifest+json; charset=utf-8', JSON.stringify(mockManifest)],
   ].forEach((pair) => {
     const [route, contentType, mockResponse] = pair;
 

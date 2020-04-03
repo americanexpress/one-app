@@ -27,6 +27,7 @@ import { getClientStateConfig } from '../../../src/server/utils/stateConfig';
 // eslint-disable-next-line import/named
 import transit from '../../../src/universal/utils/transit';
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
+import { getClientPWAConfig } from '../../../src/server/middleware/pwa/config';
 
 jest.mock('react-helmet');
 jest.mock('holocron', () => ({
@@ -81,6 +82,14 @@ jest.mock('../../../src/server/utils/readJsonFile', () => (filePath) => {
       throw new Error('Couldn\'t find JSON file to read');
   }
 });
+jest.mock('../../../src/server/middleware/pwa/config', () => ({
+  getClientPWAConfig: jest.fn(() => ({
+    enabled: false,
+    scope: null,
+    scriptUrl: null,
+    manifest: null,
+  })),
+}));
 jest.mock('../../../src/universal/utils/transit', () => ({
   toJSON: jest.fn(() => 'serialized in a string'),
 }));
@@ -400,6 +409,41 @@ describe('sendHtml', () => {
       sendHtml(req, res);
       expect(res.send).toHaveBeenCalledTimes(1);
       expect(/<script.*nonce="54321"/.test(res.send.mock.calls[0][0])).toBe(true);
+    });
+
+    describe('PWA config rendering', () => {
+      it('includes __pwa_metadata__ with disabled values', () => {
+        sendHtml(req, res);
+        expect(res.send).toHaveBeenCalledTimes(1);
+        expect(/window\.__pwa_metadata__ = {"enabled":false,"scope":null,"scriptUrl":null};/.test(res.send.mock.calls[0][0])).toBe(true);
+        expect(/<link rel="manifest" href="\/manifest\.webmanifest">/.test(res.send.mock.calls[0][0])).not.toBe(true);
+      });
+
+      it('includes __pwa_metadata__ with enabled values', () => {
+        getClientPWAConfig.mockImplementationOnce(() => ({
+          enabled: true,
+          scope: '/',
+          scriptUrl: '/sw.js',
+          manifest: null,
+        }));
+        sendHtml(req, res);
+        expect(res.send).toHaveBeenCalledTimes(1);
+        expect(/window\.__pwa_metadata__ = {"enabled":true,"scope":"\/","scriptUrl":"\/sw\.js"};/.test(res.send.mock.calls[0][0])).toBe(true);
+        expect(/<link rel="manifest" href="\/manifest\.webmanifest">/.test(res.send.mock.calls[0][0])).not.toBe(true);
+      });
+
+      it('includes __pwa_metadata__ and link for the webmanifest', () => {
+        getClientPWAConfig.mockImplementationOnce(() => ({
+          enabled: true,
+          scope: '/',
+          scriptUrl: '/sw.js',
+          manifest: '/manifest.webmanifest',
+        }));
+        sendHtml(req, res);
+        expect(res.send).toHaveBeenCalledTimes(1);
+        expect(/__pwa_metadata__/.test(res.send.mock.calls[0][0])).toBe(true);
+        expect(/<link rel="manifest" href="\/manifest\.webmanifest">/.test(res.send.mock.calls[0][0])).toBe(true);
+      });
     });
 
     describe('renderPartialOnly', () => {
