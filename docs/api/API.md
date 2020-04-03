@@ -24,8 +24,12 @@ HelloWorldModule.childRoutes = (store) => {
 };
 
 // See "Loading Data" section
-HelloWorldModule.loadModuleData = async ({ store, fetchClient }) => {
-  // Async Requests on Module Load
+HelloWorldModule.holocron = {
+  loadModuleData: async ({
+    store, fetchClient, ownProps, module,
+  }) => {
+    // Async Requests on Module Load
+  },
 };
 
 // See "App Configuration" section
