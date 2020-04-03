@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PWA middleware should export components and middleware 1`] = `
+Array [
+  Array [
+    "configurePWA",
+    [Function],
+  ],
+  Array [
+    "getClientPWAConfig",
+    [Function],
+  ],
+  Array [
+    "getPWAConfig",
+    [Function],
+  ],
+  Array [
+    "webmanifestMiddleware",
+    [Function],
+  ],
+  Array [
+    "serviceWorkerMiddleware",
+    [Function],
+  ],
+]
+`;

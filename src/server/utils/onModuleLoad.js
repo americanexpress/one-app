@@ -23,6 +23,7 @@ import readJsonFile from './readJsonFile';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from './safeRequest';
 import { setConfigureRequestLog } from './logging/serverMiddleware';
 import { setCreateSsrFetch } from './createSsrFetch';
+import { configurePWA } from '../middleware/pwa';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
@@ -74,6 +75,7 @@ export default function onModuleLoad({
       configureRequestLog,
       extendSafeRequestRestrictedAttributes = {},
       createSsrFetch,
+      pwa,
       // Child Module Specific
       requiredExternals,
       validateStateConfig,
@@ -107,6 +109,9 @@ export default function onModuleLoad({
     clearModulesUsingExternals();
     if (provideStateConfig) {
       setStateConfig(provideStateConfig);
+    }
+    if (pwa) {
+      configurePWA(pwa);
     }
     setCorsOrigins(corsOrigins);
     extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);

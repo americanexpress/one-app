@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`routers should export routers 1`] = `
+Array [
+  Array [
+    "routes",
+    Object {
+      "pwa": Object {
+        "manifest": "/manifest.webmanifest",
+        "prefix": "/_/pwa",
+        "worker": "/service-worker.js",
+      },
+    },
+  ],
+  Array [
+    "pwaRouter",
+    [Function],
+  ],
+]
+`;

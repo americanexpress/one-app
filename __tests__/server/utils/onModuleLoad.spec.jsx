@@ -29,6 +29,7 @@ import { setCorsOrigins } from '../../../src/server/middleware/conditionallyAllo
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from '../../../src/server/utils/safeRequest';
 import { setConfigureRequestLog } from '../../../src/server/utils/logging/serverMiddleware';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
+import { configurePWA } from '../../../src/server/middleware/pwa/config';
 
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
@@ -46,6 +47,9 @@ jest.mock('../../../src/server/utils/createSsrFetch');
 jest.mock('../../../src/server/utils/safeRequest', () => ({
   extendRestrictedAttributesAllowList: jest.fn(),
   validateSafeRequestRestrictedAttributes: jest.fn(),
+}));
+jest.mock('../../../src/server/middleware/pwa/config', () => ({
+  configurePWA: jest.fn(),
 }));
 
 const RootModule = () => <h1>Hello, world</h1>;
@@ -309,6 +313,16 @@ describe('onModuleLoad', () => {
       moduleName: 'some-root',
     });
     expect(setCorsOrigins).toHaveBeenCalledWith(corsOrigins);
+  });
+
+  it('calls configurePWA when pwa key is present', () => {
+    const pwa = {};
+    onModuleLoad({
+      module: { [CONFIGURATION_KEY]: { csp, pwa }, [META_DATA_KEY]: { version: '1.0.15' } },
+      moduleName: 'some-root',
+    });
+    expect(configurePWA).toHaveBeenCalledTimes(1);
+    expect(configurePWA).toHaveBeenCalledWith(pwa);
   });
 
   it('logs when the root module is loaded', () => {
