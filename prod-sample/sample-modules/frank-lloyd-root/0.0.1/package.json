@@ -11,7 +11,8 @@
   "dependencies": {
     "@americanexpress/one-app-ducks": "^4.0.0",
     "content-security-policy-builder": "^2.1.0",
-    "holocron-module-route": "^1.0.0",
+    "holocron": "^1.1.0",
+    "holocron-module-route": "^1.1.0",
     "immutable": "^3.8.2",
     "ip": "^1.1.5",
     "prop-types": "^15.5.9",
