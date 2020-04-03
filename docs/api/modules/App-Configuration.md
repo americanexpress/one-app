@@ -34,6 +34,7 @@ Node Bundle (e.g.`mymodule.node.js`) rather than the Browser Bundles (e.g.
 security and bundle size considerations.
 
 **Contents**
+- `Module.appConfig`
   - [`provideStateConfig`](#providestateconfig)
   - [`csp`](#csp)
   - [`corsOrigins`](#corsorigins)
@@ -68,7 +69,7 @@ if (!global.BROWSER) {
 }
 ```
 
-The `provideStateConfig` directive is useful for supplying string-based key value settings per runtime (e.g. `client` or `server`) and per `environmentLevel` (e.g. QA, Prod, etc). The `environmentLevel` is specified in the `ONE_CONFIG_ENV` environment variable when running the Server.
+The `provideStateConfig` directive is useful for supplying string-based key value settings per runtime (e.g. `client` or `server`) and per `environmentLevel` (e.g. QA, Prod, etc). The `environmentLevel` is specified in the [`ONE_CONFIG_ENV` environment variable](../server/Environment-Variables.md#one_config_env) when running the Server.
 
 In practice, the state config supplied by a Root Module may look like this shape:
 
@@ -273,7 +274,7 @@ For example, you may wish to forward cookies or headers from the initial page lo
 **📘 More Information**
 * Example: [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
 * Example: [An SSR Fetch Client](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/createFrankLikeFetch.js)
-* Using SSR Fetch Client with [`loadModuleData`](./Loading-Data.md#loadmoduledata)
+* Using SSR Fetch Client with [`Module.holocron.loadModuleData`](./Loading-Data.md#moduleholocronloadmoduledata)
 
 ## `validateStateConfig`
 **Module Type**

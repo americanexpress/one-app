@@ -9,11 +9,10 @@
     "prepare": "npm run build"
   },
   "dependencies": {
+    "immutable": "^3.8.2",
     "prop-types": "^15.5.9",
     "react": "^16.4.2",
-    "react-helmet": "^5.2.1",
-    "holocron": "^1.0.0",
-    "immutable": "^3.8.2"
+    "react-helmet": "^5.2.1"
   },
   "devDependencies": {
     "@americanexpress/one-app-bundler": "^6.0.0",

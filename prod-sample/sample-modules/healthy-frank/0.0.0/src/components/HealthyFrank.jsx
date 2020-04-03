@@ -21,6 +21,7 @@ import { Link, Route, IndexRedirect } from '@americanexpress/one-app-router';
 import { connect } from 'react-redux';
 
 export function HealthyFrank({ children, prefetch }) {
+  const onPreFetch = () => prefetch({ location: '/healthy-frank/ssr-frank' });
   return (
     <div>
       <h1 className="helloFrank">Im Frank, and healthy</h1>
@@ -36,13 +37,13 @@ export function HealthyFrank({ children, prefetch }) {
           baby frank
         </Link>
         |
-        <button
+        <Link
           className="prefetch-ssr-frank"
-          onClick={() => prefetch({ location: '/healthy-frank/ssr-frank' })}
-          type="button"
+          onHover={onPreFetch}
+          to="/healthy-frank/ssr-frank"
         >
           prefetch baby frank
-        </button>
+        </Link>
       </nav>
       <div>
         { children }
