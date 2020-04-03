@@ -15,7 +15,6 @@
  */
 
 import React from 'react';
-import { holocronModule } from 'holocron';
 import PropTypes from 'prop-types';
 import reducer, { FAKE_REQUEST, FAKE_SUCCESS } from '../duck';
 
@@ -26,7 +25,12 @@ const SsrFrank = ({ moduleState }) => (
   </div>
 );
 
-SsrFrank.loadModuleData = async ({ store, fetchClient }) => {
+const loadModuleData = async ({ store, fetchClient }) => {
+  const moduleState = store.getState().getIn(['modules', 'ssr-frank']);
+  // If isComplete and data already exists dont run request again
+  if (moduleState.get('isComplete') && moduleState.get('data')) {
+    return;
+  }
   store.dispatch({ type: FAKE_REQUEST });
   const fastRes = await fetchClient('https://fast.api.frank/posts');
   const secretMessage = fastRes.headers.get('secret-message');
@@ -48,7 +52,10 @@ SsrFrank.propTypes = {
   }).isRequired,
 };
 
-export default holocronModule({
+SsrFrank.holocron = {
   name: 'ssr-frank',
   reducer,
-})(SsrFrank);
+  loadModuleData,
+};
+
+export default SsrFrank;

@@ -16,7 +16,7 @@
 
 import { applyMiddleware, compose } from 'redux';
 import lifesaver from 'redux-lifesaver';
-import { MODULE_LOADED } from 'holocron/ducks/load';
+import { MODULE_LOADED } from 'holocron/ducks/constants';
 
 export default function createEnhancer(extraMiddleware = []) {
   const middleware = [
