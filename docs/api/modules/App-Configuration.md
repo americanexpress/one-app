@@ -38,6 +38,7 @@ security and bundle size considerations.
   - [`provideStateConfig`](#providestateconfig)
   - [`csp`](#csp)
   - [`corsOrigins`](#corsorigins)
+  - [`pwa`](#pwa)
   - [`configureRequestLog`](#configurerequestlog)
   - [`extendSafeRequestRestrictedAttributes`](#extendsaferequestrestrictedattributes)
   - [`createSsrFetch`](#createssrfetch)
@@ -169,6 +170,42 @@ In practice, this allows POST requests from given origins to return partially re
 **📘 More Information**
 * [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
 * In Practice: [Partial Rendering](../../../README.md#partial-rendering)
+
+## `pwa`
+**Module Type**
+* ✅ Root Module
+* 🚫 Child Module
+
+**Shape**
+```js
+if (!global.BROWSER) {
+  RootModule.appConfig = {
+    pwa: {
+      // having enabled set to true will enable the service worker and
+      // other components such as the manifest
+      enabled: true,
+      // we can optionally define a scope to use with the service worker
+      scope: '/',
+      // defining a webmanifest can be directly added into the config
+      manifest: {
+        name: 'My App Name',
+        short_name: 'My App',
+        start_url: '/home',
+        display: 'standalone',
+        background_color: '#fff',
+        description: 'My PWA app.',
+        icons: [
+          {
+            src: 'images/my-splash-icon.png',
+            sizes: '48x48',
+            type: 'image/png',
+          },
+        ],
+      },
+    },
+  };
+}
+```
 
 ## `configureRequestLog`
 **Module Type**
