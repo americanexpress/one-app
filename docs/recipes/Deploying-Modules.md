@@ -17,7 +17,7 @@
 
 ### Creating your Deploy Action
 
-This deploy action uses Zeit's `now-cli` which you will need a [token from Now](https://zeit.co/account/tokens). The below action runs whenever a release is created or a push to master occurs. This will create 
+This deploy action uses Zeit's `now-cli` which you will need a [token from Now](https://zeit.co/account/tokens). The below action runs whenever a release is created or a push to master occurs. The `now` command already comes available within GitHub actions, due to this you do not need to install this or add it to your `package.json`.
 
 ```yml
 name: Deploy
@@ -92,6 +92,8 @@ To create a module map in Now, you can create a module-map.json locally that loo
 You can deploy this by running the [now](https://zeit.co/docs/now-cli#commands/now/basic-usage) command within the directory that you created the `module-map.json` in. You can now view it at the production URL that `now` prints out, you will need that URL for the following steps.
 
 ### Create an Update Module Script
+
+You can place this script wherever you would like. However, the following step expects it to be in `scripts/updateModuleMap.js`. If you put it in a different location, make sure you update it in the following step.
 
 ```javascript
 const fs = require('fs-extra');
