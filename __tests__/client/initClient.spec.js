@@ -35,6 +35,7 @@ jest.mock('../../src/client/prerender', () => {
   const prerender = require.requireActual('../../src/client/prerender');
   prerender.loadPrerenderScripts = jest.fn(() => Promise.resolve());
   prerender.moveHelmetScripts = jest.fn();
+  prerender.loadPWA = jest.fn();
   return prerender;
 });
 

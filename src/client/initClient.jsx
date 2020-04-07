@@ -20,7 +20,9 @@ import { Provider } from 'react-redux';
 import { browserHistory, Router } from '@americanexpress/one-app-router';
 import { setModuleMap } from 'holocron';
 
-import { initializeClientStore, loadPrerenderScripts, moveHelmetScripts } from './prerender';
+import {
+  initializeClientStore, loadPrerenderScripts, moveHelmetScripts, loadPWA,
+} from './prerender';
 import createRoutes from '../universal/routes';
 import match from '../universal/utils/matchPromisified';
 
@@ -45,6 +47,8 @@ export default async function initClient() {
       window.location.replace(redirectLocation.pathname);
       return;
     }
+
+    await loadPWA();
 
     /* eslint-disable react/jsx-props-no-spreading */
     const App = () => (

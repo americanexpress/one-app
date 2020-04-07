@@ -20,21 +20,21 @@ const path = require('path');
 const rollup = require('rollup');
 const resolve = require('@rollup/plugin-node-resolve');
 
-async function buildServiceWorkerScripts({ minify = true, output = false } = {}) {
+async function buildServiceWorkerScripts({ minify = true, config = {} } = {}) {
   const inputDirectory = path.resolve(__dirname, '../src/client/sw');
   const buildFolderDirectory = path.resolve(__dirname, '../lib/server/middleware/pwa', 'scripts');
 
-  // eslint-disable-next-line global-require, import/no-dynamic-require
-  const { buildVersion } = require(path.resolve(__dirname, '../.build-meta.json'));
-
-  const plugins = [{
-    name: 'one-app/replace',
-    transform(code) {
-      return {
-        code: code.replace('process.env.OSW_CONFIG', `{ buildVersion: "${buildVersion}" }`),
-      };
+  const plugins = [
+    {
+      name: '@rollup/one-app-plugins/replace-osw-config',
+      transform(code) {
+        return {
+          code: code.replace('process.env.OSW_CONFIG', JSON.stringify(config)),
+        };
+      },
     },
-  }, resolve()];
+    resolve(),
+  ];
 
   if (minify) {
     // eslint-disable-next-line global-require
@@ -50,15 +50,6 @@ async function buildServiceWorkerScripts({ minify = true, output = false } = {})
     plugins,
   });
 
-  if (output) {
-    // expecting an array of the two chunks defined
-    return (await build.generate({
-      output: {
-        format: 'esm',
-      },
-    })).output.map(({ code }) => code);
-  }
-
   return build.write({
     output: {
       format: 'esm',
@@ -67,10 +58,13 @@ async function buildServiceWorkerScripts({ minify = true, output = false } = {})
   });
 }
 
-if (require.main === module) {
-  (async function buildWorkers() {
-    await buildServiceWorkerScripts();
-  }());
-} else {
-  module.exports = buildServiceWorkerScripts;
-}
+(async function buildWorkers() {
+  // eslint-disable-next-line global-require, import/no-dynamic-require
+  const { buildVersion } = require(path.resolve(__dirname, '../.build-meta.json'));
+
+  const config = {
+    buildVersion: buildVersion.replace(/(\.)/g, '\\$1'),
+  };
+
+  await buildServiceWorkerScripts({ config });
+}());

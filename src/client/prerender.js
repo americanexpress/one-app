@@ -22,6 +22,7 @@ import createEnhancer from '../universal/enhancers';
 import reducer from '../universal/reducers';
 import transit from '../universal/utils/transit';
 import createTimeoutFetch from '../universal/utils/createTimeoutFetch';
+import initializePWA from './sw';
 
 export function initializeClientStore() {
   // Six second timeout on client
@@ -48,5 +49,21 @@ export function moveHelmetScripts() {
     const helmetScripts = [...document.querySelectorAll('script[data-react-helmet]')];
     helmetScripts.forEach((script) => document.body.removeChild(script));
     helmetScripts.forEach((script) => document.head.appendChild(script));
+  });
+}
+
+export function loadPWA(config = global.__pwa_metadata__) {
+  return new Promise((resolve, reject) => {
+    window.addEventListener('load', function pwaInitialization() {
+      initializePWA(config)
+        .then(resolve)
+        .catch(reject);
+      // remove handler once load event is fired
+      window.removeEventListener('load', pwaInitialization);
+    });
+  }).catch((error) => {
+    // in the event of failure or no support,
+    // the app should not crash for non-critical progressive enhancement
+    console.error('One App PWA load failure', error);
   });
 }

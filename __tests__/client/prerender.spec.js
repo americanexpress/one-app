@@ -16,7 +16,10 @@
 
 import { fromJS } from 'immutable';
 
-import { initializeClientStore, loadPrerenderScripts, moveHelmetScripts } from '../../src/client/prerender';
+import {
+  initializeClientStore, loadPrerenderScripts, moveHelmetScripts, loadPWA,
+} from '../../src/client/prerender';
+import initializePWA from '../../src/client/sw';
 
 jest.mock('@americanexpress/one-app-router', () => ({
   browserHistory: 'browserHistory',
@@ -41,6 +44,7 @@ jest.mock('../../src/universal/utils/createTimeoutFetch', () => jest.fn(
       return res;
     })
 ));
+jest.mock('../../src/client/sw', () => jest.fn(() => Promise.resolve()));
 
 describe('initializeClientStore', () => {
   beforeAll(() => {
@@ -173,5 +177,57 @@ describe('moveHelmetScripts', () => {
     jest.spyOn(NodeList.prototype, 'forEach');
     document.addEventListener.mock.calls[0][1]();
     expect(NodeList.prototype.forEach).not.toHaveBeenCalled();
+  });
+});
+
+describe('loadPWA', () => {
+  let error;
+
+  beforeAll(() => {
+    ({ error } = console);
+    console.error = jest.fn();
+    jest.spyOn(window, 'addEventListener');
+    jest.spyOn(window, 'removeEventListener');
+  });
+
+  afterAll(() => {
+    console.error = error;
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should call initializePWA on window load and remove the load listener when resolved', async () => {
+    expect.assertions(4);
+
+    const loadPromise = loadPWA();
+    const loadEventHandler = window.addEventListener.mock.calls[0][1];
+
+    loadEventHandler();
+
+    await expect(loadPromise).resolves.toBeUndefined();
+
+    expect(initializePWA).toHaveBeenCalledTimes(1);
+    expect(window.addEventListener).toHaveBeenCalledTimes(1);
+    expect(window.removeEventListener).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not crash the application on failure and remove window load listener', async () => {
+    expect.assertions(5);
+
+    initializePWA.mockImplementationOnce(() => Promise.reject());
+
+    const loadPromise = loadPWA();
+    const loadEventHandler = window.addEventListener.mock.calls[0][1];
+
+    loadEventHandler();
+
+    await expect(loadPromise).resolves.toBeUndefined();
+
+    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(initializePWA).toHaveBeenCalledTimes(1);
+    expect(window.addEventListener).toHaveBeenCalledTimes(1);
+    expect(window.removeEventListener).toHaveBeenCalledTimes(1);
   });
 });
