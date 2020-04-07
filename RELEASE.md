@@ -53,4 +53,4 @@ We should try to prevent this from happening, but if it does happen, since the p
 
 ### How can i do a dry run to test out the files to be changed locally
 
-Locally you can run  `run release -- --dry-run`, this would show the new version to be released, the files that would changed and a view of the changelog without changing any of the files.
+Locally you can run  `npm run release -- --dry-run`, this would show the new version to be released, the files that would changed and a view of the changelog without changing any of the files.
