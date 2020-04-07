@@ -59,7 +59,7 @@ describe('server index', () => {
       getModules: () => getModulesImplementation,
     }));
 
-    jest.doMock('isomorphic-fetch');
+    jest.doMock('cross-fetch');
 
     jest.doMock(
       '../../src/server/utils/loadModules',
