@@ -6,18 +6,16 @@
 
 * [Deploying to Now with GitHub Actions](#deploying-to-now-with-github-actions)
   * [Creating your Deploy Action](#creating-your-deploy-action)
-  * [Create and Update Your Module Map](#create-and-update-your-module-map)
-    * [Creating a Module Map in Now.sh](#creating-a-module-map-in-nowsh)
-    * [Create an Update Module Script](#create-an-update-module-script)
-    * [Update your Deploy Action to Update your Module Map](#update-your-deploy-action-to-update-your-module-map)
+* [Create and Update Your Module Map](#create-and-update-your-module-map)
+  * [Creating a Module Map in Now.sh](#creating-a-module-map-in-nowsh)
+  * [Create an Update Module Script](#create-an-update-module-script)
+  * [Update your Deploy Action to Update your Module Map](#update-your-deploy-action-to-update-your-module-map)
 
-* [Deploying to Now with GitHub Actions](#deploying-to-now-with-github-actions)
-
-# Deploying to Now with GitHub Actions
+## Deploying to Now with GitHub Actions
 
 [Now.sh](https://zeit.co/home) allows you to deploy statics such as your modules. We will accomplish this be using [GitHub Actions](https://github.com/features/actions).
 
-## Creating your Deploy Action
+### Creating your Deploy Action
 
 This deploy action uses Zeit's `now-cli` which you will need a [token from Now](https://zeit.co/account/tokens). The below action runs whenever a release is created or a push to master occurs. This will create 
 
@@ -51,7 +49,7 @@ jobs:
       run: npm install
       env:
         NODE_ENV: development
-    - name: Build One App Page Wrapper
+    - name: Build Module
       run: npm run build
       env:
         NODE_ENV: production
@@ -66,7 +64,6 @@ If you view the action running, during the `Deploy` step, you should see somethi
 ```bash
 Run now build --prod --confirm -t $NOW_TOKEN
 Now CLI 17.1.1
-The `name` property in now.json is deprecated (https://zeit.ink/5F)
 - Setting up project
 Linked to [YOUR NOW USERNAME]/[YOUR-REPO-NAME] (created .now and added it to .gitignore)
 Inspect: https://zeit.co/[YOUR NOW USERNAME]/[YOUR-REPO-NAME]/
