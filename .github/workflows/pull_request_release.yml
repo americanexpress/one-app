@@ -27,11 +27,11 @@ jobs:
         uses: peter-evans/create-pull-request@v2
         with:
           token: ${{ secrets.PA_TOKEN }}
-          commit-message: One App prerelease
+          commit-message: One App Prepare Release
           committer: 'OneAmexBot <one.amex@aexp.com>'
           author: 'OneAmexBot <one.amex@aexp.com>'
-          title: 'One App prerelease'
+          title: 'One App Prepare Release'
           body: 'This is an auto-generated pull request for One App release changes. Please review this PR and merge it for a release to be initiated. Please close this PR to stop a release from being initiated.'
           labels: release,automated pr,skip-release-drafter
-          branch: prerelease
+          branch: prepare-release
           base: master
