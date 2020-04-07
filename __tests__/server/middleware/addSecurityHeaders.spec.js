@@ -36,4 +36,17 @@ describe('addSecurityHeaders', () => {
     );
     expect(next).toBeCalled();
   });
+
+  describe('Referrer-Policy', () => {
+    it('default can be overridden ', () => {
+      const req = { get: jest.fn(), headers: {} };
+      const res = { set: jest.fn((key, value) => value) };
+      process.env.ONE_REFERRER_POLICY_OVERRIDE = 'no-referrer';
+
+      addSecurityHeaders(req, res, jest.fn());
+      expect(res.set).toBeCalledWith('Referrer-Policy', 'no-referrer');
+
+      delete process.env.ONE_REFERRER_POLICY_OVERRIDE;
+    });
+  });
 });
