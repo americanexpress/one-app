@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@americanexpress/one-app-ducks": "^4.0.0",
-    "holocron": "^1.0.0",
+    "holocron": "^1.1.0",
     "immutable": "^3.8.2",
     "prop-types": "^15.5.9",
     "react": "^16.4.2",

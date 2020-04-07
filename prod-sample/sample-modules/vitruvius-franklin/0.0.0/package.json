@@ -9,7 +9,7 @@
     "postinstall": "npm run build"
   },
   "dependencies": {
-    "holocron": "^1.0.0",
+    "holocron": "^1.1.0",
     "immutable": "^4.0.0-rc.12",
     "prop-types": "^15.6.2",
     "react": "^16.6.3",

@@ -25,11 +25,15 @@ renovate.json
 dangerfile.js
 .github
 CODEOWNERS
+docs
+*.png
 
 # test
 test-results
 .jest-cache
 prod-sample
+jest.integration.config.js
+jest.config.js
 
 # env
 .env*
