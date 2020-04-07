@@ -30,6 +30,6 @@ describe('createFetchMiddleware', () => {
 
   test('returns an array of middleware for use', () => {
     expect.assertions(1);
-    expect(createFetchMiddleware()).toHaveLength(5);
+    expect(createFetchMiddleware()).toHaveLength(4);
   });
 });

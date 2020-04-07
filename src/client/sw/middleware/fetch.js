@@ -17,28 +17,28 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { expiration, cacheRouter } from '@americanexpress/one-service-worker';
 
-import createInvalidationMiddleware from './invalidation';
-import { getConfig } from './utility';
+import {
+  oneAppRegexp, moduleRegexp, langPackRegexp,
+} from './utility';
 
-export default function createFetchMiddleware(config = getConfig()) {
+export default function createFetchMiddleware() {
   return [
     {
       cacheName: 'one-app-cache',
       // eslint-disable-next-line no-useless-escape
-      match: new RegExp(`^https?.*\/_\/static\/app\/${config.buildVersion}\/.*\\.js$`),
+      match: oneAppRegexp,
     },
     {
       cacheName: 'module-cache',
       // ends with .browser.js and matches the name
-      match: /^https?.*\.(.*)\/(.*)\/(?:.*)\1(?:legacy\.)?browser\.js(?:\?clientCacheRevision=.*)?$/,
+      match: moduleRegexp,
     },
     {
       cacheName: 'language-pack-cache',
       // any valid bcp 47 locale id
-      match: /^https?.*\/.{2,3}-.{1,4}\/(qa|integration|.*)\.json$/,
+      match: langPackRegexp,
     },
   ].map(cacheRouter).concat([
-    createInvalidationMiddleware(),
     expiration(),
   ]);
 }

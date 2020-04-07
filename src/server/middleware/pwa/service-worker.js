@@ -47,12 +47,12 @@ export function setServiceWorkerScript(value, scope) {
 
 export function createServiceWorkerNoopScript() {
   // this file is created during build inside lib/server/middleware/pwa
-  return fs.readFileSync('scripts/sw.noop.js').toString();
+  return fs.readFileSync([__dirname, 'scripts/sw.noop.js'].join('/')).toString();
 }
 
 export function createServiceWorkerScript() {
   // this file is created during build inside lib/server/middleware/pwa
-  return fs.readFileSync('scripts/sw.js').toString();
+  return fs.readFileSync([__dirname, 'scripts/sw.js'].join('/')).toString();
 }
 
 export function createServiceWorkerEscapeHatchScript() {

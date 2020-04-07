@@ -64,6 +64,7 @@ export function loadPWA(config = global.__pwa_metadata__) {
   }).catch((error) => {
     // in the event of failure or no support,
     // the app should not crash for non-critical progressive enhancement
+    // eslint-disable-next-line no-console
     console.error('One App PWA load failure', error);
   });
 }
