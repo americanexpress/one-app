@@ -35,15 +35,15 @@ This process can be used to make ad hoc releases outside of wednesday release cy
 
 ## FAQs
 
-### How can i revert a release?
+### How can I revert a release?
 
 If changes were made and need to be reverted. Please use the [manual release process](#manual-release-process) to revert the changes.
 
-### How can i run the first release?
+### How can I run the first release?
 
 For the first release please use the [manual release process](#manual-release-process). Run `npm run release -- --first-release` to generate the initial changelog and update the package.json files.
 
-### How can i create a prerelease?
+### How can I create a prerelease?
 
 For the first release please use the [manual release process](#manual-release-process). Run `npm run release -- --prerelease` to generate the initial changelog and update the package.json files.
 
@@ -51,6 +51,6 @@ For the first release please use the [manual release process](#manual-release-pr
 
 We should try to prevent this from happening, but if it does happen, since the pull request runs every wednesday it won't be triggered again and updated. Follow the above [manual release process](#manual-release-process) to include the changes that have been merged.
 
-### How can i do a dry run to test out the files to be changed locally
+### How can I do a dry run to test out the files to be changed locally
 
 Locally you can run  `run release -- --dry-run`, this would show the new version to be released, the files that would changed and a view of the changelog without changing any of the files.
