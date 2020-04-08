@@ -19,7 +19,7 @@ import ip from 'ip';
 
 export default contentSecurityPolicyBuilder({
   directives: {
-    reportUri: `${process.env.ONE_CLIENT_REPORTING_URL}/report/security/csp-violation`,
+    reportUri: process.env.ONE_CLIENT_CSP_REPORTING_URL,
     defaultSrc: [
       "'self'",
     ],

@@ -11,7 +11,7 @@
 * [Shape](#shape)
 * [Example](#example)
 * [Field Annotations](#field-annotations)
-  * [`key` Field](#key-field)
+  * [`clientCacheRevision` Field](#clientcacherevision-field)
   * [`[moduleName]` Field](#moduleName-field)
   * [`browser` Field](#browser-field)
   * [`legacyBrowser` Field](#legacyBrowser-field)
@@ -23,7 +23,7 @@
 
 ```js
 ({
-  key: String, // optional
+  clientCacheRevision: String, // optional
   modules: {
     [moduleName]: { // required
       browser: {
@@ -47,7 +47,7 @@
 ## Example
 ```json
 {
-  "key": "<any-string>",
+  "clientCacheRevision": "<any-string>",
   "modules": {
     "cultured-frankie": {
       "browser": {
@@ -69,9 +69,9 @@
 
 ## Field Annotations
 
-### `key` Field
+### `clientCacheRevision` Field
 
-This required key is used to bust the caching of Modules in the [Holocron Module Registry].
+This optional value is used to bust the client-side caching of Modules in the [Holocron Module Registry].
 
 ### `[moduleName]` Field
 
