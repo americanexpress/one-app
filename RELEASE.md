@@ -37,7 +37,7 @@ This process can be used to make ad hoc releases outside of wednesday release cy
 
 ### How can I revert a release?
 
-If changes were made and need to be reverted. Please use the [manual release process](#manual-release-process) to revert the changes.
+If changes were made and need to be reverted. Please use the [manual release process](#manual-release-process) to revert the changes and raise a patch release.
 
 ### How can I run the first release?
 
