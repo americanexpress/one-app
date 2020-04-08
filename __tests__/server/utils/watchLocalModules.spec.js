@@ -86,7 +86,6 @@ describe('watchLocalModules', () => {
     const moduleName = 'some-module';
     const moduleVersion = '1.0.1';
     const moduleMapSample = {
-      key: '123',
       modules: {
         [moduleName]: {
           node: {
@@ -147,7 +146,6 @@ describe('watchLocalModules', () => {
     const moduleVersion = '1.0.1';
     process.env.HTTP_ONE_APP_DEV_CDN_PORT = 3002;
     const moduleMapSample = {
-      key: '123',
       modules: {
         [moduleName]: {
           node: {
@@ -167,7 +165,6 @@ describe('watchLocalModules', () => {
     };
     const oneAppDevCdnAddress = `http://${ip}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`;
     const updatedModuleMapSample = {
-      key: '123',
       modules: {
         [moduleName]: {
           node: {

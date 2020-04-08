@@ -33,7 +33,6 @@ jest.mock('holocron', () => {
 });
 
 holocron.getModuleMap.mockImplementation(() => fromJS({
-  key: '123',
   modules: {
     'test-root': {
       node: {
