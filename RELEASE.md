@@ -18,7 +18,7 @@ Releases can be triggered in two ways:
 
    ```
 
-   > Integration tests will continue to run in Travis as they currently do, after the automated pull request is created it would run the tests on `prerelease` branch.
+   > Integration tests will continue to run in Travis as they currently do, after the automated pull request is created it would run the tests on `prepare-release` branch.
 
 1. The merge will trigger the automatic generation of a new tag using the semantic version provided during the merging of the pull request above.
 
