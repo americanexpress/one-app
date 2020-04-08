@@ -29,7 +29,7 @@ within `childRoutes` defined on a module.
 
 Please see One App Router's [Route API docs](https://github.com/americanexpress/one-app-router/blob/master/docs/API.md#route) for more information.
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@one-doc-templating/packages/holocron-module-route/README.md" id="childRoutes" parentHeaderLevel="1" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@one-doc-templating/packages/holocron-module-route/README.md" id="childRoutes" parentHeadingLevel="1" start-->
 
 ## `childRoutes`
 
@@ -75,7 +75,7 @@ MyModule.onEnterRouteHook = (nextState, replace, callback) => {
 };
 ```
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@one-doc-templating/packages/holocron-module-route/README.md" id="ModuleRoute" parentHeaderLevel="1" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@one-doc-templating/packages/holocron-module-route/README.md" id="ModuleRoute" parentHeadingLevel="1" start-->
 
 Please see the [Holocron Module Route docs](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route#onenterroutehook) for information.
 

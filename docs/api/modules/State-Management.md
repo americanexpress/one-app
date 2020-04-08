@@ -28,7 +28,7 @@ global.BROWSER; // Boolean
 
 ## Holocron Module Configuration
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@one-doc-templating/packages/holocron/API.md" id="Module.holocron" parentHeaderLevel="2" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@one-doc-templating/packages/holocron/API.md" id="Module.holocron" parentHeadingLevel="2" start-->
 
 Please see [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocron-module-configuration) in the Holocron API.
 
@@ -42,7 +42,7 @@ Please see [Holocron Module Configuration](https://github.com/americanexpress/ho
 **Contents**
 * [`holocronModule`](#holocronmodule)
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@one-doc-templating/packages/holocron/API.md" id="holocronModule" parentHeaderLevel="2" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@one-doc-templating/packages/holocron/API.md" id="holocronModule" parentHeadingLevel="2" start-->
 
 ### `holocronModule`
 
@@ -141,7 +141,7 @@ dispatch(setConfig(config));
 
 This `config` passed to `setConfig` replaces the contents of the `config` state object in the Redux Store.
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@one-doc-templating/README.md" id="errorReporting-duck" parentHeaderLevel="2" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@one-doc-templating/README.md" id="errorReporting-duck" parentHeadingLevel="2" start-->
 
 ### `errorReporting` Duck
 
@@ -149,7 +149,7 @@ Please see the [`errorReporting` Duck](https://github.com/americanexpress/one-ap
 
 <!--ONE-DOCS end-->
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@one-doc-templating/README.md" id="error-duck" parentHeaderLevel="2" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@one-doc-templating/README.md" id="error-duck" parentHeadingLevel="2" start-->
 
 ### `error` Duck
 
@@ -157,7 +157,7 @@ Please see the [`error` Duck](https://github.com/americanexpress/one-app-ducks#e
 
 <!--ONE-DOCS end-->
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@one-doc-templating/README.md" id="browser-duck" parentHeaderLevel="2" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@one-doc-templating/README.md" id="browser-duck" parentHeadingLevel="2" start-->
 
 ### `browser` Duck
 
@@ -165,7 +165,7 @@ Please see the [`browser` Duck](https://github.com/americanexpress/one-app-ducks
 
 <!--ONE-DOCS end-->
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@one-doc-templating/README.md" id="rendering-duck" parentHeaderLevel="2" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@one-doc-templating/README.md" id="rendering-duck" parentHeadingLevel="2" start-->
 
 ### `rendering` Duck
 
@@ -173,7 +173,7 @@ Please see the [`rendering` Duck](https://github.com/americanexpress/one-app-duc
 
 <!--ONE-DOCS end-->
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@one-doc-templating/README.md" id="redirection-duck" parentHeaderLevel="2" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@one-doc-templating/README.md" id="redirection-duck" parentHeadingLevel="2" start-->
 
 ### `redirection` Duck
 
@@ -185,7 +185,7 @@ Please see the [`redirection` Duck](https://github.com/americanexpress/one-app-d
 
 Please see the [`holocron` Duck](https://github.com/americanexpress/holocron/blob/master/packages/holocron/src/ducks/load.js) in the Holocron API.
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@one-doc-templating/README.md" id="intl-duck" parentHeaderLevel="2" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@one-doc-templating/README.md" id="intl-duck" parentHeadingLevel="2" start-->
 
 ### `intl` Duck
 
