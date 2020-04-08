@@ -44,7 +44,7 @@
   },
   "homepage": "https://github.com/americanexpress/one-app",
   "bugs": {
-    "url": "https://github.com/americanexpress/one-app"
+    "url": "https://github.com/americanexpress/one-app/issues"
   },
   "contributors": [
     "Andres Escobar <Andres.Escobar@aexp.com> (https://github.com/anescobar1991)",
@@ -55,7 +55,8 @@
     "Michael Tomcal <Michael.A.Tomcal@aexp.com> (https://github.com/mtomcal)",
     "Stephanie Coates  <Stephanie.Coates1@aexp.com> (https://github.com/stephaniecoates)",
     "Nelly Kiboi <Nelly.J.Kiboi@aexp.com> (https://github.com/nellyk)",
-    "Nickolas Oliver <nickolas.oliver@aexp.com> (https://github.com/PixnBits)"
+    "Nickolas Oliver <nickolas.oliver@aexp.com> (https://github.com/PixnBits)",
+    "Ruben Casas <ruben.casas@aexp.com> (https://github.com/infoxicator)"
   ],
   "license": "Apache-2.0",
   "keywords": [

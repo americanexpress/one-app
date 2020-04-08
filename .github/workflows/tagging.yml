@@ -28,7 +28,7 @@ jobs:
           git config --local user.name "OneAmexBot"
           echo ${tagversion}
           git tag ${tagversion}
-          git push origin --tag
+          git push origin --tags
           echo ::set-output name=action_tag::${tagversion}
       - name: Trigger Image Publishing
         uses: octokit/request-action@v2.x
