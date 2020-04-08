@@ -3,7 +3,6 @@
 exports[`createRequestStore should add the client holocron module map cache to the request object 1`] = `
 Object {
   "browser": Object {
-    "key": "123",
     "modules": Object {
       "test-root": Object {
         "baseUrl": "https://example.com/cdn/test-root/2.2.2/",
@@ -15,7 +14,6 @@ Object {
     },
   },
   "legacyBrowser": Object {
-    "key": "123",
     "modules": Object {
       "test-root": Object {
         "baseUrl": "https://example.com/cdn/test-root/2.2.2/",

@@ -14,7 +14,6 @@ Object {
 exports[`loadModules updates the client module map cache 1`] = `
 Object {
   "browser": Object {
-    "key": "123",
     "modules": Object {
       "some-root": Object {
         "baseUrl": "https://example.com/cdn/some-root/2.2.2/",
@@ -26,7 +25,6 @@ Object {
     },
   },
   "legacyBrowser": Object {
-    "key": "123",
     "modules": Object {
       "some-root": Object {
         "baseUrl": "https://example.com/cdn/some-root/2.2.2/",

@@ -46,7 +46,6 @@ jest.mock('react-dom', () => {
 
 describe('initClient', () => {
   const clientHolocronModuleMap = {
-    key: '123',
     modules: {
       'module-a': {
         baseUrl: 'https://example.com/cdn/module-a/1.0.0/',

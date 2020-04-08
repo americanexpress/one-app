@@ -91,7 +91,7 @@ Ultimately a Holocron Module Map is a JSON object of the following shape:
 
 ```json
 {
-  "key": "123",
+  "clientCacheRevision": "123",
   "modules": {
     "<moduleName>": {
       "browser": {
@@ -111,7 +111,7 @@ Ultimately a Holocron Module Map is a JSON object of the following shape:
 }
 ```
 
-The `key` property is used to cache bust all module bundles. This works because its value is appended
+The `clientCacheRevision` property is used to cache bust all module bundles. This works because its value is appended
 to each module asset request from One App.
 
 The `modules` property contains module objects containing the URL and
