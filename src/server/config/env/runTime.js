@@ -139,7 +139,15 @@ const runTime = [
   {
     name: 'ONE_CLIENT_REPORTING_URL',
     defaultValue: () => (process.env.NODE_ENV === 'development'
-      ? `http://${ip}:${process.env.HTTP_PORT}/_`
+      ? `http://${ip}:${process.env.HTTP_PORT}/_/report/errors`
+      : undefined),
+    validate: isFetchableUrlInBrowser,
+  },
+  // where to send/report csp violations
+  {
+    name: 'ONE_CLIENT_CSP_REPORTING_URL',
+    defaultValue: () => (process.env.NODE_ENV === 'development'
+      ? `http://${ip}:${process.env.HTTP_PORT}/_/report/security/csp-violation`
       : undefined),
     validate: isFetchableUrlInBrowser,
   },

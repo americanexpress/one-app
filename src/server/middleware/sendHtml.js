@@ -113,9 +113,9 @@ export function renderModuleScripts({
 
   return orderedLoadedModules.map((moduleName) => {
     const { integrity, url: src } = moduleMap.modules[moduleName][bundle];
-    const { key } = moduleMap;
+    const { clientCacheRevision } = moduleMap;
     const additionalAttributes = isDevelopmentEnv ? '' : `integrity="${integrity}"`;
-    const scriptSource = isDevelopmentEnv || !key ? src : `${src}?key=${key}`;
+    const scriptSource = isDevelopmentEnv || !clientCacheRevision ? src : `${src}?clientCacheRevision=${clientCacheRevision}`;
     return `<script src="${scriptSource}" crossorigin="anonymous" ${additionalAttributes}></script>`;
   }).join(isDevelopmentEnv ? '\n          ' : '');
 }

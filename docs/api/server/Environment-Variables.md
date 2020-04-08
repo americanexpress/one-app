@@ -23,6 +23,7 @@ One App can be configured via Environment Variables:
   * [`NODE_ENV`](#node_env)
   * [`ONE_CLIENT_LOCALE_FILENAME`](#one_client_locale_filename)
   * [`ONE_CLIENT_REPORTING_URL`](#one_client_reporting_url) ⚠️
+  * [`ONE_CLIENT_CSP_REPORTING_URL`](#one_client_csp_reporting_url) ⚠️
   * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
   * [`ONE_CLIENT_CDN_URL`](#one_client_cdn_url) ⚠️
   * [`ONE_CONFIG_ENV`](#one_config_env)
@@ -406,7 +407,7 @@ ONE_CLIENT_LOCALE_FILENAME=undefined
 * ✅ Production
 * ✅ Development
 
-URL where browser should send client side errors to. Defaults to `/_` if `NODE_ENV` is set to
+URL where browser should send client side errors to. Defaults to `/_/report/errors` if `NODE_ENV` is set to
 `development` and is undefined otherwise.
 
 **Shape**
@@ -422,10 +423,39 @@ ONE_CLIENT_REPORTING_URL=https://my-app-errors.com/client
 **Default Value**
 ```bash
 # if NODE_ENV=development
-ONE_CLIENT_REPORTING_URL=/_
+ONE_CLIENT_REPORTING_URL=/_/report/errors
 # else
 ONE_CLIENT_REPORTING_URL=undefined
 ```
+
+## `ONE_CLIENT_CSP_REPORTING_URL`
+
+⚠️ Required In Production
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+URL where browser should send [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) errors to. Defaults to `/_/report/security/csp-violation` if `NODE_ENV` is set to
+`development` and is undefined otherwise.
+
+**Shape**
+```bash
+ONE_CLIENT_CSP_REPORTING_URL=String
+```
+
+**Example**
+```bash
+ONE_CLIENT_CSP_REPORTING_URL=https://my-app-csp-violations.example.com/client
+```
+
+**Default Value**
+```bash
+# if NODE_ENV=development
+ONE_CLIENT_CSP_REPORTING_URL=/_/report/security/csp-violation
+# else
+ONE_CLIENT_CSP_REPORTING_URL=undefined
+
 
 ## `ONE_CLIENT_ROOT_MODULE_NAME`
 

@@ -43,6 +43,7 @@ describe('runTime', () => {
     'HOLOCRON_SERVER_MAX_MODULES_RETRY',
     'HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH',
     'ONE_CLIENT_REPORTING_URL',
+    'ONE_CLIENT_CSP_REPORTING_URL',
     'ONE_CLIENT_CDN_URL',
     'ONE_CLIENT_LOCALE_FILENAME',
     'ONE_CLIENT_ROOT_MODULE_NAME',
@@ -294,6 +295,21 @@ describe('runTime', () => {
     it('has no default value for production', () => {
       process.env.NODE_ENV = 'production';
       expect(clientReportingUrl.defaultValue()).not.toBeDefined();
+    });
+  });
+
+  describe('ONE_CLIENT_CSP_REPORTING_URL', () => {
+    const clientCSPReportingUrl = getEnvVarConfig('ONE_CLIENT_CSP_REPORTING_URL');
+
+    it('has a default value for development', () => {
+      process.env.NODE_ENV = 'development';
+      expect(clientCSPReportingUrl.defaultValue()).toBeDefined();
+      expect(clientCSPReportingUrl.defaultValue()).toMatch(/^https?:\/\//);
+    });
+
+    it('has no default value for production', () => {
+      process.env.NODE_ENV = 'production';
+      expect(clientCSPReportingUrl.defaultValue()).not.toBeDefined();
     });
   });
 
