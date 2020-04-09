@@ -15,7 +15,7 @@
  */
 
 import { createStore, compose } from 'redux';
-import { MODULE_LOADED } from 'holocron/ducks/load';
+import { MODULE_LOADED } from 'holocron/ducks/constants';
 
 import createEnhancer from '../../src/universal/enhancers';
 

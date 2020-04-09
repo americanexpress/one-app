@@ -25,6 +25,7 @@ import {
   getModules,
   getModuleMap,
   resetModuleRegistry,
+  addHigherOrderComponent,
 } from 'holocron/moduleRegistry';
 import { address } from 'ip';
 import onModuleLoad from './onModuleLoad';
@@ -54,11 +55,11 @@ export default function watchLocalModules() {
     moduleData.legacyBrowser.url = moduleData.legacyBrowser.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
     moduleData.node.url = moduleData.node.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
 
-    const module = await loadModule(
+    const module = addHigherOrderComponent(await loadModule(
       moduleNameChangeDetectedIn,
       moduleData,
       onModuleLoad
-    );
+    ));
 
     const modules = getModules().set(moduleNameChangeDetectedIn, module);
     resetModuleRegistry(modules, getModuleMap());

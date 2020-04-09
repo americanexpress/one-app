@@ -1,0 +1,33 @@
+{
+  "name": "cultured-frankie",
+  "version": "0.0.1",
+  "description": "A sample module to demonstrate and test internationalization and requiredExternals",
+  "scripts": {
+    "prebuild": "npm run clean",
+    "build": "bundle-module",
+    "clean": "rimraf build",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@americanexpress/one-app-ducks": "^4.0.0",
+    "holocron": "^1.0.0",
+    "immutable": "^3.8.2",
+    "prop-types": "^15.5.9",
+    "react": "^16.4.2",
+    "react-intl": "^3.6.0",
+    "react-redux": "^7.1.3",
+    "redux": "^4.0.4"
+  },
+  "devDependencies": {
+    "@americanexpress/one-app-bundler": "^6.0.0",
+    "babel-preset-amex": "^3.1.0",
+    "rimraf": "^2.5.2"
+  },
+  "one-amex": {
+    "bundler": {
+      "requiredExternals": [
+        "react-intl"
+      ]
+    }
+  }
+}

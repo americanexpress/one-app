@@ -14,11 +14,13 @@
  * permissions and limitations under the License.
  */
 
-import React from 'react';
+/** @jsx jsx */
+
+import { jsx, css } from '@emotion/core';
 import styles from './styles.scss';
 
 const HelloMessage = () => (
-  <h1 className={`helloMessage ${styles.stylish}`}>
+  <h1 className={`helloMessage ${styles.stylish}`} css={css`background-color: blue;`}>
     Hello! One App is successfully rendering its Modules!
   </h1>
 );

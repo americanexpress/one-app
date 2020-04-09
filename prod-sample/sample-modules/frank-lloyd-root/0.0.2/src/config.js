@@ -18,6 +18,11 @@ import csp from './csp';
 
 export default {
   csp,
+  extendSafeRequestRestrictedAttributes: {
+    cookies: [
+      'macadamia',
+    ],
+  },
   configureRequestLog: ({ req, log = {} }) => {
     const clonedLog = JSON.parse(JSON.stringify(log));
     const { cookies } = req;
