@@ -18,7 +18,7 @@
 import { expiration, cacheRouter } from '@americanexpress/one-service-worker';
 
 import {
-  oneAppRegexp, moduleRegexp, langPackRegexp,
+  oneAppRegExp, moduleRegExp, langPackRegExp,
 } from './utility';
 
 export default function createFetchMiddleware() {
@@ -26,17 +26,17 @@ export default function createFetchMiddleware() {
     {
       cacheName: 'one-app-cache',
       // eslint-disable-next-line no-useless-escape
-      match: oneAppRegexp,
+      match: oneAppRegExp,
     },
     {
       cacheName: 'module-cache',
       // ends with .browser.js and matches the name
-      match: moduleRegexp,
+      match: moduleRegExp,
     },
     {
       cacheName: 'language-pack-cache',
       // any valid bcp 47 locale id
-      match: langPackRegexp,
+      match: langPackRegExp,
     },
   ].map(cacheRouter).concat([
     expiration(),
