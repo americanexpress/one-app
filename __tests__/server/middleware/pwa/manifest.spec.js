@@ -16,33 +16,33 @@
 
 import {
   webmanifestMiddleware,
-  configureWebmanifest,
-  getWebmanifestEnabled,
-  getWebmanifest,
-  setWebmanifest,
-  resetWebmanifest,
+  configureWebManifest,
+  getWebManifestEnabled,
+  getWebManifest,
+  setWebManifest,
+  resetWebManifest,
 } from '../../../../src/server/middleware/pwa/manifest';
 
 describe('webmanifest middleware', () => {
   test('exports functions as default', () => {
     expect.assertions(6);
     expect(webmanifestMiddleware).toBeInstanceOf(Function);
-    expect(configureWebmanifest).toBeInstanceOf(Function);
-    expect(getWebmanifestEnabled).toBeInstanceOf(Function);
-    expect(getWebmanifest).toBeInstanceOf(Function);
-    expect(setWebmanifest).toBeInstanceOf(Function);
-    expect(resetWebmanifest).toBeInstanceOf(Function);
+    expect(configureWebManifest).toBeInstanceOf(Function);
+    expect(getWebManifestEnabled).toBeInstanceOf(Function);
+    expect(getWebManifest).toBeInstanceOf(Function);
+    expect(setWebManifest).toBeInstanceOf(Function);
+    expect(resetWebManifest).toBeInstanceOf(Function);
   });
 
   test('gets a valid webmanifest and gets enabled value', () => {
     expect.assertions(2);
-    expect(getWebmanifestEnabled()).toEqual(false);
-    expect(getWebmanifest()).toBe(null);
+    expect(getWebManifestEnabled()).toEqual(false);
+    expect(getWebManifest()).toBe(null);
   });
 
   test('resets the webmanifest', () => {
     expect.assertions(1);
-    expect(resetWebmanifest()).toMatchObject({
+    expect(resetWebManifest()).toMatchObject({
       name: expect.any(String),
       short_name: expect.any(String),
     });
@@ -50,12 +50,12 @@ describe('webmanifest middleware', () => {
 
   test('sets the webmanifest value', () => {
     expect.assertions(3);
-    expect(setWebmanifest({ name: 'One App Test' })).toMatchObject({
+    expect(setWebManifest({ name: 'One App Test' })).toMatchObject({
       name: 'One App Test',
       short_name: expect.any(String),
     });
-    expect(getWebmanifestEnabled()).toEqual(false);
-    expect(getWebmanifest()).toMatchObject({
+    expect(getWebManifestEnabled()).toEqual(false);
+    expect(getWebManifest()).toMatchObject({
       name: 'One App Test',
       short_name: expect.any(String),
     });
@@ -63,16 +63,16 @@ describe('webmanifest middleware', () => {
 
   test('configuring the webmanifest without params does nothing', () => {
     expect.assertions(3);
-    expect(configureWebmanifest()).toBeUndefined();
-    expect(getWebmanifestEnabled()).toEqual(false);
-    expect(getWebmanifest()).toEqual(null);
+    expect(configureWebManifest()).toBeUndefined();
+    expect(getWebManifestEnabled()).toEqual(false);
+    expect(getWebManifest()).toEqual(null);
   });
 
   test('configures the webmanifest and enables it', () => {
     expect.assertions(3);
-    expect(configureWebmanifest({ enabled: true, manifest: { short_name: 'one-app-test' } })).toBeUndefined();
-    expect(getWebmanifestEnabled()).toEqual(true);
-    expect(getWebmanifest()).toMatchObject({
+    expect(configureWebManifest({ enabled: true, manifest: { short_name: 'one-app-test' } })).toBeUndefined();
+    expect(getWebManifestEnabled()).toEqual(true);
+    expect(getWebManifest()).toMatchObject({
       name: expect.any(String),
       short_name: expect.any(String),
     });
@@ -80,20 +80,20 @@ describe('webmanifest middleware', () => {
 
   test('configures the webmanifest but does not enable by default', () => {
     expect.assertions(3);
-    expect(configureWebmanifest({ manifest: { short_name: 'one-app-test' } })).toBeUndefined();
-    expect(getWebmanifestEnabled()).toEqual(false);
-    expect(getWebmanifest()).toEqual(null);
+    expect(configureWebManifest({ manifest: { short_name: 'one-app-test' } })).toBeUndefined();
+    expect(getWebManifestEnabled()).toEqual(false);
+    expect(getWebManifest()).toEqual(null);
   });
 
   test('disables the webmanifest', () => {
     expect.assertions(3);
-    expect(configureWebmanifest({ enabled: false })).toBeUndefined();
-    expect(getWebmanifestEnabled()).toEqual(false);
-    expect(getWebmanifest()).toBe(null);
+    expect(configureWebManifest({ enabled: false })).toBeUndefined();
+    expect(getWebManifestEnabled()).toEqual(false);
+    expect(getWebManifest()).toBe(null);
   });
 
   describe('middleware', () => {
-    beforeAll(configureWebmanifest);
+    beforeAll(configureWebManifest);
 
     test('middleware factory returns function', () => {
       expect.assertions(1);
@@ -114,11 +114,11 @@ describe('webmanifest middleware', () => {
       const next = jest.fn();
       const send = jest.fn();
       const type = jest.fn(() => ({ send }));
-      configureWebmanifest({ enabled: true, manifest: { name: 'One App Test' } });
+      configureWebManifest({ enabled: true, manifest: { name: 'One App Test' } });
       expect(middleware(null, { type, send }, next)).toBeUndefined();
       expect(next).not.toHaveBeenCalled();
       expect(type).toHaveBeenCalledWith('application/manifest+json');
-      expect(send).toHaveBeenCalledWith(getWebmanifest());
+      expect(send).toHaveBeenCalledWith(getWebManifest());
     });
   });
 });

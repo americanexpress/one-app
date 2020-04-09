@@ -17,7 +17,7 @@
 let webmanifest = null;
 let webmanifestEnabled = false;
 
-export function resetWebmanifest() {
+export function resetWebManifest() {
   webmanifest = {
     name: 'One App',
     short_name: 'One App',
@@ -25,24 +25,24 @@ export function resetWebmanifest() {
   return webmanifest;
 }
 
-export function getWebmanifestEnabled() {
+export function getWebManifestEnabled() {
   return webmanifestEnabled;
 }
 
-export function getWebmanifest() {
+export function getWebManifest() {
   return webmanifest;
 }
 
-export function setWebmanifest(manifest) {
+export function setWebManifest(manifest) {
   if (manifest === null) webmanifest = null;
-  else Object.assign(resetWebmanifest(), manifest);
-  return getWebmanifest();
+  else Object.assign(resetWebManifest(), manifest);
+  return getWebManifest();
 }
 
-export function configureWebmanifest({ enabled = false, manifest } = {}) {
+export function configureWebManifest({ enabled = false, manifest } = {}) {
   webmanifestEnabled = enabled;
-  if (enabled === false) setWebmanifest(null);
-  else setWebmanifest(manifest);
+  if (enabled === false) setWebManifest(null);
+  else setWebManifest(manifest);
 }
 
 export function webmanifestMiddleware() {
@@ -50,6 +50,6 @@ export function webmanifestMiddleware() {
     if (!webmanifestEnabled) return next();
     return res
       .type('application/manifest+json')
-      .send(getWebmanifest());
+      .send(getWebManifest());
   };
 }

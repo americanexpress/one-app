@@ -17,7 +17,7 @@
 import routes from '../../config/routes';
 import { isString, isBoolean, isPlainObject } from '../../utils/typeChecks';
 
-import { configureWebmanifest, getWebmanifestEnabled, getWebmanifest } from './manifest';
+import { configureWebManifest, getWebManifestEnabled, getWebManifest } from './manifest';
 import {
   configureServiceWorker, getServiceWorkerEnabled, getServiceWorkerScope, getServiceWorkerScript,
 } from './service-worker';
@@ -50,7 +50,7 @@ export function setPWAConfig(value) {
   Object.assign(resetPWAConfig(), {
     enabled: getServiceWorkerEnabled(),
     scope: getServiceWorkerScope(),
-    manifest: getWebmanifest(),
+    manifest: getWebManifest(),
   }, value);
   return pwaConfig;
 }
@@ -60,7 +60,7 @@ export function getClientPWAConfig() {
     enabled: getServiceWorkerEnabled(),
     scope: getServiceWorkerScope(),
     scriptUrl: getServiceWorkerScript() ? [routes.pwa.prefix, routes.pwa.worker].join('/') : null,
-    manifest: getWebmanifestEnabled() ? [routes.pwa.prefix, routes.pwa.manifest].join('/') : null,
+    manifest: getWebManifestEnabled() ? [routes.pwa.prefix, routes.pwa.manifest].join('/') : null,
   };
 }
 
@@ -94,8 +94,8 @@ export function configurePWA(config) {
   const validatedConfig = validatePWAConfig(config);
 
   if (validatedConfig.enabled && validatedConfig.manifest) {
-    configureWebmanifest({ enabled: true, manifest: validatedConfig.manifest });
-  } else configureWebmanifest({ enabled: false, manifest: null });
+    configureWebManifest({ enabled: true, manifest: validatedConfig.manifest });
+  } else configureWebManifest({ enabled: false, manifest: null });
 
   configureServiceWorker(validatedConfig);
 
