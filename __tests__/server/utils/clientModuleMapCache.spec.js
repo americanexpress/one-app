@@ -17,7 +17,6 @@
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
 
 const moduleMap = {
-  key: '123',
   modules: {
     'module-a': {
       node: {

@@ -1,7 +1,8 @@
 #!/bin/bash
 set -ev
 docker build -t one-app:at-test .
-if [ "${TRAVIS_PULL_REQUEST}" = "false" ] && [ "${TRAVIS_BRANCH}" = "master" ]; then
+if [[ "${TRAVIS_BRANCH}" = "prepare-release" ]] ||
+[[ "${TRAVIS_BRANCH}" = "master"  && "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
   npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=$SURGE_DOMAIN
   echo $HEROKU_APP_URL >> sample-module-bundles/CORS && \
   npx surge teardown $SURGE_DOMAIN && \
