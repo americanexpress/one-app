@@ -21,7 +21,6 @@ const {
   getPWAConfig,
   getClientPWAConfig,
   setPWAConfig,
-  validatePWAConfig,
   configurePWA,
 } = pwaConfig;
 
@@ -30,10 +29,6 @@ jest.mock('fs', () => ({
 }));
 
 describe('pwa configuration', () => {
-  test('should consistently export', () => {
-    expect(Object.entries(pwaConfig)).toMatchSnapshot();
-  });
-
   test('getters return default state', () => {
     expect(getPWAConfig()).toMatchObject({
       enabled: false,
@@ -44,6 +39,19 @@ describe('pwa configuration', () => {
       enabled: false,
       scope: null,
       scriptUrl: false,
+    });
+  });
+
+  test('resetting pwa config', () => {
+    expect(resetPWAConfig()).toEqual({
+      enabled: false,
+      escapeHatch: false,
+      noop: false,
+    });
+    expect(getPWAConfig()).toEqual({
+      enabled: false,
+      escapeHatch: false,
+      noop: false,
     });
   });
 
@@ -68,71 +76,6 @@ describe('pwa configuration', () => {
       enabled: false,
       escapeHatch: false,
       noop: true,
-    });
-  });
-
-  test('resetPWAConfig', () => {
-    expect(resetPWAConfig()).toEqual({
-      enabled: false,
-      escapeHatch: false,
-      noop: false,
-    });
-    expect(getPWAConfig()).toEqual({
-      enabled: false,
-      escapeHatch: false,
-      noop: false,
-    });
-  });
-
-  describe('validation', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    beforeAll(() => {
-      jest.spyOn(console, 'warn');
-      jest.spyOn(console, 'error');
-      console.warn.mockImplementation();
-      console.error.mockImplementation();
-    });
-
-    test('invalid configuration object informs the user', () => {
-      expect(validatePWAConfig(null)).toEqual(null);
-      expect(console.error).toHaveBeenCalledTimes(1);
-      expect(console.error).toHaveBeenCalledWith('invalid config given to service worker (expected "object")');
-      expect(validatePWAConfig([])).toEqual(null);
-      expect(validatePWAConfig(true)).toEqual(null);
-    });
-
-    test('invalid configuration keys informs the user and ignores them', () => {
-      expect(validatePWAConfig({
-        random: 'key',
-        foo: 'bar',
-      })).toEqual({});
-      expect(console.warn).toHaveBeenCalledTimes(2);
-      expect(console.warn).toHaveBeenCalledWith('supplied configuration key "random" is not a valid property - ignoring');
-      expect(console.warn).toHaveBeenCalledWith('supplied configuration key "foo" is not a valid property - ignoring');
-    });
-
-    test('invalid configuration values for keys informs the user and ignores them', () => {
-      expect(validatePWAConfig({
-        enabled: 'true',
-        scope: 42,
-      })).toEqual({});
-      expect(console.warn).toHaveBeenCalledTimes(2);
-      expect(console.warn).toHaveBeenCalledWith('invalid value type given for configuration key "enabled" (expected "Boolean") - ignoring');
-      expect(console.warn).toHaveBeenCalledWith('invalid value type given for configuration key "scope" (expected "String") - ignoring');
-    });
-
-    test('valid keys emits no warnings or errors and returns valid configuration', () => {
-      const validConfig = {
-        enabled: true,
-        scope: '/',
-      };
-
-      expect(validatePWAConfig(validConfig)).toEqual(validConfig);
-      expect(console.warn).not.toHaveBeenCalled();
-      expect(console.error).not.toHaveBeenCalled();
     });
   });
 

@@ -25,10 +25,6 @@ beforeEach(() => {
 });
 
 describe('initializePWA', () => {
-  test('exports a function as default', () => {
-    expect(initializePWA).toBeInstanceOf(Function);
-  });
-
   test('it calls register when enabled', async () => {
     expect.assertions(3);
     const scriptUrl = '/_/pwa/sw.js';

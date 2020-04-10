@@ -14,9 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import * as serviceWorker from '../../../../src/server/pwa/middleware/service-worker';
-
-const {
+import {
   serviceWorkerMiddleware,
   getServiceWorkerEnabled,
   getServiceWorkerScript,
@@ -27,17 +25,13 @@ const {
   createServiceWorkerScript,
   createServiceWorkerEscapeHatchScript,
   createServiceWorkerNoopScript,
-} = serviceWorker;
+} from '../../../../src/server/pwa/middleware/service-worker';
 
 jest.mock('fs', () => ({
   readFileSync: (filePath) => ({ toString: () => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]') }),
 }));
 
 describe('service worker middleware components', () => {
-  test('should consistently export', () => {
-    expect(Object.entries(serviceWorker)).toMatchSnapshot();
-  });
-
   test('gets default values', () => {
     expect(getServiceWorkerEnabled()).toBe(false);
     expect(getServiceWorkerScript()).toBe(null);

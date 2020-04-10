@@ -24,10 +24,6 @@ beforeEach(() => {
 });
 
 describe('pwaClient', () => {
-  test('exports a function as default', () => {
-    expect(pwaClient).toBeInstanceOf(Function);
-  });
-
   test('imports client and calls with config', async () => {
     expect.assertions(3);
 

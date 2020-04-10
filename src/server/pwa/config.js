@@ -15,17 +15,10 @@
  */
 
 import { routes } from './createRouter';
-import { isString, isBoolean, isPlainObject } from '../utils/typeChecks';
+import { validatePWAConfig } from './validation';
 import {
   configureServiceWorker, getServiceWorkerEnabled, getServiceWorkerScope,
 } from './middleware/service-worker';
-
-const validKeys = new Map([
-  ['enabled', isBoolean],
-  ['escapeHatch', isBoolean],
-  ['noop', isBoolean],
-  ['scope', isString],
-]);
 
 let pwaConfig = null;
 
@@ -57,32 +50,6 @@ export function getClientPWAConfig() {
     scope: getServiceWorkerScope(),
     scriptUrl: getServiceWorkerEnabled() && [routes.prefix, routes.worker].join(''),
   };
-}
-
-export function validatePWAConfig(configToValidate) {
-  if (!isPlainObject(configToValidate)) {
-    console.error('invalid config given to service worker (expected "object")');
-    return null;
-  }
-
-  return Object.keys(configToValidate)
-    .map((key) => {
-      if (validKeys.has(key)) {
-        const testValueType = validKeys.get(key);
-
-        if (testValueType(configToValidate[key])) {
-          return [key, configToValidate[key]];
-        }
-
-        console.warn(
-          `invalid value type given for configuration key "${key}" (expected "${testValueType.name.replace('is', '')}") - ignoring`
-        );
-      } else console.warn(`supplied configuration key "${key}" is not a valid property - ignoring`);
-
-      return null;
-    })
-    .filter((value) => !!value)
-    .reduce((map, [key, value]) => ({ ...map, [key]: value }), {});
 }
 
 export function configurePWA(config) {
