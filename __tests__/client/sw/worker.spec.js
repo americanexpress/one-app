@@ -46,12 +46,12 @@ describe('service worker script', () => {
     console.error = error;
   });
 
-  test('calls "on" with lifecycle and fetch middleware', () => {
-    expect.assertions(4);
+  test('calls "on" with lifecycle middleware', () => {
+    expect.assertions(3);
 
     loadServiceWorker();
 
-    expect(on).toHaveBeenCalledTimes(3);
+    expect(on).toHaveBeenCalledTimes(2);
     expect(on).toHaveBeenCalledWith('install', createInstallMiddleware());
     expect(on).toHaveBeenCalledWith('activate', createActivateMiddleware());
   });

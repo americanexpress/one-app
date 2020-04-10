@@ -174,6 +174,22 @@ describe('initClient', () => {
     expect(tree).toMatchSnapshot();
   });
 
+  it('should load pwa script', async () => {
+    expect.assertions(2);
+    document.getElementById = jest.fn(() => ({ remove: jest.fn() }));
+
+    const { match } = require('@americanexpress/one-app-router');
+    match.mockImplementationOnce((config, cb) => cb(null, null, { testProp: 'test' }));
+
+    const { loadPWA } = require('../../src/client/prerender');
+
+    const initClient = require('../../src/client/initClient').default;
+
+    await initClient();
+
+    expect(loadPWA).toHaveBeenCalledTimes(1);
+  });
+
   it('should remove the server rendered stylesheets', async () => {
     expect.assertions(2);
     const remove = jest.fn();
