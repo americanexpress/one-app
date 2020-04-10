@@ -836,8 +836,8 @@ describe('Tests that require Docker setup', () => {
         });
 
         const { routes } = require('../../src/server/pwa/createRouter');
-        scriptUrl = [appAtTestUrls.fetchUrl, routes.pwa.prefix, routes.pwa.worker].join('');
-        manifestUrl = [appAtTestUrls.fetchUrl, routes.pwa.prefix, routes.pwa.manifest].join('');
+        scriptUrl = [appAtTestUrls.fetchUrl, routes.prefix, routes.worker].join('');
+        manifestUrl = [appAtTestUrls.fetchUrl, routes.prefix, routes.manifest].join('');
       });
 
       test('does not load PWA resources from server by default', async () => {
