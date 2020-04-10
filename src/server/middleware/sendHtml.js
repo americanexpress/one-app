@@ -188,12 +188,10 @@ export function getHead({
   helmetInfo,
   store,
   disableStyles,
-  manifest,
 }) {
   return `
     <head>
       ${getHelmetString(helmetInfo, disableStyles)}
-      ${manifest ? `<link rel="manifest" href="${manifest}">` : ''}
       ${disableStyles ? '' : `
       ${renderModuleStyles(store)}
       `}
@@ -308,7 +306,7 @@ export default function sendHtml(req, res) {
       .map((chunkAsset) => `<script src="${appBundlesURLPrefix}/${chunkAsset}" integrity="${integrityManifest[chunkAsset]}" crossorigin="anonymous"></script>`)
       .join('\n          ');
 
-    const { manifest, ...pwaMetadata } = getClientPWAConfig();
+    const pwaMetadata = getClientPWAConfig();
 
     const headSectionArgs = {
       helmetInfo,
@@ -316,7 +314,6 @@ export default function sendHtml(req, res) {
       disableScripts,
       disableStyles,
       scriptNonce,
-      manifest,
     };
 
     const bodySectionArgs = {

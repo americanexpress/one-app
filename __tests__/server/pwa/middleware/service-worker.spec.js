@@ -33,7 +33,6 @@ jest.mock('fs', () => ({
 
 describe('service worker middleware components', () => {
   test('exports functions as default', () => {
-    expect.assertions(10);
     expect(serviceWorkerMiddleware).toBeInstanceOf(Function);
     expect(getServiceWorkerEnabled).toBeInstanceOf(Function);
     expect(getServiceWorkerScope).toBeInstanceOf(Function);
@@ -47,7 +46,6 @@ describe('service worker middleware components', () => {
   });
 
   test('gets default values', () => {
-    expect.assertions(4);
     expect(getServiceWorkerEnabled()).toBe(false);
     expect(getServiceWorkerScript()).toBe(null);
     expect(getServiceWorkerScope()).toBe(null);
@@ -55,7 +53,6 @@ describe('service worker middleware components', () => {
   });
 
   test('sets the service worker script and scope', () => {
-    expect.assertions(3);
     const script = '[service-worker-script]';
     const scope = '/my-scope';
     expect(setServiceWorkerScript(script, scope)).toEqual(script);
@@ -64,7 +61,6 @@ describe('service worker middleware components', () => {
   });
 
   test('sets the service worker script without scope', () => {
-    expect.assertions(3);
     const script = '[service-worker-script-without-scope-set]';
     const scope = '/';
     expect(setServiceWorkerScript(script)).toEqual(script);
@@ -73,7 +69,6 @@ describe('service worker middleware components', () => {
   });
 
   test('sets the service worker script to null', () => {
-    expect.assertions(3);
     const script = null;
     const scope = null;
     expect(setServiceWorkerScript(script)).toEqual(script);
@@ -82,14 +77,12 @@ describe('service worker middleware components', () => {
   });
 
   test('creates various types of service worker scripts', () => {
-    expect.assertions(3);
     expect(createServiceWorkerNoopScript()).toEqual('[service-worker-noop-script]');
     expect(createServiceWorkerScript()).toEqual('[service-worker-script]');
     expect(createServiceWorkerEscapeHatchScript()).toEqual('self.unregister();');
   });
 
   test('configuring the service worker without parameters will disable it', () => {
-    expect.assertions(4);
     expect(configureServiceWorker()).toBeUndefined();
     expect(getServiceWorkerScript()).toBe(null);
     expect(getServiceWorkerScope()).toBe(null);
@@ -100,12 +93,10 @@ describe('service worker middleware components', () => {
     beforeAll(configureServiceWorker);
 
     test('middleware factory returns function', () => {
-      expect.assertions(1);
       expect(serviceWorkerMiddleware()).toBeInstanceOf(Function);
     });
 
     test('middleware calls next when disabled', () => {
-      expect.assertions(2);
       const middleware = serviceWorkerMiddleware();
       const next = jest.fn();
       expect(middleware(null, null, next)).toBeUndefined();
@@ -113,7 +104,6 @@ describe('service worker middleware components', () => {
     });
 
     test('middleware responds with service worker script', () => {
-      expect.assertions(9);
       const middleware = serviceWorkerMiddleware();
       const next = jest.fn();
       const res = {};
@@ -135,7 +125,6 @@ describe('service worker middleware components', () => {
     });
 
     test('middleware responds with service worker noop script', () => {
-      expect.assertions(9);
       const middleware = serviceWorkerMiddleware();
       const next = jest.fn();
       const res = {};
@@ -157,7 +146,6 @@ describe('service worker middleware components', () => {
     });
 
     test('middleware responds with service worker escape hatch script', () => {
-      expect.assertions(9);
       const middleware = serviceWorkerMiddleware();
       const next = jest.fn();
       const res = {};

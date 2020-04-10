@@ -16,21 +16,18 @@
 
 import express from 'express';
 
-import { webmanifestMiddleware } from './middleware/manifest';
 import { serviceWorkerMiddleware } from './middleware/service-worker';
 
 export const routes = {
   prefix: '/_/pwa',
   worker: '/service-worker.js',
-  manifest: '/manifest.webmanifest',
 };
 
 export function createPWARouter(routeNames = routes) {
   const pwaRouter = express.Router();
 
   pwaRouter
-    .get(routeNames.worker, serviceWorkerMiddleware())
-    .get(routeNames.manifest, webmanifestMiddleware());
+    .get(routeNames.worker, serviceWorkerMiddleware());
 
   return pwaRouter;
 }

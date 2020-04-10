@@ -29,8 +29,6 @@ jest.mock('fs', () => ({
 
 describe('pwa configuration', () => {
   test('exports functions as default', () => {
-    expect.assertions(6);
-
     expect(resetPWAConfig).toBeInstanceOf(Function);
     expect(getPWAConfig).toBeInstanceOf(Function);
     expect(getClientPWAConfig).toBeInstanceOf(Function);
@@ -40,8 +38,6 @@ describe('pwa configuration', () => {
   });
 
   test('getters return default state', () => {
-    expect.assertions(2);
-
     expect(getPWAConfig()).toMatchObject({
       enabled: false,
       escapeHatch: false,
@@ -50,14 +46,11 @@ describe('pwa configuration', () => {
     expect(getClientPWAConfig()).toMatchObject({
       enabled: false,
       scope: null,
-      manifest: false,
       scriptUrl: false,
     });
   });
 
   test('setting service worker configuration', () => {
-    expect.assertions(3);
-
     expect(setPWAConfig({
       enabled: true,
     })).toMatchObject({
@@ -85,33 +78,23 @@ describe('pwa configuration', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
-    const { error, warn } = console;
+
     beforeAll(() => {
-      console.warn = jest.fn();
-      console.error = jest.fn();
-    });
-    afterAll(() => {
-      console.warn = warn;
-      console.error = error;
+      jest.spyOn(console, 'warn');
+      jest.spyOn(console, 'error');
+      console.warn.mockImplementation();
+      console.error.mockImplementation();
     });
 
     test('invalid configuration object informs the user', () => {
-      expect.assertions(9);
-
       expect(validatePWAConfig(null)).toEqual(null);
       expect(console.error).toHaveBeenCalledTimes(1);
       expect(console.error).toHaveBeenCalledWith('invalid config given to service worker (expected "object")');
       expect(validatePWAConfig([])).toEqual(null);
-      expect(console.error).toHaveBeenCalledTimes(2);
-      expect(console.error).toHaveBeenCalledWith('invalid config given to service worker (expected "object")');
       expect(validatePWAConfig(true)).toEqual(null);
-      expect(console.error).toHaveBeenCalledTimes(3);
-      expect(console.error).toHaveBeenCalledWith('invalid config given to service worker (expected "object")');
     });
 
     test('invalid configuration keys informs the user and ignores them', () => {
-      expect.assertions(4);
-
       expect(validatePWAConfig({
         random: 'key',
         foo: 'bar',
@@ -122,26 +105,19 @@ describe('pwa configuration', () => {
     });
 
     test('invalid configuration values for keys informs the user and ignores them', () => {
-      expect.assertions(5);
-
       expect(validatePWAConfig({
         enabled: 'true',
         scope: 42,
-        manifest: '',
       })).toEqual({});
-      expect(console.warn).toHaveBeenCalledTimes(3);
+      expect(console.warn).toHaveBeenCalledTimes(2);
       expect(console.warn).toHaveBeenCalledWith('invalid value type given for configuration key "enabled" (expected "Boolean") - ignoring');
       expect(console.warn).toHaveBeenCalledWith('invalid value type given for configuration key "scope" (expected "String") - ignoring');
-      expect(console.warn).toHaveBeenCalledWith('invalid value type given for configuration key "manifest" (expected "PlainObject") - ignoring');
     });
 
     test('valid keys emits no warnings or errors and returns valid configuration', () => {
-      expect.assertions(3);
-
       const validConfig = {
         enabled: true,
         scope: '/',
-        manifest: {},
       };
 
       expect(validatePWAConfig(validConfig)).toEqual(validConfig);
@@ -152,23 +128,14 @@ describe('pwa configuration', () => {
 
   describe('configuration', () => {
     test('configuring the service worker and webmanifest to be enabled', () => {
-      expect.assertions(3);
-
-      const manifest = {
-        name: 'PWA Config',
-        short_name: 'pwa_config',
-        start_url: '/index.html',
-      };
       const config = {
         enabled: true,
-        manifest,
       };
       const expectedConfig = {
         enabled: true,
         escapeHatch: false,
         noop: false,
         scope: '/',
-        manifest,
       };
 
       expect(configurePWA(config)).toMatchObject(expectedConfig);
@@ -177,17 +144,14 @@ describe('pwa configuration', () => {
         enabled: true,
         scope: '/',
         scriptUrl: expect.any(String),
-        manifest: expect.any(String),
       });
     });
 
     test('disabling PWA configuration', () => {
-      expect.assertions(3);
-
       expect(configurePWA({ enabled: false })).toMatchObject({ enabled: false });
-      expect(getPWAConfig()).toMatchObject({ enabled: false, manifest: null });
+      expect(getPWAConfig()).toMatchObject({ enabled: false });
       expect(getClientPWAConfig()).toMatchObject({
-        enabled: false, scope: null, scriptUrl: false, manifest: false,
+        enabled: false, scope: null, scriptUrl: false,
       });
     });
   });

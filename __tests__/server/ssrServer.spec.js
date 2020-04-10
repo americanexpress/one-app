@@ -34,13 +34,6 @@ jest.mock('../../src/server/middleware/addFrameOptionsHeader');
 jest.mock('../../src/server/middleware/forwardedHeaderParser');
 jest.mock('../../src/server/utils/logging/serverMiddleware', () => (req, res, next) => setImmediate(next));
 jest.mock('../../src/universal/index');
-jest.mock('../../src/server/pwa/middleware/manifest', () => {
-  const manifest = jest.fn((req, res, next) => next());
-  return ({
-    manifest,
-    webmanifestMiddleware: () => manifest,
-  });
-});
 jest.mock('../../src/server/pwa/middleware/service-worker', () => {
   const serviceWorker = jest.fn((req, res, next) => next());
   return ({
@@ -111,7 +104,6 @@ describe('ssrServer', () => {
     let addCacheHeaders;
     let json;
     let forwardedHeaderParser;
-    let manifest;
     let serviceWorker;
 
     function loadServer() {
@@ -133,7 +125,6 @@ describe('ssrServer', () => {
       addCacheHeaders = require('../../src/server/middleware/addCacheHeaders').default;
       forwardedHeaderParser = require('../../src/server/middleware/forwardedHeaderParser').default;
       ({ serviceWorker } = require('../../src/server/pwa/middleware/service-worker'));
-      ({ manifest } = require('../../src/server/pwa/middleware/manifest'));
       const server = require('../../src/server/ssrServer').default;
 
       return server;
@@ -241,15 +232,6 @@ describe('ssrServer', () => {
         .get('/route')
         .end(() => {
           expect(addCacheHeaders).toBeCalled();
-          done();
-        });
-    });
-
-    it('should call manifest middleware', (done) => {
-      request(loadServer())
-        .get('/_/pwa/manifest.webmanifest')
-        .end(() => {
-          expect(manifest).toBeCalled();
           done();
         });
     });

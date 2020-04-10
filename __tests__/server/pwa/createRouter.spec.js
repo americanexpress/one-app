@@ -50,21 +50,15 @@ const makeGetFrom = (app) => (url) => new Promise((resolve, reject) => {
 
 describe('PWA router', () => {
   const workerPath = [routes.prefix, routes.worker].join('');
-  const manifestPath = [routes.prefix, routes.manifest].join('');
   const mockWorker = createServiceWorkerScript();
   const mockNoopWorker = createServiceWorkerNoopScript();
   const mockEscapeHatchWorker = createServiceWorkerEscapeHatchScript();
   const mockServiceWorkerScope = '/nested/scope';
-  const mockManifest = {
-    name: 'One App',
-    short_name: 'one-app',
-  };
 
   beforeEach(() => jest.clearAllMocks());
   beforeAll(() => {
     configurePWA({
       enabled: true,
-      manifest: mockManifest,
     });
   });
 
@@ -75,7 +69,6 @@ describe('PWA router', () => {
 
   [
     [workerPath, 'application/javascript; charset=utf-8', mockWorker],
-    [manifestPath, 'application/manifest+json; charset=utf-8', JSON.stringify(mockManifest)],
   ].forEach((pair) => {
     const [route, contentType, mockResponse] = pair;
 
@@ -97,7 +90,6 @@ describe('PWA router', () => {
 
     [
       [workerPath, 404],
-      [manifestPath, 404],
     ].forEach((pair) => {
       const [route, status] = pair;
 
