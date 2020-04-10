@@ -35,15 +35,9 @@ beforeEach(() => {
 });
 
 describe('service worker script', () => {
-  let error;
-
   beforeAll(() => {
-    ({ error } = console);
-    console.error = jest.fn();
-  });
-
-  afterAll(() => {
-    console.error = error;
+    jest.spyOn(console, 'error');
+    console.error.mockImplementation();
   });
 
   test('calls "on" with lifecycle middleware', () => {

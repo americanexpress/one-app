@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`pwa configuration should export components and router 1`] = `
+Array [
+  Array [
+    "resetPWAConfig",
+    [Function],
+  ],
+  Array [
+    "getPWAConfig",
+    [Function],
+  ],
+  Array [
+    "setPWAConfig",
+    [Function],
+  ],
+  Array [
+    "getClientPWAConfig",
+    [Function],
+  ],
+  Array [
+    "validatePWAConfig",
+    [Function],
+  ],
+  Array [
+    "configurePWA",
+    [Function],
+  ],
+]
+`;

@@ -181,17 +181,11 @@ describe('moveHelmetScripts', () => {
 });
 
 describe('loadPWA', () => {
-  let error;
-
   beforeAll(() => {
-    ({ error } = console);
-    console.error = jest.fn();
+    jest.spyOn(console, 'error');
     jest.spyOn(window, 'addEventListener');
     jest.spyOn(window, 'removeEventListener');
-  });
-
-  afterAll(() => {
-    console.error = error;
+    console.error.mockImplementation();
   });
 
   beforeEach(() => {

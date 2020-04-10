@@ -43,13 +43,11 @@ describe('worker noop', () => {
   });
 
   test('adds listeners', () => {
-    expect.assertions(5);
+    expect.assertions(3);
 
     loadServiceWorker();
 
     expect(self.listeners.size).toEqual(2);
-    expect(self.listeners.has('install')).toBeDefined();
-    expect(self.listeners.has('activate')).toBeDefined();
     expect(self.listeners.get('install').size).toEqual(1);
     expect(self.listeners.get('activate').size).toEqual(1);
   });

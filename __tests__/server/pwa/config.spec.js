@@ -14,27 +14,24 @@
  * permissions and limitations under the License.
  */
 
-import {
+import * as pwaConfig from '../../../src/server/pwa/config';
+
+const {
   resetPWAConfig,
   getPWAConfig,
   getClientPWAConfig,
   setPWAConfig,
   validatePWAConfig,
   configurePWA,
-} from '../../../src/server/pwa/config';
+} = pwaConfig;
 
 jest.mock('fs', () => ({
   readFileSync: (filePath) => ({ toString: () => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]') }),
 }));
 
 describe('pwa configuration', () => {
-  test('exports functions as default', () => {
-    expect(resetPWAConfig).toBeInstanceOf(Function);
-    expect(getPWAConfig).toBeInstanceOf(Function);
-    expect(getClientPWAConfig).toBeInstanceOf(Function);
-    expect(setPWAConfig).toBeInstanceOf(Function);
-    expect(validatePWAConfig).toBeInstanceOf(Function);
-    expect(configurePWA).toBeInstanceOf(Function);
+  it('should export components and router', () => {
+    expect(Object.entries(pwaConfig)).toMatchSnapshot();
   });
 
   test('getters return default state', () => {
@@ -71,6 +68,19 @@ describe('pwa configuration', () => {
       enabled: false,
       escapeHatch: false,
       noop: true,
+    });
+  });
+
+  test('resetPWAConfig', () => {
+    expect(resetPWAConfig()).toEqual({
+      enabled: false,
+      escapeHatch: false,
+      noop: false,
+    });
+    expect(getPWAConfig()).toEqual({
+      enabled: false,
+      escapeHatch: false,
+      noop: false,
     });
   });
 
@@ -121,8 +131,8 @@ describe('pwa configuration', () => {
       };
 
       expect(validatePWAConfig(validConfig)).toEqual(validConfig);
-      expect(console.warn).toHaveBeenCalledTimes(0);
-      expect(console.error).toHaveBeenCalledTimes(0);
+      expect(console.warn).not.toHaveBeenCalled();
+      expect(console.error).not.toHaveBeenCalled();
     });
   });
 
