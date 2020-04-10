@@ -30,7 +30,7 @@ jest.mock('fs', () => ({
 }));
 
 describe('pwa configuration', () => {
-  it('should export components and router', () => {
+  test('should consistently export', () => {
     expect(Object.entries(pwaConfig)).toMatchSnapshot();
   });
 

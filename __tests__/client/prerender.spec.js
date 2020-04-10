@@ -207,6 +207,23 @@ describe('loadPWA', () => {
     expect(window.removeEventListener).toHaveBeenCalledTimes(1);
   });
 
+  it('loadPWA does not reject if failure happens with initializePWA', async () => {
+    expect.assertions(4);
+
+    initializePWA.mockImplementationOnce(() => Promise.reject());
+
+    const loadPromise = loadPWA();
+    const loadEventHandler = window.addEventListener.mock.calls[0][1];
+
+    loadEventHandler();
+
+    await expect(loadPromise).resolves.toBeUndefined();
+
+    expect(initializePWA).toHaveBeenCalledTimes(1);
+    expect(window.addEventListener).toHaveBeenCalledTimes(1);
+    expect(window.removeEventListener).toHaveBeenCalledTimes(1);
+  });
+
   it('should not crash the application on failure and remove window load listener', async () => {
     expect.assertions(5);
 

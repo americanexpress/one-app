@@ -25,7 +25,6 @@ beforeEach(() => {
 
 describe('pwaClient', () => {
   test('exports a function as default', () => {
-    expect.assertions(1);
     expect(pwaClient).toBeInstanceOf(Function);
   });
 

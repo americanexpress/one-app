@@ -14,7 +14,9 @@
  * permissions and limitations under the License.
  */
 
-import {
+import * as serviceWorker from '../../../../src/server/pwa/middleware/service-worker';
+
+const {
   serviceWorkerMiddleware,
   getServiceWorkerEnabled,
   getServiceWorkerScript,
@@ -25,24 +27,15 @@ import {
   createServiceWorkerScript,
   createServiceWorkerEscapeHatchScript,
   createServiceWorkerNoopScript,
-} from '../../../../src/server/pwa/middleware/service-worker';
+} = serviceWorker;
 
 jest.mock('fs', () => ({
   readFileSync: (filePath) => ({ toString: () => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]') }),
 }));
 
 describe('service worker middleware components', () => {
-  test('exports functions as default', () => {
-    expect(serviceWorkerMiddleware).toBeInstanceOf(Function);
-    expect(getServiceWorkerEnabled).toBeInstanceOf(Function);
-    expect(getServiceWorkerScope).toBeInstanceOf(Function);
-    expect(getServiceWorkerType).toBeInstanceOf(Function);
-    expect(getServiceWorkerScript).toBeInstanceOf(Function);
-    expect(setServiceWorkerScript).toBeInstanceOf(Function);
-    expect(configureServiceWorker).toBeInstanceOf(Function);
-    expect(createServiceWorkerScript).toBeInstanceOf(Function);
-    expect(createServiceWorkerEscapeHatchScript).toBeInstanceOf(Function);
-    expect(createServiceWorkerNoopScript).toBeInstanceOf(Function);
+  test('should consistently export', () => {
+    expect(Object.entries(serviceWorker)).toMatchSnapshot();
   });
 
   test('gets default values', () => {

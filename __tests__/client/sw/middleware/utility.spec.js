@@ -20,12 +20,10 @@ import {
 
 describe('getConfig', () => {
   test('returns empty object if configuration is not set', () => {
-    expect.assertions(1);
     expect(getConfig()).toEqual({});
   });
 
   test('gets the current configuration from env', () => {
-    expect.assertions(1);
     const config = { buildVersion: '5.0.0' };
     process.env.OSW_CONFIG = JSON.stringify(config);
     expect(getConfig()).toEqual(config);

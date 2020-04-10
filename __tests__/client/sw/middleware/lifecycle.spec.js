@@ -14,21 +14,28 @@
  * permissions and limitations under the License.
  */
 
+import { skipWaiting, clientsClaim } from '@americanexpress/one-service-worker';
+
 import {
   createInstallMiddleware,
   createActivateMiddleware,
 } from '../../../../src/client/sw/middleware/lifecycle';
 
-jest.mock('@americanexpress/one-service-worker');
+jest.mock('@americanexpress/one-service-worker', () => ({
+  skipWaiting: () => 'skip-waiting',
+  clientsClaim: () => 'clients-claim',
+}));
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
 describe('createLifecycleMiddleware', () => {
-  test('exports a function as default', () => {
-    expect.assertions(2);
-    expect(createInstallMiddleware).toBeInstanceOf(Function);
-    expect(createActivateMiddleware).toBeInstanceOf(Function);
+  test('createInstallMiddleware uses skipWaiting', () => {
+    expect(createInstallMiddleware()).toEqual(skipWaiting());
+  });
+
+  test('createActivateMiddleware uses clientsClaim', () => {
+    expect(createActivateMiddleware()).toEqual(clientsClaim());
   });
 });

@@ -17,7 +17,7 @@
 import * as pwa from '../../../src/server/pwa';
 
 describe('PWA', () => {
-  it('should export components and router', () => {
+  test('should export components and router', () => {
     expect(Object.entries(pwa)).toMatchSnapshot();
   });
 });

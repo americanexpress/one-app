@@ -26,7 +26,6 @@ beforeEach(() => {
 
 describe('initializePWA', () => {
   test('exports a function as default', () => {
-    expect.assertions(1);
     expect(initializePWA).toBeInstanceOf(Function);
   });
 

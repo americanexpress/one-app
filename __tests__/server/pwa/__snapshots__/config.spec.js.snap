@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`pwa configuration should export components and router 1`] = `
+exports[`pwa configuration should consistently export 1`] = `
 Array [
   Array [
     "resetPWAConfig",

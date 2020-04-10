@@ -941,7 +941,7 @@ describe('Tests that require Docker setup', () => {
             expect(metadata).toEqual({
               enabled: false,
               scriptUrl: null,
-              scope: null,
+              scope: false,
             });
 
             // eslint-disable-next-line prefer-arrow-callback
