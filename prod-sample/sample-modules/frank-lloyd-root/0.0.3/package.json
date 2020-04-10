@@ -1,0 +1,31 @@
+{
+  "name": "frank-lloyd-root",
+  "version": "0.0.3",
+  "description": "Tenancy root module for integration tests",
+  "scripts": {
+    "prebuild": "npm run clean",
+    "build:assets": "cp -R assets build/0.0.3/assets",
+    "build": "bundle-module && npm run build:assets",
+    "clean": "rimraf build",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@americanexpress/one-app-ducks": "^4.0.0",
+    "content-security-policy-builder": "^2.1.0",
+    "holocron": "^1.1.0",
+    "holocron-module-route": "^1.1.0",
+    "immutable": "^4.0.0-0",
+    "ip": "^1.1.5",
+    "prop-types": "^15.5.9",
+    "react": "^16.4.2",
+    "react-helmet": "^5.2.1",
+    "react-immutable-proptypes": "^2.1.0",
+    "react-redux": "^7.1.1",
+    "redux": "^4.0.4"
+  },
+  "devDependencies": {
+    "@americanexpress/one-app-bundler": "^6.0.0",
+    "babel-preset-amex": "^3.1.0",
+    "rimraf": "^2.5.2"
+  }
+}

@@ -822,6 +822,216 @@ describe('Tests that require Docker setup', () => {
         writeModuleMap(originalModuleMap);
       });
     });
+
+    describe('progressive web app', () => {
+      const https = require('https');
+      const agent = new https.Agent({
+        rejectUnauthorized: false,
+      });
+
+      test('does not load PWA resources from server by default', async () => {
+        const routes = require('../../src/server/config/routes').default;
+        const serviceWorkerResponse = await fetch([appAtTestUrls.fetchUrl, routes.pwa.prefix, routes.pwa.worker].join(''), { agent });
+        const manifestResponse = await fetch([appAtTestUrls.fetchUrl, routes.pwa.prefix, routes.pwa.manifest].join(''), { agent });
+
+        expect(serviceWorkerResponse.status).toBe(404);
+        expect(manifestResponse.status).toBe(404);
+      });
+
+      describe('progressive web app enabled', () => {
+        let scriptUrl;
+        let manifestUrl;
+
+        beforeAll(async () => {
+          const routes = require('../../src/server/config/routes').default;
+          scriptUrl = [appAtTestUrls.fetchUrl, routes.pwa.prefix, routes.pwa.worker].join('');
+          manifestUrl = [appAtTestUrls.fetchUrl, routes.pwa.prefix, routes.pwa.manifest].join('');
+
+          await Promise.all([
+            addModuleToModuleMap({
+              moduleName: 'frank-lloyd-root',
+              version: '0.0.3',
+            }),
+            // for data fetching
+            addModuleToModuleMap({
+              moduleName: 'needy-frank',
+              version: '0.0.1',
+            }),
+          ]);
+          // wait for change to be picked up
+          await waitFor(5000);
+        });
+
+        afterAll(async () => {
+          writeModuleMap(originalModuleMap);
+        });
+
+        test('loads PWA resources from server ', async () => {
+          const serviceWorkerResponse = await fetch(scriptUrl, { agent });
+          const manifestResponse = await fetch(manifestUrl, { agent });
+
+          expect(serviceWorkerResponse.status).toBe(200);
+          expect(serviceWorkerResponse.headers._headers).toHaveProperty('service-worker-allowed');
+
+          expect(manifestResponse.status).toBe(200);
+          expect(manifestResponse.headers._headers).toHaveProperty('cache-control');
+        });
+
+        test('includes __pwa_metadata__ with enabled values', async () => {
+          await browser.url(`${appAtTestUrls.browserUrl}/success`);
+
+          // eslint-disable-next-line prefer-arrow-callback
+          const pwaMetaData = await browser.executeAsync(function getPWAMeta(done) {
+            done(window.__pwa_metadata__);
+          });
+
+          expect(pwaMetaData).toEqual({
+            enabled: true,
+            scriptUrl: scriptUrl.replace(appAtTestUrls.fetchUrl, ''),
+            scope: '/',
+          });
+        });
+
+        test('service worker has a valid registration', async () => {
+          await browser.url(`${appAtTestUrls.browserUrl}/success`);
+
+          // eslint-disable-next-line prefer-arrow-callback
+          const result = await browser.executeAsync(function getReg(done) {
+            navigator.serviceWorker.getRegistration().then(done);
+          });
+
+          expect(result).toMatchObject({
+            // subset of registration
+            waiting: null,
+            installing: null,
+            active: {
+              scriptURL: scriptUrl.replace(appAtTestUrls.fetchUrl, appAtTestUrls.browserUrl),
+              state: 'activated',
+            },
+            scope: `${appAtTestUrls.browserUrl}/`,
+            updateViaCache: 'none',
+          });
+        });
+
+        describe('service worker caching', () => {
+          async function getCacheSnapshot() {
+            // eslint-disable-next-line prefer-arrow-callback
+            const keys = await browser.executeAsync(function getKeys(done) {
+              caches.keys().then(done);
+            });
+
+            // eslint-disable-next-line prefer-arrow-callback
+            const items = await browser.executeAsync(function getKeys(cacheKeys, done) {
+              Promise.all(
+                cacheKeys.map((key) => caches.open(key)
+                  .then(
+                    (cache) => cache.keys()
+                      .then((requests) => [key, requests.map((request) => request.url)])
+                  ))
+              ).then(done);
+            }, keys);
+
+            const entries = new Map(items);
+
+            const values = items.reduce((array, next) => {
+              const [, urlEntries] = next;
+              return array.concat(urlEntries);
+            }, []);
+
+            return {
+              keys, items, entries, values,
+            };
+          }
+
+          test('successfully caches app resources and root module', async () => {
+            await browser.url(`${appAtTestUrls.browserUrl}/success`);
+
+            const { entries } = await getCacheSnapshot();
+
+            expect(entries.get('__sw/module-cache')).toContain(
+              'https://sample-cdn.frank/modules/91b18ab/frank-lloyd-root/0.0.3/frank-lloyd-root.browser.js'
+            );
+          });
+
+          test('successfully caches module assets', async () => {
+            await browser.url(`${appAtTestUrls.browserUrl}/healthy-frank`);
+
+            const { entries } = await getCacheSnapshot();
+
+            expect(entries.get('__sw/module-cache')).toContain(
+              'https://sample-cdn.frank/modules/91b18ab/healthy-frank/0.0.0/healthy-frank.browser.js'
+            );
+          });
+
+          test('successfully caches code-split module chunks', async () => {
+            await browser.url(`${appAtTestUrls.browserUrl}/demo/franks-burgers`);
+
+            const btn = await browser.$('#order-burger-btn');
+            await btn.waitForExist();
+            await btn.click();
+
+            const franksBurger = await browser.$('#franks-burger');
+            await franksBurger.waitForExist();
+
+            await expect(franksBurger.getText()).resolves.toEqual('Burger');
+
+            const { entries } = await getCacheSnapshot();
+
+            expect(entries.get('__sw/module-cache')).toContain(
+              'https://sample-cdn.frank/modules/91b18ab/franks-burgers/0.0.0/Burger.franks-burgers.chunk.browser.js'
+            );
+          });
+
+          test('assure only selected resources are cached, not everything', async () => {
+            const apiUrl = 'https://fast.api.frank/posts';
+            await browser.url(`${appAtTestUrls.browserUrl}/demo/needy-frank?api=${apiUrl}`);
+
+            const cacheSnapshot = await getCacheSnapshot();
+
+            console.log(cacheSnapshot);
+
+            expect(cacheSnapshot.values).not.toContain(apiUrl);
+          });
+        });
+
+        describe('progressive web app disabled', () => {
+          beforeAll(async () => {
+            await addModuleToModuleMap({
+              moduleName: 'frank-lloyd-root',
+              version: '0.0.0',
+            });
+            // wait for change to be picked up
+            await waitFor(5000);
+          });
+
+          afterAll(async () => {
+            writeModuleMap(originalModuleMap);
+          });
+
+          test('service worker is no longer registered and removed with root module change', async () => {
+            await browser.url(`${appAtTestUrls.browserUrl}/success`);
+
+            // eslint-disable-next-line prefer-arrow-callback
+            const metadata = await browser.executeAsync(function getPWAMeta(done) {
+              done(window.__pwa_metadata__);
+            });
+
+            expect(metadata).toEqual({
+              enabled: false,
+              scriptUrl: null,
+              scope: null,
+            });
+
+            // eslint-disable-next-line prefer-arrow-callback
+            const result = await browser.executeAsync(function getRegistration(done) {
+              navigator.serviceWorker.getRegistration().then(done);
+            });
+
+            expect(result).toBe(null);
+          });
+        });
+      });
+    });
   });
 });
 

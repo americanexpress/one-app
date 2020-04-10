@@ -19,8 +19,9 @@
 const path = require('path');
 const rollup = require('rollup');
 const resolve = require('@rollup/plugin-node-resolve');
+const babel = require('rollup-plugin-babel');
 
-async function buildServiceWorkerScripts({ dev = false, minify = true, config = {} } = {}) {
+async function buildServiceWorkerScripts({ dev = false, minify = true, config } = {}) {
   const inputDirectory = path.resolve(__dirname, '../src/client/sw');
   const buildFolderDirectory = path.resolve(__dirname, '../lib/server/middleware/pwa', 'scripts');
 
@@ -35,6 +36,7 @@ async function buildServiceWorkerScripts({ dev = false, minify = true, config = 
       },
     },
     resolve(),
+    babel(),
   ];
 
   if (minify) {
@@ -70,5 +72,5 @@ async function buildServiceWorkerScripts({ dev = false, minify = true, config = 
 
   const dev = process.env.NODE_ENV === 'development';
 
-  await buildServiceWorkerScripts({ config, dev });
+  await buildServiceWorkerScripts({ dev, config });
 }());

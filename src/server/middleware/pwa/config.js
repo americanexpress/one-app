@@ -59,8 +59,8 @@ export function getClientPWAConfig() {
   return {
     enabled: getServiceWorkerEnabled(),
     scope: getServiceWorkerScope(),
-    scriptUrl: getServiceWorkerScript() ? [routes.pwa.prefix, routes.pwa.worker].join('/') : null,
-    manifest: getWebManifestEnabled() ? [routes.pwa.prefix, routes.pwa.manifest].join('/') : null,
+    scriptUrl: getServiceWorkerScript() ? [routes.pwa.prefix, routes.pwa.worker].join('') : null,
+    manifest: getWebManifestEnabled() ? [routes.pwa.prefix, routes.pwa.manifest].join('') : null,
   };
 }
 

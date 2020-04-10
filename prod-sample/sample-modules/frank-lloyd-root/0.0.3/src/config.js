@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2020 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 
 import csp from './csp';
+import pwa from './pwa';
 import createFrankLikeFetch from './createFrankLikeFetch';
 
 export default {
   csp,
-  corsOrigins: [/\.example.com$/],
+  pwa,
+  corsOrigins: [/\.example\.com$/],
   configureRequestLog: ({ req, log = {} }) => {
     const clonedLog = JSON.parse(JSON.stringify(log));
     const { cookies } = req;
@@ -55,7 +57,4 @@ export default {
     ],
   },
   createSsrFetch: createFrankLikeFetch,
-  pwa: {
-    enabled: false,
-  },
 };
