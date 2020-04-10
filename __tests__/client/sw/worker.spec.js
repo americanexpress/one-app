@@ -20,7 +20,6 @@ import { on } from '@americanexpress/one-service-worker';
 import {
   createInstallMiddleware,
   createActivateMiddleware,
-  createFetchMiddleware,
 } from '../../../src/client/sw/middleware';
 
 jest.mock('@americanexpress/one-service-worker');
@@ -55,7 +54,6 @@ describe('service worker script', () => {
     expect(on).toHaveBeenCalledTimes(3);
     expect(on).toHaveBeenCalledWith('install', createInstallMiddleware());
     expect(on).toHaveBeenCalledWith('activate', createActivateMiddleware());
-    expect(on).toHaveBeenCalledWith('fetch', createFetchMiddleware());
   });
 
   test('catches error during initialization, logs the error and unregisters the service worker', () => {

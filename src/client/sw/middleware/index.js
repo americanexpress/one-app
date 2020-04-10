@@ -15,5 +15,4 @@
  */
 
 export { createInstallMiddleware, createActivateMiddleware } from './lifecycle';
-export { default as createFetchMiddleware } from './fetch';
 export { getConfig } from './utility';

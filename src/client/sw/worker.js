@@ -20,15 +20,12 @@ import { on } from '@americanexpress/one-service-worker';
 import {
   createInstallMiddleware,
   createActivateMiddleware,
-  createFetchMiddleware,
 } from './middleware';
 
 try {
   on('install', createInstallMiddleware());
 
   on('activate', createActivateMiddleware());
-
-  on('fetch', createFetchMiddleware());
 } catch (e) {
   // eslint-disable-next-line no-console
   console.error(e);

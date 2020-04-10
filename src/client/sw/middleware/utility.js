@@ -15,12 +15,7 @@
  */
 
 
+// eslint-disable-next-line import/prefer-default-export
 export function getConfig() {
   return JSON.parse(process.env.OSW_CONFIG || '{}');
 }
-
-export const moduleRegExp = /^https?.*\/(?<checksum>.*)?\/(?<name>.*)\/(?<version>.*)\/(?<chunk>.*\.)?(?:.*)\2\.(?<bundle>(legacy\.|chunk\.)?browser)\.js(?:\?clientCacheRevision=(?<revision>.*))?$/;
-
-export const langPackRegExp = /^https?.*\/(?<checksum>.*)?\/(?<name>.*)\/(?<version>.*)\/(?<locale>(?<language>[a-z]{2,3})-(?<country>[A-Z]{1,4})?)\/(?<env>qa|integration|production|(.*)\2)\.json$/;
-
-export const oneAppRegExp = /^https?.*(?:\/_\/static)?\/app\/(?<version>.*)\/(?<name>(?<i18n>i18n)?.*)\.js$/;
