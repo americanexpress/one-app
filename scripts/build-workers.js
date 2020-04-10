@@ -21,17 +21,17 @@ const rollup = require('rollup');
 const resolve = require('@rollup/plugin-node-resolve');
 const babel = require('rollup-plugin-babel');
 
-async function buildServiceWorkerScripts({ dev = false, minify = true, config } = {}) {
+async function buildServiceWorkerScripts({ dev = false, minify = true, config = {} } = {}) {
   const inputDirectory = path.resolve(__dirname, '../src/client/sw');
-  const buildFolderDirectory = path.resolve(__dirname, '../lib/server/middleware/pwa', 'scripts');
+  const buildFolderDirectory = path.resolve(__dirname, '../lib/server/pwa/middleware', 'scripts');
 
   const plugins = [
     {
       name: '@rollup/one-app-plugins/replace-osw-config',
-      transform(code, sourcemap) {
+      transform(code) {
         return {
           code: code.replace('process.env.OSW_CONFIG', JSON.stringify(config)),
-          sourcemap,
+          // sourcemap,
         };
       },
     },
@@ -62,7 +62,7 @@ async function buildServiceWorkerScripts({ dev = false, minify = true, config } 
   });
 }
 
-(async function buildWorkers() {
+(async function buildWorkers({ dev }) {
   // eslint-disable-next-line global-require, import/no-dynamic-require
   const { buildVersion } = require(path.resolve(__dirname, '../.build-meta.json'));
 
@@ -70,7 +70,8 @@ async function buildServiceWorkerScripts({ dev = false, minify = true, config } 
     buildVersion: buildVersion.replace(/(\.)/g, '\\$1'),
   };
 
-  const dev = process.env.NODE_ENV === 'development';
-
-  await buildServiceWorkerScripts({ dev, config });
-}());
+  await buildServiceWorkerScripts({ config, dev });
+}({
+  // for environment variables
+  dev: process.env.NODE_ENV === 'development',
+}));

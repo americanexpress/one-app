@@ -17,7 +17,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { register, unregister } from '@americanexpress/one-service-worker';
 
-export default async function initializePWA({ enabled, scriptUrl, scope } = {}) {
+export default async function pwaClient({ enabled, scriptUrl, scope } = {}) {
   if (enabled) {
     return register(scriptUrl, { scope });
   }

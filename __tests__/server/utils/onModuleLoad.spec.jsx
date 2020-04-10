@@ -29,7 +29,7 @@ import { setCorsOrigins } from '../../../src/server/middleware/conditionallyAllo
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from '../../../src/server/utils/safeRequest';
 import { setConfigureRequestLog } from '../../../src/server/utils/logging/serverMiddleware';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
-import { configurePWA } from '../../../src/server/middleware/pwa/config';
+import { configurePWA } from '../../../src/server/pwa';
 
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
@@ -48,7 +48,7 @@ jest.mock('../../../src/server/utils/safeRequest', () => ({
   extendRestrictedAttributesAllowList: jest.fn(),
   validateSafeRequestRestrictedAttributes: jest.fn(),
 }));
-jest.mock('../../../src/server/middleware/pwa/config', () => ({
+jest.mock('../../../src/server/pwa', () => ({
   configurePWA: jest.fn(),
 }));
 

@@ -14,10 +14,9 @@
  * permissions and limitations under the License.
  */
 
-export default {
-  pwa: {
-    prefix: '/_/pwa',
-    worker: '/service-worker.js',
-    manifest: '/manifest.webmanifest',
-  },
-};
+import { createPWARouter, routes } from './createRouter';
+
+export const pwaRouter = createPWARouter();
+export const pwaBasePath = routes.prefix;
+
+export { configurePWA, getClientPWAConfig, getPWAConfig } from './config';

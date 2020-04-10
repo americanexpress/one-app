@@ -21,7 +21,7 @@ import {
   setPWAConfig,
   validatePWAConfig,
   configurePWA,
-} from '../../../../src/server/middleware/pwa/config';
+} from '../../../src/server/pwa/config';
 
 jest.mock('fs', () => ({
   readFileSync: (filePath) => ({ toString: () => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]') }),
@@ -50,8 +50,8 @@ describe('pwa configuration', () => {
     expect(getClientPWAConfig()).toMatchObject({
       enabled: false,
       scope: null,
-      manifest: null,
-      scriptUrl: null,
+      manifest: false,
+      scriptUrl: false,
     });
   });
 
@@ -186,7 +186,9 @@ describe('pwa configuration', () => {
 
       expect(configurePWA({ enabled: false })).toMatchObject({ enabled: false });
       expect(getPWAConfig()).toMatchObject({ enabled: false, manifest: null });
-      expect(getClientPWAConfig()).toMatchObject({ enabled: false, scope: null, scriptUrl: null });
+      expect(getClientPWAConfig()).toMatchObject({
+        enabled: false, scope: null, scriptUrl: false, manifest: false,
+      });
     });
   });
 });

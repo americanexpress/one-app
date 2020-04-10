@@ -27,7 +27,7 @@ import { getClientStateConfig } from '../../../src/server/utils/stateConfig';
 // eslint-disable-next-line import/named
 import transit from '../../../src/universal/utils/transit';
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
-import { getClientPWAConfig } from '../../../src/server/middleware/pwa/config';
+import { getClientPWAConfig } from '../../../src/server/pwa';
 
 jest.mock('react-helmet');
 jest.mock('holocron', () => ({
@@ -82,7 +82,7 @@ jest.mock('../../../src/server/utils/readJsonFile', () => (filePath) => {
       throw new Error('Couldn\'t find JSON file to read');
   }
 });
-jest.mock('../../../src/server/middleware/pwa/config', () => ({
+jest.mock('../../../src/server/pwa', () => ({
   getClientPWAConfig: jest.fn(() => ({
     enabled: false,
     scope: null,

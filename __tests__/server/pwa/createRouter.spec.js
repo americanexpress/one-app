@@ -17,14 +17,16 @@
 import request from 'supertest';
 import express from 'express';
 
-import createPWARouter from '../../../src/server/routes/pwa';
-import { configurePWA } from '../../../src/server/middleware/pwa/config';
+import {
+  createPWARouter,
+  routes,
+} from '../../../src/server/pwa/createRouter';
+import { configurePWA } from '../../../src/server/pwa';
 import {
   createServiceWorkerEscapeHatchScript,
   createServiceWorkerNoopScript,
   createServiceWorkerScript,
-} from '../../../src/server/middleware/pwa/service-worker';
-import routes from '../../../src/server/config/routes';
+} from '../../../src/server/pwa/middleware/service-worker';
 
 jest.mock('fs', () => ({
   readFileSync: (filePath) => ({ toString: () => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]') }),
@@ -47,8 +49,8 @@ const makeGetFrom = (app) => (url) => new Promise((resolve, reject) => {
 });
 
 describe('PWA router', () => {
-  const workerPath = [routes.pwa.prefix, routes.pwa.worker].join('');
-  const manifestPath = [routes.pwa.prefix, routes.pwa.manifest].join('');
+  const workerPath = [routes.prefix, routes.worker].join('');
+  const manifestPath = [routes.prefix, routes.manifest].join('');
   const mockWorker = createServiceWorkerScript();
   const mockNoopWorker = createServiceWorkerNoopScript();
   const mockEscapeHatchWorker = createServiceWorkerEscapeHatchScript();
@@ -67,7 +69,7 @@ describe('PWA router', () => {
   });
 
   const app = express()
-    .use(routes.pwa.prefix, createPWARouter())
+    .use(routes.prefix, createPWARouter())
     .get('*', defaultMatchAll);
   const get = makeGetFrom(app);
 

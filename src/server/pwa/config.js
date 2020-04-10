@@ -14,13 +14,13 @@
  * permissions and limitations under the License.
  */
 
-import routes from '../../config/routes';
-import { isString, isBoolean, isPlainObject } from '../../utils/typeChecks';
+import { routes } from './createRouter';
+import { isString, isBoolean, isPlainObject } from '../utils/typeChecks';
 
-import { configureWebManifest, getWebManifestEnabled, getWebManifest } from './manifest';
+import { configureWebManifest, getWebManifestEnabled, getWebManifest } from './middleware/manifest';
 import {
-  configureServiceWorker, getServiceWorkerEnabled, getServiceWorkerScope, getServiceWorkerScript,
-} from './service-worker';
+  configureServiceWorker, getServiceWorkerEnabled, getServiceWorkerScope,
+} from './middleware/service-worker';
 
 const validKeys = new Map([
   ['enabled', isBoolean],
@@ -59,8 +59,8 @@ export function getClientPWAConfig() {
   return {
     enabled: getServiceWorkerEnabled(),
     scope: getServiceWorkerScope(),
-    scriptUrl: getServiceWorkerScript() ? [routes.pwa.prefix, routes.pwa.worker].join('') : null,
-    manifest: getWebManifestEnabled() ? [routes.pwa.prefix, routes.pwa.manifest].join('') : null,
+    scriptUrl: getServiceWorkerEnabled() && [routes.prefix, routes.worker].join(''),
+    manifest: getWebManifestEnabled() && [routes.prefix, routes.manifest].join(''),
   };
 }
 

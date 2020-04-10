@@ -23,7 +23,7 @@ import readJsonFile from './readJsonFile';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from './safeRequest';
 import { setConfigureRequestLog } from './logging/serverMiddleware';
 import { setCreateSsrFetch } from './createSsrFetch';
-import { configurePWA } from '../middleware/pwa';
+import { configurePWA } from '../pwa';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');

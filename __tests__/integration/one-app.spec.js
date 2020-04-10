@@ -824,29 +824,32 @@ describe('Tests that require Docker setup', () => {
     });
 
     describe('progressive web app', () => {
-      const https = require('https');
-      const agent = new https.Agent({
-        rejectUnauthorized: false,
+      let agent;
+      let scriptUrl;
+      let manifestUrl;
+
+      beforeAll(async () => {
+        const https = require('https');
+        // using this to avoid erroring from a self signed certificate
+        agent = new https.Agent({
+          rejectUnauthorized: false,
+        });
+
+        const { routes } = require('../../src/server/pwa/createRouter');
+        scriptUrl = [appAtTestUrls.fetchUrl, routes.pwa.prefix, routes.pwa.worker].join('');
+        manifestUrl = [appAtTestUrls.fetchUrl, routes.pwa.prefix, routes.pwa.manifest].join('');
       });
 
       test('does not load PWA resources from server by default', async () => {
-        const routes = require('../../src/server/config/routes').default;
-        const serviceWorkerResponse = await fetch([appAtTestUrls.fetchUrl, routes.pwa.prefix, routes.pwa.worker].join(''), { agent });
-        const manifestResponse = await fetch([appAtTestUrls.fetchUrl, routes.pwa.prefix, routes.pwa.manifest].join(''), { agent });
+        const serviceWorkerResponse = await fetch([appAtTestUrls.fetchUrl, scriptUrl].join(''), { agent });
+        const manifestResponse = await fetch([appAtTestUrls.fetchUrl, manifestUrl].join(''), { agent });
 
         expect(serviceWorkerResponse.status).toBe(404);
         expect(manifestResponse.status).toBe(404);
       });
 
       describe('progressive web app enabled', () => {
-        let scriptUrl;
-        let manifestUrl;
-
         beforeAll(async () => {
-          const routes = require('../../src/server/config/routes').default;
-          scriptUrl = [appAtTestUrls.fetchUrl, routes.pwa.prefix, routes.pwa.worker].join('');
-          manifestUrl = [appAtTestUrls.fetchUrl, routes.pwa.prefix, routes.pwa.manifest].join('');
-
           await Promise.all([
             addModuleToModuleMap({
               moduleName: 'frank-lloyd-root',

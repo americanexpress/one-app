@@ -25,7 +25,7 @@ import {
   createServiceWorkerScript,
   createServiceWorkerEscapeHatchScript,
   createServiceWorkerNoopScript,
-} from '../../../../src/server/middleware/pwa/service-worker';
+} from '../../../../src/server/pwa/middleware/service-worker';
 
 jest.mock('fs', () => ({
   readFileSync: (filePath) => ({ toString: () => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]') }),

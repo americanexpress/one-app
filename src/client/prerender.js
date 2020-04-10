@@ -55,6 +55,7 @@ export function moveHelmetScripts() {
 export function loadPWA(config = global.__pwa_metadata__) {
   return new Promise((resolve, reject) => {
     window.addEventListener('load', function pwaInitialization() {
+      // pwa client will install or remove the service worker
       initializePWA(config)
         .then(resolve)
         .catch(reject);

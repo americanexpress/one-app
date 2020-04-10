@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`PWA middleware should export components and middleware 1`] = `
+exports[`PWA should export components and router 1`] = `
 Array [
   Array [
     "configurePWA",
@@ -15,12 +15,12 @@ Array [
     [Function],
   ],
   Array [
-    "webmanifestMiddleware",
+    "pwaRouter",
     [Function],
   ],
   Array [
-    "serviceWorkerMiddleware",
-    [Function],
+    "pwaBasePath",
+    "/_/pwa",
   ],
 ]
 `;

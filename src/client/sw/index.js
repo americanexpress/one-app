@@ -14,8 +14,8 @@
  * permissions and limitations under the License.
  */
 
-export default function pwaClient(config) {
+export default function initializePWA(config) {
   return import(/* webpackChunkName: "pwa-client" */ './client')
     .then((imported) => imported.default)
-    .then((initializePWA) => initializePWA(config));
+    .then((pwaClient) => pwaClient(config));
 }

@@ -23,4 +23,4 @@ export const moduleRegExp = /^https?.*\/(?<checksum>.*)?\/(?<name>.*)\/(?<versio
 
 export const langPackRegExp = /^https?.*\/(?<checksum>.*)?\/(?<name>.*)\/(?<version>.*)\/(?<locale>(?<language>[a-z]{2,3})-(?<country>[A-Z]{1,4})?)\/(?<env>qa|integration|production|(.*)\2)\.json$/;
 
-export const oneAppRegExp = /^https?.*\/_\/static\/app\/(?<version>.*)\/(?<name>(?<i18n>i18n)?.*)\.js$/;
+export const oneAppRegExp = /^https?.*(?:\/_\/static)?\/app\/(?<version>.*)\/(?<name>(?<i18n>i18n)?.*)\.js$/;

@@ -27,7 +27,7 @@ import { getClientStateConfig } from '../utils/stateConfig';
 import getI18nFileFromState from '../utils/getI18nFileFromState';
 import renderModuleStyles from '../utils/renderModuleStyles';
 import readJsonFile from '../utils/readJsonFile';
-import { getClientPWAConfig } from './pwa';
+import { getClientPWAConfig } from '../pwa';
 
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
 const integrityManifest = readJsonFile('../../../bundle.integrity.manifest.json');

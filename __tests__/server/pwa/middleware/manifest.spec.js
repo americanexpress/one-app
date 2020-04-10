@@ -21,7 +21,7 @@ import {
   getWebManifest,
   setWebManifest,
   resetWebManifest,
-} from '../../../../src/server/middleware/pwa/manifest';
+} from '../../../../src/server/pwa/middleware/manifest';
 
 describe('webmanifest middleware', () => {
   test('exports functions as default', () => {

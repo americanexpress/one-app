@@ -14,9 +14,10 @@
  * permissions and limitations under the License.
  */
 
-import createPWARouter from './pwa';
+import * as pwa from '../../../src/server/pwa';
 
-// eslint-disable-next-line import/prefer-default-export
-export const pwaRouter = createPWARouter();
-
-export { default as routes } from '../config/routes';
+describe('PWA', () => {
+  it('should export components and router', () => {
+    expect(Object.entries(pwa)).toMatchSnapshot();
+  });
+});

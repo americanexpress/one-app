@@ -14,10 +14,23 @@
  * permissions and limitations under the License.
  */
 
-import * as routers from '../../../src/server/routes';
+import express from 'express';
 
-describe('routers', () => {
-  it('should export routers', () => {
-    expect(Object.entries(routers)).toMatchSnapshot();
-  });
-});
+import { webmanifestMiddleware } from './middleware/manifest';
+import { serviceWorkerMiddleware } from './middleware/service-worker';
+
+export const routes = {
+  prefix: '/_/pwa',
+  worker: '/service-worker.js',
+  manifest: '/manifest.webmanifest',
+};
+
+export function createPWARouter(routeNames = routes) {
+  const pwaRouter = express.Router();
+
+  pwaRouter
+    .get(routeNames.worker, serviceWorkerMiddleware())
+    .get(routeNames.manifest, webmanifestMiddleware());
+
+  return pwaRouter;
+}
