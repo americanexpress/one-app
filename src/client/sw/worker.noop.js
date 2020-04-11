@@ -23,6 +23,8 @@ self.addEventListener('install', function install() {
 
 // eslint-disable-next-line prefer-arrow-callback
 self.addEventListener('activate', function activate(event) {
+  // Loads each open browser tab/client at the exact url it is currently on.
+  // Used to reset any existing service worker as it will be controlling these clients.
   event.waitUntil(
     self.clients.matchAll({ type: 'window' })
       .then((windowClients) => {

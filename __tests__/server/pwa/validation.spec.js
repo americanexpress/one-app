@@ -75,10 +75,10 @@ describe('validation', () => {
 
   test('invalid configuration object informs the user', () => {
     expect(validatePWAConfig(null)).toEqual(null);
-    expect(console.error).toHaveBeenCalledTimes(1);
-    expect(console.error).toHaveBeenCalledWith('invalid config given to service worker (expected "object")');
     expect(validatePWAConfig([])).toEqual(null);
     expect(validatePWAConfig(true)).toEqual(null);
+    expect(console.error).toHaveBeenCalledTimes(3);
+    expect(console.error).toHaveBeenCalledWith('invalid config given to service worker (expected "object")');
   });
 
   test('invalid configuration keys informs the user and ignores them', () => {

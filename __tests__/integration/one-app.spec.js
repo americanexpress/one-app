@@ -826,7 +826,6 @@ describe('Tests that require Docker setup', () => {
     describe('progressive web app', () => {
       let agent;
       let scriptUrl;
-      let manifestUrl;
 
       beforeAll(async () => {
         const https = require('https');
@@ -837,15 +836,12 @@ describe('Tests that require Docker setup', () => {
 
         const { routes } = require('../../src/server/pwa/createRouter');
         scriptUrl = [appAtTestUrls.fetchUrl, routes.prefix, routes.worker].join('');
-        manifestUrl = [appAtTestUrls.fetchUrl, routes.prefix, routes.manifest].join('');
       });
 
       test('does not load PWA resources from server by default', async () => {
         const serviceWorkerResponse = await fetch([appAtTestUrls.fetchUrl, scriptUrl].join(''), { agent });
-        const manifestResponse = await fetch([appAtTestUrls.fetchUrl, manifestUrl].join(''), { agent });
 
         expect(serviceWorkerResponse.status).toBe(404);
-        expect(manifestResponse.status).toBe(404);
       });
 
       describe('progressive web app enabled', () => {
@@ -871,13 +867,9 @@ describe('Tests that require Docker setup', () => {
 
         test('loads PWA resources from server ', async () => {
           const serviceWorkerResponse = await fetch(scriptUrl, { agent });
-          const manifestResponse = await fetch(manifestUrl, { agent });
 
           expect(serviceWorkerResponse.status).toBe(200);
           expect(serviceWorkerResponse.headers._headers).toHaveProperty('service-worker-allowed');
-
-          expect(manifestResponse.status).toBe(200);
-          expect(manifestResponse.headers._headers).toHaveProperty('cache-control');
         });
 
         test('includes __pwa_metadata__ with enabled values', async () => {

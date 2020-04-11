@@ -176,36 +176,31 @@ In practice, this allows POST requests from given origins to return partially re
 * ✅ Root Module
 * 🚫 Child Module
 
+The `pwa` configuration to enable or disable the service worker.
+
 **Shape**
 ```js
 if (!global.BROWSER) {
   RootModule.appConfig = {
     pwa: {
-      // having enabled set to true will enable the service worker and
-      // other components such as the manifest
+      // having enabled set to true will enable the service worker and will be
+      // registered when one-app is loaded in the browser
       enabled: true,
+      // in the case we need to reset our clients from a faulty service worker
+      // we can use the noop worker to replace the older worker
+      noop: false,
+      // if we want to remove the service worker altogether, we can deploy
+      // an escape hatch worker to immediately remove itself on install
+      escapeHatch: false,
       // we can optionally define a scope to use with the service worker
       scope: '/',
-      // defining a webmanifest can be directly added into the config
-      manifest: {
-        name: 'My App Name',
-        short_name: 'My App',
-        start_url: '/home',
-        display: 'standalone',
-        background_color: '#fff',
-        description: 'My PWA app.',
-        icons: [
-          {
-            src: 'images/my-splash-icon.png',
-            sizes: '48x48',
-            type: 'image/png',
-          },
-        ],
-      },
     },
   };
 }
 ```
+
+**📘 More Information**
+* Example: [Frank Lloyd Root's `pwa` config](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.3/src/pwa.js)
 
 ## `configureRequestLog`
 **Module Type**
