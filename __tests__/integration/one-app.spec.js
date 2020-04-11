@@ -839,7 +839,7 @@ describe('Tests that require Docker setup', () => {
       });
 
       test('does not load PWA resources from server by default', async () => {
-        const serviceWorkerResponse = await fetch([appAtTestUrls.fetchUrl, scriptUrl].join(''), { agent });
+        const serviceWorkerResponse = await fetch(scriptUrl, { agent });
 
         expect(serviceWorkerResponse.status).toBe(404);
       });
