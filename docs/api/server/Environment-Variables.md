@@ -562,7 +562,7 @@ ONE_MAP_POLLING_MIN=0
 * ✅ Production
 * ✅ Development
 
-Overrides the `Referrer-Policy` header.
+Overrides the [`Referrer-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy) header.
 
 Must be one of: `no-referrer`, `no-referrer-when-downgrade`, `same-origin` or `strict-origin`.
 
