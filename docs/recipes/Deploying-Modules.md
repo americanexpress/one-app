@@ -112,7 +112,7 @@ const updateModuleMap = async () => {
     const response = await fetch(moduleMapUrl);
 
     const moduleMapContent = await response.json();
-    const dir = 'tmp';
+    const dir = 'module_map';
 
     moduleMapContent.modules[name] = {
       browser: {
