@@ -784,6 +784,7 @@ describe('Tests that require Docker setup', () => {
           },
         ],
         secretMessage: 'you are being watched',
+        loadedOnServer: true,
       });
     });
 
@@ -978,6 +979,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             data: {
               posts: [{ id: 1, title: 'json-server', author: 'typicode' }],
               secretMessage: null,
+              loadedOnServer: false,
             },
           });
         });
@@ -1000,6 +1002,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             data: {
               posts: [{ id: 1, title: 'json-server', author: 'typicode' }],
               secretMessage: null,
+              loadedOnServer: false,
             },
           });
         });
