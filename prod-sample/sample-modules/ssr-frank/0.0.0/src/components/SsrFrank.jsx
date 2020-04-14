@@ -40,6 +40,7 @@ const loadModuleData = async ({ store, fetchClient }) => {
     data: {
       posts,
       secretMessage,
+      loadedOnServer: !global.BROWSER,
     },
   });
 };
