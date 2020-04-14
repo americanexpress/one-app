@@ -131,7 +131,7 @@ const updateModuleMap = async () => {
 
     await fs.ensureDir(dir);
     await fs.writeFile(
-      './tmp/module-map.json', JSON.stringify(moduleMapContent, null, 2)
+      './module_map/module-map.json', JSON.stringify(moduleMapContent, null, 2)
     );
   } catch (error) {
     console.log(error);
@@ -152,7 +152,7 @@ At the bottom of your deploy action, you will want to add the following:
  - name: 'Update Module Map'
       run: |
         node ./scripts/updateModuleMap.js
-        now tmp --prod --confirm -t $NOW_TOKEN --name [NAME OF YOUR MODULE MAP]
+        now module_map --prod --confirm -t $NOW_TOKEN --name [NAME OF YOUR MODULE MAP]
       env:
         NOW_TOKEN: ${{ secrets.NOW_TOKEN }}
 ```
