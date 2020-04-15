@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 5.0.0 (2020-04-15)
+
 ## 5.0.0-rc.0 (2020-04-08)
 
 
