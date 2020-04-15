@@ -14,14 +14,47 @@
  * permissions and limitations under the License.
  */
 
+/* global BigInt */
+
+import { promisify } from 'util';
 import React from 'react';
 import { Provider } from 'react-redux';
 import url, { Url } from 'url';
 import { RouterContext } from '@americanexpress/one-app-router';
 import { composeModules } from 'holocron';
+import CircuitBreaker from 'opossum';
+import PrometheusMetrics from 'opossum-prometheus';
+import { register } from 'prom-client';
 import match from '../../universal/utils/matchPromisified';
 
 import { renderForString, renderForStaticMarkup } from '../utils/reactRendering';
+
+const immediate = promisify(setImmediate);
+
+const getModuleData = async ({ dispatch, modules }) => {
+  await dispatch(composeModules(modules));
+  return false;
+};
+
+const options = {
+  timeout: 1e3, // If our function takes longer than 1 second, trigger a failure
+  errorThresholdPercentage: 1, // When 1% of requests fail, trip the circuit
+  resetTimeout: 10e3, // After 10 seconds, try again.
+};
+
+const breaker = new CircuitBreaker(getModuleData, options);
+// Just need to connect opossum to prometheus
+// eslint-disable-next-line no-unused-vars
+const metrics = new PrometheusMetrics(breaker, register);
+
+breaker.fallback(async () => {
+  const start = process.hrtime.bigint();
+  await immediate();
+  const end = process.hrtime.bigint();
+  const diff = (end - start) / BigInt(1e6);
+  // Open the circuit if event loop lag is greater than 30ms
+  return diff > 30;
+});
 
 export default function createRequestHtmlFragment({ createRoutes }) {
   return async (req, res, next) => {
@@ -69,11 +102,22 @@ export default function createRequestHtmlFragment({ createRoutes }) {
           },
         }));
 
-      await dispatch(composeModules(routeModules));
-
       const state = store.getState();
       const disableScripts = state.getIn(['rendering', 'disableScripts']);
       const renderPartialOnly = state.getIn(['rendering', 'renderPartialOnly']);
+
+      if (disableScripts || renderPartialOnly) {
+        await dispatch(composeModules(routeModules));
+      } else {
+        const fallback = await breaker.fire({ dispatch, modules: routeModules });
+
+        if (fallback) {
+          req.appHtml = '';
+          req.helmetInfo = {};
+          return next();
+        }
+      }
+
       const renderMethod = (disableScripts || renderPartialOnly)
         ? renderForStaticMarkup : renderForString;
 
