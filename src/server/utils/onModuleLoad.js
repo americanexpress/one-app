@@ -23,6 +23,7 @@ import readJsonFile from './readJsonFile';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from './safeRequest';
 import { setConfigureRequestLog } from './logging/serverMiddleware';
 import { setCreateSsrFetch } from './createSsrFetch';
+import { setEventLoopLagThreshold } from './circuitBreaker';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
@@ -66,7 +67,7 @@ export default function onModuleLoad({
 }) {
   const {
     [CONFIGURATION_KEY]: {
-      // Tenant Root Specific
+      // Root Module Specific
       providedExternals,
       provideStateConfig,
       csp,
@@ -74,6 +75,7 @@ export default function onModuleLoad({
       configureRequestLog,
       extendSafeRequestRestrictedAttributes = {},
       createSsrFetch,
+      eventLoopLagThreshold,
       // Child Module Specific
       requiredExternals,
       validateStateConfig,
@@ -112,6 +114,7 @@ export default function onModuleLoad({
     extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
     setConfigureRequestLog(configureRequestLog);
     setCreateSsrFetch(createSsrFetch);
+    setEventLoopLagThreshold(eventLoopLagThreshold);
     logModuleLoad(moduleName, metaData.version);
     return;
   }

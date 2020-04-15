@@ -267,6 +267,26 @@ if (!global.BROWSER) {
 }
 ```
 
+## `eventLoopLagThreshold`
+**Module Type**
+* ✅ Root Module
+* 🚫 Child Module
+
+**Shape**
+```js
+if (!global.BROWSER) {
+  Module.appConfig = {
+    eventLoopLagThreshold: Number,
+  };
+}
+```
+
+The `eventLoopLagThreshold` directive accepts a number representing the threshold of the event loop lag (in milliseconds) before opening the circuit in our circuit breaker created with [Opossum](https://nodeshift.dev/opossum/). Once the circuit is open, it will remain open for 10 seconds and close at that time pending the event loop lag. The default value is `30`. If you desire to disable the circuit completely, set this value to `Infinity`.
+
+**📘 More Information**
+* [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
+* Library: [Opossum](https://nodeshift.dev/opossum/)
+
 `createSsrFetch` allows for customizing the fetch client used in `one-app` to perform server-side requests.
 
 For example, you may wish to forward cookies or headers from the initial page load request to all the requisite SSR API requests.

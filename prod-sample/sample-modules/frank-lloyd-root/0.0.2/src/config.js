@@ -17,6 +17,7 @@
 import csp from './csp';
 
 export default {
+  eventLoopLagThreshold: Infinity,
   csp,
   extendSafeRequestRestrictedAttributes: {
     cookies: [

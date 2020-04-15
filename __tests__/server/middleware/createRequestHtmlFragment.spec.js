@@ -14,10 +14,14 @@
  * permissions and limitations under the License.
  */
 
+/* global BigInt */
+
 import url from 'url';
 import { browserHistory } from '@americanexpress/one-app-router';
 import { Map as iMap, fromJS } from 'immutable';
+import { composeModules } from 'holocron';
 import match from '../../../src/universal/utils/matchPromisified';
+import breaker from '../../../src/server/utils/circuitBreaker';
 
 import * as reactRendering from '../../../src/server/utils/reactRendering';
 
@@ -25,13 +29,20 @@ jest.mock('../../../src/universal/utils/matchPromisified');
 
 jest.mock('holocron', () => ({
   composeModules: jest.fn(() => 'composeModules'),
+  getModule: () => () => 0,
 }));
 
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 const renderForStringSpy = jest.spyOn(reactRendering, 'renderForString');
 const renderForStaticMarkupSpy = jest.spyOn(reactRendering, 'renderForStaticMarkup');
+const msToNs = (n) => n * 1e6;
 
 describe('createRequestHtmlFragment', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
+  const realHrtime = process.hrtime;
+  const mockHrtime = (...args) => realHrtime(...args);
+  mockHrtime.bigint = jest.fn();
+  process.hrtime = mockHrtime;
 
   let req;
   let res;
@@ -59,6 +70,8 @@ describe('createRequestHtmlFragment', () => {
   });
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    breaker.close();
     req = jest.fn();
     req.headers = {};
 
@@ -78,6 +91,10 @@ describe('createRequestHtmlFragment', () => {
     renderForStaticMarkupSpy.mockClear();
   });
 
+  afterAll(() => {
+    process.hrtime = realHrtime;
+  });
+
   it('returns a function', () => {
     const createRequestHtmlFragment = require(
       '../../../src/server/middleware/createRequestHtmlFragment'
@@ -93,7 +110,6 @@ describe('createRequestHtmlFragment', () => {
     const middleware = createRequestHtmlFragment({ createRoutes });
     return middleware(req, res, next)
       .then(() => {
-        const { composeModules } = require('holocron');
         expect(composeModules).toHaveBeenCalled();
         expect(composeModules.mock.calls[0][0]).toMatchSnapshot();
         expect(dispatch).toHaveBeenCalledWith('composeModules');
@@ -228,5 +244,87 @@ describe('createRequestHtmlFragment', () => {
     expect(console.error.mock.calls[0]).toMatchSnapshot();
     expect(next).toHaveBeenCalled();
     /* eslint-enable no-console */
+  });
+
+  it('should open the circuit when event loop lag is > 30ms', async () => {
+    expect.assertions(5);
+    const createRequestHtmlFragment = require(
+      '../../../src/server/middleware/createRequestHtmlFragment'
+    ).default;
+    const middleware = createRequestHtmlFragment({ createRoutes });
+    process.hrtime.bigint
+      .mockReturnValueOnce(BigInt(msToNs(100)))
+      .mockReturnValueOnce(BigInt(msToNs(131)));
+    await sleep(110);
+    await middleware(req, res, next);
+    expect(next).toHaveBeenCalled();
+    expect(composeModules).not.toHaveBeenCalled();
+    expect(renderForStringSpy).not.toHaveBeenCalled();
+    expect(renderForStaticMarkupSpy).not.toHaveBeenCalled();
+    expect(req.appHtml).toBe('');
+  });
+
+  it('should not open the circuit when event loop lag is < 30ms', async () => {
+    expect.assertions(5);
+    const createRequestHtmlFragment = require(
+      '../../../src/server/middleware/createRequestHtmlFragment'
+    ).default;
+    const middleware = createRequestHtmlFragment({ createRoutes });
+    process.hrtime.bigint
+      .mockReturnValueOnce(BigInt(msToNs(100)))
+      .mockReturnValueOnce(BigInt(msToNs(120)));
+    await sleep(110);
+    await middleware(req, res, next);
+    expect(next).toHaveBeenCalled();
+    expect(composeModules).toHaveBeenCalled();
+    expect(renderForStringSpy).toHaveBeenCalled();
+    expect(renderForStaticMarkupSpy).not.toHaveBeenCalled();
+    expect(req.appHtml).toBe('hi');
+  });
+
+  it('should not open the circuit for partials', async () => {
+    expect.assertions(5);
+    const createRequestHtmlFragment = require(
+      '../../../src/server/middleware/createRequestHtmlFragment'
+    ).default;
+    const middleware = createRequestHtmlFragment({ createRoutes });
+    getState.mockImplementationOnce(() => fromJS({
+      rendering: {
+        renderPartialOnly: true,
+      },
+    }));
+    process.hrtime.bigint
+      .mockReturnValueOnce(BigInt(msToNs(100)))
+      .mockReturnValueOnce(BigInt(msToNs(131)));
+    await sleep(110);
+    await middleware(req, res, next);
+    expect(next).toHaveBeenCalled();
+    expect(composeModules).toHaveBeenCalled();
+    expect(renderForStringSpy).not.toHaveBeenCalled();
+    expect(renderForStaticMarkupSpy).toHaveBeenCalled();
+    expect(req.appHtml).toBe('hi');
+  });
+
+  it('should not open the when scripts are disabled', async () => {
+    expect.assertions(5);
+    const createRequestHtmlFragment = require(
+      '../../../src/server/middleware/createRequestHtmlFragment'
+    ).default;
+    const middleware = createRequestHtmlFragment({ createRoutes });
+    getState.mockImplementationOnce(() => fromJS({
+      rendering: {
+        disableScripts: true,
+      },
+    }));
+    process.hrtime.bigint
+      .mockReturnValueOnce(BigInt(msToNs(100)))
+      .mockReturnValueOnce(BigInt(msToNs(131)));
+    await sleep(110);
+    await middleware(req, res, next);
+    expect(next).toHaveBeenCalled();
+    expect(composeModules).toHaveBeenCalled();
+    expect(renderForStringSpy).not.toHaveBeenCalled();
+    expect(renderForStaticMarkupSpy).toHaveBeenCalled();
+    expect(req.appHtml).toBe('hi');
   });
 });

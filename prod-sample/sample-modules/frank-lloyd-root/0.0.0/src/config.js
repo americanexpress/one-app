@@ -18,6 +18,7 @@ import csp from './csp';
 import createFrankLikeFetch from './createFrankLikeFetch';
 
 export default {
+  eventLoopLagThreshold: Infinity,
   csp,
   corsOrigins: [/\.example.com$/],
   configureRequestLog: ({ req, log = {} }) => {
