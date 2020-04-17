@@ -89,7 +89,7 @@ To create a module map in Now, you can create a module-map.json locally that loo
 }
 ```
 
-You can deploy this by running the [now](https://zeit.co/docs/now-cli#commands/now/basic-usage) command within the directory that you created the `module-map.json` in. You can now view it at the production URL that `now` prints out, you will need that URL for the following steps.
+You can deploy this by running the [now](https://zeit.co/docs/now-cli#commands/now/basic-usage) command within the directory that you created the `module-map.json` in. You can now view it at the production URL that `now` prints out, you will need that URL for the following steps for the `moduleMapUrl` variable.
 
 ### Create an Update Module Script
 
