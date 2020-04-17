@@ -28,7 +28,7 @@ export default contentSecurityPolicyBuilder({
       // used by integration tests running in docker where domain names are aliased
       'https://sample-cdn.frank',
       // used for our sample app deployment in heroku
-      'https://one-app-statics.surge.sh',
+      '*.surge.sh',
       // used for local development
       `${ip.address()}:3001`,
       // used for local development
@@ -39,7 +39,7 @@ export default contentSecurityPolicyBuilder({
       // used by integration tests running in docker
       'https://sample-cdn.frank',
       // used for our sample app deployment in heroku
-      'https://one-app-statics.surge.sh',
+      '*.surge.sh',
     ],
     styleSrc: [
       "'self'",
@@ -55,7 +55,7 @@ export default contentSecurityPolicyBuilder({
       // used by integration tests running in docker where domain names are aliased
       'https://sample-cdn.frank',
       // used for our sample app deployment in heroku
-      'https://one-app-statics.surge.sh',
+      '*.surge.sh',
     ],
   },
 });
