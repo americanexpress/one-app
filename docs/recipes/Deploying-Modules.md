@@ -13,7 +13,7 @@
 
 ## Deploying to Now with GitHub Actions
 
-[Now.sh](https://zeit.co/home) allows you to deploy statics such as your modules. We will accomplish this be using [GitHub Actions](https://github.com/features/actions).
+[Now.sh](https://zeit.co/home) allows you to deploy statics such as your modules. We will accomplish this by using [GitHub Actions](https://github.com/features/actions).
 
 ### Creating your Deploy Action
 
