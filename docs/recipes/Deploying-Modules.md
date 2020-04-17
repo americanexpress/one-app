@@ -17,7 +17,7 @@
 
 ### Creating your Deploy Action
 
-This deploy action uses Zeit's `now-cli` which you will need a [token from Now](https://zeit.co/account/tokens). The below action runs whenever a release is created or a push to master occurs. The `now` command already comes available within GitHub actions, due to this you do not need to install this or add it to your `package.json`.
+This deploy action uses Zeit's `now-cli` so you will need a create [token with Now](https://zeit.co/account/tokens). The below action runs whenever a release is created or a push to master occurs. You do not need to install or add `now-cli` to your `package.json` as the `now` command is available within GitHub actions, .
 
 ```yml
 name: Deploy
