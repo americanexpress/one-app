@@ -2,7 +2,6 @@
 
 exports[`initClient should set the holocron module map with the value sent from the server 1`] = `
 Immutable.Map {
-  "key": "123",
   "modules": Immutable.Map {
     "module-a": Immutable.Map {
       "baseUrl": "https://example.com/cdn/module-a/1.0.0/",

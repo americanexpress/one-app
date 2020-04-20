@@ -485,7 +485,7 @@ describe('Tests that require Docker setup', () => {
           expect(consoleLogs).toEqual(
             expect.arrayContaining([{
               level: 'SEVERE',
-              message: expect.stringMatching(/https:\/\/one-app:8443\/demo\/healthy-frank - Failed to find a valid digest in the 'integrity' attribute for resource 'https:\/\/sample-cdn\.frank\/modules\/.+\/healthy-frank\/0\.0\.0\/healthy-frank.browser.js\?key=not-used-in-development' with computed SHA-256 integrity '.+'\. The resource has been blocked\./),
+              message: expect.stringMatching(/https:\/\/one-app:8443\/demo\/healthy-frank - Failed to find a valid digest in the 'integrity' attribute for resource 'https:\/\/sample-cdn\.frank\/modules\/.+\/healthy-frank\/0\.0\.0\/healthy-frank.browser.js' with computed SHA-256 integrity '.+'\. The resource has been blocked\./),
               source: 'security',
               timestamp: expect.any(Number),
             }])
@@ -784,6 +784,7 @@ describe('Tests that require Docker setup', () => {
           },
         ],
         secretMessage: 'you are being watched',
+        loadedOnServer: true,
       });
     });
 
@@ -978,6 +979,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             data: {
               posts: [{ id: 1, title: 'json-server', author: 'typicode' }],
               secretMessage: null,
+              loadedOnServer: false,
             },
           });
         });
@@ -1000,6 +1002,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             data: {
               posts: [{ id: 1, title: 'json-server', author: 'typicode' }],
               secretMessage: null,
+              loadedOnServer: false,
             },
           });
         });
@@ -1016,7 +1019,7 @@ describe('Tests that can run against either local Docker setup or remote One App
         test('uses language from the language pack to render on the initial page load', async () => {
           await browser.url(`${appInstanceUrls.browserUrl}/demo/cultured-frankie`);
           const greetingMessage = await browser.$('#greeting-message');
-          await waitFor(200);
+          await waitFor(1000);
           expect(await greetingMessage.getText()).toBe(
             'Hello, my name is Frankie and I am in the United States!'
           );
@@ -1027,13 +1030,13 @@ describe('Tests that can run against either local Docker setup or remote One App
           const greetingMessage = await browser.$('#greeting-message');
           const localeSelector = await browser.$('#locale-selector');
           await localeSelector.selectByVisibleText('en-CA');
-          await waitFor(200);
+          await waitFor(1000);
           expect(await greetingMessage.getText()).toBe(
             'Hello, my name is Frankie and I am in Canada!'
           );
-          await waitFor(200);
+          await waitFor(1000);
           await localeSelector.selectByVisibleText('es-MX');
-          await waitFor(200);
+          await waitFor(1000);
           expect(await greetingMessage.getText()).toBe(
             'Hola! Mi nombre es Frankie y estoy en Mexico!'
           );
