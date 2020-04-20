@@ -14,12 +14,16 @@
  * permissions and limitations under the License.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { register, unregister } from '@americanexpress/one-service-worker';
+import { register } from '@americanexpress/one-service-worker';
 
 export default async function pwaClient({ enabled, scriptUrl, scope } = {}) {
   if (enabled) {
+    // as of now, we are only registering a service worker in pwaClient
+    // down the line, we should integrate the PWA state into the store
+    // and include a reducer in `one-app-ducks` where we can select PWA
+    // state directly from the store and update accordingly with
+    // dispatch calls
     return register(scriptUrl, { scope });
   }
-  return unregister(scope);
+  return Promise.resolve();
 }

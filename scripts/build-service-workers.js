@@ -21,20 +21,11 @@ const rollup = require('rollup');
 const resolve = require('@rollup/plugin-node-resolve');
 const babel = require('rollup-plugin-babel');
 
-async function buildServiceWorkerScripts({ dev = false, minify = true, config = {} } = {}) {
+async function buildServiceWorkerScripts({ dev = false, minify = true } = {}) {
   const inputDirectory = path.resolve(__dirname, '../src/client/sw');
   const buildFolderDirectory = path.resolve(__dirname, '../lib/server/pwa/middleware', 'scripts');
 
   const plugins = [
-    {
-      name: '@rollup/one-app-plugins/replace-osw-config',
-      transform(code) {
-        return {
-          code: code.replace('process.env.OSW_CONFIG', JSON.stringify(config)),
-          // sourcemap,
-        };
-      },
-    },
     resolve(),
     babel(),
   ];
@@ -63,14 +54,7 @@ async function buildServiceWorkerScripts({ dev = false, minify = true, config = 
 }
 
 (async function buildWorkers({ dev }) {
-  // eslint-disable-next-line global-require, import/no-dynamic-require
-  const { buildVersion } = require(path.resolve(__dirname, '../.build-meta.json'));
-
-  const config = {
-    buildVersion: buildVersion.replace(/(\.)/g, '\\$1'),
-  };
-
-  await buildServiceWorkerScripts({ config, dev });
+  await buildServiceWorkerScripts({ dev });
 }({
   // for environment variables
   dev: process.env.NODE_ENV === 'development',

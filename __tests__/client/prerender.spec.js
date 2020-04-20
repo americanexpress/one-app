@@ -19,7 +19,7 @@ import { fromJS } from 'immutable';
 import {
   initializeClientStore, loadPrerenderScripts, moveHelmetScripts, loadPWA,
 } from '../../src/client/prerender';
-import initializePWA from '../../src/client/sw';
+import { initializePWA } from '../../src/client/sw';
 
 jest.mock('@americanexpress/one-app-router', () => ({
   browserHistory: 'browserHistory',
@@ -35,6 +35,7 @@ jest.mock('../../src/universal/reducers', () => 'reducers');
 
 jest.mock('@americanexpress/one-app-ducks', () => ({
   getLocalePack: jest.fn((locale) => Promise.resolve(locale)),
+  addErrorToReport: jest.fn(),
 }));
 
 jest.mock('../../src/universal/utils/createTimeoutFetch', () => jest.fn(
@@ -44,7 +45,7 @@ jest.mock('../../src/universal/utils/createTimeoutFetch', () => jest.fn(
       return res;
     })
 ));
-jest.mock('../../src/client/sw', () => jest.fn(() => Promise.resolve()));
+jest.mock('../../src/client/sw', () => ({ initializePWA: jest.fn(() => Promise.resolve()) }));
 
 describe('initializeClientStore', () => {
   beforeAll(() => {
@@ -181,11 +182,13 @@ describe('moveHelmetScripts', () => {
 });
 
 describe('loadPWA', () => {
+  const store = {
+    dispatch: jest.fn(),
+  };
+
   beforeAll(() => {
-    jest.spyOn(console, 'error');
     jest.spyOn(window, 'addEventListener');
     jest.spyOn(window, 'removeEventListener');
-    console.error.mockImplementation();
   });
 
   beforeEach(() => {
@@ -195,7 +198,7 @@ describe('loadPWA', () => {
   it('should call initializePWA on window load and remove the load listener when resolved', async () => {
     expect.assertions(4);
 
-    const loadPromise = loadPWA();
+    const loadPromise = loadPWA(store);
     const loadEventHandler = window.addEventListener.mock.calls[0][1];
 
     loadEventHandler();
@@ -212,7 +215,7 @@ describe('loadPWA', () => {
 
     initializePWA.mockImplementationOnce(() => Promise.reject());
 
-    const loadPromise = loadPWA();
+    const loadPromise = loadPWA(store);
     const loadEventHandler = window.addEventListener.mock.calls[0][1];
 
     loadEventHandler();
@@ -229,14 +232,14 @@ describe('loadPWA', () => {
 
     initializePWA.mockImplementationOnce(() => Promise.reject());
 
-    const loadPromise = loadPWA();
+    const loadPromise = loadPWA(store);
     const loadEventHandler = window.addEventListener.mock.calls[0][1];
 
     loadEventHandler();
 
     await expect(loadPromise).resolves.toBeUndefined();
 
-    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(store.dispatch).toHaveBeenCalledTimes(1);
     expect(initializePWA).toHaveBeenCalledTimes(1);
     expect(window.addEventListener).toHaveBeenCalledTimes(1);
     expect(window.removeEventListener).toHaveBeenCalledTimes(1);

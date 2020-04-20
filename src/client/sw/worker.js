@@ -14,7 +14,6 @@
  * permissions and limitations under the License.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { on } from '@americanexpress/one-service-worker';
 
 import {
@@ -26,9 +25,13 @@ try {
   on('install', createInstallMiddleware());
 
   on('activate', createActivateMiddleware());
-} catch (e) {
-  // eslint-disable-next-line no-console
-  console.error(e);
-  // eslint-disable-next-line no-restricted-globals
+} catch (error) {
+  // due to the script body being able to terminate and cut off any
+  // asyncronous behavior before it finishes executing, we need to rely on
+  // synchronous calls to the main thread or rely on invoking a global
+  // 'error' event handler to triage.
+  console.error(error);
+  // in the event of any failure during setup, we immediately
+  // unregister this service worker
   self.unregister();
 }

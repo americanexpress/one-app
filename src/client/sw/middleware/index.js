@@ -15,4 +15,3 @@
  */
 
 export { createInstallMiddleware, createActivateMiddleware } from './lifecycle';
-export { getConfig } from './utility';

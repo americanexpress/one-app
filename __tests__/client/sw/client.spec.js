@@ -14,9 +14,9 @@
  * permissions and limitations under the License.
  */
 
-import { register, unregister } from '@americanexpress/one-service-worker';
+import { register } from '@americanexpress/one-service-worker';
 
-import initializePWA from '../../../src/client/sw/client';
+import pwaClient from '../../../src/client/sw/client';
 
 jest.mock('@americanexpress/one-service-worker');
 
@@ -29,20 +29,20 @@ describe('initializePWA', () => {
     expect.assertions(3);
     const scriptUrl = '/_/pwa/sw.js';
     const scope = '/';
-    await expect(initializePWA({ enabled: true, scriptUrl, scope })).resolves.toBeUndefined();
+    await expect(pwaClient({ enabled: true, scriptUrl, scope })).resolves.toBeUndefined();
     expect(register).toHaveBeenCalledTimes(1);
     expect(register).toHaveBeenCalledWith(scriptUrl, { scope });
   });
 
-  test('it calls unregister when disabled', async () => {
+  test('it does not call register when disabled', async () => {
     expect.assertions(2);
-    await expect(initializePWA({ enabled: false })).resolves.toBeUndefined();
-    expect(unregister).toHaveBeenCalledTimes(1);
+    await expect(pwaClient({ enabled: false })).resolves.toBeUndefined();
+    expect(register).not.toHaveBeenCalled();
   });
 
-  test('it calls unregister when no parameters are passed', async () => {
+  test('it does not call register when no parameters are passed', async () => {
     expect.assertions(2);
-    await expect(initializePWA()).resolves.toBeUndefined();
-    expect(unregister).toHaveBeenCalledTimes(1);
+    await expect(pwaClient()).resolves.toBeUndefined();
+    expect(register).not.toHaveBeenCalled();
   });
 });

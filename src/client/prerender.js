@@ -15,14 +15,14 @@
  */
 
 import { createHolocronStore } from 'holocron';
-import { getLocalePack } from '@americanexpress/one-app-ducks';
+import { getLocalePack, addErrorToReport } from '@americanexpress/one-app-ducks';
 import { compose } from 'redux';
 
 import createEnhancer from '../universal/enhancers';
 import reducer from '../universal/reducers';
 import transit from '../universal/utils/transit';
 import createTimeoutFetch from '../universal/utils/createTimeoutFetch';
-import initializePWA from './sw';
+import { initializePWA } from './sw';
 
 export function initializeClientStore() {
   // Six second timeout on client
@@ -52,20 +52,22 @@ export function moveHelmetScripts() {
   });
 }
 
-export function loadPWA(config = global.__pwa_metadata__) {
+export function loadPWA(store, config = global.__pwa_metadata__) {
   return new Promise((resolve, reject) => {
     window.addEventListener('load', function pwaInitialization() {
-      // pwa client will install or remove the service worker
+      // remove handler once load event is fired
+      // although we use the "once" option, to support older versions of
+      // browsers that do not yet implement this, we can safely remove it manually
+      window.removeEventListener('load', pwaInitialization);
+      // pwa client will install the service worker
       initializePWA(config)
         .then(resolve)
         .catch(reject);
-      // remove handler once load event is fired
-      window.removeEventListener('load', pwaInitialization);
-    });
+    }, { once: true });
   }).catch((error) => {
     // in the event of failure or no support,
     // the app should not crash for non-critical progressive enhancement
-    // eslint-disable-next-line no-console
-    console.error('One App PWA load failure', error);
+    // and report the error back to the server
+    store.dispatch(addErrorToReport(error));
   });
 }

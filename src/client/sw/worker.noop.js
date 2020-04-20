@@ -14,20 +14,19 @@
  * permissions and limitations under the License.
  */
 
-/* eslint-disable no-restricted-globals */
-
-// eslint-disable-next-line prefer-arrow-callback
 self.addEventListener('install', function install() {
   self.skipWaiting();
 });
 
-// eslint-disable-next-line prefer-arrow-callback
 self.addEventListener('activate', function activate(event) {
   // Loads each open browser tab/client at the exact url it is currently on.
   // Used to reset any existing service worker as it will be controlling these clients.
   event.waitUntil(
+    // we filter all the clients that are open windows
     self.clients.matchAll({ type: 'window' })
       .then((windowClients) => {
+        // for every client, we move them to their current url
+        // for the current service worker to take effect
         windowClients.forEach((windowClient) => {
           windowClient.navigate(windowClient.url);
         });

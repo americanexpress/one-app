@@ -14,23 +14,73 @@
  * permissions and limitations under the License.
  */
 
-import pwaClient from '../../../src/client/sw';
-import initializePWA from '../../../src/client/sw/client';
+import { importPWAChunk, initializePWA } from '../../../src/client/sw';
+import pwaClient from '../../../src/client/sw/client';
 
-jest.mock('../../../src/client/sw/client', () => jest.fn(() => Promise.resolve()));
+jest.mock('../../../src/client/sw/client', () => jest.fn(() => Promise.resolve('pwaClient')));
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('pwaClient', () => {
+describe('importPWAChunk', () => {
   test('imports client and calls with config', async () => {
     expect.assertions(3);
 
     const pwaConfig = {};
     // we should expect pwaClient to chain the return value of initializePWA
-    await expect(pwaClient(pwaConfig)).resolves.toBeUndefined();
-    expect(initializePWA).toHaveBeenCalledTimes(1);
-    expect(initializePWA).toHaveBeenCalledWith(pwaConfig);
+    await expect(importPWAChunk(pwaConfig)).resolves.toEqual('pwaClient');
+    expect(pwaClient).toHaveBeenCalledTimes(1);
+    expect(pwaClient).toHaveBeenCalledWith(pwaConfig);
+  });
+});
+
+describe('initializePWA', () => {
+  let getRegistration;
+
+  beforeEach(() => {
+    getRegistration = jest.fn(() => Promise.resolve());
+    navigator.serviceWorker = {
+      getRegistration,
+    };
+  });
+
+  test('does nothing without arguments and resolves to undefined', async () => {
+    expect.assertions(2);
+
+    await expect(initializePWA()).resolves.toBeUndefined();
+    expect(pwaClient).not.toHaveBeenCalled();
+  });
+
+  test('does not call in pwaClient if service worker is not supported', async () => {
+    expect.assertions(3);
+
+    delete navigator.serviceWorker;
+
+    await expect(initializePWA()).resolves.toBeUndefined();
+    expect(getRegistration).not.toHaveBeenCalled();
+    expect(pwaClient).not.toHaveBeenCalled();
+  });
+
+  test('does not call in pwaClient if a service worker already exists', async () => {
+    expect.assertions(3);
+
+    const registration = {};
+    getRegistration.mockImplementationOnce(() => Promise.resolve(registration));
+
+    await expect(initializePWA({ enabled: true })).resolves.toBe(registration);
+    expect(getRegistration).toHaveBeenCalledTimes(1);
+    expect(pwaClient).not.toHaveBeenCalled();
+  });
+
+  test('imports client and calls with config', async () => {
+    expect.assertions(4);
+
+    const pwaConfig = { enabled: true };
+
+    await expect(initializePWA(pwaConfig)).resolves.toEqual('pwaClient');
+    expect(getRegistration).toHaveBeenCalledTimes(1);
+    expect(pwaClient).toHaveBeenCalledTimes(1);
+    expect(pwaClient).toHaveBeenCalledWith(pwaConfig);
   });
 });

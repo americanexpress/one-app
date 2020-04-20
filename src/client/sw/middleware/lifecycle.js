@@ -14,7 +14,6 @@
  * permissions and limitations under the License.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { skipWaiting, clientsClaim } from '@americanexpress/one-service-worker';
 
 export function createInstallMiddleware() {
