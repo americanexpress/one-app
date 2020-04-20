@@ -41,19 +41,22 @@ export function validatePWAConfig(configToValidate) {
 
   return Object.keys(configToValidate)
     .map((key) => {
-      if (validKeys.has(key)) {
-        const testValueType = validKeys.get(key);
-
-        if (testValueType(configToValidate[key])) {
-          return [key, configToValidate[key]];
-        }
-
+      if (!validKeys.has(key)) {
+        console.warn(`supplied configuration key "${key}" is not a valid property - ignoring`);
+        return null;
+      }
+      
+      const testValueType = validKeys.get(key);
+      const configToValidateValue = configToValidate[key];
+      
+      if (!testValueType(configToValidateValue)) {
         console.warn(
           `invalid value type given for configuration key "${key}" (expected "${testValueType.name.replace('is', '')}") - ignoring`
         );
-      } else console.warn(`supplied configuration key "${key}" is not a valid property - ignoring`);
-
-      return null;
+        return null;
+      }
+      
+      return [key, configToValidateValue];
     })
     .filter((value) => !!value)
     .reduce((map, [key, value]) => ({ ...map, [key]: value }), {});
