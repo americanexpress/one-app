@@ -59,7 +59,7 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
 
   app.use('/_/static', express.static(path.join(__dirname, '../../build'), { maxage: '182d' }));
   app.get('*', addCacheHeaders);
-  app.use(pwaBasePath, pwaRouter);
+  app.use('/_/pwa', pwaRouter);
 
   app.disable('x-powered-by');
   app.disable('e-tag');
