@@ -36,7 +36,7 @@ One App can be configured via Environment Variables:
   * [`HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`](#holocron_server_max_sim_modules_fetch)
   * [`ONE_ENABLE_POST_TO_MODULE_ROUTES`](#one_enable_post_to_module_routes)
   * [`ONE_MAP_POLLING_MAX`](#one_map_polling_max)
-  * [`ONE_MAP_POLLING_MIN`](#one_map_polling_min)
+  * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
 
 **Alphabetical Contents**
 * [`HOLOCRON_MODULE_MAP_URL`](#holocron_module_map_url)
@@ -61,6 +61,7 @@ One App can be configured via Environment Variables:
 * [`ONE_ENABLE_POST_TO_MODULE_ROUTES`](#one_enable_post_to_module_routes)
 * [`ONE_MAP_POLLING_MAX`](#one_map_polling_max)
 * [`ONE_MAP_POLLING_MIN`](#one_map_polling_min)
+* [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
 
 > ⚠️ = Required
 
@@ -553,6 +554,30 @@ ONE_MAP_POLLING_MIN=Number
 **Default Value**
 ```bash
 ONE_MAP_POLLING_MIN=0
+```
+
+## `ONE_REFERRER_POLICY_OVERRIDE`
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+Overrides the [`Referrer-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy) header.
+
+Must be one of: `no-referrer`, `no-referrer-when-downgrade`, `same-origin` or `strict-origin`.
+
+**Shape**
+```bash
+ONE_REFERRER_POLICY_OVERRIDE=String
+```
+**Exampke**
+```bash
+ONE_REFERRER_POLICY_OVERRIDE=no-referrer
+```
+
+**Default Value**
+```bash
+ONE_REFERRER_POLICY_OVERRIDE=same-origin
 ```
 
 **📘 More Information**

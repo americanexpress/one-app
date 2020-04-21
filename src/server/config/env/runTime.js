@@ -176,6 +176,22 @@ const runTime = [
     validate: (value) => { if (!value) { throw new Error('The `ONE_CLIENT_ROOT_MODULE_NAME` environment variable must be defined.'); } },
     defaultValue: () => (process.env.NODE_ENV === 'development' ? argv.rootModuleName : undefined),
   },
+  {
+    name: 'ONE_REFERRER_POLICY_OVERRIDE',
+    defaultValue: () => 'same-origin',
+    validate: (value) => {
+      const approvedPolicies = [
+        'no-referrer',
+        'no-referrer-when-downgrade',
+        'same-origin',
+        'strict-origin',
+      ];
+
+      if (!approvedPolicies.includes(value)) {
+        throw new Error(`${value} in not an approved policy. Please use: ${approvedPolicies.join(',')}.`);
+      }
+    },
+  },
 ];
 
 runTime.forEach(preprocessEnvVar);
