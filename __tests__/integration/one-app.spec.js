@@ -16,7 +16,7 @@
 
 // Headers are under a key with a dangling underscore
 /* eslint-disable no-underscore-dangle */
-import fetch from 'isomorphic-fetch';
+import fetch from 'cross-fetch';
 import yargs, { argv } from 'yargs';
 
 import { setUpTestRunner, tearDownTestRunner } from './helpers/testRunner';
@@ -78,10 +78,11 @@ describe('Tests that require Docker setup', () => {
           },
         }
       );
+      const rawHeaders = response.headers.raw();
       expect(response.status).toBe(200);
-      expect(response.headers._headers).not.toHaveProperty('access-control-allow-origin');
-      expect(response.headers._headers).not.toHaveProperty('access-control-expose-headers');
-      expect(response.headers._headers).not.toHaveProperty('access-control-allow-credentials');
+      expect(rawHeaders).not.toHaveProperty('access-control-allow-origin');
+      expect(rawHeaders).not.toHaveProperty('access-control-expose-headers');
+      expect(rawHeaders).not.toHaveProperty('access-control-allow-credentials');
     });
 
     test('app rejects CORS OPTIONS pre-flight requests for POST', async () => {
@@ -97,13 +98,14 @@ describe('Tests that require Docker setup', () => {
 
       expect(response.status).toBe(200);
       // preflight-only headers
-      expect(response.headers._headers).not.toHaveProperty('access-control-max-age');
-      expect(response.headers._headers).not.toHaveProperty('access-control-allow-methods');
-      expect(response.headers._headers).not.toHaveProperty('access-control-allow-headers');
+      const rawHeaders = response.headers.raw();
+      expect(rawHeaders).not.toHaveProperty('access-control-max-age');
+      expect(rawHeaders).not.toHaveProperty('access-control-allow-methods');
+      expect(rawHeaders).not.toHaveProperty('access-control-allow-headers');
       // any respnse headers
-      expect(response.headers._headers).not.toHaveProperty('access-control-allow-origin');
-      expect(response.headers._headers).not.toHaveProperty('access-control-expose-headers');
-      expect(response.headers._headers).not.toHaveProperty('access-control-allow-credentials');
+      expect(rawHeaders).not.toHaveProperty('access-control-allow-origin');
+      expect(rawHeaders).not.toHaveProperty('access-control-expose-headers');
+      expect(rawHeaders).not.toHaveProperty('access-control-allow-credentials');
     });
 
     describe('tenant without corsOrigins set', () => {
@@ -133,10 +135,11 @@ describe('Tests that require Docker setup', () => {
             },
           }
         );
+        const rawHeaders = response.headers.raw();
         expect(response.status).toBe(200);
-        expect(response.headers._headers).not.toHaveProperty('access-control-allow-origin');
-        expect(response.headers._headers).not.toHaveProperty('access-control-expose-headers');
-        expect(response.headers._headers).not.toHaveProperty('access-control-allow-credentials');
+        expect(rawHeaders).not.toHaveProperty('access-control-allow-origin');
+        expect(rawHeaders).not.toHaveProperty('access-control-expose-headers');
+        expect(rawHeaders).not.toHaveProperty('access-control-allow-credentials');
       });
 
       afterAll(async () => {
@@ -877,8 +880,8 @@ describe('Tests that can run against either local Docker setup or remote One App
           }
         );
         expect(response.status).toBe(200);
-        expect(response.headers._headers).toHaveProperty('access-control-allow-origin');
-        expect(response.headers._headers['access-control-allow-origin']).toEqual(['test.example.com']);
+        expect(response.headers.raw()).toHaveProperty('access-control-allow-origin');
+        expect(response.headers.get('access-control-allow-origin')).toEqual('test.example.com');
       });
 
       test('app renders frank-lloyd-root on a POST', async () => {
