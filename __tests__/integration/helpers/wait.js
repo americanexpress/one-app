@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-const fetch = require('isomorphic-fetch');
+const fetch = require('cross-fetch');
 const https = require('https');
 
 const waitFor = (ms) => new Promise((res) => setTimeout(res, ms));
