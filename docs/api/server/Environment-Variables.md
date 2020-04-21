@@ -23,6 +23,7 @@ One App can be configured via Environment Variables:
   * [`NODE_ENV`](#node_env)
   * [`ONE_CLIENT_LOCALE_FILENAME`](#one_client_locale_filename)
   * [`ONE_CLIENT_REPORTING_URL`](#one_client_reporting_url) ⚠️
+  * [`ONE_CLIENT_CSP_REPORTING_URL`](#one_client_csp_reporting_url) ⚠️
   * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
   * [`ONE_CLIENT_CDN_URL`](#one_client_cdn_url) ⚠️
   * [`ONE_CONFIG_ENV`](#one_config_env)
@@ -35,7 +36,7 @@ One App can be configured via Environment Variables:
   * [`HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`](#holocron_server_max_sim_modules_fetch)
   * [`ONE_ENABLE_POST_TO_MODULE_ROUTES`](#one_enable_post_to_module_routes)
   * [`ONE_MAP_POLLING_MAX`](#one_map_polling_max)
-  * [`ONE_MAP_POLLING_MIN`](#one_map_polling_min)
+  * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
 
 **Alphabetical Contents**
 * [`HOLOCRON_MODULE_MAP_URL`](#holocron_module_map_url)
@@ -60,6 +61,7 @@ One App can be configured via Environment Variables:
 * [`ONE_ENABLE_POST_TO_MODULE_ROUTES`](#one_enable_post_to_module_routes)
 * [`ONE_MAP_POLLING_MAX`](#one_map_polling_max)
 * [`ONE_MAP_POLLING_MIN`](#one_map_polling_min)
+* [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
 
 > ⚠️ = Required
 
@@ -136,7 +138,7 @@ HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH=30
 > ⚠️ Requires [`HTTPS_PRIVATE_KEY_PATH`] and [`HTTPS_PUBLIC_CERT_CHAIN_PATH`] to be set.
 
 **Runs In**
-* ✅ Production 
+* ✅ Production
 * ✅ Development
 
 Sets the port on which One App will listen for requests.
@@ -154,10 +156,10 @@ HTTPS_PORT=443
 ## `HTTPS_PRIVATE_KEY_PASS_FILE_PATH`
 
 **Runs In**
-* ✅ Production 
+* ✅ Production
 * ✅ Development
 
-The file path to a file containing a shared passphrase for single private key (See [Node documentation on `passphrase` for `tls.createSecureContext`](https://nodejs.org/api/tls.html#tls_tls_connect_options_callback)). 
+The file path to a file containing a shared passphrase for single private key (See [Node documentation on `passphrase` for `tls.createSecureContext`](https://nodejs.org/api/tls.html#tls_tls_connect_options_callback)).
 
 **Shape**
 ```bash
@@ -172,7 +174,7 @@ HTTPS_PRIVATE_KEY_PASS_FILE_PATH=./some-extra-certs.pem
 ## `HTTPS_PRIVATE_KEY_PATH`
 
 **Runs In**
-* ✅ Production 
+* ✅ Production
 * ✅ Development
 
 The file path to the private key of an SSL Certificate.
@@ -192,7 +194,7 @@ HTTPS_PRIVATE_KEY_PATH=./some-private-key.pem
 > ⚠️ Required by [`HTTPS_PORT`]
 
 **Runs In**
-* ✅ Production 
+* ✅ Production
 * ✅ Development
 
 The file path to the public key of an SSL Certificate.
@@ -212,7 +214,7 @@ HTTPS_PUBLIC_CERT_CHAIN_PATH=./some-cert.pem
 > ⚠️ Required by [`HTTPS_PORT`]
 
 **Runs In**
-* ✅ Production 
+* ✅ Production
 * ✅ Development
 
 The file path to a file containing one or more certs to trust over the system default. See [Node documentation on `ca` option in `tls.createSecureContext`](https://nodejs.org/api/tls.html#tls_tls_createsecurecontext_options).
@@ -292,7 +294,7 @@ HTTP_ONE_APP_DEV_PROXY_SERVER_PORT=undefined
 ## `HTTP_PORT`
 
 **Runs In**
-* ✅ Production 
+* ✅ Production
 * ✅ Development
 
 Sets the port on which One App will listen for requests.
@@ -310,7 +312,7 @@ HTTP_PORT=3000
 ## `IP_ADDRESS`
 
 **Runs In**
-* ✅ Production 
+* ✅ Production
 * ✅ Development
 
 Specify a specific IP Address for One App to bind to.
@@ -328,7 +330,7 @@ IP_ADDRESS=192.168.1.1
 ## `NODE_ENV`
 
 **Runs In**
-* ✅ Production 
+* ✅ Production
 * ✅ Development
 
 May be set to either `production` or `development`. When set to `development` additional tooling
@@ -405,7 +407,7 @@ ONE_CLIENT_LOCALE_FILENAME=undefined
 * ✅ Production
 * ✅ Development
 
-URL where browser should send client side errors to. Defaults to `/_` if `NODE_ENV` is set to
+URL where browser should send client side errors to. Defaults to `/_/report/errors` if `NODE_ENV` is set to
 `development` and is undefined otherwise.
 
 **Shape**
@@ -421,10 +423,39 @@ ONE_CLIENT_REPORTING_URL=https://my-app-errors.com/client
 **Default Value**
 ```bash
 # if NODE_ENV=development
-ONE_CLIENT_REPORTING_URL=/_
+ONE_CLIENT_REPORTING_URL=/_/report/errors
 # else
 ONE_CLIENT_REPORTING_URL=undefined
 ```
+
+## `ONE_CLIENT_CSP_REPORTING_URL`
+
+⚠️ Required In Production
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+URL where browser should send [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) errors to. Defaults to `/_/report/security/csp-violation` if `NODE_ENV` is set to
+`development` and is undefined otherwise.
+
+**Shape**
+```bash
+ONE_CLIENT_CSP_REPORTING_URL=String
+```
+
+**Example**
+```bash
+ONE_CLIENT_CSP_REPORTING_URL=https://my-app-csp-violations.example.com/client
+```
+
+**Default Value**
+```bash
+# if NODE_ENV=development
+ONE_CLIENT_CSP_REPORTING_URL=/_/report/security/csp-violation
+# else
+ONE_CLIENT_CSP_REPORTING_URL=undefined
+
 
 ## `ONE_CLIENT_ROOT_MODULE_NAME`
 
@@ -434,7 +465,7 @@ ONE_CLIENT_REPORTING_URL=undefined
 * ✅ Production
 * ✅ Development
 
-Name of the module that serves as the entry point to your application. In local development this is 
+Name of the module that serves as the entry point to your application. In local development this is
 not necessary as you can pass the [`--root-module-name` argument to `npm start`](./CLI-Commands.md#start-commands) instead.
 
 **Shape**
@@ -523,6 +554,30 @@ ONE_MAP_POLLING_MIN=Number
 **Default Value**
 ```bash
 ONE_MAP_POLLING_MIN=0
+```
+
+## `ONE_REFERRER_POLICY_OVERRIDE`
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+Overrides the [`Referrer-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy) header.
+
+Must be one of: `no-referrer`, `no-referrer-when-downgrade`, `same-origin` or `strict-origin`.
+
+**Shape**
+```bash
+ONE_REFERRER_POLICY_OVERRIDE=String
+```
+**Exampke**
+```bash
+ONE_REFERRER_POLICY_OVERRIDE=no-referrer
+```
+
+**Default Value**
+```bash
+ONE_REFERRER_POLICY_OVERRIDE=same-origin
 ```
 
 **📘 More Information**

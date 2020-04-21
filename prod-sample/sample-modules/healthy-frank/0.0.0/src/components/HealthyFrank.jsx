@@ -39,7 +39,8 @@ export function HealthyFrank({ children, prefetch }) {
         |
         <Link
           className="prefetch-ssr-frank"
-          onHover={onPreFetch}
+          onMouseOver={onPreFetch}
+          onFocus={onPreFetch}
           to="/healthy-frank/ssr-frank"
         >
           prefetch baby frank

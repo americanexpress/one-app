@@ -45,7 +45,6 @@ const RootModule = () => ({});
 
 describe('loadModules', () => {
   const moduleMap = {
-    key: '123',
     modules: {
       'some-root': {
         node: {
