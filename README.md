@@ -5,6 +5,8 @@
   <img src='https://github.com/americanexpress/one-app/raw/master/one-app.png' alt="One App - One Amex" width='50%'/>
 </h1>
 
+![One App Docker Release](https://github.com/americanexpress/one-app/workflows/One%20App%20Docker%20Release/badge.svg)
+
 One App is a fresh take on web application development. It consists of a [Node.js](https://nodejs.org)
 server that serves up a single page app built using [React] components and
 makes use of [Holocron](https://github.com/americanexpress/holocron) to allow for code splitting

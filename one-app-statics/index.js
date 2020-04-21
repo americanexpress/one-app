@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2020 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,4 @@
  * permissions and limitations under the License.
  */
 
-export default [
-  'ONE_CLIENT_REPORTING_URL',
-  'ONE_CLIENT_CSP_REPORTING_URL',
-  'ONE_CLIENT_CDN_URL',
-  'ONE_CLIENT_LOCALE_FILENAME',
-  'ONE_CLIENT_ROOT_MODULE_NAME',
-];
+throw new Error('one-app-statics is not intended to be required, please refer to the README for more details');

@@ -19,14 +19,14 @@ import ip from 'ip';
 
 export default contentSecurityPolicyBuilder({
   directives: {
-    reportUri: `${process.env.ONE_CLIENT_REPORTING_URL}/report/security/csp-violation`,
+    reportUri: process.env.ONE_CLIENT_CSP_REPORTING_URL,
     defaultSrc: [
       "'self'",
     ],
     scriptSrc: [
       "'self'",
       // used for our sample app deployment in heroku
-      'https://one-app-statics.surge.sh',
+      '*.surge.sh',
       // used by integration tests running in docker where domain names are aliased
       'https://sample-cdn.frank',
       // used for local development
@@ -37,7 +37,7 @@ export default contentSecurityPolicyBuilder({
     imgSrc: [
       "'self'",
       // used for our sample app deployment in heroku
-      'https://one-app-statics.surge.sh',
+      '*.surge.sh',
       // used by integration tests running in docker where domain names are aliased
       'https://sample-cdn.frank',
     ],
@@ -49,7 +49,7 @@ export default contentSecurityPolicyBuilder({
       "'self'",
       '*.api.frank',
       // used for our sample app deployment in heroku
-      'https://one-app-statics.surge.sh',
+      '*.surge.sh',
       // used for local development
       `${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
       // used for local development
