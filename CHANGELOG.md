@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.0.0-rc.1](https://github.com/americanexpress/one-app/compare/5.0.0-rc.0...5.0.0-rc.1) (2020-04-22)
+
+
+### Features
+
+* **fetch:** switch to cross-fetch instead of isomorphic-fetch ([#101](https://github.com/americanexpress/one-app/issues/101)) ([82155d5](https://github.com/americanexpress/one-app/commit/82155d5d63344409559c42fd0783ab8b4b012bc3))
+* **SecurityHeaders:** add Referrer-Policy override ([#97](https://github.com/americanexpress/one-app/issues/97)) ([6e16cc9](https://github.com/americanexpress/one-app/commit/6e16cc97926095f85ca786fd56c8cf825aad6c6e))
+
+
+### Bug Fixes
+
+* **healthyFrank:** change onHover for onMouseOver ([#104](https://github.com/americanexpress/one-app/issues/104)) ([ff3c87d](https://github.com/americanexpress/one-app/commit/ff3c87dd41e185624948408e966e9797a73611c2))
+* **react:** update React to 16.13.1 ([#109](https://github.com/americanexpress/one-app/issues/109)) ([917e55a](https://github.com/americanexpress/one-app/commit/917e55a8deebf561c81762c4c9e88015760cac6a))
+* **workflows:** removed greeting action ([#103](https://github.com/americanexpress/one-app/issues/103)) ([663fc0c](https://github.com/americanexpress/one-app/commit/663fc0c0a7b325339cba1cedb5e4cfe00fb97b7a))
+
+
 ## 5.0.0-rc.0 (2020-04-08)
 
 
