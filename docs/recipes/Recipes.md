@@ -13,6 +13,7 @@
 * [Running An Existing One App Instance Locally](./Running-Existing-App-Locally.md) 🔨
 * [Running In Production](./Running-In-Production.md) 🔨
 * [Monitoring One App](./Monitoring-One-App.md) 📌
+* [Deploying Modules](./Deploying-Modules.md) 🔨
 
 > 🔨 = This guide is a work-in-progress.
 > 📌 = This guide needs to be written.

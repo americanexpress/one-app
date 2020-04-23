@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2020 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,5 @@
  * permissions and limitations under the License.
  */
 
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import 'cross-fetch/polyfill';
-
-import './polyfill/intl';
-import './config/env/argv';
-import './utils/logging/setup';
-import './config/env/runTime';
-import './utils/heapdump';
+// eslint-disable-next-line no-console
+console.log('🚨 🚨 🚨 one-app-statics is not intended to be installed using npm, please refer to the README for more details!🚨 🚨 🚨 ');

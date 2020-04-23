@@ -97,7 +97,6 @@ describe('sendHtml', () => {
 
   const setFullMap = () => {
     setClientModuleMapCache({
-      key: '123',
       modules: {
         'test-root': {
           node: {
@@ -162,7 +161,6 @@ describe('sendHtml', () => {
 
   beforeEach(() => {
     setClientModuleMapCache({
-      key: '123',
       modules: {
         'test-root': {
           node: {
@@ -239,7 +237,7 @@ describe('sendHtml', () => {
         'window.__holocron_module_bundle_type__ = \'browser\';'
       );
       expect(res.send.mock.calls[0][0]).toContain(
-        'window.__CLIENT_HOLOCRON_MODULE_MAP__ = {"key":"123","modules":{"test-root":{"baseUrl":"https://example.com/cdn/test-root/2.2.2/","browser":{"url":"https://example.com/cdn/test-root/2.2.2/test-root.browser.js","integrity":"nggdfhr34"}}}};'
+        'window.__CLIENT_HOLOCRON_MODULE_MAP__ = {"modules":{"test-root":{"baseUrl":"https://example.com/cdn/test-root/2.2.2/","browser":{"url":"https://example.com/cdn/test-root/2.2.2/test-root.browser.js","integrity":"nggdfhr34"}}}};'
       );
       expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
     });
@@ -256,7 +254,7 @@ describe('sendHtml', () => {
         'window.__holocron_module_bundle_type__ = \'legacyBrowser\';'
       );
       expect(res.send.mock.calls[0][0]).toContain(
-        'window.__CLIENT_HOLOCRON_MODULE_MAP__ = {"key":"123","modules":{"test-root":{"baseUrl":"https://example.com/cdn/test-root/2.2.2/","legacyBrowser":{"url":"https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js","integrity":"7567ee"}}}};'
+        'window.__CLIENT_HOLOCRON_MODULE_MAP__ = {"modules":{"test-root":{"baseUrl":"https://example.com/cdn/test-root/2.2.2/","legacyBrowser":{"url":"https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js","integrity":"7567ee"}}}};'
       );
       expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
     });
@@ -553,7 +551,7 @@ describe('sendHtml', () => {
 
     beforeEach(() => {
       setClientModuleMapCache({
-        key: '123',
+        clientCacheRevision: '123',
         modules: {
           'test-root': {
             node: {
@@ -574,7 +572,7 @@ describe('sendHtml', () => {
       clientModuleMapCache = getClientModuleMapCache();
     });
 
-    it('adds cache busting key from module map to each module script src if NODE_ENV is production', () => {
+    it('adds cache busting clientCacheRevision from module map to each module script src if NODE_ENV is production', () => {
       expect(renderModuleScripts({
         clientInitialState: req.store.getState(),
         moduleMap: clientModuleMapCache.browser,
@@ -583,7 +581,7 @@ describe('sendHtml', () => {
       })).toMatchSnapshot();
     });
 
-    it('does not add cache busting key from module map to each module script src if NODE_ENV is development', () => {
+    it('does not add cache busting clientCacheRevision from module map to each module script src if NODE_ENV is development', () => {
       expect(renderModuleScripts({
         clientInitialState: req.store.getState(),
         moduleMap: clientModuleMapCache.browser,
@@ -592,9 +590,9 @@ describe('sendHtml', () => {
       })).toMatchSnapshot();
     });
 
-    it('does not add cache busting key if not present', () => {
+    it('does not add cache busting clientCacheRevision if not present', () => {
       const moduleMap = { ...clientModuleMapCache.browser };
-      delete moduleMap.key;
+      delete moduleMap.clientCacheRevision;
       expect(renderModuleScripts({
         clientInitialState: req.store.getState(),
         moduleMap,
