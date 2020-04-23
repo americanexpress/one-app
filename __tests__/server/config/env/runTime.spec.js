@@ -385,4 +385,17 @@ describe('runTime', () => {
       expect(clientRootModuleName.defaultValue()).not.toBeDefined();
     });
   });
+
+  describe('ONE_REFERRER_POLICY_OVERRIDE', () => {
+    const referrerPolicyOverride = getEnvVarConfig('ONE_REFERRER_POLICY_OVERRIDE');
+
+    it('default value', () => {
+      expect(referrerPolicyOverride.defaultValue()).toEqual('same-origin');
+    });
+
+    it('validates approved policy', () => {
+      expect(() => referrerPolicyOverride.validate('strict-origin')).not.toThrow();
+      expect(() => referrerPolicyOverride.validate('unsafe-url')).toThrow();
+    });
+  });
 });
