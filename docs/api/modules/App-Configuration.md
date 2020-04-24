@@ -176,7 +176,17 @@ In practice, this allows POST requests from given origins to return partially re
 * ✅ Root Module
 * 🚫 Child Module
 
-The `pwa` configuration to enable or disable the service worker.
+The `pwa` directive is how we configure the service worker and various PWA features.
+There are three distinct service workers with their given purpose. To use
+the standard service worker, we can set the `serviceWorker` to true. If there
+was any failure caused by the service worker, we can use the recovery service
+worker with `recoveryMode` set to true if we wish to reset browser clients. In
+the event we want to purge the service worker and remove any existing service
+workers on browser clients, We can use the escape hatch worker by setting `escapeHatch` to true.
+
+For the variety of service workers available, we have control to set its
+`scope` with the desired pathname and assign what url base the service worker
+can oversee.
 
 **Shape**
 ```js
@@ -185,10 +195,10 @@ if (!global.BROWSER) {
     pwa: {
       // having enabled set to true will enable the service worker and will be
       // registered when one-app is loaded in the browser
-      enabled: true,
+      serviceWorker: true,
       // in the case we need to reset our clients from a faulty service worker
       // we can use the noop worker to replace the older worker
-      noop: false,
+      recoveryMode: false,
       // if we want to remove the service worker altogether, we can deploy
       // an escape hatch worker to immediately remove itself on install
       escapeHatch: false,
