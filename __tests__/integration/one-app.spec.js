@@ -870,28 +870,17 @@ describe('Tests that require Docker setup', () => {
         });
 
         test('loads PWA resources from server ', async () => {
+          expect.assertions(2);
+
           const serviceWorkerResponse = await fetch(scriptUrl, { agent });
 
           expect(serviceWorkerResponse.status).toBe(200);
           expect(serviceWorkerResponse.headers._headers).toHaveProperty('service-worker-allowed');
         });
 
-        test('includes __pwa_metadata__ with enabled values', async () => {
-          await browser.url(`${appAtTestUrls.browserUrl}/success`);
-
-          // eslint-disable-next-line prefer-arrow-callback
-          const pwaMetaData = await browser.executeAsync(function getPWAMeta(done) {
-            done(window.__pwa_metadata__);
-          });
-
-          expect(pwaMetaData).toEqual({
-            enabled: true,
-            scriptUrl: scriptUrl.replace(appAtTestUrls.fetchUrl, ''),
-            scope: '/',
-          });
-        });
-
         test('service worker has a valid registration', async () => {
+          expect.assertions(1);
+
           await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
           // eslint-disable-next-line prefer-arrow-callback
@@ -927,18 +916,9 @@ describe('Tests that require Docker setup', () => {
           });
 
           test('service worker is no longer registered and removed with root module change', async () => {
+            expect.assertions(1);
+
             await browser.url(`${appAtTestUrls.browserUrl}/success`);
-
-            // eslint-disable-next-line prefer-arrow-callback
-            const metadata = await browser.executeAsync(function getPWAMeta(done) {
-              done(window.__pwa_metadata__);
-            });
-
-            expect(metadata).toEqual({
-              enabled: false,
-              scriptUrl: false,
-              scope: null,
-            });
 
             // eslint-disable-next-line prefer-arrow-callback
             const result = await browser.executeAsync(function getRegistration(done) {
