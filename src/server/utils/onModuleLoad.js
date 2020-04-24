@@ -110,14 +110,12 @@ export default function onModuleLoad({
     if (provideStateConfig) {
       setStateConfig(provideStateConfig);
     }
-    if (pwa) {
-      configurePWA(pwa);
-    }
     setCorsOrigins(corsOrigins);
     extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
     setConfigureRequestLog(configureRequestLog);
     setCreateSsrFetch(createSsrFetch);
     logModuleLoad(moduleName, metaData.version);
+    configurePWA(pwa);
     return;
   }
 

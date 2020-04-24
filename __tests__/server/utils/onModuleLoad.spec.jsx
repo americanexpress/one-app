@@ -315,8 +315,8 @@ describe('onModuleLoad', () => {
     expect(setCorsOrigins).toHaveBeenCalledWith(corsOrigins);
   });
 
-  it('calls configurePWA when pwa key is present', () => {
-    const pwa = {};
+  it('calls configurePWA with pwa configuration', () => {
+    const pwa = { serviceWorker: true };
     onModuleLoad({
       module: { [CONFIGURATION_KEY]: { csp, pwa }, [META_DATA_KEY]: { version: '1.0.15' } },
       moduleName: 'some-root',

@@ -26,6 +26,7 @@ import { getClientStateConfig } from '../../../src/server/utils/stateConfig';
 // _setVars is a method to control the mock
 // eslint-disable-next-line import/named
 import transit from '../../../src/universal/utils/transit';
+import { setConfig } from '../../../src/universal/ducks/config';
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
 import { getClientPWAConfig } from '../../../src/server/pwa';
 
@@ -84,11 +85,12 @@ jest.mock('../../../src/server/utils/readJsonFile', () => (filePath) => {
 });
 jest.mock('../../../src/server/pwa', () => ({
   getClientPWAConfig: jest.fn(() => ({
-    enabled: false,
-    scope: null,
-    scriptUrl: null,
+    serviceWorker: false,
+    serviceWorkerScope: null,
+    serviceWorkerScriptUrl: null,
   })),
 }));
+jest.mock('../../../src/universal/ducks/config');
 jest.mock('../../../src/universal/utils/transit', () => ({
   toJSON: jest.fn(() => 'serialized in a string'),
 }));
@@ -411,21 +413,30 @@ describe('sendHtml', () => {
     });
 
     describe('PWA config rendering', () => {
-      it('includes __pwa_metadata__ with disabled values', () => {
+      it('should include disabled configuration values when setting client state config', () => {
         sendHtml(req, res);
         expect(res.send).toHaveBeenCalledTimes(1);
-        expect(/window\.__pwa_metadata__ = {"enabled":false,"scope":null,"scriptUrl":null};/.test(res.send.mock.calls[0][0])).toBe(true);
+        expect(getClientPWAConfig).toHaveBeenCalledTimes(1);
+        expect(setConfig).toHaveBeenCalledWith({
+          ...getClientStateConfig(),
+          ...getClientPWAConfig(),
+        });
       });
 
-      it('includes __pwa_metadata__ with enabled values', () => {
-        getClientPWAConfig.mockImplementationOnce(() => ({
-          enabled: true,
-          scope: '/',
-          scriptUrl: '/sw.js',
-        }));
+      it('should include enabled configuration values', () => {
+        const enabledPWAConfig = {
+          serviceWorker: true,
+          serviceWorkerScope: '/',
+          serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
+        };
+        getClientPWAConfig.mockImplementationOnce(() => enabledPWAConfig);
         sendHtml(req, res);
         expect(res.send).toHaveBeenCalledTimes(1);
-        expect(/window\.__pwa_metadata__ = {"enabled":true,"scope":"\/","scriptUrl":"\/sw\.js"};/.test(res.send.mock.calls[0][0])).toBe(true);
+        expect(getClientPWAConfig).toHaveBeenCalledTimes(1);
+        expect(setConfig).toHaveBeenCalledWith({
+          ...getClientStateConfig(),
+          ...enabledPWAConfig,
+        });
       });
     });
 
