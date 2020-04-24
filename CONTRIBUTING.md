@@ -9,7 +9,7 @@ The following guidelines must be followed by all contributors to this repository
 * Be clear and concise when documenting code; focus on value.
 * Don't commit commented code to the main repo (stash locally, if needed).
 
-See [our code of conduct](./CODE_OF_CONDUCT) for more details.
+See [our code of conduct](./CODE_OF_CONDUCT.md) for more details.
 
 ### Running One App Locally
 
