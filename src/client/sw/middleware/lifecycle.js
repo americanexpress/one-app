@@ -17,9 +17,11 @@
 import { skipWaiting, clientsClaim } from '@americanexpress/one-service-worker';
 
 export function createInstallMiddleware() {
+  // `install` lifecycle event
   return skipWaiting();
 }
 
 export function createActivateMiddleware() {
+  // `activate` lifecycle event
   return clientsClaim();
 }

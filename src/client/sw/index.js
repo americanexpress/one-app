@@ -14,24 +14,55 @@
  * permissions and limitations under the License.
  */
 
-export function importPWAChunk(config) {
-  // in the future, we should consider making one-service worker added dynamically
-  // as an external chunk that is conditionally loadable and provide it to one-app
-  // users/modules that want to use the library
+import { addErrorToReport } from '@americanexpress/one-app-ducks';
+
+export function importPWAClient(settings) {
+  // In the future, we should consider making one-service worker added dynamically
+  // as an external chunk with the ability to support conditional load.
   return import(/* webpackChunkName: "pwa-client" */ './client')
     .then((imported) => imported.default)
-    .then((pwaClient) => pwaClient(config));
+    .then((pwaClient) => pwaClient(settings));
 }
 
-export function initializePWA(config = { enabled: false }) {
-  // since we handle unregistering of the service worker via the service workers
-  // that we distribute server side, we should not call in the chunk unless we plan
-  // to register the service worker.
-  // in the case that the service worker is unavailable, we would
-  // not need to call in the chunk as well.
-  if ('serviceWorker' in navigator === false || config.enabled === false) return Promise.resolve();
-  // before we call in the pwa chunk, we can check to see if the service worker
-  // is already registered and if not, we can load up the library and register the worker.
+export function initializePWA(store) {
+  // If the service worker is unavailable, we would not need
+  // to call in the chunk since it is not supported in the given browser.
+  if ('serviceWorker' in navigator === false) return Promise.resolve();
+
+  const state = store.getState();
+
+  // Before we load in the pwa chunk, we can make a few checks to avoid loading it, if not needed.
   return navigator.serviceWorker.getRegistration()
-    .then((registration) => registration || importPWAChunk(config));
+    .then((registration) => {
+      const serviceWorker = state.getIn(['config', 'serviceWorker'], false);
+
+      // When the service Worker is not enabled (default)
+      if (!serviceWorker) {
+        // If by any chance a service worker is present, we remove it.
+        if (registration) return registration.unregister().then(() => registration);
+        // When there is no registration, nothing further needed to be done.
+        return null;
+      }
+
+      const recoveryMode = state.getIn(['config', 'serviceWorkerRecoveryMode'], false);
+
+      if (recoveryMode) {
+        // Recovery mode is active if the Escape Hatch or No Op scripts are enabled
+        // as well as when opting out of PWA (by omitting the config when previously there).
+        if (registration) return registration.update().then(() => registration);
+        // When Escape Hatch is active, updating the worker will unregister the worker
+        // and make it redundant, any page navigation afterwards should yield no registration.
+        return null;
+      }
+
+      const scriptUrl = state.getIn(['config', 'serviceWorkerScriptUrl'], null);
+      const scope = state.getIn(['config', 'serviceWorkerScope'], null);
+
+      // To handle any errors that occur during installation, we set this handler
+      // for dispatching the error back to the server.
+      const onError = (error) => store.dispatch(addErrorToReport(error));
+
+      // Normal operations will load up the library and integrate with the service worker
+      return importPWAClient({ scriptUrl, scope, onError });
+    });
 }

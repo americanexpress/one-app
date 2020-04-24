@@ -52,7 +52,7 @@ export function moveHelmetScripts() {
   });
 }
 
-export function loadPWA(store, config = global.__pwa_metadata__) {
+export function loadPWA(store) {
   return new Promise((resolve, reject) => {
     window.addEventListener('load', function pwaInitialization() {
       // remove handler once load event is fired
@@ -60,7 +60,7 @@ export function loadPWA(store, config = global.__pwa_metadata__) {
       // browsers that do not yet implement this, we can safely remove it manually
       window.removeEventListener('load', pwaInitialization);
       // pwa client will install the service worker
-      initializePWA(config)
+      initializePWA(store)
         .then(resolve)
         .catch(reject);
     }, { once: true });

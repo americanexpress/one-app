@@ -27,6 +27,7 @@ function loadServiceWorker() {
 
 describe('worker noop', () => {
   beforeEach(() => {
+    self.postMessage = jest.fn();
     Object.assign(
       global,
       createServiceWorkerMocks(),
@@ -43,13 +44,12 @@ describe('worker noop', () => {
   });
 
   test('adds listeners', () => {
-    expect.assertions(3);
+    expect.assertions(2);
 
     loadServiceWorker();
 
-    expect(self.listeners.size).toEqual(2);
+    expect(self.listeners.size).toEqual(1);
     expect(self.listeners.get('install').size).toEqual(1);
-    expect(self.listeners.get('activate').size).toEqual(1);
   });
 
   test('calls skipWaiting on "install"', () => {
@@ -62,30 +62,5 @@ describe('worker noop', () => {
     self.listeners.get('install').forEach((handler) => handler());
 
     expect(self.skipWaiting).toHaveBeenCalledTimes(1);
-  });
-
-  test('navigates all active window clients on "activate"', async () => {
-    expect.assertions(6);
-
-    const waitUntil = jest.fn();
-    const clientUrl = 'https://pwa.example.com';
-    const windowClient = await self.clients.openWindow(clientUrl);
-    jest.spyOn(windowClient, 'navigate');
-    jest.spyOn(global.clients, 'matchAll');
-
-    loadServiceWorker();
-
-    self.listeners.get('activate').forEach((handler) => handler({
-      waitUntil,
-    }));
-
-    await waitUntil.mock.calls[0][0];
-
-    expect(waitUntil).toHaveBeenCalledTimes(1);
-    expect(self.clients.matchAll).toHaveBeenCalledTimes(1);
-    expect(self.clients.matchAll).toHaveBeenCalledWith({ type: 'window' });
-    expect(self.clients.matchAll).toHaveReturnedWith(Promise.resolve([windowClient]));
-    expect(windowClient.navigate).toHaveBeenCalledTimes(1);
-    expect(windowClient.navigate).toHaveBeenCalledWith(clientUrl);
   });
 });

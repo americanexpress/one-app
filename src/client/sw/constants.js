@@ -14,8 +14,5 @@
  * permissions and limitations under the License.
  */
 
-self.addEventListener('install', function install() {
-  // as a recovery worker, we only need to get it past the install event
-  // we use this worker to replace any faulty workers before
-  self.skipWaiting();
-});
+// eslint-disable-next-line import/prefer-default-export
+export const ERROR_MESSAGE_ID_KEY = 'error';

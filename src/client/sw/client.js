@@ -14,16 +14,23 @@
  * permissions and limitations under the License.
  */
 
-import { register } from '@americanexpress/one-service-worker';
+import {
+  on, register, messageContext, messenger,
+} from '@americanexpress/one-service-worker';
 
-export default async function pwaClient({ enabled, scriptUrl, scope } = {}) {
-  if (enabled) {
-    // as of now, we are only registering a service worker in pwaClient
-    // down the line, we should integrate the PWA state into the store
-    // and include a reducer in `one-app-ducks` where we can select PWA
-    // state directly from the store and update accordingly with
-    // dispatch calls
-    return register(scriptUrl, { scope });
-  }
-  return Promise.resolve();
+import { ERROR_MESSAGE_ID_KEY } from './constants';
+
+export default function pwaClient({
+  scriptUrl, scope, onError,
+}) {
+  // We listen for any messages that come in from the service worker
+  on('message', [
+    messageContext(),
+    messenger({
+      [ERROR_MESSAGE_ID_KEY]: onError,
+    }),
+  ]);
+
+  // as the first basis, we would register the service worker before performing anything else.
+  return register(scriptUrl, { scope });
 }

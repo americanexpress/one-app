@@ -25,6 +25,7 @@ import {
   createInstallMiddleware,
   createActivateMiddleware,
 } from '../../../src/client/sw/middleware';
+import { ERROR_MESSAGE_ID_KEY } from '../../../src/client/sw/constants';
 
 jest.mock('@americanexpress/one-service-worker');
 
@@ -40,8 +41,7 @@ beforeEach(() => {
 
 describe('service worker script', () => {
   beforeAll(() => {
-    jest.spyOn(console, 'error');
-    console.error.mockImplementation();
+    self.postMessage = jest.fn();
   });
 
   test('calls "on" with lifecycle middleware', () => {
@@ -67,8 +67,11 @@ describe('service worker script', () => {
 
     expect(on).toHaveBeenCalledTimes(1);
     expect(self.unregister).toHaveBeenCalledTimes(1);
-    expect(console.error).toHaveBeenCalledTimes(1);
-    expect(console.error).toHaveBeenCalledWith(failureError);
+    expect(self.postMessage).toHaveBeenCalledTimes(1);
+    expect(self.postMessage).toHaveBeenCalledWith({
+      id: ERROR_MESSAGE_ID_KEY,
+      error: failureError,
+    });
   });
 });
 
