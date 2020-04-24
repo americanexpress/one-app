@@ -16,64 +16,21 @@
 
 import {
   serviceWorkerMiddleware,
-  getServiceWorkerEnabled,
-  getServiceWorkerScript,
-  getServiceWorkerScope,
-  getServiceWorkerType,
-  setServiceWorkerScript,
   configureServiceWorker,
   createServiceWorkerScript,
   createServiceWorkerEscapeHatchScript,
-  createServiceWorkerNoopScript,
+  createServiceWorkerRecoveryScript,
 } from '../../../../src/server/pwa/middleware/service-worker';
 
 jest.mock('fs', () => ({
-  readFileSync: (filePath) => ({ toString: () => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]') }),
+  readFileSync: (filePath) => Buffer.from((filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]')),
 }));
 
 describe('service worker middleware components', () => {
-  test('gets default values', () => {
-    expect(getServiceWorkerEnabled()).toBe(false);
-    expect(getServiceWorkerScript()).toBe(null);
-    expect(getServiceWorkerScope()).toBe(null);
-    expect(getServiceWorkerType()).toBe(null);
-  });
-
-  test('sets the service worker script and scope', () => {
-    const script = '[service-worker-script]';
-    const scope = '/my-scope';
-    expect(setServiceWorkerScript(script, scope)).toEqual(script);
-    expect(getServiceWorkerScope()).toEqual(scope);
-    expect(getServiceWorkerScript()).toEqual(script);
-  });
-
-  test('sets the service worker script without scope', () => {
-    const script = '[service-worker-script-without-scope-set]';
-    const scope = '/';
-    expect(setServiceWorkerScript(script)).toEqual(script);
-    expect(getServiceWorkerScope()).toEqual(scope);
-    expect(getServiceWorkerScript()).toEqual(script);
-  });
-
-  test('sets the service worker script to null', () => {
-    const script = null;
-    const scope = null;
-    expect(setServiceWorkerScript(script)).toEqual(script);
-    expect(getServiceWorkerScope()).toEqual(scope);
-    expect(getServiceWorkerScript()).toEqual(script);
-  });
-
   test('creates various types of service worker scripts', () => {
-    expect(createServiceWorkerNoopScript()).toEqual('[service-worker-noop-script]');
+    expect(createServiceWorkerRecoveryScript()).toEqual('[service-worker-noop-script]');
     expect(createServiceWorkerScript()).toEqual('[service-worker-script]');
-    expect(createServiceWorkerEscapeHatchScript()).toEqual('self.unregister();');
-  });
-
-  test('configuring the service worker without parameters will disable it', () => {
-    expect(configureServiceWorker()).toBeUndefined();
-    expect(getServiceWorkerScript()).toBe(null);
-    expect(getServiceWorkerScope()).toBe(null);
-    expect(getServiceWorkerEnabled()).toBe(false);
+    expect(createServiceWorkerEscapeHatchScript().toString()).toEqual('self.unregister();');
   });
 
   describe('middleware and various configurations', () => {
@@ -97,7 +54,7 @@ describe('service worker middleware components', () => {
       res.send = jest.fn(() => res);
       res.set = jest.fn(() => res);
       res.type = jest.fn(() => res);
-      configureServiceWorker({ enabled: true });
+      configureServiceWorker({ type: 'standard' });
 
       expect(middleware(null, res, next)).toBe(res);
 
@@ -106,9 +63,9 @@ describe('service worker middleware components', () => {
       expect(res.set).toHaveBeenCalledTimes(2);
       expect(next).not.toHaveBeenCalled();
       expect(res.type).toHaveBeenCalledWith('js');
-      expect(res.set).toHaveBeenCalledWith('Service-Worker-Allowed', getServiceWorkerScope());
+      expect(res.set).toHaveBeenCalledWith('Service-Worker-Allowed', '/');
       expect(res.set).toHaveBeenCalledWith('Cache-Control', 'no-store, no-cache');
-      expect(res.send).toHaveBeenCalledWith(getServiceWorkerScript());
+      expect(res.send).toHaveBeenCalledWith(createServiceWorkerScript());
     });
 
     test('middleware responds with service worker noop script', () => {
@@ -118,7 +75,7 @@ describe('service worker middleware components', () => {
       res.send = jest.fn(() => res);
       res.set = jest.fn(() => res);
       res.type = jest.fn(() => res);
-      configureServiceWorker({ noop: true });
+      configureServiceWorker({ type: 'recovery' });
 
       expect(middleware(null, res, next)).toBe(res);
 
@@ -127,9 +84,9 @@ describe('service worker middleware components', () => {
       expect(res.set).toHaveBeenCalledTimes(2);
       expect(next).not.toHaveBeenCalled();
       expect(res.type).toHaveBeenCalledWith('js');
-      expect(res.set).toHaveBeenCalledWith('Service-Worker-Allowed', getServiceWorkerScope());
+      expect(res.set).toHaveBeenCalledWith('Service-Worker-Allowed', '/');
       expect(res.set).toHaveBeenCalledWith('Cache-Control', 'no-store, no-cache');
-      expect(res.send).toHaveBeenCalledWith(createServiceWorkerNoopScript());
+      expect(res.send).toHaveBeenCalledWith(createServiceWorkerRecoveryScript());
     });
 
     test('middleware responds with service worker escape hatch script', () => {
@@ -139,7 +96,7 @@ describe('service worker middleware components', () => {
       res.send = jest.fn(() => res);
       res.set = jest.fn(() => res);
       res.type = jest.fn(() => res);
-      configureServiceWorker({ escapeHatch: true });
+      configureServiceWorker({ type: 'escape-hatch' });
 
       expect(middleware(null, res, next)).toBe(res);
 
@@ -148,7 +105,7 @@ describe('service worker middleware components', () => {
       expect(res.set).toHaveBeenCalledTimes(2);
       expect(next).not.toHaveBeenCalled();
       expect(res.type).toHaveBeenCalledWith('js');
-      expect(res.set).toHaveBeenCalledWith('Service-Worker-Allowed', getServiceWorkerScope());
+      expect(res.set).toHaveBeenCalledWith('Service-Worker-Allowed', '/');
       expect(res.set).toHaveBeenCalledWith('Cache-Control', 'no-store, no-cache');
       expect(res.send).toHaveBeenCalledWith(createServiceWorkerEscapeHatchScript());
     });

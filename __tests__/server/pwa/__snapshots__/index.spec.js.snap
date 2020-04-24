@@ -11,16 +11,8 @@ Array [
     [Function],
   ],
   Array [
-    "getPWAConfig",
-    [Function],
-  ],
-  Array [
     "pwaRouter",
     [Function],
-  ],
-  Array [
-    "pwaBasePath",
-    "/_/pwa",
   ],
 ]
 `;

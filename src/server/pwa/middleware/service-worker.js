@@ -16,36 +16,11 @@
 
 import fs from 'fs';
 
+let serviceWorkerEnabled = false;
 let serviceWorkerScript = null;
 let serviceWorkerScope = null;
-let serviceWorkerType = null;
-let serviceWorkerEnabled = false;
 
-export function getServiceWorkerEnabled() {
-  return serviceWorkerEnabled;
-}
-
-export function getServiceWorkerScope() {
-  return serviceWorkerScope;
-}
-
-export function getServiceWorkerType() {
-  return serviceWorkerType;
-}
-
-export function getServiceWorkerScript() {
-  return serviceWorkerScript;
-}
-
-export function setServiceWorkerScript(value, scope) {
-  if (scope) serviceWorkerScope = scope;
-  else if (value) serviceWorkerScope = '/';
-  else serviceWorkerScope = null;
-  serviceWorkerScript = value;
-  return serviceWorkerScript;
-}
-
-export function createServiceWorkerNoopScript() {
+export function createServiceWorkerRecoveryScript() {
   // this file is created during build inside lib/server/middleware/pwa
   return fs.readFileSync([__dirname, 'scripts/sw.noop.js'].join('/')).toString();
 }
@@ -56,28 +31,30 @@ export function createServiceWorkerScript() {
 }
 
 export function createServiceWorkerEscapeHatchScript() {
-  return 'self.unregister();';
+  return Buffer.from('self.unregister();');
 }
 
 export function configureServiceWorker({
-  enabled, escapeHatch, noop, scope,
+  type, scope = '/',
 } = {}) {
-  if (escapeHatch) {
-    serviceWorkerType = 'escape-hatch';
-    serviceWorkerEnabled = true;
-    setServiceWorkerScript(createServiceWorkerEscapeHatchScript(), scope);
-  } else if (noop) {
-    serviceWorkerType = 'noop';
-    serviceWorkerEnabled = true;
-    setServiceWorkerScript(createServiceWorkerNoopScript(), scope);
-  } else if (enabled) {
-    serviceWorkerType = 'standard';
-    serviceWorkerEnabled = true;
-    setServiceWorkerScript(createServiceWorkerScript(), scope);
-  } else {
-    serviceWorkerType = null;
-    serviceWorkerEnabled = false;
-    setServiceWorkerScript(null);
+  serviceWorkerEnabled = true;
+  serviceWorkerScope = scope;
+
+  switch (type) {
+    case 'escape-hatch':
+      serviceWorkerScript = createServiceWorkerEscapeHatchScript();
+      break;
+    case 'recovery':
+      serviceWorkerScript = createServiceWorkerRecoveryScript();
+      break;
+    case 'standard':
+      serviceWorkerScript = createServiceWorkerScript();
+      break;
+    default:
+      serviceWorkerEnabled = false;
+      serviceWorkerScope = null;
+      serviceWorkerScript = null;
+      break;
   }
 }
 
@@ -88,6 +65,6 @@ export function serviceWorkerMiddleware() {
       .type('js')
       .set('Service-Worker-Allowed', serviceWorkerScope)
       .set('Cache-Control', 'no-store, no-cache')
-      .send(getServiceWorkerScript());
+      .send(serviceWorkerScript);
   };
 }

@@ -14,15 +14,10 @@
  * permissions and limitations under the License.
  */
 
-import * as pwaConfig from '../../../src/server/pwa/config';
-
-const {
-  resetPWAConfig,
-  getPWAConfig,
+import {
   getClientPWAConfig,
-  setPWAConfig,
   configurePWA,
-} = pwaConfig;
+} from '../../../src/server/pwa/config';
 
 jest.mock('fs', () => ({
   readFileSync: (filePath) => ({ toString: () => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]') }),
@@ -30,82 +25,79 @@ jest.mock('fs', () => ({
 
 describe('pwa configuration', () => {
   test('getters return default state', () => {
-    expect(getPWAConfig()).toMatchObject({
-      enabled: false,
-      escapeHatch: false,
-      noop: false,
-    });
     expect(getClientPWAConfig()).toMatchObject({
-      enabled: false,
-      scope: null,
-      scriptUrl: false,
-    });
-  });
-
-  test('resetting pwa config', () => {
-    expect(resetPWAConfig()).toEqual({
-      enabled: false,
-      escapeHatch: false,
-      noop: false,
-    });
-    expect(getPWAConfig()).toEqual({
-      enabled: false,
-      escapeHatch: false,
-      noop: false,
-    });
-  });
-
-  test('setting service worker configuration', () => {
-    expect(setPWAConfig({
-      enabled: true,
-    })).toMatchObject({
-      enabled: true,
-      escapeHatch: false,
-      noop: false,
-    });
-    expect(setPWAConfig({
-      escapeHatch: true,
-    })).toMatchObject({
-      enabled: false,
-      escapeHatch: true,
-      noop: false,
-    });
-    expect(setPWAConfig({
-      noop: true,
-    })).toMatchObject({
-      enabled: false,
-      escapeHatch: false,
-      noop: true,
+      serviceWorker: false,
+      serviceWorkerRecoveryMode: false,
+      serviceWorkerScriptUrl: false,
+      serviceWorkerScope: null,
     });
   });
 
   describe('configuration', () => {
-    test('configuring the service worker and webmanifest to be enabled', () => {
-      const config = {
-        enabled: true,
-      };
-      const expectedConfig = {
-        enabled: true,
-        escapeHatch: false,
-        noop: false,
-        scope: '/',
-      };
-
-      expect(configurePWA(config)).toMatchObject(expectedConfig);
-      expect(getPWAConfig()).toMatchObject(expectedConfig);
+    test('enabling the service worker with minimum config', () => {
+      expect(configurePWA({
+        serviceWorker: true,
+      })).toMatchObject({
+        serviceWorker: true,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerType: 'standard',
+        serviceWorkerScope: '/',
+      });
       expect(getClientPWAConfig()).toMatchObject({
-        enabled: true,
-        scope: '/',
-        scriptUrl: expect.any(String),
+        serviceWorker: true,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerScope: '/',
+        serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
+      });
+    });
+
+    test('enabling the service worker in recovery mode', () => {
+      expect(configurePWA({
+        recoveryMode: true,
+      })).toMatchObject({
+        serviceWorker: true,
+        serviceWorkerRecoveryMode: true,
+        serviceWorkerType: 'recovery',
+        serviceWorkerScope: '/',
+      });
+      expect(getClientPWAConfig()).toMatchObject({
+        serviceWorker: true,
+        serviceWorkerRecoveryMode: true,
+        serviceWorkerScope: '/',
+        serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
+      });
+    });
+
+    test('enabling the service worker with escape hatch', () => {
+      expect(configurePWA({
+        escapeHatch: true,
+      })).toMatchObject({
+        serviceWorker: true,
+        serviceWorkerRecoveryMode: true,
+        serviceWorkerType: 'escape-hatch',
+        serviceWorkerScope: '/',
+      });
+      expect(getClientPWAConfig()).toMatchObject({
+        serviceWorker: true,
+        serviceWorkerRecoveryMode: true,
+        serviceWorkerScope: '/',
+        serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
       });
     });
 
     test('disabling PWA configuration', () => {
-      expect(configurePWA({ enabled: false })).toMatchObject({ enabled: false });
-      expect(getPWAConfig()).toMatchObject({ enabled: false });
+      expect(configurePWA({ serviceWorker: false })).toMatchObject({ serviceWorker: false });
       expect(getClientPWAConfig()).toMatchObject({
-        enabled: false, scope: null, scriptUrl: false,
+        serviceWorker: false,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerScriptUrl: false,
+        serviceWorkerScope: null,
       });
+    });
+
+    test('resetting PWA configuration when root module opts out', () => {
+      expect(configurePWA({ serviceWorker: true })).toMatchObject({ serviceWorker: true });
+      expect(configurePWA()).toMatchObject({ serviceWorker: false });
     });
   });
 });

@@ -14,25 +14,26 @@
  * permissions and limitations under the License.
  */
 
-export function isString(value) {
+function isString(value) {
   return typeof value === 'string';
 }
 
-export function isBoolean(value) {
+function isBoolean(value) {
   return typeof value === 'boolean';
 }
 
-export function isPlainObject(value) {
+function isPlainObject(value) {
   return !!value && typeof value === 'object' && Array.isArray(value) === false;
 }
 
-export const validKeys = new Map([
-  ['enabled', isBoolean],
+const validKeys = new Map([
+  ['serviceWorker', isBoolean],
+  ['recoveryMode', isBoolean],
   ['escapeHatch', isBoolean],
-  ['noop', isBoolean],
   ['scope', isString],
 ]);
 
+// eslint-disable-next-line import/prefer-default-export
 export function validatePWAConfig(configToValidate) {
   if (!isPlainObject(configToValidate)) {
     console.error('invalid config given to service worker (expected "object")');
@@ -45,17 +46,17 @@ export function validatePWAConfig(configToValidate) {
         console.warn(`supplied configuration key "${key}" is not a valid property - ignoring`);
         return null;
       }
-      
+
       const testValueType = validKeys.get(key);
       const configToValidateValue = configToValidate[key];
-      
+
       if (!testValueType(configToValidateValue)) {
         console.warn(
           `invalid value type given for configuration key "${key}" (expected "${testValueType.name.replace('is', '')}") - ignoring`
         );
         return null;
       }
-      
+
       return [key, configToValidateValue];
     })
     .filter((value) => !!value)

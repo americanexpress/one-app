@@ -16,46 +16,71 @@
 
 import { routes } from './createRouter';
 import { validatePWAConfig } from './validation';
-import {
-  configureServiceWorker, getServiceWorkerEnabled, getServiceWorkerScope,
-} from './middleware/service-worker';
+import { configureServiceWorker } from './middleware/service-worker';
 
-let pwaConfig = null;
+const defaultPWAConfig = {
+  serviceWorker: false,
+  serviceWorkerRecoveryMode: false,
+  serviceWorkerType: null,
+  serviceWorkerScope: null,
+};
 
-export function resetPWAConfig() {
-  pwaConfig = {
-    enabled: false,
-    escapeHatch: false,
-    noop: false,
-  };
-  return pwaConfig;
+let pwaConfig = { ...defaultPWAConfig };
+
+function resetPWAConfig() {
+  pwaConfig = { ...defaultPWAConfig };
 }
 
-export function getPWAConfig() {
-  if (pwaConfig === null) return resetPWAConfig();
-  return pwaConfig;
-}
-
-export function setPWAConfig(value) {
-  Object.assign(resetPWAConfig(), {
-    enabled: getServiceWorkerEnabled(),
-    scope: getServiceWorkerScope(),
-  }, value);
+function setPWAConfig(newConfiguration) {
+  pwaConfig = newConfiguration;
   return pwaConfig;
 }
 
 export function getClientPWAConfig() {
+  const { serviceWorker, serviceWorkerRecoveryMode, serviceWorkerScope } = pwaConfig;
   return {
-    enabled: getServiceWorkerEnabled(),
-    scope: getServiceWorkerScope(),
-    scriptUrl: getServiceWorkerEnabled() && [routes.prefix, routes.worker].join(''),
+    serviceWorker,
+    serviceWorkerRecoveryMode,
+    serviceWorkerScope,
+    serviceWorkerScriptUrl: serviceWorker && [routes.prefix, routes.worker].join(''),
   };
 }
 
 export function configurePWA(config) {
-  const validatedConfig = validatePWAConfig(config);
+  if (!config && pwaConfig.serviceWorker) {
+    // if there was a previous configuration present, we want to gracefully
+    // remove any remaining instances. We currently handle this client side
+    // and would only need to reset the configuration when we want to decouple.
+    resetPWAConfig();
+  }
 
-  configureServiceWorker(validatedConfig);
+  const validatedConfig = config ? validatePWAConfig(config) : {};
 
-  return setPWAConfig(validatedConfig);
+  let enabled = false;
+  let scope = null;
+  let type = null;
+
+  // the type dictates the service worker script to be used
+  if (validatedConfig.escapeHatch) type = 'escape-hatch';
+  else if (validatedConfig.recoveryMode) type = 'recovery';
+  else if (validatedConfig.serviceWorker) type = 'standard';
+
+  if (type) {
+    // with a valid type, we can be sure that the service worker will be
+    // ready to enable and assign a scope
+    enabled = true;
+    scope = validatedConfig.scope || '/';
+  }
+
+  configureServiceWorker({
+    type,
+    scope,
+  });
+
+  return setPWAConfig({
+    serviceWorker: enabled,
+    serviceWorkerScope: scope,
+    serviceWorkerType: type,
+    serviceWorkerRecoveryMode: ['escape-hatch', 'recovery'].includes(type),
+  });
 }

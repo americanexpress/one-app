@@ -15,51 +15,8 @@
  */
 
 import {
-  isBoolean, isString, isPlainObject, validatePWAConfig,
+  validatePWAConfig,
 } from '../../../src/server/pwa/validation';
-
-describe('isBoolean', () => {
-  test('returns true if a boolean', () => {
-    expect(isBoolean(false)).toBe(true);
-    expect(isBoolean(true)).toBe(true);
-  });
-
-  test('returns false if not a boolean', () => {
-    expect(isBoolean('true')).toBe(false);
-    expect(isBoolean({})).toBe(false);
-    expect(isBoolean(null)).toBe(false);
-    expect(isBoolean([])).toBe(false);
-  });
-});
-
-describe('isString', () => {
-  test('returns true if a string', () => {
-    expect(isString('str')).toBe(true);
-    expect(isString(`${true}`)).toBe(true);
-  });
-
-  test('returns false if not a string', () => {
-    expect(isString(true)).toBe(false);
-    expect(isString({})).toBe(false);
-    expect(isString(null)).toBe(false);
-    expect(isString([])).toBe(false);
-  });
-});
-
-describe('isPlainObject', () => {
-  test('returns true if a plain object', () => {
-    expect(isPlainObject({})).toBe(true);
-    expect(isPlainObject({ foo: {} })).toBe(true);
-    expect(isPlainObject(Object.create(null))).toBe(true);
-  });
-
-  test('returns false if not a plain object', () => {
-    expect(isPlainObject(null)).toBe(false);
-    expect(isPlainObject([])).toBe(false);
-    expect(isPlainObject('{  }')).toBe(false);
-    expect(isPlainObject('true')).toBe(false);
-  });
-});
 
 describe('validation', () => {
   beforeEach(() => {
@@ -76,8 +33,7 @@ describe('validation', () => {
   test('invalid configuration object informs the user', () => {
     expect(validatePWAConfig(null)).toEqual(null);
     expect(validatePWAConfig([])).toEqual(null);
-    expect(validatePWAConfig(true)).toEqual(null);
-    expect(console.error).toHaveBeenCalledTimes(3);
+    expect(console.error).toHaveBeenCalledTimes(2);
     expect(console.error).toHaveBeenCalledWith('invalid config given to service worker (expected "object")');
   });
 
@@ -93,17 +49,17 @@ describe('validation', () => {
 
   test('invalid configuration values for keys informs the user and ignores them', () => {
     expect(validatePWAConfig({
-      enabled: 'true',
+      serviceWorker: 'true',
       scope: 42,
     })).toEqual({});
     expect(console.warn).toHaveBeenCalledTimes(2);
-    expect(console.warn).toHaveBeenCalledWith('invalid value type given for configuration key "enabled" (expected "Boolean") - ignoring');
+    expect(console.warn).toHaveBeenCalledWith('invalid value type given for configuration key "serviceWorker" (expected "Boolean") - ignoring');
     expect(console.warn).toHaveBeenCalledWith('invalid value type given for configuration key "scope" (expected "String") - ignoring');
   });
 
   test('valid keys emits no warnings or errors and returns valid configuration', () => {
     const validConfig = {
-      enabled: true,
+      serviceWorker: true,
       scope: '/',
     };
 

@@ -24,7 +24,7 @@ import {
 import { configurePWA } from '../../../src/server/pwa';
 import {
   createServiceWorkerEscapeHatchScript,
-  createServiceWorkerNoopScript,
+  createServiceWorkerRecoveryScript,
   createServiceWorkerScript,
 } from '../../../src/server/pwa/middleware/service-worker';
 
@@ -51,14 +51,14 @@ const makeGetFrom = (app) => (url) => new Promise((resolve, reject) => {
 describe('PWA router', () => {
   const workerPath = [routes.prefix, routes.worker].join('');
   const mockWorker = createServiceWorkerScript();
-  const mockNoopWorker = createServiceWorkerNoopScript();
-  const mockEscapeHatchWorker = createServiceWorkerEscapeHatchScript();
+  const mockRecoveryWorker = createServiceWorkerRecoveryScript();
+  const mockEscapeHatchWorker = createServiceWorkerEscapeHatchScript().toString();
   const mockServiceWorkerScope = '/nested/scope';
 
   beforeEach(() => jest.clearAllMocks());
   beforeAll(() => {
     configurePWA({
-      enabled: true,
+      serviceWorker: true,
     });
   });
 
@@ -84,7 +84,7 @@ describe('PWA router', () => {
   describe('disabled', () => {
     beforeAll(() => {
       configurePWA({
-        enabled: false,
+        serviceWorker: false,
       });
     });
 
@@ -101,19 +101,19 @@ describe('PWA router', () => {
     });
   });
 
-  describe('noop worker', () => {
+  describe('recovery mode', () => {
     beforeAll(() => {
       configurePWA({
-        noop: true,
+        recoveryMode: true,
       });
     });
 
     [
-      [workerPath, 'application/javascript; charset=utf-8', mockNoopWorker],
+      [workerPath, 'application/javascript; charset=utf-8', mockRecoveryWorker],
     ].forEach((pair) => {
       const [route, contentType, mockResponse] = pair;
 
-      it(`should respond with a noop worker at ${route}`, async () => {
+      it(`should respond with recovery asset at ${route}`, async () => {
         expect.assertions(3);
         const response = await get(route);
         expect(response.status).toBe(200);
@@ -148,7 +148,7 @@ describe('PWA router', () => {
   describe('setting scope', () => {
     beforeAll(() => {
       configurePWA({
-        enabled: true,
+        serviceWorker: true,
         scope: mockServiceWorkerScope,
       });
     });
