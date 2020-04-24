@@ -149,7 +149,7 @@ describe('createRequestStore', () => {
 
     it('does not use the request body as the locals for initial state when useBodyForBuildingTheInitialState is not given', () => {
       const middleware = createRequestStore({ reducers });
-      req.body = { some: 'other form data', that: 'was aquired' };
+      req.body = { some: 'other form data', that: 'was acquired' };
       middleware(req, res, next);
       expect(reducers.buildInitialState).toHaveBeenCalledTimes(1);
       expect(reducers.buildInitialState.mock.calls[0][0]).not.toHaveProperty('req.body');
