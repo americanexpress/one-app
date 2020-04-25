@@ -18,6 +18,7 @@ import express from 'express';
 
 import { serviceWorkerMiddleware } from './middleware/service-worker';
 
+// used to reference the paths used by the router
 export const routes = {
   prefix: '/_/pwa',
   worker: '/service-worker.js',
