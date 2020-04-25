@@ -17,9 +17,9 @@
 import {
   serviceWorkerMiddleware,
   configureServiceWorker,
-  createServiceWorkerScript,
+  readServiceWorkerScript,
   createServiceWorkerEscapeHatchScript,
-  createServiceWorkerRecoveryScript,
+  readServiceWorkerRecoveryScript,
 } from '../../../../src/server/pwa/middleware/service-worker';
 
 jest.mock('fs', () => ({
@@ -28,8 +28,8 @@ jest.mock('fs', () => ({
 
 describe('service worker middleware components', () => {
   test('creates various types of service worker scripts', () => {
-    expect(createServiceWorkerRecoveryScript().toString()).toEqual('[service-worker-noop-script]');
-    expect(createServiceWorkerScript().toString()).toEqual('[service-worker-script]');
+    expect(readServiceWorkerRecoveryScript().toString()).toEqual('[service-worker-noop-script]');
+    expect(readServiceWorkerScript().toString()).toEqual('[service-worker-script]');
     expect(createServiceWorkerEscapeHatchScript().toString()).toEqual('self.unregister();');
   });
 
@@ -65,7 +65,7 @@ describe('service worker middleware components', () => {
       expect(res.type).toHaveBeenCalledWith('js');
       expect(res.set).toHaveBeenCalledWith('Service-Worker-Allowed', '/');
       expect(res.set).toHaveBeenCalledWith('Cache-Control', 'no-store, no-cache');
-      expect(res.send).toHaveBeenCalledWith(createServiceWorkerScript());
+      expect(res.send).toHaveBeenCalledWith(readServiceWorkerScript());
     });
 
     test('middleware responds with service worker noop script', () => {
@@ -86,7 +86,7 @@ describe('service worker middleware components', () => {
       expect(res.type).toHaveBeenCalledWith('js');
       expect(res.set).toHaveBeenCalledWith('Service-Worker-Allowed', '/');
       expect(res.set).toHaveBeenCalledWith('Cache-Control', 'no-store, no-cache');
-      expect(res.send).toHaveBeenCalledWith(createServiceWorkerRecoveryScript());
+      expect(res.send).toHaveBeenCalledWith(readServiceWorkerRecoveryScript());
     });
 
     test('middleware responds with service worker escape hatch script', () => {

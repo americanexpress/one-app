@@ -24,8 +24,8 @@ import {
 import { configurePWA } from '../../../src/server/pwa';
 import {
   createServiceWorkerEscapeHatchScript,
-  createServiceWorkerRecoveryScript,
-  createServiceWorkerScript,
+  readServiceWorkerRecoveryScript,
+  readServiceWorkerScript,
 } from '../../../src/server/pwa/middleware/service-worker';
 
 jest.mock('fs', () => ({
@@ -50,8 +50,8 @@ const makeGetFrom = (app) => (url) => new Promise((resolve, reject) => {
 
 describe('PWA router', () => {
   const workerPath = [routes.prefix, routes.worker].join('');
-  const mockWorker = createServiceWorkerScript();
-  const mockRecoveryWorker = createServiceWorkerRecoveryScript();
+  const mockWorker = readServiceWorkerScript();
+  const mockRecoveryWorker = readServiceWorkerRecoveryScript();
   const mockEscapeHatchWorker = createServiceWorkerEscapeHatchScript().toString();
   const mockServiceWorkerScope = '/nested/scope';
 
