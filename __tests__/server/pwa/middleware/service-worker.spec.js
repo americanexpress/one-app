@@ -18,8 +18,8 @@ import {
   serviceWorkerMiddleware,
   configureServiceWorker,
   readServiceWorkerScript,
-  createServiceWorkerEscapeHatchScript,
   readServiceWorkerRecoveryScript,
+  createServiceWorkerEscapeHatchScript,
 } from '../../../../src/server/pwa/middleware/service-worker';
 
 jest.mock('fs', () => ({
