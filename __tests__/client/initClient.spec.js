@@ -35,7 +35,7 @@ jest.mock('../../src/client/prerender', () => {
   const prerender = require.requireActual('../../src/client/prerender');
   prerender.loadPrerenderScripts = jest.fn(() => Promise.resolve());
   prerender.moveHelmetScripts = jest.fn();
-  prerender.loadPWA = jest.fn();
+  prerender.loadServiceWorker = jest.fn();
   return prerender;
 });
 
@@ -181,13 +181,13 @@ describe('initClient', () => {
     const { match } = require('@americanexpress/one-app-router');
     match.mockImplementationOnce((config, cb) => cb(null, null, { testProp: 'test' }));
 
-    const { loadPWA } = require('../../src/client/prerender');
+    const { loadServiceWorker } = require('../../src/client/prerender');
 
     const initClient = require('../../src/client/initClient').default;
 
     await initClient();
 
-    expect(loadPWA).toHaveBeenCalledTimes(1);
+    expect(loadServiceWorker).toHaveBeenCalledTimes(1);
   });
 
   it('should remove the server rendered stylesheets', async () => {

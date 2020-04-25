@@ -21,7 +21,7 @@ import createServiceWorkerMocks from 'service-worker-mock';
 
 function loadServiceWorker() {
   jest.isolateModules(() => {
-    require('../../../src/client/sw/worker.noop');
+    require('../../../src/client/service-worker/worker.noop');
   });
 }
 

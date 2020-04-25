@@ -21,7 +21,7 @@ import { browserHistory, Router } from '@americanexpress/one-app-router';
 import { setModuleMap } from 'holocron';
 
 import {
-  initializeClientStore, loadPrerenderScripts, moveHelmetScripts, loadPWA,
+  initializeClientStore, loadPrerenderScripts, moveHelmetScripts, loadServiceWorker,
 } from './prerender';
 import createRoutes from '../universal/routes';
 import match from '../universal/utils/matchPromisified';
@@ -51,7 +51,7 @@ export default async function initClient() {
     // we want to kick off service worker installation and store sync
     // as early as possible, while not blocking the app from rendering
     // so we let this async function run at its own pace and call it synchronously
-    loadPWA(store);
+    loadServiceWorker(store);
 
     /* eslint-disable react/jsx-props-no-spreading */
     const App = () => (

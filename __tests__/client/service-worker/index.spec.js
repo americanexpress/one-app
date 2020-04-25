@@ -15,28 +15,28 @@
  */
 
 import { fromJS } from 'immutable';
-import { importPWAClient, initializePWA } from '../../../src/client/sw';
-import pwaClient from '../../../src/client/sw/client';
+import { importServiceWorkerClient, initializeServiceWorker } from '../../../src/client/service-worker';
+import serviceWorkerClient from '../../../src/client/service-worker/client';
 
-jest.mock('../../../src/client/sw/client', () => jest.fn(() => Promise.resolve('pwaClient')));
+jest.mock('../../../src/client/service-worker/client', () => jest.fn(() => Promise.resolve('serviceWorkerClient')));
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('importPWAClient', () => {
+describe('importServiceWorkerClient', () => {
   test('imports client and calls with config', async () => {
     expect.assertions(3);
 
     const pwaConfig = {};
-    // we should expect pwaClient to chain the return value of initializePWA
-    await expect(importPWAClient(pwaConfig)).resolves.toEqual('pwaClient');
-    expect(pwaClient).toHaveBeenCalledTimes(1);
-    expect(pwaClient).toHaveBeenCalledWith(pwaConfig);
+    // we should expect serviceWorkerClient to chain the return value of initializeServiceWorker
+    await expect(importServiceWorkerClient(pwaConfig)).resolves.toEqual('serviceWorkerClient');
+    expect(serviceWorkerClient).toHaveBeenCalledTimes(1);
+    expect(serviceWorkerClient).toHaveBeenCalledWith(pwaConfig);
   });
 });
 
-describe('initializePWA', () => {
+describe('initializeServiceWorker', () => {
   let registration;
   let getRegistration;
 
@@ -60,17 +60,17 @@ describe('initializePWA', () => {
     navigator.serviceWorker = {
       getRegistration,
     };
-    pwaClient.mockImplementation(() => Promise.resolve(registration));
+    serviceWorkerClient.mockImplementation(() => Promise.resolve(registration));
   });
 
-  test('does not call in pwaClient if service worker is not supported', async () => {
+  test('does not call in serviceWorkerClient if service worker is not supported', async () => {
     expect.assertions(3);
 
     delete navigator.serviceWorker;
 
-    await expect(initializePWA({ getState })).resolves.toBeUndefined();
+    await expect(initializeServiceWorker({ getState })).resolves.toBeUndefined();
     expect(getRegistration).not.toHaveBeenCalled();
-    expect(pwaClient).not.toHaveBeenCalled();
+    expect(serviceWorkerClient).not.toHaveBeenCalled();
   });
 
   test('when serviceWorker is disabled, returns null if registration is not present', async () => {
@@ -79,8 +79,8 @@ describe('initializePWA', () => {
     getRegistration.mockImplementationOnce(() => Promise.resolve());
     getState.mockImplementationOnce(() => fromJS({ config: { serviceWorker: false } }));
 
-    await expect(initializePWA({ getState })).resolves.toBe(null);
-    expect(pwaClient).not.toHaveBeenCalled();
+    await expect(initializeServiceWorker({ getState })).resolves.toBe(null);
+    expect(serviceWorkerClient).not.toHaveBeenCalled();
   });
 
   test('when serviceWorker is disabled, returns registration and unregisters the service worker', async () => {
@@ -88,9 +88,9 @@ describe('initializePWA', () => {
 
     getState.mockImplementationOnce(() => fromJS({ config: { serviceWorker: false } }));
 
-    await expect(initializePWA({ getState })).resolves.toBe(registration);
+    await expect(initializeServiceWorker({ getState })).resolves.toBe(registration);
     expect(registration.unregister).toHaveBeenCalledTimes(1);
-    expect(pwaClient).not.toHaveBeenCalled();
+    expect(serviceWorkerClient).not.toHaveBeenCalled();
   });
 
   test('when recoveryMode is active, returns null if registration is not present', async () => {
@@ -104,8 +104,8 @@ describe('initializePWA', () => {
       },
     }));
 
-    await expect(initializePWA({ getState })).resolves.toBe(null);
-    expect(pwaClient).not.toHaveBeenCalled();
+    await expect(initializeServiceWorker({ getState })).resolves.toBe(null);
+    expect(serviceWorkerClient).not.toHaveBeenCalled();
   });
 
   test('when recoveryMode is active, returns registration and updates the service worker', async () => {
@@ -118,45 +118,45 @@ describe('initializePWA', () => {
       },
     }));
 
-    await expect(initializePWA({ getState })).resolves.toBe(registration);
+    await expect(initializeServiceWorker({ getState })).resolves.toBe(registration);
     expect(registration.update).toHaveBeenCalledTimes(1);
-    expect(pwaClient).not.toHaveBeenCalled();
+    expect(serviceWorkerClient).not.toHaveBeenCalled();
   });
 
-  test('calls pwaClient with settings if a service worker registration does not exist', async () => {
+  test('calls serviceWorkerClient with settings if a service worker registration does not exist', async () => {
     expect.assertions(4);
 
     getRegistration.mockImplementationOnce(() => Promise.resolve());
 
-    await expect(initializePWA({ getState })).resolves.toBe(registration);
+    await expect(initializeServiceWorker({ getState })).resolves.toBe(registration);
     expect(getRegistration).toHaveBeenCalledTimes(1);
-    expect(pwaClient).toHaveBeenCalledTimes(1);
-    expect(pwaClient).toHaveBeenCalledWith({
+    expect(serviceWorkerClient).toHaveBeenCalledTimes(1);
+    expect(serviceWorkerClient).toHaveBeenCalledWith({
       scriptUrl,
       scope,
       onError: expect.any(Function),
     });
   });
 
-  test('calls pwaClient with settings if the registration is present', async () => {
+  test('calls serviceWorkerClient with settings if the registration is present', async () => {
     expect.assertions(4);
 
-    await expect(initializePWA({ getState })).resolves.toBe(registration);
+    await expect(initializeServiceWorker({ getState })).resolves.toBe(registration);
     expect(getRegistration).toHaveBeenCalledTimes(1);
-    expect(pwaClient).toHaveBeenCalledTimes(1);
-    expect(pwaClient).toHaveBeenCalledWith({
+    expect(serviceWorkerClient).toHaveBeenCalledTimes(1);
+    expect(serviceWorkerClient).toHaveBeenCalledWith({
       scriptUrl,
       scope,
       onError: expect.any(Function),
     });
   });
 
-  test('calls pwaClient with settings and simulates when an error occurs', async () => {
+  test('calls serviceWorkerClient with settings and simulates when an error occurs', async () => {
     expect.assertions(4);
 
     const dispatch = jest.fn();
-    await expect(initializePWA({ getState, dispatch })).resolves.toBe(registration);
-    expect(pwaClient).toHaveBeenCalledWith({
+    await expect(initializeServiceWorker({ getState, dispatch })).resolves.toBe(registration);
+    expect(serviceWorkerClient).toHaveBeenCalledWith({
       scriptUrl,
       scope,
       onError: expect.any(Function),
@@ -165,7 +165,7 @@ describe('initializePWA', () => {
     // we make sure any error calls dispatch with addErrorToReport
 
     const error = new Error('ooops');
-    const { onError } = pwaClient.mock.calls[0][0];
+    const { onError } = serviceWorkerClient.mock.calls[0][0];
     expect(onError(error)).toBeUndefined();
     expect(dispatch).toHaveBeenCalledTimes(1);
   });

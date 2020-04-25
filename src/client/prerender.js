@@ -22,7 +22,7 @@ import createEnhancer from '../universal/enhancers';
 import reducer from '../universal/reducers';
 import transit from '../universal/utils/transit';
 import createTimeoutFetch from '../universal/utils/createTimeoutFetch';
-import { initializePWA } from './sw';
+import { initializeServiceWorker } from './service-worker';
 
 export function initializeClientStore() {
   // Six second timeout on client
@@ -52,7 +52,7 @@ export function moveHelmetScripts() {
   });
 }
 
-export function loadPWA(store) {
+export function loadServiceWorker(store) {
   return new Promise((resolve, reject) => {
     window.addEventListener('load', function pwaInitialization() {
       // remove handler once load event is fired
@@ -60,7 +60,7 @@ export function loadPWA(store) {
       // browsers that do not yet implement this, we can safely remove it manually
       window.removeEventListener('load', pwaInitialization);
       // pwa client will install the service worker
-      initializePWA(store)
+      initializeServiceWorker(store)
         .then(resolve)
         .catch(reject);
     }, { once: true });

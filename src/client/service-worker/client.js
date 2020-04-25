@@ -20,7 +20,7 @@ import {
 
 import { ERROR_MESSAGE_ID_KEY } from './constants';
 
-export default function pwaClient({
+export default function serviceWorkerClient({
   scriptUrl, scope, onError,
 }) {
   // We listen for any messages that come in from the service worker

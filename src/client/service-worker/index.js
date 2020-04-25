@@ -16,15 +16,15 @@
 
 import { addErrorToReport } from '@americanexpress/one-app-ducks';
 
-export function importPWAClient(settings) {
+export function importServiceWorkerClient(settings) {
   // In the future, we should consider making one-service worker added dynamically
   // as an external chunk with the ability to support conditional load.
   return import(/* webpackChunkName: "pwa-client" */ './client')
     .then((imported) => imported.default)
-    .then((pwaClient) => pwaClient(settings));
+    .then((serviceWorkerClient) => serviceWorkerClient(settings));
 }
 
-export function initializePWA(store) {
+export function initializeServiceWorker(store) {
   // If the service worker is unavailable, we would not need
   // to call in the chunk since it is not supported in the given browser.
   if ('serviceWorker' in navigator === false) return Promise.resolve();
@@ -63,6 +63,6 @@ export function initializePWA(store) {
       const onError = (error) => store.dispatch(addErrorToReport(error));
 
       // Normal operations will load up the library and integrate with the service worker
-      return importPWAClient({ scriptUrl, scope, onError });
+      return importServiceWorkerClient({ scriptUrl, scope, onError });
     });
 }

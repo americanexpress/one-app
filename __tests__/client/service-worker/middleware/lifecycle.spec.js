@@ -14,29 +14,28 @@
  * permissions and limitations under the License.
  */
 
-import { on, register } from '@americanexpress/one-service-worker';
+import { skipWaiting, clientsClaim } from '@americanexpress/one-service-worker';
 
-import pwaClient from '../../../src/client/sw/client';
+import {
+  createInstallMiddleware,
+  createActivateMiddleware,
+} from '../../../../src/client/service-worker/middleware/lifecycle';
 
 jest.mock('@americanexpress/one-service-worker', () => ({
-  messageContext: jest.fn(),
-  messenger: jest.fn(),
-  on: jest.fn(),
-  register: jest.fn(() => Promise.resolve()),
+  skipWaiting: () => 'skip-waiting',
+  clientsClaim: () => 'clients-claim',
 }));
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('pwaClient', () => {
-  test('it calls register and listens for messages', async () => {
-    expect.assertions(4);
-    const scriptUrl = '/_/pwa/sw.js';
-    const scope = '/';
-    await expect(pwaClient({ scriptUrl, scope })).resolves.toBeUndefined();
-    expect(on).toHaveBeenCalledTimes(1);
-    expect(register).toHaveBeenCalledTimes(1);
-    expect(register).toHaveBeenCalledWith(scriptUrl, { scope });
+describe('createLifecycleMiddleware', () => {
+  test('createInstallMiddleware uses skipWaiting', () => {
+    expect(createInstallMiddleware()).toEqual(skipWaiting());
+  });
+
+  test('createActivateMiddleware uses clientsClaim', () => {
+    expect(createActivateMiddleware()).toEqual(clientsClaim());
   });
 });

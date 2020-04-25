@@ -24,14 +24,14 @@ import createServiceWorkerMocks from 'service-worker-mock';
 import {
   createInstallMiddleware,
   createActivateMiddleware,
-} from '../../../src/client/sw/middleware';
-import { ERROR_MESSAGE_ID_KEY } from '../../../src/client/sw/constants';
+} from '../../../src/client/service-worker/middleware';
+import { ERROR_MESSAGE_ID_KEY } from '../../../src/client/service-worker/constants';
 
 jest.mock('@americanexpress/one-service-worker');
 
 function loadServiceWorker() {
   jest.isolateModules(() => {
-    require('../../../src/client/sw/worker');
+    require('../../../src/client/service-worker/worker');
   });
 }
 
