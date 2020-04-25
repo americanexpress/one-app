@@ -27,10 +27,10 @@ import { compose } from 'redux';
 import HelloWorldComponent from './HelloWorld';
 import Partial, { onPartialRouteEnter } from './Partial';
 
-import {
-  // eslint-disable-next-line camelcase
-  start_url, theme_color, defaultIcon, appleIcon,
-} from '../pwa';
+export const defaultIcon = 'http://localhost:3001/static/modules/frank-lloyd-root/0.0.3/assets/pwa-icon-192px.png';
+export const appleIcon = 'http://localhost:3001/static/modules/frank-lloyd-root/0.0.3/assets/pwa-icon-180px.png';
+// eslint-disable-next-line camelcase
+export const theme_color = '#FDB92D';
 
 export function FrankLloydRoot({ children, config }) {
   return (
@@ -60,7 +60,7 @@ export function FrankLloydRoot({ children, config }) {
 
 FrankLloydRoot.childRoutes = (store) => ([
   <ModuleRoute path="vitruvius" moduleName="vitruvius-franklin" />,
-  <ModuleRoute path={start_url.replace('/', '')} component={HelloWorldComponent} />,
+  <ModuleRoute path="/success" component={HelloWorldComponent} />,
   <ModuleRoute path="healthy-frank" moduleName="healthy-frank" />,
   <ModuleRoute path="demo/:moduleName" moduleName="preview-frank" />,
   <ModuleRoute path="html-partial/:locale/:moduleName" component={Partial} onEnter={onPartialRouteEnter(store)} />,

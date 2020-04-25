@@ -55,7 +55,4 @@ export default {
     ],
   },
   createSsrFetch: createFrankLikeFetch,
-  pwa: {
-    enabled: false,
-  },
 };
