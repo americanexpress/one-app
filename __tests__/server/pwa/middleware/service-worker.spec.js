@@ -28,8 +28,8 @@ jest.mock('fs', () => ({
 
 describe('service worker middleware components', () => {
   test('creates various types of service worker scripts', () => {
-    expect(createServiceWorkerRecoveryScript()).toEqual('[service-worker-noop-script]');
-    expect(createServiceWorkerScript()).toEqual('[service-worker-script]');
+    expect(createServiceWorkerRecoveryScript().toString()).toEqual('[service-worker-noop-script]');
+    expect(createServiceWorkerScript().toString()).toEqual('[service-worker-script]');
     expect(createServiceWorkerEscapeHatchScript().toString()).toEqual('self.unregister();');
   });
 

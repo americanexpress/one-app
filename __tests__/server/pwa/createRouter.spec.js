@@ -29,7 +29,7 @@ import {
 } from '../../../src/server/pwa/middleware/service-worker';
 
 jest.mock('fs', () => ({
-  readFileSync: (filePath) => ({ toString: () => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]') }),
+  readFileSync: (filePath) => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]'),
 }));
 
 const defaultMatchAll = jest.fn((req, res) => {

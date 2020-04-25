@@ -15,6 +15,7 @@
  */
 
 import fs from 'fs';
+import path from 'path';
 
 let serviceWorkerEnabled = false;
 let serviceWorkerScript = null;
@@ -22,12 +23,12 @@ let serviceWorkerScope = null;
 
 export function createServiceWorkerRecoveryScript() {
   // this file is created during build inside lib/server/middleware/pwa
-  return fs.readFileSync([__dirname, 'scripts/sw.noop.js'].join('/')).toString();
+  return fs.readFileSync(path.join(__dirname, 'scripts/sw.noop.js'));
 }
 
 export function createServiceWorkerScript() {
   // this file is created during build inside lib/server/middleware/pwa
-  return fs.readFileSync([__dirname, 'scripts/sw.js'].join('/')).toString();
+  return fs.readFileSync(path.join(__dirname, 'scripts/sw.js'));
 }
 
 export function createServiceWorkerEscapeHatchScript() {
