@@ -870,12 +870,13 @@ describe('Tests that require Docker setup', () => {
         });
 
         test('loads PWA resources from server ', async () => {
-          expect.assertions(2);
+          expect.assertions(3);
 
           const serviceWorkerResponse = await fetch(scriptUrl, { agent });
 
           expect(serviceWorkerResponse.status).toBe(200);
-          expect(serviceWorkerResponse.headers._headers).toHaveProperty('service-worker-allowed');
+          expect(serviceWorkerResponse.headers.get('cache-control')).toEqual('no-store, no-cache');
+          expect(serviceWorkerResponse.headers.get('service-worker-allowed')).toEqual('/');
         });
 
         test('service worker has a valid registration', async () => {
@@ -884,11 +885,11 @@ describe('Tests that require Docker setup', () => {
           await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
           // eslint-disable-next-line prefer-arrow-callback
-          const result = await browser.executeAsync(function getReg(done) {
-            navigator.serviceWorker.getRegistration().then(done);
+          const ready = await browser.executeAsync(function getReg(done) {
+            navigator.serviceWorker.ready.then(done);
           });
 
-          expect(result).toMatchObject({
+          expect(ready).toMatchObject({
             // subset of registration
             waiting: null,
             installing: null,
