@@ -1,7 +1,8 @@
 name: One App Release Pull Request
 on:
-  schedule:
-  - cron: "0 16 * * 3"
+  push:
+    branches:
+      - master
   repository_dispatch:
     types: [prepare-release-command]
 jobs:
@@ -24,6 +25,9 @@ jobs:
           NODE_ENV=development npm ci
           git config --local user.email "one.amex@aexp.com"
           git config --local user.name "OneAmexBot"
+          npm run release:changelog
+          git add .
+          git commit -m "docs(changelog): add changelog"
           npm run release
       - name: Create release pull request
         uses: peter-evans/create-pull-request@v2
