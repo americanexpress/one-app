@@ -6,7 +6,7 @@ Array [
 ]
 `;
 
-exports[`friendly formatter module map polling finishes with errors writes the log statment 1`] = `
+exports[`friendly formatter module map polling finishes with errors writes the log statement 1`] = `
 "<red>error</red>: sample test error
 <skipping for files>"
 `;
@@ -23,7 +23,7 @@ Array [
 ]
 `;
 
-exports[`friendly formatter module map polling finishes with updates writes a re-formatted log statment 1`] = `
+exports[`friendly formatter module map polling finishes with updates writes a re-formatted log statement 1`] = `
 "Modules updated: {
   \\"a\\": \\"1.2.3\\",
   \\"b\\": \\"4.5.6\\"

@@ -331,7 +331,7 @@ describe('friendly', () => {
           expect(moduleMapSpinner.isEnabled).toBe(false);
         });
 
-        it('writes a re-formatted log statment', () => {
+        it('writes a re-formatted log statement', () => {
           expect(formatter('error', 'pollModuleMap: 2 modules loaded/updated:', { a: '1.2.3', b: '4.5.6' })).toMatchSnapshot();
         });
       });
@@ -348,7 +348,7 @@ describe('friendly', () => {
           expect(moduleMapSpinner.isEnabled).toBe(false);
         });
 
-        it('writes the log statment', () => {
+        it('writes the log statement', () => {
           const err = new Error('sample test error');
           err.stack = 'sample test error\n<skipping for files>';
           const formattedError = formatter('error', 'pollModuleMap: error polling', err)
