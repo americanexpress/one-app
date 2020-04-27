@@ -18,8 +18,10 @@ import fs from 'fs';
 import path from 'path';
 
 import { validatePWAConfig } from './validation';
+import { configureWebManifest } from './middleware/webManifest';
 
 const defaultPWAConfig = {
+  webManifest: false,
   serviceWorker: false,
   serviceWorkerRecoveryMode: false,
   serviceWorkerType: null,
@@ -77,12 +79,15 @@ export function getServerPWAConfig() {
 }
 
 export function getClientPWAConfig() {
-  const { serviceWorker, serviceWorkerRecoveryMode, serviceWorkerScope } = pwaConfig;
+  const {
+    webManifest, serviceWorker, serviceWorkerRecoveryMode, serviceWorkerScope,
+  } = pwaConfig;
   return {
     serviceWorker,
     serviceWorkerRecoveryMode,
     serviceWorkerScope,
     serviceWorkerScriptUrl: serviceWorker && '/_/pwa/service-worker.js',
+    webManifestUrl: webManifest && [routes.prefix, routes.webManifest].join(''),
   };
 }
 
@@ -102,6 +107,21 @@ export function configurePWA(config) {
   }
 
   const validatedConfig = config ? validatePWAConfig(config) : {};
+
+  let manifest = null;
+  let manifestEnabled = true;
+
+  if (validatedConfig.webManifest) manifest = validatedConfig.webManifest;
+  else if (validatedConfig.webManifest !== undefined) {
+    // if webManifest was explicitly set to a falsy value (false, null),
+    // we disable the manifest
+    manifestEnabled = false;
+  }
+
+  configureWebManifest({
+    enabled: manifestEnabled,
+    manifest,
+  });
 
   return setPWAConfig({
     ...createServiceWorkerConfig(validatedConfig),

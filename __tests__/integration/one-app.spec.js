@@ -830,6 +830,7 @@ describe('Tests that require Docker setup', () => {
     describe('progressive web app', () => {
       let agent;
       let scriptUrl;
+      let webManifestUrl;
 
       beforeAll(async () => {
         const https = require('https');
@@ -842,9 +843,13 @@ describe('Tests that require Docker setup', () => {
       });
 
       test('does not load PWA resources from server by default', async () => {
+        expect.assertions(2);
+
         const serviceWorkerResponse = await fetch(scriptUrl, { agent });
+        const webManifestResponse = await fetch(webManifestUrl, { agent });
 
         expect(serviceWorkerResponse.status).toBe(404);
+        expect(webManifestResponse.status).toBe(404);
       });
 
       describe('progressive web app enabled', () => {
@@ -869,13 +874,18 @@ describe('Tests that require Docker setup', () => {
         });
 
         test('loads PWA resources from server ', async () => {
-          expect.assertions(3);
+          expect.assertions(5);
 
           const serviceWorkerResponse = await fetch(scriptUrl, { agent });
 
           expect(serviceWorkerResponse.status).toBe(200);
           expect(serviceWorkerResponse.headers.get('cache-control')).toEqual('no-store, no-cache');
           expect(serviceWorkerResponse.headers.get('service-worker-allowed')).toEqual('/');
+
+          const webManifestResponse = await fetch(webManifestUrl, { agent });
+
+          expect(webManifestResponse.status).toBe(200);
+          expect(webManifestResponse.headers.get('cache-control')).toBeDefined();
         });
 
         test('service worker has a valid registration', async () => {

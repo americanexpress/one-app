@@ -99,6 +99,7 @@ describe('ssrServer', () => {
     let json;
     let forwardedHeaderParser;
     let serviceWorker;
+    let webManifest;
 
     function loadServer() {
       ({ json } = require('body-parser'));
@@ -235,6 +236,15 @@ describe('ssrServer', () => {
         .get('/_/pwa/service-worker.js')
         .end(() => {
           expect(serviceWorker).toBeCalled();
+          done();
+        });
+    });
+
+    it('should call web manifest middleware', (done) => {
+      request(loadServer())
+        .get('/_/pwa/manifest.webmanifest')
+        .end(() => {
+          expect(webManifest).toBeCalled();
           done();
         });
     });

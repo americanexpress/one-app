@@ -41,6 +41,7 @@ describe('pwa configuration', () => {
       serviceWorkerScript: null,
     });
     expect(getClientPWAConfig()).toMatchObject({
+      webManifestUrl: false,
       serviceWorker: false,
       serviceWorkerRecoveryMode: false,
       serviceWorkerScriptUrl: false,
@@ -138,6 +139,7 @@ describe('pwa configuration', () => {
         serviceWorker: false,
         serviceWorkerRecoveryMode: false,
         serviceWorkerScriptUrl: false,
+        webManifestUrl: false,
         serviceWorkerScope: null,
       });
     });

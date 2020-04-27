@@ -188,6 +188,7 @@ export function getHead({
   helmetInfo,
   store,
   disableStyles,
+  webManifestUrl,
 }) {
   return `
     <head>
@@ -195,6 +196,7 @@ export function getHead({
       ${disableStyles ? '' : `
       ${renderModuleStyles(store)}
       `}
+      ${webManifestUrl ? `<link rel="manifest" href="${webManifestUrl}">` : ''}
     </head>
   `;
 }
@@ -313,6 +315,7 @@ export default function sendHtml(req, res) {
       disableScripts,
       disableStyles,
       scriptNonce,
+      webManifestUrl: pwaMetadata.webManifestUrl,
     };
 
     const bodySectionArgs = {

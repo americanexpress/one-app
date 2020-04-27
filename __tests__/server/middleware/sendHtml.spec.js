@@ -86,7 +86,8 @@ jest.mock('../../../src/server/middleware/pwa', () => ({
   getClientPWAConfig: jest.fn(() => ({
     serviceWorker: false,
     serviceWorkerScope: null,
-    serviceWorkerScriptUrl: null,
+    serviceWorkerScriptUrl: false,
+    webManifestUrl: false,
   })),
 }));
 jest.mock('../../../src/universal/ducks/config');
