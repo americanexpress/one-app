@@ -38,7 +38,7 @@ jobs:
         run: |
           tagversion=${{ steps.set_tag_version.outputs.tagversion}}
           res=
-          echo ::set-output name=dockertag::$(sed 's/^v//' <<< "$tagversion")
+          echo ::set-output name=dockertag::$(sed 's/^v*//' <<< "$tagversion")
       - name: Docker tag version
         run: echo $get_docker_tag
       - name: Docker login
