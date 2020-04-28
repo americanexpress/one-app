@@ -21,7 +21,7 @@ jobs:
         run: |
           #Checks for when a valid tag is manually pushed
           if [[ $GITHUB_REF != "" && "${{ github.event.client_payload.tagversion }}" == "" ]]; then
-          echo ::set-output name=tagversion::$(egrep -o '(v[0-9]+\.[0-9]+\.[0-9]+)(-.*)?' <<< $GITHUB_REF)
+          echo ::set-output name=tagversion::$(egrep -o '(v[0-9]+\.[0-9]+\.[0-9]+)(-\S*)?' <<< $GITHUB_REF)
           else
           #Runs when a tag is triggered automatically
           echo ::set-output name=tagversion::${{ github.event.client_payload.tagversion }}
