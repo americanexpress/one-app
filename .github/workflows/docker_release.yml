@@ -59,7 +59,7 @@ jobs:
         run: |
           docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_tag_version.outputs.dockertag}}
           docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_tag_version.outputs.dockertag }}
-          docker tag dev ${{ secrets.DOCKER_USER }}/one-app:latest
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:latest
           docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:latest
       - name: Push Docker Images
         run: |
