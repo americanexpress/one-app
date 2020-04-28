@@ -250,6 +250,8 @@ The `extendSafeRequestRestrictedAttributes` directive accepts a list of cookie n
 * [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
 * Library: [Vitruvius](https://github.com/americanexpress/vitruvius)
 
+<!--ONE-DOCS-ID id="createSsrFetch" start-->
+
 ## `createSsrFetch`
 **Module Type**
 * ✅ Root Module
@@ -275,6 +277,8 @@ For example, you may wish to forward cookies or headers from the initial page lo
 * Example: [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
 * Example: [An SSR Fetch Client](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/createFrankLikeFetch.js)
 * Using SSR Fetch Client with [`Module.holocron.loadModuleData`](./Loading-Data.md#moduleholocronloadmoduledata)
+
+<!--ONE-DOCS-ID end-->
 
 ## `validateStateConfig`
 **Module Type**
