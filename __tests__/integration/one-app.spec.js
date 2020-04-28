@@ -18,6 +18,7 @@
 /* eslint-disable no-underscore-dangle */
 import fetch from 'cross-fetch';
 import yargs, { argv } from 'yargs';
+import parsePrometheusTextFormat from 'parse-prometheus-text-format';
 
 import { setUpTestRunner, tearDownTestRunner } from './helpers/testRunner';
 import { waitFor } from './helpers/wait';
@@ -49,8 +50,10 @@ describe('Tests that require Docker setup', () => {
     const defaultFetchOptions = createFetchOptions();
     let originalModuleMap;
     const oneAppLocalPortToUse = getRandomPortNumber();
+    const oneAppMetricsLocalPortToUse = getRandomPortNumber();
     const appAtTestUrls = {
       fetchUrl: `https://localhost:${oneAppLocalPortToUse}`,
+      fetchMetricsUrl: `http://localhost:${oneAppMetricsLocalPortToUse}/metrics`,
       browserUrl: 'https://one-app:8443',
     };
 
@@ -59,7 +62,7 @@ describe('Tests that require Docker setup', () => {
     beforeAll(async () => {
       removeModuleFromModuleMap('late-frank');
       originalModuleMap = readModuleMap();
-      ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse }));
+      ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse }));
     });
 
     afterAll(async () => {
@@ -83,6 +86,31 @@ describe('Tests that require Docker setup', () => {
       expect(rawHeaders).not.toHaveProperty('access-control-allow-origin');
       expect(rawHeaders).not.toHaveProperty('access-control-expose-headers');
       expect(rawHeaders).not.toHaveProperty('access-control-allow-credentials');
+    });
+
+    describe('metrics', () => {
+      it('connects', async () => {
+        expect.assertions(1);
+        const response = await fetch(appAtTestUrls.fetchMetricsUrl);
+        expect(response).toHaveProperty('status', 200);
+      });
+
+      it('has all metrics', async () => {
+        expect.assertions(1);
+        const response = await fetch(appAtTestUrls.fetchMetricsUrl);
+        const parsedMetrics = parsePrometheusTextFormat(await response.text());
+        expect(parsedMetrics.map((metric) => metric.name).sort()).toMatchSnapshot();
+      });
+
+      it('has help information on each metric', async () => {
+        expect.assertions(1);
+        const response = await fetch(appAtTestUrls.fetchMetricsUrl);
+        const parsedMetrics = parsePrometheusTextFormat(await response.text());
+        const errors = parsedMetrics
+          .filter((metric) => (!metric.help) || metric.help.length === 0)
+          .map((metric) => metric.name);
+        expect(errors).toEqual([]);
+      });
     });
 
     test('app rejects CORS OPTIONS pre-flight requests for POST', async () => {

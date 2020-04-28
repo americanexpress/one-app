@@ -161,6 +161,7 @@
     "node-mocks-http": "1.8.0",
     "nodemon": "^1.19.4",
     "ora": "^4.0.3",
+    "parse-prometheus-text-format": "^1.1.1",
     "react-test-renderer": "^16.13.1",
     "rimraf": "^3.0.0",
     "rollup": "^2.2.0",
