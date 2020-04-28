@@ -185,7 +185,7 @@ describe('onModuleLoad', () => {
     expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.7' } }, moduleName: 'my-awesome-module' })).not.toThrow();
   });
 
-  it('throws if a modules that isn\'t the root module attempts to provide externals', () => {
+  it('warns if a module that isn\'t the root module attempts to provide externals', () => {
     const configuration = {
       providedExternals: {
         'dep-b': {
