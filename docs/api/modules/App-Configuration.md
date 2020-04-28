@@ -268,7 +268,7 @@ if (!global.BROWSER) {
 **📘 More Information**
 * Environment Variable: [`ONE_SERVICE_WORKER`](../server/Environment-Variables.md#one_service_worker)
 * Example: [Frank Lloyd Root's `pwa` config](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.3/src/pwa.js)
-* Service Worker: [Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
+* Service Worker: [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
 * Web App Manifest: [Documentation](https://developer.mozilla.org/en-US/docs/Web/Manifest)
 
 ## `configureRequestLog`
