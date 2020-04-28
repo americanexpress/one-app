@@ -1,4 +1,4 @@
-name: Slash Command Dispatch Pull Request Trigger
+name: /prepare-release Dispatch Pull Request Trigger
 on:
   issue_comment:
     types: [created]
