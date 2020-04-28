@@ -16,7 +16,7 @@
 
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
-import 'isomorphic-fetch';
+import 'cross-fetch/polyfill';
 
 import './polyfill/intl';
 import './config/env/argv';
