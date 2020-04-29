@@ -1,15 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`onModuleLoad includes messages about all missing or incompatible externals 1`] = `
-"dep-a@^2.0.0 is required by my-awesome-module, but tenant root module provides 3.2.0
-dep-b@~5.8.0 is required by my-awesome-module, but tenant root module provides 5.9.6
-External 'dep-d' is required by my-awesome-module, but is not provided by tenant root module"
+"dep-a@^2.0.0 is required by my-awesome-module, but the root module provides 3.2.0
+dep-b@~5.8.0 is required by my-awesome-module, but the root module provides 5.9.6
+External 'dep-d' is required by my-awesome-module, but is not provided by the root module"
 `;
 
-exports[`onModuleLoad throws if the tenant root module does not provide the expected external 1`] = `"External 'dep-b' is required by my-awesome-module, but is not provided by tenant root module"`;
+exports[`onModuleLoad throws if the root module does not provide the expected external 1`] = `"External 'dep-b' is required by my-awesome-module, but is not provided by the root module"`;
 
-exports[`onModuleLoad throws if the tenant root module provides an incompatible version of a required external 1`] = `"dep-a@^2.1.1 is required by my-awesome-module, but tenant root module provides 2.1.0"`;
+exports[`onModuleLoad throws if the root module provides an incompatible version of a required external 1`] = `"dep-a@^2.1.1 is required by my-awesome-module, but the root module provides 2.1.0"`;
 
 exports[`onModuleLoad throws when the one app version is incompatible 1`] = `"some-module@1.0.2 is not compatible with this version of one-app (4.43.0-0), it requires ~4.41.0."`;
 
-exports[`onModuleLoad validates csp added to tenant module 1`] = `"Root module must provide a valid content security policy"`;
+exports[`onModuleLoad validates csp added to the root module 1`] = `"Root module must provide a valid content security policy"`;

@@ -138,9 +138,9 @@ Object {
 }
 `;
 
-exports[`stateConfig methods stateConfig with module config should throw if ONE_CONFIG_ENV is not set on parsing client 1`] = `"Failed to parse an object in the tenant root configuration due to missing ONE_CONFIG_ENV."`;
+exports[`stateConfig methods stateConfig with module config should throw if ONE_CONFIG_ENV is not set on parsing client 1`] = `"Failed to parse an object in the root module configuration due to missing ONE_CONFIG_ENV."`;
 
-exports[`stateConfig methods stateConfig with module config should throw if ONE_CONFIG_ENV is not set on parsing server 1`] = `"Failed to parse an object in the tenant root configuration due to missing ONE_CONFIG_ENV."`;
+exports[`stateConfig methods stateConfig with module config should throw if ONE_CONFIG_ENV is not set on parsing server 1`] = `"Failed to parse an object in the root module configuration due to missing ONE_CONFIG_ENV."`;
 
 exports[`stateConfig methods stateConfig with module config should throw if client variables are supplied without server variables 1`] = `
 "Root module attempted to set the following non-overrideable options for the client but not the server:

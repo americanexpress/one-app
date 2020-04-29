@@ -44,7 +44,7 @@ describe('routes', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('should set up the tenancy root route first', () => {
+  it('should set up the root module route first', () => {
     const RootRoute = createRoutes(store)[0];
     expect(ReactTestUtils.isElement(RootRoute)).toBe(true);
     expect(RootRoute.props).toEqual({ moduleName: 'fakeRootModule', store });
