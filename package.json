@@ -179,7 +179,7 @@
       "one-app-statics/package.json"
     ],
     "skip": {
-      "tag": true,
+      "tag": true
     }
   }
 }
