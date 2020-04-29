@@ -1,7 +1,7 @@
 {
   "name": "frank-lloyd-root",
   "version": "0.0.1",
-  "description": "Tenancy root module for integration tests",
+  "description": "Root module for integration tests",
   "scripts": {
     "prebuild": "npm run clean",
     "build": "bundle-module",
