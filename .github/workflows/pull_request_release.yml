@@ -26,7 +26,7 @@ jobs:
           git config --local user.name "OneAmexBot"
           npm run release:changelog
           git add .
-          git commit -m "docs(changelog): add changelog"
+          git commit -m "docs(changelog): update"
           npm run release
       - name: Create release pull request
         uses: peter-evans/create-pull-request@v2
