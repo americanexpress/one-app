@@ -24,9 +24,6 @@ jobs:
           NODE_ENV=development npm ci
           git config --local user.email "one.amex@aexp.com"
           git config --local user.name "OneAmexBot"
-          echo -e "$(head -3 CHANGELOG.md)\n\n$(node_modules/.bin/conventional-changelog -p angular)\n\n$(tail -n +3 CHANGELOG.md)" > CHANGELOG.md
-          git add .
-          git commit -m "docs(changelog): update"
           npm run release
       - name: Create release pull request
         uses: peter-evans/create-pull-request@v2
