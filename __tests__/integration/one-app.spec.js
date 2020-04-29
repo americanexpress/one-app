@@ -108,7 +108,7 @@ describe('Tests that require Docker setup', () => {
       expect(rawHeaders).not.toHaveProperty('access-control-allow-credentials');
     });
 
-    describe('tenant without corsOrigins set', () => {
+    describe('root module without corsOrigins set', () => {
       beforeAll(async () => {
         await addModuleToModuleMap({
           moduleName: 'frank-lloyd-root',
@@ -277,7 +277,7 @@ describe('Tests that require Docker setup', () => {
         });
       });
 
-      describe('tenant module config', () => {
+      describe('root module module config', () => {
         test('provideStateConfig sets config', async () => {
           await browser.url(`${appAtTestUrls.browserUrl}/success`);
           const configPreTag = await browser.$('.value-provided-from-config');
@@ -318,14 +318,14 @@ describe('Tests that require Docker setup', () => {
       });
 
       describe('child module config', () => {
-        test('validateStateConfig validates an acceptable tenant module config', async () => {
+        test('validateStateConfig validates an acceptable module config', async () => {
           await browser.url(`${appAtTestUrls.browserUrl}/demo/picky-frank`);
           const versionSelector = await browser.$('.version');
           const version = await versionSelector.getText();
           expect(version).toEqual('v0.0.0');
         });
 
-        describe('child module fails to validate tenant module config', () => {
+        describe('child module fails to validate the module config', () => {
           let failedChildModuleSearch;
           const failedChildModuleValidation = /Error: Failed to pass correct url on client/;
 
@@ -518,7 +518,7 @@ describe('Tests that require Docker setup', () => {
               expect(JSON.parse(needyFrankModuleState)).toMatchSnapshot();
             });
 
-            describe('uses tenant provided fetch', () => {
+            describe('uses root module provided fetch', () => {
               test('should timeout on server if request exceeds one second', async () => {
                 await browser.url(`${appAtTestUrls.browserUrl}/demo/needy-frank?api=https://slow.api.frank/posts`);
                 const needyFrankModuleStateTag = await browser.$('.needy-frank-loaded-data');
@@ -735,8 +735,8 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
-    describe('module requires SafeRequest Restricted Attributes not provided by tenant module', () => {
-      const requestRestrictedAttributesRegex = /Error: Tenant root must extendSafeRequestRestrictedAttributes with cookies: \[macadamia,homebaked\]/;
+    describe('module requires SafeRequest Restricted Attributes not provided by the root module', () => {
+      const requestRestrictedAttributesRegex = /Error: Root module must extendSafeRequestRestrictedAttributes with cookies: \[macadamia,homebaked\]/;
       let requestRestrictedAttributesLogSearch;
 
       beforeAll(async () => {
@@ -770,7 +770,7 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
-    test('app calls loadModuleData to run async requests using Tenant provided fetchClient', async () => {
+    test('app calls loadModuleData to run async requests using root module provided fetchClient', async () => {
       const response = await fetch(`${appAtTestUrls.fetchUrl}/demo/ssr-frank`, {
         ...defaultFetchOptions,
       });
@@ -803,7 +803,7 @@ describe('Tests that require Docker setup', () => {
         await expect(searchForRequerstLog).resolves.toMatch(requestLogRegex);
       });
 
-      it('log gets updated when Tenancy Root module gets updated', async () => {
+      it('log gets updated when Root module gets updated', async () => {
         await addModuleToModuleMap({
           moduleName: 'frank-lloyd-root',
           version: '0.0.2',
