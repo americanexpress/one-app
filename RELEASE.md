@@ -13,8 +13,8 @@ Releases can be triggered in two ways:
  2. Once a pull request is reviewed merge the pull request and please ensure that the commit message is updated to follow this pattern  
 
    ``` bash
-   #chore(release): v5.0.0
-   chore(release): v<semantic-version>
+   #chore(release): 5.0.0
+   chore(release): <semantic-version>
 
    ```
 
@@ -49,7 +49,7 @@ For the first release please use the [manual release process](#manual-release-pr
 
 ### What happens if a pull request merged after the automated pull request is created?
 
-We should try to prevent this from happening, but if it does happen, since the pull request runs every wednesday it won't be triggered again and updated. Follow the above [manual release process](#manual-release-process) to include the changes that have been merged.
+We should try to prevent this from happening, but if it does happen, trigger the pull request to update by typing `/prepare-release` once that has completed a 🚀 and 👀 reaction would be added to the comment.
 
 ### How can I do a dry run to test out the files to be changed locally
 
