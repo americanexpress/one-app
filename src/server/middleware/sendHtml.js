@@ -286,7 +286,7 @@ export default function sendHtml(req, res) {
     // replace server specific config with client specific config (api urls and such)
     const clientConfig = getClientStateConfig();
     const pwaMetadata = getClientPWAConfig();
-    store.dispatch(setConfig({ ...clientConfig, ...pwaMetadata }));
+    store.dispatch(setConfig({ ...pwaMetadata, ...clientConfig }));
     const cdnUrl = clientConfig.cdnUrl || '/_/static/';
     const clientInitialState = store.getState();
     const appBundlesURLPrefix = `${cdnUrl}app/${buildVersion}`;

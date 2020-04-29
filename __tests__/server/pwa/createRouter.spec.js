@@ -54,6 +54,7 @@ describe('PWA router', () => {
 
   beforeEach(() => jest.clearAllMocks());
   beforeAll(() => {
+    process.env.ONE_SERVICE_WORKER = true;
     configurePWA({
       serviceWorker: true,
     });

@@ -47,6 +47,14 @@ export function getClientPWAConfig() {
 }
 
 export function configurePWA(config) {
+  // feature flag will not allow pwa/service-worker to be configured
+  // it will default to a disabled state regardless if `appConfig.pwa` was provided
+  if (process.env.ONE_SERVICE_WORKER !== 'true') {
+    // eslint-disable-next-line no-param-reassign
+    config = null;
+    resetPWAConfig();
+  }
+
   if (!config && pwaConfig.serviceWorker) {
     // if there was a previous configuration present, we want to gracefully
     // remove any remaining instances. We currently handle this client side

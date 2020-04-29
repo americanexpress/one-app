@@ -398,4 +398,19 @@ describe('runTime', () => {
       expect(() => referrerPolicyOverride.validate('unsafe-url')).toThrow();
     });
   });
+
+  describe('ONE_SERVICE_WORKER', () => {
+    const oneServiceWorkerFeatureFlag = getEnvVarConfig('ONE_SERVICE_WORKER');
+
+    it('default value and normalize both return `false`', () => {
+      expect(oneServiceWorkerFeatureFlag.defaultValue()).toEqual(false);
+      expect(oneServiceWorkerFeatureFlag.normalize()).toEqual(false);
+    });
+
+    it('normalizes feature flag value based on string input', () => {
+      expect(oneServiceWorkerFeatureFlag.normalize('false')).toEqual(false);
+      expect(oneServiceWorkerFeatureFlag.normalize('truth')).toEqual(false);
+      expect(oneServiceWorkerFeatureFlag.normalize('true')).toEqual(true);
+    });
+  });
 });

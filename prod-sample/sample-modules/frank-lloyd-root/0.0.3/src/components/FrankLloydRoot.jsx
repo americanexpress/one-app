@@ -43,7 +43,7 @@ export function FrankLloydRoot({ children, config }) {
           { name: 'theme-color', content: theme_color },
         ]}
         link={[
-          { rel: 'webmanifest', href: 'http://localhost:3001/static/modules/frank-lloyd-root/0.0.3/assets/manifest.webmanifest' },
+          { rel: 'webmanifest', href: `${config.get('cdnUrl')}modules/frank-lloyd-root/0.0.3/assets/manifest.webmanifest` },
           // pre-connect to Holocron Module CDN
           { rel: 'preconnect', href: 'http://localhost:3001' },
           // favicon

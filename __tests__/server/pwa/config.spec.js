@@ -24,6 +24,10 @@ jest.mock('fs', () => ({
 }));
 
 describe('pwa configuration', () => {
+  beforeAll(() => {
+    process.env.ONE_SERVICE_WORKER = true;
+  });
+
   test('getters return default state', () => {
     expect(getClientPWAConfig()).toMatchObject({
       serviceWorker: false,
@@ -83,6 +87,25 @@ describe('pwa configuration', () => {
         serviceWorkerScope: '/',
         serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
       });
+    });
+
+    test('service worker feature flag will reset config to defaults if disabled', () => {
+      process.env.ONE_SERVICE_WORKER = false;
+      expect(configurePWA({
+        serviceWorker: true,
+      })).toMatchObject({
+        serviceWorker: false,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerType: null,
+        serviceWorkerScope: null,
+      });
+      expect(getClientPWAConfig()).toMatchObject({
+        serviceWorker: false,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerScriptUrl: false,
+        serviceWorkerScope: null,
+      });
+      process.env.ONE_SERVICE_WORKER = true;
     });
 
     test('disabling PWA configuration', () => {

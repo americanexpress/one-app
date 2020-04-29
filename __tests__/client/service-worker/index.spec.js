@@ -152,7 +152,7 @@ describe('initializeServiceWorker', () => {
   });
 
   test('calls serviceWorkerClient with settings and simulates when an error occurs', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     const dispatch = jest.fn();
     await expect(initializeServiceWorker({ getState, dispatch })).resolves.toBe(registration);
@@ -168,5 +168,13 @@ describe('initializeServiceWorker', () => {
     const { onError } = serviceWorkerClient.mock.calls[0][0];
     expect(onError(error)).toBeUndefined();
     expect(dispatch).toHaveBeenCalledTimes(1);
+
+    // to make sure our error action object is reachable, we invoke it thunk-like
+    dispatch.mock.calls[0][0](dispatch);
+    expect(dispatch).toHaveBeenCalledWith({
+      error,
+      otherData: undefined,
+      type: '@americanexpress/one-app-ducks/error-reporting/ADD_ERROR_REPORT_TO_QUEUE',
+    });
   });
 });
