@@ -131,7 +131,6 @@
     "babel-eslint": "^10.0.3",
     "chokidar": "^3.3.0",
     "concurrently": "^5.0.0",
-    "conventional-changelog-cli": "^2.0.31",
     "cross-env": "^6.0.3",
     "danger": "^9.2.8",
     "enzyme": "^3.10.0",
