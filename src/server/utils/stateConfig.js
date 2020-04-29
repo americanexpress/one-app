@@ -87,7 +87,7 @@ if (process.env.NODE_ENV === 'development' && fs.existsSync(pathToDevEndpoints))
 
 let stateConfigFromModule = { server: {}, client: {} };
 const configEnv = process.env.ONE_CONFIG_ENV;
-const makeConfigEnvError = () => new Error('Failed to parse an object in the tenant root configuration due to missing ONE_CONFIG_ENV.');
+const makeConfigEnvError = () => new Error('Failed to parse an object in the root module configuration due to missing ONE_CONFIG_ENV.');
 
 // Set initial config state
 let clientStateConfig = {

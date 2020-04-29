@@ -66,7 +66,7 @@ export default function onModuleLoad({
 }) {
   const {
     [CONFIGURATION_KEY]: {
-      // Tenant Root Specific
+      // Root Module Specific
       providedExternals,
       provideStateConfig,
       csp,
@@ -130,9 +130,9 @@ export default function onModuleLoad({
       const providedExternal = RootModule[CONFIGURATION_KEY].providedExternals[externalName];
 
       if (!providedExternal) {
-        messages.push(`External '${externalName}' is required by ${moduleName}, but is not provided by tenant root module`);
+        messages.push(`External '${externalName}' is required by ${moduleName}, but is not provided by the root module`);
       } else if (!semver.satisfies(providedExternal.version, requestedExternalVersion)) {
-        messages.push(`${externalName}@${requestedExternalVersion} is required by ${moduleName}, but tenant root module provides ${providedExternal.version}`);
+        messages.push(`${externalName}@${requestedExternalVersion} is required by ${moduleName}, but the root module provides ${providedExternal.version}`);
       }
     });
 
