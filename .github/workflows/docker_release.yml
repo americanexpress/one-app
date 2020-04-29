@@ -19,12 +19,27 @@ jobs:
       - name: Set env
         id: set_tag_version
         run: |
-          if [ "${{ github.event.client_payload.tagversion }}" != "" ]; then
-          echo ::set-output name=tagversion::${{ github.event.client_payload.tagversion }}
+          #Checks for when a valid tag is manually pushed
+          if [[ $GITHUB_REF != "" && "${{ github.event.client_payload.tagversion }}" == "" ]]; then
+          echo ::set-output name=tagversion::$(egrep -o '(v[0-9]+\.[0-9]+\.[0-9]+)(-\S*)?' <<< $GITHUB_REF)
           else
-          echo ::set-output name=tagversion::$(echo $GITHUB_REF | cut -d / -f 3)
+          #Runs when a tag is triggered automatically
+          echo ::set-output name=tagversion::${{ github.event.client_payload.tagversion }}
           fi
           echo $tagversion
+      - name: Check Tag Version
+        run: |
+          if [[ "${{ steps.set_tag_version.outputs.tagversion }}" == ""  ]]; then
+          echo "::error::Incorrect tag provided, please provide a tag with the correct format and try again"
+          exit 1
+          fi
+      - name: Docker tag version
+        id: set_docker_tag_version
+        run: |
+          tagversion=${{ steps.set_tag_version.outputs.tagversion}}
+          echo ::set-output name=dockertag::$(sed 's/^v*//' <<< "$tagversion")
+      - name: Docker tag version
+        run: echo $get_docker_tag
       - name: Docker login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Build production docker image
@@ -41,12 +56,16 @@ jobs:
         run: docker build -t dev . --target=development
       - name: Tag Docker Images
         run: |
-          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_tag_version.outputs.tagversion }}
-          docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_tag_version.outputs.tagversion }}
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_tag_version.outputs.dockertag}}
+          docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_tag_version.outputs.dockertag }}
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:latest
+          docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:latest
       - name: Push Docker Images
         run: |
-          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_tag_version.outputs.tagversion }}
-          docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_tag_version.outputs.tagversion }}
+          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_tag_version.outputs.dockertag}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app-dev:{{ steps.set_docker_tag_version.outputs.dockertag}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app:latest
+          docker push ${{ secrets.DOCKER_USER }}/one-app-dev:latest
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
