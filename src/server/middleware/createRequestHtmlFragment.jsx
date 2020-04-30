@@ -20,9 +20,16 @@ import url, { Url } from 'url';
 import { RouterContext } from '@americanexpress/one-app-router';
 import { composeModules } from 'holocron';
 import match from '../../universal/utils/matchPromisified';
-import breaker from '../utils/circuitBreaker';
+import createCircuitBreaker from '../utils/createCircuitBreaker';
 
 import { renderForString, renderForStaticMarkup } from '../utils/reactRendering';
+
+const getModuleData = async ({ dispatch, modules }) => {
+  await dispatch(composeModules(modules));
+  return false;
+};
+
+const breaker = createCircuitBreaker(getModuleData);
 
 export default function createRequestHtmlFragment({ createRoutes }) {
   return async (req, res, next) => {

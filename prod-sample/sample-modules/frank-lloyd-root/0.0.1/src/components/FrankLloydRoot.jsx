@@ -48,7 +48,7 @@ FrankLloydRoot.propTypes = {
 
 if (!global.BROWSER) {
   FrankLloydRoot.appConfig = {
-    eventLoopLagThreshold: Infinity,
+    eventLoopDelayThreshold: Infinity,
     // eslint-disable-next-line global-require
     csp: require('../csp').default,
     provideStateConfig: {

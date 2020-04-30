@@ -267,7 +267,7 @@ if (!global.BROWSER) {
 }
 ```
 
-## `eventLoopLagThreshold`
+## `eventLoopDelayThreshold`
 **Module Type**
 * ✅ Root Module
 * 🚫 Child Module
@@ -276,12 +276,12 @@ if (!global.BROWSER) {
 ```js
 if (!global.BROWSER) {
   Module.appConfig = {
-    eventLoopLagThreshold: Number,
+    eventLoopDelayThreshold: Number,
   };
 }
 ```
 
-The `eventLoopLagThreshold` directive accepts a number representing the threshold of the event loop lag (in milliseconds) before opening the circuit in our circuit breaker created with [Opossum](https://nodeshift.dev/opossum/). Once the circuit is open, it will remain open for 10 seconds and close at that time pending the event loop lag. The default value is `30`. If you desire to disable the circuit completely, set this value to `Infinity`.
+The `eventLoopDelayThreshold` directive accepts a number representing the threshold of the event loop delay (in milliseconds) before opening the circuit. Once the circuit is open, it will remain open for 10 seconds and close at that time pending the event loop delay. The default value is `250`. If you desire to disable the event loop delay potion of the circuit breaker, set this value to `Infinity`. The circuit will also open if the error rate exceeds 10%.
 
 **📘 More Information**
 * [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)

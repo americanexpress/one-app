@@ -29,7 +29,7 @@ import { setCorsOrigins } from '../../../src/server/middleware/conditionallyAllo
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from '../../../src/server/utils/safeRequest';
 import { setConfigureRequestLog } from '../../../src/server/utils/logging/serverMiddleware';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
-import { getEventLoopLagThreshold } from '../../../src/server/utils/circuitBreaker';
+import { getEventLoopDelayThreshold } from '../../../src/server/utils/createCircuitBreaker';
 
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
@@ -313,19 +313,19 @@ describe('onModuleLoad', () => {
   });
 
   it('sets the event loop lag threshold from the root module', () => {
-    const eventLoopLagThreshold = 50;
-    expect(getEventLoopLagThreshold()).not.toBe(eventLoopLagThreshold);
+    const eventLoopDelayThreshold = 50;
+    expect(getEventLoopDelayThreshold()).not.toBe(eventLoopDelayThreshold);
     onModuleLoad({
       module: {
         [CONFIGURATION_KEY]: {
           csp,
-          eventLoopLagThreshold,
+          eventLoopDelayThreshold,
         },
         [META_DATA_KEY]: { version: '1.0.14' },
       },
       moduleName: 'some-root',
     });
-    expect(getEventLoopLagThreshold()).toBe(eventLoopLagThreshold);
+    expect(getEventLoopDelayThreshold()).toBe(eventLoopDelayThreshold);
   });
 
   it('logs when the root module is loaded', () => {
