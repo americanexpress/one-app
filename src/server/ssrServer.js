@@ -45,7 +45,7 @@ import sendHtml, { renderStaticErrorPage } from './middleware/sendHtml';
 import logging from './utils/logging/serverMiddleware';
 import forwardedHeaderParser from './middleware/forwardedHeaderParser';
 
-import { pwaRouter } from './pwa';
+import { createPWARouter } from './pwa';
 
 export function createApp({ enablePostToModuleRoutes = false } = {}) {
   const app = express();
@@ -59,7 +59,7 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
 
   app.use('/_/static', express.static(path.join(__dirname, '../../build'), { maxage: '182d' }));
   app.get('*', addCacheHeaders);
-  app.use('/_/pwa', pwaRouter);
+  app.use('/_/pwa', createPWARouter());
 
   app.disable('x-powered-by');
   app.disable('e-tag');

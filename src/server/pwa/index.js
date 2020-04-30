@@ -14,8 +14,5 @@
  * permissions and limitations under the License.
  */
 
-import { createPWARouter } from './createRouter';
-
-export const pwaRouter = createPWARouter();
-
+export { createPWARouter } from './createRouter';
 export { configurePWA, getClientPWAConfig } from './config';
