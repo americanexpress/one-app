@@ -593,7 +593,7 @@ Feature flag to enable service worker and PWA feature, defaults to false.
 ```bash
 ONE_SERVICE=WORKER=Boolean
 ```
-**Exampke**
+**Example**
 ```bash
 ONE_SERVICE=WORKER=true
 ```
