@@ -176,7 +176,7 @@ In practice, this allows POST requests from given origins to return partially re
 * ✅ Root Module
 * 🚫 Child Module
 
-> The PWA feature is behind a feature flag `ONE_SERVICE_WORKER` that needs to be
+> ⚠️ The PWA feature is behind a feature flag `ONE_SERVICE_WORKER` that needs to be
 > set to "true" during runtime.
 
 The `pwa` directive is how we configure the service worker and various PWA features.
