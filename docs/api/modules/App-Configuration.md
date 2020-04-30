@@ -227,7 +227,7 @@ if (!global.BROWSER) {
 ```
 
 **📘 More Information**
-* [`ONE_SERVICE_WORKER`](../server/Environment-Variables.md#one_service_worker)
+* Environment Variable: [`ONE_SERVICE_WORKER`](../server/Environment-Variables.md#one_service_worker)
 * Example: [Frank Lloyd Root's `pwa` config](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.3/src/pwa.js)
 
 ## `configureRequestLog`
