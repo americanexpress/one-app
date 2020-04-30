@@ -33,10 +33,7 @@ jest.mock('fs', () => ({
 }));
 
 const defaultMatchAll = jest.fn((req, res) => {
-  res
-    .status(404)
-    .set('Content-Type', 'text/html')
-    .send('<!doctype>');
+  res.sendStatus(404);
 });
 
 const makeGetFrom = (app) => (url) => new Promise((resolve, reject) => {
