@@ -27,7 +27,7 @@ describe('batchModulesToUpdate', () => {
   const modulesWithoutRoot = [...modules];
   modules.splice(20, 0, 'my-root');
 
-  it('should put the tenant root module first', () => {
+  it('should put the root module first', () => {
     const result = batchModulesToUpdate(modules);
     expect(result[0]).toEqual(['my-root']);
   });

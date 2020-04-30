@@ -2,6 +2,8 @@ name: One App Release Pull Request
 on:
   schedule:
   - cron: "0 16 * * 3"
+  repository_dispatch:
+    types: [prepare-release-command]
 jobs:
   one-app-release-pull-request:
     runs-on: ubuntu-latest

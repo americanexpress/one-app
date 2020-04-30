@@ -6,6 +6,7 @@
 
 **Contents**
 * [Globals](#globals)
+* [Holocron Module Configuration](#holocron-module-configuration)
 * [Higher Order Components](#higher-order-components)
 * [Shared Ducks](#shared-ducks)
 
@@ -25,6 +26,15 @@ global.BROWSER; // Boolean
 
 `global.BROWSER` is provided in the Server and Browser environments to determine if the code is currently being executed on the Server or the Browser.
 
+## Holocron Module Configuration
+
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@master/packages/holocron/API.md" id="Module.holocron" parentHeadingLevel="2" start-->
+
+Please see [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocron-module-configuration) in the Holocron API.
+
+<!--ONE-DOCS end-->
+
+
 ## Higher Order Components
 
 [Holocron Modules](../API.md#modules) use [Higher Order Components (HOC)](https://reactjs.org/docs/higher-order-components.html) to add behaviors regarding when a Module loads, connecting a Module with its [Reducer(s)](https://redux.js.org/basics/reducers/) to a Redux Store (similar to [Redux `connect`](https://react-redux.js.org/api/connect)) and adding runtime validations for a Module.
@@ -32,11 +42,15 @@ global.BROWSER; // Boolean
 **Contents**
 * [`holocronModule`](#holocronmodule)
 
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@master/packages/holocron/API.md" id="holocronModule" parentHeadingLevel="2" start-->
+
 ### `holocronModule`
 
 > ☠ `holocronModule` has been deprecated and will be removed in the next major version of Holocron. Please see [Holocron Module Configuration].
 
 Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule) in the Holocron API.
+
+<!--ONE-DOCS end-->
 
 ## Shared Ducks
 
@@ -101,11 +115,11 @@ const state = new Map({
 
 **📘 More Information**
 * Adding values to `config` state with [`provideStateConfig`](./App-Configuration.md#providestateconfig) from [App Configuration API](./App-Configuration.md).
-* Learn more about [Environment Variables](#):
-  * [`ONE_CLIENT_REPORTING_URL`](#),
-  * [`ONE_CLIENT_CDN_URL`](#),
-  * [`ONE_CLIENT_LOCALE_FILENAME`](#),
-  * [`ONE_CLIENT_ROOT_MODULE_NAME`](#)
+* Learn more about [Environment Variables](../server/Environment-Variables.md):
+  * [`ONE_CLIENT_REPORTING_URL`](../server/Environment-Variables.md#one_client_reporting_url),
+  * [`ONE_CLIENT_CDN_URL`](../server/Environment-Variables.md#one_client_cdn_url),
+  * [`ONE_CLIENT_LOCALE_FILENAME`](../server/Environment-Variables.md#one_client_locale_filename),
+  * [`ONE_CLIENT_ROOT_MODULE_NAME`](../server/Environment-Variables.md#one_client_root_module_name)
 
 #### Action Creators
 
@@ -127,33 +141,57 @@ dispatch(setConfig(config));
 
 This `config` passed to `setConfig` replaces the contents of the `config` state object in the Redux Store.
 
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@master/README.md" id="errorReporting-duck" parentHeadingLevel="2" start-->
+
 ### `errorReporting` Duck
 
 Please see the [`errorReporting` Duck](https://github.com/americanexpress/one-app-ducks#errorreporting-duck) in the One App Ducks API.
+
+<!--ONE-DOCS end-->
+
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@master/README.md" id="error-duck" parentHeadingLevel="2" start-->
 
 ### `error` Duck
 
 Please see the [`error` Duck](https://github.com/americanexpress/one-app-ducks#error-duck) in the One App Ducks API.
 
+<!--ONE-DOCS end-->
+
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@master/README.md" id="browser-duck" parentHeadingLevel="2" start-->
+
 ### `browser` Duck
 
 Please see the [`browser` Duck](https://github.com/americanexpress/one-app-ducks#browser-duck) in the One App Ducks API.
+
+<!--ONE-DOCS end-->
+
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@master/README.md" id="rendering-duck" parentHeadingLevel="2" start-->
 
 ### `rendering` Duck
 
 Please see the [`rendering` Duck](https://github.com/americanexpress/one-app-ducks#rendering-duck) in the One App Ducks API.
 
+<!--ONE-DOCS end-->
+
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@master/README.md" id="redirection-duck" parentHeadingLevel="2" start-->
+
 ### `redirection` Duck
 
 Please see the [`redirection` Duck](https://github.com/americanexpress/one-app-ducks#redirection-duck) in the One App Ducks API.
+
+<!--ONE-DOCS end-->
 
 ### `holocron` Duck
 
 Please see the [`holocron` Duck](https://github.com/americanexpress/holocron/blob/master/packages/holocron/src/ducks/load.js) in the Holocron API.
 
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app-ducks@master/README.md" id="intl-duck" parentHeadingLevel="2" start-->
+
 ### `intl` Duck
 
 Please see the [`intl` Duck](https://github.com/americanexpress/one-app-ducks#intl-duck) in the One App Ducks API.
+
+<!--ONE-DOCS end-->
 
 [☝️ Return To Top](#state-management)
 

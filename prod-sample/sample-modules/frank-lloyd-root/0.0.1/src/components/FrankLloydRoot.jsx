@@ -26,7 +26,7 @@ export function FrankLloydRoot({ children, config }) {
   return (
     <React.Fragment>
       <Helmet
-        title="Sample Tenancy"
+        title="Sample Root Module"
         link={[
           { rel: 'icon', href: 'https://sample-cdn.frank/favicon.ico' },
         ]}

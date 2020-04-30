@@ -62,7 +62,7 @@ export function renderStaticErrorPage(res) {
     message = 'Sorry, we are unable to load this page at this time.';
   }
 
-  // TODO: allow tenant to provide custom error message and override default html
+  // TODO: allow root module to provide custom error message and override default html
   safeSend(res,
     `<!DOCTYPE html>
         <html>
