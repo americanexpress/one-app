@@ -62,6 +62,7 @@ One App can be configured via Environment Variables:
 * [`ONE_MAP_POLLING_MAX`](#one_map_polling_max)
 * [`ONE_MAP_POLLING_MIN`](#one_map_polling_min)
 * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
+* [`ONE_SERVICE_WORKER`](#one_service_worker)
 
 > ⚠️ = Required
 
@@ -578,6 +579,28 @@ ONE_REFERRER_POLICY_OVERRIDE=no-referrer
 **Default Value**
 ```bash
 ONE_REFERRER_POLICY_OVERRIDE=same-origin
+```
+
+## `ONE_SERVICE=WORKER`
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+Feature flag to enable service worker and PWA feature, defaults to false.
+
+**Shape**
+```bash
+ONE_SERVICE=WORKER=Boolean
+```
+**Exampke**
+```bash
+ONE_SERVICE=WORKER=true
+```
+
+**Default Value**
+```bash
+ONE_SERVICE=WORKER=false
 ```
 
 **📘 More Information**

@@ -176,13 +176,17 @@ In practice, this allows POST requests from given origins to return partially re
 * ✅ Root Module
 * 🚫 Child Module
 
+> The PWA feature is behind a feature flag `ONE_SERVICE_WORKER` that needs to be
+> set to "true" during runtime.
+
 The `pwa` directive is how we configure the service worker and various PWA features.
 There are three distinct service workers with their given purpose. To use
 the standard service worker, we can set the `serviceWorker` to true. If there
 was any failure caused by the service worker, we can use the recovery service
 worker with `recoveryMode` set to true if we wish to reset browser clients. In
 the event we want to purge the service worker and remove any existing service
-workers on browser clients, We can use the escape hatch worker by setting `escapeHatch` to true.
+workers on browser clients, We can use the escape hatch worker by setting
+`escapeHatch` to true.
 
 There is a precedence to which of the three flags is respected and the order goes:
 
@@ -223,6 +227,7 @@ if (!global.BROWSER) {
 ```
 
 **📘 More Information**
+* [`ONE_SERVICE_WORKER`](../server/Environment-Variables.md#one_service_worker)
 * Example: [Frank Lloyd Root's `pwa` config](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.3/src/pwa.js)
 
 ## `configureRequestLog`
