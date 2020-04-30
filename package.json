@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "5.0.0-rc.1",
+  "version": "5.0.0-rc.2",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {

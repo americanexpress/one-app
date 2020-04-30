@@ -38,7 +38,7 @@ Configure your `ONE_CLIENT_URL` environment variable to point at the correct ver
 
 Example:
 
-`ONE_CLIENT_CDN_URL=https://cdn.jsdelivr.net/npm/one-app-statics@5.0.1/build/`
+`ONE_CLIENT_CDN_URL=https://cdn.jsdelivr.net/npm/@americanexpress/one-app-statics@5.0.0-rc.1/build/`
 
 
 

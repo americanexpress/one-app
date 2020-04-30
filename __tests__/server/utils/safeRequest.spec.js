@@ -123,7 +123,7 @@ describe('safeRequest', () => {
       expect(extendedCleanedRequest.headers.risky).toEqual('could be useful');
     });
 
-    it('does not add additonal keys to request', () => {
+    it('does not add additional keys to request', () => {
       extendRestrictedAttributesAllowList({
         notvalid: ['haha'],
       });

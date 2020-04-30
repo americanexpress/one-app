@@ -29,6 +29,8 @@ within `childRoutes` defined on a module.
 
 Please see One App Router's [Route API docs](https://github.com/americanexpress/one-app-router/blob/master/docs/API.md#route) for more information.
 
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@master/packages/holocron-module-route/README.md" id="childRoutes" parentHeadingLevel="1" start-->
+
 ## `childRoutes`
 
 Enables components and modules to define their own child routes. `childRoutes` can be either a single
@@ -43,6 +45,8 @@ MyModule.childRoutes = <ModuleRoute path="/" />;
 ```
 
 Please see [One App Router](https://github.com/americanexpress/one-app-router/blob/master/docs/API.md#childroutes) for more information.
+
+<!--ONE-DOCS end-->
 
 ## `Link`
 
@@ -71,11 +75,15 @@ MyModule.onEnterRouteHook = (nextState, replace, callback) => {
 };
 ```
 
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@master/packages/holocron-module-route/README.md" id="ModuleRoute" parentHeadingLevel="1" start-->
+
 Please see the [Holocron Module Route docs](https://github.com/americanexpress/holocron/tree/master/packages/holocron-module-route#onenterroutehook) for information.
 
 ## ModuleRoute
 
 Please see [ModuleRoute](./Loading-Modules.md#moduleroute) for more information.
+
+<!--ONE-DOCS end-->
 
 **📘 More Information**
 * For an root module implementation example see [`FrankLloydRoot`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/components/FrankLloydRoot.jsx)
