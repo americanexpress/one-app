@@ -42,7 +42,6 @@ const eventLoopDelayHistogram = monitorEventLoopDelay();
 eventLoopDelayHistogram.enable();
 
 const checkMaxEventLoopDelay = async () => {
-  // const eventLoopDelayHistogram = monitorEventLoopDelay();
   // Return if root module is not loaded, as that is where threshold is configured
   if (!getModule(rootModuleName)) return;
   // Get event loop delay in milliseconds (from nanoseconds)
