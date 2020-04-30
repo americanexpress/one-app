@@ -184,6 +184,19 @@ worker with `recoveryMode` set to true if we wish to reset browser clients. In
 the event we want to purge the service worker and remove any existing service
 workers on browser clients, We can use the escape hatch worker by setting `escapeHatch` to true.
 
+There is a precedence to which of the three flags is respected and the order goes:
+
+```
+1. serviceWorker
+2. escapeHatch
+3. recoveryMode
+```
+
+What this means is, if we set `{ recoveryMode: true, escapeHatch: true }`, `escapeHatch`
+will be honored (and enabled) instead of `recoveryMode`. To enable either of these modes,
+make sure to omit `{ serviceWorker: true }` when desiring to set either of the two optional
+modes since it is applied.
+
 For the variety of service workers available, we have control to set its
 `scope` with the desired pathname and assign what url base the service worker
 can oversee.
