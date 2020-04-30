@@ -63,7 +63,7 @@ describe('service worker script', () => {
       throw failureError;
     });
 
-    expect(loadServiceWorker).not.toThrow(failureError);
+    expect(loadServiceWorker).not.toThrow();
 
     expect(on).toHaveBeenCalledTimes(1);
     expect(self.unregister).toHaveBeenCalledTimes(1);
