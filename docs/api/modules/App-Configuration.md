@@ -188,13 +188,21 @@ the event we want to purge the service worker and remove any existing service
 workers on browser clients, We can use the escape hatch worker by setting
 `escapeHatch` to true.
 
+While in normal circumstances we would normally want to use the standard `serviceWorker`,
+`recoveryMode` and `escapeHatch` are there to help the origin that `one-app` is deployed on;
+to safely transition their service worker installation on existing clients that have them. If we have
+a healthy service worker in place and simply want to start removing our service worker for any
+given reason, we would enable the `escapeHatch` to segway clients out of the current service worker
+that is registered. In the case that there is a malfunction with the service worker, we can use
+`recoveryMode` to reinstall the service worker with a safe alternative to avoid zombie workers
+from persisting. Afterwards, we can either opt back in to using the standard service worker,
+or the `escapeHatch` to remove it altogether.
+
 There is a precedence to which of the three flags is respected and the order goes:
 
-```
 1. `serviceWorker`
 2. `escapeHatch`
 3. `recoveryMode`
-```
 
 What this means is, if we set `{ recoveryMode: true, escapeHatch: true }`, `escapeHatch`
 will be honored (and enabled) instead of `recoveryMode`. To enable either of these modes,
