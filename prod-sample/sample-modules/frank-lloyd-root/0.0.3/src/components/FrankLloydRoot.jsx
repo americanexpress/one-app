@@ -20,10 +20,8 @@ import PropTypes from 'prop-types';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import { fromJS } from 'immutable';
 import ModuleRoute from 'holocron-module-route';
-import { holocronModule } from 'holocron';
 import Helmet from 'react-helmet';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
 import HelloWorldComponent from './HelloWorld';
 
 export function FrankLloydRoot({ children, config }) {
@@ -70,10 +68,9 @@ if (!global.BROWSER) {
 
 const reducer = (state = fromJS({})) => state;
 
-export default compose(
-  connect((state) => ({ config: state.get('config') })),
-  holocronModule({
-    name: 'frank-lloyd-root',
-    reducer,
-  })
-)(FrankLloydRoot);
+FrankLloydRoot.holocron = {
+  name: 'frank-lloyd-root',
+  reducer,
+};
+
+export default connect((state) => ({ config: state.get('config') }))(FrankLloydRoot);
