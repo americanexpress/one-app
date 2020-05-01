@@ -191,9 +191,9 @@ workers on browser clients, We can use the escape hatch worker by setting
 There is a precedence to which of the three flags is respected and the order goes:
 
 ```
-1. serviceWorker
-2. escapeHatch
-3. recoveryMode
+1. `serviceWorker`
+2. `escapeHatch`
+3. `recoveryMode`
 ```
 
 What this means is, if we set `{ recoveryMode: true, escapeHatch: true }`, `escapeHatch`
