@@ -25,14 +25,9 @@ import Helmet from 'react-helmet';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import HelloWorldComponent from './HelloWorld';
-import Partial, { onPartialRouteEnter } from './Partial';
-
-export const defaultIcon = 'http://localhost:3001/static/modules/frank-lloyd-root/0.0.3/assets/pwa-icon-192px.png';
-export const appleIcon = 'http://localhost:3001/static/modules/frank-lloyd-root/0.0.3/assets/pwa-icon-180px.png';
-// eslint-disable-next-line camelcase
-export const theme_color = '#FDB92D';
 
 export function FrankLloydRoot({ children, config }) {
+  const cdnUrl = config.get('cdnUrl');
   return (
     <React.Fragment>
       <Helmet
@@ -40,16 +35,14 @@ export function FrankLloydRoot({ children, config }) {
         meta={[
           { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
           { name: 'description', content: 'A Progressive Web App ready Holocron Module' },
-          { name: 'theme-color', content: theme_color },
+          { name: 'theme-color', content: '#FDB92D' },
         ]}
         link={[
-          { rel: 'webmanifest', href: `${config.get('cdnUrl')}modules/frank-lloyd-root/0.0.3/assets/manifest.webmanifest` },
-          // pre-connect to Holocron Module CDN
-          { rel: 'preconnect', href: 'http://localhost:3001' },
+          { rel: 'webmanifest', href: `${cdnUrl}modules/frank-lloyd-root/0.0.3/assets/manifest.webmanifest` },
           // favicon
-          { rel: 'icon', href: defaultIcon },
+          { rel: 'icon', href: `${cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-192px.png` },
           // icon ideally with a size of 192px (or 180px), it is added as the home icon
-          { rel: 'apple-touch-icon', href: appleIcon },
+          { rel: 'apple-touch-icon', href: `${cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-180px.png` },
         ]}
       />
       <pre className="value-provided-from-config">{ config.get('someApiUrl') }</pre>
@@ -58,12 +51,11 @@ export function FrankLloydRoot({ children, config }) {
   );
 }
 
-FrankLloydRoot.childRoutes = (store) => ([
+FrankLloydRoot.childRoutes = () => ([
   <ModuleRoute path="vitruvius" moduleName="vitruvius-franklin" />,
   <ModuleRoute path="/success" component={HelloWorldComponent} />,
   <ModuleRoute path="healthy-frank" moduleName="healthy-frank" />,
   <ModuleRoute path="demo/:moduleName" moduleName="preview-frank" />,
-  <ModuleRoute path="html-partial/:locale/:moduleName" component={Partial} onEnter={onPartialRouteEnter(store)} />,
 ]);
 
 FrankLloydRoot.propTypes = {
@@ -77,12 +69,6 @@ if (!global.BROWSER) {
 }
 
 const reducer = (state = fromJS({})) => state;
-reducer.buildInitialState = ({ req } = {}) => {
-  if (req && req.body) {
-    return fromJS({ postProps: req.body });
-  }
-  return fromJS({});
-};
 
 export default compose(
   connect((state) => ({ config: state.get('config') })),

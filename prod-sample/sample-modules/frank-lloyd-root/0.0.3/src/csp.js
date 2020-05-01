@@ -23,6 +23,15 @@ export default contentSecurityPolicyBuilder({
     defaultSrc: [
       "'self'",
     ],
+    workerSrc: [
+      "'self'",
+    ],
+    manifestSrc: [
+      "'self'",
+      'https://sample-cdn.frank',
+      `${ip.address()}:3001`,
+      'localhost:3001',
+    ],
     scriptSrc: [
       "'self'",
       // used by integration tests running in docker where domain names are aliased
