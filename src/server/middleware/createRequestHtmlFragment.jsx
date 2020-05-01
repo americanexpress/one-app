@@ -29,7 +29,7 @@ const getModuleData = async ({ dispatch, modules }) => {
   return false;
 };
 
-const breaker = createCircuitBreaker(getModuleData);
+const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 
 export default function createRequestHtmlFragment({ createRoutes }) {
   return async (req, res, next) => {
@@ -84,7 +84,7 @@ export default function createRequestHtmlFragment({ createRoutes }) {
       if (disableScripts || renderPartialOnly) {
         await dispatch(composeModules(routeModules));
       } else {
-        const fallback = await breaker.fire({ dispatch, modules: routeModules });
+        const fallback = await getModuleDataBreaker.fire({ dispatch, modules: routeModules });
 
         if (fallback) {
           req.appHtml = '';
