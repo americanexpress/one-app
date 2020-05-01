@@ -37,6 +37,7 @@ One App can be configured via Environment Variables:
   * [`ONE_ENABLE_POST_TO_MODULE_ROUTES`](#one_enable_post_to_module_routes)
   * [`ONE_MAP_POLLING_MAX`](#one_map_polling_max)
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
+  * [`ONE_SERVICE_WORKER`](#one_service_worker)
 
 **Alphabetical Contents**
 * [`HOLOCRON_MODULE_MAP_URL`](#holocron_module_map_url)
@@ -581,7 +582,7 @@ ONE_REFERRER_POLICY_OVERRIDE=no-referrer
 ONE_REFERRER_POLICY_OVERRIDE=same-origin
 ```
 
-## `ONE_SERVICE=WORKER`
+## `ONE_SERVICE_WORKER`
 
 **Runs In**
 * ✅ Production
@@ -591,16 +592,16 @@ Feature flag to enable service worker and PWA feature, defaults to false.
 
 **Shape**
 ```bash
-ONE_SERVICE=WORKER=Boolean
+ONE_SERVICE_WORKER=Boolean
 ```
 **Example**
 ```bash
-ONE_SERVICE=WORKER=true
+ONE_SERVICE_WORKER=true
 ```
 
 **Default Value**
 ```bash
-ONE_SERVICE=WORKER=false
+ONE_SERVICE_WORKER=false
 ```
 
 **📘 More Information**
