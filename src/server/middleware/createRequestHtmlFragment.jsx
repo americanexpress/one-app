@@ -20,8 +20,16 @@ import url, { Url } from 'url';
 import { RouterContext } from '@americanexpress/one-app-router';
 import { composeModules } from 'holocron';
 import match from '../../universal/utils/matchPromisified';
+import createCircuitBreaker from '../utils/createCircuitBreaker';
 
 import { renderForString, renderForStaticMarkup } from '../utils/reactRendering';
+
+const getModuleData = async ({ dispatch, modules }) => {
+  await dispatch(composeModules(modules));
+  return false;
+};
+
+const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 
 export default function createRequestHtmlFragment({ createRoutes }) {
   return async (req, res, next) => {
@@ -69,11 +77,22 @@ export default function createRequestHtmlFragment({ createRoutes }) {
           },
         }));
 
-      await dispatch(composeModules(routeModules));
-
       const state = store.getState();
       const disableScripts = state.getIn(['rendering', 'disableScripts']);
       const renderPartialOnly = state.getIn(['rendering', 'renderPartialOnly']);
+
+      if (disableScripts || renderPartialOnly) {
+        await dispatch(composeModules(routeModules));
+      } else {
+        const fallback = await getModuleDataBreaker.fire({ dispatch, modules: routeModules });
+
+        if (fallback) {
+          req.appHtml = '';
+          req.helmetInfo = {};
+          return next();
+        }
+      }
+
       const renderMethod = (disableScripts || renderPartialOnly)
         ? renderForStaticMarkup : renderForString;
 
