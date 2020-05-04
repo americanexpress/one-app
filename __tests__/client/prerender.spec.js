@@ -186,62 +186,23 @@ describe('loadServiceWorker', () => {
     dispatch: jest.fn(),
   };
 
-  beforeAll(() => {
-    jest.spyOn(window, 'addEventListener');
-    jest.spyOn(window, 'removeEventListener');
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should call initializeServiceWorker on window load and remove the load listener when resolved', async () => {
-    expect.assertions(4);
+  it('should call initializeServiceWorker and resolve', async () => {
+    expect.assertions(2);
 
-    const loadPromise = loadServiceWorker(store);
-    const loadEventHandler = window.addEventListener.mock.calls[0][1];
-
-    loadEventHandler();
-
-    await expect(loadPromise).resolves.toBeUndefined();
-
+    await expect(loadServiceWorker(store)).resolves.toBeUndefined();
     expect(initializeServiceWorker).toHaveBeenCalledTimes(1);
-    expect(window.addEventListener).toHaveBeenCalledTimes(1);
-    expect(window.removeEventListener).toHaveBeenCalledTimes(1);
   });
 
-  it('loadServiceWorker does not reject if failure happens with initializeServiceWorker', async () => {
-    expect.assertions(4);
-
+  it('should not crash the application on failure nor does loadServiceWorker reject', async () => {
+    expect.assertions(3);
     initializeServiceWorker.mockImplementationOnce(() => Promise.reject());
 
-    const loadPromise = loadServiceWorker(store);
-    const loadEventHandler = window.addEventListener.mock.calls[0][1];
-
-    loadEventHandler();
-
-    await expect(loadPromise).resolves.toBeUndefined();
-
-    expect(initializeServiceWorker).toHaveBeenCalledTimes(1);
-    expect(window.addEventListener).toHaveBeenCalledTimes(1);
-    expect(window.removeEventListener).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not crash the application on failure and remove window load listener', async () => {
-    expect.assertions(5);
-
-    initializeServiceWorker.mockImplementationOnce(() => Promise.reject());
-
-    const loadPromise = loadServiceWorker(store);
-    const loadEventHandler = window.addEventListener.mock.calls[0][1];
-
-    loadEventHandler();
-
-    await expect(loadPromise).resolves.toBeUndefined();
-
+    await expect(loadServiceWorker(store)).resolves.toBeUndefined();
     expect(store.dispatch).toHaveBeenCalledTimes(1);
     expect(initializeServiceWorker).toHaveBeenCalledTimes(1);
-    expect(window.addEventListener).toHaveBeenCalledTimes(1);
-    expect(window.removeEventListener).toHaveBeenCalledTimes(1);
   });
 });

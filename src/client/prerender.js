@@ -53,18 +53,7 @@ export function moveHelmetScripts() {
 }
 
 export function loadServiceWorker(store) {
-  return new Promise((resolve, reject) => {
-    window.addEventListener('load', function pwaInitialization() {
-      // remove handler once load event is fired
-      // although we use the "once" option, to support older versions of
-      // browsers that do not yet implement this, we can safely remove it manually
-      window.removeEventListener('load', pwaInitialization);
-      // pwa client will install the service worker
-      initializeServiceWorker(store)
-        .then(resolve)
-        .catch(reject);
-    }, { once: true });
-  }).catch((error) => {
+  return initializeServiceWorker(store).catch((error) => {
     // in the event of failure or no support,
     // the app should not crash for non-critical progressive enhancement
     // and report the error back to the server
