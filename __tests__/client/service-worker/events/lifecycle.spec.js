@@ -19,7 +19,7 @@ import { skipWaiting, clientsClaim } from '@americanexpress/one-service-worker';
 import {
   createInstallMiddleware,
   createActivateMiddleware,
-} from '../../../../src/client/service-worker/middleware/lifecycle';
+} from '../../../../src/client/service-worker/events/lifecycle';
 
 jest.mock('@americanexpress/one-service-worker', () => ({
   skipWaiting: () => 'skip-waiting',

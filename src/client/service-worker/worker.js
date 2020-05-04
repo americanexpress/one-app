@@ -19,7 +19,7 @@ import { on } from '@americanexpress/one-service-worker';
 import {
   createInstallMiddleware,
   createActivateMiddleware,
-} from './middleware';
+} from './events';
 import { ERROR_MESSAGE_ID_KEY } from './constants';
 
 try {

@@ -24,7 +24,7 @@ import createServiceWorkerMocks from 'service-worker-mock';
 import {
   createInstallMiddleware,
   createActivateMiddleware,
-} from '../../../src/client/service-worker/middleware';
+} from '../../../src/client/service-worker/events';
 import { ERROR_MESSAGE_ID_KEY } from '../../../src/client/service-worker/constants';
 
 jest.mock('@americanexpress/one-service-worker');
