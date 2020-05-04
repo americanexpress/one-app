@@ -3,15 +3,15 @@
 exports[`PWA should export components and router 1`] = `
 Array [
   Array [
-    "createPWARouter",
-    [Function],
-  ],
-  Array [
     "configurePWA",
     [Function],
   ],
   Array [
     "getClientPWAConfig",
+    [Function],
+  ],
+  Array [
+    "serviceWorkerMiddleware",
     [Function],
   ],
 ]

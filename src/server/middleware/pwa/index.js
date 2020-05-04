@@ -14,5 +14,5 @@
  * permissions and limitations under the License.
  */
 
-export { createPWARouter } from './createRouter';
 export { configurePWA, getClientPWAConfig } from './config';
+export { serviceWorkerMiddleware } from './service-worker';

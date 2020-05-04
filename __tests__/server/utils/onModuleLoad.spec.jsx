@@ -30,7 +30,7 @@ import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttri
 import { setConfigureRequestLog } from '../../../src/server/utils/logging/serverMiddleware';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
 import { getEventLoopDelayThreshold } from '../../../src/server/utils/createCircuitBreaker';
-import { configurePWA } from '../../../src/server/pwa';
+import { configurePWA } from '../../../src/server/middleware/pwa';
 
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
@@ -49,7 +49,7 @@ jest.mock('../../../src/server/utils/safeRequest', () => ({
   extendRestrictedAttributesAllowList: jest.fn(),
   validateSafeRequestRestrictedAttributes: jest.fn(),
 }));
-jest.mock('../../../src/server/pwa', () => ({
+jest.mock('../../../src/server/middleware/pwa', () => ({
   configurePWA: jest.fn(),
 }));
 

@@ -14,9 +14,8 @@
  * permissions and limitations under the License.
  */
 
-import { routes } from './createRouter';
 import { validatePWAConfig } from './validation';
-import { configureServiceWorker } from './middleware/service-worker';
+import { configureServiceWorker } from './service-worker';
 
 const defaultPWAConfig = {
   serviceWorker: false,
@@ -42,7 +41,7 @@ export function getClientPWAConfig() {
     serviceWorker,
     serviceWorkerRecoveryMode,
     serviceWorkerScope,
-    serviceWorkerScriptUrl: serviceWorker && [routes.prefix, routes.worker].join(''),
+    serviceWorkerScriptUrl: serviceWorker && '/_/pwa/service-worker.js',
   };
 }
 

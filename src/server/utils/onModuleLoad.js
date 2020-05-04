@@ -24,7 +24,7 @@ import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttri
 import { setConfigureRequestLog } from './logging/serverMiddleware';
 import { setCreateSsrFetch } from './createSsrFetch';
 import { setEventLoopDelayThreshold } from './createCircuitBreaker';
-import { configurePWA } from '../pwa';
+import { configurePWA } from '../middleware/pwa';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');

@@ -14,39 +14,43 @@
  * permissions and limitations under the License.
  */
 
+
 import request from 'supertest';
 import express from 'express';
 
 import {
-  createPWARouter,
-  routes,
-} from '../../../src/server/pwa/createRouter';
-import { configurePWA } from '../../../src/server/pwa';
-import {
   createServiceWorkerEscapeHatchScript,
   readServiceWorkerRecoveryScript,
   readServiceWorkerScript,
-} from '../../../src/server/pwa/middleware/service-worker';
+  serviceWorkerMiddleware,
+} from '../../../../src/server/middleware/pwa/service-worker';
+import * as pwa from '../../../../src/server/middleware/pwa';
 
 jest.mock('fs', () => ({
   readFileSync: (filePath) => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]'),
 }));
 
-const defaultMatchAll = jest.fn((req, res) => {
-  res.sendStatus(404);
+describe('PWA', () => {
+  test('should export components and router', () => {
+    expect(Object.entries(pwa)).toMatchSnapshot();
+  });
 });
 
-const makeGetFrom = (app) => (url) => new Promise((resolve, reject) => {
-  request(app)
-    .get(url)
-    .end((err, res) => {
-      if (err) reject(err);
-      else resolve(res);
-    });
-});
+describe('PWA routing', () => {
+  const defaultMatchAll = jest.fn((req, res) => {
+    res.sendStatus(404);
+  });
 
-describe('PWA router', () => {
-  const workerPath = [routes.prefix, routes.worker].join('');
+  const makeGetFrom = (app) => (url) => new Promise((resolve, reject) => {
+    request(app)
+      .get(url)
+      .end((err, res) => {
+        if (err) reject(err);
+        else resolve(res);
+      });
+  });
+
+  const workerPath = '/_/pwa/service-worker.js';
   const mockWorker = readServiceWorkerScript();
   const mockRecoveryWorker = readServiceWorkerRecoveryScript();
   const mockEscapeHatchWorker = createServiceWorkerEscapeHatchScript().toString();
@@ -55,13 +59,13 @@ describe('PWA router', () => {
   beforeEach(() => jest.clearAllMocks());
   beforeAll(() => {
     process.env.ONE_SERVICE_WORKER = true;
-    configurePWA({
+    pwa.configurePWA({
       serviceWorker: true,
     });
   });
 
   const app = express()
-    .use(routes.prefix, createPWARouter())
+    .get(workerPath, serviceWorkerMiddleware())
     .get('*', defaultMatchAll);
   const get = makeGetFrom(app);
 
@@ -81,7 +85,7 @@ describe('PWA router', () => {
 
   describe('disabled', () => {
     beforeAll(() => {
-      configurePWA({
+      pwa.configurePWA({
         serviceWorker: false,
       });
     });
@@ -101,7 +105,7 @@ describe('PWA router', () => {
 
   describe('recovery mode', () => {
     beforeAll(() => {
-      configurePWA({
+      pwa.configurePWA({
         recoveryMode: true,
       });
     });
@@ -123,7 +127,7 @@ describe('PWA router', () => {
 
   describe('escape hatch worker', () => {
     beforeAll(() => {
-      configurePWA({
+      pwa.configurePWA({
         escapeHatch: true,
       });
     });
@@ -145,7 +149,7 @@ describe('PWA router', () => {
 
   describe('setting scope', () => {
     beforeAll(() => {
-      configurePWA({
+      pwa.configurePWA({
         serviceWorker: true,
         scope: mockServiceWorkerScope,
       });

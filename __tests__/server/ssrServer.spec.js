@@ -34,7 +34,7 @@ jest.mock('../../src/server/middleware/addFrameOptionsHeader');
 jest.mock('../../src/server/middleware/forwardedHeaderParser');
 jest.mock('../../src/server/utils/logging/serverMiddleware', () => (req, res, next) => setImmediate(next));
 jest.mock('../../src/universal/index');
-jest.mock('../../src/server/pwa/middleware/service-worker', () => {
+jest.mock('../../src/server/middleware/pwa/service-worker', () => {
   const serviceWorker = jest.fn((req, res, next) => next());
   return ({
     serviceWorker,
@@ -124,7 +124,7 @@ describe('ssrServer', () => {
       addFrameOptionsHeader = require('../../src/server/middleware/addFrameOptionsHeader').default;
       addCacheHeaders = require('../../src/server/middleware/addCacheHeaders').default;
       forwardedHeaderParser = require('../../src/server/middleware/forwardedHeaderParser').default;
-      ({ serviceWorker } = require('../../src/server/pwa/middleware/service-worker'));
+      ({ serviceWorker } = require('../../src/server/middleware/pwa/service-worker'));
       const server = require('../../src/server/ssrServer').default;
 
       return server;

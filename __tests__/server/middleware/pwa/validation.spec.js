@@ -16,7 +16,7 @@
 
 import {
   validatePWAConfig,
-} from '../../../src/server/pwa/validation';
+} from '../../../../src/server/middleware/pwa/validation';
 
 describe('validation', () => {
   beforeEach(() => {

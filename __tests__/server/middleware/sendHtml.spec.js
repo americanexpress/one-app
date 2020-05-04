@@ -28,7 +28,7 @@ import { getClientStateConfig } from '../../../src/server/utils/stateConfig';
 import transit from '../../../src/universal/utils/transit';
 import { setConfig } from '../../../src/universal/ducks/config';
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
-import { getClientPWAConfig } from '../../../src/server/pwa';
+import { getClientPWAConfig } from '../../../src/server/middleware/pwa';
 
 jest.mock('react-helmet');
 jest.mock('holocron', () => ({
@@ -83,7 +83,7 @@ jest.mock('../../../src/server/utils/readJsonFile', () => (filePath) => {
       throw new Error('Couldn\'t find JSON file to read');
   }
 });
-jest.mock('../../../src/server/pwa', () => ({
+jest.mock('../../../src/server/middleware/pwa', () => ({
   getClientPWAConfig: jest.fn(() => ({
     serviceWorker: false,
     serviceWorkerScope: null,

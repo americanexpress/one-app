@@ -20,7 +20,7 @@ import {
   readServiceWorkerScript,
   readServiceWorkerRecoveryScript,
   createServiceWorkerEscapeHatchScript,
-} from '../../../../src/server/pwa/middleware/service-worker';
+} from '../../../../src/server/middleware/pwa/service-worker';
 
 jest.mock('fs', () => ({
   readFileSync: (filePath) => Buffer.from((filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]')),

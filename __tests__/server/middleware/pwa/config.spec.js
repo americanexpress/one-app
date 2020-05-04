@@ -17,7 +17,7 @@
 import {
   getClientPWAConfig,
   configurePWA,
-} from '../../../src/server/pwa/config';
+} from '../../../../src/server/middleware/pwa/config';
 
 jest.mock('fs', () => ({
   readFileSync: (filePath) => ({ toString: () => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]') }),
