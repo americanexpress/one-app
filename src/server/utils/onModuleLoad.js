@@ -23,6 +23,7 @@ import readJsonFile from './readJsonFile';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from './safeRequest';
 import { setConfigureRequestLog } from './logging/serverMiddleware';
 import { setCreateSsrFetch } from './createSsrFetch';
+import { setEventLoopDelayThreshold } from './createCircuitBreaker';
 import { configurePWA } from '../pwa';
 
 // Trim build hash
@@ -75,6 +76,7 @@ export default function onModuleLoad({
       configureRequestLog,
       extendSafeRequestRestrictedAttributes = {},
       createSsrFetch,
+      eventLoopDelayThreshold,
       pwa,
       // Child Module Specific
       requiredExternals,
@@ -114,6 +116,7 @@ export default function onModuleLoad({
     extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
     setConfigureRequestLog(configureRequestLog);
     setCreateSsrFetch(createSsrFetch);
+    setEventLoopDelayThreshold(eventLoopDelayThreshold);
     logModuleLoad(moduleName, metaData.version);
     configurePWA(pwa);
     return;
