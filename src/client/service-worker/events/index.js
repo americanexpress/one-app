@@ -15,3 +15,4 @@
  */
 
 export { createInstallMiddleware, createActivateMiddleware } from './lifecycle';
+export { createCachingMiddleware } from './caching';

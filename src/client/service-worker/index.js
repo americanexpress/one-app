@@ -15,11 +15,18 @@
  */
 
 export function importServiceWorkerClient(settings) {
-  // In the future, we should consider making one-service worker added dynamically
-  // as an external chunk with the ability to support conditional load.
   return import(/* webpackChunkName: "service-worker-client" */ './client')
+    // get the default export
     .then((imported) => imported.default)
+    // invoke with settings
     .then((serviceWorkerClient) => serviceWorkerClient(settings));
+}
+
+function clearCache() {
+  // get the instanced Cache key in browser CacheStorage
+  return caches.keys().then(
+    // remove cache instances (deleting cache entries in batch)
+    (cacheKeys) => Promise.all(cacheKeys.map((cacheKey) => caches.delete(cacheKey))));
 }
 
 export function initializeServiceWorker({
@@ -38,16 +45,19 @@ export function initializeServiceWorker({
     .then((registration) => {
       // When the service Worker is not enabled (default)
       if (!serviceWorker) {
-        // If by any chance a service worker is present, we remove it.
-        if (registration) return registration.unregister().then(() => registration);
+        // If by any chance a service worker is present, we clear the cache and remove it.
+        if (registration) {
+          return registration.unregister().then(clearCache).then(() => registration);
+        }
         // When there is no registration, nothing further needed to be done.
         return null;
       }
 
       if (recoveryMode) {
-        // Recovery mode is active if the Escape Hatch or No Op scripts are enabled
-        // as well as when opting out of PWA (by omitting the config when previously there).
-        if (registration) return registration.update().then(() => registration);
+        // Recovery mode is active if the escape-hatch or recovery scripts are enabled
+        if (registration) {
+          return registration.update().then(clearCache).then(() => registration);
+        }
         // When Escape Hatch is active, updating the worker will unregister the worker
         // and make it redundant, any page navigation afterwards should yield no registration.
         return null;

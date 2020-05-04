@@ -18,14 +18,18 @@
 
 const path = require('path');
 const rollup = require('rollup');
+const replace = require('@rollup/plugin-replace');
 const resolve = require('@rollup/plugin-node-resolve');
 const babel = require('rollup-plugin-babel');
 
-async function buildServiceWorkerScripts({ dev = false, minify = true } = {}) {
+async function buildServiceWorkerScripts({ dev = false, buildVersion, minify = true } = {}) {
   const inputDirectory = path.resolve(__dirname, '../src/client/service-worker');
   const buildFolderDirectory = path.resolve(__dirname, '../lib/server/middleware/pwa', 'scripts');
 
   const plugins = [
+    replace({
+      'process.env.ONE_APP_BUILD_VERSION': `"${buildVersion}"`,
+    }),
     resolve(),
     babel(),
   ];
@@ -54,7 +58,9 @@ async function buildServiceWorkerScripts({ dev = false, minify = true } = {}) {
 }
 
 (async function buildWorkers({ dev }) {
-  await buildServiceWorkerScripts({ dev });
+  // eslint-disable-next-line global-require
+  const { buildVersion } = require('../.build-meta.json');
+  await buildServiceWorkerScripts({ dev, buildVersion });
 }({
   // for environment variables
   dev: process.env.NODE_ENV === 'development',

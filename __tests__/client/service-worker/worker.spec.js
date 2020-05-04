@@ -35,6 +35,11 @@ function loadServiceWorker() {
   });
 }
 
+beforeAll(() => {
+  const { buildVersion } = require('../../../.build-meta.json');
+  process.env.ONE_APP_BUILD_VERSION = buildVersion;
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
 });
@@ -44,19 +49,16 @@ describe('service worker script', () => {
     self.postMessage = jest.fn();
   });
 
-  test('calls "on" with lifecycle middleware', () => {
-    expect.assertions(3);
-
+  test('calls "on" with lifecycle and caching middleware', () => {
     loadServiceWorker();
 
-    expect(on).toHaveBeenCalledTimes(2);
+    expect(on).toHaveBeenCalledTimes(3);
     expect(on).toHaveBeenCalledWith('install', createInstallMiddleware());
     expect(on).toHaveBeenCalledWith('activate', createActivateMiddleware());
+    expect(on).toHaveBeenCalledWith('fetch', expect.any(Function));
   });
 
   test('catches error during initialization, logs the error and unregisters the service worker', () => {
-    expect.assertions(5);
-
     self.unregister = jest.fn();
     const failureError = new Error('failure');
     on.mockImplementationOnce(() => {
