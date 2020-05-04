@@ -340,7 +340,6 @@ describe('onModuleLoad', () => {
       moduleName: 'some-root',
     });
     expect(getEventLoopDelayThreshold()).toBe(eventLoopDelayThreshold);
-
   });
 
   it('logs when the root module is loaded', () => {
