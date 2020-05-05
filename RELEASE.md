@@ -9,7 +9,7 @@ Releases can be triggered in two ways:
 
 ## Automated release process
 
- 1. An automated pull request will be raised every Wednesday at 16:00 UTC, from a `prepare-release` branch to master. This uses [pull_request_release workflow](.github/workflows/pull_request_release.yml) and updates the [package.json](package.json), [package-lock.json](package-lock.json), [one-app-statics package.json](one-app-statics/package.json) and the changelog. Behind the scene it uses [standard-version](https://github.com/conventional-changelog/standard-version) to generate and update these files with the changes for released. The commit message contains will be in the following format `chore(release): X.X.X` . You can update this pull request to remove or add any new changes.
+ 1. An automated pull request will be raised every Wednesday at 16:00 UTC, from a `prepare-release` branch to master. This uses [pull_request_release workflow](.github/workflows/pull_request_release.yml) and updates the [package.json](package.json), [package-lock.json](package-lock.json), [one-app-statics package.json](one-app-statics/package.json) and runs `npm run release:changelog` to generate the changelog. Behind the scene it uses [standard-version](https://github.com/conventional-changelog/standard-version) to generate and update these files with the changes for released. The commit message contains will be in the following format `chore(release): X.X.X` . You can update this pull request to remove or add any new changes.
  2. Once a pull request is reviewed merge the pull request and please ensure that the commit message is updated to follow this pattern  
 
    ``` bash
@@ -25,13 +25,33 @@ Releases can be triggered in two ways:
 2. After the the generated tag is pushed to the branch this will trigger the docker build and publish the statics and push the images to Docker Hub. The development and production images would be accessible in docker [https://hub.docker.com/u/oneamex](https://hub.docker.com/u/oneamex)
 
 3. We are currently using [https://github.com/release-drafter/release-drafter](https://github.com/release-drafter/release-drafter) to generate release notes. Please add the labels specified within [release-drafter](.github/release-drafter.yml) to categorize different pull requests. Update the draft release notes and tie it to the release tag above, you can also link this to different artifacts. The statics assets will be published and added to a tag that has been released.
+4. For the release notes use the below format, checkout [https://github.com/americanexpress/one-app/releases](https://github.com/americanexpress/one-app/releases)
+   
+   ```
+
+    [Paste changelog entries here]
+  
+    ### Docker Images
+
+    #### Developer Image
+    [one-app-dev/version-released](https://hub.docker.com/layers/oneamex/one-app-dev/link-to-the-docker-tag)
+
+    #### Production Image
+    [one-app/version-released](https://hub.docker.com/layers/oneamex/one-app/link-to-the-docker-tag)
+
+    ### One App Statics
+    https://www.npmjs.com/package/@americanexpress/one-app-statics
+
+  ```
 
 ## Manual release process
 
 This process can be used to make ad hoc releases outside of wednesday release cycle.
 
- 1. Run `npm run release` locally within your branch, this would update the changelog, [package.json](package.json), [package-lock.json](package-lock.json)and [one-app-statics package.json](one-app-statics/package.json) with the new version to be released. Push your changes and create a pull request to master.
- 2. When the changes are merged and reviewed. The same process from step 3 above will be followed.
+ 1. Run `npm run release` locally within your branch, this would update [package.json](package.json), [package-lock.json](package-lock.json)and [one-app-statics package.json](one-app-statics/package.json) with the new version to be released. 
+ 2. Run `npm run release:changelog` to generate and update the changelog.
+ 3. Push your changes and create a pull request to master.
+ 4. When the changes are merged and reviewed. The same process from [step 3](#automated-release-process) above will be followed.
 
 ## FAQs
 
