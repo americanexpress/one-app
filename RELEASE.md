@@ -23,26 +23,29 @@ Releases can be triggered in two ways:
 1. The merge will trigger the automatic generation of a new tag using the semantic version provided during the merging of the pull request above.
 
 2. After the the generated tag is pushed to the branch this will trigger the docker build and publish the statics and push the images to Docker Hub. The development and production images would be accessible in docker [https://hub.docker.com/u/oneamex](https://hub.docker.com/u/oneamex)
-
-3. We are currently using [https://github.com/release-drafter/release-drafter](https://github.com/release-drafter/release-drafter) to generate release notes. Please add the labels specified within [release-drafter](.github/release-drafter.yml) to categorize different pull requests. Update the draft release notes and tie it to the release tag above, you can also link this to different artifacts. The statics assets will be published and added to a tag that has been released.
-4. For the release notes use the below format. Please review some of the releases to check the format used [https://github.com/americanexpress/one-app/releases](https://github.com/americanexpress/one-app/releases)
-   
-   ```
-
-    [Paste changelog entries here]
-  
-    ### Docker Images
-
-    #### Developer Image
-    [one-app-dev/version-released](https://hub.docker.com/layers/oneamex/one-app-dev/link-to-the-docker-tag)
-
-    #### Production Image
-    [one-app/version-released](https://hub.docker.com/layers/oneamex/one-app/link-to-the-docker-tag)
-
-    ### One App Statics
-    https://www.npmjs.com/package/@americanexpress/one-app-statics
+3. The statics assets will be published and added to a tag that has been released via the [release static assets actions](.github/workflows/docker_release.yml)
+4. We are currently using [https://github.com/release-drafter/release-drafter](https://github.com/release-drafter/release-drafter) to generate release notes. This is a github action that generates draft releases note that can be added to the released tag. Please add the labels specified within [release-drafter](.github/release-drafter.yml) to categorize different pull requests to ensure that any changes are categorized correctly. You can also use the changelog generated for this content.
+5. Update the draft release notes with any changes required and tie it to the released tag.
+6. For the release notes use the below format. Please review some of the releases to check the format used [https://github.com/americanexpress/one-app/releases](https://github.com/americanexpress/one-app/releases)
 
   ```
+
+      [Paste changelog entries here]
+    
+      ### Docker Images
+
+      #### Developer Image
+      [one-app-dev/version-released](https://hub.docker.com/layers/oneamex/one-app-dev/link-to-the-docker-tag)
+
+      #### Production Image
+      [one-app/version-released](https://hub.docker.com/layers/oneamex/one-app/link-to-the-docker-tag)
+
+      ### One App Statics
+      https://www.npmjs.com/package/@americanexpress/one-app-statics
+
+  ```
+
+5. 
 
 ## Manual release process
 
