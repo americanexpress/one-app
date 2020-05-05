@@ -15,20 +15,31 @@
  */
 
 import {
+  getServerPWAConfig,
   getClientPWAConfig,
   configurePWA,
 } from '../../../../src/server/middleware/pwa/config';
 
 jest.mock('fs', () => ({
-  readFileSync: (filePath) => ({ toString: () => (filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]') }),
+  readFileSync: (filePath) => Buffer.from(filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]'),
 }));
 
 describe('pwa configuration', () => {
+  const serviceWorkerStandardScript = Buffer.from('[service-worker-script]');
+  const serviceWorkerRecoveryScript = Buffer.from('[service-worker-noop-script]');
+  const serviceWorkerEscapeHatchScript = Buffer.from('self.unregister();');
+
   beforeAll(() => {
     process.env.ONE_SERVICE_WORKER = true;
   });
 
   test('getters return default state', () => {
+    expect(getServerPWAConfig()).toMatchObject({
+      serviceWorker: false,
+      serviceWorkerRecoveryMode: false,
+      serviceWorkerScope: null,
+      serviceWorkerScript: null,
+    });
     expect(getClientPWAConfig()).toMatchObject({
       serviceWorker: false,
       serviceWorkerRecoveryMode: false,
@@ -39,13 +50,14 @@ describe('pwa configuration', () => {
 
   describe('configuration', () => {
     test('enabling the service worker with minimum config', () => {
-      expect(configurePWA({
-        serviceWorker: true,
-      })).toMatchObject({
+      configurePWA({ serviceWorker: true });
+
+      expect(getServerPWAConfig()).toMatchObject({
         serviceWorker: true,
         serviceWorkerRecoveryMode: false,
         serviceWorkerType: 'standard',
         serviceWorkerScope: '/',
+        serviceWorkerScript: serviceWorkerStandardScript,
       });
       expect(getClientPWAConfig()).toMatchObject({
         serviceWorker: true,
@@ -56,13 +68,14 @@ describe('pwa configuration', () => {
     });
 
     test('enabling the service worker in recovery mode', () => {
-      expect(configurePWA({
-        recoveryMode: true,
-      })).toMatchObject({
+      configurePWA({ recoveryMode: true });
+
+      expect(getServerPWAConfig()).toMatchObject({
         serviceWorker: true,
         serviceWorkerRecoveryMode: true,
         serviceWorkerType: 'recovery',
         serviceWorkerScope: '/',
+        serviceWorkerScript: serviceWorkerRecoveryScript,
       });
       expect(getClientPWAConfig()).toMatchObject({
         serviceWorker: true,
@@ -73,13 +86,14 @@ describe('pwa configuration', () => {
     });
 
     test('enabling the service worker with escape hatch', () => {
-      expect(configurePWA({
-        escapeHatch: true,
-      })).toMatchObject({
+      configurePWA({ escapeHatch: true });
+
+      expect(getServerPWAConfig()).toMatchObject({
         serviceWorker: true,
         serviceWorkerRecoveryMode: true,
         serviceWorkerType: 'escape-hatch',
         serviceWorkerScope: '/',
+        serviceWorkerScript: serviceWorkerEscapeHatchScript,
       });
       expect(getClientPWAConfig()).toMatchObject({
         serviceWorker: true,
@@ -91,13 +105,14 @@ describe('pwa configuration', () => {
 
     test('service worker feature flag will reset config to defaults if disabled', () => {
       process.env.ONE_SERVICE_WORKER = false;
-      expect(configurePWA({
-        serviceWorker: true,
-      })).toMatchObject({
+      configurePWA({ serviceWorker: true });
+
+      expect(getServerPWAConfig()).toMatchObject({
         serviceWorker: false,
         serviceWorkerRecoveryMode: false,
         serviceWorkerType: null,
         serviceWorkerScope: null,
+        serviceWorkerScript: null,
       });
       expect(getClientPWAConfig()).toMatchObject({
         serviceWorker: false,
@@ -105,11 +120,20 @@ describe('pwa configuration', () => {
         serviceWorkerScriptUrl: false,
         serviceWorkerScope: null,
       });
+
       process.env.ONE_SERVICE_WORKER = true;
     });
 
     test('disabling PWA configuration', () => {
-      expect(configurePWA({ serviceWorker: false })).toMatchObject({ serviceWorker: false });
+      configurePWA({ serviceWorker: false });
+
+      expect(getServerPWAConfig()).toMatchObject({
+        serviceWorker: false,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerType: null,
+        serviceWorkerScope: null,
+        serviceWorkerScript: null,
+      });
       expect(getClientPWAConfig()).toMatchObject({
         serviceWorker: false,
         serviceWorkerRecoveryMode: false,

@@ -14,5 +14,5 @@
  * permissions and limitations under the License.
  */
 
-export { configurePWA, getClientPWAConfig } from './config';
-export { serviceWorkerMiddleware } from './service-worker';
+export { configurePWA, getClientPWAConfig, getServerPWAConfig } from './config';
+export { default as serviceWorkerMiddleware } from './service-worker';

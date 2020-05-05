@@ -14,54 +14,12 @@
  * permissions and limitations under the License.
  */
 
-import fs from 'fs';
-import path from 'path';
+import { getServerPWAConfig } from './config';
 
-let serviceWorkerEnabled = false;
-let serviceWorkerScript = null;
-let serviceWorkerScope = null;
-
-export function readServiceWorkerRecoveryScript() {
-  // this file is created during build inside lib/server/middleware/pwa
-  return fs.readFileSync(path.join(__dirname, 'scripts/sw.noop.js'));
-}
-
-export function readServiceWorkerScript() {
-  // this file is created during build inside lib/server/middleware/pwa
-  return fs.readFileSync(path.join(__dirname, 'scripts/sw.js'));
-}
-
-export function createServiceWorkerEscapeHatchScript() {
-  return Buffer.from('self.unregister();');
-}
-
-export function configureServiceWorker({
-  type, scope = '/',
-} = {}) {
-  serviceWorkerEnabled = true;
-  serviceWorkerScope = scope;
-
-  switch (type) {
-    case 'escape-hatch':
-      serviceWorkerScript = createServiceWorkerEscapeHatchScript();
-      break;
-    case 'recovery':
-      serviceWorkerScript = readServiceWorkerRecoveryScript();
-      break;
-    case 'standard':
-      serviceWorkerScript = readServiceWorkerScript();
-      break;
-    default:
-      serviceWorkerEnabled = false;
-      serviceWorkerScope = null;
-      serviceWorkerScript = null;
-      break;
-  }
-}
-
-export function serviceWorkerMiddleware() {
+export default function serviceWorkerMiddleware() {
   return function serviceWorkerMiddlewareHandler(req, res, next) {
-    if (serviceWorkerEnabled === false) return next();
+    const { serviceWorker, serviceWorkerScope, serviceWorkerScript } = getServerPWAConfig();
+    if (serviceWorker === false) return next();
     return res
       .type('js')
       .set('Service-Worker-Allowed', serviceWorkerScope)

@@ -44,7 +44,6 @@ import checkStateForStatusCode from './middleware/checkStateForStatusCode';
 import sendHtml, { renderStaticErrorPage } from './middleware/sendHtml';
 import logging from './utils/logging/serverMiddleware';
 import forwardedHeaderParser from './middleware/forwardedHeaderParser';
-
 import { serviceWorkerMiddleware } from './middleware/pwa';
 
 export function createApp({ enablePostToModuleRoutes = false } = {}) {
