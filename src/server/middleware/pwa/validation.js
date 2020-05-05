@@ -14,6 +14,8 @@
  * permissions and limitations under the License.
  */
 
+import { getClientStateConfig } from '../../utils/stateConfig';
+
 function isString(value) {
   return typeof value === 'string';
 }
@@ -22,8 +24,16 @@ function isBoolean(value) {
   return typeof value === 'boolean';
 }
 
+function isFunc(value) {
+  return typeof value === 'function';
+}
+
 function isPlainObject(value) {
   return !!value && typeof value === 'object' && Array.isArray(value) === false;
+}
+
+function isOneOf(value, tests) {
+  return tests.map((validator) => validator(value)).find((validationResult) => validationResult);
 }
 
 function createIsRequired(isType) {
@@ -38,7 +48,7 @@ function createIsEnum(enumerableValues, isType) {
   };
 }
 
-function createArrayOf(isType) {
+function createIsArrayOf(isType) {
   return function isArrayOf(valuesToTest) {
     return Array.isArray(valuesToTest) && valuesToTest.map(isType).filter(Boolean);
   };
@@ -75,7 +85,7 @@ function isWebManifest(manifestToValidate) {
       'browser',
     ], isString)],
     ['iarc_rating_id', isBoolean],
-    ['icons', createArrayOf(
+    ['icons', createIsArrayOf(
       createIsShape({
         src: isString,
         sizes: isString,
@@ -100,7 +110,7 @@ function isWebManifest(manifestToValidate) {
       'portrait-secondary',
     ], isString)],
     ['prefer_related_applications', isBoolean],
-    ['related_applications', createArrayOf(
+    ['related_applications', createIsArrayOf(
       createIsShape({
         platform: isString,
         url: isString,
@@ -108,7 +118,7 @@ function isWebManifest(manifestToValidate) {
       })
     )],
     ['scope', isString],
-    ['screenshots', createArrayOf(
+    ['screenshots', createIsArrayOf(
       createIsShape({
         src: isString,
         sizes: isString,
@@ -180,11 +190,19 @@ export function validatePWAConfig(configToValidate) {
         // we can accept either of these values if the user wishes to opt out
         if ([false, null].includes(configValueToValidate)) return [configKeyToValidate, null];
         // if not a plain object at this point we mark the manifest as invalid
-        if (!isPlainObject(configValueToValidate)) {
-          console.warn('The "webManifest" key is expected to be a plain object only');
+        if (!isOneOf(configValueToValidate, [isPlainObject, isFunc])) {
+          console.warn('The "webManifest" key is expected to be a plain object or function');
           return false;
         }
-        return [configKeyToValidate, testValueType(configValueToValidate)];
+
+        let manifestToValidate = null;
+
+        if (typeof configValueToValidate === 'function') {
+          manifestToValidate = configValueToValidate(getClientStateConfig());
+        } else {
+          manifestToValidate = configValueToValidate;
+        }
+        return [configKeyToValidate, testValueType(manifestToValidate)];
       }
 
       if (!testValueType(configValueToValidate)) {

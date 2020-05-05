@@ -56,23 +56,41 @@ describe('validation', () => {
     expect(console.warn).toHaveBeenCalledTimes(3);
     expect(console.warn).toHaveBeenCalledWith('invalid value type given for configuration key "serviceWorker" (expected "Boolean") - ignoring');
     expect(console.warn).toHaveBeenCalledWith('invalid value type given for configuration key "scope" (expected "String") - ignoring');
-    expect(console.warn).toHaveBeenCalledWith('The "webManifest" key is expected to be a plain object only');
-  });
-
-  test('valid keys emits no warnings or errors and returns valid configuration', () => {
-    const validConfig = {
-      serviceWorker: true,
-      scope: '/',
-      webManifest: {
-        name: 'One App Test',
-      },
-    };
-    expect(validatePWAConfig(validConfig)).toEqual(validConfig);
-    expect(console.warn).not.toHaveBeenCalled();
-    expect(console.error).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledWith('The "webManifest" key is expected to be a plain object or function');
   });
 
   describe('web manifest validation', () => {
+    test('web app manifest has valid keys emits no warnings or errors and returns valid configuration', () => {
+      const validConfig = {
+        serviceWorker: true,
+        scope: '/',
+        webManifest: {
+          name: 'One App Test',
+        },
+      };
+      expect(validatePWAConfig(validConfig)).toEqual(validConfig);
+      expect(console.warn).not.toHaveBeenCalled();
+      expect(console.error).not.toHaveBeenCalled();
+    });
+
+    test('web app manifest can be a function', () => {
+      const validConfig = {
+        serviceWorker: true,
+        scope: '/',
+        webManifest: () => ({
+          name: 'One App Test',
+        }),
+      };
+      expect(validatePWAConfig(validConfig)).toEqual({
+        ...validConfig,
+        webManifest: {
+          name: 'One App Test',
+        },
+      });
+      expect(console.warn).not.toHaveBeenCalled();
+      expect(console.error).not.toHaveBeenCalled();
+    });
+
     test('expects name to be required', () => {
       const validConfig = {
         serviceWorker: true,

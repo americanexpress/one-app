@@ -215,7 +215,8 @@ can oversee.
 
 The `webManifest` key is used to set up a [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Manifest)
 as part of the PWA group of technologies. It allows `one-app` to be installed onto a device
-with support for a more native experience using web technologies.
+with support for a more native experience using web technologies. The `webManifest` can also
+be a `Function` and is passed the `clientConfig` as the only argument.
 
 **Shape**
 ```js
@@ -234,7 +235,7 @@ if (!global.BROWSER) {
       // we can optionally define a scope to use with the service worker
       scope: '/',
       // the web app manifest can be directly incorporated in the PWA config
-      webManifest: {
+      webManifest: (clientConfig) => ({
         // the full name is the official name of a given PWA
         name: 'My App Name',
         // the short name is used by mobile devices to label your home screen icon
@@ -254,12 +255,12 @@ if (!global.BROWSER) {
         // icons can perform many purposes, including the splash screen when a web app is loading
         icons: [
           {
-            src: 'images/my-splash-icon.png',
+            src: `${clientConfig.cdnUrl}/my-splash-icon.png`,
             sizes: '48x48',
             type: 'image/png',
           },
         ],
-      },
+      }),
     },
   };
 }
