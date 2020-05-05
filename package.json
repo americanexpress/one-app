@@ -36,6 +36,7 @@
     "set-middleware": "set-middleware",
     "set-dev-endpoints": "node scripts/set-dev-endpoints.js",
     "postinstall": "npm run build",
+    "release:changelog": "echo -e \"$(head -3 CHANGELOG.md)\n\n$(node_modules/.bin/conventional-changelog -p angular)\n\n$(tail -n +3 CHANGELOG.md)\" > CHANGELOG.md",
     "release": "standard-version"
   },
   "repository": {
@@ -131,6 +132,7 @@
     "babel-eslint": "^10.0.3",
     "chokidar": "^3.3.0",
     "concurrently": "^5.0.0",
+    "conventional-changelog-cli": "^2.0.31",
     "cross-env": "^6.0.3",
     "danger": "^9.2.8",
     "enzyme": "^3.10.0",
@@ -178,7 +180,8 @@
       "one-app-statics/package.json"
     ],
     "skip": {
-      "tag": true
+      "tag": true,
+      "changelog": true
     }
   }
 }
