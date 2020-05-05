@@ -23,24 +23,22 @@ Immutable.Map {
 `;
 
 exports[`initClient should use strict mode 1`] = `
-<StrictMode>
-  <Provider
-    store={
-      Object {
-        "dispatch": [Function],
-        "getState": [Function],
-        "modules": Immutable.Map {},
-        "rebuildReducer": [Function],
-        "replaceReducer": [Function],
-        "subscribe": [Function],
-        Symbol(observable): [Function],
-      }
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "modules": Immutable.Map {},
+      "rebuildReducer": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
     }
-  >
-    <Router
-      render={[Function]}
-      testProp="test"
-    />
-  </Provider>
-</StrictMode>
+  }
+>
+  <Router
+    render={[Function]}
+    testProp="test"
+  />
+</Provider>
 `;

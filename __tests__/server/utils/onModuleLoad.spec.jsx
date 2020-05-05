@@ -29,11 +29,12 @@ import { setCorsOrigins } from '../../../src/server/middleware/conditionallyAllo
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from '../../../src/server/utils/safeRequest';
 import { setConfigureRequestLog } from '../../../src/server/utils/logging/serverMiddleware';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
+import { getEventLoopDelayThreshold } from '../../../src/server/utils/createCircuitBreaker';
 
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
   getClientStateConfig: jest.fn(),
-  getServerStateConfig: jest.fn(),
+  getServerStateConfig: jest.fn(() => ({ rootModuleName: 'root-module' })),
 }));
 jest.mock('@americanexpress/env-config-utils');
 jest.mock('../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: '4.43.0-0-38f0178d' }));
@@ -309,6 +310,22 @@ describe('onModuleLoad', () => {
       moduleName: 'some-root',
     });
     expect(setCorsOrigins).toHaveBeenCalledWith(corsOrigins);
+  });
+
+  it('sets the event loop lag threshold from the root module', () => {
+    const eventLoopDelayThreshold = 50;
+    expect(getEventLoopDelayThreshold()).not.toBe(eventLoopDelayThreshold);
+    onModuleLoad({
+      module: {
+        [CONFIGURATION_KEY]: {
+          csp,
+          eventLoopDelayThreshold,
+        },
+        [META_DATA_KEY]: { version: '1.0.14' },
+      },
+      moduleName: 'some-root',
+    });
+    expect(getEventLoopDelayThreshold()).toBe(eventLoopDelayThreshold);
   });
 
   it('logs when the root module is loaded', () => {

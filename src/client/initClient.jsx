@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import React, { StrictMode } from 'react';
+import React from 'react';
 import { hydrate } from 'react-dom';
 import { Provider } from 'react-redux';
 import { browserHistory, Router } from '@americanexpress/one-app-router';
@@ -48,11 +48,9 @@ export default async function initClient() {
 
     /* eslint-disable react/jsx-props-no-spreading */
     const App = () => (
-      <StrictMode>
-        <Provider store={store}>
-          <Router {...renderProps} />
-        </Provider>
-      </StrictMode>
+      <Provider store={store}>
+        <Router {...renderProps} />
+      </Provider>
     );
     /* eslint-enable react/jsx-props-no-spreading */
 
