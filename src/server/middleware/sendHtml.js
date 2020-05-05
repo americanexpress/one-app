@@ -289,7 +289,7 @@ export default function sendHtml(req, res) {
     }
     // replace server specific config with client specific config (api urls and such)
     const clientConfig = getClientStateConfig();
-    const pwaMetadata = getClientPWAConfig();
+    const { webManifestUrl, ...pwaMetadata } = getClientPWAConfig();
     store.dispatch(setConfig(clientConfig));
     const cdnUrl = clientConfig.cdnUrl || '/_/static/';
     const clientInitialState = store.getState();
@@ -315,7 +315,7 @@ export default function sendHtml(req, res) {
       disableScripts,
       disableStyles,
       scriptNonce,
-      webManifestUrl: pwaMetadata.webManifestUrl,
+      webManifestUrl,
     };
 
     const bodySectionArgs = {
