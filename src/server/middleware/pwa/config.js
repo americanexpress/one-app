@@ -18,7 +18,6 @@ import fs from 'fs';
 import path from 'path';
 
 import { validatePWAConfig } from './validation';
-import { configureWebManifest } from './middleware/webManifest';
 
 const defaultPWAConfig = {
   webManifest: false,
@@ -29,6 +28,7 @@ const defaultPWAConfig = {
   serviceWorkerScript: null,
 };
 
+let webAppManifest = null;
 let pwaConfig = { ...defaultPWAConfig };
 
 function resetPWAConfig() {
@@ -74,6 +74,18 @@ function createServiceWorkerConfig(config) {
   };
 }
 
+function createWebManifestConfig(config, serviceWorkerConfig) {
+  const webManifest = !!(config.webManifest && serviceWorkerConfig.serviceWorker);
+  return {
+    webManifest,
+    webManifestObject: webManifest ? config.webManifest : null,
+  };
+}
+
+export function getWebAppManifestConfig() {
+  return { webManifest: webAppManifest, webManifestEnabled: pwaConfig.webManifest };
+}
+
 export function getServerPWAConfig() {
   return { ...pwaConfig };
 }
@@ -87,7 +99,7 @@ export function getClientPWAConfig() {
     serviceWorkerRecoveryMode,
     serviceWorkerScope,
     serviceWorkerScriptUrl: serviceWorker && '/_/pwa/service-worker.js',
-    webManifestUrl: webManifest && [routes.prefix, routes.webManifest].join(''),
+    webManifestUrl: webManifest && '/_/pwa/manifest.webmanifest',
   };
 }
 
@@ -108,22 +120,15 @@ export function configurePWA(config) {
 
   const validatedConfig = config ? validatePWAConfig(config) : {};
 
-  let manifest = null;
-  let manifestEnabled = true;
+  const serviceWorkerConfig = createServiceWorkerConfig(validatedConfig);
+  const {
+    webManifestObject, webManifest,
+  } = createWebManifestConfig(validatedConfig, serviceWorkerConfig);
 
-  if (validatedConfig.webManifest) manifest = validatedConfig.webManifest;
-  else if (validatedConfig.webManifest !== undefined) {
-    // if webManifest was explicitly set to a falsy value (false, null),
-    // we disable the manifest
-    manifestEnabled = false;
-  }
-
-  configureWebManifest({
-    enabled: manifestEnabled,
-    manifest,
-  });
+  webAppManifest = webManifestObject ? Buffer.from(JSON.stringify(webManifestObject)) : null;
 
   return setPWAConfig({
-    ...createServiceWorkerConfig(validatedConfig),
+    ...serviceWorkerConfig,
+    webManifest,
   });
 }
