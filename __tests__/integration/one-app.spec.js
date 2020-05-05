@@ -102,7 +102,7 @@ describe('Tests that require Docker setup', () => {
       expect(rawHeaders).not.toHaveProperty('access-control-max-age');
       expect(rawHeaders).not.toHaveProperty('access-control-allow-methods');
       expect(rawHeaders).not.toHaveProperty('access-control-allow-headers');
-      // any respnse headers
+      // any response headers
       expect(rawHeaders).not.toHaveProperty('access-control-allow-origin');
       expect(rawHeaders).not.toHaveProperty('access-control-expose-headers');
       expect(rawHeaders).not.toHaveProperty('access-control-allow-credentials');

@@ -23,6 +23,7 @@ import readJsonFile from './readJsonFile';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from './safeRequest';
 import { setConfigureRequestLog } from './logging/serverMiddleware';
 import { setCreateSsrFetch } from './createSsrFetch';
+import { setEventLoopDelayThreshold } from './createCircuitBreaker';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
@@ -74,6 +75,7 @@ export default function onModuleLoad({
       configureRequestLog,
       extendSafeRequestRestrictedAttributes = {},
       createSsrFetch,
+      eventLoopDelayThreshold,
       // Child Module Specific
       requiredExternals,
       validateStateConfig,
@@ -112,6 +114,7 @@ export default function onModuleLoad({
     extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
     setConfigureRequestLog(configureRequestLog);
     setCreateSsrFetch(createSsrFetch);
+    setEventLoopDelayThreshold(eventLoopDelayThreshold);
     logModuleLoad(moduleName, metaData.version);
     return;
   }
