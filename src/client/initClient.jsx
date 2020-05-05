@@ -51,7 +51,11 @@ export default async function initClient() {
     // we want to kick off service worker installation and store sync
     // as early as possible, while not blocking the app from rendering
     // so we let this async function run at its own pace and call it synchronously
-    loadServiceWorker(store);
+    loadServiceWorker({
+      // eslint-disable-next-line no-underscore-dangle
+      config: global.__pwa_metadata__,
+      dispatch: store.dispatch,
+    });
 
     /* eslint-disable react/jsx-props-no-spreading */
     const App = () => (

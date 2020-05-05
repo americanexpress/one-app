@@ -14,7 +14,6 @@
  * permissions and limitations under the License.
  */
 
-import { fromJS } from 'immutable';
 import { importServiceWorkerClient, initializeServiceWorker } from '../../../src/client/service-worker';
 import serviceWorkerClient from '../../../src/client/service-worker/client';
 
@@ -40,16 +39,9 @@ describe('initializeServiceWorker', () => {
   let registration;
   let getRegistration;
 
+  const onError = jest.fn();
   const scope = '/';
   const scriptUrl = '/_/pwa/service-worker.js';
-  const getState = jest.fn(() => fromJS({
-    config: {
-      serviceWorker: true,
-      serviceWorkerRecoveryMode: false,
-      serviceWorkerScriptUrl: scriptUrl,
-      serviceWorkerScope: scope,
-    },
-  }));
 
   beforeEach(() => {
     registration = {
@@ -68,7 +60,9 @@ describe('initializeServiceWorker', () => {
 
     delete navigator.serviceWorker;
 
-    await expect(initializeServiceWorker({ getState })).resolves.toBeUndefined();
+    await expect(initializeServiceWorker({
+      serviceWorker: true,
+    })).resolves.toBeUndefined();
     expect(getRegistration).not.toHaveBeenCalled();
     expect(serviceWorkerClient).not.toHaveBeenCalled();
   });
@@ -77,18 +71,15 @@ describe('initializeServiceWorker', () => {
     expect.assertions(2);
 
     getRegistration.mockImplementationOnce(() => Promise.resolve());
-    getState.mockImplementationOnce(() => fromJS({ config: { serviceWorker: false } }));
 
-    await expect(initializeServiceWorker({ getState })).resolves.toBe(null);
+    await expect(initializeServiceWorker({ serviceWorker: false })).resolves.toBe(null);
     expect(serviceWorkerClient).not.toHaveBeenCalled();
   });
 
   test('when serviceWorker is disabled, returns registration and unregisters the service worker', async () => {
     expect.assertions(3);
 
-    getState.mockImplementationOnce(() => fromJS({ config: { serviceWorker: false } }));
-
-    await expect(initializeServiceWorker({ getState })).resolves.toBe(registration);
+    await expect(initializeServiceWorker({ serviceWorker: false })).resolves.toBe(registration);
     expect(registration.unregister).toHaveBeenCalledTimes(1);
     expect(serviceWorkerClient).not.toHaveBeenCalled();
   });
@@ -97,28 +88,21 @@ describe('initializeServiceWorker', () => {
     expect.assertions(2);
 
     getRegistration.mockImplementationOnce(() => Promise.resolve());
-    getState.mockImplementationOnce(() => fromJS({
-      config: {
-        serviceWorker: true,
-        serviceWorkerRecoveryMode: true,
-      },
-    }));
 
-    await expect(initializeServiceWorker({ getState })).resolves.toBe(null);
+    await expect(initializeServiceWorker({
+      serviceWorker: true,
+      recoveryMode: true,
+    })).resolves.toBe(null);
     expect(serviceWorkerClient).not.toHaveBeenCalled();
   });
 
   test('when recoveryMode is active, returns registration and updates the service worker', async () => {
     expect.assertions(3);
 
-    getState.mockImplementationOnce(() => fromJS({
-      config: {
-        serviceWorker: true,
-        serviceWorkerRecoveryMode: true,
-      },
-    }));
-
-    await expect(initializeServiceWorker({ getState })).resolves.toBe(registration);
+    await expect(initializeServiceWorker({
+      serviceWorker: true,
+      recoveryMode: true,
+    })).resolves.toBe(registration);
     expect(registration.update).toHaveBeenCalledTimes(1);
     expect(serviceWorkerClient).not.toHaveBeenCalled();
   });
@@ -128,53 +112,38 @@ describe('initializeServiceWorker', () => {
 
     getRegistration.mockImplementationOnce(() => Promise.resolve());
 
-    await expect(initializeServiceWorker({ getState })).resolves.toBe(registration);
+    await expect(initializeServiceWorker({
+      serviceWorker: true,
+      recoveryMode: false,
+      scriptUrl,
+      scope,
+      onError,
+    })).resolves.toBe(registration);
     expect(getRegistration).toHaveBeenCalledTimes(1);
     expect(serviceWorkerClient).toHaveBeenCalledTimes(1);
     expect(serviceWorkerClient).toHaveBeenCalledWith({
       scriptUrl,
       scope,
-      onError: expect.any(Function),
+      onError,
     });
   });
 
   test('calls serviceWorkerClient with settings if the registration is present', async () => {
     expect.assertions(4);
 
-    await expect(initializeServiceWorker({ getState })).resolves.toBe(registration);
+    await expect(initializeServiceWorker({
+      serviceWorker: true,
+      recoveryMode: false,
+      scriptUrl,
+      scope,
+      onError,
+    })).resolves.toBe(registration);
     expect(getRegistration).toHaveBeenCalledTimes(1);
     expect(serviceWorkerClient).toHaveBeenCalledTimes(1);
     expect(serviceWorkerClient).toHaveBeenCalledWith({
       scriptUrl,
       scope,
-      onError: expect.any(Function),
-    });
-  });
-
-  test('calls serviceWorkerClient with settings and simulates when an error occurs', async () => {
-    expect.assertions(5);
-
-    const dispatch = jest.fn();
-    await expect(initializeServiceWorker({ getState, dispatch })).resolves.toBe(registration);
-    expect(serviceWorkerClient).toHaveBeenCalledWith({
-      scriptUrl,
-      scope,
-      onError: expect.any(Function),
-    });
-
-    // we make sure any error calls dispatch with addErrorToReport
-
-    const error = new Error('ooops');
-    const { onError } = serviceWorkerClient.mock.calls[0][0];
-    expect(onError(error)).toBeUndefined();
-    expect(dispatch).toHaveBeenCalledTimes(1);
-
-    // to make sure our error action object is reachable, we invoke it thunk-like
-    dispatch.mock.calls[0][0](dispatch);
-    expect(dispatch).toHaveBeenCalledWith({
-      error,
-      otherData: undefined,
-      type: '@americanexpress/one-app-ducks/error-reporting/ADD_ERROR_REPORT_TO_QUEUE',
+      onError,
     });
   });
 });

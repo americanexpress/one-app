@@ -14,28 +14,28 @@
  * permissions and limitations under the License.
  */
 
-import { addErrorToReport } from '@americanexpress/one-app-ducks';
-
 export function importServiceWorkerClient(settings) {
   // In the future, we should consider making one-service worker added dynamically
   // as an external chunk with the ability to support conditional load.
-  return import(/* webpackChunkName: "pwa-client" */ './client')
+  return import(/* webpackChunkName: "service-worker-client" */ './client')
     .then((imported) => imported.default)
     .then((serviceWorkerClient) => serviceWorkerClient(settings));
 }
 
-export function initializeServiceWorker(store) {
+export function initializeServiceWorker({
+  serviceWorker,
+  recoveryMode,
+  scriptUrl,
+  scope,
+  onError,
+}) {
   // If the service worker is unavailable, we would not need
   // to call in the chunk since it is not supported in the given browser.
   if ('serviceWorker' in navigator === false) return Promise.resolve();
 
-  const state = store.getState();
-
   // Before we load in the pwa chunk, we can make a few checks to avoid loading it, if not needed.
   return navigator.serviceWorker.getRegistration()
     .then((registration) => {
-      const serviceWorker = state.getIn(['config', 'serviceWorker'], false);
-
       // When the service Worker is not enabled (default)
       if (!serviceWorker) {
         // If by any chance a service worker is present, we remove it.
@@ -43,8 +43,6 @@ export function initializeServiceWorker(store) {
         // When there is no registration, nothing further needed to be done.
         return null;
       }
-
-      const recoveryMode = state.getIn(['config', 'serviceWorkerRecoveryMode'], false);
 
       if (recoveryMode) {
         // Recovery mode is active if the Escape Hatch or No Op scripts are enabled
@@ -54,13 +52,6 @@ export function initializeServiceWorker(store) {
         // and make it redundant, any page navigation afterwards should yield no registration.
         return null;
       }
-
-      const scriptUrl = state.getIn(['config', 'serviceWorkerScriptUrl'], null);
-      const scope = state.getIn(['config', 'serviceWorkerScope'], null);
-
-      // To handle any errors that occur during installation, we set this handler
-      // for dispatching the error back to the server.
-      const onError = (error) => store.dispatch(addErrorToReport(error));
 
       // Normal operations will load up the library and integrate with the service worker
       return importServiceWorkerClient({ scriptUrl, scope, onError });

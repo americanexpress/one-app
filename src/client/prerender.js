@@ -52,11 +52,17 @@ export function moveHelmetScripts() {
   });
 }
 
-export function loadServiceWorker(store) {
-  return initializeServiceWorker(store).catch((error) => {
-    // in the event of failure or no support,
-    // the app should not crash for non-critical progressive enhancement
-    // and report the error back to the server
-    store.dispatch(addErrorToReport(error));
-  });
+export function loadServiceWorker({ dispatch, config }) {
+  // To handle any errors that occur during installation, we set this handler
+  // for dispatching the error back to the server and tie it to the 'message' event.
+  const onError = (error) => dispatch(addErrorToReport(error));
+  return initializeServiceWorker({
+    onError,
+    serviceWorker: config.serviceWorker,
+    recoveryMode: config.serviceWorkerRecoveryMode,
+    scriptUrl: config.serviceWorkerScriptUrl,
+    scope: config.serviceWorkerScope,
+    // in the event of any failure, the app should not crash for non-critical
+    // progressive enhancement and report the error back to the server
+  }).catch(onError);
 }

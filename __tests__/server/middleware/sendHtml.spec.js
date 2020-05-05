@@ -26,7 +26,6 @@ import { getClientStateConfig } from '../../../src/server/utils/stateConfig';
 // _setVars is a method to control the mock
 // eslint-disable-next-line import/named
 import transit from '../../../src/universal/utils/transit';
-import { setConfig } from '../../../src/universal/ducks/config';
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
 import { getClientPWAConfig } from '../../../src/server/middleware/pwa';
 
@@ -413,30 +412,21 @@ describe('sendHtml', () => {
     });
 
     describe('PWA config rendering', () => {
-      it('should include disabled configuration values when setting client state config', () => {
+      it('includes __pwa_metadata__ with disabled values', () => {
         sendHtml(req, res);
         expect(res.send).toHaveBeenCalledTimes(1);
-        expect(getClientPWAConfig).toHaveBeenCalledTimes(1);
-        expect(setConfig).toHaveBeenCalledWith({
-          ...getClientStateConfig(),
-          ...getClientPWAConfig(),
-        });
+        expect(/window\.__pwa_metadata__ = {"serviceWorker":false,"serviceWorkerScope":null,"serviceWorkerScriptUrl":null};/.test(res.send.mock.calls[0][0])).toBe(true);
       });
 
-      it('should include enabled configuration values', () => {
-        const enabledPWAConfig = {
+      it('includes __pwa_metadata__ with enabled values', () => {
+        getClientPWAConfig.mockImplementationOnce(() => ({
           serviceWorker: true,
           serviceWorkerScope: '/',
-          serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
-        };
-        getClientPWAConfig.mockImplementationOnce(() => enabledPWAConfig);
+          serviceWorkerScriptUrl: '/sw.js',
+        }));
         sendHtml(req, res);
         expect(res.send).toHaveBeenCalledTimes(1);
-        expect(getClientPWAConfig).toHaveBeenCalledTimes(1);
-        expect(setConfig).toHaveBeenCalledWith({
-          ...getClientStateConfig(),
-          ...enabledPWAConfig,
-        });
+        expect(/window\.__pwa_metadata__ = {"serviceWorker":true,"serviceWorkerScope":"\/","serviceWorkerScriptUrl":"\/sw\.js"};/.test(res.send.mock.calls[0][0])).toBe(true);
       });
     });
 

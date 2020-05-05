@@ -15,6 +15,7 @@
  */
 
 import { fromJS } from 'immutable';
+import { addErrorToReport } from '@americanexpress/one-app-ducks';
 
 import {
   initializeClientStore, loadPrerenderScripts, moveHelmetScripts, loadServiceWorker,
@@ -182,9 +183,7 @@ describe('moveHelmetScripts', () => {
 });
 
 describe('loadServiceWorker', () => {
-  const store = {
-    dispatch: jest.fn(),
-  };
+  const dispatch = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -193,16 +192,19 @@ describe('loadServiceWorker', () => {
   it('should call initializeServiceWorker and resolve', async () => {
     expect.assertions(2);
 
-    await expect(loadServiceWorker(store)).resolves.toBeUndefined();
+    await expect(loadServiceWorker({ dispatch, config: {} })).resolves.toBeUndefined();
     expect(initializeServiceWorker).toHaveBeenCalledTimes(1);
   });
 
-  it('should not crash the application on failure nor does loadServiceWorker reject', async () => {
-    expect.assertions(3);
-    initializeServiceWorker.mockImplementationOnce(() => Promise.reject());
+  it('should not crash the application on failure nor should loadServiceWorker reject', async () => {
+    expect.assertions(4);
 
-    await expect(loadServiceWorker(store)).resolves.toBeUndefined();
-    expect(store.dispatch).toHaveBeenCalledTimes(1);
+    const error = new Error('ooops');
+    initializeServiceWorker.mockImplementationOnce(() => Promise.reject(error));
+
+    await expect(loadServiceWorker({ dispatch, config: {} })).resolves.toBeUndefined();
+    expect(dispatch).toHaveBeenCalledTimes(1);
     expect(initializeServiceWorker).toHaveBeenCalledTimes(1);
+    expect(addErrorToReport).toHaveBeenCalledWith(error);
   });
 });
