@@ -840,6 +840,7 @@ describe('Tests that require Docker setup', () => {
         });
 
         scriptUrl = [appAtTestUrls.fetchUrl, '/_/pwa/service-worker.js'].join('');
+        webManifestUrl = [appAtTestUrls.fetchUrl, '/_/pwa/manifest.webmanifest'].join('');
       });
 
       test('does not load PWA resources from server by default', async () => {
@@ -886,6 +887,7 @@ describe('Tests that require Docker setup', () => {
 
           expect(webManifestResponse.status).toBe(200);
           expect(webManifestResponse.headers.get('cache-control')).toBeDefined();
+          expect(serviceWorkerResponse.headers.get('content-type')).toEqual('application/manifest+json');
         });
 
         test('service worker has a valid registration', async () => {
