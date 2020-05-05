@@ -25,7 +25,7 @@ Releases can be triggered in two ways:
 2. After the the generated tag is pushed to the branch this will trigger the docker build and publish the statics and push the images to Docker Hub. The development and production images would be accessible in docker [https://hub.docker.com/u/oneamex](https://hub.docker.com/u/oneamex)
 
 3. We are currently using [https://github.com/release-drafter/release-drafter](https://github.com/release-drafter/release-drafter) to generate release notes. Please add the labels specified within [release-drafter](.github/release-drafter.yml) to categorize different pull requests. Update the draft release notes and tie it to the release tag above, you can also link this to different artifacts. The statics assets will be published and added to a tag that has been released.
-4. For the release notes use the below format, checkout [https://github.com/americanexpress/one-app/releases](https://github.com/americanexpress/one-app/releases)
+4. For the release notes use the below format. Please review some of the releases to check the format used [https://github.com/americanexpress/one-app/releases](https://github.com/americanexpress/one-app/releases)
    
    ```
 
