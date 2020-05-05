@@ -9,8 +9,8 @@ Releases can be triggered in two ways:
 
 ## Automated release process
 
- 1. An automated pull request will be raised every Wednesday at 16:00 UTC, from a `prepare-release` branch to master. This uses [pull_request_release workflow](.github/workflows/pull_request_release.yml) and updates the [package.json](package.json), [package-lock.json](package-lock.json), [one-app-statics package.json](one-app-statics/package.json) and runs `npm run release:changelog` to generate the changelog. Behind the scene it uses [standard-version](https://github.com/conventional-changelog/standard-version) to generate and update these files with the changes for released. The commit message contains will be in the following format `chore(release): X.X.X` . You can update this pull request to remove or add any new changes.
- 2. Once a pull request is reviewed merge the pull request and please ensure that the commit message is updated to follow this pattern  
+ 1. An automated pull request will be raised every Wednesday at 16:00 UTC, from a `prepare-release` branch to master. This uses [pull_request_release workflow](.github/workflows/pull_request_release.yml) and updates the [package.json](package.json), [package-lock.json](package-lock.json), [one-app-statics package.json](one-app-statics/package.json) and runs `npm run release:changelog` to generate the changelog. Behind the scene it uses [standard-version](https://github.com/conventional-changelog/standard-version) to update these file versions and [conventional-changelog](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-cli) to generate the changelog. The commit message will be in the following format `chore(release): X.X.X` . You can update this pull request to remove or add any new changes.
+ 2. Once a pull request is reviewed, merge the pull request and please ensure that the commit message is updated to follow this pattern  
 
    ``` bash
    #chore(release): 5.0.0
@@ -61,11 +61,11 @@ If changes were made and need to be reverted. Please use the [manual release pro
 
 ### How can I run the first release?
 
-For the first release please use the [manual release process](#manual-release-process). Run `npm run release -- --first-release` to generate the initial changelog and update the package.json files.
+For the first release please use the [manual release process](#manual-release-process). Run `npm run release -- --first-release` to update the package.json files.
 
 ### How can I create a prerelease?
 
-For the first release please use the [manual release process](#manual-release-process). Run `npm run release -- --prerelease` to generate the initial changelog and update the package.json files.
+For the first release please use the [manual release process](#manual-release-process). Run `npm run release -- --prerelease` to update the package.json files.
 
 ### What happens if a pull request merged after the automated pull request is created?
 
@@ -73,4 +73,4 @@ We should try to prevent this from happening, but if it does happen, trigger the
 
 ### How can I do a dry run to test out the files to be changed locally
 
-Locally you can run  `npm run release -- --dry-run`, this would show the new version to be released, the files that would changed and a view of the changelog without changing any of the files.
+Locally you can run  `npm run release -- --dry-run`, this would show the new version to be released and the files that would changed.
