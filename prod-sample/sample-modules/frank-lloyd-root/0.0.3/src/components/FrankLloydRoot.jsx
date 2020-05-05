@@ -25,7 +25,7 @@ import { connect } from 'react-redux';
 import HelloWorldComponent from './HelloWorld';
 
 export function FrankLloydRoot({ children, config }) {
-  const cdnUrl = config.get('cdnUrl');
+  const cdnUrl = React.useMemo(() => config.get('cdnUrl'), [config]);
   return (
     <React.Fragment>
       <Helmet
@@ -36,7 +36,6 @@ export function FrankLloydRoot({ children, config }) {
           { name: 'theme-color', content: '#FDB92D' },
         ]}
         link={[
-          { rel: 'webmanifest', href: `${cdnUrl}modules/frank-lloyd-root/0.0.3/assets/manifest.webmanifest` },
           // favicon
           { rel: 'icon', href: `${cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-192px.png` },
           // icon ideally with a size of 192px (or 180px), it is added as the home icon
