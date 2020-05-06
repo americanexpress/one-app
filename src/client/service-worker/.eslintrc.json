@@ -1,0 +1,24 @@
+{
+  "extends": "../../../.eslintrc.json",
+  "overrides": [
+    {
+      "files": "**/*.js",
+      "rules": {
+        // for clearer error reporting, having anonymous functions may inhibit us from
+        // collecting a concise stack trace with the proper names of invoked functions
+        "prefer-arrow-callback": "off",
+        // generally, self is acceptable to use in a service worker script
+        // we want to allow this behavior throughout
+        "no-restricted-globals": ["off", "self"],
+        // we have `@americanexpress/one-service-worker` as part of devDependencies
+        // so we disable this rule to allow it to exist as we use it only during build time
+        "import/no-extraneous-dependencies": [
+          "off",
+          {
+            "devDependencies": true
+          }
+        ]
+      }
+    }
+  ]
+}

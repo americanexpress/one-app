@@ -38,6 +38,7 @@ security and bundle size considerations.
   - [`provideStateConfig`](#providestateconfig)
   - [`csp`](#csp)
   - [`corsOrigins`](#corsorigins)
+  - [`pwa`](#pwa)
   - [`configureRequestLog`](#configurerequestlog)
   - [`extendSafeRequestRestrictedAttributes`](#extendsaferequestrestrictedattributes)
   - [`createSsrFetch`](#createssrfetch)
@@ -169,6 +170,73 @@ In practice, this allows POST requests from given origins to return partially re
 **📘 More Information**
 * [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
 * In Practice: [Partial Rendering](../../../README.md#partial-rendering)
+
+## `pwa`
+**Module Type**
+* ✅ Root Module
+* 🚫 Child Module
+
+> ⚠️ The PWA feature is behind a feature flag `ONE_SERVICE_WORKER` that needs to be
+> set to "true" during runtime.
+
+The `pwa` directive is how we configure the service worker and various PWA features.
+There are three distinct service workers with their given purpose. To use
+the standard service worker, we can set the `serviceWorker` to true. If there
+was any failure caused by the service worker, we can use the recovery service
+worker with `recoveryMode` set to true if we wish to reset browser clients. In
+the event we want to purge the service worker and remove any existing service
+workers on browser clients, We can use the escape hatch worker by setting
+`escapeHatch` to true.
+
+While in normal circumstances we would want to use the standard `serviceWorker`,
+`recoveryMode` and `escapeHatch` are there to help the origin that `one-app` is deployed on;
+to safely transition their service worker installation on existing clients that have them. If we have
+a healthy service worker in place and simply want to start removing our service worker for any
+given reason, we would enable the `escapeHatch` to segway clients out of the current service worker
+that is registered. In the case that there is a malfunction with the service worker, we can use
+`recoveryMode` to reinstall the service worker with a safe alternative to avoid zombie workers
+from persisting. Afterwards, we can either opt back in to using the standard service worker,
+or the `escapeHatch` to remove it altogether.
+
+There is a precedence to which of the three flags is respected and the order goes:
+
+1. `serviceWorker`
+2. `escapeHatch`
+3. `recoveryMode`
+
+What this means is, if we set `{ recoveryMode: true, escapeHatch: true }`, `escapeHatch`
+will be honored (and enabled) instead of `recoveryMode`. To enable either of these modes,
+make sure to omit `{ serviceWorker: true }` when desiring to set either of the two optional
+modes since it is applied.
+
+For the variety of service workers available, we have control to set its
+`scope` with the desired pathname and assign what url base the service worker
+can oversee.
+
+**Shape**
+```js
+if (!global.BROWSER) {
+  RootModule.appConfig = {
+    pwa: {
+      // having enabled set to true will enable the service worker and will be
+      // registered when one-app is loaded in the browser
+      serviceWorker: true,
+      // in the case we need to reset our clients from a faulty service worker
+      // we can use the noop worker to replace the older worker
+      recoveryMode: false,
+      // if we want to remove the service worker altogether, we can deploy
+      // an escape hatch worker to immediately remove itself on install
+      escapeHatch: false,
+      // we can optionally define a scope to use with the service worker
+      scope: '/',
+    },
+  };
+}
+```
+
+**📘 More Information**
+* Environment Variable: [`ONE_SERVICE_WORKER`](../server/Environment-Variables.md#one_service_worker)
+* Example: [Frank Lloyd Root's `pwa` config](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.3/src/pwa.js)
 
 ## `configureRequestLog`
 **Module Type**

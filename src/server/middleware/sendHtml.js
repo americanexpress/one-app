@@ -27,6 +27,7 @@ import { getClientStateConfig } from '../utils/stateConfig';
 import getI18nFileFromState from '../utils/getI18nFileFromState';
 import renderModuleStyles from '../utils/renderModuleStyles';
 import readJsonFile from '../utils/readJsonFile';
+import { getClientPWAConfig } from './pwa';
 
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
 const integrityManifest = readJsonFile('../../../bundle.integrity.manifest.json');
@@ -208,6 +209,7 @@ export function getBody({
   disableScripts,
   clientModuleMapCache,
   scriptNonce,
+  pwaMetadata,
 }) {
   const bundle = isLegacy ? 'legacyBrowser' : 'browser';
   const { bodyAttributes, script } = helmetInfo;
@@ -221,6 +223,7 @@ export function getBody({
         window.__CLIENT_HOLOCRON_MODULE_MAP__ = ${jsonStringifyForScript(clientModuleMapCache[bundle])};
         window.__INITIAL_STATE__ = ${jsonStringifyForScript(serializeClientInitialState(clientInitialState))};
         window.__holocron_module_bundle_type__ = '${bundle}';
+        window.__pwa_metadata__ = ${jsonStringifyForScript(pwaMetadata)};
       </script>
       ${assets}
       ${renderI18nScript(clientInitialState, bundlePrefixForBrowser)}
@@ -284,6 +287,7 @@ export default function sendHtml(req, res) {
     }
     // replace server specific config with client specific config (api urls and such)
     const clientConfig = getClientStateConfig();
+    const pwaMetadata = getClientPWAConfig();
     store.dispatch(setConfig(clientConfig));
     const cdnUrl = clientConfig.cdnUrl || '/_/static/';
     const clientInitialState = store.getState();
@@ -321,6 +325,7 @@ export default function sendHtml(req, res) {
       disableScripts,
       clientModuleMapCache,
       scriptNonce,
+      pwaMetadata,
     };
 
     body = `

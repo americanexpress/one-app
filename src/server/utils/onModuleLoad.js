@@ -24,6 +24,7 @@ import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttri
 import { setConfigureRequestLog } from './logging/serverMiddleware';
 import { setCreateSsrFetch } from './createSsrFetch';
 import { setEventLoopDelayThreshold } from './createCircuitBreaker';
+import { configurePWA } from '../middleware/pwa';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
@@ -76,6 +77,7 @@ export default function onModuleLoad({
       extendSafeRequestRestrictedAttributes = {},
       createSsrFetch,
       eventLoopDelayThreshold,
+      pwa,
       // Child Module Specific
       requiredExternals,
       validateStateConfig,
@@ -116,6 +118,7 @@ export default function onModuleLoad({
     setCreateSsrFetch(createSsrFetch);
     setEventLoopDelayThreshold(eventLoopDelayThreshold);
     logModuleLoad(moduleName, metaData.version);
+    configurePWA(pwa);
     return;
   }
 

@@ -15,13 +15,14 @@
  */
 
 import { createHolocronStore } from 'holocron';
-import { getLocalePack } from '@americanexpress/one-app-ducks';
+import { getLocalePack, addErrorToReport } from '@americanexpress/one-app-ducks';
 import { compose } from 'redux';
 
 import createEnhancer from '../universal/enhancers';
 import reducer from '../universal/reducers';
 import transit from '../universal/utils/transit';
 import createTimeoutFetch from '../universal/utils/createTimeoutFetch';
+import { initializeServiceWorker } from './service-worker';
 
 export function initializeClientStore() {
   // Six second timeout on client
@@ -49,4 +50,19 @@ export function moveHelmetScripts() {
     helmetScripts.forEach((script) => document.body.removeChild(script));
     helmetScripts.forEach((script) => document.head.appendChild(script));
   });
+}
+
+export function loadServiceWorker({ dispatch, config }) {
+  // To handle any errors that occur during installation, we set this handler
+  // for dispatching the error back to the server and tie it to the 'message' event.
+  const onError = (error) => dispatch(addErrorToReport(error));
+  return initializeServiceWorker({
+    onError,
+    serviceWorker: config.serviceWorker,
+    recoveryMode: config.serviceWorkerRecoveryMode,
+    scriptUrl: config.serviceWorkerScriptUrl,
+    scope: config.serviceWorkerScope,
+    // in the event of any failure, the app should not crash for non-critical
+    // progressive enhancement and report the error back to the server
+  }).catch(onError);
 }
