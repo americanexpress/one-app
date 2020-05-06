@@ -22,9 +22,9 @@ Releases can be triggered in two ways:
 
  3. The merge will trigger the automatic generation of a new tag using the semantic version provided during the merging of the pull request above.
  4. After the the generated tag is pushed to the branch this will trigger the docker build and publish the statics and push the images to Docker Hub. The development and production images would be accessible in docker [https://hub.docker.com/u/oneamex](https://hub.docker.com/u/oneamex)
- 5. The statics assets will be published and added to a tag that has been released via the [release static assets action](.github/workflows/docker_release.yml)
+ 5. The statics assets will be published and added to the tag created via the [release static assets action](.github/workflows/docker_release.yml) as part of the previous step.
  6. We are currently using [https://github.com/release-drafter/release-drafter](https://github.com/release-drafter/release-drafter) to generate release notes. This is a github action that generates draft releases note that can be added to the released tag. Please add the labels specified within [release-drafter](.github/release-drafter.yml) to categorize different pull requests to ensure that any changes are categorized correctly. You can also use the changelog generated for this content.
- 7. Update the draft release notes with any changes required and tie it to the released tag.
+ 7. Update the draft release notes with any changes required and edit the released tag to add them there.
  8. For the release notes use the below format. Please review some of the releases to check the format used [https://github.com/americanexpress/one-app/releases](https://github.com/americanexpress/one-app/releases)
 
   ```
@@ -39,8 +39,7 @@ Releases can be triggered in two ways:
 
       ### One App Statics
       https://www.npmjs.com/package/@americanexpress/one-app-statics
-
-  ``` 
+  ```
 
 ## Manual release process
 
