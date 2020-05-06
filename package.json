@@ -38,7 +38,7 @@
     "postinstall": "npm run build",
     "release:standard-version": "standard-version -- --no-verify",
     "release:changelog": "echo -e \"$(head -3 CHANGELOG.md)\n\n$(node_modules/.bin/conventional-changelog -p angular)\n\n$(tail -n +4 CHANGELOG.md)\" > CHANGELOG.md",
-    "release": "release:standard-version && release:changelog"
+    "release": "npm run release:standard-version && npm run release:changelog"
   },
   "repository": {
     "type": "git",
