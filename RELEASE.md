@@ -28,17 +28,17 @@ Releases can be triggered in two ways:
  8. For the release notes use the below format. Please review some of the releases to check the format used [https://github.com/americanexpress/one-app/releases](https://github.com/americanexpress/one-app/releases)
 
   ```
-      [Paste changelog entries here]
-      ### Docker Images
+  [Paste changelog entries here]
+  ### Docker Images
 
-      #### Developer Image
-      [one-app-dev/version-released](https://hub.docker.com/layers/oneamex/one-app-dev/link-to-the-docker-tag)
+  #### Developer Image
+  [one-app-dev/version-released](https://hub.docker.com/layers/oneamex/one-app-dev/link-to-the-docker-tag)
 
-      #### Production Image
-      [one-app/version-released](https://hub.docker.com/layers/oneamex/one-app/link-to-the-docker-tag)
+  #### Production Image
+  one-app/version-released](https://hub.docker.com/layers/oneamex/one-app/link-to-the-docker-tag)
 
-      ### One App Statics
-      https://www.npmjs.com/package/@americanexpress/one-app-statics
+  ### One App Statics
+  https://www.npmjs.com/package/@americanexpress/one-app-statics
   ```
 
 ## Manual release process
