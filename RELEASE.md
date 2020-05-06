@@ -50,7 +50,7 @@ This process can be used to make ad hoc releases outside of wednesday release cy
 
  1. Run `npm run release` locally within your branch, this would update [package.json](package.json), [package-lock.json](package-lock.json)and [one-app-statics package.json](one-app-statics/package.json) with the new version to be released. 
  2. Run `npm run release:changelog` to generate and update the changelog.
- 3. Push your changes and create a pull request to master.
+ 3. Commit using the `chore(release): X.X.X` message format and push your changes, then create a pull request to master.
  4. When the changes are merged and reviewed. The same process from [step 3](#automated-release-process) above will be followed.
 
 ## FAQs
