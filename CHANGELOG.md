@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 5.0.0 (2020-05-06)
+
+
+### Features
+
+* **createRequestHtmlFragment:** implemented circuit breaker ([#111](https://github.com/americanexpress/one-app/issues/111)) ([e10f707](https://github.com/americanexpress/one-app/commit/e10f707b2532c5f9fdd8d9db44afffa848343817))
+
 <a name="5.0.0-rc.2"></a>
 # [5.0.0-rc.2](https://github.com/americanexpress/one-app/compare/5.0.0-rc.1...v5.0.0-rc.2) (2020-04-29)
 
