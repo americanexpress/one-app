@@ -63,7 +63,7 @@ jobs:
       - name: Push Docker Images
         run: |
           docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_tag_version.outputs.dockertag}}
-          docker push ${{ secrets.DOCKER_USER }}/one-app-dev:{{ steps.set_docker_tag_version.outputs.dockertag}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_tag_version.outputs.dockertag}}
           docker push ${{ secrets.DOCKER_USER }}/one-app:latest
           docker push ${{ secrets.DOCKER_USER }}/one-app-dev:latest
       - name: Create Release
