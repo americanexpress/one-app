@@ -54,9 +54,9 @@ describe('validation', () => {
       webManifest: [],
     })).toEqual({});
     expect(console.warn).toHaveBeenCalledTimes(3);
-    expect(console.warn).toHaveBeenCalledWith('invalid value type given for configuration key "serviceWorker" (expected "Boolean") - ignoring');
-    expect(console.warn).toHaveBeenCalledWith('invalid value type given for configuration key "scope" (expected "String") - ignoring');
-    expect(console.warn).toHaveBeenCalledWith('The "webManifest" key is expected to be a plain object or function');
+    expect(console.warn).toHaveBeenCalledWith('Invalid value type given for configuration key "serviceWorker" (expected "Boolean") - ignoring');
+    expect(console.warn).toHaveBeenCalledWith('Invalid value type given for configuration key "scope" (expected "String") - ignoring');
+    expect(console.warn).toHaveBeenCalledWith('Invalid value type given for configuration key "webManifest" (expected "WebManifest") - ignoring');
   });
 
   describe('web manifest validation', () => {
@@ -69,24 +69,6 @@ describe('validation', () => {
         },
       };
       expect(validatePWAConfig(validConfig)).toEqual(validConfig);
-      expect(console.warn).not.toHaveBeenCalled();
-      expect(console.error).not.toHaveBeenCalled();
-    });
-
-    test('web app manifest can be a function', () => {
-      const validConfig = {
-        serviceWorker: true,
-        scope: '/',
-        webManifest: () => ({
-          name: 'One App Test',
-        }),
-      };
-      expect(validatePWAConfig(validConfig)).toEqual({
-        ...validConfig,
-        webManifest: {
-          name: 'One App Test',
-        },
-      });
       expect(console.warn).not.toHaveBeenCalled();
       expect(console.error).not.toHaveBeenCalled();
     });
@@ -169,6 +151,7 @@ describe('validation', () => {
           orientation: 'portrait',
           short_name: 'Test',
           name: 'One App Test',
+          categories: ['testing', 'example'],
           icons: [{
             src: 'https://example.com/pwa-icon.png',
             type: 'img/png',

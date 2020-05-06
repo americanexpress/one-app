@@ -14,31 +14,21 @@
  * permissions and limitations under the License.
  */
 
-import { getClientStateConfig } from '../../utils/stateConfig';
-
-function isString(value) {
-  return typeof value === 'string';
+function isString(valueToTest) {
+  return typeof valueToTest === 'string';
 }
 
-function isBoolean(value) {
-  return typeof value === 'boolean';
+function isBoolean(valueToTest) {
+  return typeof valueToTest === 'boolean';
 }
 
-function isFunc(value) {
-  return typeof value === 'function';
-}
-
-function isPlainObject(value) {
-  return !!value && typeof value === 'object' && Array.isArray(value) === false;
-}
-
-function isOneOf(value, tests) {
-  return tests.map((validator) => validator(value)).find((validationResult) => validationResult);
+function isPlainObject(valueToTest) {
+  return !!valueToTest && typeof valueToTest === 'object' && Array.isArray(valueToTest) === false;
 }
 
 function createIsRequired(isType) {
-  return function isRequired(value) {
-    return !!value && isType(value);
+  return function isRequired(valueToTest) {
+    return !!valueToTest && isType(valueToTest);
   };
 }
 
@@ -69,9 +59,16 @@ function createIsShape(objectShape) {
 }
 
 function isWebManifest(manifestToValidate) {
+  // we can accept either of these values if the user wishes to opt out
+  if ([false, null].includes(manifestToValidate)) return null;
+  // if not a plain object at this point we mark the manifest as invalid
+  if (!isPlainObject(manifestToValidate)) {
+    return false;
+  }
+
   const webAppManifestKeys = new Map([
     ['background_color', isString],
-    ['categories', isBoolean],
+    ['categories', createIsArrayOf(isString)],
     ['description', isString],
     ['dir', createIsEnum([
       'auto',
@@ -129,7 +126,7 @@ function isWebManifest(manifestToValidate) {
     ['start_url', isString],
     ['theme_color', isString],
   ]);
-  // we manually add required properties
+  // we manually add required properties (eg name)
   return [...new Set(Object.keys(manifestToValidate).concat('name'))]
     .map((keyToTest) => {
       if (!webAppManifestKeys.has(keyToTest)) {
@@ -183,36 +180,18 @@ export function validatePWAConfig(configToValidate) {
         return null;
       }
 
-      const testValueType = validKeys.get(configKeyToValidate);
       const configValueToValidate = configToValidate[configKeyToValidate];
+      const testValueType = validKeys.get(configKeyToValidate);
+      const testResults = testValueType(configValueToValidate);
 
-      if (configKeyToValidate === 'webManifest') {
-        // we can accept either of these values if the user wishes to opt out
-        if ([false, null].includes(configValueToValidate)) return [configKeyToValidate, null];
-        // if not a plain object at this point we mark the manifest as invalid
-        if (!isOneOf(configValueToValidate, [isPlainObject, isFunc])) {
-          console.warn('The "webManifest" key is expected to be a plain object or function');
-          return false;
-        }
-
-        let manifestToValidate = null;
-
-        if (typeof configValueToValidate === 'function') {
-          manifestToValidate = configValueToValidate(getClientStateConfig());
-        } else {
-          manifestToValidate = configValueToValidate;
-        }
-        return [configKeyToValidate, testValueType(manifestToValidate)];
-      }
-
-      if (!testValueType(configValueToValidate)) {
+      if (!testResults) {
         console.warn(
-          `invalid value type given for configuration key "${configKeyToValidate}" (expected "${testValueType.name.replace('is', '')}") - ignoring`
+          `Invalid value type given for configuration key "${configKeyToValidate}" (expected "${testValueType.name.replace('is', '')}") - ignoring`
         );
         return null;
       }
 
-      return [configKeyToValidate, configValueToValidate];
+      return [configKeyToValidate, configKeyToValidate === 'webManifest' ? testResults : configValueToValidate];
     })
     .filter(Boolean)
     .reduce((map, [configKey, value]) => ({ ...map, [configKey]: value }), {});

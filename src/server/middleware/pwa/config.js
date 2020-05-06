@@ -17,6 +17,8 @@
 import fs from 'fs';
 import path from 'path';
 
+import { getClientStateConfig } from '../../utils/stateConfig';
+
 import { validatePWAConfig } from './validation';
 
 const defaultPWAConfig = {
@@ -75,11 +77,21 @@ function createServiceWorkerConfig(config) {
 }
 
 function createWebManifestConfig(config, serviceWorkerConfig) {
-  const webManifest = !!(config.webManifest && serviceWorkerConfig.serviceWorker);
+  const webManifest = !!(serviceWorkerConfig.serviceWorker && config.webManifest);
   return {
     webManifest,
     webManifestObject: webManifest ? config.webManifest : null,
   };
+}
+
+function validateConfig(config) {
+  if (!config) return {};
+
+  const object = { ...config };
+
+  if (typeof config.webManifest === 'function') object.webManifest = config.webManifest(getClientStateConfig());
+
+  return validatePWAConfig(object);
 }
 
 export function getWebAppManifestConfig() {
@@ -118,7 +130,7 @@ export function configurePWA(config) {
     resetPWAConfig();
   }
 
-  const validatedConfig = config ? validatePWAConfig(config) : {};
+  const validatedConfig = validateConfig(config);
 
   const serviceWorkerConfig = createServiceWorkerConfig(validatedConfig);
   const {
