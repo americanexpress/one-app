@@ -28,7 +28,6 @@ Releases can be triggered in two ways:
 6. For the release notes use the below format. Please review some of the releases to check the format used [https://github.com/americanexpress/one-app/releases](https://github.com/americanexpress/one-app/releases)
 
   ```
-
       [Paste changelog entries here]
     
       ### Docker Images
@@ -43,8 +42,7 @@ Releases can be triggered in two ways:
       https://www.npmjs.com/package/@americanexpress/one-app-statics
 
   ```
-
-5. 
+7. 
 
 ## Manual release process
 
