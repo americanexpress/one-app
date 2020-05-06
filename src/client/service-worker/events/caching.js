@@ -23,11 +23,31 @@ import {
   remove,
 } from '@americanexpress/one-service-worker';
 
+// The RegExp codex:
+// - (?<capture-group-name>.*) for an exactly labeled object made from matching parts
+// -> /(capture groups)/ of a string url. we can use `url.match(regExp).groups`to get
+// -> all the named capture groups
+// - /^https?(?::\/\/)/ start pattern anchors the start of the url and is not captured
+// -> ( /(?:.*)/ ), only matched
+// - specifying what we want to capture in (?<version>[^/]+[\d]+)
+// -> we use /[^/]+/ to accurately capture what in between the slashes through negation ([^]).
+// -> for each named capture, we want to get specific on what we expect that match to be.
+// - we have a match-all in the center of the string (/https?(?::\/\/)HERE .* HERE\/(?<name>)/)
+// -> because it allows us to ignore any matches before the url is
+// -> matched from the end of the string and back
+// - if you run across `/(?<name> .{1,5})\1/`, the `\1` matches what was first matched
+// -> in a capture group. for this example: `name = \1`
+
 const moduleRegExp = /^https?(?::\/\/).*\/(?<name>[^/]+)\/(?<version>[^/]+[\d]+)\/(?<resource>([a-zA-Z-~]+|\1)(?:\.\1)?)(?:\.chunk)?\.(?<bundle>(legacy\.)?browser)\.js(?:\?clientCacheRevision=(?<revision>[^/&]*))?$/;
 
 const langPackRegExp = /^https?(?::\/\/).*\/(?<name>[^/]+)\/(?<version>[^/]+[\d]+)\/locale\/(?<locale>(?<language>[a-z]{2,3})(?:-)?(?<country>[A-Z]{1,})?)\/(?<resource>(\1|[^/]*))\.json$/;
 
 const oneAppRegExp = /^https?(?::\/\/).*(?:\/_\/static)?\/app\/(?<version>[^/]+[\d]+)?\/(?:(?<bundle>legacy)\/)?(?:i18n\/)?(?<name>[^/]+)\.js$/;
+
+// - we compare the metadata between two resources in cache,
+// -> depending on the rules that we want, we can use the meta-data
+// -> between two requests occupying the same meta record entry name
+// -> (eg `/${meta.type}/${meta.resource || meta.name}`)
 
 function markForRemoval(cachedMetaRecord, newMetaRecord) {
   // on any change to the clientCacheRevision, we remove
@@ -37,6 +57,10 @@ function markForRemoval(cachedMetaRecord, newMetaRecord) {
   if (cachedMetaRecord.locale !== newMetaRecord.locale) return false;
   return false;
 }
+
+// - using the RegExps, we extract the metadata from the url and adding
+// -> { meta } to the middleware stack context - but only on matching one
+// -> of the three types.
 
 function createFetchContext(event) {
   const { request: { url } } = event;
@@ -72,7 +96,7 @@ function invalidationMiddleware(event, context) {
     };
 
     // we write the meta data extracted from the url and write a record for each resource
-    // if a resource matches (by type and name) but differs in version (revision, bundle type)
+    // if a resource matches (by type and name) but differs in version (or revision, bundle type)
     // it will delete the variant
     event.waitUntil(
       getMetaData({

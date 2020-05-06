@@ -234,6 +234,14 @@ if (!global.BROWSER) {
 }
 ```
 
+### Caching
+
+When the service worker is enabled, the Caches API is working on every `fetch` event
+that is intercepted by the service worker and caches/responds if they are either app,
+module or lang pack resources (the expected paths are the build outputs from `one-amex-bundler`).
+The cache adds an expiration time (1 month default) and can invalidate what is cached by
+comparing versions, bundle types, locale, and the `clientCacheRevision` key.
+
 **📘 More Information**
 * Environment Variable: [`ONE_SERVICE_WORKER`](../server/Environment-Variables.md#one_service_worker)
 * Example: [Frank Lloyd Root's `pwa` config](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.3/src/pwa.js)
