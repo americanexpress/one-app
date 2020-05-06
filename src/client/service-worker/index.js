@@ -15,11 +15,9 @@
  */
 
 export function importServiceWorkerClient(settings) {
-  return import(/* webpackChunkName: "service-worker-client" */ './client')
-    // get the default export
-    .then((imported) => imported.default)
-    // invoke with settings
-    .then((serviceWorkerClient) => serviceWorkerClient(settings));
+return import(/* webpackChunkName: "service-worker-client" */ './client')
+    // get the default export and invoke with settings
+    .then(({ default: serviceWorkerClient }) => serviceWorkerClient(settings)
 }
 
 function clearCache() {
