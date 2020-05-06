@@ -422,40 +422,6 @@ describe('caching', () => {
     });
   });
 
-  test('caches two different modules without conflicting', async () => {
-    expect.assertions(13);
-
-    const middleware = createCachingMiddleware();
-
-    const events = await [
-      'https://example.com/cdn/test-root/2.2.2/test-root.browser.js',
-      'https://example.com/cdn/test-module/2.2.2/test-module.browser.js',
-      'https://example.com/cdn/test-root/2.2.2/test-root.browser.js',
-      'https://example.com/cdn/test-module/2.2.2/test-module.browser.js',
-    ].reduce(async (lastPromises, url, index) => {
-      const lastEvents = await lastPromises;
-      const event = createFetchEvent(url);
-      if (index < 2) {
-        fetch.mockImplementationOnce(() => Promise.resolve(event.response));
-      }
-      middleware(event);
-      await waitFor(event.respondWith);
-      await waitFor(event.waitUntil);
-      return Promise.resolve(lastEvents.concat(event));
-    }, Promise.resolve([]));
-
-    expect(fetch).toHaveBeenCalledTimes(2);
-    events.forEach((event, index) => {
-      if (index < 2) {
-        expect(event.waitUntil).toHaveBeenCalledTimes(3);
-      } else {
-        expect(event.waitUntil).toHaveBeenCalledTimes(2);
-      }
-      expect(event.respondWith).toHaveBeenCalledTimes(1);
-      expect(event.respondWith).toHaveBeenCalledWith(Promise.resolve(event.response));
-    });
-  });
-
   test('caches a module while removing an older version and updates meta record', async () => {
     expect.assertions(12);
 
