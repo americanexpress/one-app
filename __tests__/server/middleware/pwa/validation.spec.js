@@ -59,6 +59,18 @@ describe('validation', () => {
     expect(console.warn).toHaveBeenCalledWith('Invalid value type given for configuration key "webManifest" (expected "WebManifest") - ignoring');
   });
 
+  test('valid keys emits no warnings or errors and returns valid configuration', () => {
+    const validConfig = {
+      serviceWorker: true,
+      scope: '/',
+      webManifest: { name: 'my-app' },
+    };
+
+    expect(validatePWAConfig(validConfig)).toEqual(validConfig);
+    expect(console.warn).not.toHaveBeenCalled();
+    expect(console.error).not.toHaveBeenCalled();
+  });
+
   describe('web manifest validation', () => {
     test('web app manifest has valid keys emits no warnings or errors and returns valid configuration', () => {
       const validConfig = {

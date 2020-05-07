@@ -188,7 +188,7 @@ the event we want to purge the service worker and remove any existing service
 workers on browser clients, We can use the escape hatch worker by setting
 `escapeHatch` to true.
 
-While in normal circumstances we would normally want to use the standard `serviceWorker`,
+While in normal circumstances we would want to use the standard `serviceWorker`,
 `recoveryMode` and `escapeHatch` are there to help the origin that `one-app` is deployed on;
 to safely transition their service worker installation on existing clients that have them. If we have
 a healthy service worker in place and simply want to start removing our service worker for any
@@ -371,6 +371,8 @@ if (!global.BROWSER) {
 }
 ```
 
+<!--ONE-DOCS-ID end-->
+
 ## `eventLoopDelayThreshold`
 **Module Type**
 * ✅ Root Module
@@ -399,8 +401,6 @@ For example, you may wish to forward cookies or headers from the initial page lo
 * Example: [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
 * Example: [An SSR Fetch Client](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/createFrankLikeFetch.js)
 * Using SSR Fetch Client with [`Module.holocron.loadModuleData`](./Loading-Data.md#moduleholocronloadmoduledata)
-
-<!--ONE-DOCS-ID end-->
 
 ## `validateStateConfig`
 **Module Type**
