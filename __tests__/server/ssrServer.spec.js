@@ -257,7 +257,7 @@ describe('ssrServer', () => {
           done();
         });
     });
-    
+
     it('should call errors logging', (done) => {
       request(loadServer())
         .post('/_/report/errors')
