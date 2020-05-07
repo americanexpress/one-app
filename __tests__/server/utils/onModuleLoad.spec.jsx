@@ -30,6 +30,7 @@ import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttri
 import { setConfigureRequestLog } from '../../../src/server/utils/logging/serverMiddleware';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
 import { getEventLoopDelayThreshold } from '../../../src/server/utils/createCircuitBreaker';
+import { configurePWA } from '../../../src/server/middleware/pwa';
 
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
@@ -47,6 +48,9 @@ jest.mock('../../../src/server/utils/createSsrFetch');
 jest.mock('../../../src/server/utils/safeRequest', () => ({
   extendRestrictedAttributesAllowList: jest.fn(),
   validateSafeRequestRestrictedAttributes: jest.fn(),
+}));
+jest.mock('../../../src/server/middleware/pwa', () => ({
+  configurePWA: jest.fn(),
 }));
 
 const RootModule = () => <h1>Hello, world</h1>;
@@ -310,6 +314,16 @@ describe('onModuleLoad', () => {
       moduleName: 'some-root',
     });
     expect(setCorsOrigins).toHaveBeenCalledWith(corsOrigins);
+  });
+
+  it('calls configurePWA with pwa configuration', () => {
+    const pwa = { serviceWorker: true };
+    onModuleLoad({
+      module: { [CONFIGURATION_KEY]: { csp, pwa }, [META_DATA_KEY]: { version: '1.0.15' } },
+      moduleName: 'some-root',
+    });
+    expect(configurePWA).toHaveBeenCalledTimes(1);
+    expect(configurePWA).toHaveBeenCalledWith(pwa);
   });
 
   it('sets the event loop lag threshold from the root module', () => {

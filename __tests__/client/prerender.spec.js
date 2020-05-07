@@ -15,8 +15,12 @@
  */
 
 import { fromJS } from 'immutable';
+import { addErrorToReport } from '@americanexpress/one-app-ducks';
 
-import { initializeClientStore, loadPrerenderScripts, moveHelmetScripts } from '../../src/client/prerender';
+import {
+  initializeClientStore, loadPrerenderScripts, moveHelmetScripts, loadServiceWorker,
+} from '../../src/client/prerender';
+import { initializeServiceWorker } from '../../src/client/service-worker';
 
 jest.mock('@americanexpress/one-app-router', () => ({
   browserHistory: 'browserHistory',
@@ -32,6 +36,7 @@ jest.mock('../../src/universal/reducers', () => 'reducers');
 
 jest.mock('@americanexpress/one-app-ducks', () => ({
   getLocalePack: jest.fn((locale) => Promise.resolve(locale)),
+  addErrorToReport: jest.fn(),
 }));
 
 jest.mock('../../src/universal/utils/createTimeoutFetch', () => jest.fn(
@@ -41,6 +46,7 @@ jest.mock('../../src/universal/utils/createTimeoutFetch', () => jest.fn(
       return res;
     })
 ));
+jest.mock('../../src/client/service-worker', () => ({ initializeServiceWorker: jest.fn(() => Promise.resolve()) }));
 
 describe('initializeClientStore', () => {
   beforeAll(() => {
@@ -173,5 +179,32 @@ describe('moveHelmetScripts', () => {
     jest.spyOn(NodeList.prototype, 'forEach');
     document.addEventListener.mock.calls[0][1]();
     expect(NodeList.prototype.forEach).not.toHaveBeenCalled();
+  });
+});
+
+describe('loadServiceWorker', () => {
+  const dispatch = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should call initializeServiceWorker and resolve', async () => {
+    expect.assertions(2);
+
+    await expect(loadServiceWorker({ dispatch, config: {} })).resolves.toBeUndefined();
+    expect(initializeServiceWorker).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not crash the application on failure nor should loadServiceWorker reject', async () => {
+    expect.assertions(4);
+
+    const error = new Error('ooops');
+    initializeServiceWorker.mockImplementationOnce(() => Promise.reject(error));
+
+    await expect(loadServiceWorker({ dispatch, config: {} })).resolves.toBeUndefined();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(initializeServiceWorker).toHaveBeenCalledTimes(1);
+    expect(addErrorToReport).toHaveBeenCalledWith(error);
   });
 });
