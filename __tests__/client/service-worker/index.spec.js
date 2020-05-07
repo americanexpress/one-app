@@ -105,7 +105,7 @@ describe('initializeServiceWorker', () => {
     expect(serviceWorkerClient).not.toHaveBeenCalled();
     expect(caches.snapshot()).toEqual({});
   });
-
+  
   test('when recoveryMode is active, returns null if registration is not present', async () => {
     expect.assertions(2);
 
