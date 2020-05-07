@@ -202,7 +202,8 @@ describe('createCachingMiddleware', () => {
           'https://cdn.example.com/cdn/test-root/1.2.3-rc.4/locale/fr-FR/integration.json',
           'https://example.com/cdn/test-module/2.2.1/locale/en/production.json',
           // during development
-          'http://localhost:3001/static/modules/test-module/2.2.1/locale/en/test-module.json',
+          'http://localhost:3001/static/modules/franks-burgers/0.0.0/en-us/integration.json',
+          'http://localhost:3001/static/modules/test-module/2.2.1/locale/en-CA/test-module.json',
           'http://localhost:3000/_/static/modules/test-module/2.2.1/locale/en/production.json',
         ],
       ],

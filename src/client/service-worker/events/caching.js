@@ -38,10 +38,11 @@ import {
 // - if you run across `/(?<name> .{1,5})\1/`, the `\1` matches what was first matched
 // -> in a capture group. for this example: `name = \1`
 
+// groups: name / version / resource . bundle ? revision
 const moduleRegExp = /^https?(?::\/\/).*\/(?<name>[^/]+)\/(?<version>[^/]+[\d]+)\/(?<resource>([a-zA-Z-~]+|\1)(?:\.\1)?)(?:\.chunk)?\.(?<bundle>(legacy\.)?browser)\.js(?:\?clientCacheRevision=(?<revision>[^/&]*))?$/;
-
-const langPackRegExp = /^https?(?::\/\/).*\/(?<name>[^/]+)\/(?<version>[^/]+[\d]+)\/locale\/(?<locale>(?<language>[a-z]{2,3})(?:-)?(?<country>[A-Z]{1,})?)\/(?<resource>(\1|[^/]*))\.json$/;
-
+// groups: name / version / locale / resource
+const langPackRegExp = /^https?(?::\/\/).*\/(?<name>[^/]+)\/(?<version>[^/]+[\d]+)(?:\/locale)?\/(?<locale>(?<language>[a-z]{2,3})(?:-)?(?<country>[a-zA-Z]{1,})?)\/(?<resource>(\1|[^/]*))\.json$/;
+// groups: version / bundle / name
 const oneAppRegExp = /^https?(?::\/\/).*(?:\/_\/static)?\/app\/(?<version>[^/]+[\d]+)?\/(?:(?<bundle>legacy)\/)?(?:i18n\/)?(?<name>[^/]+)\.js$/;
 
 // - we compare the metadata between two resources in cache,
