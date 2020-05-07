@@ -238,7 +238,7 @@ if (!global.BROWSER) {
 
 When the service worker is enabled, the Caches API is working on every `fetch` event
 that is intercepted by the service worker and caches/responds if they are either app,
-module or lang pack resources (the expected paths are the build outputs from `one-amex-bundler`).
+module or lang pack resources (the expected paths are the build outputs from [`one-app-bundler`](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler)).
 The cache adds an expiration time (1 month default) and can invalidate what is cached by
 comparing versions, bundle types, locale, and the `clientCacheRevision` key.
 
