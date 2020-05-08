@@ -14,7 +14,9 @@ if (!global.BROWSER) {
     corsOrigins,
     configureRequestLog,
     extendSafeRequestRestrictedAttributes,
+    pwa,
     createSsrFetch,
+    eventLoopDelayThreshold,
     /* Child Module Specific */
     validateStateConfig,
     requiredSafeRequestRestrictedAttributes,
@@ -42,6 +44,7 @@ security and bundle size considerations.
   - [`configureRequestLog`](#configurerequestlog)
   - [`extendSafeRequestRestrictedAttributes`](#extendsaferequestrestrictedattributes)
   - [`createSsrFetch`](#createssrfetch)
+  - [`eventLoopDelayThreshold`](#eventloopdelaythreshold)
   - [`validateStateConfig`](#validatestateconfig)
   - [`requiredSafeRequestRestrictedAttributes`](#requiredsaferequestrestrictedattributes)
   - [`appCompatibility`](#appcompatibility)
