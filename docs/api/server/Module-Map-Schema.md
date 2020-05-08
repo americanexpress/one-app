@@ -105,5 +105,5 @@ Contains a hash [SRI](https://developer.mozilla.org/en-US/docs/Web/Security/Subr
 
 [☝️ Return To Top](#module-map-schema)
 
-[Holocron Module Registry]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/README.md#module-registry
+[Holocron Module Registry]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/docs/api/README.md#module-registry
 [Holocron Module]: ../README.md#modules

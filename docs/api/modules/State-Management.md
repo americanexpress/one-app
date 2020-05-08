@@ -28,9 +28,9 @@ global.BROWSER; // Boolean
 
 ## Holocron Module Configuration
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@master/packages/holocron/README.md" id="Module.holocron" parentHeadingLevel="2" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@master/packages/holocron/docs/api/README.md" id="Module.holocron" parentHeadingLevel="2" start-->
 
-Please see [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/master/packages/holocron/README.md#holocron-module-configuration) in the Holocron API.
+Please see [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/master/packages/holocron/docs/api/README.md#holocron-module-configuration) in the Holocron API.
 
 <!--ONE-DOCS end-->
 
@@ -42,13 +42,13 @@ Please see [Holocron Module Configuration](https://github.com/americanexpress/ho
 **Contents**
 * [`holocronModule`](#holocronmodule)
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@master/packages/holocron/README.md" id="holocronModule" parentHeadingLevel="2" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@master/packages/holocron/docs/api/README.md" id="holocronModule" parentHeadingLevel="2" start-->
 
 ### `holocronModule`
 
 > ☠ `holocronModule` has been deprecated and will be removed in the next major version of Holocron. Please see [Holocron Module Configuration].
 
-Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/README.md#holocronmodule) in the Holocron API.
+Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/docs/api/README.md#holocronmodule) in the Holocron API.
 
 <!--ONE-DOCS end-->
 
@@ -195,4 +195,4 @@ Please see the [`intl` Duck](https://github.com/americanexpress/one-app-ducks#in
 
 [☝️ Return To Top](#state-management)
 
-[Holocron Module Configuration]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/README.md#holocron-module-configuration
+[Holocron Module Configuration]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/docs/api/README.md#holocron-module-configuration

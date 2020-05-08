@@ -25,7 +25,7 @@ Please see [`createSsrFetch`](./App-Configuration.md#createssrfetch) in the [App
 
 ## Holocron Module Configuration
 
-Please see the [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/master/packages/holocron/README.md#holocron-module-configuration) from the Holocron API Docs for more information about other properties.
+Please see the [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/master/packages/holocron/docs/api/README.md#holocron-module-configuration) from the Holocron API Docs for more information about other properties.
 
 ### `Module.holocron.loadModuleData`
 
