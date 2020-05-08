@@ -1,4 +1,4 @@
-[👈 Return to Overview](../API.md)
+[👈 Return to Overview](../README.md)
 
 # Environment Variables
 
@@ -468,7 +468,7 @@ ONE_CLIENT_CSP_REPORTING_URL=undefined
 * ✅ Development
 
 Name of the module that serves as the entry point to your application. In local development this is
-not necessary as you can pass the [`--root-module-name` argument to `npm start`](./CLI-Commands.md#start-commands) instead.
+not necessary as you can pass the [`--root-module-name` argument to `npm start`](./Cli-Commands.md#start-commands) instead.
 
 **Shape**
 ```bash
@@ -607,15 +607,15 @@ ONE_SERVICE_WORKER=false
 **📘 More Information**
 * Useful NodeJS Env Variables: [Node CLI Docs](https://nodejs.org/api/cli.html#cli_node_extra_ca_certs_file)
 * [Development Tools Documentation](./Development-Tools.md)
-* [CLI Commands Documentation](./CLI-Commands.md)
+* [CLI Commands Documentation](./Cli-Commands.md)
 * [Module Map Documentation](./Module-Map-Schema.md)
 
 [☝️ Return To Top](#environment-variables)
 
 [One App Dev Proxy]: https://github.com/americanexpress/one-app-dev-proxy
 [One App Dev CDN]: https://github.com/americanexpress/one-app-dev-cdn
-[Holocron Module]: ../API.md#modules
-[Holocron Modules]: ../API.md#modules
+[Holocron Module]: ../README.md#modules
+[Holocron Modules]: ../README.md#modules
 [Module Map]: ./Module-Map-Schema.md
 [`HTTPS_PRIVATE_KEY_PATH`]: #https_private_key_path
 [`HTTPS_PUBLIC_CERT_CHAIN_PATH`]: #https_public_cert_chain_path

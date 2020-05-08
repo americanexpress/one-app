@@ -1,7 +1,7 @@
 [`one-app-bundler`]: https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler
 [React]: http://reactjs.org/
 
-[👈 Return to Overview](./Recipes.md)
+[👈 Return to Overview](./README.md)
 
 # Running In Production
 
