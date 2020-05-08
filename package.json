@@ -76,7 +76,7 @@
     "@americanexpress/env-config-utils": "^2.0.2",
     "@americanexpress/lumberjack": "^1.1.3",
     "@americanexpress/one-app-bundler": "^6.5.0",
-    "@americanexpress/one-app-ducks": "^4.0.0",
+    "@americanexpress/one-app-ducks": "^4.0.1",
     "@americanexpress/one-app-router": "^1.0.0",
     "@americanexpress/vitruvius": "^2.0.0",
     "babel-preset-amex": "^3.2.0",
