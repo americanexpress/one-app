@@ -1174,7 +1174,7 @@ describe('Tests that require Docker setup', () => {
 
         test('does not load PWA resources from server after shutdown', async () => {
           expect.assertions(2);
-            
+
           const serviceWorkerResponse = await fetchServiceWorker();
           const webManifestResponse = await fetchWebManifest();
 

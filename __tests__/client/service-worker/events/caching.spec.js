@@ -212,7 +212,7 @@ describe('createCachingMiddleware', () => {
     urls.forEach((urlsToTest, name) => {
       const cacheName = `__sw/${name}-cache`;
       urlsToTest.forEach((url) => {
-        test(`matches ${url}`, async () => {
+        test(`matches (${name}) ${url}`, async () => {
           const event = createFetchEvent(url);
           fetch.mockImplementationOnce(() => Promise.resolve(event.response));
           middleware(event);
