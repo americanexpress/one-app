@@ -15,17 +15,24 @@
  */
 
 import url from 'url';
-import { browserHistory } from '@americanexpress/one-app-router';
+import { browserHistory, matchPromise } from '@americanexpress/one-app-router';
 import { Map as iMap, fromJS } from 'immutable';
 import { composeModules } from 'holocron';
-import match from '../../../src/universal/utils/matchPromisified';
 // getBreaker is only added in the mock
 /* eslint-disable-next-line import/named */
 import { getBreaker } from '../../../src/server/utils/createCircuitBreaker';
 
 import * as reactRendering from '../../../src/server/utils/reactRendering';
 
-jest.mock('../../../src/universal/utils/matchPromisified');
+// const { browserHistory } = jest.requireActual('@americanexpress/one-app-router');
+
+// jest.mock('@americanexpress/one-app-router');
+
+jest.mock('@americanexpress/one-app-router', () => {
+  const reactRouter = require.requireActual('@americanexpress/one-app-router');
+  jest.spyOn(reactRouter, 'matchPromise');
+  return reactRouter;
+});
 
 jest.mock('holocron', () => ({
   composeModules: jest.fn(() => 'composeModules'),
@@ -61,7 +68,7 @@ describe('createRequestHtmlFragment', () => {
   }));
 
   beforeAll(() => {
-    match.mockImplementation(({ routes, location }) => Promise.resolve({
+    matchPromise.mockImplementation(({ routes, location }) => Promise.resolve({
       redirectLocation: undefined,
       renderProps: {
         routes,
@@ -178,7 +185,7 @@ describe('createRequestHtmlFragment', () => {
       '../../../src/server/middleware/createRequestHtmlFragment'
     ).default;
 
-    match.mockImplementationOnce(() => ({
+    matchPromise.mockImplementationOnce(() => ({
       redirectLocation: undefined,
       // omit renderProps
     }));
@@ -203,7 +210,7 @@ describe('createRequestHtmlFragment', () => {
       '../../../src/server/middleware/createRequestHtmlFragment'
     ).default;
 
-    match.mockImplementationOnce(() => ({
+    matchPromise.mockImplementationOnce(() => ({
       redirectLocation: {
         pathname: '/redirect',
         search: '',
@@ -225,7 +232,7 @@ describe('createRequestHtmlFragment', () => {
       '../../../src/server/middleware/createRequestHtmlFragment'
     ).default;
 
-    match.mockImplementationOnce(() => ({
+    matchPromise.mockImplementationOnce(() => ({
       redirectLocation: {
         state: url.parse('https://example.com/redirect'),
       },
