@@ -104,7 +104,7 @@ To auto fix eslint rule failures that are autofixable run `npm run test:lint -- 
 
 ### Getting in Contact
 
-- Join our [Slack channel](https://one-amex.slack.com) request an invite [here](https://join.slack.com/t/one-amex/shared_invite/enQtOTA0MzEzODExODEwLTlmYzI1Y2U2ZDEwNWJjOTAxYTlmZTYzMjUyNzQyZTdmMWIwZGJmZDM2MDZmYzVjMDk5OWU4OGIwNjJjZWRhMjY)
+- Join our [Slack channel](https://one-amex.slack.com) request an [invite](https://join.slack.com/t/one-amex/shared_invite/enQtOTA0MzEzODExODEwLTlmYzI1Y2U2ZDEwNWJjOTAxYTlmZTYzMjUyNzQyZTdmMWIwZGJmZDM2MDZmYzVjMDk5OWU4OGIwNjJjZWRhMjY)
 
 ### Git Commit Guidelines
 
