@@ -903,6 +903,8 @@ describe('Tests that require Docker setup', () => {
         });
 
         describe('caching', () => {
+          const oneAppVersionRegExp = /\/([^/]+)(?:\/i18n)?\/[^/]*\.js$/;
+
           function _getCacheEntries(done) {
             caches
               .keys()
@@ -939,7 +941,8 @@ describe('Tests that require Docker setup', () => {
               cacheMap.get('__sw/one-app-cache').map(({ url, cache }) => ({
                 cache,
                 url: url.replace(
-                  /.*([^/].*)(?:\/i18n)?(?:\/[^/][a-zA-Z0-9-~].*\.js)/, '[app-version]'
+                  url.match(oneAppVersionRegExp)[1],
+                  '[one-app-version]'
                 ),
               }))
             ).toMatchObject(
@@ -952,13 +955,13 @@ describe('Tests that require Docker setup', () => {
                 `${appAtTestUrls.cdnUrl}/app/${buildVersion}/i18n/en-US.js`,
                 `${appAtTestUrls.cdnUrl}/app/${buildVersion}/vendors.js`,
                 `${appAtTestUrls.cdnUrl}/app/${buildVersion}/app.js`,
-              ]
-                .map((url) => ({
-                  cache: '__sw/one-app-cache',
-                  url: url.replace(
-                    /.*([^/].*)(?:\/i18n)?(?:\/[^/][a-zA-Z0-9-~].*\.js)/, '[app-version]'
-                  ),
-                }))
+              ].map((url) => ({
+                cache: '__sw/one-app-cache',
+                url: url.replace(
+                  url.match(oneAppVersionRegExp)[1],
+                  '[one-app-version]'
+                ),
+              }))
             );
             expect(cacheMap.get('__sw/module-cache')).toMatchObject([
               {
