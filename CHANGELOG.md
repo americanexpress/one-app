@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="5.0.0-rc.3"></a>
+# [5.0.0-rc.3](https://github.com/americanexpress/one-app/compare/v5.0.0-rc.2...v5.0.0-rc.3) (2020-05-06)
+
+
+### Features
+
+* **createRequestHtmlFragment:** implemented circuit breaker ([#111](https://github.com/americanexpress/one-app/issues/111)) ([e10f707](https://github.com/americanexpress/one-app/commit/e10f707))
+* **initClient:** removed StrictMode, resolves [#74](https://github.com/americanexpress/one-app/issues/74) ([#126](https://github.com/americanexpress/one-app/issues/126)) ([890a7e8](https://github.com/americanexpress/one-app/commit/890a7e8))
+
+
+<a name="5.0.0-rc.2"></a>
+# [5.0.0-rc.2](https://github.com/americanexpress/one-app/compare/5.0.0-rc.1...v5.0.0-rc.2) (2020-04-29)
+
+
+### Features
+
+* **dep:** add create-shared-react-context ([#112](https://github.com/americanexpress/one-app/issues/112)) ([24217c6](https://github.com/americanexpress/one-app/commit/24217c6))
+* **one-app:** removed tenancy or tenant instances ([#69](https://github.com/americanexpress/one-app/issues/69)) ([1b6a5e5](https://github.com/americanexpress/one-app/commit/1b6a5e5))
+
+
 # [5.0.0-rc.1](https://github.com/americanexpress/one-app/compare/5.0.0-rc.0...5.0.0-rc.1) (2020-04-22)
 
 

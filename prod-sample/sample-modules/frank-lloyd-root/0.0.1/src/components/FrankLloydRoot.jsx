@@ -26,7 +26,7 @@ export function FrankLloydRoot({ children, config }) {
   return (
     <React.Fragment>
       <Helmet
-        title="Sample Tenancy"
+        title="Sample Root Module"
         link={[
           { rel: 'icon', href: 'https://sample-cdn.frank/favicon.ico' },
         ]}
@@ -48,6 +48,7 @@ FrankLloydRoot.propTypes = {
 
 if (!global.BROWSER) {
   FrankLloydRoot.appConfig = {
+    eventLoopDelayThreshold: Infinity,
     // eslint-disable-next-line global-require
     csp: require('../csp').default,
     provideStateConfig: {

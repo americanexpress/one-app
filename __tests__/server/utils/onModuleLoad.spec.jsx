@@ -29,11 +29,13 @@ import { setCorsOrigins } from '../../../src/server/middleware/conditionallyAllo
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from '../../../src/server/utils/safeRequest';
 import { setConfigureRequestLog } from '../../../src/server/utils/logging/serverMiddleware';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
+import { getEventLoopDelayThreshold } from '../../../src/server/utils/createCircuitBreaker';
+import { configurePWA } from '../../../src/server/middleware/pwa';
 
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
   getClientStateConfig: jest.fn(),
-  getServerStateConfig: jest.fn(),
+  getServerStateConfig: jest.fn(() => ({ rootModuleName: 'root-module' })),
 }));
 jest.mock('@americanexpress/env-config-utils');
 jest.mock('../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: '4.43.0-0-38f0178d' }));
@@ -46,6 +48,9 @@ jest.mock('../../../src/server/utils/createSsrFetch');
 jest.mock('../../../src/server/utils/safeRequest', () => ({
   extendRestrictedAttributesAllowList: jest.fn(),
   validateSafeRequestRestrictedAttributes: jest.fn(),
+}));
+jest.mock('../../../src/server/middleware/pwa', () => ({
+  configurePWA: jest.fn(),
 }));
 
 const RootModule = () => <h1>Hello, world</h1>;
@@ -167,7 +172,7 @@ describe('onModuleLoad', () => {
     expect(setStateConfig).toHaveBeenCalledWith(provideStateConfig);
   });
 
-  it('does not throw if the tenant root module provides the expected versions of required externals', () => {
+  it('does not throw if the root module provides the expected versions of required externals', () => {
     RootModule[CONFIGURATION_KEY] = {
       providedExternals: {
         'dep-a': { version: '2.1.0', module: () => 0 },
@@ -185,7 +190,7 @@ describe('onModuleLoad', () => {
     expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.7' } }, moduleName: 'my-awesome-module' })).not.toThrow();
   });
 
-  it('warns if a module that isn\'t the tenant root module attempts to provide externals', () => {
+  it('warns if a module that isn\'t the root module attempts to provide externals', () => {
     const configuration = {
       providedExternals: {
         'dep-b': {
@@ -199,7 +204,7 @@ describe('onModuleLoad', () => {
     expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('throws if the tenant root module does not provide the expected external', () => {
+  it('throws if the root module does not provide the expected external', () => {
     RootModule[CONFIGURATION_KEY] = {
       providedExternals: {
         'dep-a': { version: '2.1.0', module: () => 0 },
@@ -213,7 +218,7 @@ describe('onModuleLoad', () => {
     expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.9' } }, moduleName: 'my-awesome-module' })).toThrowErrorMatchingSnapshot();
   });
 
-  it('throws if the tenant root module provides an incompatible version of a required external', () => {
+  it('throws if the root module provides an incompatible version of a required external', () => {
     RootModule[CONFIGURATION_KEY].providedExternals = {
       'dep-a': { version: '2.1.0', module: () => 0 },
     };
@@ -271,7 +276,7 @@ describe('onModuleLoad', () => {
     expect(getModulesUsingExternals()).toEqual([]);
   });
 
-  it('validates csp added to tenant module', () => {
+  it('validates csp added to the root module', () => {
     const callOnModuleLoad = () => (onModuleLoad({
       module: {},
       moduleName: 'some-root',
@@ -280,7 +285,7 @@ describe('onModuleLoad', () => {
     expect(callOnModuleLoad).toThrowErrorMatchingSnapshot();
   });
 
-  it('updates createSsrFetch when added on tenant module', () => {
+  it('updates createSsrFetch when added on the root module', () => {
     const fakeCreateSsrFetch = jest.fn();
     onModuleLoad({
       module: {
@@ -296,7 +301,7 @@ describe('onModuleLoad', () => {
     expect(setCreateSsrFetch).toHaveBeenCalledWith(fakeCreateSsrFetch);
   });
 
-  it('sets CORS origins from tenant module', () => {
+  it('sets CORS origins from the root module', () => {
     const corsOrigins = ['example.com'];
     onModuleLoad({
       module: {
@@ -309,6 +314,32 @@ describe('onModuleLoad', () => {
       moduleName: 'some-root',
     });
     expect(setCorsOrigins).toHaveBeenCalledWith(corsOrigins);
+  });
+
+  it('calls configurePWA with pwa configuration', () => {
+    const pwa = { serviceWorker: true };
+    onModuleLoad({
+      module: { [CONFIGURATION_KEY]: { csp, pwa }, [META_DATA_KEY]: { version: '1.0.15' } },
+      moduleName: 'some-root',
+    });
+    expect(configurePWA).toHaveBeenCalledTimes(1);
+    expect(configurePWA).toHaveBeenCalledWith(pwa);
+  });
+
+  it('sets the event loop lag threshold from the root module', () => {
+    const eventLoopDelayThreshold = 50;
+    expect(getEventLoopDelayThreshold()).not.toBe(eventLoopDelayThreshold);
+    onModuleLoad({
+      module: {
+        [CONFIGURATION_KEY]: {
+          csp,
+          eventLoopDelayThreshold,
+        },
+        [META_DATA_KEY]: { version: '1.0.14' },
+      },
+      moduleName: 'some-root',
+    });
+    expect(getEventLoopDelayThreshold()).toBe(eventLoopDelayThreshold);
   });
 
   it('logs when the root module is loaded', () => {
@@ -329,7 +360,7 @@ describe('onModuleLoad', () => {
     expect(consoleInfoSpy).toHaveBeenCalledWith('Loaded module not-the-root-module@1.0.16');
   });
 
-  it('updates allowed safeRequest values from tenant root', () => {
+  it('updates allowed safeRequest values from the root module', () => {
     onModuleLoad({
       module: {
         [CONFIGURATION_KEY]: {
@@ -361,7 +392,7 @@ describe('onModuleLoad', () => {
     });
   });
 
-  it('sets configureRequestLog when given on tenant root', () => {
+  it('sets configureRequestLog when given on the root module', () => {
     const configureRequestLog = jest.fn();
     onModuleLoad({
       module: {

@@ -192,6 +192,13 @@ const runTime = [
       }
     },
   },
+  {
+    // feature flag for service worker, required to be enabled for `appConfig.pwa` to take effect
+    // TODO: Expires on 2020-10-30
+    name: 'ONE_SERVICE_WORKER',
+    normalize: (value) => value === 'true',
+    defaultValue: () => false,
+  },
 ];
 
 runTime.forEach(preprocessEnvVar);

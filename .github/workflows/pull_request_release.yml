@@ -2,11 +2,14 @@ name: One App Release Pull Request
 on:
   schedule:
   - cron: "0 16 * * 3"
+  repository_dispatch:
+    types: [prepare-release-command]
 jobs:
   one-app-release-pull-request:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run: git fetch --prune --unshallow
       - uses: actions/cache@v1
         with:
           path: ~/.npm
@@ -23,6 +26,8 @@ jobs:
           git config --local user.email "one.amex@aexp.com"
           git config --local user.name "OneAmexBot"
           npm run release
+          git add .
+          git commit -m "docs(changelog): update"
       - name: Create release pull request
         uses: peter-evans/create-pull-request@v2
         with:

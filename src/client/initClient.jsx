@@ -14,13 +14,15 @@
  * permissions and limitations under the License.
  */
 
-import React, { StrictMode } from 'react';
+import React from 'react';
 import { hydrate } from 'react-dom';
 import { Provider } from 'react-redux';
 import { browserHistory, Router } from '@americanexpress/one-app-router';
 import { setModuleMap } from 'holocron';
 
-import { initializeClientStore, loadPrerenderScripts, moveHelmetScripts } from './prerender';
+import {
+  initializeClientStore, loadPrerenderScripts, moveHelmetScripts, loadServiceWorker,
+} from './prerender';
 import createRoutes from '../universal/routes';
 import match from '../universal/utils/matchPromisified';
 
@@ -46,13 +48,20 @@ export default async function initClient() {
       return;
     }
 
+    // we want to kick off service worker installation and store sync
+    // as early as possible, while not blocking the app from rendering
+    // so we let this async function run at its own pace and call it synchronously
+    loadServiceWorker({
+      // eslint-disable-next-line no-underscore-dangle
+      config: global.__pwa_metadata__,
+      dispatch: store.dispatch,
+    });
+
     /* eslint-disable react/jsx-props-no-spreading */
     const App = () => (
-      <StrictMode>
-        <Provider store={store}>
-          <Router {...renderProps} />
-        </Provider>
-      </StrictMode>
+      <Provider store={store}>
+        <Router {...renderProps} />
+      </Provider>
     );
     /* eslint-enable react/jsx-props-no-spreading */
 
