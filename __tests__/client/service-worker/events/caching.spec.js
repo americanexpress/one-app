@@ -388,8 +388,10 @@ describe('caching', () => {
     }, Promise.resolve([]));
 
     expect(fetch).toHaveBeenCalledTimes(3);
-    events.forEach((event) => {
-      expect(event.waitUntil).toHaveBeenCalledTimes(3);
+    events.forEach((event, index) => {
+      // on the third call, we expect to waitUntil the original cache item was removed
+      // as an additional step when invalidating
+      expect(event.waitUntil).toHaveBeenCalledTimes(index === 2 ? 4 : 3);
       expect(event.respondWith).toHaveBeenCalledTimes(1);
       expect(event.respondWith).toHaveBeenCalledWith(Promise.resolve(event.response));
     });

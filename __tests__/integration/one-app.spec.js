@@ -1070,17 +1070,25 @@ describe('Tests that require Docker setup', () => {
               );
             });
 
-            // eslint-disable-next-line jest/no-disabled-tests
-            test.skip('invalidates a module by its version and removes any existing entry with a different version', async () => {
-              expect.assertions(4);
+            test('invalidates a module by its version and removes any existing entry with a different version', async () => {
+              expect.assertions(6);
 
               await browser.url(`${appAtTestUrls.browserUrl}/demo/cultured-frankie`);
 
               const oldHolocronModuleMap = readModuleMap();
               const oldCacheMap = new Map(await browser.executeAsync(_getCacheEntries));
+              // eslint-disable-next-line prefer-arrow-callback
+              const originalModuleCacheMetaData = await browser.executeAsync(
+                // eslint-disable-next-line prefer-arrow-callback
+                function _getMetaData(done) {
+                  caches
+                    .match('/__sw/__meta/__sw/module-cache')
+                    .then((response) => response.json())
+                    .then(done);
+                }
+              );
 
-              console.log(oldCacheMap.get('__sw/module-cache'));
-
+              expect(originalModuleCacheMetaData).toMatchSnapshot();
               expect(oldCacheMap.get('__sw/module-cache')).toHaveLength(5);
               expect(oldCacheMap.get('__sw/module-cache')).toMatchObject(
                 [
@@ -1106,15 +1114,17 @@ describe('Tests that require Docker setup', () => {
 
               const newHolocronModuleMap = readModuleMap();
               const newCacheMap = new Map(await browser.executeAsync(_getCacheEntries));
+              const newModuleCacheMetaData = await browser.executeAsync(
+                // eslint-disable-next-line prefer-arrow-callback
+                function _getMetaData(done) {
+                  caches
+                    .match('/__sw/__meta/__sw/module-cache')
+                    .then((response) => response.json())
+                    .then(done);
+                }
+              );
 
-              // eslint-disable-next-line prefer-arrow-callback
-              const moduleCacheMetaData = await browser.executeAsync(function _getMetaData(done) {
-                caches.match('/__sw/__meta/__sw/module-cache').then((response) => response.json()).then(done);
-              });
-
-              console.log(moduleCacheMetaData);
-              console.log(newCacheMap.get('__sw/module-cache'));
-
+              expect(newModuleCacheMetaData).toMatchSnapshot();
               expect(newCacheMap.get('__sw/module-cache')).toHaveLength(5);
               expect(newCacheMap.get('__sw/module-cache')).toMatchObject(
                 [
