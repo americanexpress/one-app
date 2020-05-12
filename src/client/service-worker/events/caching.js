@@ -55,7 +55,7 @@ function markForRemoval(cachedMetaRecord, newMetaRecord) {
   if (cachedMetaRecord.revision !== newMetaRecord.revision) return true;
   if (cachedMetaRecord.version !== newMetaRecord.version) return true;
   if (cachedMetaRecord.bundle !== newMetaRecord.bundle) return true;
-  if (cachedMetaRecord.locale !== newMetaRecord.locale) return false;
+  if (cachedMetaRecord.locale !== newMetaRecord.locale) return true;
   return false;
 }
 
