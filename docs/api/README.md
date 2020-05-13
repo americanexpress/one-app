@@ -57,7 +57,7 @@ export default HelloWorldModule;
 The One App Server, `one-app`, provides a runtime for serving an HTML document with asset tags (Style tags, Script tags etc.) and [preloaded Redux state](https://redux.js.org/recipes/server-rendering#inject-initial-component-html-and-state) required to bootstrap a [Holocron Module](#modules) driven [Single Page Application (SPA)](https://developer.mozilla.org/en-US/docs/Glossary/SPA). The `one-app` server enables a full development environment locally as well as an efficient production environment able to be deployed and scaled on cloud infrastructure.
 
 **Contents**
-* [CLI Commands](./server/CLI-Commands.md)
+* [CLI Commands](./server/Cli-Commands.md)
 * [Module Map Schema](./server/Module-Map-Schema.md)
 * [Environment Variables](./server/Environment-Variables.md)
 * [Development Tools](./server/Development-Tools.md)
