@@ -1,4 +1,4 @@
-[👈 Return to Overview](./Recipes.md)
+[👈 Return to Overview](./README.md)
 
 # Internationalizing Your Module
 
@@ -225,7 +225,7 @@ export default compose(
 
 With the `IntlProvider` created in the `Parent` component there are several ways to access the `intl` information in the `Child` component.
 
-With [useIntl](https://github.com/formatjs/react-intl/blob/master/docs/API.md#useintl-hook) Hook:
+With [useIntl](https://github.com/formatjs/react-intl/blob/master/docs/README.md#useintl-hook) Hook:
 ```es6
 import React from 'react';
 import { useIntl } from 'react-intl';
@@ -238,7 +238,7 @@ const Child = () => {
 export default Child;
 ```
 
-With [injectIntl](https://github.com/formatjs/react-intl/blob/master/docs/API.md#injectintl-hoc) HOC:
+With [injectIntl](https://github.com/formatjs/react-intl/blob/master/docs/README.md#injectintl-hoc) HOC:
 ```es6
 import React from 'react';
 import { injectIntl } from 'react-intl';

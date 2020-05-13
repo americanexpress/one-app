@@ -1,8 +1,8 @@
-[👈 Return to Overview](../API.md)
+[👈 Return to Overview](../README.md)
 
 # State Management
 
-[Holocron Modules](../API.md#modules) rely on one Store provided by [Redux](https://redux.js.org/) used primarily to cache the results of loaded data and Modules. Every Module may add their own [Reducers](https://redux.js.org/basics/reducers/) to the shared Store (through [Holocron Module Configuration]) and may dispatch actions to transform the Store. Redux provides a simple way to store data on the Server and [preload the store](https://redux.js.org/recipes/server-rendering#inject-initial-component-html-and-state) used by the Browser. This is commonly referred to as [Server Side Rendering](https://redux.js.org/recipes/server-rendering). One App employs the [Ducks Specification](https://github.com/erikras/ducks-modular-redux) design pattern for the logical grouping of Reducers, Action Creators, and Selectors (e.g. the `error` duck contains reducers, actions, and selectors for storing error data in the Redux Store).
+[Holocron Modules](../README.md#modules) rely on one Store provided by [Redux](https://redux.js.org/) used primarily to cache the results of loaded data and Modules. Every Module may add their own [Reducers](https://redux.js.org/basics/reducers/) to the shared Store (through [Holocron Module Configuration]) and may dispatch actions to transform the Store. Redux provides a simple way to store data on the Server and [preload the store](https://redux.js.org/recipes/server-rendering#inject-initial-component-html-and-state) used by the Browser. This is commonly referred to as [Server Side Rendering](https://redux.js.org/recipes/server-rendering). One App employs the [Ducks Specification](https://github.com/erikras/ducks-modular-redux) design pattern for the logical grouping of Reducers, Action Creators, and Selectors (e.g. the `error` duck contains reducers, actions, and selectors for storing error data in the Redux Store).
 
 **Contents**
 * [Globals](#globals)
@@ -28,27 +28,27 @@ global.BROWSER; // Boolean
 
 ## Holocron Module Configuration
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@master/packages/holocron/API.md" id="Module.holocron" parentHeadingLevel="2" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@master/packages/holocron/docs/api/README.md" id="Module.holocron" parentHeadingLevel="2" start-->
 
-Please see [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocron-module-configuration) in the Holocron API.
+Please see [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/master/packages/holocron/docs/api/README.md#holocron-module-configuration) in the Holocron API.
 
 <!--ONE-DOCS end-->
 
 
 ## Higher Order Components
 
-[Holocron Modules](../API.md#modules) use [Higher Order Components (HOC)](https://reactjs.org/docs/higher-order-components.html) to add behaviors regarding when a Module loads, connecting a Module with its [Reducer(s)](https://redux.js.org/basics/reducers/) to a Redux Store (similar to [Redux `connect`](https://react-redux.js.org/api/connect)) and adding runtime validations for a Module.
+[Holocron Modules](../README.md#modules) use [Higher Order Components (HOC)](https://reactjs.org/docs/higher-order-components.html) to add behaviors regarding when a Module loads, connecting a Module with its [Reducer(s)](https://redux.js.org/basics/reducers/) to a Redux Store (similar to [Redux `connect`](https://react-redux.js.org/api/connect)) and adding runtime validations for a Module.
 
 **Contents**
 * [`holocronModule`](#holocronmodule)
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@master/packages/holocron/API.md" id="holocronModule" parentHeadingLevel="2" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/holocron@master/packages/holocron/docs/api/README.md" id="holocronModule" parentHeadingLevel="2" start-->
 
 ### `holocronModule`
 
 > ☠ `holocronModule` has been deprecated and will be removed in the next major version of Holocron. Please see [Holocron Module Configuration].
 
-Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocronmodule) in the Holocron API.
+Please see [`holocronModule`](https://github.com/americanexpress/holocron/blob/master/packages/holocron/docs/api/README.md#holocronmodule) in the Holocron API.
 
 <!--ONE-DOCS end-->
 
@@ -195,4 +195,4 @@ Please see the [`intl` Duck](https://github.com/americanexpress/one-app-ducks#in
 
 [☝️ Return To Top](#state-management)
 
-[Holocron Module Configuration]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocron-module-configuration
+[Holocron Module Configuration]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/docs/api/README.md#holocron-module-configuration
