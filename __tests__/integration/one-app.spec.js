@@ -106,10 +106,14 @@ describe('Tests that require Docker setup', () => {
         expect.assertions(1);
         const response = await fetch(appAtTestUrls.fetchMetricsUrl);
         const parsedMetrics = parsePrometheusTextFormat(await response.text());
-        const errors = parsedMetrics
-          .filter((metric) => (!metric.help) || metric.help.length === 0)
+        const allMetricNames = parsedMetrics
           .map((metric) => metric.name);
-        expect(errors).toEqual([]);
+
+        const metricsNamesWithHelpInfo = parsedMetrics
+          .filter((metric) => metric.help && metric.help.length > 0)
+          .map((metric) => metric.name);
+
+        expect(metricsNamesWithHelpInfo).toEqual(allMetricNames);
       });
     });
 
