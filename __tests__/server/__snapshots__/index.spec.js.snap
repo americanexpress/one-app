@@ -6,6 +6,7 @@ Array [
   "version",
   "m",
   "use-middleware",
+  "use-host",
 ]
 `;
 

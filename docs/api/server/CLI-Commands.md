@@ -166,6 +166,7 @@ npm run build:sample-modules [--] [--archive-built-artifacts]
 | `--root-module-name`  | Name of the [Holocron Module] that serves as the entry point to your application. |
 | `--module-map-url`  | Remote Module Map URL for [`one-app-dev-cdn`] to proxy. *For Development.* |
 | `--use-middleware` | Apply a custom middleware configuration for [`one-app-dev-proxy`]. *For Development.* |
+| `--use-host` | Use `req.headers.host` instead of `localhost`. Passed as true or false to [`one-app-dev-cdn`]. *For Development.* |
 
 #### Environment Variables
 
