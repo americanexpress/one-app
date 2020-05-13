@@ -1087,15 +1087,15 @@ describe('Tests that require Docker setup', () => {
                 }
               );
 
-              expect(originalModuleCacheMetaData).toContain({
-                'https://one-app:8443/module/cultured-frankie': {
-                  bundle: 'browser',
-                  name: 'cultured-frankie',
-                  resource: 'cultured-frankie',
-                  type: 'module',
-                  url: oldHolocronModuleMap.modules['cultured-frankie'].browser.url,
-                  version: '0.0.0',
-                },
+              expect(
+                originalModuleCacheMetaData['https://one-app:8443/module/cultured-frankie']
+              ).toEqual({
+                bundle: 'browser',
+                name: 'cultured-frankie',
+                resource: 'cultured-frankie',
+                type: 'module',
+                url: oldHolocronModuleMap.modules['cultured-frankie'].browser.url,
+                version: '0.0.0',
               });
               expect(oldCacheMap.get('__sw/module-cache')).toHaveLength(5);
               expect(oldCacheMap.get('__sw/module-cache')).toMatchObject(
@@ -1132,15 +1132,15 @@ describe('Tests that require Docker setup', () => {
                 }
               );
 
-              expect(newModuleCacheMetaData).toContain({
-                'https://one-app:8443/module/cultured-frankie': {
-                  bundle: 'browser',
-                  name: 'cultured-frankie',
-                  resource: 'cultured-frankie',
-                  type: 'module',
-                  url: newHolocronModuleMap.modules['cultured-frankie'].browser.url,
-                  version: '0.0.1',
-                },
+              expect(
+                newModuleCacheMetaData['https://one-app:8443/module/cultured-frankie']
+              ).toEqual({
+                bundle: 'browser',
+                name: 'cultured-frankie',
+                resource: 'cultured-frankie',
+                type: 'module',
+                url: newHolocronModuleMap.modules['cultured-frankie'].browser.url,
+                version: '0.0.1',
               });
               expect(newCacheMap.get('__sw/module-cache')).toHaveLength(5);
               expect(newCacheMap.get('__sw/module-cache')).toMatchObject(
