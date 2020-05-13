@@ -124,7 +124,7 @@ For a module to act as the root module the only requirements are:
 **📘 More Information**
 * Root Module example: [frank-lloyd-root](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/components/FrankLloydRoot.jsx)
 * [App Configuration in your Root Module](./docs/api/modules/App-Configuration.md)
-* [What are Holocron Modules?](./docs/api/API.md)
+* [What are Holocron Modules?](./docs/api/README.md)
 * [Useful Local Development Commands / Options](./docs/recipes/Running-Existing-App-Locally.md)
 
 
@@ -132,13 +132,13 @@ For a module to act as the root module the only requirements are:
 
 Recipes feature our guided tutorials and walkthroughs of building Holocron Modules and running the `one-app` Server runtime.
 
-Please visit our [Recipe Docs](./docs/recipes/Recipes.md).
+Please visit our [Recipe Docs](./docs/recipes/README.md).
 
 ## 🎛️ API
 
 Our API Docs break down each part of our public APIs for One App and its supporting libraries (e.g. Holocron, `one-app-ducks`, etc).
 
-Please visit our [API Docs](./docs/api/API.md).
+Please visit our [API Docs](./docs/api/README.md).
 
 ## 🏆 Contributing
 
