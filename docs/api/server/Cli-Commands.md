@@ -1,4 +1,4 @@
-[👈 Return to Overview](../API.md)
+[👈 Return to Overview](../README.md)
 
 # CLI Commands
 
@@ -166,6 +166,7 @@ npm run build:sample-modules [--] [--archive-built-artifacts]
 | `--root-module-name`  | Name of the [Holocron Module] that serves as the entry point to your application. |
 | `--module-map-url`  | Remote Module Map URL for [`one-app-dev-cdn`] to proxy. *For Development.* |
 | `--use-middleware` | Apply a custom middleware configuration for [`one-app-dev-proxy`]. *For Development.* |
+| `--use-host` | Use `req.headers.host` instead of `localhost`. Passed as true or false to [`one-app-dev-cdn`]. *For Development.* |
 
 #### Environment Variables
 
@@ -197,7 +198,7 @@ Please see the [Environment Variables](./Environment-Variables.md) API docs.
 * Library: [`one-app-dev-proxy`]
 * [Development Tools API Docs](./Development-Tools.md)
 
-[☝️ Return To Top](#cli-commands)
+[☝️ Return To Top](#Cli-Commands)
 
 [`concurrently`]: https://www.npmjs.com/package/concurrently
 [Babel]: https://babeljs.io/
@@ -209,8 +210,8 @@ Please see the [Environment Variables](./Environment-Variables.md) API docs.
 [development proxy]: https://github.com/americanexpress/one-app-dev-proxy
 [`one-app-dev-cdn`]: https://github.com/americanexpress/one-app-dev-cdn
 [development CDN]: https://github.com/americanexpress/one-app-dev-cdn
-[Holocron Module]: ../API.md#modules
-[Holocron Modules]: ../API.md#modules
+[Holocron Module]: ../README.md#modules
+[Holocron Modules]: ../README.md#modules
 [Jest]: https://jestjs.io/
 [ESLint]: https://eslint.org/
 [Integration Test Suite]: ../../../__tests__/integration/README.md

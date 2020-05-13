@@ -33,6 +33,11 @@ if (process.env.NODE_ENV === 'development') {
     .option('module-map-url', {
       describe: 'Remote module map URL for one-app-dev-cdn to proxy',
       type: 'string',
+    })
+    .option('use-host', {
+      describe: 'use req.headers.host instead of localhost for one-app-dev-cdn',
+      default: false,
+      type: 'boolean',
     });
 
   // only require a remote module map if there are no locally served modules
