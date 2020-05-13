@@ -3,7 +3,7 @@
 [one-app-bundler-readme]: https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler/README.md
 [one-app-router-readme]: https://github.com/americanexpress/one-app-router/README.md
 
-[holocron-module-api]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#holocron-module-configuration
+[holocron-module-api]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/docs/api/README.md#holocron-module-configuration
 [bundler-webpack-config]: https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler#webpackconfigpath-webpackclientconfigpath--webpackserverconfigpath
 
 [frank-lloyd-root]: ../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/README.md
@@ -14,7 +14,7 @@
 [react-lazy-api]: https://reactjs.org/docs/react-api.html#reactlazy
 [react-suspense-api]: https://reactjs.org/docs/react-api.html#reactsuspense
 
-[👈 Return to Overview](./Recipes.md)
+[👈 Return to Overview](./README.md)
 
 # Code Splitting Using Holocron
 

@@ -1,8 +1,8 @@
-[👈 Return to Overview](../API.md)
+[👈 Return to Overview](../README.md)
 
 # Module Map Schema
 
-[**Holocron Modules**](../API.md#modules) may be developed and versioned in isolation as if they were their own frontend applications. The `one-app` Server relies on a `module-map.json` configuration file to orchestrate all these versioned web experiences together to form a single application. A Module Map contains an object of the following information:
+[**Holocron Modules**](../README.md#modules) may be developed and versioned in isolation as if they were their own frontend applications. The `one-app` Server relies on a `module-map.json` configuration file to orchestrate all these versioned web experiences together to form a single application. A Module Map contains an object of the following information:
 * Holocron Module Name
 * URLs to Holocron Module Bundles
 * [Subresource Integrity](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity) Hash to verify contents of the Holocron Module Bundle
@@ -99,11 +99,11 @@ Contains a hash [SRI](https://developer.mozilla.org/en-US/docs/Web/Security/Subr
 
 **📘 More Information**
 * Library: [One App Bundler](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler)
-* CLI Command: [npm start](./CLI-Commands.md#start-usage)
+* CLI Command: [npm start](./Cli-Commands.md#start-usage)
 * [Environment Variables](./Environment-Variables.md)
 * [Development Tools](./Development-Tools.md)
 
 [☝️ Return To Top](#module-map-schema)
 
-[Holocron Module Registry]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/API.md#module-registry
-[Holocron Module]: ../API.md#modules
+[Holocron Module Registry]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/docs/api/README.md#module-registry
+[Holocron Module]: ../README.md#modules

@@ -1,8 +1,8 @@
-[👈 Return to Overview](../API.md)
+[👈 Return to Overview](../README.md)
 
 # App Configuration
 
-The App Configuration API, `appConfig` allows a module to specify a selection of configuration options for [Holocron Modules](../API.md#modules).
+The App Configuration API, `appConfig` allows a module to specify a selection of configuration options for [Holocron Modules](../README.md#modules).
 
 ```js
 // Force tree shaking appConfig away in client bundles
@@ -14,7 +14,9 @@ if (!global.BROWSER) {
     corsOrigins,
     configureRequestLog,
     extendSafeRequestRestrictedAttributes,
+    pwa,
     createSsrFetch,
+    eventLoopDelayThreshold,
     /* Child Module Specific */
     validateStateConfig,
     requiredSafeRequestRestrictedAttributes,
@@ -42,6 +44,7 @@ security and bundle size considerations.
   - [`configureRequestLog`](#configurerequestlog)
   - [`extendSafeRequestRestrictedAttributes`](#extendsaferequestrestrictedattributes)
   - [`createSsrFetch`](#createssrfetch)
+  - [`eventLoopDelayThreshold`](#eventloopdelaythreshold)
   - [`validateStateConfig`](#validatestateconfig)
   - [`requiredSafeRequestRestrictedAttributes`](#requiredsaferequestrestrictedattributes)
   - [`appCompatibility`](#appcompatibility)
