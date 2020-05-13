@@ -933,7 +933,6 @@ describe('Tests that require Docker setup', () => {
 
             await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
-            const { buildVersion } = require('../../.build-meta.json');
             const holocronModuleMap = readModuleMap();
             const cacheMap = new Map(await browser.executeAsync(_getCacheEntries));
 
@@ -949,18 +948,15 @@ describe('Tests that require Docker setup', () => {
               [
                 // the version is subject to change from the commit sha which requires
                 // building app again after any change - find a better way for DX
-                `${appAtTestUrls.cdnUrl}/app/${buildVersion}/app~vendors.js`,
-                `${appAtTestUrls.cdnUrl}/app/${buildVersion}/runtime.js`,
-                `${appAtTestUrls.cdnUrl}/app/${buildVersion}/service-worker-client.js`,
-                `${appAtTestUrls.cdnUrl}/app/${buildVersion}/i18n/en-US.js`,
-                `${appAtTestUrls.cdnUrl}/app/${buildVersion}/vendors.js`,
-                `${appAtTestUrls.cdnUrl}/app/${buildVersion}/app.js`,
+                `${appAtTestUrls.cdnUrl}/app/[one-app-version]/app~vendors.js`,
+                `${appAtTestUrls.cdnUrl}/app/[one-app-version]/runtime.js`,
+                `${appAtTestUrls.cdnUrl}/app/[one-app-version]/service-worker-client.js`,
+                `${appAtTestUrls.cdnUrl}/app/[one-app-version]/vendors.js`,
+                `${appAtTestUrls.cdnUrl}/app/[one-app-version]/i18n/en-US.js`,
+                `${appAtTestUrls.cdnUrl}/app/[one-app-version]/app.js`,
               ].map((url) => ({
                 cache: '__sw/one-app-cache',
-                url: url.replace(
-                  url.match(oneAppVersionRegExp)[1],
-                  '[one-app-version]'
-                ),
+                url,
               }))
             );
             expect(cacheMap.get('__sw/module-cache')).toMatchObject([
@@ -1091,7 +1087,16 @@ describe('Tests that require Docker setup', () => {
                 }
               );
 
-              expect(originalModuleCacheMetaData).toMatchSnapshot();
+              expect(originalModuleCacheMetaData).toContain({
+                'https://one-app:8443/module/cultured-frankie': {
+                  bundle: 'browser',
+                  name: 'cultured-frankie',
+                  resource: 'cultured-frankie',
+                  type: 'module',
+                  url: oldHolocronModuleMap.modules['cultured-frankie'].browser.url,
+                  version: '0.0.0',
+                },
+              });
               expect(oldCacheMap.get('__sw/module-cache')).toHaveLength(5);
               expect(oldCacheMap.get('__sw/module-cache')).toMatchObject(
                 [
@@ -1127,7 +1132,16 @@ describe('Tests that require Docker setup', () => {
                 }
               );
 
-              expect(newModuleCacheMetaData).toMatchSnapshot();
+              expect(newModuleCacheMetaData).toContain({
+                'https://one-app:8443/module/cultured-frankie': {
+                  bundle: 'browser',
+                  name: 'cultured-frankie',
+                  resource: 'cultured-frankie',
+                  type: 'module',
+                  url: newHolocronModuleMap.modules['cultured-frankie'].browser.url,
+                  version: '0.0.1',
+                },
+              });
               expect(newCacheMap.get('__sw/module-cache')).toHaveLength(5);
               expect(newCacheMap.get('__sw/module-cache')).toMatchObject(
                 [
