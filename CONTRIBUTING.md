@@ -102,6 +102,10 @@ To auto fix eslint rule failures that are autofixable run `npm run test:lint -- 
 
 * Write tests for your changes. A feature is not considered done until it has tests and/or a test plan. It does not matter if code coverage shows 100%, tests are expected for *all* changes. This includes [integration tests](./__tests__/integration/README.md) as needed.
 
+### Getting in Contact
+
+- Join our [Slack channel](https://one-amex.slack.com) request an [invite](https://join.slack.com/t/one-amex/shared_invite/enQtOTA0MzEzODExODEwLTlmYzI1Y2U2ZDEwNWJjOTAxYTlmZTYzMjUyNzQyZTdmMWIwZGJmZDM2MDZmYzVjMDk5OWU4OGIwNjJjZWRhMjY)
+
 ### Git Commit Guidelines
 
 We follow precise rules for git commit message formatting. These rules make it easier to review commit logs and improve contextual understanding of code changes. This also allows us to auto-generate the CHANGELOG from commit messages and automatically version One App during releases.

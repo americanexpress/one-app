@@ -31,6 +31,7 @@ app.use('/static', oneAppDevCdn({
   remoteModuleMapUrl: argv.moduleMapUrl,
   useLocalModules: true,
   appPort: process.env.HTTP_PORT,
+  useHost: argv.useHost,
 }));
 
 export default app;

@@ -33,6 +33,17 @@ Array [
 
 exports[`argv config has development options and defaults 4`] = `
 Array [
+  "use-host",
+  Object {
+    "default": false,
+    "describe": "use req.headers.host instead of localhost for one-app-dev-cdn",
+    "type": "boolean",
+  },
+]
+`;
+
+exports[`argv config has development options and defaults 5`] = `
+Array [
   "log-format",
   Object {
     "choices": Array [
@@ -47,7 +58,7 @@ Array [
 ]
 `;
 
-exports[`argv config has development options and defaults 5`] = `
+exports[`argv config has development options and defaults 6`] = `
 Array [
   "log-level",
   Object {
@@ -64,7 +75,7 @@ Array [
 ]
 `;
 
-exports[`argv config has development options and defaults 6`] = `
+exports[`argv config has development options and defaults 7`] = `
 Array [
   Array [
     Array [
