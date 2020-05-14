@@ -86,7 +86,8 @@ jest.mock('../../../src/server/middleware/pwa', () => ({
   getClientPWAConfig: jest.fn(() => ({
     serviceWorker: false,
     serviceWorkerScope: null,
-    serviceWorkerScriptUrl: null,
+    serviceWorkerScriptUrl: false,
+    webManifestUrl: false,
   })),
 }));
 jest.mock('../../../src/universal/ducks/config');
@@ -415,18 +416,20 @@ describe('sendHtml', () => {
       it('includes __pwa_metadata__ with disabled values', () => {
         sendHtml(req, res);
         expect(res.send).toHaveBeenCalledTimes(1);
-        expect(/window\.__pwa_metadata__ = {"serviceWorker":false,"serviceWorkerScope":null,"serviceWorkerScriptUrl":null};/.test(res.send.mock.calls[0][0])).toBe(true);
+        expect(/window\.__pwa_metadata__ = {"serviceWorker":false,"serviceWorkerScope":null,"serviceWorkerScriptUrl":false};/.test(res.send.mock.calls[0][0])).toBe(true);
       });
 
       it('includes __pwa_metadata__ with enabled values', () => {
         getClientPWAConfig.mockImplementationOnce(() => ({
           serviceWorker: true,
           serviceWorkerScope: '/',
-          serviceWorkerScriptUrl: '/sw.js',
+          serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
+          webManifestUrl: '/_/pwa/manifest.webmanifest',
         }));
         sendHtml(req, res);
         expect(res.send).toHaveBeenCalledTimes(1);
-        expect(/window\.__pwa_metadata__ = {"serviceWorker":true,"serviceWorkerScope":"\/","serviceWorkerScriptUrl":"\/sw\.js"};/.test(res.send.mock.calls[0][0])).toBe(true);
+        expect(/window\.__pwa_metadata__ = {"serviceWorker":true,"serviceWorkerScope":"\/","serviceWorkerScriptUrl":"\/_\/pwa\/service-worker\.js"};/.test(res.send.mock.calls[0][0])).toBe(true);
+        expect(/<link rel="manifest" href="\/_\/pwa\/manifest\.webmanifest">/.test(res.send.mock.calls[0][0])).toBe(true);
       });
     });
 

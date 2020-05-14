@@ -34,7 +34,16 @@ jest.mock('../../src/server/middleware/addFrameOptionsHeader');
 jest.mock('../../src/server/middleware/forwardedHeaderParser');
 jest.mock('../../src/server/utils/logging/serverMiddleware', () => (req, res, next) => setImmediate(next));
 jest.mock('../../src/universal/index');
-jest.mock('../../src/server/middleware/pwa', () => ({ serviceWorkerMiddleware: jest.fn(() => (req, res, next) => next()) }));
+jest.mock('../../src/server/middleware/pwa', () => {
+  const serviceWorker = jest.fn((req, res, next) => next());
+  const webManifest = jest.fn((req, res, next) => next());
+  return {
+    serviceWorker,
+    webManifest,
+    serviceWorkerMiddleware: () => serviceWorker,
+    webManifestMiddleware: () => webManifest,
+  };
+});
 jest.mock('../../mocks/scenarios', () => ({
   scenarios: true,
 }), { virtual: true });
@@ -99,6 +108,7 @@ describe('ssrServer', () => {
     let json;
     let forwardedHeaderParser;
     let serviceWorker;
+    let webManifest;
 
     function loadServer() {
       ({ json } = require('body-parser'));
@@ -118,7 +128,7 @@ describe('ssrServer', () => {
       addFrameOptionsHeader = require('../../src/server/middleware/addFrameOptionsHeader').default;
       addCacheHeaders = require('../../src/server/middleware/addCacheHeaders').default;
       forwardedHeaderParser = require('../../src/server/middleware/forwardedHeaderParser').default;
-      ({ serviceWorkerMiddleware: serviceWorker } = require('../../src/server/middleware/pwa'));
+      ({ serviceWorker, webManifest } = require('../../src/server/middleware/pwa'));
       const server = require('../../src/server/ssrServer').default;
 
       return server;
@@ -235,6 +245,15 @@ describe('ssrServer', () => {
         .get('/_/pwa/service-worker.js')
         .end(() => {
           expect(serviceWorker).toBeCalled();
+          done();
+        });
+    });
+
+    it('should call web manifest middleware', (done) => {
+      request(loadServer())
+        .get('/_/pwa/manifest.webmanifest')
+        .end(() => {
+          expect(webManifest).toBeCalled();
           done();
         });
     });

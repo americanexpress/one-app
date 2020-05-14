@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2020 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,14 @@
  * permissions and limitations under the License.
  */
 
-import { match } from '@americanexpress/one-app-router';
+import { getWebAppManifestConfig } from './config';
 
-export default function matchPromisified(opts) {
-  return new Promise((res, rej) => {
-    match(opts, (err, redirectLocation, renderProps) => {
-      if (err) {
-        return rej(err);
-      }
-      return res({ redirectLocation, renderProps });
-    });
-  });
+export default function webManifestMiddleware() {
+  return function webManifestMiddlewareHandler(req, res, next) {
+    const { webManifestEnabled, webManifest } = getWebAppManifestConfig();
+    if (!webManifestEnabled) return next();
+    return res
+      .type('application/manifest+json')
+      .send(webManifest);
+  };
 }
