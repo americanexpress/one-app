@@ -17,15 +17,13 @@
 import React from 'react';
 import { hydrate } from 'react-dom';
 import { Provider } from 'react-redux';
-import { browserHistory, Router } from '@americanexpress/one-app-router';
+import { browserHistory, Router, matchPromise } from '@americanexpress/one-app-router';
 import { setModuleMap } from 'holocron';
 
 import {
   initializeClientStore, loadPrerenderScripts, moveHelmetScripts, loadServiceWorker,
 } from './prerender';
 import createRoutes from '../universal/routes';
-import match from '../universal/utils/matchPromisified';
-
 
 export default async function initClient() {
   try {
@@ -39,7 +37,7 @@ export default async function initClient() {
 
     await loadPrerenderScripts(store.getState());
 
-    const { redirectLocation, renderProps } = await match({ history, routes });
+    const { redirectLocation, renderProps } = await matchPromise({ history, routes });
 
     if (redirectLocation) {
       // FIXME: redirectLocation has pathname, query object, etc; need to format the URL better

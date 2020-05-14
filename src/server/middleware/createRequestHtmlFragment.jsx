@@ -17,9 +17,8 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import url, { Url } from 'url';
-import { RouterContext } from '@americanexpress/one-app-router';
+import { RouterContext, matchPromise } from '@americanexpress/one-app-router';
 import { composeModules } from 'holocron';
-import match from '../../universal/utils/matchPromisified';
 import createCircuitBreaker from '../utils/createCircuitBreaker';
 
 import { renderForString, renderForStaticMarkup } from '../utils/reactRendering';
@@ -38,7 +37,7 @@ export default function createRequestHtmlFragment({ createRoutes }) {
       const { dispatch } = store;
       const routes = createRoutes(store);
 
-      const { redirectLocation, renderProps } = await match({ routes, location: req.url });
+      const { redirectLocation, renderProps } = await matchPromise({ routes, location: req.url });
       if (redirectLocation) {
         // support redirecting outside our app (i.e. domain/origin)
         // store more than pathname and search as a Url object as redirectLocation.state
