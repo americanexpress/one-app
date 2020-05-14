@@ -14,6 +14,14 @@
  * permissions and limitations under the License.
  */
 
-export { configurePWA, getClientPWAConfig, getServerPWAConfig } from './config';
-export { default as serviceWorkerMiddleware } from './service-worker';
-export { default as webManifestMiddleware } from './webManifest';
+import { getWebAppManifestConfig } from './config';
+
+export default function webManifestMiddleware() {
+  return function webManifestMiddlewareHandler(req, res, next) {
+    const { webManifestEnabled, webManifest } = getWebAppManifestConfig();
+    if (!webManifestEnabled) return next();
+    return res
+      .type('application/manifest+json')
+      .send(webManifest);
+  };
+}
