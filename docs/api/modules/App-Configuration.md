@@ -216,6 +216,11 @@ For the variety of service workers available, we have control to set its
 `scope` with the desired pathname and assign what url base the service worker
 can oversee.
 
+The `webManifest` key is used to set up a [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Manifest)
+as part of the PWA group of technologies. It allows `one-app` to be installed onto a device
+with support for a more native experience using web technologies. The `webManifest` can also
+be a `Function` and is passed the `clientConfig` as the only argument.
+
 **Shape**
 ```js
 if (!global.BROWSER) {
@@ -232,6 +237,33 @@ if (!global.BROWSER) {
       escapeHatch: false,
       // we can optionally define a scope to use with the service worker
       scope: '/',
+      // the web app manifest can be directly incorporated in the PWA config
+      webManifest: (clientConfig) => ({
+        // the full name is the official name of a given PWA
+        name: 'My App Name',
+        // the short name is used by mobile devices to label your home screen icon
+        short_name: 'My App',
+        // the description is a good piece of meta-data to include for a short description
+        // which can be used with presenting your PWA
+        description: 'My PWA app.',
+        // relative to the root of the domain
+        start_url: '/home',
+        // when installing your PWA, standalone display will have a native feel
+        // and removes the browser bar for full screen
+        display: 'standalone',
+        // the background color
+        background_color: '#fff',
+        // the theme color is what covers native UI elements that host the PWA
+        theme_color: '#000',
+        // icons can perform many purposes, including the splash screen when a web app is loading
+        icons: [
+          {
+            src: `${clientConfig.cdnUrl}/my-splash-icon.png`,
+            sizes: '48x48',
+            type: 'image/png',
+          },
+        ],
+      }),
     },
   };
 }
@@ -248,6 +280,8 @@ comparing versions, bundle types, locale, and the `clientCacheRevision` key.
 **📘 More Information**
 * Environment Variable: [`ONE_SERVICE_WORKER`](../server/Environment-Variables.md#one_service_worker)
 * Example: [Frank Lloyd Root's `pwa` config](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.3/src/pwa.js)
+* Service Worker: [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
+* Web App Manifest: [MDN Documentation](https://developer.mozilla.org/en-US/docs/Web/Manifest)
 
 ## `configureRequestLog`
 **Module Type**
