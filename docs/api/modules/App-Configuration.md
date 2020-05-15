@@ -29,11 +29,24 @@ if (!global.BROWSER) {
 In practice, we declare an `appConfig` as a static attached to the parent React
 Component in a One App Module. The `appConfig` settings are intended for the
 Server only and is invoked and validated on the initial load of the Module on
-the Server. For performance and security purposes, we recommend wrapping this
+the Server.
+
+**⚠️ Please Consider**
+
+For performance and security purposes, we recommend wrapping this
 logic in an `if (!global.BROWSER)` block, to only bundle `appConfig` inside the
 Node Bundle (e.g.`mymodule.node.js`) rather than the Browser Bundles (e.g.
 `mymodule.browser.js` or `mymodule.legacy.js`). This is good practice for
 security and bundle size considerations.
+
+```js
+if (!global.BROWSER) {
+  // To prevent server side configuration from being exposed,
+  // make sure to isolate your configuration since it may be
+  // sensitive and should be guarded with `!global.BROWSER`
+  MyModule.appConfig = require('./appConfig');
+}
+```
 
 **Contents**
 - `Module.appConfig`
