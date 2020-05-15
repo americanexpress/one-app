@@ -39,13 +39,20 @@ Node Bundle (e.g.`mymodule.node.js`) rather than the Browser Bundles (e.g.
 `mymodule.browser.js` or `mymodule.legacy.js`). This is good practice for
 security and bundle size considerations.
 
+`src/index.js`
 ```js
+import MyModule from './components/MyModule';
+
 if (!global.BROWSER) {
   // To prevent server side configuration from being exposed,
   // make sure to isolate your configuration since it may be
   // sensitive and should be guarded with `!global.BROWSER`
-  MyModule.appConfig = require('./appConfig');
+
+  // eslint-disable-next-line global-require
+  MyModule.appConfig = require('./appConfig').default;
 }
+
+export default MyModule;
 ```
 
 **Contents**
