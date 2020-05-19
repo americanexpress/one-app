@@ -828,54 +828,62 @@ describe('Tests that require Docker setup', () => {
     });
 
     describe('progressive web app', () => {
-      let agent;
-      let scriptUrl;
+      const scriptUrl = `${appAtTestUrls.fetchUrl}/_/pwa/service-worker.js`;
+      const webManifestUrl = `${appAtTestUrls.fetchUrl}/_/pwa/manifest.webmanifest`;
 
-      beforeAll(async () => {
-        const https = require('https');
-        // using this to avoid erroring from a self signed certificate
-        agent = new https.Agent({
-          rejectUnauthorized: false,
+      const fetchServiceWorker = () => fetch(scriptUrl, defaultFetchOptions);
+      const fetchWebManifest = () => fetch(webManifestUrl, defaultFetchOptions);
+      const loadInitialRoot = async () => {
+        await addModuleToModuleMap({
+          moduleName: 'frank-lloyd-root',
+          version: '0.0.0',
         });
+        // wait for change to be picked up
+        await waitFor(5000);
+      };
+      const loadPWARoot = async () => {
+        await addModuleToModuleMap({
+          moduleName: 'frank-lloyd-root',
+          version: '0.0.3',
+        });
+        // wait for change to be picked up
+        await waitFor(5000);
+      };
 
-        scriptUrl = [appAtTestUrls.fetchUrl, '/_/pwa/service-worker.js'].join('');
+      afterAll(() => {
+        writeModuleMap(originalModuleMap);
       });
 
-      test('does not load PWA resources from server by default', async () => {
-        const serviceWorkerResponse = await fetch(scriptUrl, { agent });
+      describe('default pwa state', () => {
+        test('does not load PWA resources from server by default', async () => {
+          expect.assertions(2);
 
-        expect(serviceWorkerResponse.status).toBe(404);
+          const serviceWorkerResponse = await fetchServiceWorker();
+          const webManifestResponse = await fetchWebManifest();
+
+          expect(serviceWorkerResponse.status).toBe(404);
+          expect(webManifestResponse.status).toBe(404);
+        });
       });
 
       describe('progressive web app enabled', () => {
-        beforeAll(async () => {
-          await Promise.all([
-            addModuleToModuleMap({
-              moduleName: 'frank-lloyd-root',
-              version: '0.0.3',
-            }),
-            // for data fetching
-            addModuleToModuleMap({
-              moduleName: 'needy-frank',
-              version: '0.0.1',
-            }),
-          ]);
-          // wait for change to be picked up
-          await waitFor(5000);
-        });
-
-        afterAll(async () => {
-          writeModuleMap(originalModuleMap);
-        });
+        // we load in the pwa enabled frank-lloyd-root
+        beforeAll(loadPWARoot);
 
         test('loads PWA resources from server ', async () => {
-          expect.assertions(3);
+          expect.assertions(6);
 
-          const serviceWorkerResponse = await fetch(scriptUrl, { agent });
+          const serviceWorkerResponse = await fetchServiceWorker();
 
           expect(serviceWorkerResponse.status).toBe(200);
           expect(serviceWorkerResponse.headers.get('cache-control')).toEqual('no-store, no-cache');
           expect(serviceWorkerResponse.headers.get('service-worker-allowed')).toEqual('/');
+
+          const webManifestResponse = await fetchWebManifest();
+
+          expect(webManifestResponse.status).toBe(200);
+          expect(webManifestResponse.headers.get('cache-control')).toBeDefined();
+          expect(webManifestResponse.headers.get('content-type')).toEqual('application/manifest+json');
         });
 
         test('service worker has a valid registration', async () => {
@@ -900,33 +908,33 @@ describe('Tests that require Docker setup', () => {
             updateViaCache: 'none',
           });
         });
+      });
 
-        describe('progressive web app disabled', () => {
-          beforeAll(async () => {
-            await addModuleToModuleMap({
-              moduleName: 'frank-lloyd-root',
-              version: '0.0.0',
-            });
-            // wait for change to be picked up
-            await waitFor(5000);
+      describe('progressive web app disabled', () => {
+        // we load back up to frank-lloyd-root@0.0.0 to make sure the system is off
+        beforeAll(loadInitialRoot);
+
+        test('does not load PWA resources from server after shutdown', async () => {
+          expect.assertions(2);
+
+          const serviceWorkerResponse = await fetchServiceWorker();
+          const webManifestResponse = await fetchWebManifest();
+
+          expect(serviceWorkerResponse.status).toBe(404);
+          expect(webManifestResponse.status).toBe(404);
+        });
+
+        test('service worker is no longer registered and removed with root module change', async () => {
+          expect.assertions(1);
+
+          await browser.url(`${appAtTestUrls.browserUrl}/success`);
+
+          // eslint-disable-next-line prefer-arrow-callback
+          const result = await browser.executeAsync(function getRegistration(done) {
+            navigator.serviceWorker.getRegistration().then(done);
           });
 
-          afterAll(async () => {
-            writeModuleMap(originalModuleMap);
-          });
-
-          test('service worker is no longer registered and removed with root module change', async () => {
-            expect.assertions(1);
-
-            await browser.url(`${appAtTestUrls.browserUrl}/success`);
-
-            // eslint-disable-next-line prefer-arrow-callback
-            const result = await browser.executeAsync(function getRegistration(done) {
-              navigator.serviceWorker.getRegistration().then(done);
-            });
-
-            expect(result).toBe(null);
-          });
+          expect(result).toBe(null);
         });
       });
     });

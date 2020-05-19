@@ -15,12 +15,14 @@
  */
 
 import {
+  getWebAppManifestConfig,
   getServerPWAConfig,
   getClientPWAConfig,
   configurePWA,
 } from '../../../../src/server/middleware/pwa/config';
 
 jest.mock('fs', () => ({
+  existsSync: () => false,
   readFileSync: (filePath) => Buffer.from(filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]'),
 }));
 
@@ -34,6 +36,10 @@ describe('pwa configuration', () => {
   });
 
   test('getters return default state', () => {
+    expect(getWebAppManifestConfig()).toMatchObject({
+      webManifest: null,
+      webManifestEnabled: false,
+    });
     expect(getServerPWAConfig()).toMatchObject({
       serviceWorker: false,
       serviceWorkerRecoveryMode: false,
@@ -43,12 +49,13 @@ describe('pwa configuration', () => {
     expect(getClientPWAConfig()).toMatchObject({
       serviceWorker: false,
       serviceWorkerRecoveryMode: false,
-      serviceWorkerScriptUrl: false,
       serviceWorkerScope: null,
+      serviceWorkerScriptUrl: false,
+      webManifestUrl: false,
     });
   });
 
-  describe('configuration', () => {
+  describe('service worker configuration', () => {
     test('enabling the service worker with minimum config', () => {
       configurePWA({ serviceWorker: true });
 
@@ -64,6 +71,7 @@ describe('pwa configuration', () => {
         serviceWorkerRecoveryMode: false,
         serviceWorkerScope: '/',
         serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
+        webManifestUrl: false,
       });
     });
 
@@ -82,6 +90,7 @@ describe('pwa configuration', () => {
         serviceWorkerRecoveryMode: true,
         serviceWorkerScope: '/',
         serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
+        webManifestUrl: false,
       });
     });
 
@@ -100,6 +109,7 @@ describe('pwa configuration', () => {
         serviceWorkerRecoveryMode: true,
         serviceWorkerScope: '/',
         serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
+        webManifestUrl: false,
       });
     });
 
@@ -117,8 +127,9 @@ describe('pwa configuration', () => {
       expect(getClientPWAConfig()).toMatchObject({
         serviceWorker: false,
         serviceWorkerRecoveryMode: false,
-        serviceWorkerScriptUrl: false,
         serviceWorkerScope: null,
+        serviceWorkerScriptUrl: false,
+        webManifestUrl: false,
       });
 
       process.env.ONE_SERVICE_WORKER = true;
@@ -137,14 +148,84 @@ describe('pwa configuration', () => {
       expect(getClientPWAConfig()).toMatchObject({
         serviceWorker: false,
         serviceWorkerRecoveryMode: false,
-        serviceWorkerScriptUrl: false,
         serviceWorkerScope: null,
+        serviceWorkerScriptUrl: false,
+        webManifestUrl: false,
       });
     });
 
     test('resetting PWA configuration when root module opts out', () => {
       expect(configurePWA({ serviceWorker: true })).toMatchObject({ serviceWorker: true });
       expect(configurePWA()).toMatchObject({ serviceWorker: false });
+    });
+  });
+
+  describe('web app manifest configuration', () => {
+    test('enabling the web manifest', () => {
+      configurePWA({
+        serviceWorker: true,
+        webManifest: {
+          name: 'One App Test',
+        },
+      });
+
+      expect(getServerPWAConfig()).toMatchObject({
+        webManifest: true,
+        serviceWorker: true,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerScope: '/',
+      });
+      expect(getClientPWAConfig()).toMatchObject({
+        serviceWorker: true,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerScope: '/',
+        serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
+        webManifestUrl: '/_/pwa/manifest.webmanifest',
+      });
+    });
+
+    test('using a function for the web manifest', () => {
+      configurePWA({
+        serviceWorker: true,
+        webManifest: () => ({
+          name: 'One App Test',
+        }),
+      });
+
+      expect(getServerPWAConfig()).toMatchObject({
+        webManifest: true,
+        serviceWorker: true,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerScope: '/',
+      });
+      expect(getClientPWAConfig()).toMatchObject({
+        serviceWorker: true,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerScope: '/',
+        serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
+        webManifestUrl: '/_/pwa/manifest.webmanifest',
+      });
+    });
+
+    test('opting out of the web manifest', () => {
+      configurePWA({
+        serviceWorker: true,
+        webManifest: null,
+      });
+
+      expect(getServerPWAConfig()).toMatchObject({
+        webManifest: false,
+        serviceWorker: true,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerScope: '/',
+      });
+      expect(getClientPWAConfig()).toMatchObject({
+        serviceWorker: true,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerScope: '/',
+        serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
+        webManifestUrl: false,
+      });
     });
   });
 });
