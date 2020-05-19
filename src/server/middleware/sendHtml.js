@@ -16,8 +16,6 @@
 
 // This rule is only needed for a couple functions below
 /* eslint-disable es/no-arrow-functions */
-import { matchesUA } from 'browserslist-useragent';
-import { browserList } from 'babel-preset-amex/browserlist';
 import { Set as iSet, Map as iMap } from 'immutable';
 
 import transit from '../../universal/utils/transit';
@@ -32,6 +30,16 @@ import { getClientPWAConfig } from './pwa';
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
 const integrityManifest = readJsonFile('../../../bundle.integrity.manifest.json');
 const nodeEnvIsDevelopment = process.env.NODE_ENV === 'development';
+
+// http://www.useragentstring.com/pages/useragentstring.php?name=Internet+Explorer
+const legacyIndicators = [
+  'rv:11', // IE 11 on mobile
+  'MSIE', // IE
+];
+
+const legacyUserAgent = (userAgent) => (
+  legacyIndicators.some((legacyIndicator) => userAgent.indexOf(legacyIndicator) !== -1)
+);
 
 function getChunkAssets(assetsByChunkName) {
   return Object
@@ -276,10 +284,7 @@ export default function sendHtml(req, res) {
     } = req;
     const { scriptNonce } = res;
     const userAgent = headers['user-agent'];
-    const isLegacy = !matchesUA(userAgent, {
-      browsers: browserList,
-      allowHigherVersions: true,
-    });
+    const isLegacy = legacyUserAgent(userAgent);
 
     console.info(`sendHtml, have store? ${!!store}, have appHtml? ${!!appHtml}`);
     if (appHtml && typeof appHtml !== 'string') {

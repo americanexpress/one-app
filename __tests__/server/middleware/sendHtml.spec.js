@@ -252,7 +252,8 @@ describe('sendHtml', () => {
     });
 
     it('sends a rendered page with the __holocron_module_bundle_type__ global set according to the user agent and the client module map that only includes the relevant details', () => {
-      req.headers['user-agent'] = 'Browser/5.0 (compatible; NUEI 100.0; Doors TX 81.4; Layers/1.0)';
+      // MSIE indicates legacy IE
+      req.headers['user-agent'] = 'Browser/5.0 (compatible; MSIE 100.0; Doors TX 81.4; Layers/1.0)';
       sendHtml(req, res);
       expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
@@ -318,7 +319,8 @@ describe('sendHtml', () => {
     });
 
     it('sends a rendered page with the legacy app bundle according to the user agent', () => {
-      req.headers['user-agent'] = 'Browser/5.0 (compatible; NUEI 100.0; Doors TX 81.4; Layers/1.0)';
+      // rv:11 indicates IE 11  on mobile
+      req.headers['user-agent'] = 'Browser/5.0 (compatible; NUEI 100.0; Doors TX 81.4; rv:11)';
       sendHtml(req, res);
       expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/legacy/bundle~common.js" integrity="abc" crossorigin="anonymous"></script>');
