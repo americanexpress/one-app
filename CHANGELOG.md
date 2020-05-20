@@ -1,6 +1,16 @@
-# Changelog
+-e # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+<a name="5.0.0"></a>
+# [5.0.0](https://github.com/americanexpress/one-app/compare/v5.0.0-rc.4...v5.0.0) (2020-05-20)
+
+
+### Features
+
+* **one-app-router:** update to 1.1.0 ([#137](https://github.com/americanexpress/one-app/issues/137)) ([0139c6c](https://github.com/americanexpress/one-app/commit/0139c6c))
+* **pwa/web-manifest:** add middleware & config support ([9077f17](https://github.com/americanexpress/one-app/commit/9077f17))
+
 
 <a name="5.0.0-rc.4"></a>
 # [5.0.0-rc.4](https://github.com/americanexpress/one-app/compare/v5.0.0-rc.3...v5.0.0-rc.4) (2020-05-13)
