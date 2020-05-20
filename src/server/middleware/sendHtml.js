@@ -38,7 +38,7 @@ const legacyIndicators = [
 ];
 
 const legacyUserAgent = (userAgent) => (
-  legacyIndicators.some((legacyIndicator) => userAgent.indexOf(legacyIndicator) !== -1)
+  legacyIndicators.some((legacyIndicator) => userAgent.includes(legacyIndicator))
 );
 
 function getChunkAssets(assetsByChunkName) {
