@@ -917,58 +917,28 @@ describe('Tests that require Docker setup', () => {
       describe('caching', () => {
         const oneAppVersionRegExp = /\/([^/]+)(?:\/i18n)?\/[^/]*\.js$/;
 
-        // function _getCacheEntries(done) {
-        //   caches
-        //     .keys()
-        //     .then((keys) =>
-        //       // eslint-disable-next-line implicit-arrow-linebreak
-        //       Promise.all(
-        //         keys.map((key) =>
-        //           // eslint-disable-next-line implicit-arrow-linebreak
-        //           caches
-        //             .open(key)
-        //             .then((cache) =>
-        //               // eslint-disable-next-line implicit-arrow-linebreak, no-confusing-arrow
-        //               cache.keys().then((requests) => [
-        //                 key,
-        //                 requests.map(({ url }) => url),
-        //               ])
-        //             )
-        //         )
-        //       )
-        //     )
-        //     .then(done);
-        // }
-        const _getCacheEntries = `async function getCacheEntries(done) {
-          const cacheKeys = await caches.keys();
-          const cacheKeyPairs = await Promise.all(
-            cacheKeys.map(async (key) => {
-              const cache = await caches.open(key);
-              return [key, cache];
-            })
-          );
-          const cacheEntries = await Promise.all(
-            cacheKeyPairs.map(async ([key, cache]) => {
-              const requests = await cache.keys();
-              return [key, requests.map(({ url }) => url)];
-            })
-          );
-
-          done(cacheEntries);
-        }`;
-
-        // function _getCacheEntries(done) {
-        //   const openCaches = () => caches.keys().then((keys) => Promise.all(
-        //     keys.map((key) => caches.open(key).then((cache) => [key, cache]))
-        //   ));
-        //   const getCacheEntries = (cacheKeyPair) => Promise.all(
-        //     cacheKeyPair.map(([key, cache]) => cache.keys().then((requests) => [
-        //       key,
-        //       requests.map(({ url }) => ({ url, cache: key })),
-        //     ]))
-        //   );
-        //   openCaches().then(getCacheEntries).then(done);
-        // }
+        function _getCacheEntries(done) {
+          caches
+            .keys()
+            .then((keys) =>
+              // eslint-disable-next-line implicit-arrow-linebreak
+              Promise.all(
+                keys.map((key) =>
+                  // eslint-disable-next-line implicit-arrow-linebreak
+                  caches
+                    .open(key)
+                    .then((cache) =>
+                      // eslint-disable-next-line implicit-arrow-linebreak, no-confusing-arrow
+                      cache.keys().then((requests) => [
+                        key,
+                        requests.map(({ url }) => url),
+                      ])
+                    )
+                )
+              )
+            )
+            .then(done);
+        }
 
         describe('caching resources', () => {
           test('caches the app assets and entry root module', async () => {
