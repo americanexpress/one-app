@@ -14,7 +14,11 @@
  * permissions and limitations under the License.
  */
 
-export const webManifest = (config) => ({
+const baseUrl = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:3001/static/modules/frank-lloyd-root/0.0.3/'
+  : 'https://sample-cdn.frank/modules/frank-lloyd-root/0.0.3/';
+
+export const webManifest = () => ({
   // like the service worker, we can set a scope which this manifest takes effect
   scope: '/',
   // when loading an installed PWA, we can set the starting url on entry/load
@@ -27,17 +31,20 @@ export const webManifest = (config) => ({
   theme_color: '#FDB92D',
   icons: [
     {
-      src: `${config.cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-180px.png`,
+      src: `${baseUrl}assets/pwa-icon-180px.png`,
+      // src: `${config.cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-180px.png`,
       type: 'image/png',
       sizes: '180x180',
     },
     {
-      src: `${config.cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-192px.png`,
+      src: `${baseUrl}assets/pwa-icon-192px.png`,
+      // src: `${config.cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-192px.png`,
       type: 'image/png',
       sizes: '192x192',
     },
     {
-      src: `${config.cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-512px.png`,
+      src: `${baseUrl}assets/pwa-icon-512px.png`,
+      // src: `${config.cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-512px.png`,
       type: 'image/png',
       sizes: '512x512',
     },

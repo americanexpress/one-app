@@ -67,8 +67,6 @@ export default contentSecurityPolicyBuilder({
       'https://sample-cdn.frank',
       // used for our sample app deployment in heroku
       'https://one-app-statics.surge.sh',
-      // used by needy frank 0.0.1
-      'reqres.in',
     ],
   },
 });

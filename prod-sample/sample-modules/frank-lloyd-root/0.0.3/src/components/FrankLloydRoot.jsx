@@ -19,13 +19,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import { fromJS } from 'immutable';
+import { getModuleMap } from 'holocron';
 import ModuleRoute from 'holocron-module-route';
 import Helmet from 'react-helmet';
 import { connect } from 'react-redux';
 import HelloWorldComponent from './HelloWorld';
 
 export function FrankLloydRoot({ children, config }) {
-  const cdnUrl = React.useMemo(() => config.get('cdnUrl'), [config]);
+  const baseUrl = React.useMemo(() => getModuleMap().getIn(['modules', 'frank-lloyd-root', 'baseUrl']), []);
   return (
     <React.Fragment>
       <Helmet
@@ -37,9 +38,9 @@ export function FrankLloydRoot({ children, config }) {
         ]}
         link={[
           // favicon
-          { rel: 'icon', href: `${cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-192px.png` },
+          { rel: 'icon', href: `${baseUrl}assets/pwa-icon-192px.png` },
           // icon ideally with a size of 192px (or 180px), it is added as the home icon
-          { rel: 'apple-touch-icon', href: `${cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-180px.png` },
+          { rel: 'apple-touch-icon', href: `${baseUrl}assets/pwa-icon-180px.png` },
         ]}
       />
       <pre className="value-provided-from-config">{ config.get('someApiUrl') }</pre>
