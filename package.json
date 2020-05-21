@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "5.0.0-rc.4",
+  "version": "5.0.0-rc.5",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
@@ -79,9 +79,7 @@
     "@americanexpress/one-app-ducks": "^4.0.1",
     "@americanexpress/one-app-router": "^1.1.0",
     "@americanexpress/vitruvius": "^2.0.0",
-    "babel-preset-amex": "^3.2.0",
     "body-parser": "^1.19.0",
-    "browserslist-useragent": "^3.0.2",
     "chalk": "^3.0.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.4",
@@ -129,6 +127,7 @@
     "@babel/core": "^7.7.2",
     "@babel/node": "^7.7.0",
     "@babel/register": "^7.7.0",
+    "babel-preset-amex": "^3.2.0",
     "@commitlint/cli": "^8.2.0",
     "@commitlint/config-conventional": "^8.2.0",
     "@rollup/plugin-babel": "^5.0.0",
