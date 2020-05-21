@@ -917,18 +917,20 @@ describe('Tests that require Docker setup', () => {
       describe('caching', () => {
         const oneAppVersionRegExp = /\/([^/]+)(?:\/i18n)?\/[^/]*\.js$/;
 
+        /* eslint-disable implicit-arrow-linebreak */
         function _getCacheEntries(done) {
           caches
+            // we get all the names of the cache stores in use
             .keys()
             .then((keys) =>
-              // eslint-disable-next-line implicit-arrow-linebreak
               Promise.all(
+                // then we map over each name and open that cache to use it
                 keys.map((key) =>
-                  // eslint-disable-next-line implicit-arrow-linebreak
                   caches
                     .open(key)
+                    // once we have the cache reference, we get all the keys (Request(s))
                     .then((cache) =>
-                      // eslint-disable-next-line implicit-arrow-linebreak, no-confusing-arrow
+                    // finally, we return an array for each cache with the [keyString, urlsArray]
                       cache.keys().then((requests) => [
                         key,
                         requests.map(({ url }) => url),
@@ -939,6 +941,7 @@ describe('Tests that require Docker setup', () => {
             )
             .then(done);
         }
+        /* eslint-enable implicit-arrow-linebreak */
 
         describe('caching resources', () => {
           test('caches the app assets and entry root module', async () => {
