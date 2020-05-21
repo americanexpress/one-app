@@ -887,8 +887,8 @@ describe('Tests that require Docker setup', () => {
           expect(webManifestResponse.headers.get('content-type')).toEqual('application/manifest+json');
         });
 
-        test('service worker has a valid registration', async () => {
-          expect.assertions(1);
+        test('service worker has a valid registration and in active state', async () => {
+          expect.assertions(2);
 
           await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
@@ -901,65 +901,106 @@ describe('Tests that require Docker setup', () => {
             // subset of registration
             waiting: null,
             installing: null,
-            active: {
+            active: expect.objectContaining({
               scriptURL: scriptUrl.replace(appAtTestUrls.fetchUrl, appAtTestUrls.browserUrl),
-              state: 'activated',
-            },
+            }),
             scope: `${appAtTestUrls.browserUrl}/`,
             updateViaCache: 'none',
           });
+          await expect(browser.executeAsync(
+            // eslint-disable-next-line prefer-arrow-callback
+            function getCacheKeys(done) { caches.keys().then(done); })
+          ).resolves.toEqual([]);
         });
+      });
 
-        describe('caching', () => {
-          const oneAppVersionRegExp = /\/([^/]+)(?:\/i18n)?\/[^/]*\.js$/;
+      describe('caching', () => {
+        const oneAppVersionRegExp = /\/([^/]+)(?:\/i18n)?\/[^/]*\.js$/;
 
-          function _getCacheEntries(done) {
-            const openCaches = () => caches.keys().then((keys) => Promise.all(
-              keys.map((key) => caches.open(key).then((cache) => [key, cache]))
-            ));
-            const getCacheEntries = ([key, cache]) => cache.keys().then((requests) => [
-              key,
-              requests.map(({ url }) => ({ url, cache: key })),
-            ]);
-            openCaches().then(getCacheEntries).then(done);
-          }
+        // function _getCacheEntries(done) {
+        //   caches
+        //     .keys()
+        //     .then((keys) =>
+        //       // eslint-disable-next-line implicit-arrow-linebreak
+        //       Promise.all(
+        //         keys.map((key) =>
+        //           // eslint-disable-next-line implicit-arrow-linebreak
+        //           caches
+        //             .open(key)
+        //             .then((cache) =>
+        //               // eslint-disable-next-line implicit-arrow-linebreak, no-confusing-arrow
+        //               cache.keys().then((requests) => [
+        //                 key,
+        //                 requests.map(({ url }) => url),
+        //               ])
+        //             )
+        //         )
+        //       )
+        //     )
+        //     .then(done);
+        // }
+        const _getCacheEntries = `async function getCacheEntries(done) {
+          const cacheKeys = await caches.keys();
+          const cacheKeyPairs = await Promise.all(
+            cacheKeys.map(async (key) => {
+              const cache = await caches.open(key);
+              return [key, cache];
+            })
+          );
+          const cacheEntries = await Promise.all(
+            cacheKeyPairs.map(async ([key, cache]) => {
+              const requests = await cache.keys();
+              return [key, requests.map(({ url }) => url)];
+            })
+          );
 
+          done(cacheEntries);
+        }`;
+
+        // function _getCacheEntries(done) {
+        //   const openCaches = () => caches.keys().then((keys) => Promise.all(
+        //     keys.map((key) => caches.open(key).then((cache) => [key, cache]))
+        //   ));
+        //   const getCacheEntries = (cacheKeyPair) => Promise.all(
+        //     cacheKeyPair.map(([key, cache]) => cache.keys().then((requests) => [
+        //       key,
+        //       requests.map(({ url }) => ({ url, cache: key })),
+        //     ]))
+        //   );
+        //   openCaches().then(getCacheEntries).then(done);
+        // }
+
+        describe('caching resources', () => {
           test('caches the app assets and entry root module', async () => {
             expect.assertions(3);
 
             await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
+            await waitFor(500);
+
             const holocronModuleMap = readModuleMap();
             const cacheMap = new Map(await browser.executeAsync(_getCacheEntries));
 
             expect(
-              cacheMap.get('__sw/one-app-cache').map(({ url, cache }) => ({
-                cache,
-                url: url.replace(
-                  url.match(oneAppVersionRegExp)[1],
-                  '[one-app-version]'
-                ),
-              }))
-            ).toMatchObject(
-              [
-                // the version is subject to change from the commit sha which requires
-                // building app again after any change - find a better way for DX
-                `${appAtTestUrls.cdnUrl}/app/[one-app-version]/app~vendors.js`,
-                `${appAtTestUrls.cdnUrl}/app/[one-app-version]/runtime.js`,
-                `${appAtTestUrls.cdnUrl}/app/[one-app-version]/service-worker-client.js`,
-                `${appAtTestUrls.cdnUrl}/app/[one-app-version]/vendors.js`,
-                `${appAtTestUrls.cdnUrl}/app/[one-app-version]/i18n/en-US.js`,
-                `${appAtTestUrls.cdnUrl}/app/[one-app-version]/app.js`,
-              ].map((url) => ({
-                cache: '__sw/one-app-cache',
-                url,
-              }))
+              cacheMap.get('__sw/one-app-cache').map((url) => url.replace(
+                url.match(oneAppVersionRegExp)[1],
+                '[one-app-version]'
+              ))
+            ).toEqual(
+              expect.arrayContaining(
+                [
+                  // the build output directory uses the git sha which changes from any modification
+                  `${appAtTestUrls.cdnUrl}/app/[one-app-version]/app~vendors.js`,
+                  `${appAtTestUrls.cdnUrl}/app/[one-app-version]/runtime.js`,
+                  `${appAtTestUrls.cdnUrl}/app/[one-app-version]/vendors.js`,
+                  `${appAtTestUrls.cdnUrl}/app/[one-app-version]/i18n/en-US.js`,
+                  `${appAtTestUrls.cdnUrl}/app/[one-app-version]/app.js`,
+                  `${appAtTestUrls.cdnUrl}/app/[one-app-version]/service-worker-client.js`,
+                ]
+              )
             );
-            expect(cacheMap.get('__sw/module-cache')).toMatchObject([
-              {
-                cache: '__sw/module-cache',
-                url: holocronModuleMap.modules['frank-lloyd-root'].browser.url,
-              },
+            expect(cacheMap.get('__sw/module-cache')).toEqual([
+              holocronModuleMap.modules['frank-lloyd-root'].browser.url,
             ]);
             expect(cacheMap.get('__sw/lang-pack-cache')).toBeUndefined();
           });
@@ -979,7 +1020,7 @@ describe('Tests that require Docker setup', () => {
             const cacheMap = new Map(await browser.executeAsync(_getCacheEntries));
 
             expect(cacheMap.get('__sw/module-cache')).toHaveLength(4);
-            expect(cacheMap.get('__sw/module-cache')).toMatchObject(
+            expect(cacheMap.get('__sw/module-cache')).toEqual(
               [
                 holocronModuleMap.modules['frank-lloyd-root'].browser.url,
                 holocronModuleMap.modules['preview-frank'].browser.url,
@@ -989,169 +1030,166 @@ describe('Tests that require Docker setup', () => {
                   'franks-burgers.browser.js',
                   'Burger.franks-burgers.chunk.browser.js'
                 ),
-              ].map((url) => ({ url, cache: '__sw/module-cache' }))
+              ]
             );
             expect(cacheMap.get('__sw/lang-pack-cache')).toHaveLength(1);
-            expect(cacheMap.get('__sw/lang-pack-cache')).toMatchObject([
-              {
-                cache: '__sw/lang-pack-cache',
-                url: holocronModuleMap.modules['franks-burgers'].browser.url.replace(
+            expect(cacheMap.get('__sw/lang-pack-cache')).toEqual([
+              holocronModuleMap.modules['franks-burgers'].browser.url.replace(
+                'franks-burgers.browser.js',
+                'en-us/franks-burgers.json'
+              ),
+            ]);
+          });
+        });
+
+        describe('invalidation', () => {
+          test('invalidates a language pack if a different locale is loaded', async () => {
+            expect.assertions(6);
+
+            await browser.url(`${appAtTestUrls.browserUrl}/demo/cultured-frankie`);
+            // wait for language pack to load
+            await waitFor(1000);
+
+            const holocronModuleMap = readModuleMap();
+            const cacheMap = new Map(await browser.executeAsync(_getCacheEntries));
+
+            expect(cacheMap.get('__sw/module-cache')).toHaveLength(5);
+            expect(cacheMap.get('__sw/module-cache')).toEqual(
+              [
+                holocronModuleMap.modules['frank-lloyd-root'].browser.url,
+                holocronModuleMap.modules['preview-frank'].browser.url,
+                holocronModuleMap.modules['franks-burgers'].browser.url,
+                holocronModuleMap.modules['franks-burgers'].browser.url.replace(
+                  'franks-burgers.browser.js',
+                  'Burger.franks-burgers.chunk.browser.js'
+                ),
+                holocronModuleMap.modules['cultured-frankie'].browser.url,
+              ]
+            );
+            expect(cacheMap.get('__sw/lang-pack-cache')).toHaveLength(2);
+            expect(cacheMap.get('__sw/lang-pack-cache')).toEqual(
+              [
+                holocronModuleMap.modules['franks-burgers'].browser.url.replace(
                   'franks-burgers.browser.js',
                   'en-us/franks-burgers.json'
                 ),
-              },
-            ]);
+                holocronModuleMap.modules['cultured-frankie'].browser.url.replace(
+                  'cultured-frankie.browser.js',
+                  'en-us/cultured-frankie.json'
+                ),
+              ]
+            );
+
+            // let's change the locale
+            const localeSelector = await browser.$('#locale-selector');
+            await localeSelector.selectByVisibleText('es-MX');
+            await waitFor(1000);
+
+            const updatedCacheMap = new Map(await browser.executeAsync(_getCacheEntries));
+
+            // we should not expect an additional lang pack to be added,
+            // rather it replaces the other one used by any given module
+            expect(updatedCacheMap.get('__sw/lang-pack-cache')).toHaveLength(2);
+            expect(updatedCacheMap.get('__sw/lang-pack-cache')).toEqual(
+              [
+                holocronModuleMap.modules['franks-burgers'].browser.url.replace(
+                  'franks-burgers.browser.js',
+                  'en-us/franks-burgers.json'
+                ),
+                holocronModuleMap.modules['cultured-frankie'].browser.url.replace(
+                  'cultured-frankie.browser.js',
+                  'es-mx/cultured-frankie.json'
+                ),
+              ]
+            );
           });
 
-          describe('invalidation', () => {
-            test('invalidates a language pack if a different locale is loaded', async () => {
-              expect.assertions(6);
+          test('invalidates a module by its version and removes any existing entry with a different version', async () => {
+            expect.assertions(6);
 
-              await browser.url(`${appAtTestUrls.browserUrl}/demo/cultured-frankie`);
-              // wait for language pack to load
-              await waitFor(1000);
+            await browser.url(`${appAtTestUrls.browserUrl}/demo/cultured-frankie`);
 
-              const holocronModuleMap = readModuleMap();
-              const cacheMap = new Map(await browser.executeAsync(_getCacheEntries));
-
-              expect(cacheMap.get('__sw/module-cache')).toHaveLength(5);
-              expect(cacheMap.get('__sw/module-cache')).toMatchObject(
-                [
-                  holocronModuleMap.modules['frank-lloyd-root'].browser.url,
-                  holocronModuleMap.modules['preview-frank'].browser.url,
-                  holocronModuleMap.modules['franks-burgers'].browser.url,
-                  holocronModuleMap.modules['franks-burgers'].browser.url.replace(
-                    'franks-burgers.browser.js',
-                    'Burger.franks-burgers.chunk.browser.js'
-                  ),
-                  holocronModuleMap.modules['cultured-frankie'].browser.url,
-                ].map((url) => ({ url, cache: '__sw/module-cache' }))
-              );
-              expect(cacheMap.get('__sw/lang-pack-cache')).toHaveLength(2);
-              expect(cacheMap.get('__sw/lang-pack-cache')).toMatchObject(
-                [
-                  holocronModuleMap.modules['franks-burgers'].browser.url.replace(
-                    'franks-burgers.browser.js',
-                    'en-us/franks-burgers.json'
-                  ),
-                  holocronModuleMap.modules['cultured-frankie'].browser.url.replace(
-                    'cultured-frankie.browser.js',
-                    'en-us/cultured-frankie.json'
-                  ),
-                ].map((url) => ({ url, cache: '__sw/lang-pack-cache' }))
-              );
-
-              // let's change the locale
-              const localeSelector = await browser.$('#locale-selector');
-              await localeSelector.selectByVisibleText('es-MX');
-              await waitFor(1000);
-
-              const updatedCacheMap = new Map(await browser.executeAsync(_getCacheEntries));
-
-              // we should not expect an additional lang pack to be added,
-              // rather it replaces the other one used by any given module
-              expect(updatedCacheMap.get('__sw/lang-pack-cache')).toHaveLength(2);
-              expect(updatedCacheMap.get('__sw/lang-pack-cache')).toMatchObject(
-                [
-                  holocronModuleMap.modules['franks-burgers'].browser.url.replace(
-                    'franks-burgers.browser.js',
-                    'en-us/franks-burgers.json'
-                  ),
-                  holocronModuleMap.modules['cultured-frankie'].browser.url.replace(
-                    'cultured-frankie.browser.js',
-                    'es-mx/cultured-frankie.json'
-                  ),
-                ].map((url) => ({ url, cache: '__sw/lang-pack-cache' }))
-              );
-            });
-
-            test('invalidates a module by its version and removes any existing entry with a different version', async () => {
-              expect.assertions(6);
-
-              await browser.url(`${appAtTestUrls.browserUrl}/demo/cultured-frankie`);
-
-              const oldHolocronModuleMap = readModuleMap();
-              const oldCacheMap = new Map(await browser.executeAsync(_getCacheEntries));
+            const oldHolocronModuleMap = readModuleMap();
+            const oldCacheMap = new Map(await browser.executeAsync(_getCacheEntries));
+            // eslint-disable-next-line prefer-arrow-callback
+            const originalModuleCacheMetaData = await browser.executeAsync(
               // eslint-disable-next-line prefer-arrow-callback
-              const originalModuleCacheMetaData = await browser.executeAsync(
-                // eslint-disable-next-line prefer-arrow-callback
-                function _getMetaData(done) {
-                  caches
-                    .match('/__sw/__meta/__sw/module-cache')
-                    .then((response) => response.json())
-                    .then(done);
-                }
-              );
+              function _getMetaData(done) {
+                caches
+                  .match('/__sw/__meta/__sw/module-cache')
+                  .then((response) => response.json())
+                  .then(done);
+              }
+            );
 
-              expect(
-                originalModuleCacheMetaData['https://one-app:8443/module/cultured-frankie']
-              ).toEqual({
-                bundle: 'browser',
-                name: 'cultured-frankie',
-                resource: 'cultured-frankie',
-                type: 'module',
-                url: oldHolocronModuleMap.modules['cultured-frankie'].browser.url,
-                version: '0.0.0',
-              });
-              expect(oldCacheMap.get('__sw/module-cache')).toHaveLength(5);
-              expect(oldCacheMap.get('__sw/module-cache')).toMatchObject(
-                [
-                  oldHolocronModuleMap.modules['frank-lloyd-root'].browser.url,
-                  oldHolocronModuleMap.modules['preview-frank'].browser.url,
-                  oldHolocronModuleMap.modules['franks-burgers'].browser.url,
-                  oldHolocronModuleMap.modules['franks-burgers'].browser.url.replace(
-                    'franks-burgers.browser.js',
-                    'Burger.franks-burgers.chunk.browser.js'
-                  ),
-                  oldHolocronModuleMap.modules['cultured-frankie'].browser.url,
-                ].map((url) => ({ url, cache: '__sw/module-cache' }))
-              );
-
-              await addModuleToModuleMap({
-                moduleName: 'cultured-frankie',
-                version: '0.0.1',
-              });
-              // wait for change to be picked up
-              await waitFor(5000);
-
-              await browser.url(`${appAtTestUrls.browserUrl}/demo/cultured-frankie`);
-
-              const newHolocronModuleMap = readModuleMap();
-              const newCacheMap = new Map(await browser.executeAsync(_getCacheEntries));
-              const newModuleCacheMetaData = await browser.executeAsync(
-                // eslint-disable-next-line prefer-arrow-callback
-                function _getMetaData(done) {
-                  caches
-                    .match('/__sw/__meta/__sw/module-cache')
-                    .then((response) => response.json())
-                    .then(done);
-                }
-              );
-
-              expect(
-                newModuleCacheMetaData['https://one-app:8443/module/cultured-frankie']
-              ).toEqual({
-                bundle: 'browser',
-                name: 'cultured-frankie',
-                resource: 'cultured-frankie',
-                type: 'module',
-                url: newHolocronModuleMap.modules['cultured-frankie'].browser.url,
-                version: '0.0.1',
-              });
-              expect(newCacheMap.get('__sw/module-cache')).toHaveLength(5);
-              expect(newCacheMap.get('__sw/module-cache')).toMatchObject(
-                [
-                  newHolocronModuleMap.modules['frank-lloyd-root'].browser.url,
-                  newHolocronModuleMap.modules['preview-frank'].browser.url,
-                  newHolocronModuleMap.modules['franks-burgers'].browser.url,
-                  newHolocronModuleMap.modules['franks-burgers'].browser.url.replace(
-                    'franks-burgers.browser.js',
-                    'Burger.franks-burgers.chunk.browser.js'
-                  ),
-                  newHolocronModuleMap.modules['cultured-frankie'].browser.url,
-                ].map((url) => ({ url, cache: '__sw/module-cache' }))
-              );
+            expect(
+              originalModuleCacheMetaData['https://one-app:8443/module/cultured-frankie']
+            ).toEqual({
+              bundle: 'browser',
+              name: 'cultured-frankie',
+              resource: 'cultured-frankie',
+              type: 'module',
+              url: oldHolocronModuleMap.modules['cultured-frankie'].browser.url,
+              version: '0.0.0',
             });
+            expect(oldCacheMap.get('__sw/module-cache')).toHaveLength(5);
+            expect(oldCacheMap.get('__sw/module-cache')).toEqual(
+              [
+                oldHolocronModuleMap.modules['frank-lloyd-root'].browser.url,
+                oldHolocronModuleMap.modules['preview-frank'].browser.url,
+                oldHolocronModuleMap.modules['franks-burgers'].browser.url,
+                oldHolocronModuleMap.modules['franks-burgers'].browser.url.replace(
+                  'franks-burgers.browser.js',
+                  'Burger.franks-burgers.chunk.browser.js'
+                ),
+                oldHolocronModuleMap.modules['cultured-frankie'].browser.url,
+              ]
+            );
+
+            await addModuleToModuleMap({
+              moduleName: 'cultured-frankie',
+              version: '0.0.1',
+            });
+            // wait for change to be picked up
+            await waitFor(5000);
+
+            await browser.url(`${appAtTestUrls.browserUrl}/demo/cultured-frankie`);
+
+            const newHolocronModuleMap = readModuleMap();
+            const newCacheMap = new Map(await browser.executeAsync(_getCacheEntries));
+            const newModuleCacheMetaData = await browser.executeAsync(
+              // eslint-disable-next-line prefer-arrow-callback
+              function _getMetaData(done) {
+                caches
+                  .match('/__sw/__meta/__sw/module-cache')
+                  .then((response) => response.json())
+                  .then(done);
+              }
+            );
+
+            expect(
+              newModuleCacheMetaData['https://one-app:8443/module/cultured-frankie']
+            ).toEqual({
+              bundle: 'browser',
+              name: 'cultured-frankie',
+              resource: 'cultured-frankie',
+              type: 'module',
+              url: newHolocronModuleMap.modules['cultured-frankie'].browser.url,
+              version: '0.0.1',
+            });
+            expect(newCacheMap.get('__sw/module-cache')).toHaveLength(5);
+            expect(newCacheMap.get('__sw/module-cache')).toEqual(
+              [
+                newHolocronModuleMap.modules['frank-lloyd-root'].browser.url,
+                newHolocronModuleMap.modules['preview-frank'].browser.url,
+                newHolocronModuleMap.modules['franks-burgers'].browser.url,
+                newHolocronModuleMap.modules['franks-burgers'].browser.url.replace(
+                  'franks-burgers.browser.js',
+                  'Burger.franks-burgers.chunk.browser.js'
+                ),
+                newHolocronModuleMap.modules['cultured-frankie'].browser.url,
+              ]
+            );
           });
         });
       });
