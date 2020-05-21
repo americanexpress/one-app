@@ -18,7 +18,7 @@ import {
   expiration, cacheRouter, remove, match,
 } from '@americanexpress/one-service-worker';
 
-import { createCachingMiddleware } from '../../../../src/client/service-worker/events/caching';
+import createCachingMiddleware from '../../../../src/client/service-worker/events/caching';
 
 jest.mock('@americanexpress/one-service-worker', () => {
   const osw = jest.requireActual('@americanexpress/one-service-worker');
@@ -175,18 +175,19 @@ describe('createCachingMiddleware', () => {
         'module',
         [
           // bare essentials
-          'http://example.com/test-root/2.2.2/test-root.browser.js',
-          'https://example.com/cdn/test-root/2.2.2/test-root.browser.js',
+          'http://example.com/modules/test-root/2.2.2/test-root.browser.js',
+          'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
+          'https://example.com/cdn/modules/8cfb56e/test-root/2.2.2/test-root.browser.js',
           // legacy module
-          'https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js',
+          'https://example.com/cdn/modules/test-root/2.2.2/test-root.legacy.browser.js',
           // chunks
-          'https://example.com/cdn/test-root/2.2.2/TestRootChunk.test-root.chunk.browser.js',
-          'https://example.com/cdn/test-root/2.2.2/TestRootChunk.test-root.chunk.legacy.browser.js',
+          'https://example.com/cdn/modules/test-root/2.2.2/TestRootChunk.test-root.chunk.browser.js',
+          'https://example.com/cdn/modules/test-root/2.2.2/TestRootChunk.test-root.chunk.legacy.browser.js',
           // clientCacheRevision key
-          'https://example.com/cdn/test-root/2.2.2/test-root.browser.js?clientCacheRevision=123',
+          'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js?clientCacheRevision=123',
           // nested routes
           'https://example.com/cdn/static/modules/test-root/1.4.8/test-root.browser.js?clientCacheRevision=123',
-          'https://cdn.example.com/cdn/nest/extra-nesting/one-app/modules/test-root/2.2.2/test-root.browser.js?clientCacheRevision=123',
+          'https://cdn.example.com/cdn/modules/nest/extra-nesting/one-app/modules/test-root/2.2.2/test-root.browser.js?clientCacheRevision=123',
           // during development
           'https://localhost:3001/static/modules/test-root/2.2.2/test-root.browser.js?clientCacheRevision=123',
           'https://localhost:3000/_/static/modules/test-root/2.3.5/test-root.browser.js?clientCacheRevision=123',
@@ -199,8 +200,9 @@ describe('createCachingMiddleware', () => {
           'https://cdn.example.com/cdn/static/modules/test-root/2.2.2/locale/en-US/test-root.json',
           'https://cdn.example.com/static/modules/test-root/2.3.4/locale/de-DE/test-root.json',
           'https://cdn.example.com/cdn/static/modules/test-root/2.2.2/locale/zs-ASFJKHASKF/test-root.json',
-          'https://cdn.example.com/cdn/test-root/1.2.3-rc.4/locale/fr-FR/integration.json',
-          'https://example.com/cdn/test-module/2.2.1/locale/en/production.json',
+          'https://cdn.example.com/cdn/modules/test-root/1.2.3-rc.4/locale/fr-FR/integration.json',
+          'https://example.com/cdn/modules/test-module/2.2.1/locale/en/production.json',
+          'https://example.com/cdn/modules/8cfb56e/test-module/2.2.1/locale/en/production.json',
           // during development
           'http://localhost:3001/static/modules/franks-burgers/0.0.0/en-us/integration.json',
           'http://localhost:3001/static/modules/test-module/2.2.1/locale/en-CA/test-module.json',
@@ -274,7 +276,7 @@ describe('caching', () => {
 
     const middleware = createCachingMiddleware();
 
-    const url = 'https://example.com/cdn/test-root/2.2.2/test-root.browser.js';
+    const url = 'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js';
     const event = createFetchEvent(url);
     fetch.mockImplementationOnce(() => Promise.resolve(event.response));
 
@@ -292,7 +294,7 @@ describe('caching', () => {
     const moduleMeta = JSON.parse(cachesSnapShot['__sw/__meta']['http://localhost/__sw/__meta/__sw/module-cache'].body.parts.join(''));
 
     expect(expirationMeta).toEqual({
-      'https://example.com/cdn/test-root/2.2.2/test-root.browser.js': { expires: expect.any(Number) },
+      'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js': { expires: expect.any(Number) },
     });
     expect(moduleMeta).toEqual({
       'http://localhost/module/test-root': {
@@ -316,8 +318,8 @@ describe('caching', () => {
     const middleware = createCachingMiddleware();
 
     const events = await [
-      'https://example.com/cdn/test-root/2.2.2/test-root.browser.js',
-      'https://example.com/cdn/test-root/2.2.2/test-root.browser.js',
+      'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
+      'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
     ].reduce(async (lastPromises, url, index) => {
       const lastEvents = await lastPromises;
       const event = createFetchEvent(url);
@@ -348,8 +350,8 @@ describe('caching', () => {
     const middleware = createCachingMiddleware();
 
     const events = await [
-      'https://example.com/cdn/test-root/2.2.2/test-root.browser.js',
-      'https://example.com/cdn/test-root/2.2.2/TestChunk.test-root.chunk.browser.js',
+      'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
+      'https://example.com/cdn/modules/test-root/2.2.2/TestChunk.test-root.chunk.browser.js',
     ].reduce(async (lastPromises, url) => {
       const lastEvents = await lastPromises;
       const event = createFetchEvent(url);
@@ -374,9 +376,9 @@ describe('caching', () => {
     const middleware = createCachingMiddleware();
 
     const events = await [
-      'https://example.com/cdn/test-root/2.2.2/test-root.browser.js',
-      'https://example.com/cdn/test-root/2.2.2/locale/en-US/test-root.json',
-      'https://example.com/cdn/test-root/2.2.2/locale/en-CA/test-root.json',
+      'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
+      'https://example.com/cdn/modules/test-root/2.2.2/locale/en-US/test-root.json',
+      'https://example.com/cdn/modules/test-root/2.2.2/locale/en-CA/test-root.json',
     ].reduce(async (lastPromises, url) => {
       const lastEvents = await lastPromises;
       const event = createFetchEvent(url);
@@ -403,10 +405,10 @@ describe('caching', () => {
     const middleware = createCachingMiddleware();
 
     const events = await [
-      'https://example.com/cdn/test-root/2.2.2/test-root.browser.js',
-      'https://example.com/cdn/test-root/2.2.2/locale/en-US/test-root.json',
-      'https://example.com/cdn/test-module/4.3.2/test-module.browser.js',
-      'https://example.com/cdn/test-module/4.3.2/locale/en-US/test-module.json',
+      'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
+      'https://example.com/cdn/modules/test-root/2.2.2/locale/en-US/test-root.json',
+      'https://example.com/cdn/modules/test-module/4.3.2/test-module.browser.js',
+      'https://example.com/cdn/modules/test-module/4.3.2/locale/en-US/test-module.json',
     ].reduce(async (lastPromises, url) => {
       const lastEvents = await lastPromises;
       const event = createFetchEvent(url);
@@ -430,7 +432,7 @@ describe('caching', () => {
 
     const middleware = createCachingMiddleware();
 
-    const url = 'https://example.com/cdn/test-root/2.2.1/test-root.browser.js';
+    const url = 'https://example.com/cdn/modules/test-root/2.2.1/test-root.browser.js';
     const event = createFetchEvent(url);
     fetch.mockImplementationOnce(() => Promise.resolve(event.response));
     middleware(event);
@@ -444,7 +446,7 @@ describe('caching', () => {
 
     // a second response with a differing module version
 
-    const nextUrl = 'https://example.com/cdn/test-root/2.2.2/test-root.browser.js';
+    const nextUrl = 'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js';
     const nextEvent = createFetchEvent(nextUrl);
     fetch.mockImplementationOnce(() => Promise.resolve(nextEvent.response));
     middleware(nextEvent);
@@ -482,7 +484,7 @@ describe('caching', () => {
 
     const middleware = createCachingMiddleware();
 
-    const url = 'https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js';
+    const url = 'https://example.com/cdn/modules/test-root/2.2.2/test-root.legacy.browser.js';
     const event = createFetchEvent(url);
     fetch.mockImplementationOnce(() => Promise.resolve(event.response));
     middleware(event);
@@ -494,7 +496,7 @@ describe('caching', () => {
 
     // a second response with a differing clientCacheRevision key
 
-    const nextUrl = 'https://example.com/cdn/test-root/2.2.2/test-root.browser.js';
+    const nextUrl = 'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js';
     const nextEvent = createFetchEvent(nextUrl);
     fetch.mockImplementationOnce(() => Promise.resolve(nextEvent.response));
     middleware(nextEvent);
@@ -530,7 +532,7 @@ describe('caching', () => {
 
     const middleware = createCachingMiddleware();
 
-    const url = 'https://example.com/cdn/test-root/2.2.2/test-root.browser.js?clientCacheRevision=abc';
+    const url = 'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js?clientCacheRevision=abc';
     const event = createFetchEvent(url);
     fetch.mockImplementationOnce(() => Promise.resolve(event.response));
     middleware(event);
@@ -542,7 +544,7 @@ describe('caching', () => {
 
     // a second response with a differing clientCacheRevision key
 
-    const nextUrl = 'https://example.com/cdn/test-root/2.2.2/test-root.browser.js?clientCacheRevision=def';
+    const nextUrl = 'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js?clientCacheRevision=def';
     const nextEvent = createFetchEvent(nextUrl);
     fetch.mockImplementationOnce(() => Promise.resolve(nextEvent.response));
     middleware(nextEvent);

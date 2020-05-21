@@ -24,12 +24,14 @@ import {
 } from '@americanexpress/one-service-worker';
 
 // The RegExp codex:
+// - for each RegExp, we are expecting a valid http url and each of the three are "anchored"
+// -> by a pattern that starts with either "modules" (for modules and lang packs) or "app"
 // - (?<capture-group-name>.*) for an exactly labeled object made from matching parts
 // -> /(capture groups)/ of a string url. we can use `url.match(regExp).groups`to get
 // -> all the named capture groups
 // - /^https?(?::\/\/)/ start pattern anchors the start of the url and is not captured
 // -> ( /(?:.*)/ ), only matched
-// - specifying what we want to capture in (?<version>[^/]+[\d]+)
+// - specifying what we want to capture in (?<version>[^/]+)
 // -> we use /[^/]+/ to accurately capture what in between the slashes through negation ([^]).
 // -> for each named capture, we want to get specific on what we expect that match to be.
 // - we have a match-all in the center of the string (/https?(?::\/\/)HERE .* HERE\/(?<name>)/)
@@ -38,12 +40,12 @@ import {
 // - if you run across `/(?<name> .{1,5})\1/`, the `\1` matches what was first matched
 // -> in a capture group. for this example: `name = \1`
 
-// groups: name / version / resource . bundle ? revision
-const moduleRegExp = /^https?(?::\/\/).*\/(?<name>[^/]+)\/(?<version>[^/]+[\d]+)\/(?<resource>([a-zA-Z-~]+|\1)(?:\.\1)?)(?:\.chunk)?\.(?<bundle>(legacy\.)?browser)\.js(?:\?clientCacheRevision=(?<revision>[^/&]*))?$/;
-// groups: name / version / locale / resource
-const langPackRegExp = /^https?(?::\/\/).*\/(?<name>[^/]+)\/(?<version>[^/]+[\d]+)(?:\/locale)?\/(?<locale>(?<language>[a-z]{2,3})(?:-)?(?<country>[a-zA-Z]{1,})?)\/(?<resource>(\1|[^/]*))\.json$/;
-// groups: version / bundle / name
-const oneAppRegExp = /^https?(?::\/\/).*(?:\/_\/static)?\/app\/(?<version>[^/]+[\d]+)?\/(?:(?<bundle>legacy)\/)?(?:i18n\/)?(?<name>[^/]+)\.js$/;
+// groups: (modules/sha?) name / version / resource . bundle ? revision
+const moduleRegExp = /^https?(?::\/\/).*\/modules\/(?:[a-z0-9]+\/)?(?<name>[^/]+)\/(?<version>[^/]+)\/(?<resource>([a-zA-Z-~]+|\1)(?:\.\1)?)(?:\.chunk)?\.(?<bundle>(legacy\.)?browser)\.js(?:\?clientCacheRevision=(?<revision>[^/&]*))?$/;
+// groups: (modules/sha?) name / version / locale / resource
+const langPackRegExp = /^https?(?::\/\/).*\/modules\/(?:[a-z0-9]+\/)?(?<name>[^/]+)\/(?<version>[^/]+)(?:\/locale)?\/(?<locale>(?<language>[a-z]{2,3})(?:-)?(?<country>[a-zA-Z]{1,})?)\/(?<resource>(\1|[^/]*))\.json$/;
+// groups: (app) version / bundle / name
+const oneAppRegExp = /^https?(?::\/\/).*\/app\/(?<version>[^/]+)?\/(?:(?<bundle>legacy)\/)?(?:i18n\/)?(?<name>[^/]+)\.js$/;
 
 // - we compare the metadata between two resources in cache,
 // -> depending on the rules that we want, we can use the meta-data
@@ -118,7 +120,7 @@ function invalidationMiddleware(event, context) {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export function createCachingMiddleware() {
+export default function createCachingMiddleware() {
   const oneAppVersion = process.env.ONE_APP_BUILD_VERSION.replace(/(\.)/g, '\\.');
   const oneAppPattern = new RegExp(oneAppRegExp.source.replace('\\/app\\/(.*)\\/', `\\/app\\/${oneAppVersion}\\/`));
   const middlewareStack = [
