@@ -20,8 +20,6 @@ if (!global.BROWSER) {
     /* Child Module Specific */
     validateStateConfig,
     requiredSafeRequestRestrictedAttributes,
-    /* All Modules */
-    appCompatibility,
   };
 }
 ```
@@ -67,7 +65,6 @@ export default MyModule;
   - [`eventLoopDelayThreshold`](#eventloopdelaythreshold)
   - [`validateStateConfig`](#validatestateconfig)
   - [`requiredSafeRequestRestrictedAttributes`](#requiredsaferequestrestrictedattributes)
-  - [`appCompatibility`](#appcompatibility)
 
 ## `provideStateConfig`
 **Module Type**
@@ -488,34 +485,6 @@ If an `Error` is thrown due to missing required cookies or headers, the Server w
 **📘 More Information**
 * [`extendSafeRequestRestrictedAttributes`](#extendsaferequestrestrictedattributes)
 * Example: [Vitruvius Franklin's `appConfig`](../../../prod-sample/sample-modules/vitruvius-franklin/0.0.0/src/components/VitruviusFranklin.jsx)
-
-## `appCompatibility`
-**Module Type**
-* ✅ Root Module
-* ✅ Child Module
-
-**Shape**
-```js
-if (!global.BROWSER) {
-  Module.appConfig = {
-    appCompatibility: String,
-  };
-}
-```
-
-The `appCompatibility` directive accepts a valid [Semantic Version](https://github.com/npm/node-semver) string specifying compatibility with specific One App versions.
-
-For example, we may specify Modules to be compatible with all `v5` releases of One App:
-
-```js
-if (!global.BROWSER) {
-  Module.appConfig = {
-    appCompatibility: '5.x.x',
-  };
-}
-```
-
-If the One App version fails a Module's `appCompatibility` check, the Server will fail to startup or if already running will prevent [Holocron](https://github.com/americanexpress/holocron) from loading the Module dynamically.
 
 **📘 More Information**
 * [Node Semver](https://github.com/npm/node-semver)
