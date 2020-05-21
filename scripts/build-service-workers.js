@@ -20,7 +20,7 @@ const path = require('path');
 const rollup = require('rollup');
 const replace = require('@rollup/plugin-replace');
 const resolve = require('@rollup/plugin-node-resolve');
-const babel = require('rollup-plugin-babel');
+const babel = require('@rollup/plugin-babel').default;
 
 async function buildServiceWorkerScripts({ dev = false, buildVersion, minify = true } = {}) {
   const inputDirectory = path.resolve(__dirname, '../src/client/service-worker');
@@ -31,7 +31,21 @@ async function buildServiceWorkerScripts({ dev = false, buildVersion, minify = t
       'process.env.ONE_APP_BUILD_VERSION': `"${buildVersion}"`,
     }),
     resolve(),
-    babel(),
+    babel({
+      // we need to override the current .babelrc and not extend it
+      babelrc: false,
+      babelHelpers: 'bundled',
+      presets: [['@babel/preset-env', {
+        spec: true,
+        // preserve ES syntax and allow rollup to handle the final output
+        modules: false,
+        // needed to prevent breaking the RegExp used to match resources during caching
+        exclude: [
+          '@babel/plugin-transform-named-capturing-groups-regex',
+          '@babel/plugin-transform-dotall-regex',
+        ],
+      }]],
+    }),
   ];
 
   if (minify) {
