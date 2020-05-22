@@ -17,24 +17,11 @@
 import express from 'express';
 import helmet from 'helmet';
 import { register as metricsRegister, collectDefaultMetrics } from 'prom-client';
-import gcStats from 'prometheus-gc-stats';
 
 import logging from './utils/logging/serverMiddleware';
 import healthCheck from './middleware/healthCheck';
 
-// Probe every 10th second.
-collectDefaultMetrics({ timeout: 10e3 });
-gcStats(metricsRegister)();
-
-// prometheus-gc-stats uses gc-stats but swallows the error if not importable
-// try importing ourselves so we can log a warning
-try {
-  /* eslint import/no-extraneous-dependencies: ["error", {"optionalDependencies": true}] */
-  // eslint-disable-next-line global-require, import/no-unresolved
-  require('gc-stats');
-} catch (err) {
-  console.warn('Unable to set up garbage collection monitor. This is not an issue for local development.');
-}
+collectDefaultMetrics();
 
 export function createMetricsServer() {
   const app = express();
