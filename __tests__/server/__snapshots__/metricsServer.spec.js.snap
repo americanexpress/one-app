@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`metricsServer metrics setup warns if unable to collect garbage collection metrics 1`] = `
-Array [
-  "Unable to set up garbage collection monitor. This is not an issue for local development.",
-]
-`;

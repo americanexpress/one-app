@@ -28,7 +28,7 @@ const deepMergeObjects = require('../../../src/server/utils/deepMergeObjects');
 const prodSampleDir = path.resolve('./prod-sample/');
 const pathToDockerComposeTestFile = path.resolve(prodSampleDir, 'docker-compose.test.yml');
 
-const setUpTestRunner = async ({ oneAppLocalPortToUse } = {}) => {
+const setUpTestRunner = async ({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse } = {}) => {
   const pathToBaseDockerComposeFile = path.resolve(prodSampleDir, 'docker-compose.yml');
   const seleniumServerPort = getRandomPortNumber();
   // create docker compose file from base with changes needed for tests
@@ -46,7 +46,8 @@ const setUpTestRunner = async ({ oneAppLocalPortToUse } = {}) => {
           'one-app': {
             ports: [
               `${oneAppLocalPortToUse}:8443`,
-            ],
+              oneAppMetricsLocalPortToUse ? `${oneAppMetricsLocalPortToUse}:3005` : undefined,
+            ].filter(Boolean),
           },
         },
       },
