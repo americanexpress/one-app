@@ -21,27 +21,17 @@ describe('metricsServer', () => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
 
   let client;
-  let promGcStats;
   let healthCheck;
   let logging;
 
-  function load({ gcStatsError = false } = {}) {
+  function load() {
     jest.resetModules();
 
     jest.mock('prom-client');
-    if (gcStatsError) {
-      jest.mock('gc-stats', () => {
-        throw new Error('unable to resolve gc-stats');
-      }, { virtual: true });
-    } else {
-      jest.mock('gc-stats', () => jest.fn(), { virtual: true });
-    }
-    jest.mock('prometheus-gc-stats', () => jest.fn(() => () => {}));
     jest.mock('../../src/server/utils/logging/serverMiddleware', () => jest.fn((req, res, next) => next()));
     jest.mock('../../src/server/middleware/healthCheck');
 
     client = require('prom-client');
-    promGcStats = require('prometheus-gc-stats');
     logging = require('../../src/server/utils/logging/serverMiddleware');
     healthCheck = require('../../src/server/middleware/healthCheck').default;
 
@@ -52,25 +42,6 @@ describe('metricsServer', () => {
     it('collects default metrics', () => {
       load();
       expect(client.collectDefaultMetrics).toHaveBeenCalledTimes(1);
-    });
-
-    it('collects default metrics every ten seconds', () => {
-      load();
-      expect(client.collectDefaultMetrics).toHaveBeenCalledTimes(1);
-      expect(client.collectDefaultMetrics.mock.calls[0][0]).toHaveProperty('timeout', 10 * 1e3);
-    });
-
-    it('collects garbage collection metrics', () => {
-      load();
-      expect(promGcStats).toHaveBeenCalledTimes(1);
-      expect(promGcStats).toHaveBeenCalledWith(client.register);
-    });
-
-    it('warns if unable to collect garbage collection metrics', () => {
-      console.warn.mockClear();
-      load({ gcStatsError: true });
-      expect(console.warn).toHaveBeenCalledTimes(1);
-      expect(console.warn.mock.calls[0]).toMatchSnapshot();
     });
   });
 

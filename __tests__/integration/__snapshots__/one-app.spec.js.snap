@@ -42,6 +42,46 @@ Object {
 }
 `;
 
+exports[`Tests that require Docker setup one-app successfully started metrics has all metrics 1`] = `
+Array [
+  "circuit",
+  "circuit_perf",
+  "nodejs_active_handles",
+  "nodejs_active_handles_total",
+  "nodejs_active_requests",
+  "nodejs_active_requests_total",
+  "nodejs_eventloop_lag_max_seconds",
+  "nodejs_eventloop_lag_mean_seconds",
+  "nodejs_eventloop_lag_min_seconds",
+  "nodejs_eventloop_lag_p50_seconds",
+  "nodejs_eventloop_lag_p90_seconds",
+  "nodejs_eventloop_lag_p99_seconds",
+  "nodejs_eventloop_lag_seconds",
+  "nodejs_eventloop_lag_stddev_seconds",
+  "nodejs_external_memory_bytes",
+  "nodejs_gc_duration_seconds",
+  "nodejs_heap_size_total_bytes",
+  "nodejs_heap_size_used_bytes",
+  "nodejs_heap_space_size_available_bytes",
+  "nodejs_heap_space_size_total_bytes",
+  "nodejs_heap_space_size_used_bytes",
+  "nodejs_version_info",
+  "oneapp_holocron_module_map_poll_consecutive_errors_total",
+  "oneapp_holocron_module_map_poll_total",
+  "oneapp_holocron_module_map_poll_wait_seconds",
+  "oneapp_version_info",
+  "process_cpu_seconds_total",
+  "process_cpu_system_seconds_total",
+  "process_cpu_user_seconds_total",
+  "process_heap_bytes",
+  "process_max_fds",
+  "process_open_fds",
+  "process_resident_memory_bytes",
+  "process_start_time_seconds",
+  "process_virtual_memory_bytes",
+]
+`;
+
 exports[`Tests that require Docker setup one-app successfully started one-app server provides reporting routes client reported errors logs errors when reported to /_/report/errors 1`] = `"reported client error"`;
 
 exports[`Tests that require Docker setup one-app successfully started one-app server provides reporting routes csp-violations reported to server logs violations reported to /_/report/errors 1`] = `"CSP Violation: {\\\\n  \\\\\\"csp-report\\\\\\": {\\\\n    \\\\\\"document-uri\\\\\\": \\\\\\"bad.example.com"`;
