@@ -9,21 +9,21 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@americanexpress/one-app-ducks": "^4.0.0",
+    "@americanexpress/one-app-ducks": "^4.0.1",
     "content-security-policy-builder": "^2.1.0",
     "holocron": "^1.1.0",
     "holocron-module-route": "^1.1.0",
     "immutable": "^3.8.2",
     "ip": "^1.1.5",
     "prop-types": "^15.5.9",
-    "react": "^16.4.2",
+    "react": "^16.13.1",
     "react-helmet": "^5.2.1",
-    "react-redux": "^7.1.1",
+    "react-redux": "^7.2.0",
     "redux": "^3.0.6"
   },
   "devDependencies": {
-    "@americanexpress/one-app-bundler": "^6.0.0",
-    "babel-preset-amex": "^3.1.0",
+    "@americanexpress/one-app-bundler": "^6.6.0",
+    "babel-preset-amex": "^3.3.0",
     "rimraf": "^2.5.2"
   }
 }
