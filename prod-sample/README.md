@@ -55,3 +55,13 @@ local CDN server.
 Similarly, the source code to any
 existing Modules inside the `sample-modules` directory can be modified to then be built
 and bundled from source when `npm run start:prod-sample` is run.
+
+## Updating Sample Modules
+
+To keep the sample modules updated and safely do so without breaking changes,
+the `prod-sample/update-sample-modules.sh` runs through each version of the
+sample modules and uses `npm update` in each one. To do this, you can run:
+
+```bash
+sh prod-sample/update-sample-modules.sh
+```
