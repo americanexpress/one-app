@@ -1,6 +1,7 @@
 ---
 name: Feature request
 about: Create a feature request for one-app
+labels: 'enhancement, feature-request'
 ---
 
 # 💡 Feature request
