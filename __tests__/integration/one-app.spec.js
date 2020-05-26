@@ -950,6 +950,7 @@ describe('Tests that require Docker setup', () => {
         const oneAppVersionRegExp = /\/([^/]+)(?:\/i18n)?\/[^/]*\.js$/;
 
         /* eslint-disable implicit-arrow-linebreak */
+        // TODO: refactor into readable parts
         function _getCacheEntries(done) {
           caches
             // we get all the names of the cache stores in use
