@@ -1,6 +1,7 @@
 ---
 name: Bug report
 about: Create a bug report for one-app
+labels: bug
 ---
 
 # 🐞 Bug Report
