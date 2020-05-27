@@ -277,10 +277,10 @@ describe('onModuleLoad', () => {
   });
 
   it('validates csp added to the root module', () => {
-    const callOnModuleLoad = () => (onModuleLoad({
+    const callOnModuleLoad = () => onModuleLoad({
       module: {},
       moduleName: 'some-root',
-    }));
+    });
 
     expect(callOnModuleLoad).toThrowErrorMatchingSnapshot();
   });

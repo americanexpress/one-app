@@ -65,7 +65,7 @@ function getBaseEntry(level) {
     application,
     device,
     level: nodeLevelToSchemaLevel[level],
-    timestamp: (new Date()).toISOString(),
+    timestamp: new Date().toISOString(),
   };
 }
 
@@ -98,7 +98,7 @@ function leadingStringWithError(level, ...args) {
   const entry = getBaseEntry(level);
   entry.error = generateErrorField(args[1]);
   if (args.length === 2) {
-    ([entry.message] = args);
+    [entry.message] = args;
   } else {
     entry.message = util.format(...args);
   }

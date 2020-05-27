@@ -27,7 +27,7 @@ export default {
     const { cookies } = req;
 
     clonedLog.request.metaData = {
-      userId: cookies ? (cookies.userId || null) : undefined,
+      userId: cookies ? cookies.userId || null : undefined,
       ...clonedLog.request.metaData,
     };
 

@@ -92,7 +92,7 @@ export default function createRequestHtmlFragment({ createRoutes }) {
         }
       }
 
-      const renderMethod = (disableScripts || renderPartialOnly)
+      const renderMethod = disableScripts || renderPartialOnly
         ? renderForStaticMarkup : renderForString;
 
       /* eslint-disable react/jsx-props-no-spreading */

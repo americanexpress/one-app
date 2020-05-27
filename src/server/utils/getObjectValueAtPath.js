@@ -17,8 +17,8 @@
 const getObjectValueAtPath = (obj, path, defaultValue) => {
   const result = path.split(/[[\].]+?/)
     .filter(Boolean)
-    .reduce((res, key) => ((res !== null && res !== undefined) ? res[key] : res), obj);
-  return (result === undefined || result === obj) ? defaultValue : result;
+    .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
+  return result === undefined || result === obj ? defaultValue : result;
 };
 
 export default getObjectValueAtPath;

@@ -29,7 +29,7 @@ export default {
     const { cookies } = req;
 
     clonedLog.request.metaData = {
-      guuid: cookies ? (cookies.guuid || null) : undefined,
+      guuid: cookies ? cookies.guuid || null : undefined,
       ...clonedLog.request.metaData,
     };
 
