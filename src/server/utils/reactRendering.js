@@ -15,7 +15,7 @@
  */
 
 import { renderToString, renderToStaticMarkup } from 'react-dom/server';
-import Helmet from 'react-helmet';
+import { Helmet } from 'react-helmet';
 
 Helmet.canUseDOM = false;
 

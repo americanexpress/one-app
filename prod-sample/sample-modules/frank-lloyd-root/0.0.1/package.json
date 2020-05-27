@@ -17,7 +17,7 @@
     "ip": "^1.1.5",
     "prop-types": "^15.5.9",
     "react": "^16.4.2",
-    "react-helmet": "^5.2.1",
+    "react-helmet": "^6.0.0",
     "react-redux": "^7.1.1",
     "redux": "^3.0.6"
   },
