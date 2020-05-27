@@ -17,7 +17,7 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
 import { renderToString, renderToStaticMarkup } from 'react-dom/server';
-import Helmet from 'react-helmet';
+import { Helmet } from 'react-helmet';
 
 import { renderForString, renderForStaticMarkup } from '../../../src/server/utils/reactRendering';
 
