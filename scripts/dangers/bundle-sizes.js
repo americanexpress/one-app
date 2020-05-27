@@ -54,9 +54,9 @@ function humanSize(bytes) {
     return `${bytes}B`;
   }
   if (bytes < ONE_MB) {
-    return `${(Math.floor(bytes / (ONE_KB / 10)) / 10)}KB`;
+    return `${Math.floor(bytes / (ONE_KB / 10)) / 10}KB`;
   }
-  return `${(Math.floor(bytes / (ONE_MB / 10)) / 10)}MB`;
+  return `${Math.floor(bytes / (ONE_MB / 10)) / 10}MB`;
 }
 
 function getGzipSize(filePath) {
