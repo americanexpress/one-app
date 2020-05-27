@@ -14,8 +14,8 @@
  * permissions and limitations under the License.
  */
 
-export default process.env.NODE_ENV === 'development' ? (
-  function cspViolation(req, res) {
+export default process.env.NODE_ENV === 'development'
+  ? function cspViolation(req, res) {
     const violation = req.body && req.body['csp-report'];
     if (!violation) {
       console.warn('CSP Violation reported, but no data received');
@@ -32,10 +32,8 @@ export default process.env.NODE_ENV === 'development' ? (
     }
     res.status(204).end();
   }
-) : (
-  function cspViolation(req, res) {
-    const violation = (req.body ? JSON.stringify(req.body, null, 2) : 'No data received!');
+  : function cspViolation(req, res) {
+    const violation = req.body ? JSON.stringify(req.body, null, 2) : 'No data received!';
     console.warn(`CSP Violation: ${violation}`);
     res.status(204).end();
-  }
-);
+  };
