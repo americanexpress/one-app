@@ -37,10 +37,8 @@ const legacyIndicators = [
   'MSIE', // IE
 ];
 
-const legacyUserAgent = (userAgent) => (
-  legacyIndicators.some((legacyIndicator) => userAgent.includes(legacyIndicator))
-);
-
+const legacyUserAgent = (userAgent) => legacyIndicators
+  .some((legacyIndicator) => userAgent.includes(legacyIndicator));
 function getChunkAssets(assetsByChunkName) {
   return Object
     .entries(assetsByChunkName)

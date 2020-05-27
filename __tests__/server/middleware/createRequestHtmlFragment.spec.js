@@ -25,7 +25,7 @@ import { getBreaker } from '../../../src/server/utils/createCircuitBreaker';
 import * as reactRendering from '../../../src/server/utils/reactRendering';
 
 jest.mock('@americanexpress/one-app-router', () => {
-  const reactRouter = require.requireActual('@americanexpress/one-app-router');
+  const reactRouter = jest.requireActual('@americanexpress/one-app-router');
   jest.spyOn(reactRouter, 'matchPromise');
   return reactRouter;
 });

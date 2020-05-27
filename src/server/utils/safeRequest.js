@@ -51,31 +51,28 @@ const restrictedRequestAttributes = {
 
 const moduleRequiredRestrictedAttributes = {};
 
-export const getRequiredRestrictedAttributes = () => (
-  Object.values(moduleRequiredRestrictedAttributes)
-    .reduce((acc, requiredAttributes) => {
-      Object.entries(requiredAttributes)
-        .forEach(([attribute, values]) => {
-          acc[attribute] = [...new Set(
-            [
-              ...acc[attribute] ? acc[attribute] : [],
-              ...values,
-            ]),
-          ];
-        });
-      return acc;
-    }, {})
-);
-
+export const getRequiredRestrictedAttributes = () => Object
+  .values(moduleRequiredRestrictedAttributes)
+  .reduce((acc, requiredAttributes) => {
+    Object.entries(requiredAttributes)
+      .forEach(([attribute, values]) => {
+        acc[attribute] = [...new Set(
+          [
+            ...acc[attribute] ? acc[attribute] : [],
+            ...values,
+          ]),
+        ];
+      });
+    return acc;
+  }, {});
 const validateRequiredRestrictedPresent = (restrictedAttributeAdditions) => {
   const requiredRestrictedAttributesRemoved = [];
   const requiredRestrictedAttributes = getRequiredRestrictedAttributes();
 
   Object.keys(requiredRestrictedAttributes).forEach((key) => {
     const requiredAttributesIncluded = restrictedAttributeAdditions[key]
-    && restrictedAttributeAdditions[key].every((requiredAttibute) => (
-      restrictedAttributeAdditions[key].includes(requiredAttibute))
-    );
+    && restrictedAttributeAdditions[key]
+      .every((requiredAttibute) => restrictedAttributeAdditions[key].includes(requiredAttibute));
 
     if (!requiredAttributesIncluded) {
       const missingRestrictedAttributes = requiredRestrictedAttributes[key];
@@ -105,12 +102,11 @@ export const validateSafeRequestRestrictedAttributes = (requiredAttributes, modu
   const missingRequestItemsMessages = [];
   Object.keys(requiredAttributes)
     // only validate for attibutes defined in restrictedRequestAttributes
-    .filter(((key) => Object.keys(restrictedRequestAttributes).includes(key)))
+    .filter((key) => Object.keys(restrictedRequestAttributes).includes(key))
     .forEach((key) => {
       const requiredItems = requiredAttributes[key];
-      const requestItemsIncluded = requiredItems.every((requiredValue) => (
-        restrictedRequestAttributes[key].includes(requiredValue)
-      ));
+      const requestItemsIncluded = requiredItems
+        .every((requiredValue) => restrictedRequestAttributes[key].includes(requiredValue));
 
       if (!requestItemsIncluded) {
         missingRequestItemsMessages.push(

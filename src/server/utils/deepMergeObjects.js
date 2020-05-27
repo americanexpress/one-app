@@ -18,7 +18,7 @@ const merge = (sourceObj, mergeObj) => {
   Object.keys(mergeObj).forEach((key) => {
     if (Object.prototype.hasOwnProperty.call(sourceObj, key)
                   && typeof sourceObj[key] === 'object'
-                  && !(Array.isArray(sourceObj[key]))) {
+                  && !Array.isArray(sourceObj[key])) {
       merge(sourceObj[key], mergeObj[key]);
     } else {
       // eslint-disable-next-line no-param-reassign

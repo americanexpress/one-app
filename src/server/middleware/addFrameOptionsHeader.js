@@ -22,9 +22,8 @@ export default function addFrameOptionsHeader(req, res, next) {
 
   const frameAncestorDomains = getCSP()['frame-ancestors'];
 
-  const matchedDomain = frameAncestorDomains && frameAncestorDomains.find((domain) => (
-    matcher.isMatch(referer, `${domain}/*`)
-  ));
+  const matchedDomain = frameAncestorDomains && frameAncestorDomains.find((domain) => matcher.isMatch(referer, `${domain}/*`)
+  );
 
   if (matchedDomain) {
     res.set('X-Frame-Options', `ALLOW-FROM ${referer}`);

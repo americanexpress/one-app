@@ -391,6 +391,15 @@ if (!global.BROWSER) {
 }
 ```
 
+`createSsrFetch` allows for customizing the fetch client used in `one-app` to perform server-side requests.
+
+For example, you may wish to forward cookies or headers from the initial page load request to all the requisite SSR API requests.
+
+**📘 More Information**
+* Example: [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
+* Example: [An SSR Fetch Client](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/createFrankLikeFetch.js)
+* Using SSR Fetch Client with [`Module.holocron.loadModuleData`](./Loading-Data.md#moduleholocronloadmoduledata)
+
 <!--ONE-DOCS-ID end-->
 
 ## `eventLoopDelayThreshold`
@@ -412,15 +421,6 @@ The `eventLoopDelayThreshold` directive accepts a number representing the thresh
 **📘 More Information**
 * [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
 * Library: [Opossum](https://nodeshift.dev/opossum/)
-
-`createSsrFetch` allows for customizing the fetch client used in `one-app` to perform server-side requests.
-
-For example, you may wish to forward cookies or headers from the initial page load request to all the requisite SSR API requests.
-
-**📘 More Information**
-* Example: [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
-* Example: [An SSR Fetch Client](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/createFrankLikeFetch.js)
-* Using SSR Fetch Client with [`Module.holocron.loadModuleData`](./Loading-Data.md#moduleholocronloadmoduledata)
 
 ## `validateStateConfig`
 **Module Type**

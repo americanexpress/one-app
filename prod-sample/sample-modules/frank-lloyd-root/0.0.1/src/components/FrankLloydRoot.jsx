@@ -37,9 +37,9 @@ export function FrankLloydRoot({ children, config }) {
   );
 }
 
-FrankLloydRoot.childRoutes = () => ([
+FrankLloydRoot.childRoutes = () => [
   <ModuleRoute path="success" component={HelloWorldComponent} />,
-]);
+];
 
 FrankLloydRoot.propTypes = {
   children: PropTypes.node.isRequired,

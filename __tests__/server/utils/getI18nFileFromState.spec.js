@@ -16,7 +16,7 @@
 
 import { fromJS } from 'immutable';
 
-const mockBuildMetaFile = require.requireActual('../../../.build-meta.json');
+const mockBuildMetaFile = jest.requireActual('../../../.build-meta.json');
 
 describe('getI18nFileFromState', () => {
   let getI18nFileFromState;

@@ -60,7 +60,7 @@ jest.mock('holocron/moduleRegistry', () => {
 
 jest.mock('holocron/loadModule.node', () => jest.fn(() => Promise.resolve(() => null)));
 jest.mock('fs', () => {
-  const actual = require.requireActual('fs');
+  const actual = jest.requireActual('fs');
   return {
     ...actual,
     readFileSync: jest.fn(actual.readFileSync),
