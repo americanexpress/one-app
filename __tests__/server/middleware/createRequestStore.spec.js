@@ -24,7 +24,7 @@ import { setClientModuleMapCache } from '../../../src/server/utils/clientModuleM
 
 jest.mock('../../../src/server/middleware/sendHtml');
 jest.mock('holocron', () => {
-  const actualHolocron = require.requireActual('holocron');
+  const actualHolocron = jest.requireActual('holocron');
   return {
     ...actualHolocron,
     createHolocronStore: jest.fn(actualHolocron.createHolocronStore),

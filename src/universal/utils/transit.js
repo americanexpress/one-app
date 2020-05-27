@@ -59,10 +59,9 @@ export default transit.withExtraHandlers([
     tag: 'url',
     class: global.BROWSER ? URL : require('url').Url,
     write: (value) => value.href,
-    read: (value) => (global.BROWSER ? (
-      new URL(value, global.location.href)
-    ) : (
-      require('url').parse(value)
-    )),
+    read: (value) => (global.BROWSER
+      ? new URL(value, global.location.href)
+      : require('url').parse(value)
+    ),
   },
 ]);

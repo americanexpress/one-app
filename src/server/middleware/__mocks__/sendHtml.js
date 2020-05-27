@@ -16,7 +16,7 @@
 
 jest.mock('../../utils/readJsonFile');
 
-const { renderStaticErrorPage: actualRenderStaticErrorPage } = require.requireActual('../sendHtml');
+const { renderStaticErrorPage: actualRenderStaticErrorPage } = jest.requireActual('../sendHtml');
 
 export const renderStaticErrorPage = jest.fn(actualRenderStaticErrorPage);
 

@@ -26,8 +26,8 @@ export default function getModulesToUpdate(curr, next) {
 
   const modulesUsingExternals = getModulesUsingExternals();
   const rootUpdated = !areModuleEntriesEqual(curr[rootModuleName], next[rootModuleName]);
-  return Object.keys(next).filter((moduleName) => (
-    !areModuleEntriesEqual(curr[moduleName], next[moduleName])
+  return Object.keys(next)
+    .filter((moduleName) => !areModuleEntriesEqual(curr[moduleName], next[moduleName])
     || (rootUpdated && modulesUsingExternals.includes(moduleName))
-  ));
+    );
 }

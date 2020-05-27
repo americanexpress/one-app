@@ -14,6 +14,7 @@ stats.json
 .sass_cache
 .webpack-stats*
 .build-meta.json
+.build-cache
 bundle.integrity.manifest.json
 *.tgz
 

@@ -14,4 +14,4 @@
  * permissions and limitations under the License.
  */
 
-export default jest.fn(require.requireActual('../cspViolation'));
+export default jest.fn(jest.requireActual('../cspViolation'));

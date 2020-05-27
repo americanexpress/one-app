@@ -41,13 +41,13 @@ export function FrankLloydRoot({ children, config }) {
   );
 }
 
-FrankLloydRoot.childRoutes = (store) => ([
+FrankLloydRoot.childRoutes = (store) => [
   <ModuleRoute path="vitruvius" moduleName="vitruvius-franklin" />,
   <ModuleRoute path="success" component={HelloWorldComponent} />,
   <ModuleRoute path="healthy-frank" moduleName="healthy-frank" />,
   <ModuleRoute path="demo/:moduleName" moduleName="preview-frank" />,
   <ModuleRoute path="html-partial/:locale/:moduleName" component={Partial} onEnter={onPartialRouteEnter(store)} />,
-]);
+];
 
 FrankLloydRoot.propTypes = {
   children: PropTypes.node.isRequired,

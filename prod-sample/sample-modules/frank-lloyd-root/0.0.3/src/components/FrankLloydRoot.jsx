@@ -48,12 +48,12 @@ export function FrankLloydRoot({ children, config }) {
   );
 }
 
-FrankLloydRoot.childRoutes = () => ([
+FrankLloydRoot.childRoutes = () => [
   <ModuleRoute path="vitruvius" moduleName="vitruvius-franklin" />,
   <ModuleRoute path="/success" component={HelloWorldComponent} />,
   <ModuleRoute path="healthy-frank" moduleName="healthy-frank" />,
   <ModuleRoute path="demo/:moduleName" moduleName="preview-frank" />,
-]);
+];
 
 FrankLloydRoot.propTypes = {
   children: PropTypes.node.isRequired,

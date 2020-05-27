@@ -20,7 +20,7 @@ function startTimer(obj) {
   // https://github.com/expressjs/morgan/blob/1533cdcc512f4daf20a93cb0ab3b18d6563a897f/index.js#L491
   /* eslint-disable no-param-reassign, no-underscore-dangle */
   obj._startAt = process.hrtime();
-  obj._startTime = (new Date()).toISOString();
+  obj._startTime = new Date().toISOString();
   /* eslint-enable no-param-reassign, no-underscore-dangle */
 }
 
