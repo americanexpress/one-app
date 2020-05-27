@@ -21,7 +21,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes';
 import { fromJS } from 'immutable';
 import ModuleRoute from 'holocron-module-route';
 import { holocronModule } from 'holocron';
-import Helmet from 'react-helmet';
+import { Helmet } from 'react-helmet';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import HelloWorldComponent from './HelloWorld';
