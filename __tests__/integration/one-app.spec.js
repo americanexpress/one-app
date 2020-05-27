@@ -934,7 +934,6 @@ describe('Tests that require Docker setup', () => {
             installing: null,
             active: {
               scriptURL: scriptUrl.replace(appAtTestUrls.fetchUrl, appAtTestUrls.browserUrl),
-              state: 'activated',
             },
             scope: `${appAtTestUrls.browserUrl}/`,
             updateViaCache: 'none',
