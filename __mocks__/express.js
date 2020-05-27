@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-const realExpress = require.requireActual('express');
+const realExpress = jest.requireActual('express');
 
 const express = jest.fn(() => {
   const app = realExpress();

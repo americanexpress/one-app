@@ -21,7 +21,7 @@ jest.mock('ip', () => ({
 jest.mock('yargs', () => ({ argv: { rootModuleName: 'my-module' } }));
 
 jest.mock('@americanexpress/env-config-utils', () => {
-  const actualRuntimeConfigUtils = require.requireActual('@americanexpress/env-config-utils');
+  const actualRuntimeConfigUtils = jest.requireActual('@americanexpress/env-config-utils');
   actualRuntimeConfigUtils.preprocessEnvVar = jest.fn();
 
   return actualRuntimeConfigUtils;
