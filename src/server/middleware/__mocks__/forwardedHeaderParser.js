@@ -14,4 +14,4 @@
  * permissions and limitations under the License.
  */
 
-export default jest.fn(require.requireActual('../forwardedHeaderParser').default);
+export default jest.fn(jest.requireActual('../forwardedHeaderParser').default);

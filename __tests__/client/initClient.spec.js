@@ -20,19 +20,19 @@ import { fromJS } from 'immutable';
 // the extra assertion counts in the specifications are due to the `expect` found here
 jest.mock('react', () => {
   const StrictMode = ({ children }) => children;
-  const react = require.requireActual('react');
+  const react = jest.requireActual('react');
   expect(react.StrictMode).toBeDefined();
   return { ...react, StrictMode };
 });
 
 jest.mock('@americanexpress/one-app-router', () => {
-  const reactRouter = require.requireActual('@americanexpress/one-app-router');
+  const reactRouter = jest.requireActual('@americanexpress/one-app-router');
   jest.spyOn(reactRouter, 'matchPromise');
   return reactRouter;
 });
 
 jest.mock('../../src/client/prerender', () => {
-  const prerender = require.requireActual('../../src/client/prerender');
+  const prerender = jest.requireActual('../../src/client/prerender');
   prerender.loadPrerenderScripts = jest.fn(() => Promise.resolve());
   prerender.moveHelmetScripts = jest.fn();
   prerender.loadServiceWorker = jest.fn();
@@ -40,7 +40,7 @@ jest.mock('../../src/client/prerender', () => {
 });
 
 jest.mock('react-dom', () => {
-  const reactDom = require.requireActual('react-dom');
+  const reactDom = jest.requireActual('react-dom');
   reactDom.hydrate = jest.fn();
   return reactDom;
 });
