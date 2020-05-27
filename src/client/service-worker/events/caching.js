@@ -41,11 +41,11 @@ import {
 // -> in a capture group. for this example: `name = \1`
 
 // groups: (modules/sha?) name / version / resource . bundle ? revision
-const moduleRegExp = /^https?(?::\/\/).*\/modules\/(?:[a-z0-9]+\/)?(?<name>[^/]+)\/(?<version>[^/]+)\/(?<resource>([a-zA-Z-~]+|\1)(?:\.\1)?)(?:\.chunk)?\.(?<bundle>(legacy\.)?browser)\.js(?:\?clientCacheRevision=(?<revision>[^/&]*))?$/;
+const moduleRegExp = /^https?(?::\/\/).*\/(?:modules\/?)(?:[a-z0-9]+\/)?(?<name>[^/]+)\/(?<version>[^/]+)\/(?<resource>([a-zA-Z-~]+|\1)(?:\.\1)?)(?:\.chunk)?\.(?<bundle>(legacy\.)?browser)\.js(?:\?clientCacheRevision=(?<revision>[^/&]*))?$/;
 // groups: (modules/sha?) name / version / locale / resource
-const langPackRegExp = /^https?(?::\/\/).*\/modules\/(?:[a-z0-9]+\/)?(?<name>[^/]+)\/(?<version>[^/]+)(?:\/locale)?\/(?<locale>(?<language>[a-z]{2,3})(?:-)?(?<country>[a-zA-Z]{1,})?)\/(?<resource>(\1|[^/]*))\.json$/;
+const langPackRegExp = /^https?(?::\/\/).*\/(?:modules\/?)(?:[a-z0-9]+\/)?(?<name>[^/]+)\/(?<version>[^/]+)(?:\/locale)?\/(?<locale>(?<language>[a-z]{2,3})(?:-)?(?<country>[a-zA-Z]{1,})?)\/(?<resource>(\1|[^/]*))\.json$/;
 // groups: (app) version / bundle / name
-const oneAppRegExp = /^https?(?::\/\/).*\/app\/(?<version>[^/]+)?\/(?:(?<bundle>legacy)\/)?(?:i18n\/)?(?<name>[^/]+)\.js$/;
+const oneAppRegExp = /^https?(?::\/\/).*\/(?:app\/?)(?<version>[^/]+)?\/(?:(?<bundle>legacy)\/)?(?:i18n\/)?(?<name>[^/]+)\.js$/;
 
 // - we compare the metadata between two resources in cache,
 // -> depending on the rules that we want, we can use the meta-data
