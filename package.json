@@ -111,7 +111,6 @@
     "reselect": "^4.0.0",
     "semver": "^6.3.0",
     "serialize-error": "^5.0.0",
-    "tough-cookie": "^3.0.1",
     "transit-immutable-js": "^0.8.0",
     "transit-js": "^0.8.861",
     "url-polyfill": "^1.1.9",
