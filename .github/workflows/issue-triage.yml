@@ -23,7 +23,7 @@ jobs:
           github.event.action == 'opened' &&
           steps.is_amex_member.outputs.result == 0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PA_TOKEN }}
           issue: ${{ github.event.issue.number }}
           comment: >
             Hey @${{ github.event.issue.user.login }}!
@@ -47,7 +47,7 @@ jobs:
           github.event.action == 'labeled' &&
           github.event.label.name == 'Needs Info'
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PA_TOKEN }}
           issue: ${{ github.event.issue.number }}
           comment: >
             Hi @${{ github.event.issue.user.login }}!
