@@ -12,8 +12,6 @@ jobs:
 
     env:
       NODE_ENV: production
-      ONE_CONFIG_ENV: development
-      ONE_CLIENT_ROOT_MODULE_NAME: frank-lloyd-root
 
     strategy:
       matrix:
