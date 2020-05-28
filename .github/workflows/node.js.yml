@@ -10,6 +10,11 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      NODE_ENV: production
+      ONE_CONFIG_ENV: development
+      ONE_CLIENT_ROOT_MODULE_NAME: frank-lloyd-root
+
     strategy:
       matrix:
         node-version: [12.x, 14.x]
@@ -17,12 +22,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
-      env:
-        NODE_ENV: production
-        ONE_CONFIG_ENV: development
-        ONE_CLIENT_ROOT_MODULE_NAME: frank-lloyd-root
-        # feature flags:
-        ONE_SERVICE_WORKER: 1
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
