@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.16.3, 12.x, 14.x]
+        node-version: [12.16.3]
 
     steps:
     - uses: actions/checkout@v2
@@ -30,4 +30,7 @@ jobs:
     - run: npm run test:lockfile
     - run: npm run test:lint
     - run: npm run test:unit
+    - run: npm run build:prod-sample
     - run: npm run test:integration
+    - run: echo "TODO:performance"
+    - run: echo "TODO:reporter"
