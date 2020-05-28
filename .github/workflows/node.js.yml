@@ -30,7 +30,17 @@ jobs:
     - run: npm run test:lockfile
     - run: npm run test:lint
     - run: npm run test:unit
-    - run: npm run build:prod-sample
-    - run: npm run test:integration
+    - run: sh prod-sample/build-sample-modules.sh
+    - run: sh prod-sample/generate-certs.sh "localhost" one-app
+    - run: sh prod-sample/generate-certs.sh "sample-cdn.frank" nginx
+    - run: sh prod-sample/generate-certs.sh "*.api.frank" api
+    - run: sh prod-sample/build-cdn.sh
+    - run: sh prod-sample/setup-docker.sh
+    -
+      env:
+        JEST_TEST_REPORT_PATH: ./test-results/integration-test-report.html
+      run: node_modules/.bin/jest --config jest.integration.config.js --forceExit
+    # - run: npm run build:prod-sample
+    # - run: npm run test:integration
     - run: echo "TODO:performance"
     - run: echo "TODO:reporter"

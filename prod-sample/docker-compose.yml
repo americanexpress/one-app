@@ -4,12 +4,6 @@ networks:
   one-app-at-test-network:
 services:
   one-app:
-    build:
-      context: ../
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
     # tags the built image as:
     image: one-app:at-test
     expose:

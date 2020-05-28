@@ -19,12 +19,11 @@ module.exports = {
   testEnvironment: 'node',
   testResultsProcessor: 'amex-jest-preset/html-report-creator',
   cacheDirectory: '<rootDir>/.jest-cache',
-  roots: ['<rootDir>/__tests__'],
   setupFiles: [
     './test-setup.js',
   ],
-  testPathIgnorePatterns: [
-    '__tests__/integration/helpers',
+  testMatch: [
+    '<rootDir>/__tests__/integration/**/*.spec.js',
   ],
   testRunner: 'jest-circus/runner',
 };
