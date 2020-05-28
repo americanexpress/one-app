@@ -1,4 +1,4 @@
--e # Changelog
+# Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 * **build/server:** only transpile for node ([#161](https://github.com/americanexpress/one-app/issues/161)) ([48c25cd](https://github.com/americanexpress/one-app/commit/48c25cd))
 * **sendHtml/legacy:** only check user agent for ie ([#147](https://github.com/americanexpress/one-app/issues/147)) ([cc0aa95](https://github.com/americanexpress/one-app/commit/cc0aa95))
+* **metrics/update prom-client:** update prom-client for more dimensions ([#123](https://github.com/americanexpress/one-app/issues/123)) ([79f0e68](https://github.com/americanexpress/one-app/commit/79f0e68))
 
 
 ### BREAKING CHANGES
