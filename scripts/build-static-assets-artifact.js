@@ -20,7 +20,7 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const origMkdirp = require('mkdirp');
+const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
 
 const TEMP_STATIC_PATH = path.resolve(__dirname, '../.tmp-statics');
@@ -31,16 +31,6 @@ if (!DOCKER_IMAGE_LABEL) {
   // should be the result from `docker build --build-arg HTTPS_PROXY=$HTTPS_PROXY .` or whatever
   // temporary tag was used for that build
   throw new Error('docker image label to copy built static files from is required');
-}
-
-function mkdirp(dirPath) {
-  return new Promise((res, rej) => origMkdirp(dirPath, (err) => {
-    if (err) {
-      rej(err);
-    } else {
-      res();
-    }
-  }));
 }
 
 function removeDir(dirPath) {
