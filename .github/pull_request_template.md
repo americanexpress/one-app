@@ -18,6 +18,7 @@
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
 - [ ] Documentation (adding or updating documentation)
+- [ ] Dependency update
 
 ## Checklist:
 <!--- Go over all the following points, and put an `x` in all the boxes that apply. -->
