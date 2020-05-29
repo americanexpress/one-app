@@ -18,6 +18,7 @@ jobs:
         node-version: [12.16.3]
 
     steps:
+    # setup
     - uses: actions/checkout@v2
     - run: git remote set-branches --add origin master && git fetch
     - name: Use Node.js ${{ matrix.node-version }}
@@ -26,16 +27,19 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: NODE_ENV=development npm ci
     - run: npm run build --if-present
+    - run: npm run build:prod-sample
+    # - run: |
+    #     sh prod-sample/build-sample-modules.sh
+    #     sh prod-sample/generate-certs.sh "localhost" one-app
+    #     sh prod-sample/generate-certs.sh "sample-cdn.frank" nginx
+    #     sh prod-sample/generate-certs.sh "*.api.frank" api
+    #     sh prod-sample/build-cdn.sh
+    #     sh prod-sample/setup-docker.sh
+    # tests
     - run: npm run test:git-history
     - run: npm run test:lockfile
     - run: npm run test:lint
     - run: npm run test:unit
-    - run: sh prod-sample/build-sample-modules.sh
-    - run: sh prod-sample/generate-certs.sh "localhost" one-app
-    - run: sh prod-sample/generate-certs.sh "sample-cdn.frank" nginx
-    - run: sh prod-sample/generate-certs.sh "*.api.frank" api
-    - run: sh prod-sample/build-cdn.sh
-    - run: sh prod-sample/setup-docker.sh
     -
       env:
         JEST_TEST_REPORT_PATH: ./test-results/integration-test-report.html
