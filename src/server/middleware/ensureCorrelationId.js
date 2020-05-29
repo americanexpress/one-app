@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import uuidV4 from 'uuid/v4';
+import { v4 as uuidV4 } from 'uuid';
 
 export default function ensureCorrelationId(req, res, next) {
   if (!req.headers['correlation-id']) {
