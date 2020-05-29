@@ -15,6 +15,4 @@ time {
       fi
     done
   done
-
-  cat static/module-map.json
 }
