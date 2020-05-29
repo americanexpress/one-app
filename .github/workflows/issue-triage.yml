@@ -1,0 +1,69 @@
+name: Issue Triage
+
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  welcome:
+    name: Welcome Comment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if American Express member
+        id: is_amex_member
+        if: github.event.action == 'opened'
+        uses: babel/actions/is-org-member@v2
+        with:
+          org: americanexpress
+          username: ${{ github.event.issue.user.login }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Welcome Comment
+        uses: babel/actions/create-comment@v2
+        if: |
+          github.event.action == 'opened' &&
+          steps.is_amex_member.outputs.result == 0
+        with:
+          token: ${{ secrets.PA_TOKEN }}
+          issue: ${{ github.event.issue.number }}
+          comment: >
+            Hey @${{ github.event.issue.user.login }}!
+            We really appreciate you taking the time to report an issue. The
+            collaborators on this project attempt to help as many people as
+            possible, but we're a limited number of volunteers, so it's
+            possible this won't be addressed swiftly.
+
+
+            If you need any help, you can request an [invite](https://join.slack.com/t/one-amex/shared_invite/enQtOTA0MzEzODExODEwLTlmYzI1Y2U2ZDEwNWJjOTAxYTlmZTYzMjUyNzQyZTdmMWIwZGJmZDM2MDZmYzVjMDk5OWU4OGIwNjJjZWRhMjY)
+            to our [Slack community](https://one-amex.slack.com) that typically always has someone
+            willing to help."
+
+  needs_info:
+    name: Needs Info
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Needs Info Comment
+        uses: babel/actions/create-comment@v2
+        if: |
+          github.event.action == 'labeled' &&
+          github.event.label.name == 'Needs Info'
+        with:
+          token: ${{ secrets.PA_TOKEN }}
+          issue: ${{ github.event.issue.number }}
+          comment: >
+            Hi @${{ github.event.issue.user.login }}!
+            This issue is missing some important information we'll need
+            to be able to reproduce this issue.
+
+
+            Please make sure you have the following information documented in
+            this ticket:
+
+            1. The current (incorrect) behavior you're seeing
+
+            2. The expected (correct) behavior
+
+            3. A [short, self-contained example](http://sscce.org/)
+
+
+            Please provide a link to a new and minimal repository with instructions on
+            how to build/replicate the issue.
