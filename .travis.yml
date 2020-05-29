@@ -3,6 +3,7 @@ env:
 language: node_js
 node_js:
   - "12"
+  - "14"
 services:
   - docker
 before_install:
@@ -10,10 +11,3 @@ before_install:
   # https://github.com/conventional-changelog/commitlint/issues/6
   - git remote set-branches --add origin master && git fetch
 install: NODE_ENV=development npm ci
-jobs:
-  include:
-    - stage: "Tests"
-      name: "Unit Tests"
-      script: npm run test:lint && npm run test:unit && npm run test:danger && npm run test:git-history
-    - name: "Integration Tests"
-      script: ./scripts/run-integration-tests.travis.sh
