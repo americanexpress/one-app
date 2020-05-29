@@ -1,4 +1,4 @@
-
+#!/bin/bash
 if [[ "${TRAVIS_BRANCH}" = "prepare-release" ]] || [[ "${TRAVIS_BRANCH}" = "master"  && "${TRAVIS_PULL_REQUEST}" = "false" ]]; then
   npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=$SURGE_DOMAIN
   echo $HEROKU_APP_URL >> sample-module-bundles/CORS && \

@@ -1,3 +1,4 @@
+#!/bin/bash
 time {
   for dir in prod-sample/sample-modules/*/
   do

@@ -1,3 +1,4 @@
+#!/bin/bash
 time {
   docker pull nginx
   # docker pull selenium/standalone-chrome

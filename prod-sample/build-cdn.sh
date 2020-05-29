@@ -1,3 +1,4 @@
+#!/bin/bash
 time {
   rm -rf prod-sample/nginx/origin-statics
   mkdir prod-sample/nginx/origin-statics
