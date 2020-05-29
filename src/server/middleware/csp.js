@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import uuidV4 from 'uuid/v4';
+import { v4 as uuidV4 } from 'uuid';
 import ip from 'ip';
 
 function parsePolicy(headerValue) {
