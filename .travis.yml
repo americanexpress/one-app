@@ -11,3 +11,11 @@ before_install:
   # https://github.com/conventional-changelog/commitlint/issues/6
   - git remote set-branches --add origin master && git fetch
 install: NODE_ENV=development npm ci
+script: |
+  npm run test:git-history
+  npm run test:lockfile
+  npm run test:unit
+  npm run build:prod-sample
+  ./scripts/run-integration-tests.travis.sh
+  npm run test:danger
+
