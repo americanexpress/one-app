@@ -18,7 +18,7 @@
 
 const path = require('path');
 const rollup = require('rollup');
-const resolve = require('@rollup/plugin-node-resolve');
+const resolve = require('@rollup/plugin-node-resolve').default;
 const babel = require('rollup-plugin-babel');
 
 async function buildServiceWorkerScripts({ dev = false, minify = true } = {}) {
