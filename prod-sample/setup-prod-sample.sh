@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -eo pipefail
-
 ORIGIN_STATICS_DIR=prod-sample/nginx/origin-statics
 SAMPLE_ASSETS_DIR=prod-sample/assets/
 SAMPLE_MODULES_DIR=prod-sample/sample-modules/
@@ -100,12 +98,12 @@ function setup_prod_sample {
   else
     export REMOTE_ONE_APP_ENVIRONMENT=$HEROKU_APP_URL
     build_origin_statics $SURGE_DOMAIN
-    setup_docker
-    npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=$SURGE_DOMAIN
-    echo $HEROKU_APP_URL >> sample-module-bundles/CORS
+    echo $HEROKU_APP_URL >> $ORIGIN_STATICS_DIR/CORS
 
     npx surge teardown $SURGE_DOMAIN
-    npx surge sample-module-bundles $SURGE_DOMAIN
+    npx surge $ORIGIN_STATICS_DIR $SURGE_DOMAIN
+
+    setup_docker
 
     docker login -u="$HEROKU_DOCKER_USERNAME" -p="$HEROKU_API_KEY" registry.heroku.com
     docker tag one-app:at-test registry.heroku.com/$HEROKU_APP_ID/web
