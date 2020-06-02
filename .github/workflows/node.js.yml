@@ -29,13 +29,7 @@ jobs:
     - run: npm run build --if-present
     # - run: sh prod-sample/setup-docker.sh
     # - run: npm run build:prod-sample
-    - run: |
-        sh prod-sample/build-sample-modules.sh
-        sh prod-sample/generate-certs.sh "localhost" one-app
-        sh prod-sample/generate-certs.sh "sample-cdn.frank" nginx
-        sh prod-sample/generate-certs.sh "*.api.frank" api
-        sh prod-sample/build-cdn.sh
-        sh prod-sample/setup-docker.sh
+    - run: sh prod-sample/setup-prod-sample.sh
     # tests
     - run: npm run test:git-history
     - run: npm run test:lockfile
