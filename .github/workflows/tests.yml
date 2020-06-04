@@ -27,19 +27,16 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: NODE_ENV=development npm ci
     - run: npm run build --if-present
-    # - run: sh prod-sample/setup-docker.sh
-    # - run: npm run build:prod-sample
-    - run: prod-sample/setup-prod-sample.sh
     # tests
     - run: npm run test:git-history
     - run: npm run test:lockfile
     - run: npm run test:lint
     - run: npm run test:unit
+    # build sample modules
+    - run: prod-sample/setup-prod-sample.sh
     -
       env:
         JEST_TEST_REPORT_PATH: ./test-results/integration-test-report.html
       run: node_modules/.bin/jest --config jest.integration.config.js --forceExit
-    # - run: npm run build:prod-sample
     # - run: npm run test:integration
     - run: echo "TODO:performance"
-    - run: echo "TODO:reporter"

@@ -66,7 +66,7 @@ function build_sample_modules {
 
 function build_statics {
   time {
-    echo "Cleaning statics and rebuilding"
+    echo -e "\nCleaning statics and rebuilding\n"
 
     rm -rf $ORIGIN_STATICS_DIR
     rm -rf $SAMPLE_MODULES_STATIC_DIR
@@ -141,7 +141,7 @@ function build_remote_prod_sample {
   echo -e "\nBuilding remote prod sample\n"
 
   export REMOTE_ONE_APP_ENVIRONMENT=$HEROKU_APP_URL
-  build_origin_statics $SURGE_DOMAIN
+  build_statics $SURGE_DOMAIN
   echo $HEROKU_APP_URL >> $ORIGIN_STATICS_DIR/CORS
 
   npx surge teardown $SURGE_DOMAIN
