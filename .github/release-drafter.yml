@@ -9,7 +9,13 @@ categories:
       - 'bugfix'
       - 'bug'
   - title: '🧰 Maintenance'
-    label: 'chore'
+    label: 
+      - 'chore'
+      - 'dependencies'
+  - title: '📖 Documentation'
+    label: 
+      - 'documentation'
+
 exclude-labels:
   - 'skip-release-drafter'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
@@ -17,3 +23,5 @@ template: |
   ## Changes
 
   $CHANGES
+
+
