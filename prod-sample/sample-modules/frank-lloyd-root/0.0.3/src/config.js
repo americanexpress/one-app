@@ -18,10 +18,16 @@ import csp from './csp';
 import pwa from './pwa';
 import createFrankLikeFetch from './createFrankLikeFetch';
 
+const remoteCdnUrl = process.env.SURGE_DOMAIN || '';
+const clientCdnUrl = process.env.NODE_ENV === 'development'
+  ? 'http://localhost:3001/static/'
+  : 'https://sample-cdn.frank/';
+const themeColor = '#FDB92D';
+const description = 'A Progressive Web App ready Holocron Module';
+
 export default {
   csp,
   pwa,
-  corsOrigins: [/\.example\.com$/],
   configureRequestLog: ({ req, log = {} }) => {
     const clonedLog = JSON.parse(JSON.stringify(log));
     const { cookies } = req;
@@ -34,6 +40,26 @@ export default {
     return clonedLog;
   },
   provideStateConfig: {
+    // by providing various web manifest values as config, they can both be used by
+    // the webManifest fn and the root module rendered content and achieve parity.
+    // For the root module, having the meta and links improves the browsing experience
+    // and can be used as fallback meta data where the webManifest is not supported.
+    description: {
+      server: description,
+      client: description,
+    },
+    themeColor: {
+      server: themeColor,
+      client: themeColor,
+    },
+    clientCdnUrl: {
+      server: clientCdnUrl,
+      client: clientCdnUrl,
+    },
+    remoteCdnUrl: {
+      server: remoteCdnUrl,
+      client: remoteCdnUrl,
+    },
     someApiUrl: {
       client: {
         development: 'https://internet-origin-dev.example.com/some-api/v1',

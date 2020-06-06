@@ -20,26 +20,27 @@ import PropTypes from 'prop-types';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import { fromJS } from 'immutable';
 import ModuleRoute from 'holocron-module-route';
+import { getModuleMap } from 'holocron';
 import { Helmet } from 'react-helmet';
 import { connect } from 'react-redux';
 import HelloWorldComponent from './HelloWorld';
 
 export function FrankLloydRoot({ children, config }) {
-  const cdnUrl = React.useMemo(() => config.get('cdnUrl'), [config]);
+  const baseUrl = React.useMemo(() => getModuleMap().getIn(['modules', 'frank-lloyd-root', 'baseUrl']), []);
   return (
     <React.Fragment>
       <Helmet
         title="Frank Lloyd Root"
         meta={[
           { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
-          { name: 'description', content: 'A Progressive Web App ready Holocron Module' },
-          { name: 'theme-color', content: '#FDB92D' },
+          { name: 'description', content: config.get('description') },
+          { name: 'theme-color', content: config.get('themeColor') },
         ]}
         link={[
           // favicon
-          { rel: 'icon', href: `${cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-192px.png` },
+          { rel: 'icon', href: `${baseUrl}assets/pwa-icon-192px.png` },
           // icon ideally with a size of 192px (or 180px), it is added as the home icon
-          { rel: 'apple-touch-icon', href: `${cdnUrl}modules/frank-lloyd-root/0.0.3/assets/pwa-icon-180px.png` },
+          { rel: 'apple-touch-icon', href: `${baseUrl}assets/pwa-icon-180px.png` },
         ]}
       />
       <pre className="value-provided-from-config">{ config.get('someApiUrl') }</pre>
@@ -50,7 +51,7 @@ export function FrankLloydRoot({ children, config }) {
 
 FrankLloydRoot.childRoutes = () => [
   <ModuleRoute path="vitruvius" moduleName="vitruvius-franklin" />,
-  <ModuleRoute path="/success" component={HelloWorldComponent} />,
+  <ModuleRoute path="success" component={HelloWorldComponent} />,
   <ModuleRoute path="healthy-frank" moduleName="healthy-frank" />,
   <ModuleRoute path="demo/:moduleName" moduleName="preview-frank" />,
 ];
