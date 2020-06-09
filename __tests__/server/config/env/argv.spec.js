@@ -40,15 +40,14 @@ let origModuleMapContents;
 
 beforeAll(() => {
   if (fs.existsSync(pathToModuleMap)) {
-    // eslint-disable-next-line import/no-dynamic-require
-    origModuleMapContents = require(pathToModuleMap);
+    origModuleMapContents = fs.readFileSync(pathToModuleMap, 'utf8');
     fs.unlinkSync(pathToModuleMap);
   }
 });
 
 afterAll(() => {
   if (origModuleMapContents) {
-    fs.writeFileSync(pathToModuleMap, JSON.stringify(origModuleMapContents));
+    fs.writeFileSync(pathToModuleMap, origModuleMapContents, 'utf8');
   }
 });
 
