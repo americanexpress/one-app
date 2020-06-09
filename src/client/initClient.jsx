@@ -15,7 +15,7 @@
  */
 
 import React from 'react';
-import { hydrate } from 'react-dom';
+import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { browserHistory, Router, matchPromise } from '@americanexpress/one-app-router';
 import { setModuleMap } from 'holocron';
@@ -63,7 +63,9 @@ export default async function initClient() {
     );
     /* eslint-enable react/jsx-props-no-spreading */
 
-    hydrate(
+    const { __render_mode__: renderMode = 'hydrate' } = global;
+
+    ReactDOM[renderMode](
       <App />,
       document.getElementById('root')
     );

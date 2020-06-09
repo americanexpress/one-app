@@ -27,7 +27,7 @@ import { getClientStateConfig } from '../../../src/server/utils/stateConfig';
 // eslint-disable-next-line import/named
 import transit from '../../../src/universal/utils/transit';
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
-import { getClientPWAConfig } from '../../../src/server/middleware/pwa';
+import { getClientPWAConfig } from '../../../src/server/middleware/pwa/config';
 
 jest.mock('react-helmet');
 jest.mock('holocron', () => ({
@@ -82,12 +82,13 @@ jest.mock('../../../src/server/utils/readJsonFile', () => (filePath) => {
       throw new Error('Couldn\'t find JSON file to read');
   }
 });
-jest.mock('../../../src/server/middleware/pwa', () => ({
+jest.mock('../../../src/server/middleware/pwa/config', () => ({
   getClientPWAConfig: jest.fn(() => ({
     serviceWorker: false,
     serviceWorkerScope: null,
     serviceWorkerScriptUrl: false,
     webManifestUrl: false,
+    offlineUrl: false,
   })),
 }));
 jest.mock('../../../src/universal/ducks/config');
@@ -414,11 +415,25 @@ describe('sendHtml', () => {
       expect(/<script.*nonce="54321"/.test(res.send.mock.calls[0][0])).toBe(true);
     });
 
+    describe('render modes', () => {
+      test('render mode is "hydrate" by default', () => {
+        sendHtml(req, res);
+        expect(res.send).toHaveBeenCalledTimes(1);
+        expect(res.send.mock.calls[0][0]).toContain("window.__render_mode__ = 'hydrate';");
+      });
+
+      test('render mode is "render" when set', () => {
+        sendHtml({ ...req, renderMode: 'render' }, res);
+        expect(res.send).toHaveBeenCalledTimes(1);
+        expect(res.send.mock.calls[0][0]).toContain("window.__render_mode__ = 'render';");
+      });
+    });
+
     describe('PWA config rendering', () => {
       it('includes __pwa_metadata__ with disabled values', () => {
         sendHtml(req, res);
         expect(res.send).toHaveBeenCalledTimes(1);
-        expect(/window\.__pwa_metadata__ = {"serviceWorker":false,"serviceWorkerScope":null,"serviceWorkerScriptUrl":false};/.test(res.send.mock.calls[0][0])).toBe(true);
+        expect(res.send.mock.calls[0][0]).toContain('window.__pwa_metadata__ = {"serviceWorker":false');
       });
 
       it('includes __pwa_metadata__ with enabled values', () => {
@@ -427,10 +442,13 @@ describe('sendHtml', () => {
           serviceWorkerScope: '/',
           serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
           webManifestUrl: '/_/pwa/manifest.webmanifest',
+          offlineUrl: '/_/pwa/shell',
         }));
         sendHtml(req, res);
         expect(res.send).toHaveBeenCalledTimes(1);
-        expect(/window\.__pwa_metadata__ = {"serviceWorker":true,"serviceWorkerScope":"\/","serviceWorkerScriptUrl":"\/_\/pwa\/service-worker\.js"};/.test(res.send.mock.calls[0][0])).toBe(true);
+        expect(res.send.mock.calls[0][0]).toContain(
+          'window.__pwa_metadata__ = {"serviceWorker":true,"serviceWorkerScope":"/","serviceWorkerScriptUrl":"/_/pwa/service-worker.js","webManifestUrl":"/_/pwa/manifest.webmanifest","offlineUrl":"/_/pwa/shell"};'
+        );
         expect(/<link rel="manifest" href="\/_\/pwa\/manifest\.webmanifest">/.test(res.send.mock.calls[0][0])).toBe(true);
       });
     });

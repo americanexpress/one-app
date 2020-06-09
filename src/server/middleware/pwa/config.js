@@ -112,6 +112,7 @@ export function getClientPWAConfig() {
     serviceWorkerScope,
     serviceWorkerScriptUrl: serviceWorker && '/_/pwa/service-worker.js',
     webManifestUrl: webManifest && '/_/pwa/manifest.webmanifest',
+    offlineUrl: serviceWorker && '/_/pwa/shell',
   };
 }
 
