@@ -31,19 +31,6 @@ jest.mock('../../../src/server/utils/stateConfig', () => ({
   restoreModuleStateConfig: jest.fn(),
 }));
 
-async function waitForPromiseThatShouldThrow(p) {
-  const shouldThrowCheckError = new Error('should have thrown');
-  try {
-    await p;
-    throw shouldThrowCheckError;
-  } catch (err) {
-    if (err === shouldThrowCheckError) {
-      throw shouldThrowCheckError;
-    }
-    return err;
-  }
-}
-
 describe('pollModuleMap', () => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -179,7 +166,7 @@ describe('pollModuleMap', () => {
       // pollModuleMap run 1
       .mockImplementationOnce(() => { throw new Error('STDOUT pipe closed unexpectedly'); });
 
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
 
     expect(getModulesUsingExternals).toHaveBeenCalledTimes(1);
     expect(setModulesUsingExternals).toHaveBeenCalledTimes(1);
@@ -195,7 +182,7 @@ describe('pollModuleMap', () => {
       // pollModuleMap run 1
       .mockImplementationOnce(() => { throw new Error('STDOUT pipe closed unexpectedly'); });
 
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
     expect(backupModuleStateConfig).toHaveBeenCalled();
     expect(restoreModuleStateConfig.mock.calls).toMatchSnapshot();
   });
@@ -205,7 +192,7 @@ describe('pollModuleMap', () => {
 
     getModulesUsingExternals.mockImplementationOnce(() => { throw new Error('failed to get modules using externals'); });
 
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
     expect(getModulesUsingExternals).toHaveBeenCalledTimes(1);
     expect(setModulesUsingExternals).not.toHaveBeenCalled();
   });
@@ -217,7 +204,7 @@ describe('pollModuleMap', () => {
       .mockImplementationOnce(() => { /* noop a few times */ })
       // pollModuleMap run 1
       .mockImplementationOnce(() => { throw new Error('STDOUT pipe closed unexpectedly'); });
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
     expect(setTimeout.mock.calls[0][0]).toBe(pollModuleMap);
@@ -245,7 +232,7 @@ describe('pollModuleMap', () => {
     expect(setTimeout).toHaveBeenCalledTimes(2);
     expect(setTimeout.mock.calls[1][0]).toBe(pollModuleMap);
 
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(3);
     expect(setTimeout.mock.calls[2][0]).toBe(pollModuleMap);
     expect(setTimeout.mock.calls[2][1]).toBe(MIN_POLL_TIME);
@@ -266,7 +253,7 @@ describe('pollModuleMap', () => {
     expect(setTimeout).toHaveBeenCalledTimes(2);
     expect(setTimeout.mock.calls[1][0]).toBe(pollModuleMap);
 
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(3);
     expect(setTimeout.mock.calls[2][0]).toBe(pollModuleMap);
     expect(setTimeout.mock.calls[2][1]).toBe(MIN_POLL_TIME);
@@ -287,7 +274,7 @@ describe('pollModuleMap', () => {
     expect(setTimeout).toHaveBeenCalledTimes(2);
     expect(setTimeout.mock.calls[1][0]).toBe(pollModuleMap);
 
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(3);
     expect(setTimeout.mock.calls[2][0]).toBe(pollModuleMap);
     expect(setTimeout.mock.calls[2][1]).toBe(MIN_POLL_TIME);
@@ -382,7 +369,7 @@ describe('pollModuleMap', () => {
     const { default: pollModuleMap } = load();
     loadModulesPromise = Promise.reject(new Error('sample test error'));
     console.error.mockImplementationOnce(() => { throw new Error('STDERR pipe closed unexpectedly'); });
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
   });
@@ -396,15 +383,15 @@ describe('pollModuleMap', () => {
 
     loadModulesPromise = Promise.reject(new Error('sample test error'));
 
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(1);
     expect(setTimeout.mock.calls[0][0]).toBe(pollModuleMap);
 
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(2);
     expect(setTimeout.mock.calls[1][0]).toBe(pollModuleMap);
 
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(3);
     expect(setTimeout.mock.calls[2][0]).toBe(pollModuleMap);
   });
@@ -418,15 +405,15 @@ describe('pollModuleMap', () => {
 
     loadModulesPromise = Promise.reject(new Error('sample test error'));
 
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(1);
     expect(setTimeout.mock.calls[0][0]).toBe(pollModuleMap);
 
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(2);
     expect(setTimeout.mock.calls[1][0]).toBe(pollModuleMap);
 
-    await waitForPromiseThatShouldThrow(pollModuleMap());
+    await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(3);
     expect(setTimeout.mock.calls[2][0]).toBe(pollModuleMap);
   });
