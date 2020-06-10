@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="5.1.0"></a>
+# [5.1.0](https://github.com/americanexpress/one-app/compare/v5.0.0...v5.1.0) (2020-06-10)
+
+
+### Bug Fixes
+
+* **pwa/icons:** correct base url ([c6fbd58](https://github.com/americanexpress/one-app/commit/c6fbd58))
+
+
+### Features
+
+* **make-promises-safe:** treat unhandledRejection as uncaught exception ([#174](https://github.com/americanexpress/one-app/issues/174)) ([5fe0245](https://github.com/americanexpress/one-app/commit/5fe0245))
+
+
 <a name="5.0.0"></a>
 # [5.0.0](https://github.com/americanexpress/one-app/compare/v5.0.0-rc.5...v5.0.0) (2020-05-28)
 
