@@ -19,7 +19,6 @@
 import { Set as iSet, Map as iMap } from 'immutable';
 
 import transit from '../../universal/utils/transit';
-import { setConfig } from '../../universal/ducks/config';
 import jsonStringifyForScript from '../utils/jsonStringifyForScript';
 import { getClientStateConfig } from '../utils/stateConfig';
 import getI18nFileFromState from '../utils/getI18nFileFromState';
@@ -293,7 +292,6 @@ export default function sendHtml(req, res) {
     // replace server specific config with client specific config (api urls and such)
     const clientConfig = getClientStateConfig();
     const { webManifestUrl, ...pwaMetadata } = getClientPWAConfig();
-    store.dispatch(setConfig(clientConfig));
     const cdnUrl = clientConfig.cdnUrl || '/_/static/';
     const clientInitialState = store.getState();
     const appBundlesURLPrefix = `${cdnUrl}app/${buildVersion}`;

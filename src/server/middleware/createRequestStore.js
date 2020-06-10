@@ -16,6 +16,7 @@
 
 import { createHolocronStore } from 'holocron';
 import { fromJS, Set as iSet } from 'immutable';
+import { setConfig } from '../../universal/ducks/config';
 
 import { renderStaticErrorPage } from './sendHtml';
 import createEnhancer from '../../universal/enhancers';
@@ -57,6 +58,9 @@ export default function createRequestStore(
         localsForBuildInitialState,
         extraThunkArguments: { fetchClient },
       });
+
+      // re-set the client config before rendering the html fragment/document
+      store.dispatch(setConfig(clientConfig));
 
       // TODO: namespace?
       // use the store as a global for the request
