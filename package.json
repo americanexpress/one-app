@@ -95,6 +95,7 @@
     "immutable": "^4.0.0-rc.12",
     "ip": "^1.1.5",
     "lean-intl": "^4.2.2",
+    "make-promises-safe": "^5.1.0",
     "matcher": "^3.0.0",
     "opossum": "^5.0.0",
     "opossum-prometheus": "^0.1.0",
