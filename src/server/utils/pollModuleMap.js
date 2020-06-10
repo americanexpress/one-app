@@ -164,7 +164,6 @@ async function pollModuleMap() {
     } catch (resetPollTimeOrReportingErrorPollingError) {
       currentPollTime = MIN_POLL_TIME;
     }
-    throw pollingError;
   } finally {
     setTimeoutWithoutBlockingStopping(pollModuleMap, currentPollTime);
   }
