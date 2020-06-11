@@ -1223,7 +1223,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             const response = await fetch(`${appInstanceUrls.fetchUrl}/html-partial/en-US/frank-the-parrot?message=Hello!`, defaultFetchOpts);
             const body = await response.text();
             expect(body).toBe(
-              '<style class="ssr-css">.frank-lloyd-root__styles__stylish___2aiGw{color:orchid}</style><pre class="value-provided-from-config">https://intranet-origin-dev.example.com/some-api/v1</pre><span class="message">Hello!</span>'
+              '<style class="ssr-css">.frank-lloyd-root__styles__stylish___2aiGw{color:orchid}</style><pre class="value-provided-from-config">https://internet-origin-dev.example.com/some-api/v1</pre><span class="message">Hello!</span>'
             );
           });
         });
