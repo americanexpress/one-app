@@ -929,7 +929,7 @@ describe('Tests that require Docker setup', () => {
         });
 
         test('service worker has a valid registration', async () => {
-          expect.assertions(1);
+          expect.assertions(2);
 
           await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
@@ -948,6 +948,13 @@ describe('Tests that require Docker setup', () => {
             scope: `${appAtTestUrls.browserUrl}/`,
             updateViaCache: 'none',
           });
+
+          // eslint-disable-next-line prefer-arrow-callback
+          const cacheKeys = await browser.executeAsync(function getCacheKeys(done) {
+            caches.keys().then(done);
+          });
+
+          expect(cacheKeys).toEqual(['__sw/offline']);
         });
       });
 
@@ -968,7 +975,7 @@ describe('Tests that require Docker setup', () => {
         });
 
         test('service worker is no longer registered and removed with root module change', async () => {
-          expect.assertions(1);
+          expect.assertions(2);
 
           await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
@@ -978,6 +985,13 @@ describe('Tests that require Docker setup', () => {
           });
 
           expect(result).toBe(null);
+
+          // eslint-disable-next-line prefer-arrow-callback
+          const cacheKeys = await browser.executeAsync(function getCacheKeys(done) {
+            caches.keys().then(done);
+          });
+
+          expect(cacheKeys).toEqual([]);
         });
       });
     });
