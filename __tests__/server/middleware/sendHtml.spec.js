@@ -415,6 +415,7 @@ describe('sendHtml', () => {
       expect(/<script.*nonce="54321"/.test(res.send.mock.calls[0][0])).toBe(true);
     });
 
+
     describe('render modes', () => {
       test('render mode is "hydrate" by default', () => {
         sendHtml(req, res);
@@ -426,6 +427,14 @@ describe('sendHtml', () => {
         sendHtml({ ...req, renderMode: 'render' }, res);
         expect(res.send).toHaveBeenCalledTimes(1);
         expect(res.send.mock.calls[0][0]).toContain("window.__render_mode__ = 'render';");
+      });
+    });
+
+    describe('dynamic chunks', () => {
+      it('does not add service-worker-client.js to the document script tags', () => {
+        sendHtml(req, res);
+        expect(res.send).toHaveBeenCalledTimes(1);
+        expect(res.send.mock.calls[0][0]).not.toContain('service-worker-client.js');
       });
     });
 
