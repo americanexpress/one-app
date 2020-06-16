@@ -121,7 +121,7 @@
   "devDependencies": {
     "@americanexpress/one-app-dev-cdn": "^3.3.0",
     "@americanexpress/one-app-dev-proxy": "^1.0.0",
-    "@americanexpress/one-service-worker": "^1.0.1",
+    "@americanexpress/one-service-worker": "^1.0.3",
     "@babel/cli": "^7.10.1",
     "@babel/core": "^7.10.1",
     "@babel/node": "^7.10.1",
