@@ -123,7 +123,7 @@
     "@americanexpress/one-app-dev-proxy": "^1.0.0",
     "@americanexpress/one-service-worker": "^1.0.1",
     "@babel/cli": "^7.10.1",
-    "@babel/core": "^7.10.1",
+    "@babel/core": "^7.10.2",
     "@babel/node": "^7.10.1",
     "@babel/register": "^7.10.1",
     "@commitlint/cli": "^8.3.5",
