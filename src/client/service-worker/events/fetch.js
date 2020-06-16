@@ -24,7 +24,7 @@ import {
 
 import { OFFLINE_CACHE_NAME } from '../constants';
 
-export default function fetchMiddleware() {
+export default function createFetchMiddleware() {
   return createMiddleware([
     appShell({
       route: '/_/pwa/shell',

@@ -27,10 +27,11 @@ import sendHtml from '../sendHtml';
 import { getServerPWAConfig } from './config';
 
 async function appShellMiddleware(req, res, next) {
-  const initialState = req.store.getState();
+  const { store: { getState, dispatch } } = req;
+  const initialState = getState();
   const rootModuleName = initialState.getIn(['config', 'rootModuleName']);
 
-  await req.store.dispatch(composeModules([{ name: rootModuleName }]));
+  await dispatch(composeModules([{ name: rootModuleName }]));
 
   const { renderedString, helmetInfo } = renderForStaticMarkup(
     <Provider store={req.store}>
@@ -45,26 +46,22 @@ async function appShellMiddleware(req, res, next) {
   next();
 }
 
-function composeMiddleware(middlewareStack) {
-  return async function composition(req, res, next) {
-    await (async function stackIterator(stack) {
-      const middleware = stack.shift();
-      await middleware(req, res, stack.length === 0 ? next : stackIterator.bind(null, stack));
-    }([...middlewareStack]));
-  };
-}
-
 export default function createOfflineMiddleware(oneApp) {
-  const middlewareStack = composeMiddleware([
+  const middlewareStack = [
     addFrameOptionsHeader,
     createRequestStore(oneApp),
     appShellMiddleware,
     sendHtml,
-  ]);
+  ];
 
   return async function offlineMiddleware(req, res, next) {
     const { serviceWorker } = getServerPWAConfig();
     if (serviceWorker === false) next();
-    else await middlewareStack(req, res, next);
+    else {
+      await (async function stackIterator(stack) {
+        const middleware = stack.shift();
+        await middleware(req, res, stack.length === 0 ? next : stackIterator.bind(null, stack));
+      }([...middlewareStack]));
+    }
   };
 }
