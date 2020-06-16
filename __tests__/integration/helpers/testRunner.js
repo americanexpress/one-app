@@ -88,6 +88,7 @@ const setUpTestRunner = async ({ oneAppLocalPortToUse, oneAppMetricsLocalPortToU
     logLevel: 'silent',
     protocol: 'http',
     hostname: 'localhost',
+    path: '/wd/hub',
     port: seleniumServerPort,
     capabilities: {
       'goog:chromeOptions': {
