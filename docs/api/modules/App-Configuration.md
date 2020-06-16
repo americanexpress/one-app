@@ -245,9 +245,9 @@ be a `Function` and is passed the `clientConfig` as the only argument.
 One App supports offline navigation capabilities when the network is unavailable and the
 service worker is enabled. With a configured web app manifest and root module, One App
 clients can be installed as a PWA across devices and platforms.
-To enable installing an app, please set the value for `start_url` in the web manifest
-to load the route that is desired when an installed PWA is opened directly from the device;
-for the best experience, consider making a Holocron module route to match the `start_url`.
+To enable installing an app, please set the value for `start_url`, `icons` and `display`
+in the web manifest. If desired, a route can be used to match the `start_url` and used
+when an installed PWA is opened directly from the device.
 
 **Shape**
 ```js
