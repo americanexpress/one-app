@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="5.1.1"></a>
+## [5.1.1](https://github.com/americanexpress/one-app/compare/v5.1.0...v5.1.1) (2020-06-17)
+
+
+### Bug Fixes
+
+* **send-html:** ignore async chunks ([49a3826](https://github.com/americanexpress/one-app/commit/49a3826))
+
+
 <a name="5.1.0"></a>
 # [5.1.0](https://github.com/americanexpress/one-app/compare/v5.0.0...v5.1.0) (2020-06-10)
 
