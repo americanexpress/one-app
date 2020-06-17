@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
@@ -104,7 +104,7 @@
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-helmet": "^6.0.0",
+    "react-helmet": "^6.1.0",
     "react-redux": "^7.2.0",
     "redux": "^4.0.5",
     "redux-lifesaver": "^2.1.0",
@@ -128,7 +128,7 @@
     "@babel/register": "^7.10.1",
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
-    "@rollup/plugin-node-resolve": "^8.0.0",
+    "@rollup/plugin-node-resolve": "^8.0.1",
     "accepts": "^1.3.7",
     "acorn": "^7.2.0",
     "amex-jest-preset-react": "^6.1.0",
@@ -170,7 +170,7 @@
     "supertest": "^4.0.2",
     "surge": "^0.21.3",
     "tar": "^6.0.2",
-    "webdriverio": "^5.23.0"
+    "webdriverio": "^6.1.17"
   },
   "husky": {
     "hooks": {
