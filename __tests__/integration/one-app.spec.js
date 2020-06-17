@@ -1196,23 +1196,22 @@ describe('Tests that can run against either local Docker setup or remote One App
             await browser.url(`${appInstanceUrls.browserUrl}/demo/franks-burgers`);
 
             const openerMessage = await browser.$('#franks-opening-line');
-            await openerMessage.waitForExist();
-
+            await openerMessage.waitForExist({ timeout: 50000 });
             expect(await openerMessage.getText()).toBe(
               'Welcome to Franks Burgers! The best burgers in town.'
             );
 
-            const btn = await browser.$('#order-burger-btn');
-            await btn.waitForExist();
             // before clicking to lazy load our chunk, ensure `franks-burger` does not exist
-            const franksBurgerNonExistent = await browser.$('#franks-burger');
-            await franksBurgerNonExistent.waitForExist(undefined, true);
+            const missingFranksBurger = await browser.$('#franks-burger');
+            const exists = await missingFranksBurger.isExisting();
+            expect(exists).toBeFalsy();
+
             // once confirmed chunk does not exist, click to load it
+            const btn = await browser.$('#order-burger-btn');
             await btn.click();
             // grab the chunk and wait for it to load
             const franksBurger = await browser.$('#franks-burger');
-            await franksBurger.waitForExist();
-
+            await franksBurger.waitForExist({ timeout: 50000 });
             await expect(franksBurger.getText()).resolves.toEqual('Burger');
           });
       });
