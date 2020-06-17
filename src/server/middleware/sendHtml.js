@@ -43,7 +43,7 @@ function getChunkAssets(assetsByChunkName) {
   return Object
     .entries(assetsByChunkName)
     // i18n is different per request, app needs to be the last chunk loaded
-    .filter(([chunkName]) => !chunkName.startsWith('i18n/') && chunkName !== 'app')
+    .filter(([chunkName]) => !chunkName.startsWith('i18n/') && !['app', 'service-worker-client'].includes(chunkName))
     .map(([, assets]) => (typeof assets === 'string' ? assets : assets[0]));
 }
 
