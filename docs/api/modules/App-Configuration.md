@@ -96,7 +96,7 @@ The `provideStateConfig` directive is useful for supplying string-based key valu
 
 > Server specific values used within state config are not isolated from the client side, as they are used
 > while rendering server side Holocron modules. Please use caution not to expose any sensitive data in a
-> Holocron module while using `state.get('config')` server-side while rendering markup in your module.
+> Holocron module when using `state.get('config')` server-side and rendering markup in your module.
 
 In practice, the state config supplied by a Root Module may look like this shape:
 
