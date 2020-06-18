@@ -92,6 +92,12 @@ if (!global.BROWSER) {
 
 The `provideStateConfig` directive is useful for supplying string-based key value settings per runtime (e.g. `client` or `server`) and per `environmentLevel` (e.g. QA, Prod, etc). The `environmentLevel` is specified in the [`ONE_CONFIG_ENV` environment variable](../server/Environment-Variables.md#one_config_env) when running the Server.
 
+**⚠️ Please Consider**
+
+> Server specific values used within state config are not isolated from the client side, as they are used
+> while rendering server side Holocron modules. Please use caution not to expose any sensitive data in a
+> Holocron module while using `state.get('config')` server-side while rendering markup in your module.
+
 In practice, the state config supplied by a Root Module may look like this shape:
 
 ```js
