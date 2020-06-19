@@ -37,11 +37,14 @@ jest.mock('../../src/universal/index');
 jest.mock('../../src/server/middleware/pwa', () => {
   const serviceWorker = jest.fn((req, res, next) => next());
   const webManifest = jest.fn((req, res, next) => next());
+  const offline = jest.fn((req, res, next) => next());
   return {
     serviceWorker,
     webManifest,
+    offline,
     serviceWorkerMiddleware: () => serviceWorker,
     webManifestMiddleware: () => webManifest,
+    offlineMiddleware: () => offline,
   };
 });
 jest.mock('../../mocks/scenarios', () => ({
@@ -109,6 +112,7 @@ describe('ssrServer', () => {
     let forwardedHeaderParser;
     let serviceWorker;
     let webManifest;
+    let offline;
 
     function loadServer() {
       ({ json } = require('body-parser'));
@@ -128,7 +132,7 @@ describe('ssrServer', () => {
       addFrameOptionsHeader = require('../../src/server/middleware/addFrameOptionsHeader').default;
       addCacheHeaders = require('../../src/server/middleware/addCacheHeaders').default;
       forwardedHeaderParser = require('../../src/server/middleware/forwardedHeaderParser').default;
-      ({ serviceWorker, webManifest } = require('../../src/server/middleware/pwa'));
+      ({ serviceWorker, webManifest, offline } = require('../../src/server/middleware/pwa'));
       const server = require('../../src/server/ssrServer').default;
 
       return server;
@@ -254,6 +258,18 @@ describe('ssrServer', () => {
         .get('/_/pwa/manifest.webmanifest')
         .end(() => {
           expect(webManifest).toBeCalled();
+          done();
+        });
+    });
+
+    it('should call offline middleware and other html middleware', (done) => {
+      request(loadServer())
+        .get('/_/pwa/shell')
+        .end(() => {
+          expect(addFrameOptionsHeader).toBeCalled();
+          expect(createRequestStore).toBeCalled();
+          expect(offline).toBeCalled();
+          expect(sendHtml).toBeCalled();
           done();
         });
     });
