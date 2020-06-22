@@ -19,13 +19,14 @@ import { on } from '@americanexpress/one-service-worker';
 import {
   createInstallMiddleware,
   createActivateMiddleware,
+  createFetchMiddleware,
 } from './events';
 import { ERROR_MESSAGE_ID_KEY } from './constants';
 
 try {
   on('install', createInstallMiddleware());
-
   on('activate', createActivateMiddleware());
+  on('fetch', createFetchMiddleware());
 } catch (error) {
   // due to the script body being able to terminate and cut off any
   // asynchronous behavior before it finishes executing, we need to rely on
