@@ -35,6 +35,7 @@ jest.mock('holocron', () => {
 holocron.getModuleMap.mockImplementation(() => fromJS({
   modules: {
     'test-root': {
+      baseUrl: 'https://example.com/cdn/test-root/2.2.2/',
       node: {
         url: 'https://example.com/cdn/test-root/2.2.2/test-root.node.js',
         integrity: '4y45hr',

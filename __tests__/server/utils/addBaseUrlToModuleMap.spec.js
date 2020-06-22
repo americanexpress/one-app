@@ -57,4 +57,22 @@ describe('addBaseUrlToModuleMap', () => {
       expect(module.baseUrl).toBe(`https://example.com/cdn/${moduleName}/1.0.0/`);
     });
   });
+
+  it('does not override the baseUrl key if already present in the module map', () => {
+    const moduleMapWithBaseUrl = {
+      ...moduleMap,
+      modules: {
+        ...moduleMap.modules,
+        'module-a': {
+          ...moduleMap.modules['module-a'],
+          baseUrl: 'https://example.com/languages/module-a/1.0.0/',
+        },
+      },
+    };
+    const updatedModuleMap = addBaseUrlToModuleMap(moduleMapWithBaseUrl);
+    const moduleA = updatedModuleMap.modules['module-a'];
+    const moduleB = updatedModuleMap.modules['module-b'];
+    expect(moduleA.baseUrl).toBe('https://example.com/languages/module-a/1.0.0/');
+    expect(moduleB.baseUrl).toBe('https://example.com/cdn/module-b/1.0.0/');
+  });
 });

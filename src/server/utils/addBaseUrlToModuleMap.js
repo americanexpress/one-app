@@ -14,6 +14,8 @@
  * permissions and limitations under the License.
  */
 
+/* The baseUrl key in the module map is used by one-app-ducks to construct
+the language pack URL pointing at the location of the language pack */
 const addBaseUrlToModuleMap = (moduleMap) => ({
   ...moduleMap,
   modules: Object.entries(moduleMap.modules).reduce((acc, [moduleName, moduleBundles]) => (
@@ -21,7 +23,7 @@ const addBaseUrlToModuleMap = (moduleMap) => ({
       ...acc,
       [moduleName]: {
         ...moduleBundles,
-        baseUrl: moduleBundles.node.url.replace(/[^/]+\.js$/i, ''),
+        baseUrl: moduleBundles.baseUrl ? moduleBundles.baseUrl : moduleBundles.node.url.replace(/[^/]+\.js$/i, ''),
       },
     }
   ), {}),
