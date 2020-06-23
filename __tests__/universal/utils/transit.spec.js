@@ -18,7 +18,6 @@ import url from 'url';
 import {
   Map, OrderedMap, List, Set, OrderedSet, Record,
 } from 'immutable';
-import { TimeoutError } from '../../../src/universal/utils/createTimeoutFetch';
 
 describe('transit', () => {
   let { default: transit } = require('../../../src/universal/utils/transit');
@@ -74,11 +73,6 @@ describe('transit', () => {
 
   it('should serialize an Error into an object', () => {
     const input = new Error('test');
-    expect(transform(input)).toEqual(input);
-  });
-
-  it('should serialize a TimeoutError into an object', () => {
-    const input = new TimeoutError();
     expect(transform(input)).toEqual(input);
   });
 

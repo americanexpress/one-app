@@ -17,11 +17,11 @@
 import { createHolocronStore } from 'holocron';
 import { getLocalePack, addErrorToReport } from '@americanexpress/one-app-ducks';
 import { compose } from 'redux';
+import { createTimeoutFetch } from '@americanexpress/fetch-enhancers';
 
 import createEnhancer from '../universal/enhancers';
 import reducer from '../universal/reducers';
 import transit from '../universal/utils/transit';
-import createTimeoutFetch from '../universal/utils/createTimeoutFetch';
 import { initializeServiceWorker } from './service-worker';
 
 export function initializeClientStore() {
