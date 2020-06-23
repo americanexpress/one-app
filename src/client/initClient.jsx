@@ -15,7 +15,7 @@
  */
 
 import React from 'react';
-import { hydrate } from 'react-dom';
+import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { browserHistory, Router, matchPromise } from '@americanexpress/one-app-router';
 import { setModuleMap } from 'holocron';
@@ -46,12 +46,16 @@ export default async function initClient() {
       return;
     }
 
+    const {
+      __pwa_metadata__: pwaConfig,
+      __render_mode__: renderMode = 'hydrate',
+    } = global;
+
     // we want to kick off service worker installation and store sync
     // as early as possible, while not blocking the app from rendering
     // so we let this async function run at its own pace and call it synchronously
     loadServiceWorker({
-      // eslint-disable-next-line no-underscore-dangle
-      config: global.__pwa_metadata__,
+      config: pwaConfig,
       dispatch: store.dispatch,
     });
 
@@ -63,7 +67,9 @@ export default async function initClient() {
     );
     /* eslint-enable react/jsx-props-no-spreading */
 
-    hydrate(
+    const render = renderMode === 'render' ? ReactDOM.render : ReactDOM.hydrate;
+
+    render(
       <App />,
       document.getElementById('root')
     );

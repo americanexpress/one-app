@@ -239,10 +239,21 @@ For the variety of service workers available, we have control to set its
 `scope` with the desired pathname and assign what url base the service worker
 can oversee.
 
+#### Web App Manifest
+
 The `webManifest` key is used to set up a [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Manifest)
 as part of the PWA group of technologies. It allows `one-app` to be installed onto a device
 with support for a more native experience using web technologies. The `webManifest` can also
 be a `Function` and is passed the `clientConfig` as the only argument.
+
+#### App Install and Offline Capability
+
+One App supports offline navigation capabilities when the network is unavailable and the
+service worker is enabled. With a configured web app manifest and root module, One App
+clients can be installed as a PWA across devices and platforms.
+To enable installing an app, please set the value for `start_url`, `icons` and `display`
+in the web manifest. If desired, a route can be used to match the `start_url` and used
+when an installed PWA is opened directly from the device.
 
 **Shape**
 ```js

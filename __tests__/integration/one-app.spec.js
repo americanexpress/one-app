@@ -862,9 +862,11 @@ describe('Tests that require Docker setup', () => {
     describe('progressive web app', () => {
       const scriptUrl = `${appAtTestUrls.fetchUrl}/_/pwa/service-worker.js`;
       const webManifestUrl = `${appAtTestUrls.fetchUrl}/_/pwa/manifest.webmanifest`;
+      const offlineUrl = `${appAtTestUrls.fetchUrl}/_/pwa/shell`;
 
       const fetchServiceWorker = () => fetch(scriptUrl, defaultFetchOptions);
       const fetchWebManifest = () => fetch(webManifestUrl, defaultFetchOptions);
+      const fetchOfflineShell = () => fetch(offlineUrl, defaultFetchOptions);
       const loadInitialRoot = async () => {
         await addModuleToModuleMap({
           moduleName: 'frank-lloyd-root',
@@ -888,13 +890,15 @@ describe('Tests that require Docker setup', () => {
 
       describe('default pwa state', () => {
         test('does not load PWA resources from server by default', async () => {
-          expect.assertions(2);
+          expect.assertions(3);
 
           const serviceWorkerResponse = await fetchServiceWorker();
           const webManifestResponse = await fetchWebManifest();
+          const offlineResponse = await fetchOfflineShell();
 
           expect(serviceWorkerResponse.status).toBe(404);
           expect(webManifestResponse.status).toBe(404);
+          expect(offlineResponse.status).toBe(404);
         });
       });
 
@@ -903,7 +907,7 @@ describe('Tests that require Docker setup', () => {
         beforeAll(loadPWARoot);
 
         test('loads PWA resources from server ', async () => {
-          expect.assertions(6);
+          expect.assertions(9);
 
           const serviceWorkerResponse = await fetchServiceWorker();
 
@@ -916,6 +920,12 @@ describe('Tests that require Docker setup', () => {
           expect(webManifestResponse.status).toBe(200);
           expect(webManifestResponse.headers.get('cache-control')).toBeDefined();
           expect(webManifestResponse.headers.get('content-type')).toEqual('application/manifest+json');
+
+          const offlineResponse = await fetchOfflineShell();
+
+          expect(offlineResponse.status).toBe(200);
+          expect(offlineResponse.headers.get('content-security-policy')).toBeDefined();
+          expect(offlineResponse.headers.get('content-type')).toEqual('text/html; charset=utf-8');
         });
 
         test('service worker has a valid registration', async () => {
@@ -946,13 +956,15 @@ describe('Tests that require Docker setup', () => {
         beforeAll(loadInitialRoot);
 
         test('does not load PWA resources from server after shutdown', async () => {
-          expect.assertions(2);
+          expect.assertions(3);
 
           const serviceWorkerResponse = await fetchServiceWorker();
           const webManifestResponse = await fetchWebManifest();
+          const offlineResponse = await fetchOfflineShell();
 
           expect(serviceWorkerResponse.status).toBe(404);
           expect(webManifestResponse.status).toBe(404);
+          expect(offlineResponse.status).toBe(404);
         });
 
         test('service worker is no longer registered and removed with root module change', async () => {
