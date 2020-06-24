@@ -15,7 +15,7 @@
  */
 
 import {
-  expiration, cacheRouter, appShell, match,
+  expiration, cacheRouter, appShell, match, remove, createCacheName,
 } from '@americanexpress/one-service-worker';
 
 import createFetchMiddleware from '../../../../src/client/service-worker/events/fetch';
@@ -36,19 +36,19 @@ function waitFor(asyncTarget, getTarget = () => asyncTarget.mock.calls) {
   return Promise.all(getTarget().reduce((array, next) => array.concat(next), []));
 }
 
-function createFetchEvent(url = '/index.html') {
+function createFetchRequestResponse(url) {
   const request = new Request(url);
   const response = new Response('body', { url: request.url });
-  ['json', 'text', 'clone'].forEach((method) => {
-    response[method] = response[method].bind(response);
-    jest.spyOn(response, method);
-  });
+  return [request, response];
+}
+
+function createFetchEvent(url = '/index.html') {
+  const [request, response] = createFetchRequestResponse(url);
   const event = new global.FetchEvent('fetch', {
     request,
   });
   event.response = response;
   ['waitUntil', 'respondWith'].forEach((method) => {
-    event[method] = event[method].bind(event);
     jest.spyOn(event, method);
   });
   event.waitForCompletion = async () => {
@@ -64,8 +64,6 @@ function createFetchEventsChainForURLS(middleware, urls = [], initEvent) {
     const event = createFetchEvent(url);
     if (typeof initEvent === 'function') {
       initEvent(event, index);
-    } else if (initEvent !== null) {
-      fetch.mockImplementationOnce(() => Promise.resolve(event.response));
     }
     middleware(event);
     await event.waitForCompletion();
@@ -107,15 +105,18 @@ function createServiceWorkerEnvironment(target = global) {
       .then((results) => (results && results.map((result) => result.clone())) || []);
   };
   // eslint-disable-next-line no-param-reassign
-  target.fetch = jest.fn(() => Promise.resolve({
-    json: jest.fn(() => Promise.resolve()),
-    text: jest.fn(() => Promise.resolve()),
-    // eslint-disable-next-line no-restricted-globals
-    clone: jest.fn(new Response(null, { url: self.location })),
-  }));
+  target.fetch = jest.fn((url) => {
+    const [, response] = createFetchRequestResponse(url);
+    return Promise.resolve(response);
+  });
 }
 
 describe('createFetchMiddleware', () => {
+  beforeAll(() => {
+    process.env.ONE_APP_BUILD_VERSION = '5.0.0';
+    process.env.HOLOCRON_MODULE_MAP = '{ "modules": {} }';
+  });
+
   test('createFetchMiddleware exports a function and calls middleware', () => {
     expect(createFetchMiddleware()).toBeInstanceOf(Function);
     expect(appShell).toHaveBeenCalledTimes(1);
@@ -164,12 +165,335 @@ describe('createFetchMiddleware', () => {
       ], (event, index) => {
         // eslint-disable-next-line no-param-reassign
         if (index === 0) event.request.mode = 'navigate';
-        fetch.mockImplementationOnce(() => Promise.resolve(event.response));
       });
 
       expect(fetch).toHaveBeenCalledTimes(0);
       events.forEach((event) => {
         expect(event.respondWith).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('caching', () => {
+    const setOneAppVersion = (version = '1.2.3-rc.4-abc123') => {
+      process.env.ONE_APP_BUILD_VERSION = version;
+    };
+    const setModuleMap = (moduleMap = { modules: {} }) => {
+      process.env.HOLOCRON_MODULE_MAP = JSON.stringify(moduleMap);
+    };
+
+    beforeEach(() => {
+      setOneAppVersion();
+      setModuleMap({
+        clientCacheRevision: '123',
+        modules: {
+          'test-root': {
+            baseUrl: 'https://example.com/cdn/modules/test-root/2.2.2',
+          },
+          'child-module': {
+            baseUrl: 'https://cdn.example.com/nested/cdn/path/modules/child-module/2.3.4/',
+          },
+          'alt-child-module': {
+            baseUrl: 'https://example.com/alt-child-module/3.4.5/',
+          },
+          'local-module': {
+            baseUrl: 'http://localhost:3001/static/modules/local-module/4.5.6/',
+          },
+        },
+      });
+    });
+
+    describe('not caching invalid urls', () => {
+      beforeAll(() => {
+        createServiceWorkerEnvironment();
+      });
+
+      test('does not match any of the preset routers and does nothing with expiration or invalidation', async () => {
+        const middleware = createFetchMiddleware();
+        const events = await createFetchEventsChainForURLS(middleware, [
+          // module urls
+          'https://example.com/index.html',
+          'https://example.com/index.browser.js',
+          'https://example.com/test-root.browser.js',
+          'https://example.com/modules/test-root.legacy.browser.js',
+          'https://example.com/modules/test-root/test-root.legacy.browser.js',
+          'https://example.com/modules/test-root/2.2.2/test-root.legacy.browser.js',
+          'https://example.com/test-root/Chunk.test-root.browser.js',
+        ]);
+
+        expect.assertions(3 * events.length);
+        events.forEach((event) => {
+          // expect no activity to cache the response or attribute meta-data
+          expect(event.waitUntil).not.toHaveBeenCalled();
+          // expect no responses from middleware
+          expect(event.respondWith).not.toHaveBeenCalled();
+          // expect nothing set on the cache
+          expect(caches.snapshot()).toEqual({});
+        });
+      });
+    });
+
+    describe('caching valid urls', () => {
+      let middleware;
+
+      beforeAll(() => {
+        createServiceWorkerEnvironment();
+        middleware = createFetchMiddleware();
+      });
+
+      const urls = new Map([
+        [
+          'one-app',
+          [
+            'https://example.com/cdn/app/1.2.3-rc.4-abc123/vendors.js',
+            'https://cdn.example.com/static/cdn/app/1.2.3-rc.4-abc123/app~vendors.js',
+            'https://cdn.example.com/cdn/app/1.2.3-rc.4-abc123/legacy/i18n/de-DE.js',
+            'https://example.com/cdn/app/1.2.3-rc.4-abc123/i18n/es-MX.js',
+            'https://example.com/_/static/app/1.2.3-rc.4-abc123/runtime.js',
+            'https://example.com/_/static/app/1.2.3-rc.4-abc123/i18n/en-US.js',
+            'https://example.com/_/static/app/1.2.3-rc.4-abc123/app.js',
+            'https://example.com/static/app/1.2.3-rc.4-abc123/legacy/app.js',
+            'https://cdn.example.com/cdn/app/1.2.3-rc.4-abc123/legacy/app~vendors.js',
+            'https://example.com/_/static/app/1.2.3-rc.4-abc123/legacy/i18n/en-US.js',
+            // during development
+            'http://localhost:3001/static/app/1.2.3-rc.4-abc123/i18n/en-US.js',
+            'http://localhost:3000/_/static/app/1.2.3-rc.4-abc123/app.js',
+          ],
+        ],
+        [
+          'modules',
+          [
+            // bare essentials
+            'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
+            'https://cdn.example.com/nested/cdn/path/modules/child-module/2.3.4/child-module.browser.js',
+            'https://example.com/alt-child-module/3.4.5/alt-child-module.browser.js?clientCacheRevision=123',
+            // legacy module
+            'https://example.com/cdn/modules/test-root/2.2.2/test-root.legacy.browser.js',
+            // chunks
+            'https://example.com/cdn/modules/test-root/2.2.2/TestRootChunk.test-root.chunk.browser.js',
+            'https://example.com/cdn/modules/test-root/2.2.2/TestRootChunk.test-root.chunk.legacy.browser.js',
+            // clientCacheRevision key
+            'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js?clientCacheRevision=123',
+            // during development
+            'http://localhost:3001/static/modules/local-module/4.5.6/local-root.browser.js',
+            'http://localhost:3001/static/modules/local-module/4.5.6/local-root.legacy.browser.js?clientCacheRevision=123',
+          ],
+        ],
+        [
+          'lang-packs',
+          [
+            // lang-packs
+            'https://example.com/cdn/modules/test-root/2.2.2/en-US/test-root.json',
+            'https://cdn.example.com/nested/cdn/path/modules/child-module/2.3.4/locale/de-DE/child-module.json',
+            'https://example.com/cdn/modules/test-root/2.2.2/locale/zs-ASFJKHASKF/test-root.json',
+            'https://cdn.example.com/nested/cdn/path/modules/child-module/2.3.4/locale/fr-FR/integration.json',
+            // during development
+            'http://localhost:3001/static/modules/local-module/4.5.6/en-us/integration.json',
+            'http://localhost:3001/static/modules/local-module/4.5.6/locale/en-CA/local-module.json',
+            'http://localhost:3001/static/modules/local-module/4.5.6/locale/en/production.json',
+          ],
+        ],
+      ]);
+
+      urls.forEach((urlsToTest, cacheName) => {
+        urlsToTest.forEach((url) => {
+          test(`matches (${cacheName}) ${url}`, async () => {
+            const event = createFetchEvent(url);
+            middleware(event);
+            await event.waitForCompletion();
+            const {
+              clone, json, text, ...eventResponse
+            } = event.response;
+            await expect(
+              match(url, { cacheName: createCacheName(cacheName) })
+            ).resolves.toEqual(eventResponse);
+          });
+        });
+      });
+    });
+
+    describe('invalidation', () => {
+      beforeEach(() => {
+        // clear all internal caches already used
+        // https://github.com/zackargyle/service-workers/blob/master/packages/service-worker-mock/models/CacheStorage.js#L6
+        caches.caches = {};
+      });
+
+      test('caches all app assets and overwrites initial legacy bundle items', async () => {
+        expect.assertions(41);
+
+        const middleware = createFetchMiddleware();
+        const events = await createFetchEventsChainForURLS(middleware, [
+          // legacy
+          'https://example.com/cdn/app/1.2.3-rc.4-abc123/legacy/app~vendors.js',
+          'https://example.com/cdn/app/1.2.3-rc.4-abc123/legacy/vendors.js',
+          'https://example.com/cdn/app/1.2.3-rc.4-abc123/legacy/runtime.js',
+          'https://example.com/cdn/app/1.2.3-rc.4-abc123/legacy/i18n/en-US.js',
+          'https://example.com/cdn/app/1.2.3-rc.4-abc123/legacy/app.js',
+          // modern
+          'https://example.com/cdn/app/1.2.3-rc.4-abc123/app~vendors.js',
+          'https://example.com/cdn/app/1.2.3-rc.4-abc123/vendors.js',
+          'https://example.com/cdn/app/1.2.3-rc.4-abc123/runtime.js',
+          'https://example.com/cdn/app/1.2.3-rc.4-abc123/i18n/en-US.js',
+          'https://example.com/cdn/app/1.2.3-rc.4-abc123/app.js',
+        ]);
+
+        expect(fetch).toHaveBeenCalledTimes(10);
+        await Promise.all(
+          events.map(async (event, index) => {
+            // if the index is 5 or bigger, we expect modern app resources
+            // and should add an extra call to `event.waitUntil(remove(legacyURL));`
+            expect(event.waitUntil).toHaveBeenCalledTimes(index >= 5 ? 4 : 3);
+            expect(event.respondWith).toHaveBeenCalledTimes(1);
+            expect(event.respondWith).toHaveBeenCalledWith(Promise.resolve(event.response));
+          })
+        );
+        await Promise.all(events.map(async (event, index) => {
+          if (index >= 5) {
+            // we should expect the modern app resources in the cache
+            await expect(match(event.request)).resolves.toBeInstanceOf(Response);
+          } else {
+            // and the legacy resources removed from the cache
+            await expect(match(event.request)).resolves.toBe(null);
+          }
+        }));
+      });
+
+      test('caches only one language pack per module and invalidates the existing lang pack', async () => {
+        expect.assertions(12);
+
+        const middleware = createFetchMiddleware();
+        const events = await createFetchEventsChainForURLS(middleware, [
+          'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
+          'https://example.com/cdn/modules/test-root/2.2.2/locale/en-US/test-root.json',
+          'https://example.com/cdn/modules/test-root/2.2.2/locale/en-CA/test-root.json',
+        ]);
+
+        expect(fetch).toHaveBeenCalledTimes(3);
+        events.forEach((event, index) => {
+          expect(event.respondWith).toHaveBeenCalledTimes(1);
+          expect(event.respondWith).toHaveBeenCalledWith(Promise.resolve(event.response));
+          if (index === 2) {
+            // on the third and final call, we expect to waitUntil the original
+            // cache item was removed as an additional step when invalidating
+            expect(event.waitUntil).toHaveBeenCalledTimes(4);
+          } else {
+            // otherwise the previous two calls should
+            expect(event.waitUntil).toHaveBeenCalledTimes(3);
+          }
+        });
+        await expect(match(new Request('https://example.com/cdn/modules/test-root/2.2.2/locale/en-US/test-root.json'))).resolves.toBe(null);
+        await expect(match(new Request('https://example.com/cdn/modules/test-root/2.2.2/locale/en-CA/test-root.json'))).resolves.toBeInstanceOf(Response);
+      });
+
+      test('caches a module and invalidates with differing `clientCacheRevision` key', async () => {
+        expect.assertions(10);
+
+        let middleware = createFetchMiddleware();
+
+        const url = 'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js?clientCacheRevision=123';
+        const event = createFetchEvent(url);
+        fetch.mockImplementationOnce(() => Promise.resolve(event.response));
+        middleware(event);
+        await event.waitForCompletion();
+
+        expect(event.waitUntil).toHaveBeenCalledTimes(3);
+        expect(event.respondWith).toHaveBeenCalledTimes(1);
+        expect(event.respondWith).toHaveBeenCalledWith(Promise.resolve(event.response));
+
+        // a second response with a differing clientCacheRevision key
+
+        setModuleMap({
+          ...JSON.parse(process.env.HOLOCRON_MODULE_MAP),
+          clientCacheRevision: 'def',
+        });
+
+        middleware = createFetchMiddleware();
+
+        const nextUrl = 'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js?clientCacheRevision=def';
+        const nextEvent = createFetchEvent(nextUrl);
+        middleware(nextEvent);
+        await nextEvent.waitForCompletion();
+
+        expect(nextEvent.waitUntil).toHaveBeenCalledTimes(4);
+        expect(remove).toHaveBeenCalledTimes(1);
+        expect(nextEvent.respondWith).toHaveBeenCalledTimes(1);
+        expect(nextEvent.respondWith).toHaveBeenCalledWith(Promise.resolve(nextEvent.response));
+
+        const cachesSnapShot = caches.snapshot();
+        expect(cachesSnapShot['__sw/modules'][url]).toBeUndefined();
+        expect(cachesSnapShot['__sw/modules'][nextUrl]).toEqual(nextEvent.response);
+        expect(
+          JSON.parse(cachesSnapShot['__sw/__meta']['http://localhost/__sw/__meta/modules/test-root/test-root.browser.js'].body.parts.join(''))
+        ).toEqual({
+          'http://localhost/modules/test-root/test-root.browser.js': {
+            name: 'test-root',
+            version: '2.2.2',
+            path: '/test-root.browser.js',
+            revision: 'def',
+            bundle: 'browser',
+            type: 'modules',
+            url: nextUrl,
+            cacheName: '__sw/modules',
+          },
+        });
+      });
+
+      test('caches a module and invalidates with differing module `version`', async () => {
+        expect.assertions(10);
+
+        let middleware = createFetchMiddleware();
+
+        const url = 'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js';
+        const event = createFetchEvent(url);
+        fetch.mockImplementationOnce(() => Promise.resolve(event.response));
+        middleware(event);
+        await event.waitForCompletion();
+
+        expect(event.waitUntil).toHaveBeenCalledTimes(3);
+        expect(event.respondWith).toHaveBeenCalledTimes(1);
+        expect(event.respondWith).toHaveBeenCalledWith(Promise.resolve(event.response));
+
+        // a second response with a differing module version
+
+        setModuleMap({
+          clientCacheRevision: '123',
+          modules: {
+            'test-root': {
+              baseUrl: 'https://example.com/cdn/modules/test-root/3.2.1',
+            },
+          },
+        });
+
+        middleware = createFetchMiddleware();
+
+        const nextUrl = 'https://example.com/cdn/modules/test-root/3.2.1/test-root.browser.js';
+        const nextEvent = createFetchEvent(nextUrl);
+        middleware(nextEvent);
+        await nextEvent.waitForCompletion();
+
+        expect(nextEvent.waitUntil).toHaveBeenCalledTimes(4);
+        expect(remove).toHaveBeenCalledTimes(1);
+        expect(nextEvent.respondWith).toHaveBeenCalledTimes(1);
+        expect(nextEvent.respondWith).toHaveBeenCalledWith(Promise.resolve(nextEvent.response));
+
+        const cachesSnapShot = caches.snapshot();
+        expect(cachesSnapShot['__sw/modules'][url]).toBeUndefined();
+        expect(cachesSnapShot['__sw/modules'][nextUrl]).toEqual(nextEvent.response);
+        expect(
+          JSON.parse(cachesSnapShot['__sw/__meta']['http://localhost/__sw/__meta/modules/test-root/test-root.browser.js'].body.parts.join(''))
+        ).toEqual({
+          'http://localhost/modules/test-root/test-root.browser.js': {
+            name: 'test-root',
+            version: '3.2.1',
+            path: '/test-root.browser.js',
+            revision: '123',
+            bundle: 'browser',
+            type: 'modules',
+            url: nextUrl,
+            cacheName: '__sw/modules',
+          },
+        });
       });
     });
   });
