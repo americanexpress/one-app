@@ -23,10 +23,11 @@ import getModulesToUpdate from './getModulesToUpdate';
 import { getServerStateConfig } from './stateConfig';
 import { setClientModuleMapCache } from './clientModuleMapCache';
 import { updateCSP } from '../middleware/csp';
+import addBaseUrlToModuleMap from './addBaseUrlToModuleMap';
 
 const loadModules = async () => {
   const moduleMapResponse = await fetch(process.env.HOLOCRON_MODULE_MAP_URL);
-  const moduleMap = await moduleMapResponse.json();
+  const moduleMap = addBaseUrlToModuleMap(await moduleMapResponse.json());
   const serverConfig = getServerStateConfig();
 
   const loadedModules = await updateModuleRegistry({
