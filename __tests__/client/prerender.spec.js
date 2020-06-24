@@ -39,13 +39,16 @@ jest.mock('@americanexpress/one-app-ducks', () => ({
   addErrorToReport: jest.fn(),
 }));
 
-jest.mock('../../src/universal/utils/createTimeoutFetch', () => jest.fn(
-  (timeout) => (next) => () => next()
-    .then((res) => {
-      res.timeout = timeout;
-      return res;
-    })
-));
+jest.mock('@americanexpress/fetch-enhancers', () => ({
+  createTimeoutFetch: jest.fn(
+    (timeout) => (next) => () => next()
+      .then((res) => {
+        res.timeout = timeout;
+        return res;
+      })
+  ),
+}));
+
 jest.mock('../../src/client/service-worker', () => ({ initializeServiceWorker: jest.fn(() => Promise.resolve()) }));
 
 describe('initializeClientStore', () => {

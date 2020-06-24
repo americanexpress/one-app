@@ -25,7 +25,7 @@ import { getClientStateConfig } from '../utils/stateConfig';
 import getI18nFileFromState from '../utils/getI18nFileFromState';
 import renderModuleStyles from '../utils/renderModuleStyles';
 import readJsonFile from '../utils/readJsonFile';
-import { getClientPWAConfig } from './pwa';
+import { getClientPWAConfig } from './pwa/config';
 
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
 const integrityManifest = readJsonFile('../../../bundle.integrity.manifest.json');
@@ -43,7 +43,7 @@ function getChunkAssets(assetsByChunkName) {
   return Object
     .entries(assetsByChunkName)
     // i18n is different per request, app needs to be the last chunk loaded
-    .filter(([chunkName]) => !chunkName.startsWith('i18n/') && chunkName !== 'app')
+    .filter(([chunkName]) => !chunkName.startsWith('i18n/') && !['app', 'service-worker-client'].includes(chunkName))
     .map(([, assets]) => (typeof assets === 'string' ? assets : assets[0]));
 }
 
@@ -194,7 +194,7 @@ export function getHead({
   helmetInfo,
   store,
   disableStyles,
-  webManifestUrl,
+  pwaMetadata,
 }) {
   return `
     <head>
@@ -202,7 +202,7 @@ export function getHead({
       ${disableStyles ? '' : `
       ${renderModuleStyles(store)}
       `}
-      ${webManifestUrl ? `<link rel="manifest" href="${webManifestUrl}">` : ''}
+      ${pwaMetadata.webManifestUrl ? `<link rel="manifest" href="${pwaMetadata.webManifestUrl}">` : ''}
     </head>
   `;
 }
@@ -210,6 +210,7 @@ export function getHead({
 export function getBody({
   isLegacy,
   helmetInfo,
+  renderMode,
   assets,
   appHtml,
   appBundlesURLPrefix,
@@ -232,6 +233,7 @@ export function getBody({
         window.__INITIAL_STATE__ = ${jsonStringifyForScript(serializeClientInitialState(clientInitialState))};
         window.__holocron_module_bundle_type__ = '${bundle}';
         window.__pwa_metadata__ = ${jsonStringifyForScript(pwaMetadata)};
+        window.__render_mode__ = '${renderMode}';
       </script>
       ${assets}
       ${renderI18nScript(clientInitialState, bundlePrefixForBrowser)}
@@ -280,7 +282,7 @@ export default function sendHtml(req, res) {
   let body;
   try {
     const {
-      appHtml, clientModuleMapCache, store, headers, helmetInfo = {},
+      appHtml, clientModuleMapCache, store, headers, helmetInfo = {}, renderMode = 'hydrate',
     } = req;
     const { scriptNonce } = res;
     const userAgent = headers['user-agent'];
@@ -292,7 +294,7 @@ export default function sendHtml(req, res) {
     }
     // replace server specific config with client specific config (api urls and such)
     const clientConfig = getClientStateConfig();
-    const { webManifestUrl, ...pwaMetadata } = getClientPWAConfig();
+    const pwaMetadata = getClientPWAConfig();
     store.dispatch(setConfig(clientConfig));
     const cdnUrl = clientConfig.cdnUrl || '/_/static/';
     const clientInitialState = store.getState();
@@ -318,11 +320,12 @@ export default function sendHtml(req, res) {
       disableScripts,
       disableStyles,
       scriptNonce,
-      webManifestUrl,
+      pwaMetadata,
     };
 
     const bodySectionArgs = {
       helmetInfo,
+      renderMode,
       isLegacy,
       assets,
       appHtml,

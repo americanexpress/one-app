@@ -14,8 +14,19 @@
  * permissions and limitations under the License.
  */
 
-// messaging keys
-export const ERROR_MESSAGE_ID_KEY = 'error';
+/* The baseUrl key in the module map is used by one-app-ducks to construct
+the language pack URL pointing at the location of the language pack */
+const addBaseUrlToModuleMap = (moduleMap) => ({
+  ...moduleMap,
+  modules: Object.entries(moduleMap.modules).reduce((acc, [moduleName, moduleBundles]) => (
+    {
+      ...acc,
+      [moduleName]: {
+        ...moduleBundles,
+        baseUrl: moduleBundles.node.url.replace(/[^/]+\.js$/i, ''),
+      },
+    }
+  ), {}),
+});
 
-// cache names
-export const OFFLINE_CACHE_NAME = 'offline';
+export default addBaseUrlToModuleMap;

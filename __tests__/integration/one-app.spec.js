@@ -862,9 +862,11 @@ describe('Tests that require Docker setup', () => {
     describe('progressive web app', () => {
       const scriptUrl = `${appAtTestUrls.fetchUrl}/_/pwa/service-worker.js`;
       const webManifestUrl = `${appAtTestUrls.fetchUrl}/_/pwa/manifest.webmanifest`;
+      const offlineUrl = `${appAtTestUrls.fetchUrl}/_/pwa/shell`;
 
       const fetchServiceWorker = () => fetch(scriptUrl, defaultFetchOptions);
       const fetchWebManifest = () => fetch(webManifestUrl, defaultFetchOptions);
+      const fetchOfflineShell = () => fetch(offlineUrl, defaultFetchOptions);
       const loadInitialRoot = async () => {
         await addModuleToModuleMap({
           moduleName: 'frank-lloyd-root',
@@ -888,13 +890,15 @@ describe('Tests that require Docker setup', () => {
 
       describe('default pwa state', () => {
         test('does not load PWA resources from server by default', async () => {
-          expect.assertions(2);
+          expect.assertions(3);
 
           const serviceWorkerResponse = await fetchServiceWorker();
           const webManifestResponse = await fetchWebManifest();
+          const offlineResponse = await fetchOfflineShell();
 
           expect(serviceWorkerResponse.status).toBe(404);
           expect(webManifestResponse.status).toBe(404);
+          expect(offlineResponse.status).toBe(404);
         });
       });
 
@@ -903,7 +907,7 @@ describe('Tests that require Docker setup', () => {
         beforeAll(loadPWARoot);
 
         test('loads PWA resources from server ', async () => {
-          expect.assertions(6);
+          expect.assertions(9);
 
           const serviceWorkerResponse = await fetchServiceWorker();
 
@@ -916,6 +920,12 @@ describe('Tests that require Docker setup', () => {
           expect(webManifestResponse.status).toBe(200);
           expect(webManifestResponse.headers.get('cache-control')).toBeDefined();
           expect(webManifestResponse.headers.get('content-type')).toEqual('application/manifest+json');
+
+          const offlineResponse = await fetchOfflineShell();
+
+          expect(offlineResponse.status).toBe(200);
+          expect(offlineResponse.headers.get('content-security-policy')).toBeDefined();
+          expect(offlineResponse.headers.get('content-type')).toEqual('text/html; charset=utf-8');
         });
 
         test('service worker has a valid registration', async () => {
@@ -946,13 +956,15 @@ describe('Tests that require Docker setup', () => {
         beforeAll(loadInitialRoot);
 
         test('does not load PWA resources from server after shutdown', async () => {
-          expect.assertions(2);
+          expect.assertions(3);
 
           const serviceWorkerResponse = await fetchServiceWorker();
           const webManifestResponse = await fetchWebManifest();
+          const offlineResponse = await fetchOfflineShell();
 
           expect(serviceWorkerResponse.status).toBe(404);
           expect(webManifestResponse.status).toBe(404);
+          expect(offlineResponse.status).toBe(404);
         });
 
         test('service worker is no longer registered and removed with root module change', async () => {
@@ -1196,23 +1208,22 @@ describe('Tests that can run against either local Docker setup or remote One App
             await browser.url(`${appInstanceUrls.browserUrl}/demo/franks-burgers`);
 
             const openerMessage = await browser.$('#franks-opening-line');
-            await openerMessage.waitForExist();
-
+            await openerMessage.waitForExist({ timeout: 50000 });
             expect(await openerMessage.getText()).toBe(
               'Welcome to Franks Burgers! The best burgers in town.'
             );
 
-            const btn = await browser.$('#order-burger-btn');
-            await btn.waitForExist();
             // before clicking to lazy load our chunk, ensure `franks-burger` does not exist
-            const franksBurgerNonExistent = await browser.$('#franks-burger');
-            await franksBurgerNonExistent.waitForExist(undefined, true);
+            const missingFranksBurger = await browser.$('#franks-burger');
+            const exists = await missingFranksBurger.isExisting();
+            expect(exists).toBeFalsy();
+
             // once confirmed chunk does not exist, click to load it
+            const btn = await browser.$('#order-burger-btn');
             await btn.click();
             // grab the chunk and wait for it to load
             const franksBurger = await browser.$('#franks-burger');
-            await franksBurger.waitForExist();
-
+            await franksBurger.waitForExist({ timeout: 50000 });
             await expect(franksBurger.getText()).resolves.toEqual('Burger');
           });
       });
