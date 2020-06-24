@@ -23,7 +23,7 @@ const addBaseUrlToModuleMap = (moduleMap) => ({
       ...acc,
       [moduleName]: {
         ...moduleBundles,
-        baseUrl: moduleBundles.baseUrl ? moduleBundles.baseUrl : moduleBundles.node.url.replace(/[^/]+\.js$/i, ''),
+        baseUrl: moduleBundles.node.url.replace(/[^/]+\.js$/i, ''),
       },
     }
   ), {}),
