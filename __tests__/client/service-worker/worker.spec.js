@@ -24,6 +24,7 @@ import createServiceWorkerMocks from 'service-worker-mock';
 import {
   createInstallMiddleware,
   createActivateMiddleware,
+  createFetchMiddleware,
 } from '../../../src/client/service-worker/events';
 import { ERROR_MESSAGE_ID_KEY } from '../../../src/client/service-worker/constants';
 
@@ -45,18 +46,15 @@ describe('service worker script', () => {
   });
 
   test('calls "on" with lifecycle middleware', () => {
-    expect.assertions(3);
-
     loadServiceWorker();
 
-    expect(on).toHaveBeenCalledTimes(2);
+    expect(on).toHaveBeenCalledTimes(3);
     expect(on).toHaveBeenCalledWith('install', createInstallMiddleware());
     expect(on).toHaveBeenCalledWith('activate', createActivateMiddleware());
+    expect(on).toHaveBeenCalledWith('fetch', createFetchMiddleware());
   });
 
   test('catches error during initialization, logs the error and unregisters the service worker', () => {
-    expect.assertions(5);
-
     self.unregister = jest.fn();
     const failureError = new Error('failure');
     on.mockImplementationOnce(() => {

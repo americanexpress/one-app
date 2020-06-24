@@ -14,8 +14,26 @@
  * permissions and limitations under the License.
  */
 
-// messaging keys
-export const ERROR_MESSAGE_ID_KEY = 'error';
+import {
+  appShell,
+  cacheRouter,
+  expiration,
+  createMiddleware,
+  createCacheName,
+} from '@americanexpress/one-service-worker';
 
-// cache names
-export const OFFLINE_CACHE_NAME = 'offline';
+import { OFFLINE_CACHE_NAME } from '../constants';
+
+export default function createFetchMiddleware() {
+  return createMiddleware([
+    appShell({
+      route: '/_/pwa/shell',
+      cacheName: createCacheName(OFFLINE_CACHE_NAME),
+    }),
+    cacheRouter({
+      match: /manifest\.webmanifest$/,
+      cacheName: OFFLINE_CACHE_NAME,
+    }),
+    expiration(),
+  ]);
+}
