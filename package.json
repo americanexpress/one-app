@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "5.1.1",
+  "version": "5.2.0",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
@@ -38,7 +38,7 @@
     "set-dev-endpoints": "node scripts/set-dev-endpoints.js",
     "postinstall": "npm run build",
     "release:standard-version": "standard-version -- --no-verify",
-    "release:changelog": "echo -e \"$(head -3 CHANGELOG.md)\n\n$(node_modules/.bin/conventional-changelog -p angular)\n\n$(tail -n +4 CHANGELOG.md)\" > CHANGELOG.md",
+    "release:changelog": "echo \"$(head -3 CHANGELOG.md)\n\n$(node_modules/.bin/conventional-changelog -p angular)\n\n$(tail -n +4 CHANGELOG.md)\" > CHANGELOG.md",
     "release": "npm run release:standard-version && npm run release:changelog"
   },
   "repository": {
@@ -81,7 +81,7 @@
     "@americanexpress/one-app-router": "^1.1.0",
     "@americanexpress/vitruvius": "^2.0.0",
     "body-parser": "^1.19.0",
-    "chalk": "^4.0.0",
+    "chalk": "^4.1.0",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
     "core-js": "^3.6.5",
@@ -124,7 +124,7 @@
     "@americanexpress/one-app-dev-proxy": "^1.0.0",
     "@americanexpress/one-service-worker": "^1.0.3",
     "@babel/cli": "^7.10.1",
-    "@babel/core": "^7.10.1",
+    "@babel/core": "^7.10.2",
     "@babel/node": "^7.10.1",
     "@babel/register": "^7.10.1",
     "@commitlint/cli": "^8.3.5",
@@ -142,11 +142,11 @@
     "danger": "^10.2.0",
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.5.0",
-    "eslint": "^7.1.0",
+    "eslint": "^7.2.0",
     "eslint-config-amex": "^11.2.0",
     "eslint-plugin-es": "^3.0.1",
     "find-up": "^4.1.0",
-    "fs-extra": "^9.0.0",
+    "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
     "https-proxy-agent": "^5.0.0",
     "husky": "^4.2.5",
