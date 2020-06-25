@@ -20,7 +20,6 @@ import { CONFIGURATION_KEY } from '../../../src/server/utils/onModuleLoad';
 import loadModules from '../../../src/server/utils/loadModules';
 import { updateCSP } from '../../../src/server/middleware/csp';
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
-import addBaseUrlToModuleMap from '../../../src/server/utils/addBaseUrlToModuleMap';
 
 // This named export exists only on the mock
 // eslint-disable-next-line import/named
@@ -96,7 +95,7 @@ describe('loadModules', () => {
   it('updates the holocron module registry', async () => {
     await loadModules();
     expect(updateModuleRegistry).toHaveBeenCalledWith({
-      moduleMap: addBaseUrlToModuleMap(moduleMap),
+      moduleMap,
       batchModulesToUpdate: require('../../../src/server/utils/batchModulesToUpdate').default,
       getModulesToUpdate: require('../../../src/server/utils/getModulesToUpdate').default,
       onModuleLoad: require('../../../src/server/utils/onModuleLoad').default,

@@ -62,6 +62,16 @@ describe('clientModuleMapCache', () => {
     expect(Object.keys(moduleMapCache)).toEqual(cacheKeys);
   });
 
+  it('creates a "baseUrl" entry for each module and returns a module map including the addition', () => {
+    // conflicting eslint rules here
+    // eslint-disable-next-line max-len
+    cacheKeys.forEach((cacheKey) => Object.keys(moduleMapCache[cacheKey].modules).forEach((moduleName) => {
+      const module = moduleMapCache[cacheKey].modules[moduleName];
+      expect(module.baseUrl).toBe(`https://example.com/cdn/${moduleName}/1.0.0/`);
+    })
+    );
+  });
+
   it('only includes values for a single bundle per module in each map', () => {
     // conflicting eslint rules here
     // eslint-disable-next-line max-len

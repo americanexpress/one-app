@@ -16,8 +16,6 @@
 
 let cache = {};
 
-/* Filters bundle types so only the required client moduleBundleType is returned
-in ../server/middleware/sendHtml.js and reducing the html payload size */
 function filterBundles(moduleMap, moduleBundleType) {
   return {
     ...moduleMap,
@@ -25,7 +23,7 @@ function filterBundles(moduleMap, moduleBundleType) {
       {
         ...acc,
         [moduleName]: {
-          baseUrl: moduleBundles.baseUrl,
+          baseUrl: moduleBundles[moduleBundleType].url.replace(/[^/]+\.js$/i, ''),
           [moduleBundleType]: moduleBundles[moduleBundleType],
         },
       }
