@@ -949,6 +949,8 @@ describe('Tests that require Docker setup', () => {
             updateViaCache: 'none',
           });
 
+          await waitFor(1000);
+
           // eslint-disable-next-line prefer-arrow-callback
           const cacheKeys = await browser.executeAsync(function getCacheKeys(done) {
             caches.keys().then(done);
