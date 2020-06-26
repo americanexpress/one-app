@@ -10,10 +10,12 @@ before_install:
 install: NODE_ENV=development npm ci
 jobs:
   include:
-    - stage: Node 12 tests
+    - stage: Node 12 Tests
       node_js:
         - "12"
-      script: npm test
+      script: npm run test:lint && npm run test:unit && npm run test:danger && npm run test:git-history
+      - script: ./scripts/run-integration-tests.travis.sh
+        name: "Integration Tests"
     - stage: Node 14 unit tests
       node_js:
         - "14"
