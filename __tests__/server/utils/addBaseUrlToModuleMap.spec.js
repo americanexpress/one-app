@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
+import addBaseUrlToModuleMap from '../../../src/server/utils/addBaseUrlToModuleMap';
 
 const moduleMap = {
   modules: {
@@ -49,30 +49,12 @@ const moduleMap = {
   },
 };
 
-describe('clientModuleMapCache', () => {
-  let moduleMapCache;
-  const cacheKeys = ['browser', 'legacyBrowser'];
-
-  beforeAll(() => {
-    setClientModuleMapCache(moduleMap);
-    moduleMapCache = getClientModuleMapCache();
-  });
-
-  it('creates a cache with separate entries for browser and legacyBrowser', () => {
-    expect(Object.keys(moduleMapCache)).toEqual(cacheKeys);
-  });
-
-  it('only includes values for a single bundle per module in each map', () => {
-    // conflicting eslint rules here
-    // eslint-disable-next-line max-len
-    cacheKeys.forEach((cacheKey) => Object.keys(moduleMapCache[cacheKey].modules).forEach((moduleName) => {
-      const module = moduleMapCache[cacheKey].modules[moduleName];
-      expect(Object.keys(module)).toEqual(['baseUrl', cacheKey]);
-      expect(module[cacheKey]).toEqual({
-        url: `https://example.com/cdn/${moduleName}/1.0.0/${moduleName}.${cacheKey === 'browser' ? 'browser' : 'legacy.browser'}.js`,
-        integrity: expect.any(String),
-      });
-    })
-    );
+describe('addBaseUrlToModuleMap', () => {
+  it('creates a "baseUrl" entry for each module and returns a module map including the new key', () => {
+    const updatedModuleMap = addBaseUrlToModuleMap(moduleMap);
+    Object.keys(updatedModuleMap.modules).forEach((moduleName) => {
+      const module = updatedModuleMap.modules[moduleName];
+      expect(module.baseUrl).toBe(`https://example.com/cdn/${moduleName}/1.0.0/`);
+    });
   });
 });
