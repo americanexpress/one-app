@@ -74,7 +74,7 @@
   ],
   "dependencies": {
     "@americanexpress/env-config-utils": "^2.0.2",
-    "@americanexpress/fetch-enhancers": "^1.0.0",
+    "@americanexpress/fetch-enhancers": "^1.0.1",
     "@americanexpress/lumberjack": "^1.1.4",
     "@americanexpress/one-app-bundler": "^6.6.0",
     "@americanexpress/one-app-ducks": "^4.0.1",
