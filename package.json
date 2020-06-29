@@ -126,7 +126,7 @@
     "@babel/cli": "^7.10.1",
     "@babel/core": "^7.10.2",
     "@babel/node": "^7.10.1",
-    "@babel/register": "^7.10.1",
+    "@babel/register": "^7.10.3",
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
     "@rollup/plugin-node-resolve": "^8.0.1",
