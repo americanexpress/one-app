@@ -56,7 +56,7 @@ One App can be configured via Environment Variables:
   * [`HTTP_ONE_APP_DEV_PROXY_SERVER_PORT`](#http_one_app_dev_proxy_server_port)
   * [`HTTP_PORT`](#http_port)
   * [`IP_ADDRESS`](#ip_address)
-  * [`NODE_ENV`](#node_env)
+  * [`NODE_ENV`](#node_env) ⚠️
   * [`ONE_CLIENT_CDN_URL`](#one_client_cdn_url)
   * [`ONE_CLIENT_CSP_REPORTING_URL`](#one_client_csp_reporting_url) ⚠️
   * [`ONE_CLIENT_LOCALE_FILENAME`](#one_client_locale_filename)
