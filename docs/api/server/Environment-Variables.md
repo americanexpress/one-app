@@ -20,17 +20,17 @@ One App can be configured via Environment Variables:
   * [`IP_ADDRESS`](#ip_address)
 * Running in Production
   * [`HOLOCRON_MODULE_MAP_URL`](#holocron_module_map_url) ⚠️
-  * [`NODE_ENV`](#node_env)
+  * [`NODE_ENV`](#node_env) ⚠️
   * [`ONE_CLIENT_LOCALE_FILENAME`](#one_client_locale_filename)
   * [`ONE_CLIENT_REPORTING_URL`](#one_client_reporting_url) ⚠️
   * [`ONE_CLIENT_CSP_REPORTING_URL`](#one_client_csp_reporting_url) ⚠️
   * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
   * [`ONE_CLIENT_CDN_URL`](#one_client_cdn_url) ⚠️
-  * [`ONE_CONFIG_ENV`](#one_config_env)
+  * [`ONE_CONFIG_ENV`](#one_config_env) ⚠️
 * Running in Development
-  * [`NODE_ENV`](#node_env)
+  * [`NODE_ENV`](#node_env) ⚠️
   * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
-  * [`ONE_CONFIG_ENV`](#one_config_env)
+  * [`ONE_CONFIG_ENV`](#one_config_env) ⚠️
 * Server Settings
   * [`HOLOCRON_SERVER_MAX_MODULES_RETRY`](#holocron_server_max_modules_retry)
   * [`HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`](#holocron_server_max_sim_modules_fetch)
