@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="5.2.1"></a>
+## [5.2.1](https://github.com/americanexpress/one-app/compare/v5.2.0...v5.2.1) (2020-07-01)
+
+
+### Bug Fixes
+
+* **clientModuleMapCache:** set base url for module bundle type ([#215](https://github.com/americanexpress/one-app/issues/215)) ([95ca35f](https://github.com/americanexpress/one-app/commit/95ca35f))
+* **release/change-log:** remove -e added ([#211](https://github.com/americanexpress/one-app/issues/211)) ([250113b](https://github.com/americanexpress/one-app/commit/250113b))
+
+
 <a name="5.2.0"></a>
 # [5.2.0](https://github.com/americanexpress/one-app/compare/v5.1.1...v5.2.0) (2020-06-24)
 
