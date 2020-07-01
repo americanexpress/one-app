@@ -25,7 +25,7 @@ function filterBundles(moduleMap, moduleBundleType) {
       {
         ...acc,
         [moduleName]: {
-          baseUrl: moduleBundles.baseUrl,
+          baseUrl: moduleBundles[moduleBundleType].url.replace(/[^/]+\.js$/i, ''),
           [moduleBundleType]: moduleBundles[moduleBundleType],
         },
       }
