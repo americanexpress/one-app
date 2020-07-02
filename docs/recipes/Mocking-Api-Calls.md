@@ -53,9 +53,9 @@
   
    ```json
     "one-amex": {
-   "runner": {
-     "parrotMiddleware": "[path-to-your-module]/dev.middleware.js"
-   },
+        "runner": {
+            "parrotMiddleware": "[path-to-your-module]/dev.middleware.js"
+        }
     }
    ```
 
