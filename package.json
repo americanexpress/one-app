@@ -150,7 +150,7 @@
     "glob": "^7.1.6",
     "https-proxy-agent": "^5.0.0",
     "husky": "^4.2.5",
-    "jest": "^26.0.1",
+    "jest": "^26.1.0",
     "jest-circus": "^26.0.1",
     "js-yaml": "^3.14.0",
     "lockfile-lint": "^4.3.6",
