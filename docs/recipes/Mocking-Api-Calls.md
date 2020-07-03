@@ -18,7 +18,8 @@
 
 2. Configure the Parrot scenarios. When modules are generated using [One App module generator](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module) a mock folder is created, this contains sample scenarios.
 
-   > 🐦 Parrot is a set of tools that allow you to create HTTP mocks and organize them into scenarios in order to develop your app against different sets of data
+   > 🐦 [Parrot](https://github.com/americanexpress/parrot) is a set of tools that allow you to create HTTP mocks
+   > and organize them into scenarios in order to develop your app against different sets of data.
 
     ```
     module
