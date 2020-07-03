@@ -75,7 +75,7 @@
    (our reverse proxy and mocking server that runs during development) and can be used to set remote endpoints
    for your Module to use during local development. Create this file within the root folder of your module.
 
-   **Runng within One App.**
+   **Running within One App**
 
    Use the `set-dev-endpoints` command to link your module's dev endpoints file to One App. Navigate to your local One App directory and run the following command: 
 
