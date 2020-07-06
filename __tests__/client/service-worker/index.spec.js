@@ -93,11 +93,11 @@ describe('initializeServiceWorker', () => {
   test('when serviceWorker is disabled, clears the cache of any entries', async () => {
     expect.assertions(5);
 
-    await (await caches.open('one-app-test')).put(new Request('/index.js'), null);
+    await (await caches.open('__sw/one-app-test')).put(new Request('/app.js'), null);
 
     expect(caches.snapshot()).toEqual({
-      'one-app-test': {
-        'http://localhost/index.js': null,
+      '__sw/one-app-test': {
+        'http://localhost/app.js': null,
       },
     });
     await expect(initializeServiceWorker({ serviceWorker: false })).resolves.toBe(registration);
@@ -132,17 +132,17 @@ describe('initializeServiceWorker', () => {
   test('when recoveryMode is active, clears the cache of any entries', async () => {
     expect.assertions(5);
 
-    await (await caches.open('one-app-test')).put(new Request('/index.html'), null);
-    await (await caches.open('one-app-test')).put(new Request('/index.js'), null);
-    await (await caches.open('__sw/one-app-cache')).put(new Request('/app.js'), null);
+    await (await caches.open('__sw/one-app-test')).put(new Request('/shell.html'), null);
+    await (await caches.open('__sw/one-app-test')).put(new Request('/app.js'), null);
+    await (await caches.open('__sw/other-cache')).put(new Request('/misc.js'), null);
 
     expect(caches.snapshot()).toEqual({
-      'one-app-test': {
-        'http://localhost/index.html': null,
-        'http://localhost/index.js': null,
-      },
-      '__sw/one-app-cache': {
+      '__sw/one-app-test': {
+        'http://localhost/shell.html': null,
         'http://localhost/app.js': null,
+      },
+      '__sw/other-cache': {
+        'http://localhost/misc.js': null,
       },
     });
     await expect(initializeServiceWorker({

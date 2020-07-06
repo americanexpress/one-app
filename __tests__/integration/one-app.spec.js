@@ -884,6 +884,19 @@ describe('Tests that require Docker setup', () => {
         await waitFor(5000);
       };
 
+      // cache utils
+
+      // usage: const cacheKeys = await browser.executeAsync(getCacheKeys);
+      function getCacheKeys(done) {
+        // eslint-disable-next-line prefer-arrow-callback
+        caches.keys().then(function filterKeys(cacheKeys) {
+          // eslint-disable-next-line prefer-arrow-callback
+          return cacheKeys.filter(function filterSWCache(key) {
+            return key.startsWith('__sw');
+          });
+        }).then(done);
+      }
+
       afterAll(() => {
         writeModuleMap(originalModuleMap);
       });
@@ -948,15 +961,6 @@ describe('Tests that require Docker setup', () => {
             scope: `${appAtTestUrls.browserUrl}/`,
             updateViaCache: 'none',
           });
-
-          await waitFor(1000);
-
-          // eslint-disable-next-line prefer-arrow-callback
-          const cacheKeys = await browser.executeAsync(function getCacheKeys(done) {
-            caches.keys().then(done);
-          });
-
-          expect(cacheKeys).toEqual(['__sw/offline']);
         });
       });
 
@@ -989,9 +993,7 @@ describe('Tests that require Docker setup', () => {
           expect(result).toBe(null);
 
           // eslint-disable-next-line prefer-arrow-callback
-          const cacheKeys = await browser.executeAsync(function getCacheKeys(done) {
-            caches.keys().then(done);
-          });
+          const cacheKeys = await browser.executeAsync(getCacheKeys);
 
           expect(cacheKeys).toEqual([]);
         });

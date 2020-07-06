@@ -24,7 +24,11 @@ function clearCache() {
   // get the instanced Cache key in browser CacheStorage
   return caches.keys().then(
     // remove cache instances (deleting cache entries in batch)
-    (cacheKeys) => Promise.all(cacheKeys.map((cacheKey) => caches.delete(cacheKey))));
+    (cacheKeys) => Promise.all(
+      cacheKeys
+        .filter((cacheKey) => cacheKey.startsWith('__sw'))
+        .map((cacheKey) => caches.delete(cacheKey))
+    ));
 }
 
 export function initializeServiceWorker({
