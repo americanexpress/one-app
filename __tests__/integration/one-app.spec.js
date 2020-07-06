@@ -942,7 +942,7 @@ describe('Tests that require Docker setup', () => {
         });
 
         test('service worker has a valid registration', async () => {
-          expect.assertions(2);
+          expect.assertions(1);
 
           await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
