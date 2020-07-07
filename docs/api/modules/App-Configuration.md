@@ -449,15 +449,13 @@ The `eventLoopDelayThreshold` directive accepts a number representing the thresh
 if (!global.BROWSER) {
   Module.appConfig = {
     validateStateConfig: {
-      server: {
-        [settingName]: {
+      [settingName]: {
+        server: {
           validate(settingValue) {
             // Throw an error or return undefined
           },
         },
-      },
-      client: {
-        [settingName]: {
+        client: {
           validate(settingValue) {
             // Throw an error or return undefined
           },
@@ -468,9 +466,13 @@ if (!global.BROWSER) {
 }
 ```
 
-The `validateStateConfig` allows a Child Module to validate settings passed from `provideStateConfig`. Each `settingName` object accepts a `validate(settingValue)` method. The `validate` function may throw an `Error` or return `undefined` depending on validity of the value supplied to the Module on load.
+The `validateStateConfig` allows a Child Module to validate settings passed from
+`provideStateConfig`. Each `settingName` object accepts a `validate(settingValue)`
+method per `server` and `client` key. The `validate` function may throw an `Error`
+or return `undefined` depending on validity of the value supplied to the Module on load.
 
-If an `Error` is thrown, the Server will fail to startup or if already running will prevent [Holocron](https://github.com/americanexpress/holocron) from loading the Module dynamically.
+If an `Error` is thrown, the Server will fail to startup or if already running will prevent
+[Holocron](https://github.com/americanexpress/holocron) from loading the Module dynamically.
 
 **📘 More Information**
 * [`provideStateConfig`](#providestateconfig)
