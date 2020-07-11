@@ -20,7 +20,6 @@
 
 import transit from 'transit-immutable-js';
 import { serializeError } from 'serialize-error';
-import { TimeoutError } from './createTimeoutFetch';
 
 const concealOrigin = (href) => href && href.replace(/\/\/[^/]+/g, '//***');
 
@@ -40,12 +39,6 @@ export default transit.withExtraHandlers([
   {
     tag: 'error',
     class: Error,
-    write: writeError,
-    read: (value) => Object.assign(new Error(), { stack: undefined }, value),
-  },
-  {
-    tag: 'timeoutError',
-    class: TimeoutError,
     write: writeError,
     read: (value) => Object.assign(new Error(), { stack: undefined }, value),
   },

@@ -17,11 +17,11 @@
 import { createHolocronStore } from 'holocron';
 import { getLocalePack, addErrorToReport } from '@americanexpress/one-app-ducks';
 import { compose } from 'redux';
+import { createTimeoutFetch } from '@americanexpress/fetch-enhancers';
 
 import createEnhancer from '../universal/enhancers';
 import reducer from '../universal/reducers';
 import transit from '../universal/utils/transit';
-import createTimeoutFetch from '../universal/utils/createTimeoutFetch';
 import { initializeServiceWorker } from './service-worker';
 
 export function initializeClientStore() {
@@ -60,8 +60,10 @@ export function loadServiceWorker({ dispatch, config }) {
     onError,
     serviceWorker: config.serviceWorker,
     recoveryMode: config.serviceWorkerRecoveryMode,
-    scriptUrl: config.serviceWorkerScriptUrl,
     scope: config.serviceWorkerScope,
+    scriptUrl: config.serviceWorkerScriptUrl,
+    webManifestUrl: config.webManifestUrl,
+    offlineUrl: config.offlineUrl,
     // in the event of any failure, the app should not crash for non-critical
     // progressive enhancement and report the error back to the server
   }).catch(onError);

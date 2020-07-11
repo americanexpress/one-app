@@ -92,6 +92,12 @@ if (!global.BROWSER) {
 
 The `provideStateConfig` directive is useful for supplying string-based key value settings per runtime (e.g. `client` or `server`) and per `environmentLevel` (e.g. QA, Prod, etc). The `environmentLevel` is specified in the [`ONE_CONFIG_ENV` environment variable](../server/Environment-Variables.md#one_config_env) when running the Server.
 
+**⚠️ Please Consider**
+
+> Server specific values used within state config are not isolated from the client side, as they are used
+> while rendering server side Holocron modules. Please use caution not to expose any sensitive data in a
+> Holocron module while using `state.get('config')` for any server side rendering in your module.
+
 In practice, the state config supplied by a Root Module may look like this shape:
 
 ```js
@@ -233,10 +239,21 @@ For the variety of service workers available, we have control to set its
 `scope` with the desired pathname and assign what url base the service worker
 can oversee.
 
+#### Web App Manifest
+
 The `webManifest` key is used to set up a [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Manifest)
 as part of the PWA group of technologies. It allows `one-app` to be installed onto a device
 with support for a more native experience using web technologies. The `webManifest` can also
 be a `Function` and is passed the `clientConfig` as the only argument.
+
+#### App Install and Offline Capability
+
+One App supports offline navigation capabilities when the network is unavailable and the
+service worker is enabled. With a configured web app manifest and root module, One App
+clients can be installed as a PWA across devices and platforms.
+To enable installing an app, please set the value for `start_url`, `icons` and `display`
+in the web manifest. If desired, a route can be used to match the `start_url` and used
+when an installed PWA is opened directly from the device.
 
 **Shape**
 ```js
@@ -432,15 +449,13 @@ The `eventLoopDelayThreshold` directive accepts a number representing the thresh
 if (!global.BROWSER) {
   Module.appConfig = {
     validateStateConfig: {
-      server: {
-        [settingName]: {
+      [settingName]: {
+        server: {
           validate(settingValue) {
             // Throw an error or return undefined
           },
         },
-      },
-      client: {
-        [settingName]: {
+        client: {
           validate(settingValue) {
             // Throw an error or return undefined
           },
@@ -451,9 +466,13 @@ if (!global.BROWSER) {
 }
 ```
 
-The `validateStateConfig` allows a Child Module to validate settings passed from `provideStateConfig`. Each `settingName` object accepts a `validate(settingValue)` method. The `validate` function may throw an `Error` or return `undefined` depending on validity of the value supplied to the Module on load.
+The `validateStateConfig` allows a Child Module to validate settings passed from
+`provideStateConfig`. Each `settingName` object accepts a `validate(settingValue)`
+method per `server` and `client` key. The `validate` function may throw an `Error`
+or return `undefined` depending on validity of the value supplied to the Module on load.
 
-If an `Error` is thrown, the Server will fail to startup or if already running will prevent [Holocron](https://github.com/americanexpress/holocron) from loading the Module dynamically.
+If an `Error` is thrown, the Server will fail to startup or if already running will prevent
+[Holocron](https://github.com/americanexpress/holocron) from loading the Module dynamically.
 
 **📘 More Information**
 * [`provideStateConfig`](#providestateconfig)

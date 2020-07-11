@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="5.2.1"></a>
+## [5.2.1](https://github.com/americanexpress/one-app/compare/v5.2.0...v5.2.1) (2020-07-01)
+
+
+### Bug Fixes
+
+* **clientModuleMapCache:** set base url for module bundle type ([#215](https://github.com/americanexpress/one-app/issues/215)) ([95ca35f](https://github.com/americanexpress/one-app/commit/95ca35f))
+* **release/change-log:** remove -e added ([#211](https://github.com/americanexpress/one-app/issues/211)) ([250113b](https://github.com/americanexpress/one-app/commit/250113b))
+
+
+<a name="5.2.0"></a>
+# [5.2.0](https://github.com/americanexpress/one-app/compare/v5.1.1...v5.2.0) (2020-06-24)
+
+
+### Bug Fixes
+
+* **module-map:** missing baseUrl to module map on server ([#206](https://github.com/americanexpress/one-app/issues/206)) ([c6a251e](https://github.com/americanexpress/one-app/commit/c6a251e))
+* **stateConfig:** incorrect env var for dev-proxy port ([#209](https://github.com/americanexpress/one-app/issues/209)) ([3620a1a](https://github.com/americanexpress/one-app/commit/3620a1a))
+
+
+### Features
+
+* **createTimeoutFetch:** replaced [@americanexpress](https://github.com/americanexpress)/fetch-enhancers ([c12db6f](https://github.com/americanexpress/one-app/commit/c12db6f))
+* **pwa/offline:** html shell ([e8a1dd2](https://github.com/americanexpress/one-app/commit/e8a1dd2))
+
+
 <a name="5.1.1"></a>
 ## [5.1.1](https://github.com/americanexpress/one-app/compare/v5.1.0...v5.1.1) (2020-06-17)
 
