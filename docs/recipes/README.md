@@ -4,7 +4,7 @@
 
 * [Adding Styles](./Adding-Styles.md) 🔨
 * [Making an API call](./Making-An-Api-Call.md) 📌
-* [Mocking your API calls for Local Development](./Mocking-Api-Calls.md) 🔨
+* [Mocking your API calls for Local Development](./Mocking-Api-Calls.md)
 * [Routing and Navigation](./Routing-And-Navigation.md)
 * [Code Splitting using Holocron](./Code-Splitting-Using-Holocron.md)
 * [Internationalizing your Module](./Internationalizing-Your-Module.md)
