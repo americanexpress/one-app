@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [5.2.2](https://github.com/americanexpress/one-app/compare/v5.2.1...v5.2.2) (2020-07-15)
 
+### Dependency Updates
+
+* **deps-dev/webdriverio** 6.1.20 to 6.1.24
+* **deps/@americanexpress/one-app-ducks** 4.0.1 to 4.1.1
+* **deps/@americanexpress/one-app-bundler** 6.6.0 to 6.7.0
+* **deps-dev/jest** 26.0.1 to 26.1.0
+* **deps/@americanexpress/fetch-enhancers** 1.0.0 to 1.0.1
 
 <a name="5.2.1"></a>
 ## [5.2.1](https://github.com/americanexpress/one-app/compare/v5.2.0...v5.2.1) (2020-07-01)
