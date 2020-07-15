@@ -27,7 +27,7 @@ export function createResourceMetaData(event, resourceInfo, revision) {
 
   let type = name === 'app' ? 'one-app' : 'modules';
 
-  let locale = null;
+  let locale;
   if (localeRegExp.test(request.url)) {
     type = 'lang-packs';
     locale = request.url.match(localeRegExp).groups.locale;
