@@ -18,7 +18,8 @@ import {
   match, put, remove, getMetaData, setMetaData, createCacheName,
 } from '@americanexpress/one-service-worker';
 
-const localeRegExp = /(?<locale>([a-z]{2,3})(?:-)?([a-zA-Z]{1,})?)\/[^/]*\.json/;
+const localeRegExp = /(([a-z]{2,3})(?:-)?([a-zA-Z]{1,})?)\/[^/]*\.json/;
+const legacyRegExp = /legacy\.browser|\/legacy\//;
 
 export function createResourceMetaData(event, resourceInfo, revision) {
   const [name, baseUrl] = resourceInfo;
@@ -27,14 +28,15 @@ export function createResourceMetaData(event, resourceInfo, revision) {
 
   let type = name === 'app' ? 'one-app' : 'modules';
 
+  let path;
   let locale;
   if (localeRegExp.test(request.url)) {
     type = 'lang-packs';
-    locale = request.url.match(localeRegExp).groups.locale;
+    [path, locale] = request.url.match(localeRegExp);
   }
 
   let bundle = 'browser';
-  if (request.url.includes('legacy')) {
+  if (legacyRegExp.test(request.url)) {
     bundle = 'legacy';
   }
 
@@ -43,7 +45,7 @@ export function createResourceMetaData(event, resourceInfo, revision) {
     type,
     name,
     version,
-    path: request.url.replace(baseUrl, '').replace(/(.*)(\?[^/]*)$/, '$1'),
+    path: path || request.url.replace(baseUrl, '').replace(/(.*)(\?[^/]*)$/, '$1'),
     url: request.url,
     cacheName: createCacheName(type),
   };
