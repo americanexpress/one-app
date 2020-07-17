@@ -61,6 +61,7 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
   app.use(forwardedHeaderParser);
 
   app.use('/_/static', express.static(path.join(__dirname, '../../build'), { maxage: '182d' }));
+  app.get('/_/ready', (req, res) => res.sendStatus(200));
   app.get('/_/pwa/service-worker.js', serviceWorkerMiddleware());
   app.get('*', addCacheHeaders);
   app.get('/_/pwa/manifest.webmanifest', webManifestMiddleware());
