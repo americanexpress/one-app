@@ -18,8 +18,11 @@ import {
   match, put, remove, getMetaData, setMetaData, createCacheName,
 } from '@americanexpress/one-service-worker';
 
-const localeRegExp = /(([a-z]{2,3})(?:-)?([a-zA-Z]{1,})?)\/[^/]*\.json/;
+// bundling
 const legacyRegExp = /\.legacy\.browser\.|\/legacy\//;
+// language
+const appLocaleRegExp = /i18n\/([^/]*)\.js$/;
+const moduleLocaleRegExp = /([a-z]{2,3}(-[a-zA-Z]{1,})?)\/[^/]*\.json$/;
 
 export function createResourceMetaData(event, resourceInfo, revision) {
   const [name, baseUrl] = resourceInfo;
@@ -30,9 +33,11 @@ export function createResourceMetaData(event, resourceInfo, revision) {
 
   let path;
   let locale;
-  if (localeRegExp.test(request.url)) {
+  if (moduleLocaleRegExp.test(request.url)) {
     type = 'lang-packs';
-    [path, locale] = request.url.match(localeRegExp);
+    [path, locale] = request.url.match(moduleLocaleRegExp);
+  } else if (appLocaleRegExp.test(request.url)) {
+    [path, locale] = request.url.match(appLocaleRegExp);
   }
 
   let bundle = 'browser';
