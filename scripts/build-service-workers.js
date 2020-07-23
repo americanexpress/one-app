@@ -40,11 +40,6 @@ async function buildServiceWorkerScripts({ dev = false, buildVersion, minify = t
           spec: true,
           // preserve ES syntax and allow rollup to handle the final output
           modules: false,
-          // needed to prevent breaking the RegExp used to match resources during caching
-          exclude: [
-            '@babel/plugin-transform-named-capturing-groups-regex',
-            '@babel/plugin-transform-dotall-regex',
-          ],
         },
       }]],
     }),

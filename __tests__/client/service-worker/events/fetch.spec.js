@@ -284,13 +284,13 @@ describe('createFetchMiddleware', () => {
           [
             // lang-packs
             'https://example.com/cdn/modules/test-root/2.2.2/en-US/test-root.json',
-            'https://cdn.example.com/nested/cdn/path/modules/child-module/2.3.4/locale/de-DE/child-module.json',
+            'https://cdn.example.com/nested/cdn/path/modules/child-module/2.3.4/de-DE/child-module.json',
             'https://example.com/cdn/modules/test-root/2.2.2/locale/zs-ASFJKHASKF/test-root.json',
-            'https://cdn.example.com/nested/cdn/path/modules/child-module/2.3.4/locale/fr-FR/integration.json',
+            'https://cdn.example.com/nested/cdn/path/modules/child-module/2.3.4/fr-FR/integration.json',
             // during development
             'http://localhost:3001/static/modules/local-module/4.5.6/en-us/integration.json',
             'http://localhost:3001/static/modules/local-module/4.5.6/locale/en-CA/local-module.json',
-            'http://localhost:3001/static/modules/local-module/4.5.6/locale/en/production.json',
+            'http://localhost:3001/static/modules/local-module/4.5.6/en/production.json',
           ],
         ],
       ]);

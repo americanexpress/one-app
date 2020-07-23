@@ -19,7 +19,7 @@ import {
 } from '@americanexpress/one-service-worker';
 
 const localeRegExp = /(([a-z]{2,3})(?:-)?([a-zA-Z]{1,})?)\/[^/]*\.json/;
-const legacyRegExp = /legacy\.browser|\/legacy\//;
+const legacyRegExp = /\.legacy\.browser\.|\/legacy\//;
 
 export function createResourceMetaData(event, resourceInfo, revision) {
   const [name, baseUrl] = resourceInfo;
