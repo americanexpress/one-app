@@ -1,10 +1,10 @@
-name: One App Development Image Build
+name: One App Development Image Build and Push
 on:
   repository_dispatch:
     types: [one-app-docker-dev-build]
 jobs:
   one-app-docker-dev-build:
-    name: One App Development Image Build
+    name: One App Development Image Build and Push
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

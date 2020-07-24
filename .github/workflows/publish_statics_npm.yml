@@ -4,7 +4,7 @@ on:
     types: [publish-statics-npm]
 jobs:
   publish-statics-npm:
-    name: Build Production Image
+    name: One App Statics Publish to NPM
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -13,9 +13,12 @@ jobs:
         with:
           node-version: '12.x'
           registry-url: 'https://registry.npmjs.org'
+      - name: Docker login
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Extract and zip production statics
         run: |
-          docker cp $(docker create prod):opt/one-app/build ./one-app-statics
+          docker create --name prod ${{ secrets.DOCKER_USER }}/one-app:${{ github.event.client_payload.docker_tag_version}}
+          docker cp prod:opt/one-app/build ./one-app-statics
           zip -r one-app-static-assets one-app-statics/build
       - name: Publish statics to NPM
         run: npm publish ./one-app-statics --access public

@@ -1,10 +1,10 @@
-name: One App Production Image Build and Static Extraction
+name: One App Production Image Build and Push
 on:
   repository_dispatch:
     types: [one-app-docker-prod-build]
 jobs:
   one-app-docker-prod-build:
-    name: Build Production Image
+    name: One App Production Image Build and Push
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
