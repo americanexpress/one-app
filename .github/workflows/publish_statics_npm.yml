@@ -1,0 +1,43 @@
+name: One App Statics Publish to NPM
+on:
+  repository_dispatch:
+    types: [publish-statics-npm]
+jobs:
+  publish-statics-npm:
+    name: Build Production Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Extract and zip production statics
+        run: |
+          docker cp $(docker create prod):opt/one-app/build ./one-app-statics
+          zip -r one-app-static-assets one-app-statics/build
+      - name: Publish statics to NPM
+        run: npm publish ./one-app-statics --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.client_payload.docker_tag_version }}
+          release_name: Release ${{ github.event.client_payload.docker_tag_version }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Assets
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./one-app-static-assets.zip
+          asset_name: one-app-static-assets.zip
+          asset_content_type: application/zip
