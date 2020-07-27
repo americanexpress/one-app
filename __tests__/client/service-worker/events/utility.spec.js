@@ -109,7 +109,7 @@ describe(createResourceMetaData.name, () => {
     }],
     ['https://example.com/cdn/app/1.2.3-rc.4-abc123/i18n/en-US.js', appInfo, {
       ...appMetaData,
-      path: 'i18n/en-US.js',
+      path: 'i18n/language.js',
       locale: 'en-US',
     }],
     // modules

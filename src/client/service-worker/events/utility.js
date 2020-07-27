@@ -38,6 +38,8 @@ export function createResourceMetaData(event, resourceInfo, revision) {
     [path, locale] = request.url.match(moduleLocaleRegExp);
   } else if (appLocaleRegExp.test(request.url)) {
     [path, locale] = request.url.match(appLocaleRegExp);
+    // write over the intl resource to allow locale invalidation
+    path = path.replace(locale, 'language');
   }
 
   let bundle = 'browser';
