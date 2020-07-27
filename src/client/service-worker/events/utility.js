@@ -50,18 +50,10 @@ export function createResourceMetaData(event, resourceInfo) {
     [path, locale] = request.url.match(appLocaleRegExp);
     // write over the intl resource to allow locale invalidation
     path = path.replace(locale, 'language');
-<<<<<<< HEAD
   } else {
     // if not an i18n resource type, we only extract the base filename as the path
     // we remove the clientCacheRevision from the url if present
     path = request.url.replace(baseUrl, '').replace(clientCacheRevisionRegexp, '$1');
-=======
-  }
-
-  let bundle = 'browser';
-  if (legacyRegExp.test(request.url)) {
-    bundle = 'legacy';
->>>>>>> fix(pwa/cache): invalidate app locale
   }
 
   const metaData = {
