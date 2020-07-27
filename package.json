@@ -167,7 +167,7 @@
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-terser": "^6.1.0",
     "service-worker-mock": "^2.0.5",
-    "standard-version": "^8.0.0",
+    "standard-version": "^8.0.2",
     "supertest": "^4.0.2",
     "surge": "^0.21.3",
     "tar": "^6.0.2",
