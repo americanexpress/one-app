@@ -19,8 +19,6 @@ import PropTypes from 'prop-types';
 import { loadLanguagePack } from '@americanexpress/one-app-ducks';
 import { FormattedMessage, IntlProvider } from 'react-intl';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
-import { holocronModule } from 'holocron';
 import { fromJS } from 'immutable';
 
 const Burger = React.lazy(() => import(/* webpackChunkName: 'Burger' */ './Burger'));
@@ -73,6 +71,12 @@ FranksBurgers.propTypes = {
   }).isRequired,
 };
 
+FranksBurgers.holocron = {
+  name: 'franks-burgers',
+  load: () => (dispatch) => dispatch(loadLanguagePack('franks-burgers', { fallbackLocale: 'en-US' })),
+  options: { ssr: true },
+};
+
 const mapStateToProps = (state) => {
   const localeName = state.getIn(['intl', 'activeLocale']);
   const languagePack = state.getIn(
@@ -86,11 +90,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default compose(
-  connect(mapStateToProps),
-  holocronModule({
-    name: 'franks-burgers',
-    load: () => (dispatch) => dispatch(loadLanguagePack('franks-burgers', { fallbackLocale: 'en-US' })),
-    options: { ssr: true },
-  })
-)(FranksBurgers);
+export default connect(mapStateToProps)(FranksBurgers);

@@ -19,8 +19,6 @@ import PropTypes from 'prop-types';
 import { loadLanguagePack, updateLocale } from '@americanexpress/one-app-ducks';
 import { FormattedMessage, IntlProvider } from 'react-intl';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
-import { holocronModule } from 'holocron';
 import { fromJS } from 'immutable';
 
 const CulturedFrankie = ({ switchLanguage, languageData, localeName }) => {
@@ -53,6 +51,11 @@ CulturedFrankie.propTypes = {
   }).isRequired,
   localeName: PropTypes.string.isRequired,
 };
+CulturedFrankie.holocron = {
+  name: 'cultured-frankie',
+  load: () => (dispatch) => dispatch(loadLanguagePack('cultured-frankie', { fallbackLocale: 'en-US' })),
+  options: { ssr: true },
+};
 
 const mapDispatchToProps = (dispatch) => ({
   switchLanguage: async ({ target }) => {
@@ -74,11 +77,4 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default compose(
-  connect(mapStateToProps, mapDispatchToProps),
-  holocronModule({
-    name: 'cultured-frankie',
-    load: () => (dispatch) => dispatch(loadLanguagePack('cultured-frankie', { fallbackLocale: 'en-US' })),
-    options: { ssr: true },
-  })
-)(CulturedFrankie);
+export default connect(mapStateToProps, mapDispatchToProps)(CulturedFrankie);
