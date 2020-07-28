@@ -42,7 +42,16 @@ const buildServiceWorkerScripts = require('./build-service-workers');
     killSignal: 'SIGINT',
   });
 
-  const nodemon = spawn('nodemon', ['--signal', 'SIGTERM', '--watch', 'src', '--ext', 'js,jsx', 'lib/server/index.js'], {
+  const flags = process.argv.filter((arg) => [
+    '--root-module-name',
+    '--module-map-url',
+    '--use-middleware',
+    '--use-host',
+  ].find((argName) => arg.startsWith(argName)));
+
+  const nodemon = spawn('nodemon', [
+    '--signal', 'SIGTERM', '--watch', 'src', '--ext', 'js,jsx', 'lib/server/index.js',
+  ].concat(flags.length > 0 ? ['--', ...flags] : []), {
     stdio: 'inherit',
     killSignal: 'SIGINT',
   });
