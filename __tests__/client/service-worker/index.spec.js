@@ -14,6 +14,9 @@
  * permissions and limitations under the License.
  */
 
+import CacheStorage from 'service-worker-mock/models/CacheStorage';
+import Request from 'service-worker-mock/models/Request';
+
 import { importServiceWorkerClient, initializeServiceWorker } from '../../../src/client/service-worker';
 import serviceWorkerClient from '../../../src/client/service-worker/client';
 
@@ -44,6 +47,9 @@ describe('initializeServiceWorker', () => {
   const scriptUrl = '/_/pwa/service-worker.js';
 
   beforeEach(() => {
+    window.Request = Request;
+    window.caches = new CacheStorage();
+
     registration = {
       update: jest.fn(() => Promise.resolve()),
       unregister: jest.fn(() => Promise.resolve()),
@@ -84,6 +90,22 @@ describe('initializeServiceWorker', () => {
     expect(serviceWorkerClient).not.toHaveBeenCalled();
   });
 
+  test('when serviceWorker is disabled, clears the cache of any entries', async () => {
+    expect.assertions(5);
+
+    await (await caches.open('__sw/one-app-test')).put(new Request('/app.js'), null);
+
+    expect(caches.snapshot()).toEqual({
+      '__sw/one-app-test': {
+        'http://localhost/app.js': null,
+      },
+    });
+    await expect(initializeServiceWorker({ serviceWorker: false })).resolves.toBe(registration);
+    expect(registration.unregister).toHaveBeenCalledTimes(1);
+    expect(serviceWorkerClient).not.toHaveBeenCalled();
+    expect(caches.snapshot()).toEqual({});
+  });
+
   test('when recoveryMode is active, returns null if registration is not present', async () => {
     expect.assertions(2);
 
@@ -105,6 +127,31 @@ describe('initializeServiceWorker', () => {
     })).resolves.toBe(registration);
     expect(registration.update).toHaveBeenCalledTimes(1);
     expect(serviceWorkerClient).not.toHaveBeenCalled();
+  });
+
+  test('when recoveryMode is active, clears the cache of any entries', async () => {
+    expect.assertions(5);
+
+    await (await caches.open('__sw/one-app-test')).put(new Request('/shell.html'), null);
+    await (await caches.open('__sw/one-app-test')).put(new Request('/app.js'), null);
+    await (await caches.open('__sw/other-cache')).put(new Request('/misc.js'), null);
+
+    expect(caches.snapshot()).toEqual({
+      '__sw/one-app-test': {
+        'http://localhost/shell.html': null,
+        'http://localhost/app.js': null,
+      },
+      '__sw/other-cache': {
+        'http://localhost/misc.js': null,
+      },
+    });
+    await expect(initializeServiceWorker({
+      serviceWorker: true,
+      recoveryMode: true,
+    })).resolves.toBe(registration);
+    expect(registration.update).toHaveBeenCalledTimes(1);
+    expect(serviceWorkerClient).not.toHaveBeenCalled();
+    expect(caches.snapshot()).toEqual({});
   });
 
   test('calls serviceWorkerClient with settings if a service worker registration does not exist', async () => {

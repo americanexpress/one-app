@@ -884,6 +884,19 @@ describe('Tests that require Docker setup', () => {
         await waitFor(5000);
       };
 
+      // cache utils
+
+      // usage: const cacheKeys = await browser.executeAsync(getCacheKeys);
+      function getCacheKeys(done) {
+        // eslint-disable-next-line prefer-arrow-callback
+        caches.keys().then(function filterKeys(cacheKeys) {
+          // eslint-disable-next-line prefer-arrow-callback
+          return cacheKeys.filter(function filterSWCache(key) {
+            return key.startsWith('__sw');
+          });
+        }).then(done);
+      }
+
       afterAll(() => {
         writeModuleMap(originalModuleMap);
       });
@@ -968,7 +981,7 @@ describe('Tests that require Docker setup', () => {
         });
 
         test('service worker is no longer registered and removed with root module change', async () => {
-          expect.assertions(1);
+          expect.assertions(2);
 
           await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
@@ -978,6 +991,11 @@ describe('Tests that require Docker setup', () => {
           });
 
           expect(result).toBe(null);
+
+          // eslint-disable-next-line prefer-arrow-callback
+          const cacheKeys = await browser.executeAsync(getCacheKeys);
+
+          expect(cacheKeys).toEqual([]);
         });
       });
     });
