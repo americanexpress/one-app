@@ -73,8 +73,10 @@ FranksBurgers.propTypes = {
 
 FranksBurgers.holocron = {
   name: 'franks-burgers',
-  load: () => (dispatch) => dispatch(loadLanguagePack('franks-burgers', { fallbackLocale: 'en-US' })),
   options: { ssr: true },
+  loadModuleData: ({ store: { dispatch } }) => dispatch(
+    loadLanguagePack('franks-burgers', { fallbackLocale: 'en-US' })
+  ),
 };
 
 const mapStateToProps = (state) => {

@@ -53,8 +53,10 @@ CulturedFrankie.propTypes = {
 };
 CulturedFrankie.holocron = {
   name: 'cultured-frankie',
-  load: () => (dispatch) => dispatch(loadLanguagePack('cultured-frankie', { fallbackLocale: 'en-US' })),
   options: { ssr: true },
+  loadModuleData: ({ store: { dispatch } }) => dispatch(
+    loadLanguagePack('cultured-frankie', { fallbackLocale: 'en-US' })
+  ),
 };
 
 const mapDispatchToProps = (dispatch) => ({

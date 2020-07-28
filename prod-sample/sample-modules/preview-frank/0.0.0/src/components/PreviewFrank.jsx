@@ -18,7 +18,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { RenderModule } from 'holocron';
-import { load } from '../duck';
+import { loadModuleData } from '../duck';
 import getDemoProps from '../utils/getDemoProps';
 
 const PreviewFrank = (props) => {
@@ -59,7 +59,7 @@ PreviewFrank.propTypes = {
 
 PreviewFrank.holocron = {
   name: 'preview-frank',
-  load,
+  loadModuleData,
   options: { ssr: true },
 };
 
