@@ -23,18 +23,16 @@ import getDemoProps from './utils/getDemoProps';
 // This duck does not have a reducer
 export default null;
 
-export function load(props) {
+export function loadModuleData({ store: { dispatch }, ownProps: props }) {
   const { location, params } = props;
-  return (dispatch) => {
-    const demoProps = getDemoProps(props);
-    const locale = get(location, 'query.locale');
+  const demoProps = getDemoProps(props);
+  const locale = get(location, 'query.locale');
 
-    const promises = [
-      dispatch(composeModules([{ name: params.moduleName, props: demoProps }])),
-    ];
+  const promises = [
+    dispatch(composeModules([{ name: params.moduleName, props: demoProps }])),
+  ];
 
-    return locale
-      ? Promise.all([...promises, dispatch(updateLocale(locale))])
-      : Promise.all(promises);
-  };
+  return locale
+    ? Promise.all([...promises, dispatch(updateLocale(locale))])
+    : Promise.all(promises);
 }
