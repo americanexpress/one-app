@@ -184,7 +184,7 @@ describe('ssrServer', () => {
 
     it('should return a 200 response for the readiness check', (done) => {
       request(loadServer())
-        .get('/_/ready')
+        .get('/_/status')
         .end((error, res) => {
           expect(res.status).toEqual(200);
           expect(res.text).toEqual('OK');
