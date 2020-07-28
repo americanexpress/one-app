@@ -16,7 +16,6 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { fromJS } from 'immutable';
 import ModuleRoute from 'holocron-module-route';
 import { Helmet } from 'react-helmet';
 import { connect } from 'react-redux';
@@ -62,13 +61,5 @@ if (!global.BROWSER) {
     },
   };
 }
-
-const reducer = (state = fromJS({})) => state;
-reducer.buildInitialState = ({ req } = {}) => {
-  if (req && req.body) {
-    return fromJS({ postProps: req.body });
-  }
-  return fromJS({});
-};
 
 export default connect((state) => ({ config: state.get('config') }))(FrankLloydRoot);
