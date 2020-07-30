@@ -78,62 +78,89 @@ describe(markResourceForRemoval.name, () => {
 });
 
 describe(createResourceMetaData.name, () => {
-  const appInfo = ['app', 'https://example.com/cdn/app/1.2.3-rc.4-abc123/'];
-  const appMetaData = {
-    type: 'one-app',
-    cacheName: '__sw/one-app',
-    name: 'app',
-    bundle: 'browser',
-    version: '1.2.3-rc.4-abc123',
-  };
-  const moduleInfo = ['module', 'https://example.com/cdn/modules/test-root/2.2.2/'];
-  const baseMetaData = {
-    bundle: 'browser',
-    type: 'modules',
-    name: 'module',
-    version: '2.2.2',
-    cacheName: '__sw/modules',
-  };
   test.each([
     // app
-    ['https://example.com/cdn/app/1.2.3-rc.4-abc123/app.js', appInfo, {
-      ...appMetaData,
-      path: 'app.js',
-    }],
-    ['https://example.com/cdn/app/1.2.3-rc.4-abc123/i18n/en-US.js', appInfo, {
-      ...appMetaData,
-      path: 'i18n/language.js',
-      locale: 'en-US',
-    }],
+    [
+      'https://example.com/cdn/app/1.2.3-rc.4-abc123/app.js',
+      ['app', 'https://example.com/cdn/app/1.2.3-rc.4-abc123/'], {
+        type: 'one-app',
+        cacheName: '__sw/one-app',
+        name: 'app',
+        bundle: 'browser',
+        version: '1.2.3-rc.4-abc123',
+        path: 'app.js',
+      },
+    ],
+    [
+      'https://example.com/cdn/app/1.2.3-rc.4-abc123/i18n/en-US.js',
+      ['app', 'https://example.com/cdn/app/1.2.3-rc.4-abc123/'], {
+        type: 'one-app',
+        cacheName: '__sw/one-app',
+        name: 'app',
+        bundle: 'browser',
+        version: '1.2.3-rc.4-abc123',
+        path: 'i18n/language.js',
+        locale: 'en-US',
+      },
+    ],
     // modules
-    ['https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js', moduleInfo, {
-      ...baseMetaData,
-      path: 'test-root.browser.js',
-    }],
-    ['https://example.com/cdn/modules/test-root/2.2.2/test-root.legacy.browser.js', moduleInfo, {
-      ...baseMetaData,
-      bundle: 'legacy',
-      path: 'test-root.legacy.browser.js',
-    }],
-    ['https://example.com/cdn/modules/test-root/2.2.2/locale/en-US/test-root.json', moduleInfo, {
-      ...baseMetaData,
-      type: 'lang-packs',
-      path: 'en-US/test-root.json',
-      cacheName: '__sw/lang-packs',
-      locale: 'en-US',
-    }],
-    ['https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js', moduleInfo, {
-      ...baseMetaData,
-      path: 'test-root.browser.js',
-    }],
     [
       'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
-      moduleInfo.concat('101010'),
-      {
-        ...baseMetaData,
+      ['module', 'https://example.com/cdn/modules/test-root/2.2.2/'], {
+        bundle: 'browser',
+        type: 'modules',
+        name: 'module',
+        version: '2.2.2',
+        cacheName: '__sw/modules',
+        path: 'test-root.browser.js',
+      },
+    ],
+    [
+      'https://example.com/cdn/modules/test-root/2.2.2/test-root.legacy.browser.js',
+      ['module', 'https://example.com/cdn/modules/test-root/2.2.2/'], {
+        type: 'modules',
+        name: 'module',
+        version: '2.2.2',
+        cacheName: '__sw/modules',
+        bundle: 'legacy',
+        path: 'test-root.legacy.browser.js',
+      },
+    ],
+    [
+      'https://example.com/cdn/modules/test-root/2.2.2/locale/en-US/test-root.json',
+      ['module', 'https://example.com/cdn/modules/test-root/2.2.2/'], {
+        bundle: 'browser',
+        name: 'module',
+        version: '2.2.2',
+        type: 'lang-packs',
+        path: 'en-US/test-root.json',
+        cacheName: '__sw/lang-packs',
+        locale: 'en-US',
+      },
+    ],
+    [
+      'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
+      ['module', 'https://example.com/cdn/modules/test-root/2.2.2/'], {
+        bundle: 'browser',
+        type: 'modules',
+        name: 'module',
+        version: '2.2.2',
+        cacheName: '__sw/modules',
+        path: 'test-root.browser.js',
+      },
+    ],
+    [
+      'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
+      ['module', 'https://example.com/cdn/modules/test-root/2.2.2/', '101010'], {
+        bundle: 'browser',
+        type: 'modules',
+        name: 'module',
+        version: '2.2.2',
+        cacheName: '__sw/modules',
         path: 'test-root.browser.js',
         revision: '101010',
-      }],
+      },
+    ],
   ])('extracts metadata from %s', (url, resourceInfo, result) => {
     // eslint-disable-next-line no-param-reassign
     const meta = createResourceMetaData({ request: { url } }, resourceInfo);
