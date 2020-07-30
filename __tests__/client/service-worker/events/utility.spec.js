@@ -30,7 +30,7 @@ import {
 jest.mock('@americanexpress/one-service-worker', () => ({
   put: jest.fn(() => Promise.resolve()),
   match: jest.fn(() => Promise.resolve()),
-  getMetaData: jest.fn(() => Promise.resolve()),
+  getMetaData: jest.fn(() => Promise.resolve({})),
   setMetaData: jest.fn(() => Promise.resolve()),
   remove: jest.fn(() => Promise.resolve()),
   createCacheName: jest.fn((passthrough) => ['__sw', passthrough].join('/')),
@@ -93,7 +93,6 @@ describe(createResourceMetaData.name, () => {
     name: 'module',
     version: '2.2.2',
     cacheName: '__sw/modules',
-    revision: '101010',
   };
   test.each([
     // app
@@ -126,12 +125,18 @@ describe(createResourceMetaData.name, () => {
     ['https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js', moduleInfo, {
       ...baseMetaData,
       path: 'test-root.browser.js',
-      revision: null,
     }],
-  ])('extracts metadata from %s', (url, [type, baseUrl], result) => {
+    [
+      'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
+      moduleInfo.concat('101010'),
+      {
+        ...baseMetaData,
+        path: 'test-root.browser.js',
+        revision: '101010',
+      }],
+  ])('extracts metadata from %s', (url, resourceInfo, result) => {
     // eslint-disable-next-line no-param-reassign
-    if (result.revision === null) delete result.revision;
-    const meta = createResourceMetaData({ request: { url } }, [type, baseUrl], result.revision);
+    const meta = createResourceMetaData({ request: { url } }, resourceInfo);
     expect(meta).toEqual({ ...result, url });
   });
 });
