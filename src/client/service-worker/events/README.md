@@ -24,6 +24,6 @@ handler, accessed via `process.env`:
 These values are valid to use in node/testing environment as is, however during
 build and runtime, these values are textually replaced. `ONE_APP_BUILD_VERSION`
 is replaced with One App version during build time, after the app is built. For
-`HOLOCRON_MODULE_MAP`, the value is injected into the service worker in the [service
-worker middleware](../../../server/middleware/pwa/service-worker.js) with the most
-current Holocron module map that was loaded/polled.
+`HOLOCRON_MODULE_MAP`, the value is injected into the service worker in the
+[service worker middleware](../../../server/middleware/pwa/service-worker.js)
+with the most current Holocron module map that was loaded/polled.
