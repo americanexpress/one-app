@@ -15,8 +15,6 @@
  */
 
 import React from 'react';
-import { compose } from 'redux';
-import { holocronModule } from 'holocron';
 import { configureIguazuSSR } from 'iguazu-holocron';
 import PropTypes from 'prop-types';
 import { connectAsync } from 'iguazu';
@@ -51,10 +49,9 @@ NeedyFrank.propTypes = {
   }).isRequired,
 };
 
-export default compose(
-  holocronModule({
-    name: 'needy-frank',
-    reducer,
-  }),
-  connectAsync({ loadDataAsProps })
-)(NeedyFrank);
+NeedyFrank.holocron = {
+  name: 'needy-frank',
+  reducer,
+};
+
+export default connectAsync({ loadDataAsProps })(NeedyFrank);

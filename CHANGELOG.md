@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.3.0](https://github.com/americanexpress/one-app/compare/v5.2.2...v5.3.0) (2020-07-29)
+
+
+### Features
+
+* **createCircuitBreaker:** log circuit breaker activity ([acb96c3](https://github.com/americanexpress/one-app/commit/acb96c315db663474fa99b0fc929719586deacf9))
+* **pwa/cache:** clear when disabled ([e84eddd](https://github.com/americanexpress/one-app/commit/e84eddd40a2c99a6b87928e58b5fcd40768e9edd))
+* **ssrServer:** added readiness check route ([#248](https://github.com/americanexpress/one-app/issues/248)) ([a342e71](https://github.com/americanexpress/one-app/commit/a342e71e99a1485616392c074c1d1459c058d7e2))
+
+
 ## [5.2.2](https://github.com/americanexpress/one-app/compare/v5.2.1...v5.2.2) (2020-07-15)
 
 ### Dependency Updates
