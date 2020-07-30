@@ -426,16 +426,14 @@ describe('createFetchMiddleware', () => {
         expect(
           JSON.parse(cachesSnapShot['__sw/__meta']['http://localhost/__sw/__meta/modules/test-root/test-root.browser.js'].body.parts.join(''))
         ).toEqual({
-          'http://localhost/modules/test-root/test-root.browser.js': {
-            name: 'test-root',
-            version: '2.2.2',
-            path: '/test-root.browser.js',
-            revision: 'def',
-            bundle: 'browser',
-            type: 'modules',
-            url: nextUrl,
-            cacheName: '__sw/modules',
-          },
+          name: 'test-root',
+          version: '2.2.2',
+          path: '/test-root.browser.js',
+          revision: 'def',
+          bundle: 'browser',
+          type: 'modules',
+          url: nextUrl,
+          cacheName: '__sw/modules',
         });
       });
 
@@ -483,16 +481,14 @@ describe('createFetchMiddleware', () => {
         expect(
           JSON.parse(cachesSnapShot['__sw/__meta']['http://localhost/__sw/__meta/modules/test-root/test-root.browser.js'].body.parts.join(''))
         ).toEqual({
-          'http://localhost/modules/test-root/test-root.browser.js': {
-            name: 'test-root',
-            version: '3.2.1',
-            path: '/test-root.browser.js',
-            revision: '123',
-            bundle: 'browser',
-            type: 'modules',
-            url: nextUrl,
-            cacheName: '__sw/modules',
-          },
+          name: 'test-root',
+          version: '3.2.1',
+          path: '/test-root.browser.js',
+          revision: '123',
+          bundle: 'browser',
+          type: 'modules',
+          url: nextUrl,
+          cacheName: '__sw/modules',
         });
       });
     });

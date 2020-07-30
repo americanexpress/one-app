@@ -73,22 +73,19 @@ export function markResourceForRemoval(cachedMetaRecord, newMetaRecord) {
 
 export function invalidateCacheResource(event, meta) {
   const [resourcePath] = meta.path.split('/').reverse();
-  const resourceId = `${meta.type}/${meta.name}/${resourcePath}`;
-  const resourceUrl = new Request(`/${resourceId}`).url;
+  const cacheName = [meta.type, meta.name, resourcePath].join('/');
   return (response) => {
     event.waitUntil(
       getMetaData({
-        url: resourceUrl,
-        cacheName: resourceId,
+        cacheName,
       }).then((cachedMeta) => {
         if (cachedMeta.url && markResourceForRemoval(cachedMeta, meta)) {
           event.waitUntil(
-            remove(new Request(cachedMeta.url), { cacheName: meta.cacheName })
+            remove(new Request(cachedMeta.url), { cacheName: cachedMeta.cacheName })
           );
         }
         return setMetaData({
-          url: resourceUrl,
-          cacheName: resourceId,
+          cacheName,
           metadata: meta,
         });
       })
