@@ -20,7 +20,7 @@
     "build": "concurrently \"npm run build:bundle\" \"npm run build:server\" -n build:bundle,build:server --kill-others-on-fail && npm run build:service-workers",
     "build:prod-sample": "concurrently \"npm run build:sample-modules\" \"node scripts/build-one-app-docker-setup.js\" -n build-modules,build-app",
     "build:sample-modules": "node scripts/build-sample-modules.js",
-    "start:watch": "nodemon --signal SIGTERM --watch src --ext js,jsx --exec babel-node src/server/index.js",
+    "start:watch": "node scripts/watch-server.js",
     "prestart:prod-sample": "npm run build:prod-sample",
     "start:prod-sample": "docker-compose -f ./prod-sample/docker-compose.yml up --abort-on-container-exit",
     "test:lockfile": "lockfile-lint -p package-lock.json -t npm -a npm -o https: -c -i",
