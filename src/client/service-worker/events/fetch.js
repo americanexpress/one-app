@@ -23,7 +23,12 @@ import {
 } from '@americanexpress/one-service-worker';
 
 import { OFFLINE_CACHE_NAME } from '../constants';
-import { createResourceMetaData, fetchCacheResource } from './utility';
+import {
+  createResourceMetaData,
+  fetchCacheResource,
+  getOneAppVersion,
+  getHolocronModuleMap,
+} from './utility';
 
 function createAppCachingMiddleware(oneAppVersion) {
   return function appResourceCachingMiddleware(event, context) {
@@ -62,10 +67,10 @@ function createHolocronCachingMiddleware(holocronModuleMap) {
   };
 }
 
-export default function createFetchMiddleware() {
-  const oneAppVersion = process.env.ONE_APP_BUILD_VERSION;
-  const holocronModuleMap = JSON.parse(process.env.HOLOCRON_MODULE_MAP);
-
+export default function createFetchMiddleware({
+  oneAppVersion = getOneAppVersion(),
+  holocronModuleMap = getHolocronModuleMap(),
+} = {}) {
   return createMiddleware([
     appShell({
       route: '/_/pwa/shell',

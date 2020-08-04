@@ -50,14 +50,11 @@ describe(markResourceForRemoval.name, () => {
     const existingMetaData = {
       revision: '101010',
       locale: 'en-US',
-      bundle: 'browser',
       version: '1.0.0',
     };
     const newMetaData = { ...existingMetaData };
     expect(markResourceForRemoval(existingMetaData, newMetaData)).toBe(false);
     [
-      // test bundling triggers change
-      ['bundle', 'legacy'],
       // version change, whether up or down, will invalidate
       ['version', '4.5.6'],
       // only a single locale and lang-pack per cache
@@ -86,7 +83,6 @@ describe(createResourceMetaData.name, () => {
         type: 'one-app',
         cacheName: '__sw/one-app',
         name: 'app',
-        bundle: 'browser',
         version: '1.2.3-rc.4-abc123',
         path: 'app.js',
       },
@@ -97,7 +93,6 @@ describe(createResourceMetaData.name, () => {
         type: 'one-app',
         cacheName: '__sw/one-app',
         name: 'app',
-        bundle: 'browser',
         version: '1.2.3-rc.4-abc123',
         path: 'i18n/language.js',
         locale: 'en-US',
@@ -107,7 +102,6 @@ describe(createResourceMetaData.name, () => {
     [
       'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
       ['module', 'https://example.com/cdn/modules/test-root/2.2.2/'], {
-        bundle: 'browser',
         type: 'modules',
         name: 'module',
         version: '2.2.2',
@@ -116,20 +110,8 @@ describe(createResourceMetaData.name, () => {
       },
     ],
     [
-      'https://example.com/cdn/modules/test-root/2.2.2/test-root.legacy.browser.js',
-      ['module', 'https://example.com/cdn/modules/test-root/2.2.2/'], {
-        type: 'modules',
-        name: 'module',
-        version: '2.2.2',
-        cacheName: '__sw/modules',
-        bundle: 'legacy',
-        path: 'test-root.legacy.browser.js',
-      },
-    ],
-    [
       'https://example.com/cdn/modules/test-root/2.2.2/locale/en-US/test-root.json',
       ['module', 'https://example.com/cdn/modules/test-root/2.2.2/'], {
-        bundle: 'browser',
         name: 'module',
         version: '2.2.2',
         type: 'lang-packs',
@@ -141,7 +123,6 @@ describe(createResourceMetaData.name, () => {
     [
       'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
       ['module', 'https://example.com/cdn/modules/test-root/2.2.2/'], {
-        bundle: 'browser',
         type: 'modules',
         name: 'module',
         version: '2.2.2',
@@ -152,7 +133,6 @@ describe(createResourceMetaData.name, () => {
     [
       'https://example.com/cdn/modules/test-root/2.2.2/test-root.browser.js',
       ['module', 'https://example.com/cdn/modules/test-root/2.2.2/', '101010'], {
-        bundle: 'browser',
         type: 'modules',
         name: 'module',
         version: '2.2.2',
@@ -170,7 +150,6 @@ describe(createResourceMetaData.name, () => {
 
 describe(invalidateCacheResource.name, () => {
   const existingMetaData = {
-    bundle: 'browser',
     cacheName: '__sw/modules',
     name: 'my-module',
     path: 'my-module.browser.js',

@@ -319,43 +319,31 @@ describe('createFetchMiddleware', () => {
         caches.caches = {};
       });
 
-      test('caches all app assets and overwrites initial legacy bundle items', async () => {
-        expect.assertions(41);
+      test('caches all app assets and invalidates app version', async () => {
+        expect.assertions(11);
 
-        const middleware = createFetchMiddleware();
-        const events = await createFetchEventsChainForURLS(middleware, [
-          // legacy
-          'https://example.com/cdn/app/1.2.3-rc.4-abc123/legacy/app~vendors.js',
-          'https://example.com/cdn/app/1.2.3-rc.4-abc123/legacy/vendors.js',
-          'https://example.com/cdn/app/1.2.3-rc.4-abc123/legacy/runtime.js',
-          'https://example.com/cdn/app/1.2.3-rc.4-abc123/legacy/i18n/en-US.js',
-          'https://example.com/cdn/app/1.2.3-rc.4-abc123/legacy/app.js',
-          // modern
-          'https://example.com/cdn/app/1.2.3-rc.4-abc123/app~vendors.js',
-          'https://example.com/cdn/app/1.2.3-rc.4-abc123/vendors.js',
-          'https://example.com/cdn/app/1.2.3-rc.4-abc123/runtime.js',
-          'https://example.com/cdn/app/1.2.3-rc.4-abc123/i18n/en-US.js',
-          'https://example.com/cdn/app/1.2.3-rc.4-abc123/app.js',
-        ]);
+        const createOneAppEvents = async (oneAppVersion) => {
+          const middleware = createFetchMiddleware({ oneAppVersion });
+          const events = await createFetchEventsChainForURLS(middleware, [
+            `https://example.com/cdn/app/${oneAppVersion}/app~vendors.js`,
+            `https://example.com/cdn/app/${oneAppVersion}/vendors.js`,
+            `https://example.com/cdn/app/${oneAppVersion}/runtime.js`,
+            `https://example.com/cdn/app/${oneAppVersion}/i18n/en-US.js`,
+            `https://example.com/cdn/app/${oneAppVersion}/app.js`,
+          ]);
+          return events;
+        };
 
+        const oldVersionEvents = await createOneAppEvents('0.1.2');
+        const newVersionEvents = await createOneAppEvents('1.2.3-rc.4-abc123');
         expect(fetch).toHaveBeenCalledTimes(10);
-        await Promise.all(
-          events.map(async (event, index) => {
-            // if the index is 5 or bigger, we expect modern app resources
-            // and should add an extra call to `event.waitUntil(remove(legacyURL));`
-            expect(event.waitUntil).toHaveBeenCalledTimes(index >= 5 ? 4 : 3);
-            expect(event.respondWith).toHaveBeenCalledTimes(1);
-            expect(event.respondWith).toHaveBeenCalledWith(Promise.resolve(event.response));
-          })
-        );
-        await Promise.all(events.map(async (event, index) => {
-          if (index >= 5) {
-            // we should expect the modern app resources in the cache
-            await expect(match(event.request)).resolves.toBeInstanceOf(Response);
-          } else {
-            // and the legacy resources removed from the cache
-            await expect(match(event.request)).resolves.toBe(null);
-          }
+
+        await Promise.all(newVersionEvents.map(async (event) => {
+          await expect(match(event.request)).resolves.toBeInstanceOf(Response);
+        }));
+
+        await Promise.all(oldVersionEvents.map(async (event) => {
+          await expect(match(event.request)).resolves.toBe(null);
         }));
       });
 
@@ -430,7 +418,6 @@ describe('createFetchMiddleware', () => {
           version: '2.2.2',
           path: '/test-root.browser.js',
           revision: 'def',
-          bundle: 'browser',
           type: 'modules',
           url: nextUrl,
           cacheName: '__sw/modules',
@@ -485,7 +472,6 @@ describe('createFetchMiddleware', () => {
           version: '3.2.1',
           path: '/test-root.browser.js',
           revision: '123',
-          bundle: 'browser',
           type: 'modules',
           url: nextUrl,
           cacheName: '__sw/modules',

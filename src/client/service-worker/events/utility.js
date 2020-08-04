@@ -18,10 +18,7 @@ import {
   match, put, remove, getMetaData, setMetaData, createCacheName,
 } from '@americanexpress/one-service-worker';
 
-// bundle:
-// matches the /legacy/ directory for one-app and .legacy.browser. for modules
-const legacyRegExp = /\.legacy\.browser\.|\/legacy\//;
-// language:
+// language
 const appLocaleRegExp = /i18n\/([^/]*)\.js$/;
 const moduleLocaleRegExp = /([a-z]{2,3}(-[a-zA-Z]{1,})?)\/[^/]*\.json$/;
 // url:
@@ -29,9 +26,16 @@ const moduleLocaleRegExp = /([a-z]{2,3}(-[a-zA-Z]{1,})?)\/[^/]*\.json$/;
 // the search params in the second capture group
 const clientCacheRevisionRegexp = /(.*)(\?[^/]*)$/;
 
+export function getOneAppVersion() {
+  return process.env.ONE_APP_BUILD_VERSION;
+}
+
+export function getHolocronModuleMap() {
+  return JSON.parse(process.env.HOLOCRON_MODULE_MAP);
+}
+
 export function createResourceMetaData(event, resourceInfo) {
   const [name, baseUrl, revision] = resourceInfo;
-  // we extract the version from the baseUrl provided
   const [version] = baseUrl.replace(/\/$/, '').split('/').reverse();
   const { request } = event;
 
@@ -52,14 +56,7 @@ export function createResourceMetaData(event, resourceInfo) {
     path = request.url.replace(baseUrl, '').replace(clientCacheRevisionRegexp, '$1');
   }
 
-  let bundle = 'browser';
-  if (legacyRegExp.test(request.url)) {
-    bundle = 'legacy';
-  }
-
   const metaData = {
-    // bundle type which will be either 'browser' or 'legacy'
-    bundle,
     // type can be one of ['one-app', 'modules', 'lang-packs']
     type,
     // name will be the module name for module resources (module, lang-pack)
@@ -88,7 +85,6 @@ export function createResourceMetaData(event, resourceInfo) {
 export function markResourceForRemoval(cachedMetaRecord, newMetaRecord) {
   if (cachedMetaRecord.revision !== newMetaRecord.revision) return true;
   if (cachedMetaRecord.version !== newMetaRecord.version) return true;
-  if (cachedMetaRecord.bundle !== newMetaRecord.bundle) return true;
   if (cachedMetaRecord.locale !== newMetaRecord.locale) return true;
   return false;
 }
