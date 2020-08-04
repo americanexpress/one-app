@@ -28,7 +28,6 @@ async function buildServiceWorkerScripts({
   watch = false,
   minify = true,
 } = {}) {
-
   const inputDirectory = path.resolve(__dirname, '../src/client/service-worker');
   const buildFolderDirectory = path.resolve(__dirname, '../lib/server/middleware/pwa', 'scripts');
 
