@@ -21,7 +21,7 @@ const rollup = require('rollup');
 const resolve = require('@rollup/plugin-node-resolve').default;
 const babel = require('rollup-plugin-babel');
 
-async function buildServiceWorkerScripts({ dev = false, minify = true } = {}) {
+async function buildServiceWorkerScripts({ dev = false, watch = false, minify = true } = {}) {
   const inputDirectory = path.resolve(__dirname, '../src/client/service-worker');
   const buildFolderDirectory = path.resolve(__dirname, '../lib/server/middleware/pwa', 'scripts');
 
@@ -36,26 +36,44 @@ async function buildServiceWorkerScripts({ dev = false, minify = true } = {}) {
     plugins.push(terser());
   }
 
-  const build = await rollup.rollup({
+  const { input, output } = {
     input: {
       sw: path.join(inputDirectory, 'worker.js'),
       'sw.noop': path.join(inputDirectory, 'worker.noop.js'),
     },
-    plugins,
-  });
-
-  return build.write({
     output: {
       format: 'esm',
       dir: buildFolderDirectory,
       sourcemap: dev ? 'inline' : false,
     },
+  };
+
+  if (watch) {
+    // https://rollupjs.org/guide/en/#rollupwatch
+    const watchOptions = { chokidar: true, clearScreen: false };
+    return {
+      input,
+      output,
+      watcher: await rollup.watch({
+        input, output, plugins, watch: watchOptions,
+      }),
+    };
+  }
+
+  const build = await rollup.rollup({
+    input,
+    plugins,
   });
+
+  return build.write({ output });
 }
 
-(async function buildWorkers({ dev }) {
-  await buildServiceWorkerScripts({ dev });
-}({
-  // for environment variables
-  dev: process.env.NODE_ENV === 'development',
-}));
+if (require.main === module) {
+  (async function buildWorkers({ dev }) {
+    await buildServiceWorkerScripts({ dev });
+  }({
+    dev: process.env.NODE_ENV === 'development',
+  }));
+} else {
+  module.exports = buildServiceWorkerScripts;
+}
