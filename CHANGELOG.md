@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.3.1](https://github.com/americanexpress/one-app/compare/v5.3.0...v5.3.1) (2020-08-05)
+
+
+### Bug Fixes
+
+* **scripts/watch:** ensure missing sw scripts ([69f5f1b](https://github.com/americanexpress/one-app/commit/69f5f1b37e1cdee475ca662d4bfa3d3ed3bdf0b1))
+
+
 # [5.3.0](https://github.com/americanexpress/one-app/compare/v5.2.2...v5.3.0) (2020-07-29)
 
 
