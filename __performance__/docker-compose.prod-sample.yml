@@ -1,0 +1,15 @@
+version: '3.4'
+# extend base docker-compose to use prod sample one app network
+networks:
+  prod-sample_one-app-at-test-network:
+    external: true
+services:
+  prometheus:
+    networks:
+      - prod-sample_one-app-at-test-network
+  k6:
+    networks:
+      - prod-sample_one-app-at-test-network
+    environment:
+      - TARGET_URL=https://one-app:8443/success
+      - TARGET_BASE_URL=https://one-app:8443
