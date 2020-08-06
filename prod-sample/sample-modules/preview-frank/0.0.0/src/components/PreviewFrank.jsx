@@ -17,9 +17,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { compose } from 'redux';
-import { RenderModule, holocronModule } from 'holocron';
-import { load } from '../duck';
+import { RenderModule } from 'holocron';
+import { loadModuleData } from '../duck';
 import getDemoProps from '../utils/getDemoProps';
 
 const PreviewFrank = (props) => {
@@ -58,17 +57,14 @@ PreviewFrank.propTypes = {
   moduleToBeDemoedExists: PropTypes.bool.isRequired,
 };
 
+PreviewFrank.holocron = {
+  name: 'preview-frank',
+  loadModuleData,
+  options: { ssr: true },
+};
+
 export const mapStateToProps = (state, ownProps) => ({
   moduleToBeDemoedExists: state.hasIn(['holocron', 'loaded', ownProps.params.moduleName]),
 });
 
-const hocChain = compose(
-  connect(mapStateToProps),
-  holocronModule({
-    name: 'preview-frank',
-    load,
-    options: { ssr: true },
-  })
-);
-
-export default hocChain(PreviewFrank);
+export default connect(mapStateToProps)(PreviewFrank);
