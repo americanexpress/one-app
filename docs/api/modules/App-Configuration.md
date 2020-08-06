@@ -255,6 +255,19 @@ To enable installing an app, please set the value for `start_url`, `icons` and `
 in the web manifest. If desired, a route can be used to match the `start_url` and used
 when an installed PWA is opened directly from the device.
 
+#### Caching
+
+When the service worker is enabled, both Holocron module and One App resources are cached
+in the browser using [Cache Storage](https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage)
+and [Cache](https://developer.mozilla.org/en-US/docs/Web/API/Cache) API. The cached resources
+are available when offline and each resource in the cache is validated (or invalidated) by meta
+data associated with each resource that is cached and/or requested. There are four meta properties
+that are used for invalidation on a per module basis in tandem to One App static resources;
+`version`, `locale` (if applicable - language packs, etc) and the Holocron module map
+`clientCacheRevision` key. If a resource is invalidated for a newer or older version
+for example, the service worker will remove the stale resource from the cache and place in the
+recently requested resource.
+
 **Shape**
 ```js
 if (!global.BROWSER) {
