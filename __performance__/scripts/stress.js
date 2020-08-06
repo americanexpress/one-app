@@ -31,7 +31,7 @@ export const options = {
     { duration: '10m', target: 0 }, // scale down. Recovery stage.
   ],
   thresholds: {
-    http_req_duration: ['p(99)<3000'], // 99% of requests must complete below 1s
+    http_req_duration: ['p(99)<5000'], // 99% of requests must complete below 5s
   },
 };
 
@@ -45,7 +45,7 @@ export default function virtualUser() {
       'GET',
       `${TARGET_BASE_URL}/success`,
       null,
-      { tags: { name: 'success' } },
+      { tags: { name: 'success frank' } },
     ],
     [
       'GET',
@@ -59,22 +59,10 @@ export default function virtualUser() {
       null,
       { tags: { name: 'ssr frank' } },
     ],
-    [
-      'GET',
-      `${TARGET_BASE_URL}/demo/needy-frank?api=https://fast.api.frank/posts`,
-      null,
-      { tags: { name: 'frank with fast api req' } },
-    ],
-    [
-      'GET',
-      `${TARGET_BASE_URL}/demo/needy-frank?api=https://slow.api.frank/posts`,
-      null,
-      { tags: { name: 'frank api req with timeout' } },
-    ],
   ]);
 
   check(responses[0], {
-    'main page status was 200': (res) => res.status === 200,
+    '/success status was 200': (res) => res.status === 200,
   });
 
   sleep(1);

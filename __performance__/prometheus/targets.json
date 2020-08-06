@@ -1,6 +1,6 @@
 [
   {
-    "targets": ["host.docker.internal:3005"],
+    "targets": ["one-app:3005"],
     "labels": {
       "group": "one-app-metrics"
     }

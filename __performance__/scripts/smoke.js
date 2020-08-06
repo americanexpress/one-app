@@ -17,7 +17,7 @@
 /* eslint-disable import/no-anonymous-default-export */
 /* eslint-disable import/no-unresolved */
 import http from 'k6/http';
-import { check } from 'k6';
+import { check, sleep } from 'k6';
 
 // This is a simple smoke test to ensure there is no major regression
 // to the one-app server.
@@ -39,4 +39,5 @@ export default function virtualUser() {
   const response = http.get(TARGET_URL);
   // every vu request must return 200
   check(response, { 'status is 200': (resp) => resp.status === 200 });
+  sleep(1);
 }
