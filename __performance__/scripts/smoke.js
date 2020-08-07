@@ -28,7 +28,7 @@ export const options = {
 
   thresholds: {
     // 99% of requests must complete below 20ms.
-    http_req_duration: [{ threshold: 'p(99)<20', abortOnFail: true }],
+    http_req_duration: [{ threshold: 'p(99)<1000', abortOnFail: true }],
   },
 };
 
