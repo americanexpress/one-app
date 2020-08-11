@@ -10,10 +10,6 @@ updates:
       - "dependencies"
       - "dependabot"
       - "one app"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/cultured-frankie/0.0.0"
     schedule:
@@ -24,10 +20,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "cultured frankie v0.0.0"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/cultured-frankie/0.0.1"
     schedule:
@@ -38,10 +30,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "cultured frankie v0.0.1"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-lloyd-root/0.0.0"
     schedule:
@@ -52,10 +40,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "frank lloyd root v0.0.0"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-lloyd-root/0.0.1"
     schedule:
@@ -66,10 +50,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "frank lloyd root v0.0.1"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-lloyd-root/0.0.2"
     schedule:
@@ -80,10 +60,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "frank lloyd root v0.0.2"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-lloyd-root/0.0.3"
     schedule:
@@ -94,10 +70,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "frank lloyd root v0.0.3"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-the-parrot/0.0.0"
     schedule:
@@ -108,10 +80,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "frank the parrot v0.0.0"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/franks-burgers/0.0.0"
     schedule:
@@ -122,10 +90,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "franks burgers v0.0.0"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/healthy-frank/0.0.0"
     schedule:
@@ -136,10 +100,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "healthy frank v0.0.0"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/late-frank/0.0.0"
     schedule:
@@ -150,10 +110,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "late frank v0.0.0"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/late-frank/0.0.1"
     schedule:
@@ -164,10 +120,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "late frank v0.0.1"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/late-frank/0.0.2"
     schedule:
@@ -178,10 +130,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "late frank v0.0.2"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/needy-frank/0.0.0"
     schedule:
@@ -192,10 +140,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "needy frank v0.0.0"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/needy-frank/0.0.1"
     schedule:
@@ -206,10 +150,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "needy frank v0.0.1"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/picky-frank/0.0.0"
     schedule:
@@ -220,10 +160,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "picky frank v0.0.0"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/picky-frank/0.0.1"
     schedule:
@@ -234,10 +170,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "picky frank v0.0.1"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/preview-frank/0.0.0"
     schedule:
@@ -248,10 +180,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "preview frank v0.0.0"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/ssr-frank/0.0.0"
     schedule:
@@ -262,10 +190,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "ssr frank v0.0.0"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/vitruvius-franklin/0.0.0"
     schedule:
@@ -276,10 +200,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "vitruvius franklin v0.0.0"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/vitruvius-franklin/0.0.1"
     schedule:
@@ -290,10 +210,6 @@ updates:
       - "dependabot"
       - "prod samples"
       - "vitruvius franklin v0.0.1"
-    automerged_updates:
-      - match:
-          dependency_type: all
-          update_type: semver:patch
 
   # Enable version updates for Docker
   - package-ecosystem: "docker"
