@@ -73,7 +73,9 @@ From within the one-app directory first start the one-app prod-sample:
 npm run start:prod-sample
 ```
 
-> `npn run start:prod-sample` creates the `prod-sample_one-app-at-test-network` network which is required for the performance tools to start when running against prod-sample.
+Wait for `🌎 One App server listening on port 8443` to appear in the logs to indicate the one-app server has successfully started.
+
+> `npm run start:prod-sample` creates the `prod-sample_one-app-at-test-network` network which is required for the performance tools to start when running against prod-sample.
 
 After prod-sample has successfully started you will need to start the performance test suite infrastructure in a new terminal window, navigate to `one-app/__performance__` and run the following:
 
