@@ -67,11 +67,13 @@ The following paths will be expected to be available:
 
 ### Setup
 
-From within the one-app directory start the one-app prod-sample:
+From within the one-app directory first start the one-app prod-sample:
 
 ```bash
 npm run start:prod-sample
 ```
+
+> `npn run start:prod-sample` creates the `prod-sample_one-app-at-test-network` network which is required for the performance tools to start when running against prod-sample.
 
 After prod-sample has successfully started you will need to start the performance test suite infrastructure in a new terminal window, navigate to `one-app/__performance__` and run the following:
 

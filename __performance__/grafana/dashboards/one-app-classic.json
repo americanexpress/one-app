@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1596482194827,
+  "iteration": 1597172051617,
   "links": [],
   "panels": [
     {
@@ -1483,5 +1483,5 @@
   "timezone": "browser",
   "title": "One App Classic",
   "uid": "100000073",
-  "version": 7
+  "version": 1
 }
