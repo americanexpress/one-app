@@ -16,8 +16,7 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { compose } from 'redux';
-import { holocronModule } from 'holocron';
+
 import reducer from '../duck';
 
 export function VitruviusFranklin({ moduleState }) {
@@ -39,18 +38,15 @@ if (!global.BROWSER) {
   };
 }
 
-
 VitruviusFranklin.propTypes = {
   moduleState: PropTypes.shape({
     req: PropTypes.object,
   }).isRequired,
 };
 
-const hocChain = compose(
-  holocronModule({
-    name: 'vitruvius-franklin',
-    reducer,
-  })
-);
+VitruviusFranklin.holocron = {
+  name: 'vitruvius-franklin',
+  reducer,
+};
 
-export default hocChain(VitruviusFranklin);
+export default VitruviusFranklin;
