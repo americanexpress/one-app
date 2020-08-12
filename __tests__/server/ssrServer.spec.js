@@ -182,6 +182,17 @@ describe('ssrServer', () => {
         });
     });
 
+    it('should return a 200 response for the readiness check', (done) => {
+      request(loadServer())
+        .get('/_/status')
+        .end((error, res) => {
+          expect(res.status).toEqual(200);
+          expect(res.text).toEqual('OK');
+          expect(res.type).toEqual('text/plain');
+          done();
+        });
+    });
+
     it('should use rendering middleware for HTML requests', (done) => {
       request(loadServer())
         .get('/some.html')
