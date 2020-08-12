@@ -33,7 +33,7 @@ jobs:
         run: |
           tagversion=${{ steps.set_tag_version.outputs.tagversion}}
           echo ::set-output name=dockertag::$(sed 's/^v*//' <<< "$tagversion")
-      - name: Trigger Image Publishing
+      - name: Trigger Production Image Publishing
         uses: octokit/request-action@v2.x
         id: dispatch_one-app-docker-prod-build
         with:
