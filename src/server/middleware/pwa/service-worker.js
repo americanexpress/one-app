@@ -14,7 +14,14 @@
  * permissions and limitations under the License.
  */
 
+import { getClientModuleMapCache } from '../../utils/clientModuleMapCache';
+
 import { getServerPWAConfig } from './config';
+
+function processServiceWorkerScript(script) {
+  const holocronModuleMap = `'${JSON.stringify(getClientModuleMapCache().browser)}'`;
+  return Buffer.from(script.toString().replace('process.env.HOLOCRON_MODULE_MAP', holocronModuleMap));
+}
 
 export default function serviceWorkerMiddleware() {
   return function serviceWorkerMiddlewareHandler(req, res, next) {
@@ -24,6 +31,6 @@ export default function serviceWorkerMiddleware() {
       .type('js')
       .set('Service-Worker-Allowed', serviceWorkerScope)
       .set('Cache-Control', 'no-store, no-cache')
-      .send(serviceWorkerScript);
+      .send(processServiceWorkerScript(serviceWorkerScript));
   };
 }
