@@ -32,7 +32,7 @@ jobs:
           docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.get_sem_version.outputs.major_version}}.${{ steps.get_sem_version.outputs.minor_version}}
           docker push ${{ secrets.DOCKER_USER }}/one-app:${{ github.event.client_payload.docker_tag_version}}
           docker push ${{ secrets.DOCKER_USER }}/one-app:latest
-      - name: Trigger Image Publishing
+      - name: Trigger Development Image Publishing
         uses: octokit/request-action@v2.x
         id: dispatch_one_app_docker_dev_build
         with:
