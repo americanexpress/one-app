@@ -4,8 +4,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -14,8 +13,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/cultured-frankie/0.0.0"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -25,8 +23,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/cultured-frankie/0.0.1"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -36,8 +33,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-lloyd-root/0.0.0"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -47,8 +43,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-lloyd-root/0.0.1"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -58,8 +53,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-lloyd-root/0.0.2"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -69,8 +63,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-lloyd-root/0.0.3"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -80,8 +73,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-the-parrot/0.0.0"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -91,8 +83,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/franks-burgers/0.0.0"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -102,8 +93,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/healthy-frank/0.0.0"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -113,8 +103,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/late-frank/0.0.0"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -124,8 +113,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/late-frank/0.0.1"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -135,8 +123,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/late-frank/0.0.2"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -146,8 +133,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/needy-frank/0.0.0"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -157,8 +143,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/needy-frank/0.0.1"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -168,8 +153,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/picky-frank/0.0.0"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -179,8 +163,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/picky-frank/0.0.1"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -190,8 +173,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/preview-frank/0.0.0"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -201,8 +183,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/ssr-frank/0.0.0"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -212,8 +193,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/vitruvius-franklin/0.0.0"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -223,8 +203,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/vitruvius-franklin/0.0.1"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "npm"
       - "dependencies"
@@ -237,7 +216,6 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    open-pull-requests-limit: 10
     labels:
       - "docker"
       - "dependabot"
@@ -246,8 +224,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/.github/workflows"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
+      interval: "monthly"
     labels:
       - "github-actions"
       - "dependabot"
