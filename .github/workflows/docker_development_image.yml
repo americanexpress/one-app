@@ -24,7 +24,7 @@ jobs:
           docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ github.event.client_payload.major_version}}.${{ github.event.client_payload.minor_version }}
           docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ github.event.client_payload.docker_tag_version}}
           docker push ${{ secrets.DOCKER_USER }}/one-app-dev:latest
-      - name: Trigger Image Publishing
+      - name: Publish One App Statics
         uses: octokit/request-action@v2.x
         id: dispatch_publish_statics_npm
         with:
