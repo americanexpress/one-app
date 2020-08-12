@@ -40,6 +40,11 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+beforeAll(() => {
+  process.env.ONE_APP_BUILD_VERSION = '5.0.0';
+  process.env.HOLOCRON_MODULE_MAP = '{ "modules": {} }';
+});
+
 describe('service worker script', () => {
   beforeAll(() => {
     self.postMessage = jest.fn();
