@@ -31,10 +31,13 @@ jest.mock('holocron', () => ({
 }));
 
 describe('Circuit breaker', () => {
+  const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => 0);
+  const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => 0);
+
   beforeEach(() => {
-    jest.clearAllMocks();
     setEventLoopDelayThreshold();
     mockCircuitBreaker.close();
+    jest.clearAllMocks();
   });
 
   it('should be an opossum circuit breaker', () => {
@@ -72,6 +75,44 @@ describe('Circuit breaker', () => {
     const value = await mockCircuitBreaker.fire('hola, mundo');
     expect(asyncFuntionThatMightFail).toHaveBeenCalled();
     expect(value).toBe(false);
+  });
+
+  it('should log when the healthcheck fails', async () => {
+    expect.assertions(1);
+    setEventLoopDelayThreshold(-1);
+    jest.advanceTimersByTime(510);
+    await mockCircuitBreaker.fire('hola, mundo');
+    expect(consoleErrorSpy.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          [Error: Opening circuit, event loop delay (0ms) is > eventLoopDelayThreshold (-1ms)],
+        ],
+      ]
+    `);
+  });
+
+  it('should log when the circuit opens', () => {
+    mockCircuitBreaker.open();
+    expect(consoleLogSpy.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Circuit breaker [mockConstructor] opened",
+        ],
+      ]
+    `);
+  });
+
+  it('should log when the circuit closes', () => {
+    mockCircuitBreaker.open();
+    jest.clearAllMocks();
+    mockCircuitBreaker.close();
+    expect(consoleLogSpy.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "Circuit breaker [mockConstructor] closed",
+        ],
+      ]
+    `);
   });
 
   describe('event loop delay threshold', () => {

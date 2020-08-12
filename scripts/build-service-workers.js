@@ -18,16 +18,36 @@
 
 const path = require('path');
 const rollup = require('rollup');
+const replace = require('@rollup/plugin-replace');
 const resolve = require('@rollup/plugin-node-resolve').default;
-const babel = require('rollup-plugin-babel');
+const babel = require('@rollup/plugin-babel').default;
 
-async function buildServiceWorkerScripts({ dev = false, minify = true } = {}) {
+async function buildServiceWorkerScripts({
+  buildVersion,
+  dev = false,
+  watch = false,
+  minify = true,
+} = {}) {
   const inputDirectory = path.resolve(__dirname, '../src/client/service-worker');
   const buildFolderDirectory = path.resolve(__dirname, '../lib/server/middleware/pwa', 'scripts');
 
   const plugins = [
+    replace({
+      'process.env.ONE_APP_BUILD_VERSION': `"${buildVersion}"`,
+    }),
     resolve(),
-    babel(),
+    babel({
+      // we need to override the current .babelrc and not extend it
+      babelrc: false,
+      babelHelpers: 'bundled',
+      presets: [['amex', {
+        'preset-env': {
+          spec: true,
+          // preserve ES syntax and allow rollup to handle the final output
+          modules: false,
+        },
+      }]],
+    }),
   ];
 
   if (minify) {
@@ -36,26 +56,46 @@ async function buildServiceWorkerScripts({ dev = false, minify = true } = {}) {
     plugins.push(terser());
   }
 
-  const build = await rollup.rollup({
+  const { input, output } = {
     input: {
       sw: path.join(inputDirectory, 'worker.js'),
       'sw.noop': path.join(inputDirectory, 'worker.noop.js'),
     },
-    plugins,
-  });
-
-  return build.write({
     output: {
       format: 'esm',
       dir: buildFolderDirectory,
       sourcemap: dev ? 'inline' : false,
     },
+  };
+
+  if (watch) {
+    // https://rollupjs.org/guide/en/#rollupwatch
+    const watchOptions = { chokidar: true, clearScreen: false };
+    return {
+      input,
+      output,
+      watcher: await rollup.watch({
+        input, output, plugins, watch: watchOptions,
+      }),
+    };
+  }
+
+  const build = await rollup.rollup({
+    input,
+    plugins,
   });
+
+  return build.write({ output });
 }
 
-(async function buildWorkers({ dev }) {
-  await buildServiceWorkerScripts({ dev });
-}({
-  // for environment variables
-  dev: process.env.NODE_ENV === 'development',
-}));
+if (require.main === module) {
+  (async function buildWorkers({ dev }) {
+    // eslint-disable-next-line global-require
+    const { buildVersion } = require('../.build-meta.json');
+    await buildServiceWorkerScripts({ dev, buildVersion });
+  }({
+    dev: process.env.NODE_ENV === 'development',
+  }));
+} else {
+  module.exports = buildServiceWorkerScripts;
+}
