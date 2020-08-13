@@ -1017,7 +1017,7 @@ describe('Tests that require Docker setup', () => {
             });
 
             test('caches a code-split module chunk and a language pack', async () => {
-              expect.assertions(4);
+              expect.assertions(2);
 
               await browser.url(`${appAtTestUrls.browserUrl}/demo/franks-burgers`);
               const openerMessage = await browser.$('#franks-opening-line');
@@ -1044,13 +1044,6 @@ describe('Tests that require Docker setup', () => {
                   ),
                 ]
               );
-              expect(cacheMap.get('__sw/lang-packs')).toHaveLength(1);
-              expect(cacheMap.get('__sw/lang-packs')).toEqual([
-                holocronModuleMap.modules['franks-burgers'].browser.url.replace(
-                  'franks-burgers.browser.js',
-                  'en-us/franks-burgers.json'
-                ),
-              ]);
             });
           });
 
@@ -1070,13 +1063,9 @@ describe('Tests that require Docker setup', () => {
               const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
               // we should not expect an additional lang pack to be added,
               // rather it replaces the other one used by any given module
-              expect(cacheMap.get('__sw/lang-packs')).toHaveLength(2);
+              expect(cacheMap.get('__sw/lang-packs')).toHaveLength(1);
               expect(cacheMap.get('__sw/lang-packs')).toEqual(
                 [
-                  holocronModuleMap.modules['franks-burgers'].browser.url.replace(
-                    'franks-burgers.browser.js',
-                    'en-us/franks-burgers.json'
-                  ),
                   holocronModuleMap.modules['cultured-frankie'].browser.url.replace(
                     'cultured-frankie.browser.js',
                     'es-mx/cultured-frankie.json'
