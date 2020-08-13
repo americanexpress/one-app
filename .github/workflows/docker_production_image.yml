@@ -1,5 +1,16 @@
 name: One App Production Image Build and Push
 on:
+  workflow_dispatch:
+   inputs:
+    major_version:
+     description: 'Major Version Number'
+     required: true
+    minor_version:
+     description: 'Minor Version Number'
+     required: true
+    docker_tag_version:
+     description: 'Sementic Version'
+     required: true
   repository_dispatch:
     types: [one-app-docker-prod-build]
 jobs:
@@ -20,17 +31,31 @@ jobs:
             PATCH="$(echo ${{ github.event.client_payload.docker_tag_version}} | cut -d'.' -f3)"
             echo ::set-output name=major_version::${MAJOR}
             echo ::set-output name=minor_version::${MINOR}
+      - name: Docker Image Versions
+        id: set_docker_version
+        run: |
+          #Runs when the action is triggered by the dispatch function
+          if [[ "${{ github.event.inputs.docker_tag_version }}" == "" ]]; then
+          echo ::set-output name=docker_version::${{ github.event.client_payload.docker_tag_version }}
+          echo ::set-output name=major_version::${{ steps.get_sem_version.outputs.major_version }}
+          echo ::set-output name=minor_version::${{ steps.get_sem_version.outputs.minor_version }}
+          else
+          #Runs when a tag is triggered manually
+          echo ::set-output name=docker_version::${{ github.event.inputs.docker_tag_version }}
+          echo ::set-output name=major_version::${{ github.event.inputs.major_version }}
+          echo ::set-output name=minor_version::${{ github.event.inputs.minor_version }}
+          fi
       - name: Tag Docker Images
         run: |
-          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.get_sem_version.outputs.major_version}}
-          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.get_sem_version.outputs.major_version}}.${{ steps.get_sem_version.outputs.minor_version}}
-          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ github.event.client_payload.docker_tag_version}}
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}.${{steps.set_docker_version.outputs.minor_version}}
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.docker_version}}
           docker tag prod ${{ secrets.DOCKER_USER }}/one-app:latest
       - name: Push Docker Images
         run: |
-          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.get_sem_version.outputs.major_version}}
-          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.get_sem_version.outputs.major_version}}.${{ steps.get_sem_version.outputs.minor_version}}
-          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ github.event.client_payload.docker_tag_version}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}.${{ steps.set_docker_version.outputs.minor_version}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.docker_version}}
           docker push ${{ secrets.DOCKER_USER }}/one-app:latest
       - name: Trigger Development Image Publishing
         uses: octokit/request-action@v2.x
@@ -40,6 +65,6 @@ jobs:
           repository: ${{ github.repository }}
           mediaType: '{"previews": ["everest"]}'
           event_type: "one-app-docker-dev-build"
-          client_payload: '{"docker_tag_version": "${{ github.event.client_payload.docker_tag_version }}","major_version":"${{ steps.get_sem_version.outputs.major_version}}","minor_version":"${{ steps.get_sem_version.outputs.minor_version}}"}'
+          client_payload: '{"docker_tag_version": "${{ steps.set_docker_version.outputs.docker_version }}","major_version":"${{ steps.set_docker_version.outputs.major_version}}","minor_version":"${{ steps.set_docker_version.outputs.minor_version}}"}'
         env:
           GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}

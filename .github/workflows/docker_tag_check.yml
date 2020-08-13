@@ -1,5 +1,10 @@
 name: Docker Tag Version Check
 on:
+  workflow_dispatch:
+   inputs:
+    tag_version:
+     description: 'Tag version'
+     required: true
   push:
     tags:
       - '*'
@@ -15,11 +20,15 @@ jobs:
         id: set_tag_version
         run: |
           #Checks for when a valid tag is manually pushed
-          if [[ $GITHUB_REF != "" && "${{ github.event.client_payload.tagversion }}" == "" ]]; then
+          if [[ $GITHUB_REF != "" && "${{ github.event.client_payload.tagversion }}" == "" ]];
+          then
           echo ::set-output name=tagversion::$(egrep -o '(v[0-9]+\.[0-9]+\.[0-9]+)(-\S*)?' <<< $GITHUB_REF)
           else
-          #Runs when a tag is triggered automatically
           echo ::set-output name=tagversion::${{ github.event.client_payload.tagversion }}
+          fi
+          if [[ "${{ github.event.inputs.tag_version }}" != "" ]]
+          then
+          echo ::set-output name=tagversion::${{ github.event.inputs.tag_version }}
           fi
           echo $tagversion
       - name: Check Tag Version

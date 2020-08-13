@@ -1,5 +1,10 @@
 name: One App Statics Publish to NPM
 on:
+  workflow_dispatch:
+   inputs:
+    tag_version:
+     description: 'Tag version'
+     required: true
   repository_dispatch:
     types: [publish-statics-npm]
 jobs:
@@ -15,9 +20,18 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: Docker login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
+      - name: Tag Version
+        id: set_tag_version
+        run: |
+          if [[ "${{ github.event.inputs.tag_version }}" == "" ]]
+          then
+          echo ::set-output name=tagversion::${{ github.event.client_payload.docker_tag_version }}
+          else
+          echo ::set-output name=tagversion::${{ github.event.inputs.tag_version }}
+          fi
       - name: Extract and zip production statics
         run: |
-          docker create --name prod ${{ secrets.DOCKER_USER }}/one-app:${{ github.event.client_payload.docker_tag_version}}
+          docker create --name prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_tag_version.outputs.tagversion}}
           docker cp prod:opt/one-app/build ./one-app-statics
           zip -r one-app-static-assets one-app-statics/build
       - name: Publish statics to NPM
