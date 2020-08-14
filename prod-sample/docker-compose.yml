@@ -15,6 +15,8 @@ services:
     expose:
       - "8443"
       - "3005"
+    ports:
+      - "3005:3005"
     volumes:
       - ./one-app/one-app-cert.pem:/opt/cert.pem
       - ./one-app/one-app-privkey.pem:/opt/key.pem
