@@ -28,9 +28,7 @@ jest.mock('holocron', () => ({
   getModule: jest.fn(),
 }));
 
-jest.mock('pidusage', () => ({
-  stat: jest.fn(),
-}));
+jest.mock('pidusage', () => jest.fn());
 
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   getClientStateConfig: jest.fn(() => ({
@@ -150,7 +148,7 @@ describe('healthCheck', () => {
 
   describe('middleware', () => {
     it('should return a 200 when all is good', async () => {
-      pidusage.stat.mockImplementationOnce((pid, cb) => cb(undefined, {
+      pidusage.mockImplementationOnce((pid, cb) => cb(undefined, {
         cpu: 80,
         memory: 1.4e9,
       }));
@@ -165,7 +163,7 @@ describe('healthCheck', () => {
     });
 
     it('should return a 207 when the module map is not healthy', async () => {
-      pidusage.stat.mockImplementationOnce((pid, cb) => cb(undefined, {
+      pidusage.mockImplementationOnce((pid, cb) => cb(undefined, {
         cpu: 80,
         memory: 1.4e9,
       }));
@@ -180,7 +178,7 @@ describe('healthCheck', () => {
     });
 
     it('should return a 503 when any threshold has been passed', async () => {
-      pidusage.stat.mockImplementationOnce((pid, cb) => cb(undefined, {
+      pidusage.mockImplementationOnce((pid, cb) => cb(undefined, {
         cpu: 80.1,
         memory: 1.4e9,
       }));
@@ -195,7 +193,7 @@ describe('healthCheck', () => {
     });
 
     it('should return a 500 if it can\'t get the stats', async () => {
-      pidusage.stat.mockImplementationOnce((pid, cb) => cb(new Error('no stats')));
+      pidusage.mockImplementationOnce((pid, cb) => cb(new Error('no stats')));
       getModule.mockReturnValueOnce(() => 0);
       getModuleMapHealth.mockReturnValueOnce(true);
       await healthCheck(req, res);
