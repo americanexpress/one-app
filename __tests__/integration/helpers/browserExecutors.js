@@ -37,13 +37,22 @@ exports.getCacheEntries = function getCacheEntries(cacheKeys, done) {
         // finally, we return an array for each cache (name) and every request url [url, ...]
         key,
         requests.map(({ url }) => url),
-      ])
-      )
+      ]))
     )
   ).then(done);
 };
 
 // usage: const match = await browser.executeAsync(getCacheMatch, 'https://...');
-exports.getCacheMatch = function getCacheEntries(url, done) {
+exports.getCacheMatch = function getCacheMatch(url, done) {
   caches.match(url).then(done);
+};
+
+// usage: const match = await browser.executeAsync(getCacheMatch, 'https://...');
+exports.getCacheMeta = function getCacheMeta(url, done) {
+  caches
+    .open('__sw/__meta')
+    // once we have the cache reference, we get all the keys (Request(s))
+    .then((cache) => cache.match(`/__sw/__meta/${url}`))
+    .then((response) => (response ? response.json() : {}))
+    .then(done);
 };

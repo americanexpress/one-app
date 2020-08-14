@@ -42,6 +42,7 @@ import {
   getCacheKeys,
   getCacheEntries,
   getCacheMatch,
+  getCacheMeta,
 } from './helpers/browserExecutors';
 import transit from '../../src/universal/utils/transit';
 
@@ -1016,7 +1017,7 @@ describe('Tests that require Docker setup', () => {
               );
             });
 
-            test('caches a code-split module chunk and a language pack', async () => {
+            test('caches a module and its code-split chunk', async () => {
               expect.assertions(2);
 
               await browser.url(`${appAtTestUrls.browserUrl}/demo/franks-burgers`);
@@ -1046,32 +1047,98 @@ describe('Tests that require Docker setup', () => {
               );
             });
           });
+        });
 
-          describe('invalidation', () => {
-            test('invalidates a language pack if a different locale is loaded', async () => {
+        describe('cache invalidation', () => {
+          test('invalidates a language pack if a different locale is loaded', async () => {
+            expect.assertions(2);
+
+            await browser.url(`${appAtTestUrls.browserUrl}/demo/cultured-frankie`);
+
+            const holocronModuleMap = readModuleMap();
+            const localeSelector = await browser.$('#locale-selector');
+            // update the locale
+            await localeSelector.selectByVisibleText('es-MX');
+            await waitFor(500);
+
+            const cacheKeys = await browser.executeAsync(getCacheKeys);
+            const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
+            // we should not expect an additional lang pack to be added,
+            // rather it replaces the other one used by any given module
+            expect(cacheMap.get('__sw/lang-packs')).toHaveLength(1);
+            expect(cacheMap.get('__sw/lang-packs')).toEqual(
+              [
+                holocronModuleMap.modules['cultured-frankie'].browser.url.replace(
+                  'cultured-frankie.browser.js',
+                  'es-mx/cultured-frankie.json'
+                ),
+              ]
+            );
+          });
+
+          describe('module version', () => {
+            beforeAll(async () => {
+              await addModuleToModuleMap({
+                moduleName: 'late-frank',
+                version: '0.0.0',
+              });
+              // wait for change to be picked up
+              await waitFor(5000);
+            });
+
+            afterEach(async () => {
+              await addModuleToModuleMap({
+                moduleName: 'late-frank',
+                version: '0.0.1',
+              });
+              // wait for change to be picked up
+              await waitFor(5000);
+            });
+
+            test('loads the module "late-frank" into the cache before invalidation', async () => {
               expect.assertions(2);
 
-              await browser.url(`${appAtTestUrls.browserUrl}/demo/cultured-frankie`);
+              await browser.url(`${appAtTestUrls.browserUrl}/demo/late-frank`);
 
               const holocronModuleMap = readModuleMap();
-              const localeSelector = await browser.$('#locale-selector');
-              // update the locale
-              await localeSelector.selectByVisibleText('es-MX');
-              await waitFor(500);
-
               const cacheKeys = await browser.executeAsync(getCacheKeys);
               const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
-              // we should not expect an additional lang pack to be added,
-              // rather it replaces the other one used by any given module
-              expect(cacheMap.get('__sw/lang-packs')).toHaveLength(1);
-              expect(cacheMap.get('__sw/lang-packs')).toEqual(
-                [
-                  holocronModuleMap.modules['cultured-frankie'].browser.url.replace(
-                    'cultured-frankie.browser.js',
-                    'es-mx/cultured-frankie.json'
-                  ),
-                ]
-              );
+              const meta = await browser.executeAsync(getCacheMeta, 'modules/late-frank/late-frank.browser.js');
+
+              expect(meta).toEqual({
+                cacheName: '__sw/modules',
+                name: 'late-frank',
+                path: 'late-frank.browser.js',
+                type: 'modules',
+                url: 'https://sample-cdn.frank/modules/3fefc12/late-frank/0.0.0/late-frank.browser.js',
+                version: '0.0.0',
+              });
+              expect(
+                cacheMap.get('__sw/modules').includes(holocronModuleMap.modules['late-frank'].browser.url)
+              ).toBe(true);
+            });
+
+            test('invalidates a module when a different version of late-frank is loaded', async () => {
+              expect.assertions(2);
+
+              await browser.url(`${appAtTestUrls.browserUrl}/demo/late-frank`);
+
+              const holocronModuleMap = readModuleMap();
+              const cacheKeys = await browser.executeAsync(getCacheKeys);
+              const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
+              const meta = await browser.executeAsync(getCacheMeta, 'modules/late-frank/late-frank.browser.js');
+
+              expect(meta).toEqual({
+                cacheName: '__sw/modules',
+                name: 'late-frank',
+                path: 'late-frank.browser.js',
+                type: 'modules',
+                url: 'https://sample-cdn.frank/modules/3fefc12/late-frank/0.0.1/late-frank.browser.js',
+                version: '0.0.1',
+              });
+              expect(
+                cacheMap.get('__sw/modules').includes(holocronModuleMap.modules['late-frank'].browser.url)
+              ).toBe(true);
             });
           });
         });
