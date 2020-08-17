@@ -1050,6 +1050,15 @@ describe('Tests that require Docker setup', () => {
         });
 
         describe('cache invalidation', () => {
+          beforeAll(async () => {
+            await addModuleToModuleMap({
+              moduleName: 'late-frank',
+              version: '0.0.0',
+            });
+            // wait for change to be picked up
+            await waitFor(5000);
+          });
+
           test('invalidates a language pack if a different locale is loaded', async () => {
             expect.assertions(2);
 
@@ -1077,15 +1086,6 @@ describe('Tests that require Docker setup', () => {
           });
 
           describe('module version', () => {
-            beforeAll(async () => {
-              await addModuleToModuleMap({
-                moduleName: 'late-frank',
-                version: '0.0.0',
-              });
-              // wait for change to be picked up
-              await waitFor(5000);
-            });
-
             afterEach(async () => {
               await addModuleToModuleMap({
                 moduleName: 'late-frank',
