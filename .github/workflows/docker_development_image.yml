@@ -2,14 +2,8 @@ name: One App Development Image Build and Push
 on:
   workflow_dispatch:
    inputs:
-    major_version:
-     description: 'Major Version Number'
-     required: true
-    minor_version:
-     description: 'Minor Version Number'
-     required: true
     docker_tag_version:
-     description: 'Sementic Version'
+     description: 'Semantic Version'
      required: true
   repository_dispatch:
     types: [one-app-docker-dev-build]
@@ -30,15 +24,14 @@ jobs:
           else
           #Runs when a tag is triggered manually
           echo ::set-output name=docker_version::${{ github.event.inputs.docker_tag_version }}
-          echo ::set-output name=major_version::${{ github.event.inputs.major_version }}
-          echo ::set-output name=minor_version::${{ github.event.inputs.minor_version }}
+          MAJOR="$(echo ${{ github.event.inputs.docker_tag_version}} | cut -d'.' -f1)"
+          MINOR="$(echo ${{ github.event.inputs.docker_tag_version}} | cut -d'.' -f2)"
+          echo ::set-output name=major_version::${MAJOR}
+          echo ::set-output name=minor_version::${MINOR}
           fi
       - name: Print docker version
         run:  |
-          echo "Tags: ${{ github.event.inputs.tags }}"
           echo "tag: ${{ github.event.inputs.docker_tag_version }}"
-          echo "major-version: ${{ github.event.inputs.major_version }}"
-          echo "minor-version: ${{ github.event.inputs.minor_version }}"
       - name: Docker login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Build development docker image
