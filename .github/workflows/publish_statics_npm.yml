@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
    inputs:
     tag_version:
-     description: 'Tag version'
+     description: 'Semantic Version'
      required: true
   repository_dispatch:
     types: [publish-statics-npm]
