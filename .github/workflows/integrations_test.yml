@@ -4,6 +4,7 @@ on:
    branches:
     - master
     - prepare-release
+    - feat/github-actions
 jobs:
   one-app-integration:
     name:  One App Integration Tests
