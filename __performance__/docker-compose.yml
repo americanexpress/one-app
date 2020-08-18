@@ -1,0 +1,54 @@
+version: '3.4'
+
+networks:
+  one-app-performance:
+services:
+
+  # receives k6 metrics
+  influxdb:
+    image: influxdb:latest
+    networks:
+      - one-app-performance
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+
+  # receives one-app internals metrics
+  prometheus:
+    image: prom/prometheus:latest
+    networks:
+      - one-app-performance
+    volumes:
+      - ./prometheus:/etc/prometheus
+    ports:
+      - "9090:9090"
+
+  # graphing of metrics
+  grafana:
+    image: grafana/grafana:latest
+    networks:
+      - one-app-performance
+    ports:
+      - "3030:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - "influxdb"
+
+  # runs performance scripts
+  k6:
+    image: loadimpact/k6:latest
+    networks:
+      - one-app-performance
+    ports:
+      - "6565:6565"
+    volumes:
+      - ./scripts:/scripts
+    environment:
+      - K6_OUT=influxdb=http://influxdb:8086/k6
