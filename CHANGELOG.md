@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.4.0](https://github.com/americanexpress/one-app/compare/v5.3.1...v5.4.0) (2020-08-12)
+
+
+### Features
+
+* **pwa/cache:** add resource caching and invalidation ([a85045c](https://github.com/americanexpress/one-app/commit/a85045c4622f20ea3e3f66f4d352ba05f270d73f))
+
+
 ## [5.3.1](https://github.com/americanexpress/one-app/compare/v5.3.0...v5.3.1) (2020-08-05)
 
 

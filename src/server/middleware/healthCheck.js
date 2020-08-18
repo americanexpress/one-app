@@ -20,7 +20,7 @@ import { getModule } from 'holocron';
 import { getClientStateConfig } from '../utils/stateConfig';
 import { getModuleMapHealth } from '../utils/pollModuleMap';
 
-const getProcessStats = (pid) => promisify((cb) => pidusage.stat(pid, cb))();
+const getProcessStats = (pid) => promisify((cb) => pidusage(pid, cb))();
 
 export const getTickDelay = () => new Promise((resolve) => {
   const time = process.hrtime();
