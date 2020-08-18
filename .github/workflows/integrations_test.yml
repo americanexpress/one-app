@@ -32,15 +32,15 @@ jobs:
         run: npx surge teardown one-app-statics.surge.sh
       - name: Move sample modules to Surge
         run: npx surge sample-module-bundles one-app-statics.surge.sh        
-      - name: Login to Heroku
-        run: docker login -u="$HEROKU_DOCKER_USERNAME" -p="$HEROKU_API_KEY" registry.heroku.com
+      - name: Login to Heroku Container Registry
+        run: docker login -u="${{ secrets.HEROKU_DOCKER_USERNAME }}" -p="${{ secrets.HEROKU_API_KEY }}" registry.heroku.com
       - name: Docker Tag
-        run: docker tag one-app:at-test registry.heroku.com/$HEROKU_APP_ID/web
+        run: docker tag one-app:at-test registry.heroku.com/${{ secrets.HEROKU_APP_ID }}/web
       - name: Docker Push 
-        run: docker push registry.heroku.com/$HEROKU_APP_ID/web 
+        run: docker push registry.heroku.com/${{ secrets.HEROKU_APP_ID }}/web 
       - name: Heroku Release Images
-        run: npx heroku container:release web -a $HEROKU_APP_ID
+        run: npx heroku container:release web -a ${{ secrets.HEROKU_APP_ID }}
       - name: Run Integration Tests on Heroku
-        run: ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true npm run test:integration -- --remote-one-app-environment=$HEROKU_APP_URL
+        run: ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true npm run test:integration -- --remote-one-app-environment=${{ secrets.HEROKU_APP_URL }}
 
   
