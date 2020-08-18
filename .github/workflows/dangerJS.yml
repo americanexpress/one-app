@@ -12,14 +12,14 @@ jobs:
       with:
         node-version: '12.x'
     - uses: actions/cache@v1
-       with:
+      with:
         path: ~/.npm
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
     - name: npm install
-        run: NODE_ENV=development npm ci
+      run: NODE_ENV=development npm ci
     - name: Danger
-        run: NODE_ENV=production npm run test:danger
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: NODE_ENV=production npm run test:danger
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
