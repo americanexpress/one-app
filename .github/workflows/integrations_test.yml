@@ -1,0 +1,45 @@
+name: One App Integration Tests
+on: 
+ push:
+   branches:
+    - master
+    - prepare-release
+jobs:
+  one-app-integration:
+    name:  One App Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: npm install
+        run: NODE_ENV=development npm ci
+      - name: Build docker image
+        run: docker build -t one-app:at-test .
+      - name: Build Sample Modules
+        run:  |
+         npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=https://one-app-statics.surge.sh  
+         echo 'https://one-app-sample.herokuapp.com' >> sample-module-bundles/CORS
+      - name: Teardown Surge
+        run: npx surge teardown one-app-statics.surge.sh
+      - name: Move sample modules to Surge
+        run: npx surge sample-module-bundles one-app-statics.surge.sh        
+      - name: Login to Heroku
+        run: docker login -u="$HEROKU_DOCKER_USERNAME" -p="$HEROKU_API_KEY" registry.heroku.com
+      - name: Docker Tag
+        run: docker tag one-app:at-test registry.heroku.com/$HEROKU_APP_ID/web
+      - name: Docker Push 
+        run: docker push registry.heroku.com/$HEROKU_APP_ID/web 
+      - name: Heroku Release Images
+        run: npx heroku container:release web -a $HEROKU_APP_ID
+      - name: Run Integration Tests on Heroku
+        run: ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true npm run test:integration -- --remote-one-app-environment=$HEROKU_APP_URL
+
+  

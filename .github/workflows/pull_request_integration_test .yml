@@ -1,0 +1,25 @@
+name: One App Integration Tests - PR
+on: 
+ pull_request:
+   types: [assigned, opened, synchronize, reopened, edited]
+jobs:
+  one-app-integration-pr:
+    name:  One App Integration Tests - PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: npm install
+        run: NODE_ENV=development npm ci
+      - name: Build docker image
+        run: docker build -t one-app:at-test .
+      - name: Run Integration Tests
+        run: ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true npm run test:integration

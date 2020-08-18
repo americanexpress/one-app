@@ -1,0 +1,33 @@
+name: One App Unit and Lint Tests
+on: 
+ pull_request:
+   types: [assigned, opened, synchronize, reopened, edited]
+jobs:
+  one-app-unit-tests:
+    name: One App Unit and Lint Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x, 14.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: npm install
+        run: NODE_ENV=development npm ci
+      - name: Danger
+        run: NODE_ENV=production npm run test:danger
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: npm unit test
+        run:  npm run test:unit
+      - name: npm lint test
+        run:  npm run test:lint

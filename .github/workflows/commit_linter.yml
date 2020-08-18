@@ -1,0 +1,20 @@
+name: Commit Linting
+on: 
+ pull_request:
+   types: [assigned, opened, synchronize, reopened, edited]
+jobs:
+  one-app-unit-tests:
+    name: Commit Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: lint
+        run: |
+          FIRST_COMMIT_SHA=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" ${{ github.event.pull_request.commits_url }} | jq -r '.[0].sha')
+          NODE_ENV=development npm ci
+          npx commitlint --from $FIRST_COMMIT_SHA^
