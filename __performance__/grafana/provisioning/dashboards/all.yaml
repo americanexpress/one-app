@@ -1,0 +1,10 @@
+apiVersion: 1
+
+providers:
+  - name: 'One App'
+    folder: ''
+    type: 'file'
+    editable: true
+    allowUiUpdates: false
+    options:
+      path: '/var/lib/grafana/dashboards'
