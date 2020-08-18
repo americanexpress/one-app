@@ -25,6 +25,9 @@ jobs:
       - name: Build docker image
         run: docker build -t one-app:at-test .
       - name: Build Sample Modules
+        env:
+         SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
+         SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
         run:  |
          npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=https://one-app-statics.surge.sh  
          echo 'https://one-app-sample.herokuapp.com' >> sample-module-bundles/CORS
