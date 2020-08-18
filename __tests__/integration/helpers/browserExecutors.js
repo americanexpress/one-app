@@ -56,3 +56,8 @@ exports.getCacheMeta = function getCacheMeta(url, done) {
     .then((response) => (response ? response.json() : {}))
     .then(done);
 };
+
+// usage: const registration = await browser.executeAsync(getServiceWorkerReady);
+exports.getServiceWorkerReady = function getServiceWorkerReady(done) {
+  navigator.serviceWorker.ready.then(done);
+};
