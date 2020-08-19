@@ -95,6 +95,7 @@
     "if-env": "^1.0.4",
     "immutable": "^4.0.0-rc.12",
     "ip": "^1.1.5",
+    "joi": "^17.2.0",
     "lean-intl": "^4.2.2",
     "make-promises-safe": "^5.1.0",
     "matcher": "^3.0.0",
