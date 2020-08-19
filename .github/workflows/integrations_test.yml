@@ -35,12 +35,12 @@ jobs:
         env:
          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-        run: npx surge teardown one-app-statics.surge.sh
+        run: npx surge teardown ${{ secrets.SURGE_TOKEN }}
       - name: Move sample modules to Surge
         env:
          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-        run: npx surge sample-module-bundles one-app-statics.surge.sh        
+        run: npx surge sample-module-bundles ${{ secrets.SURGE_TOKEN }}        
       - name: Login to Heroku Container Registry
         env: 
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
