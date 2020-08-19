@@ -19,7 +19,7 @@ import PropTypes from 'prop-types';
 import { RenderModule, composeModules } from 'holocron';
 import { connect } from 'react-redux';
 import { Map as iMap } from 'immutable';
-import { updateLocale, setRenderPartialOnly } from '@americanexpress/one-app-ducks';
+import { updateLocale, setRenderPartialOnly, setRenderTextOnly } from '@americanexpress/one-app-ducks';
 
 const Partial = ({ params: { moduleName }, location: { query }, postProps }) => (
   <RenderModule
@@ -33,10 +33,15 @@ const Partial = ({ params: { moduleName }, location: { query }, postProps }) => 
 
 const propSelector = (state) => state.getIn(['modules', 'frank-lloyd-root', 'postProps'], iMap()).toJS();
 
-export const onPartialRouteEnter = ({ dispatch, getState }) => (nextState, replace, cb) => {
+export const onPartialRouteEnter = (
+  { dispatch, getState },
+  partialOnly = false,
+  textOnly = false
+) => (nextState, replace, cb) => {
   const postProps = propSelector(getState());
   const { locale, moduleName } = nextState.params;
-  dispatch(setRenderPartialOnly(true));
+  dispatch(setRenderPartialOnly(partialOnly));
+  dispatch(setRenderTextOnly(textOnly));
   dispatch(updateLocale(locale))
     .then(() => dispatch(composeModules([{
       name: moduleName,

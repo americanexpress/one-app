@@ -79,8 +79,10 @@ export default function createRequestHtmlFragment({ createRoutes }) {
       const state = store.getState();
       const disableScripts = state.getIn(['rendering', 'disableScripts']);
       const renderPartialOnly = state.getIn(['rendering', 'renderPartialOnly']);
+      const renderTextOnly = state.getIn(['rendering', 'renderTextOnly']);
 
-      if (disableScripts || renderPartialOnly) {
+
+      if (disableScripts || renderPartialOnly || renderTextOnly) {
         await dispatch(composeModules(routeModules));
       } else {
         const fallback = await getModuleDataBreaker.fire({ dispatch, modules: routeModules });
@@ -92,7 +94,7 @@ export default function createRequestHtmlFragment({ createRoutes }) {
         }
       }
 
-      const renderMethod = disableScripts || renderPartialOnly
+      const renderMethod = disableScripts || renderPartialOnly || renderTextOnly
         ? renderForStaticMarkup : renderForString;
 
       /* eslint-disable react/jsx-props-no-spreading */

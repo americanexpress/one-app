@@ -18,6 +18,7 @@
 /* eslint-disable es/no-arrow-functions */
 import { Set as iSet, Map as iMap } from 'immutable';
 
+import striptags from 'striptags';
 import transit from '../../universal/utils/transit';
 import { setConfig } from '../../universal/ducks/config';
 import jsonStringifyForScript from '../utils/jsonStringifyForScript';
@@ -277,6 +278,12 @@ export function renderPartial({
   return styles + html;
 }
 
+export function renderAsText({
+  html: initialHtml,
+}) {
+  return striptags(initialHtml, [], '\n');
+}
+
 // TODO add additional client side scripts
 export default function sendHtml(req, res) {
   let body;
@@ -303,9 +310,14 @@ export default function sendHtml(req, res) {
     const disableScripts = clientInitialState.getIn(['rendering', 'disableScripts']);
     const disableStyles = clientInitialState.getIn(['rendering', 'disableStyles']);
     const renderPartialOnly = clientInitialState.getIn(['rendering', 'renderPartialOnly']);
+    const renderTextOnly = clientInitialState.getIn(['rendering', 'renderTextOnly']);
 
     if (renderPartialOnly) {
       return safeSend(res, renderPartial({ html: req.appHtml, store }));
+    }
+
+    if (renderTextOnly) {
+      return safeSend(res, renderAsText({ html: req.appHtml }));
     }
 
     const chunkAssets = isLegacy ? legacyBrowserChunkAssets : modernBrowserChunkAssets;
