@@ -97,7 +97,7 @@ jest.mock('../../../src/universal/utils/transit', () => ({
 }));
 
 jest.spyOn(console, 'info').mockImplementation(() => {});
-jest.spyOn(console, 'log').mockImplementation(() => {});
+// jest.spyOn(console, 'log').mockImplementation(() => {});
 jest.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('sendHtml', () => {
@@ -777,6 +777,9 @@ describe('sendHtml', () => {
   });
 
   describe('renderStaticErrorPage', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
     it('sends default static error page', () => {
       renderStaticErrorPage(res);
       expect(res.send).toHaveBeenCalledTimes(1);
@@ -824,6 +827,62 @@ describe('sendHtml', () => {
       expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
       expect(res.send.mock.calls[0][0]).not.toMatch('[object ');
       expect(res.send.mock.calls[0][0]).not.toContain('undefined');
+    });
+
+    it('returns default error page if custom error page url is not given', () => {
+      process.env.ONE_FALLBACK_URL = '';
+
+      renderStaticErrorPage(res);
+
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(res.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
+    });
+
+    it('returns custom error page', async () => {
+      process.env.ONE_FALLBACK_URL = 'https://example.com';
+      const mockResponse = `<!doctype html>
+      <html>
+      <head>
+        <title>Custom Error Page</title>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body>
+        <div>
+          <h1>Custom Error Page</h1>
+          <p>This is a custom error page.</p>
+        </div>
+      </body>
+      </html>`;
+      global.fetch = jest.fn(() => Promise.resolve({
+        text: () => Promise.resolve(mockResponse),
+        headers: new global.Headers({
+          'Content-Type': 'text/html',
+        }),
+      }));
+
+      renderStaticErrorPage(res);
+
+      const data = await global.fetch.mock.results[0].value;
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith('https://example.com');
+      expect(await data.text()).toBe(mockResponse);
+    });
+
+    it('returns default error page if response headers are not text/html', async () => {
+      process.env.ONE_FALLBACK_URL = 'https://example.com';
+      global.fetch = jest.fn(() => Promise.resolve({
+        headers: new global.Headers({
+          'Content-Type': 'text/plains',
+        }),
+      }));
+
+      await expect(renderStaticErrorPage(res)).rejects.toEqual(
+        new Error('Content-Type was not of type text/html')
+      );
     });
   });
   describe('safeSend', () => {
