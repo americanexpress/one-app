@@ -58,19 +58,15 @@ export function safeSend(res, ...payload) {
 }
 
 export async function fetchCustomErrorPage(fallbackUrl, res) {
-  const customErrorResponse = await fetch(fallbackUrl)
-    .then((response) => {
-    // If the Content-Type is not text/html throw an error
-      const contentType = response.headers.get('content-type');
-      if (!contentType.includes('text/html')) {
-        return Promise.reject(new Error('Content-Type was not of type text/html'));
-      }
-      // Read the response as text.
-      return response.text();
-    })
-    .then((data) => safeSend(res, data));
-
-  return customErrorResponse;
+  const response = await fetch(fallbackUrl);
+  // If the Content-Type is not text/html throw an error
+  const contentType = response.headers.get('content-type');
+  if (!contentType.includes('text/html')) {
+    throw new Error('Content-Type was not of type text/html');
+  }
+  // Read the response as text.
+  const data = await response.text();
+  return safeSend(res, data);
 }
 
 export async function renderStaticErrorPage(res) {

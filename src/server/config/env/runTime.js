@@ -199,6 +199,11 @@ const runTime = [
     normalize: (value) => value === 'true',
     defaultValue: () => false,
   },
+  {
+    name: 'ONE_FALLBACK_URL',
+    defaultValue: undefined,
+    validate: isFetchableUrlInNode,
+  },
 ];
 
 runTime.forEach(preprocessEnvVar);
