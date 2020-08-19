@@ -23,10 +23,6 @@ jobs:
             ${{ runner.os }}-node-
       - name: npm install
         run: NODE_ENV=development npm ci
-      - name: Danger
-        run: NODE_ENV=production npm run test:danger
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: npm unit test
         run:  npm run test:unit
       - name: npm lint test
