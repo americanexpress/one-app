@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "5.4.0",
+  "version": "5.4.1",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
@@ -128,7 +128,7 @@
     "@babel/core": "^7.10.2",
     "@babel/node": "^7.10.3",
     "@babel/register": "^7.10.4",
-    "@commitlint/cli": "^9.0.1",
+    "@commitlint/cli": "^9.1.1",
     "@commitlint/config-conventional": "^9.0.1",
     "@rollup/plugin-babel": "^5.0.4",
     "@rollup/plugin-node-resolve": "^8.0.1",
