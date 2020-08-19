@@ -44,7 +44,7 @@ jobs:
       - name: Docker Push 
         run: docker push registry.heroku.com/${{ secrets.HEROKU_APP_ID }}/web 
       - name: Heroku Release Image
-        run: heroku container:release web
+        run: heroku container:release web -a ${{ secrets.HEROKU_APP_ID }}
       - name: Run Integration Tests on Heroku
         run: ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true npm run test:integration -- --remote-one-app-environment=${{ secrets.HEROKU_APP_URL }}
 
