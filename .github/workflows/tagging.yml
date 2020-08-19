@@ -32,12 +32,12 @@ jobs:
           echo ::set-output name=action_tag::v${tagversion}
       - name: Trigger Image Publishing
         uses: octokit/request-action@v2.x
-        id: dispatch_one-app-docker-release
+        id: dispatch_one-app-docker-tag-check
         with:
           route: POST /repos/:repository/dispatches
           repository: ${{ github.repository }}
           mediaType: '{"previews": ["everest"]}'
-          event_type: "one-app-docker-release"
+          event_type: "one-app-docker-tag-check"
           client_payload: '{"tagversion": "${{ steps.set_tag_version.outputs.action_tag }}"}'
         env:
           GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}
