@@ -1,7 +1,5 @@
 name: Commit Linting
-on: 
- pull_request:
-   types: [assigned, opened, synchronize, reopened, edited]
+on: pull_request
 jobs:
   one-app-unit-tests:
     name: Commit Linting

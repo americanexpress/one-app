@@ -1,7 +1,5 @@
 name: One App Integration Tests - PR
-on: 
- pull_request:
-   types: [assigned, opened, synchronize, reopened, edited]
+on: pull_request
 jobs:
   one-app-integration-pr:
     name:  One App Integration Tests - PR
