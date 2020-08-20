@@ -41,7 +41,8 @@ import createRequestStore from './middleware/createRequestStore';
 import createRequestHtmlFragment from './middleware/createRequestHtmlFragment';
 import checkStateForRedirect from './middleware/checkStateForRedirect';
 import checkStateForStatusCode from './middleware/checkStateForStatusCode';
-import sendHtml, { renderStaticErrorPage } from './middleware/sendHtml';
+import sendHtml from './middleware/sendHtml';
+import serverError from './middleware/serverError';
 import logging from './utils/logging/serverMiddleware';
 import forwardedHeaderParser from './middleware/forwardedHeaderParser';
 import {
@@ -113,24 +114,8 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
   }
 
   // https://expressjs.com/en/guide/error-handling.html
-  // eslint-disable-next-line max-params
-  app.use((err, req, res, next) => {
-    console.error('express application error', err);
 
-    if (res.headersSent) {
-      // don't try changing the headers at this point
-      return next(err);
-    }
-
-    if (err.name === 'URIError') {
-      // invalid URL given to express, unable to parse
-      res.status(400);
-    } else {
-      res.status(500);
-    }
-
-    return renderStaticErrorPage(res);
-  });
+  app.use(serverError);
 
   return app;
 }
