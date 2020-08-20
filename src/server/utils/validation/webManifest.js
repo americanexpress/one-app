@@ -16,25 +16,18 @@
 
 import Joi from 'joi';
 
+import { urlSchema, colorSchema } from './shared';
+
 // eslint-disable-next-line import/prefer-default-export
 export const webManifestSchema = Joi.object().keys({
   name: Joi.string().required(),
   short_name: Joi.string(),
   description: Joi.string(),
   lang: Joi.string(),
-  scope: Joi.string().pattern(/^\//),
-  start_url: Joi.alternatives(
-    Joi.string().uri(),
-    Joi.string().pattern(/^\//)
-  ),
-  theme_color: Joi.alternatives(
-    Joi.string(),
-    Joi.string().hex()
-  ),
-  background_color: Joi.alternatives(
-    Joi.string(),
-    Joi.string().hex()
-  ),
+  scope: urlSchema,
+  start_url: urlSchema,
+  theme_color: colorSchema,
+  background_color: colorSchema,
   categories: Joi.array().items(Joi.string()),
   iarc_rating_id: Joi.boolean(),
   prefer_related_applications: Joi.boolean(),

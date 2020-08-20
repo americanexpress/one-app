@@ -43,14 +43,29 @@ describe(validatePWAConfig.name, () => {
         escapeHatch: 0,
         recoveryMode: [],
         scope: '\\',
-        webManifest: { short_name: 'One App Test' },
+        webManifest: {
+          short_name: /One App Test/,
+          start_url: '[start_url',
+          scope: 0,
+          display: 'sideways',
+          categories: ['pwa', 1234],
+          icons: [{
+            src: false,
+          }],
+        },
       })
     ).toThrow(
       new Error([
         '"recoveryMode" must be a boolean',
         '"escapeHatch" must be a boolean',
-        '"scope" with value "\\" fails to match the required pattern: /^\\//',
+        '"scope" must be a relative or absolute URL',
         '"webManifest.name" is required',
+        '"webManifest.short_name" must be a string',
+        '"webManifest.scope" must be a string',
+        '"webManifest.start_url" must be a relative or absolute URL',
+        '"webManifest.categories[1]" must be a string',
+        '"webManifest.display" must be one of [fullscreen, standalone, minimal-ui, browser]',
+        '"webManifest.icons[0].src" must be a string',
       ].join('. '))
     );
   });

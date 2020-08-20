@@ -16,14 +16,14 @@
 
 import Joi from 'joi';
 
-import { urlSchema } from './shared';
-import { webManifestExtension } from './extensions';
-
-// eslint-disable-next-line import/prefer-default-export
-export const pwaSchema = Joi.object().keys({
-  serviceWorker: Joi.boolean(),
-  recoveryMode: Joi.boolean(),
-  escapeHatch: Joi.boolean(),
-  scope: urlSchema,
-  webManifest: webManifestExtension.manifest(),
+export const urlSchema = Joi.string().uri({
+  allowRelative: true,
+}).messages({
+  'string.base': '{{#label}} must be a string',
+  'string.uri': '{{#label}} must be a relative or absolute URL',
 });
+
+export const colorSchema = Joi.alternatives(
+  Joi.string(),
+  Joi.string().hex()
+);
