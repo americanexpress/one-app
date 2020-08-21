@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "5.4.0",
+  "version": "5.4.1",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
@@ -95,6 +95,7 @@
     "if-env": "^1.0.4",
     "immutable": "^4.0.0-rc.12",
     "ip": "^1.1.5",
+    "joi": "^17.2.0",
     "lean-intl": "^4.2.2",
     "make-promises-safe": "^5.1.0",
     "matcher": "^3.0.0",
@@ -127,7 +128,7 @@
     "@babel/core": "^7.10.2",
     "@babel/node": "^7.10.3",
     "@babel/register": "^7.10.4",
-    "@commitlint/cli": "^9.0.1",
+    "@commitlint/cli": "^9.1.1",
     "@commitlint/config-conventional": "^9.0.1",
     "@rollup/plugin-babel": "^5.0.4",
     "@rollup/plugin-node-resolve": "^8.0.1",
@@ -141,7 +142,7 @@
     "concurrently": "^5.2.0",
     "conventional-changelog-cli": "^2.0.34",
     "cross-env": "^7.0.2",
-    "danger": "^10.2.0",
+    "danger": "^10.3.0",
     "enzyme": "^3.11.0",
     "enzyme-to-json": "^3.5.0",
     "eslint": "^7.3.1",

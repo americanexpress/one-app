@@ -25,6 +25,7 @@ import { setConfigureRequestLog } from './logging/serverMiddleware';
 import { setCreateSsrFetch } from './createSsrFetch';
 import { setEventLoopDelayThreshold } from './createCircuitBreaker';
 import { configurePWA } from '../middleware/pwa';
+import { validatePWAConfig } from './validation';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
@@ -117,8 +118,11 @@ export default function onModuleLoad({
     setConfigureRequestLog(configureRequestLog);
     setCreateSsrFetch(createSsrFetch);
     setEventLoopDelayThreshold(eventLoopDelayThreshold);
+    configurePWA(validatePWAConfig(pwa, {
+      clientStateConfig: getClientStateConfig(),
+    }));
+
     logModuleLoad(moduleName, metaData.version);
-    configurePWA(pwa);
     return;
   }
 

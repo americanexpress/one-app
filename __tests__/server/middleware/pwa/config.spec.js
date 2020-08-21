@@ -31,7 +31,7 @@ describe('pwa configuration', () => {
   const serviceWorkerRecoveryScript = Buffer.from('[service-worker-noop-script]');
   const serviceWorkerEscapeHatchScript = Buffer.from('self.unregister();');
 
-  beforeAll(() => {
+  beforeEach(() => {
     process.env.ONE_SERVICE_WORKER = true;
   });
 
@@ -131,8 +131,6 @@ describe('pwa configuration', () => {
         serviceWorkerScriptUrl: false,
         webManifestUrl: false,
       });
-
-      process.env.ONE_SERVICE_WORKER = true;
     });
 
     test('disabling PWA configuration', () => {
@@ -167,29 +165,6 @@ describe('pwa configuration', () => {
         webManifest: {
           name: 'One App Test',
         },
-      });
-
-      expect(getServerPWAConfig()).toMatchObject({
-        webManifest: true,
-        serviceWorker: true,
-        serviceWorkerRecoveryMode: false,
-        serviceWorkerScope: '/',
-      });
-      expect(getClientPWAConfig()).toMatchObject({
-        serviceWorker: true,
-        serviceWorkerRecoveryMode: false,
-        serviceWorkerScope: '/',
-        serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
-        webManifestUrl: '/_/pwa/manifest.webmanifest',
-      });
-    });
-
-    test('using a function for the web manifest', () => {
-      configurePWA({
-        serviceWorker: true,
-        webManifest: () => ({
-          name: 'One App Test',
-        }),
       });
 
       expect(getServerPWAConfig()).toMatchObject({
