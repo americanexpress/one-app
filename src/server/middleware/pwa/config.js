@@ -17,10 +17,6 @@
 import fs from 'fs';
 import path from 'path';
 
-import { getClientStateConfig } from '../../utils/stateConfig';
-
-import { validatePWAConfig } from './validation';
-
 const defaultPWAConfig = {
   webManifest: false,
   serviceWorker: false,
@@ -35,6 +31,7 @@ let pwaConfig = { ...defaultPWAConfig };
 
 function resetPWAConfig() {
   pwaConfig = { ...defaultPWAConfig };
+  return pwaConfig;
 }
 
 function setPWAConfig(newConfiguration) {
@@ -84,16 +81,6 @@ function createWebManifestConfig(config, serviceWorkerConfig) {
   };
 }
 
-function validateConfig(config) {
-  if (!config) return {};
-
-  const object = { ...config };
-
-  if (typeof config.webManifest === 'function') object.webManifest = config.webManifest(getClientStateConfig());
-
-  return validatePWAConfig(object);
-}
-
 export function getWebAppManifestConfig() {
   return { webManifest: webAppManifest, webManifestEnabled: pwaConfig.webManifest };
 }
@@ -116,7 +103,7 @@ export function getClientPWAConfig() {
   };
 }
 
-export function configurePWA(config) {
+export function configurePWA(config = {}) {
   // feature flag will not allow pwa/service-worker to be configured
   // it will default to a disabled state regardless if `appConfig.pwa` was provided
   if (process.env.ONE_SERVICE_WORKER !== 'true') {
@@ -128,15 +115,14 @@ export function configurePWA(config) {
     // if there was a previous configuration present, we want to gracefully
     // remove any remaining instances. We currently handle this client side
     // and would only need to reset the configuration when we want to decouple.
-    resetPWAConfig();
+    // eslint-disable-next-line no-param-reassign
+    config = resetPWAConfig();
   }
 
-  const validatedConfig = validateConfig(config);
-
-  const serviceWorkerConfig = createServiceWorkerConfig(validatedConfig);
+  const serviceWorkerConfig = createServiceWorkerConfig(config);
   const {
     webManifestObject, webManifest,
-  } = createWebManifestConfig(validatedConfig, serviceWorkerConfig);
+  } = createWebManifestConfig(config, serviceWorkerConfig);
 
   webAppManifest = webManifestObject ? Buffer.from(JSON.stringify(webManifestObject)) : null;
 
