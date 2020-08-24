@@ -40,6 +40,13 @@ function setPWAConfig(newConfiguration) {
 }
 
 function createServiceWorkerConfig(config) {
+  if (!config) {
+    // if there was no config given or a previous configuration present, we want to
+    // gracefully remove any remaining instances. We currently handle this client side
+    // and would only need to reset the configuration when we want to decouple.
+    return resetPWAConfig();
+  }
+
   let enabled = false;
   let scope = null;
   let type = null;
@@ -109,14 +116,6 @@ export function configurePWA(config = {}) {
   if (process.env.ONE_SERVICE_WORKER !== 'true') {
     // eslint-disable-next-line no-param-reassign
     config = null;
-  }
-
-  if (!config && pwaConfig.serviceWorker) {
-    // if there was a previous configuration present, we want to gracefully
-    // remove any remaining instances. We currently handle this client side
-    // and would only need to reset the configuration when we want to decouple.
-    // eslint-disable-next-line no-param-reassign
-    config = resetPWAConfig();
   }
 
   const serviceWorkerConfig = createServiceWorkerConfig(config);
