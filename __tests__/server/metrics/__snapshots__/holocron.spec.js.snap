@@ -32,7 +32,9 @@ Object {
   "default": Object {
     "moduleMapPoll": "oneapp_holocron_module_map_poll_total",
     "moduleMapPollConsecutiveErrors": "oneapp_holocron_module_map_poll_consecutive_errors_total",
+    "moduleMapPollRestarted": "oneapp_holocron_module_map_poll_restarted_total",
     "moduleMapPollWait": "oneapp_holocron_module_map_poll_wait_seconds",
+    "moduleMapUpdated": "oneapp_holocron_module_map_updated_total",
   },
 }
 `;
