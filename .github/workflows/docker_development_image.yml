@@ -1,0 +1,61 @@
+name: One App Development Image Build and Push
+on:
+  workflow_dispatch:
+   inputs:
+    docker_tag_version:
+     description: 'Semantic Version'
+     required: true
+  repository_dispatch:
+    types: [one-app-docker-dev-build]
+jobs:
+  one-app-docker-dev-build:
+    name: One App Development Image Build and Push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Docker Image Versions
+        id: set_docker_version
+        run: |
+          #Runs when the action is triggered by the dispatch function
+          if [[ "${{ github.event.inputs.docker_tag_version }}" == "" ]]; then
+          echo ::set-output name=docker_version::${{ github.event.client_payload.docker_tag_version }}
+          echo ::set-output name=major_version::${{ github.event.client_payload.major_version }}
+          echo ::set-output name=minor_version::${{ github.event.client_payload.minor_version }}
+          else
+          #Runs when a tag is triggered manually
+          echo ::set-output name=docker_version::${{ github.event.inputs.docker_tag_version }}
+          MAJOR="$(echo ${{ github.event.inputs.docker_tag_version}} | cut -d'.' -f1)"
+          MINOR="$(echo ${{ github.event.inputs.docker_tag_version}} | cut -d'.' -f2)"
+          echo ::set-output name=major_version::${MAJOR}
+          echo ::set-output name=minor_version::${MINOR}
+          fi
+      - name: Print docker version
+        run:  |
+          echo "tag: ${{ github.event.inputs.docker_tag_version }}"
+      - name: Docker login
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
+      - name: Build development docker image
+        run: docker build -t dev . --target=development
+      - name: Tag Docker Images
+        run: |
+          docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.major_version }}
+          docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.major_version}}.${{ steps.set_docker_version.outputs.minor_version }}
+          docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.docker_version }}
+          docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:latest
+      - name: Push Docker Images
+        run: |
+          docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.major_version}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.major_version}}.${{ steps.set_docker_version.outputs.minor_version }}
+          docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.docker_version}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app-dev:latest
+      - name: Publish One App Statics
+        uses: octokit/request-action@v2.x
+        id: dispatch_publish_statics_npm
+        with:
+          route: POST /repos/:repository/dispatches
+          repository: ${{ github.repository }}
+          mediaType: '{"previews": ["everest"]}'
+          event_type: "publish-statics-npm"
+          client_payload: '{"docker_tag_version": "${{ steps.set_docker_version.outputs.docker_version }}"}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}

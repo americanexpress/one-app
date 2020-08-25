@@ -573,7 +573,7 @@ describe('ssrServer', () => {
 
           expect(res.status).toEqual(500);
           expect(console.error).toHaveBeenCalledTimes(1);
-          expect(console.error).toHaveBeenCalledWith('express application error', middlewareError);
+          expect(console.error).toHaveBeenCalledWith(middlewareError, 'express application error: method GET, url "/anything", correlationId "undefined", headersSent: false');
           expect(res.type).toEqual('text/html');
           expect(res.text).toMatch('<h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>');
           expect(res.text).toMatch('Sorry, we are unable to load this page at this time.');
@@ -620,7 +620,7 @@ describe('ssrServer', () => {
 
           expect(res.status).toEqual(201);
           expect(console.error).toHaveBeenCalledTimes(1);
-          expect(console.error).toHaveBeenCalledWith('express application error', middlewareError);
+          expect(console.error).toHaveBeenCalledWith(middlewareError, 'express application error: method GET, url "/anything", correlationId "undefined", headersSent: true');
           expect(res.text).toMatch('hello');
           return done();
         });
