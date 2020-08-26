@@ -1,6 +1,7 @@
 <!--ONE-DOCS-HIDE start-->
 [👈 Return to Overview](../README.md)
 <!--ONE-DOCS-HIDE end-->
+
 # Internationalization
 
 To enable internationalization modules can contain a locale directory in the root of

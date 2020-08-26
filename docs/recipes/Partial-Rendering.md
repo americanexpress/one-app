@@ -1,6 +1,7 @@
 <!--ONE-DOCS-HIDE start-->
 [👈 Return to Overview](./README.md)
 <!--ONE-DOCS-HIDE end-->
+
 # Partial Rendering
 
 Renders static markup from a Holocron module, rather than a complete page. Useful for reusing a One
