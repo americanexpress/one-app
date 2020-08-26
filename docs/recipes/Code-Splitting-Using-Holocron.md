@@ -14,8 +14,9 @@
 [react-lazy-api]: https://reactjs.org/docs/react-api.html#reactlazy
 [react-suspense-api]: https://reactjs.org/docs/react-api.html#reactsuspense
 
+<!--ONE-DOCS-HIDE start-->
 [👈 Return to Overview](./README.md)
-
+<!--ONE-DOCS-HIDE end-->
 # Code Splitting Using Holocron
 
 **Contents**
