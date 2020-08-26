@@ -18,6 +18,9 @@
  * Main App
  * Set up the global store and kick off rendering
  */
+
+// polyfill for ie 11
+import 'abort-controller/polyfill';
 import './polyfill/console';
 import './polyfill/ChildNode.remove';
 import './polyfill/Intl';
