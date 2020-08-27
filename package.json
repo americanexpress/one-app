@@ -176,7 +176,7 @@
     "service-worker-mock": "^2.0.5",
     "standard-version": "^8.0.0",
     "supertest": "^4.0.2",
-    "surge": "^0.21.3",
+    "surge": "^0.21.6",
     "tar": "^6.0.2",
     "webdriverio": "^6.1.24"
   },
