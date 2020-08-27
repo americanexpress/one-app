@@ -33,6 +33,8 @@ On Mac OS, you can do so natively:
 Click connect and a window will appear with Google Chrome open. This is
 where you can access One App at `https://one-app:8443`!
 
+If you wish to run with node debug mode: `npm run start:prod-sample:debug`.
+
 ### Options
 
 The entire setup invoked by `npm run start:prod-sample` can take ~10 minutes and is often unnecessary

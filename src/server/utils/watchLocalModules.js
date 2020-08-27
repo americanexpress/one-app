@@ -36,14 +36,13 @@ export default function watchLocalModules() {
   const staticsDirectoryPath = path.resolve(__dirname, '../../../static');
   const moduleDirectory = path.resolve(staticsDirectoryPath, 'modules');
   const moduleMapPath = path.resolve(staticsDirectoryPath, 'module-map.json');
-  const watcher = chokidar.watch(moduleDirectory);
+  const watcher = chokidar.watch(moduleDirectory, { awaitWriteFinish: true });
 
   watcher.on('change', async (changedPath) => {
     if (!changedPath.endsWith('.node.js')) return;
 
     const match = changedPath.substring(moduleDirectory.length).match(/\/([^/]+)\/([^/]+)/);
     if (!match) return;
-
     const [, moduleNameChangeDetectedIn] = match;
 
     const moduleMap = JSON.parse(fs.readFileSync(moduleMapPath, 'utf8'));
