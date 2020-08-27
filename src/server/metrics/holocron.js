@@ -26,6 +26,16 @@ createCounter({
   help: 'total times the module map has been polled',
 });
 
+createCounter({
+  name: holocronNamespace('module_map_updated', 'total'),
+  help: 'total times the module map has been updated',
+});
+
+createCounter({
+  name: holocronNamespace('module_map_poll_restarted', 'total'),
+  help: 'total times the module map poll has been restarted',
+});
+
 createGauge({
   name: holocronNamespace('module_map_poll_wait', 'seconds'),
   help: 'delay until the next poll of the module map',
