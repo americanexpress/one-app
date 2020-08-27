@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.5.0](https://github.com/americanexpress/one-app/compare/v5.4.1...v5.5.0) (2020-08-26)
+
+
+### Bug Fixes
+
+* **pollModuleMap:** ensure single pollModuleMap ([#284](https://github.com/americanexpress/one-app/issues/284)) ([5503a03](https://github.com/americanexpress/one-app/commit/5503a035a55feaade9344d651aea0531e2ac0c37))
+* **pwa:** reset config when not supplied ([#283](https://github.com/americanexpress/one-app/issues/283)) ([6784c7c](https://github.com/americanexpress/one-app/commit/6784c7c9e2b977b036ad87ef17e2f0b2e919a740))
+* **watchLocalModules:** wait for change to finish ([#285](https://github.com/americanexpress/one-app/issues/285)) ([a27d4ba](https://github.com/americanexpress/one-app/commit/a27d4ba3af68c0bac29650be9220dadf0461227a))
+
+
+### Features
+
+* **app-config:** pwa validation ([fb10509](https://github.com/americanexpress/one-app/commit/fb10509343d2dd178cb9cb857598f4c419111b1d))
+* **serverError:** add additional logging for server errors ([#282](https://github.com/americanexpress/one-app/issues/282)) ([60825f8](https://github.com/americanexpress/one-app/commit/60825f8cf7aaa8b3919cc98b7cddf3ddb52a7607))
+
+
 ## [5.4.1](https://github.com/americanexpress/one-app/compare/v5.4.0...v5.4.1) (2020-08-19)
 
 

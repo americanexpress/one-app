@@ -81,6 +81,7 @@ const setTimeoutWithoutBlockingStopping = setLaterWithoutBlockingStopping(setTim
 
 // used by the polling monitor
 let lastPollingRecordedAt;
+let lastPollTimeout;
 
 function recordPollingForMonitor() {
   lastPollingRecordedAt = Date.now();
@@ -104,12 +105,16 @@ let startPollingMonitorIfNotAlready = () => {
     console.warn(
       `pollModuleMap: polling has unexpectedly stopped. Last poll: ${lastPollingTimeAgo}ms ago, Max poll: ${MAX_POLL_TIME}ms.`
     );
+
     // something really unusual happened, re-start polling
-    // first, make sure polling happens again
+    // ensure that the last timeout has actually stopped
+    clearTimeout(lastPollTimeout);
+    // make sure polling happens again
     // need the reference to use it, one needs to be defined first
     setImmediate(pollModuleMap); // eslint-disable-line no-use-before-define
     // log the restart
     console.warn('pollModuleMap: restarted polling');
+    incrementCounter(holocronMetrics.moduleMapPollRestarted);
     // try to reset the next scheduled polling time to the minimum
     // should work, but if it doesn't we still want polling to occur
     // so schedule the polling restart first (above), then reset the time later (here)
@@ -123,6 +128,9 @@ let startPollingMonitorIfNotAlready = () => {
 };
 
 async function pollModuleMap() {
+  // record module map poll first to reduce risk that polling monitor
+  // triggers additional poll during current poll.
+  recordPollingForMonitor();
   startPollingMonitorIfNotAlready();
   let modulesUsingExternalsBeforeUpdate;
   let configBeforeUpdate;
@@ -132,7 +140,6 @@ async function pollModuleMap() {
     modulesUsingExternalsBeforeUpdate = getModulesUsingExternals();
     console.log('pollModuleMap: polling...');
     incrementCounter(holocronMetrics.moduleMapPoll);
-    recordPollingForMonitor();
 
     const modulesLoaded = await loadModules();
 
@@ -144,6 +151,7 @@ async function pollModuleMap() {
         `pollModuleMap: ${numberOfModulesLoaded} modules loaded/updated:`,
         modulesLoaded
       );
+      incrementCounter(holocronMetrics.moduleMapUpdated);
       resetPollTime();
     } else {
       incrementPollTime();
@@ -165,7 +173,7 @@ async function pollModuleMap() {
       currentPollTime = MIN_POLL_TIME;
     }
   } finally {
-    setTimeoutWithoutBlockingStopping(pollModuleMap, currentPollTime);
+    lastPollTimeout = setTimeoutWithoutBlockingStopping(pollModuleMap, currentPollTime);
   }
 }
 

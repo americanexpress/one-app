@@ -1,5 +1,4 @@
 version: '3'
-
 networks:
   one-app-at-test-network:
 services:
@@ -10,27 +9,26 @@ services:
         - http_proxy
         - https_proxy
         - no_proxy
-    # tags the built image as:
-    image: one-app:at-test
+    image: 'one-app:at-test'
     expose:
-      - "8443"
-      - "3005"
+      - '8443'
+      - '3005'
     ports:
-      - "3005:3005"
+      - '8443:8443'
+      - '3005:3005'
     volumes:
-      - ./one-app/one-app-cert.pem:/opt/cert.pem
-      - ./one-app/one-app-privkey.pem:/opt/key.pem
-      - ./nginx/nginx-cert.pem:/opt/nginx-cert.pem
-      - ./extra-certs.pem:/opt/extra-certs.pem
-    env_file:
-      - ./one-app/base.env
+      - './one-app/one-app-cert.pem:/opt/cert.pem'
+      - './one-app/one-app-privkey.pem:/opt/key.pem'
+      - './nginx/nginx-cert.pem:/opt/nginx-cert.pem'
+      - './extra-certs.pem:/opt/extra-certs.pem'
     networks:
       one-app-at-test-network:
     depends_on:
-      - "fast-api"
-      - "slow-api"
-      - "extra-slow-api"
-      - "nginx"
+      - fast-api
+      - slow-api
+      - extra-slow-api
+      - nginx
+    env_file: ./one-app/base.env
     entrypoint: sh -c 'sleep 2s && node lib/server'
   fast-api:
     build:
@@ -40,7 +38,7 @@ services:
         - https_proxy
         - no_proxy
     ports:
-      - "8000:80"
+      - '8000:80'
     networks:
       one-app-at-test-network:
         aliases:
@@ -53,12 +51,12 @@ services:
         - https_proxy
         - no_proxy
     ports:
-      - "8001:80"
+      - '8001:80'
     entrypoint:
-      - "npm"
-      - "start"
-      - "--"
-      - "3000"
+      - npm
+      - start
+      - '--'
+      - '3000'
     networks:
       one-app-at-test-network:
         aliases:
@@ -71,23 +69,23 @@ services:
         - https_proxy
         - no_proxy
     ports:
-      - "8002:80"
+      - '8002:80'
     entrypoint:
-      - "npm"
-      - "start"
-      - "--"
-      - "8000"
+      - npm
+      - start
+      - '--'
+      - '8000'
     networks:
       one-app-at-test-network:
         aliases:
           - extra-slow.api.frank
   nginx:
-    image: nginx:1.17.5-alpine
+    image: 'nginx:1.17.5-alpine'
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/nginx-cert.pem:/etc/ssl/nginx-cert.pem
-      - ./nginx/nginx-privkey.pem:/etc/ssl/nginx-privkey.pem
-      - ./nginx/origin-statics:/usr/share/nginx/html
+      - './nginx/default.conf:/etc/nginx/conf.d/default.conf'
+      - './nginx/nginx-cert.pem:/etc/ssl/nginx-cert.pem'
+      - './nginx/nginx-privkey.pem:/etc/ssl/nginx-privkey.pem'
+      - './nginx/origin-statics:/usr/share/nginx/html'
     networks:
       one-app-at-test-network:
         aliases:
