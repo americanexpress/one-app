@@ -1,0 +1,55 @@
+name: Docker Tag Version Check
+on:
+  workflow_dispatch:
+   inputs:
+    tag_version:
+     description: 'Semantic Version'
+     required: true
+  push:
+    tags:
+      - '*'
+  repository_dispatch:
+    types: [one-app-docker-tag-check]
+jobs:
+  one-app-docker-tag-check:
+    name: Docker Tag Version Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set env
+        id: set_tag_version
+        run: |
+          #Checks for when a valid tag is manually pushed
+          if [[ $GITHUB_REF != "" && "${{ github.event.client_payload.tagversion }}" == "" ]];
+          then
+          echo ::set-output name=tagversion::$(egrep -o '(v[0-9]+\.[0-9]+\.[0-9]+)(-\S*)?' <<< $GITHUB_REF)
+          else
+          echo ::set-output name=tagversion::${{ github.event.client_payload.tagversion }}
+          fi
+          if [[ "${{ github.event.inputs.tag_version }}" != "" ]]
+          then
+          echo ::set-output name=tagversion::${{ github.event.inputs.tag_version }}
+          fi
+          echo $tagversion
+      - name: Check Tag Version
+        run: |
+          if [[ "${{ steps.set_tag_version.outputs.tagversion }}" == ""  ]]; then
+          echo "::error::Incorrect tag provided, please provide a tag with the correct format and try again"
+          exit 1
+          fi
+      - name: Docker tag version
+        id: set_docker_tag_version
+        run: |
+          tagversion=${{ steps.set_tag_version.outputs.tagversion}}
+          echo ::set-output name=dockertag::$(sed 's/^v*//' <<< "$tagversion")
+      - name: Trigger Production Image Publishing
+        uses: octokit/request-action@v2.x
+        id: dispatch_one-app-docker-prod-build
+        with:
+          route: POST /repos/:repository/dispatches
+          repository: ${{ github.repository }}
+          mediaType: '{"previews": ["everest"]}'
+          event_type: "one-app-docker-prod-build"
+          client_payload: '{"docker_tag_version": "${{ steps.set_docker_tag_version.outputs.dockertag }}"}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}
