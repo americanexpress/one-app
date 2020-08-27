@@ -57,16 +57,24 @@ export function safeSend(res, ...payload) {
   }
 }
 
-export async function fetchCustomErrorPage(fallbackUrl, res) {
+let errorPage;
+
+export async function fetchErrorPage(fallbackUrl) {
   const response = await fetch(fallbackUrl);
-  // If the Content-Type is not text/html throw an error
   const contentType = response.headers.get('content-type');
+  const contentLength = response.headers.get('content-length');
+
+  // If the Content-Type is not text/html throw an error
   if (!contentType.includes('text/html')) {
     throw new Error('Content-Type was not of type text/html');
   }
+  // If the content length is over 50kb throw an error
+  if (contentLength > 50000) {
+    throw new Error('Content-Length was over 50Kb');
+  }
   // Read the response as text.
-  const data = await response.text();
-  return safeSend(res, data);
+  errorPage = await response.text();
+  return errorPage;
 }
 
 export async function renderStaticErrorPage(res) {
@@ -81,33 +89,31 @@ export async function renderStaticErrorPage(res) {
     message = 'Sorry, we are unable to load this page at this time.';
   }
 
-  const fallbackUrl = process.env.ONE_FALLBACK_URL;
-
   const errorResponse = `<!DOCTYPE html>
-      <html>
-        <head>
-          <title>One App</title>
-          <meta http-equiv="X-UA-Compatible" content="IE=edge">
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1">
-          <meta name="application-name" content="one-app">
-        </head>
-        <body style="background-color: #F0F0F0">
-          <div id="root">
-            <div>
-              <div style="width: 70%; background-color: white; margin: 4% auto;">
-                <h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>
-                <p style="display: flex; justify-content: center; padding: 10px 15px 40px;">
-                  ${message}
-                </p>
-              </div>
-            </div>
+  <html>
+    <head>
+      <title>One App</title>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="application-name" content="one-app">
+    </head>
+    <body style="background-color: #F0F0F0">
+      <div id="root">
+        <div>
+          <div style="width: 70%; background-color: white; margin: 4% auto;">
+            <h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>
+            <p style="display: flex; justify-content: center; padding: 10px 15px 40px;">
+              ${message}
+            </p>
           </div>
-        </body>
-      </html>`;
+        </div>
+      </div>
+    </body>
+  </html>`;
 
-  if (fallbackUrl) {
-    await fetchCustomErrorPage(fallbackUrl, res);
+  if (errorPage) {
+    safeSend(res, errorPage);
   } else {
     safeSend(res, errorResponse);
   }
