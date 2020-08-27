@@ -31,7 +31,7 @@ import { setConfigureRequestLog } from '../../../src/server/utils/logging/server
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
 import { getEventLoopDelayThreshold } from '../../../src/server/utils/createCircuitBreaker';
 import { configurePWA } from '../../../src/server/middleware/pwa';
-import { fetchErrorPage } from '../../../src/server/middleware/sendHtml';
+import { setErrorPage } from '../../../src/server/middleware/sendHtml';
 
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
@@ -54,7 +54,7 @@ jest.mock('../../../src/server/middleware/pwa', () => ({
   configurePWA: jest.fn(),
 }));
 jest.mock('../../../src/server/middleware/sendHtml.js', () => ({
-  fetchErrorPage: jest.fn(),
+  setErrorPage: jest.fn(),
 }));
 
 const RootModule = () => <h1>Hello, world</h1>;
@@ -330,7 +330,7 @@ describe('onModuleLoad', () => {
     expect(configurePWA).toHaveBeenCalledWith(pwa);
   });
 
-  it('calls fetchErrorPage with error page URL', () => {
+  it('calls setErrorPage with error page URL', () => {
     const errorPageUrl = 'https://example.com';
     onModuleLoad({
       module: {
@@ -342,7 +342,7 @@ describe('onModuleLoad', () => {
       },
       moduleName: 'some-root',
     });
-    expect(fetchErrorPage).toHaveBeenCalledWith(errorPageUrl);
+    expect(setErrorPage).toHaveBeenCalledWith(errorPageUrl);
   });
 
   it('sets the event loop lag threshold from the root module', () => {

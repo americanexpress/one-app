@@ -26,7 +26,7 @@ import { setCreateSsrFetch } from './createSsrFetch';
 import { setEventLoopDelayThreshold } from './createCircuitBreaker';
 import { configurePWA } from '../middleware/pwa';
 import { validatePWAConfig } from './validation';
-import { fetchErrorPage } from '../middleware/sendHtml';
+import { setErrorPage } from '../middleware/sendHtml';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
@@ -116,7 +116,7 @@ export default function onModuleLoad({
       setStateConfig(provideStateConfig);
     }
     if (errorPageUrl) {
-      fetchErrorPage(errorPageUrl);
+      setErrorPage(errorPageUrl);
     }
     setCorsOrigins(corsOrigins);
     extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);

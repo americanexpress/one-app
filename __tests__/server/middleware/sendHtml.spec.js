@@ -19,7 +19,7 @@ import sendHtml, {
   renderStaticErrorPage,
   renderModuleScripts,
   safeSend,
-  fetchErrorPage,
+  setErrorPage,
 } from '../../../src/server/middleware/sendHtml';
 // _client is a method to control the mock
 // eslint-disable-next-line import/named
@@ -855,7 +855,7 @@ describe('sendHtml', () => {
         }),
       }));
 
-      await fetchErrorPage(errorPageUrl);
+      await setErrorPage(errorPageUrl);
       renderStaticErrorPage(res);
 
       const data = await global.fetch.mock.results[0].value;
@@ -869,7 +869,7 @@ describe('sendHtml', () => {
     });
   });
 
-  describe('fetchErrorPage', () => {
+  describe('setErrorPage', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -897,7 +897,7 @@ describe('sendHtml', () => {
         }),
       }));
 
-      fetchErrorPage(errorPageUrl);
+      setErrorPage(errorPageUrl);
 
       const data = await global.fetch.mock.results[0].value;
 
@@ -914,7 +914,7 @@ describe('sendHtml', () => {
         }),
       }));
 
-      await expect(fetchErrorPage(errorPageUrl)).rejects.toEqual(
+      await expect(setErrorPage(errorPageUrl)).rejects.toEqual(
         new Error('Content-Type was not of type text/html')
       );
     });
@@ -928,7 +928,7 @@ describe('sendHtml', () => {
         }),
       }));
 
-      await expect(fetchErrorPage(errorPageUrl)).rejects.toEqual(
+      await expect(setErrorPage(errorPageUrl)).rejects.toEqual(
         new Error('Content-Length was over 50Kb')
       );
     });

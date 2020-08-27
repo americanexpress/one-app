@@ -59,7 +59,7 @@ export function safeSend(res, ...payload) {
 
 let errorPage;
 
-export async function fetchErrorPage(fallbackUrl) {
+export async function setErrorPage(fallbackUrl) {
   const response = await fetch(fallbackUrl);
   const contentType = response.headers.get('content-type');
   const contentLength = response.headers.get('content-length');
