@@ -1,4 +1,6 @@
+<!--ONE-DOCS-HIDE start-->
 [👈 Return to Overview](./README.md)
+<!--ONE-DOCS-HIDE end-->
 
 # Internationalizing Your Module
 
