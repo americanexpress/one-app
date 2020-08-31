@@ -79,7 +79,7 @@ describe('watchLocalModules', () => {
 
   it('should watch the modules directory', () => {
     watchLocalModules();
-    expect(chokidar.watch).toHaveBeenCalledWith(path.resolve(__dirname, '../../../static/modules'));
+    expect(chokidar.watch).toHaveBeenCalledWith(path.resolve(__dirname, '../../../static/modules'), { awaitWriteFinish: true });
   });
 
   it('should update the module registry when a server bundle changes', async () => {

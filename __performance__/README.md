@@ -77,10 +77,10 @@ Wait for `🌎 One App server listening on port 8443` to appear in the logs to i
 
 > `npm run start:prod-sample` creates the `prod-sample_one-app-at-test-network` network which is required for the performance tools to start when running against prod-sample.
 
-After prod-sample has successfully started you will need to start the performance test suite infrastructure in a new terminal window, navigate to `one-app/__performance__` and run the following:
+After prod-sample has successfully started you will need to start the performance test suite infrastructure in a new terminal window, navigate to `one-app` and run the following:
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod-sample.yml up --abort-on-container-exit influxdb grafana prometheus
+npm run monitor:performance
 ```
 
 You can now view the [Grafana metrics on localhost:3030](http://localhost:3030/d/tDGvrq7Mz/one-app-performance)
@@ -122,10 +122,10 @@ If you want to run against a remote server you will need to update `targets` wit
 ]
 ```
 
-Next you can start the performance test suite infrastructure, navigate to `one-app/__performance__` and run the following:
+Next you can start the performance test suite infrastructure, navigate to `one-app` and run the following:
 
 ```bash
-docker-compose up --abort-on-container-exit influxdb grafana prometheus
+npm run monitor:performance
 ```
 
 You can now view the [Grafana metrics on localhost:3030](http://localhost:3030/d/tDGvrq7Mz/one-app-performance)
