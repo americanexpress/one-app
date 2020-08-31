@@ -1,0 +1,66 @@
+name: One App Production Image Build and Push
+on:
+  workflow_dispatch:
+   inputs:
+    docker_tag_version:
+     description: 'Semantic Version'
+     required: true
+  repository_dispatch:
+    types: [one-app-docker-prod-build]
+jobs:
+  one-app-docker-prod-build:
+    name: One App Production Image Build and Push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Docker login
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
+      - name: Build production docker image
+        run: docker build -t prod .
+      - name: Extract sem versions
+        id: get_sem_version
+        run: |
+            MAJOR="$(echo ${{ github.event.client_payload.docker_tag_version}} | cut -d'.' -f1)"
+            MINOR="$(echo ${{ github.event.client_payload.docker_tag_version}} | cut -d'.' -f2)"
+            PATCH="$(echo ${{ github.event.client_payload.docker_tag_version}} | cut -d'.' -f3)"
+            echo ::set-output name=major_version::${MAJOR}
+            echo ::set-output name=minor_version::${MINOR}
+      - name: Docker Image Versions
+        id: set_docker_version
+        run: |
+          #Runs when the action is triggered by the dispatch function
+          if [[ "${{ github.event.inputs.docker_tag_version }}" == "" ]]; then
+          echo ::set-output name=docker_version::${{ github.event.client_payload.docker_tag_version }}
+          echo ::set-output name=major_version::${{ steps.get_sem_version.outputs.major_version }}
+          echo ::set-output name=minor_version::${{ steps.get_sem_version.outputs.minor_version }}
+          else
+          #Runs when a tag is triggered manually
+          echo ::set-output name=docker_version::${{ github.event.inputs.docker_tag_version }}
+          MAJOR="$(echo ${{ github.event.inputs.docker_tag_version}} | cut -d'.' -f1)"
+          MINOR="$(echo ${{ github.event.inputs.docker_tag_version}} | cut -d'.' -f2)"
+          echo ::set-output name=major_version::${MAJOR}
+          echo ::set-output name=minor_version::${MINOR}
+          fi
+      - name: Tag Docker Images
+        run: |
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}.${{steps.set_docker_version.outputs.minor_version}}
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.docker_version}}
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:latest
+      - name: Push Docker Images
+        run: |
+          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}.${{ steps.set_docker_version.outputs.minor_version}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.docker_version}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app:latest
+      - name: Trigger Development Image Publishing
+        uses: octokit/request-action@v2.x
+        id: dispatch_one_app_docker_dev_build
+        with:
+          route: POST /repos/:repository/dispatches
+          repository: ${{ github.repository }}
+          mediaType: '{"previews": ["everest"]}'
+          event_type: "one-app-docker-dev-build"
+          client_payload: '{"docker_tag_version": "${{ steps.set_docker_version.outputs.docker_version }}","major_version":"${{ steps.set_docker_version.outputs.major_version}}","minor_version":"${{ steps.set_docker_version.outputs.minor_version}}"}'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}
