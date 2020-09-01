@@ -18,6 +18,6 @@ jobs:
       - name: npm install
         run: NODE_ENV=development npm ci
       - name: Build docker image
-        run: docker build -t one-app:at-test .
+        run: docker build -t one-app:at-test . --build-arg USER=root
       - name: Run Integration Tests
         run: ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true npm run test:integration
