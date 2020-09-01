@@ -40,6 +40,7 @@ EXPOSE 3001
 EXPOSE 3002
 EXPOSE 3005
 WORKDIR /opt/one-app
+USER $USER
 RUN chown node:node /opt/one-app
 CMD ["node", "lib/server"]
 COPY --from=builder --chown=node:node /opt/one-app/development ./
@@ -49,7 +50,6 @@ COPY --from=builder --chown=node:node /opt/one-app/development ./
 FROM node:12-alpine as production
 ARG USER
 ENV USER ${USER:-node}
-RUN echo $USER
 ENV NODE_ENV=production
 # exposing these ports as they are defaults for one app and the prom metrics server
 # see src/server/config/env/runtime.js
