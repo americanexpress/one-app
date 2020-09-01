@@ -17,6 +17,7 @@
 // This rule is only needed for a couple functions below
 /* eslint-disable es/no-arrow-functions */
 import { Set as iSet, Map as iMap } from 'immutable';
+import { createTimeoutFetch } from '@americanexpress/fetch-enhancers';
 
 import transit from '../../universal/utils/transit';
 import { setConfig } from '../../universal/ducks/config';
@@ -60,17 +61,18 @@ export function safeSend(res, ...payload) {
 let errorPage;
 
 export async function setErrorPage(fallbackUrl) {
-  const response = await fetch(fallbackUrl);
+  const timeoutFetch = createTimeoutFetch(6e3)(fetch);
+  const response = await timeoutFetch(fallbackUrl);
   const contentType = response.headers.get('content-type');
   const contentLength = response.headers.get('content-length');
 
   // If the Content-Type is not text/html throw an error
   if (!contentType.includes('text/html')) {
-    throw new Error('Content-Type was not of type text/html');
+    throw new Error('[appConfig/errorPageUrl] Content-Type was not of type text/html');
   }
   // If the content length is over 50kb throw an error
   if (contentLength > 50000) {
-    throw new Error('Content-Length was over 50Kb');
+    throw new Error('[appConfig/errorPageUrl] Content-Length was over 50Kb');
   }
   // Read the response as text.
   errorPage = await response.text();

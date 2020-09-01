@@ -39,6 +39,15 @@ jest.mock('holocron', () => ({
     return module;
   },
 }));
+jest.mock('@americanexpress/fetch-enhancers', () => ({
+  createTimeoutFetch: jest.fn(
+    (timeout) => (next) => () => next()
+      .then((res) => {
+        res.timeout = timeout;
+        return res;
+      })
+  ),
+}));
 jest.mock('../../../src/server/utils/stateConfig');
 jest.mock('../../../src/server/utils/readJsonFile', () => (filePath) => {
   switch (filePath) {
@@ -861,8 +870,8 @@ describe('sendHtml', () => {
       const data = await global.fetch.mock.results[0].value;
 
       expect(global.fetch).toHaveBeenCalledTimes(1);
-      expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
       expect(await data.text()).toBe(mockResponse);
+      expect(await data.timeout).toBe(6000);
       expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send.mock.calls[0][0]).toContain('<!doctype html>');
       expect(res.send.mock.calls[0][0]).toContain('<h1>Custom Error Page</h1>');
@@ -902,8 +911,8 @@ describe('sendHtml', () => {
       const data = await global.fetch.mock.results[0].value;
 
       expect(global.fetch).toHaveBeenCalledTimes(1);
-      expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
       expect(await data.text()).toBe(mockResponse);
+      expect(await data.timeout).toBe(6000);
     });
 
     it('throws an error if content-type is not text/html', async () => {
@@ -915,7 +924,7 @@ describe('sendHtml', () => {
       }));
 
       await expect(setErrorPage(errorPageUrl)).rejects.toEqual(
-        new Error('Content-Type was not of type text/html')
+        new Error('[appConfig/errorPageUrl] Content-Type was not of type text/html')
       );
     });
 
@@ -929,7 +938,7 @@ describe('sendHtml', () => {
       }));
 
       await expect(setErrorPage(errorPageUrl)).rejects.toEqual(
-        new Error('Content-Length was over 50Kb')
+        new Error('[appConfig/errorPageUrl] Content-Length was over 50Kb')
       );
     });
   });
