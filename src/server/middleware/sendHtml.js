@@ -85,39 +85,36 @@ export async function renderStaticErrorPage(res) {
   }
   console.info(`renderStaticErrorPage status ${res.statusCode}`);
 
-  let message = 'Sorry, we are unable to load this page at this time. Please try again later.';
-  if (res.statusCode >= 400 && res.statusCode < 500 && res.statusCode !== 404) {
-    // issue is with the request, retrying won't change the server response
-    message = 'Sorry, we are unable to load this page at this time.';
-  }
-
-  const errorResponse = `<!DOCTYPE html>
-  <html>
-    <head>
-      <title>One App</title>
-      <meta http-equiv="X-UA-Compatible" content="IE=edge">
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <meta name="application-name" content="one-app">
-    </head>
-    <body style="background-color: #F0F0F0">
-      <div id="root">
-        <div>
-          <div style="width: 70%; background-color: white; margin: 4% auto;">
-            <h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>
-            <p style="display: flex; justify-content: center; padding: 10px 15px 40px;">
-              ${message}
-            </p>
-          </div>
-        </div>
-      </div>
-    </body>
-  </html>`;
-
   if (errorPage) {
     safeSend(res, errorPage);
   } else {
-    safeSend(res, errorResponse);
+    let message = 'Sorry, we are unable to load this page at this time. Please try again later.';
+    if (res.statusCode >= 400 && res.statusCode < 500 && res.statusCode !== 404) {
+    // issue is with the request, retrying won't change the server response
+      message = 'Sorry, we are unable to load this page at this time.';
+    }
+    safeSend(res, `<!DOCTYPE html>
+    <html>
+      <head>
+        <title>One App</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="application-name" content="one-app">
+      </head>
+      <body style="background-color: #F0F0F0">
+        <div id="root">
+          <div>
+            <div style="width: 70%; background-color: white; margin: 4% auto;">
+              <h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>
+              <p style="display: flex; justify-content: center; padding: 10px 15px 40px;">
+                ${message}
+              </p>
+            </div>
+          </div>
+        </div>
+      </body>
+    </html>`);
   }
 }
 
