@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@americanexpress/one-app-ducks": "^4.0.0",
-    "@emotion/core": "^10.0.34",
     "content-security-policy-builder": "^2.1.0",
     "holocron": "^1.1.0",
     "holocron-module-route": "^1.1.0",
@@ -21,7 +20,6 @@
     "react": "^16.4.2",
     "react-helmet": "^6.0.0",
     "react-immutable-proptypes": "^2.1.0",
-    "react-intl": "^5.6.4",
     "react-redux": "^7.1.1",
     "redux": "^4.0.4"
   },
@@ -33,11 +31,7 @@
   },
   "one-amex": {
     "bundler": {
-      "webpackConfigPath": "webpack.config.js",
-      "providedExternals": [
-        "@emotion/core",
-        "react-intl"
-      ]
+      "webpackConfigPath": "webpack.config.js"
     }
   }
 }
