@@ -41,7 +41,7 @@ jest.mock('holocron', () => ({
 }));
 jest.mock('@americanexpress/fetch-enhancers', () => ({
   createTimeoutFetch: jest.fn(
-    (timeout) => (next) => () => next()
+    (timeout) => (next) => (url) => next(url)
       .then((res) => {
         res.timeout = timeout;
         return res;
@@ -870,6 +870,7 @@ describe('sendHtml', () => {
       const data = await global.fetch.mock.results[0].value;
 
       expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
       expect(await data.text()).toBe(mockResponse);
       expect(await data.timeout).toBe(6000);
       expect(res.send).toHaveBeenCalledTimes(1);
@@ -911,6 +912,7 @@ describe('sendHtml', () => {
       const data = await global.fetch.mock.results[0].value;
 
       expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
       expect(await data.text()).toBe(mockResponse);
       expect(await data.timeout).toBe(6000);
     });
