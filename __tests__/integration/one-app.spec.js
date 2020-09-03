@@ -42,7 +42,6 @@ import {
   getCacheKeys,
   getCacheEntries,
   getCacheMatch,
-  getCacheMeta,
   getServiceWorkerReady,
 } from './helpers/browserExecutors';
 import transit from '../../src/universal/utils/transit';
@@ -867,7 +866,7 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
-    describe.only('progressive web app', () => {
+    describe('progressive web app', () => {
       const scriptUrl = `${appAtTestUrls.fetchUrl}/_/pwa/service-worker.js`;
       const webManifestUrl = `${appAtTestUrls.fetchUrl}/_/pwa/manifest.webmanifest`;
       const offlineUrl = `${appAtTestUrls.fetchUrl}/_/pwa/shell`;
@@ -1047,96 +1046,33 @@ describe('Tests that require Docker setup', () => {
           });
 
           describe('cache invalidation', () => {
-            // beforeAll(async () => {
-            //   await addModuleToModuleMap({
-            //     moduleName: 'cultured-frankie',
-            //     version: '0.0.0',
-            //   });
-            //   // wait for change to be picked up
-            //   await waitFor(5000);
-            // });
-
-            // beforeEach(async () => {
-            //   await browser.url(`${appAtTestUrls.browserUrl}/success`);
-            //   await browser.executeAsync(getServiceWorkerReady);
-            // });
+            beforeAll(async () => {
+              await addModuleToModuleMap({
+                moduleName: 'late-frank',
+                version: '0.0.0',
+              });
+              // wait for change to be picked up
+              await waitFor(5000);
+            });
 
             describe('module version', () => {
-              test('loads a module into the cache before invalidation', async () => {
+              const fetchServiceWorkerScript = () => fetch(`${appAtTestUrls.fetchUrl}/_/pwa/service-worker.js`, {
+                ...defaultFetchOptions,
+              }).then((res) => res.text());
+
+              test('service worker script is updated when the module map changes with new module version', async () => {
                 expect.assertions(2);
-
-                await browser.url(`${appAtTestUrls.browserUrl}/demo/late-frank`);
-
-                await waitFor(1000);
-
-                const holocronModuleMap = readModuleMap();
-                const cacheKeys = await browser.executeAsync(getCacheKeys);
-                const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
-                const meta = await browser.executeAsync(getCacheMeta, 'modules/late-frank/late-frank.browser.js');
-                const browserUrl = holocronModuleMap.modules['late-frank'].browser.url;
-
-                console.log([...cacheMap.entries()]);
-
-                expect(meta).toEqual({
-                  cacheName: '__sw/modules',
-                  name: 'late-frank',
-                  path: 'late-frank.browser.js',
-                  type: 'modules',
-                  url: browserUrl,
-                  version: '0.0.0',
+                // due to the service worker script changing and being re-installed
+                // selenium does not seem to update the service worker, we can check if the
+                // service worker script is updated to make sure the latest module would be updated
+                await expect(fetchServiceWorkerScript()).resolves.toContain('late-frank/0.0.0');
+                await addModuleToModuleMap({
+                  moduleName: 'late-frank',
+                  version: '0.0.1',
                 });
-                expect(
-                  cacheMap.get('__sw/modules').includes(browserUrl)
-                ).toBe(true);
-              });
-
-              describe('module version change', () => {
-                beforeAll(async () => {
-                  await addModuleToModuleMap({
-                    moduleName: 'late-frank',
-                    version: '0.0.1',
-                  });
-                  // wait for change to be picked up
-                  await waitFor(5000);
-                });
-
-                // afterAll(() => {
-                //   writeModuleMap(originalModuleMap);
-                // });
-
-                test('invalidates a given module when a different version of that module is loaded', async () => {
-                  expect.assertions(2);
-
-                  await browser.url(`${appAtTestUrls.browserUrl}/success`);
-                  await browser.executeAsync(getServiceWorkerReady);
-                  await browser.url(`${appAtTestUrls.browserUrl}/demo/late-frank`);
-
-                  console.log(await fetch(`${appAtTestUrls.fetchUrl}/demo/late-frank`, {
-                    ...defaultFetchOptions,
-                  }).then((res) => res.text()));
-
-                  await waitFor(1000);
-
-                  const holocronModuleMap = readModuleMap();
-                  const cacheKeys = await browser.executeAsync(getCacheKeys);
-                  const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
-                  const meta = await browser.executeAsync(getCacheMeta, 'modules/late-frank/late-frank.browser.js');
-                  const browserUrl = holocronModuleMap.modules['late-frank'].browser.url;
-
-                  console.log([...cacheMap.entries()]);
-
-                  expect(meta).toEqual({
-                    cacheName: '__sw/modules',
-                    name: 'late-frank',
-                    path: 'late-frank.browser.js',
-                    type: 'modules',
-                    url: browserUrl,
-                    version: '0.0.1',
-                  });
-                  expect(
-                    cacheMap.get('__sw/modules').includes(browserUrl)
-                  ).toBe(true);
-                });
+                // wait for change to be picked up
+                await waitFor(5000);
+                await expect(fetchServiceWorkerScript()).resolves.toContain('late-frank/0.0.1');
               });
             });
 
