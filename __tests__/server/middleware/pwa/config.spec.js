@@ -56,6 +56,18 @@ describe('pwa configuration', () => {
   });
 
   describe('service worker configuration', () => {
+    test('no config given', () => {
+      configurePWA();
+      expect(getServerPWAConfig()).toMatchObject({
+        webManifest: false,
+        serviceWorker: false,
+        serviceWorkerRecoveryMode: false,
+        serviceWorkerType: null,
+        serviceWorkerScope: null,
+        serviceWorkerScript: null,
+      });
+    });
+
     test('enabling the service worker with minimum config', () => {
       configurePWA({ serviceWorker: true });
 
