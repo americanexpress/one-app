@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.5.1](https://github.com/americanexpress/one-app/compare/v5.5.0...v5.5.1) (2020-09-02)
+
+
+### Bug Fixes
+
+* **fetch:** upgrade bundler to add fetch polyfills ([#289](https://github.com/americanexpress/one-app/issues/289)) ([f81e8c5](https://github.com/americanexpress/one-app/commit/f81e8c5333d024702b1fcc5ca8e1388784a7971f))
+
+
 # [5.5.0](https://github.com/americanexpress/one-app/compare/v5.4.1...v5.5.0) (2020-08-26)
 
 
