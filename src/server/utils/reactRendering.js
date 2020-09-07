@@ -34,3 +34,11 @@ const renderBuilder = (renderMethod) => (...args) => {
 
 export const renderForString = renderBuilder(renderToString);
 export const renderForStaticMarkup = renderBuilder(renderToStaticMarkup);
+
+export const getRenderMethodName = (state) => {
+  const disableScripts = state.getIn(['rendering', 'disableScripts']);
+  const renderPartialOnly = state.getIn(['rendering', 'renderPartialOnly']);
+  const renderTextOnly = state.getIn(['rendering', 'renderTextOnly', 'setTextOnly']);
+  return disableScripts || renderPartialOnly || renderTextOnly
+    ? 'renderForStaticMarkup' : 'renderForString';
+};

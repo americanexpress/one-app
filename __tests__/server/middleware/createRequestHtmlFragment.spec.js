@@ -330,4 +330,24 @@ describe('createRequestHtmlFragment', () => {
     expect(renderForStaticMarkupSpy).toHaveBeenCalled();
     expect(req.appHtml).toBe('hi');
   });
+
+  it('should not use the circuit breaker when rendering text only', async () => {
+    expect.assertions(6);
+    const createRequestHtmlFragment = require(
+      '../../../src/server/middleware/createRequestHtmlFragment'
+    ).default;
+    const middleware = createRequestHtmlFragment({ createRoutes });
+    getState.mockImplementationOnce(() => fromJS({
+      rendering: {
+        renderTextOnly: { setTextOnly: true, tagReplacement: '', allowedTags: [] },
+      },
+    }));
+    await middleware(req, res, next);
+    expect(next).toHaveBeenCalled();
+    expect(getBreaker().fire).not.toHaveBeenCalled();
+    expect(composeModules).toHaveBeenCalled();
+    expect(renderForStringSpy).not.toHaveBeenCalled();
+    expect(renderForStaticMarkupSpy).toHaveBeenCalled();
+    expect(req.appHtml).toBe('hi');
+  });
 });

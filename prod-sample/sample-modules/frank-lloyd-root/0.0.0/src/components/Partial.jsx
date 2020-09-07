@@ -41,7 +41,7 @@ export const onPartialRouteEnter = (
   const postProps = propSelector(getState());
   const { locale, moduleName } = nextState.params;
   dispatch(setRenderPartialOnly(partialOnly));
-  dispatch(setRenderTextOnly(textOnly));
+  dispatch(setRenderTextOnly(textOnly, ' '));
   dispatch(updateLocale(locale))
     .then(() => dispatch(composeModules([{
       name: moduleName,

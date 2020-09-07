@@ -504,6 +504,40 @@ describe('sendHtml', () => {
       });
     });
 
+    describe('renderTextOnly', () => {
+      beforeEach(() => {
+        req.store = {
+          dispatch: jest.fn(),
+          getState: jest.fn(() => fromJS({
+            holocron: fromJS({
+              loaded: ['a'],
+            }),
+            intl: fromJS({ activeLocale: 'en-US' }),
+            rendering: fromJS({
+              renderTextOnly: { setTextOnly: true, tagReplacement: '', allowedTags: [] },
+            }),
+          })),
+        };
+        setFullMap();
+      });
+
+      afterEach(() => { req.appHtml = appHtml; });
+
+      it('sends a text only response with no HTML present', () => {
+        req.appHtml = 'text only without html';
+        const fakeRes = {
+          send: jest.fn(),
+          setHeader: jest.fn(),
+        };
+        sendHtml(req, fakeRes);
+        expect(fakeRes.send).toHaveBeenCalledTimes(1);
+        expect(fakeRes.setHeader).toHaveBeenCalledWith('content-type', 'text/plain');
+        expect(fakeRes.send.mock.calls[0][0]).not.toContain('<!DOCTYPE html>');
+        expect(fakeRes.send.mock.calls[0][0]).not.toContain('<body');
+        expect(fakeRes.send.mock.calls[0][0]).toBe(req.appHtml);
+      });
+    });
+
     describe('disableScripts', () => {
       beforeEach(() => {
         req.store = {

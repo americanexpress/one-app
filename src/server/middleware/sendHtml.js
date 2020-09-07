@@ -280,8 +280,10 @@ export function renderPartial({
 
 export function renderAsText({
   html: initialHtml,
+  allowedTags,
+  tagReplacement,
 }) {
-  return striptags(initialHtml, [], '\n');
+  return striptags(initialHtml, allowedTags, tagReplacement);
 }
 
 // TODO add additional client side scripts
@@ -310,14 +312,17 @@ export default function sendHtml(req, res) {
     const disableScripts = clientInitialState.getIn(['rendering', 'disableScripts']);
     const disableStyles = clientInitialState.getIn(['rendering', 'disableStyles']);
     const renderPartialOnly = clientInitialState.getIn(['rendering', 'renderPartialOnly']);
-    const renderTextOnly = clientInitialState.getIn(['rendering', 'renderTextOnly']);
+    const renderTextOnly = clientInitialState.getIn(['rendering', 'renderTextOnly', 'setTextOnly']);
+    const tagReplacement = clientInitialState.getIn(['rendering', 'renderTextOnly', 'tagReplacement']);
+    const allowedTags = clientInitialState.getIn(['rendering', 'renderTextOnly', 'allowedTags']);
 
     if (renderPartialOnly) {
       return safeSend(res, renderPartial({ html: req.appHtml, store }));
     }
 
     if (renderTextOnly) {
-      return safeSend(res, renderAsText({ html: req.appHtml }));
+      res.setHeader('content-type', 'text/plain');
+      return safeSend(res, renderAsText({ html: req.appHtml, tagReplacement, allowedTags }));
     }
 
     const chunkAssets = isLegacy ? legacyBrowserChunkAssets : modernBrowserChunkAssets;
