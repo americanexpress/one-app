@@ -859,6 +859,38 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
+    describe('custom error page', () => {
+      const loadCustomErrorPageRoot = async () => {
+        await addModuleToModuleMap({
+          moduleName: 'frank-lloyd-root',
+          version: '0.0.4',
+        });
+        // wait for change to be picked up
+        await waitFor(5000);
+      };
+
+      afterAll(() => {
+        writeModuleMap(originalModuleMap);
+      });
+      describe('successful fetch of error page', () => {
+        beforeAll(loadCustomErrorPageRoot);
+        test('responses with custom error page', async () => {
+          const response = await fetch(
+            `${appAtTestUrls.fetchUrl}/%c0.%c0./%c0.%c0./%c0.%c0./%c0.%c0./winnt/win.ini`,
+            defaultFetchOptions
+          );
+          const body = await response.text();
+          expect(body).toMatch(new RegExp('<!DOCTYPE html>'));
+          expect(body).toMatch(new RegExp('<title>One App</title>'));
+          expect(body).toMatch(new RegExp('<meta name="application-name" content="one-app">'));
+          expect(body).toMatch(
+            new RegExp(
+              '<p style="display: flex; justify-content: center; padding: 10px 15px 40px;">Sorry, we are unable to load this page at this time. Here is a custom error page though.</p>'
+            ));
+        });
+      });
+    });
+
     describe('progressive web app', () => {
       const scriptUrl = `${appAtTestUrls.fetchUrl}/_/pwa/service-worker.js`;
       const webManifestUrl = `${appAtTestUrls.fetchUrl}/_/pwa/manifest.webmanifest`;
@@ -1268,29 +1300,6 @@ describe('Tests that can run against either local Docker setup or remote One App
           expect(body).toMatch(new RegExp('<title>One App</title>'));
           expect(body).toMatch(new RegExp('<meta name="application-name" content="one-app">'));
           expect(body).toMatch(new RegExp('<h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>'));
-        });
-      });
-      describe('custom error page', () => {
-        test('responses with custom error page', async () => {
-          await addModuleToModuleMap({
-            moduleName: 'frank-lloyd-root',
-            version: '0.0.4',
-          });
-
-          const response = await fetch(
-            `${appInstanceUrls.fetchUrl}/%c0.%c0./%c0.%c0./%c0.%c0./%c0.%c0./winnt/win.ini`,
-            defaultFetchOpts
-          );
-          const body = await response.text();
-          console.log('********************');
-          console.log(body);
-          expect(body).toMatch(new RegExp('<!DOCTYPE html>'));
-          expect(body).toMatch(new RegExp('<title>One App</title>'));
-          expect(body).toMatch(new RegExp('<meta name="application-name" content="one-app">'));
-          expect(body).toMatch(
-            new RegExp(
-              '<p style="display: flex; justify-content: center; padding: 10px 15px 40px;">Sorry, we are unable to load this page at this time. Here is a custom error page though.</p>'
-            ));
         });
       });
     });
