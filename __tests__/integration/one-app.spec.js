@@ -877,35 +877,35 @@ describe('Tests that require Docker setup', () => {
       });
       describe('successful fetch of error page', () => {
         beforeAll(loadCustomErrorPageRoot);
+        const customErrorPage = `<!DOCTYPE html>
+        <html>
+        <head>
+          <title>One App</title>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <meta name="application-name" content="one-app">
+        </head>
+        <body style="background-color: #F0F0F0">
+          <div id="root">
+            <div>
+              <div style="width: 70%; background-color: white; margin: 4% auto;">
+                <h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>
+                <p style="display: flex; justify-content: center; padding: 10px 15px 40px;">
+                  Sorry, we are unable to load this page at this time. Here is a custom error page though.
+                </p>
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>`;
         test('responses with custom error page', async () => {
           const response = await fetch(
             `${appAtTestUrls.fetchUrl}/%c0.%c0./%c0.%c0./%c0.%c0./%c0.%c0./winnt/win.ini`,
             defaultFetchOptions
           );
           const body = await response.text();
-          expect(body).toEqual(`<!DOCTYPE html>
-          <html>
-            <head>
-              <title>One App</title>
-              <meta http-equiv="X-UA-Compatible" content="IE=edge">
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1">
-              <meta name="application-name" content="one-app">
-            </head>
-            <body style="background-color: #F0F0F0">
-              <div id="root">
-                <div>
-                  <div style="width: 70%; background-color: white; margin: 4% auto;">
-                    <h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>
-                    <p style="display: flex; justify-content: center; padding: 10px 15px 40px;">
-                      Sorry, we are unable to load this page at this time. Here is a custom error page though.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </body>
-          </html>
-          `);
+          expect(body).toEqual(customErrorPage);
         });
       });
     });
