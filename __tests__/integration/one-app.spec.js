@@ -905,7 +905,7 @@ describe('Tests that require Docker setup', () => {
               </div>
             </body>
           </html>
-          `)
+          `);
         });
       });
     });
