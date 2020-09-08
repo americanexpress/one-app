@@ -880,10 +880,7 @@ describe('Tests that require Docker setup', () => {
             defaultFetchOptions
           );
           const body = await response.text();
-          expect(body).toMatch(new RegExp('<!DOCTYPE html>'));
-          expect(body).toMatch(new RegExp('<title>One App</title>'));
-          expect(body).toMatch(new RegExp('<meta name="application-name" content="one-app">'));
-          expect(body).toBe(`<!DOCTYPE html>
+          expect(body).toEqual(`<!DOCTYPE html>
           <html>
             <head>
               <title>One App</title>
