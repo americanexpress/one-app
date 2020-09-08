@@ -1270,6 +1270,29 @@ describe('Tests that can run against either local Docker setup or remote One App
           expect(body).toMatch(new RegExp('<h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>'));
         });
       });
+      describe('custom error page', () => {
+        test('responses with custom error page', async () => {
+          await addModuleToModuleMap({
+            moduleName: 'frank-lloyd-root',
+            version: '0.0.4',
+          });
+
+          const response = await fetch(
+            `${appInstanceUrls.fetchUrl}/%c0.%c0./%c0.%c0./%c0.%c0./%c0.%c0./winnt/win.ini`,
+            defaultFetchOpts
+          );
+          const body = await response.text();
+          console.log('********************');
+          console.log(body);
+          expect(body).toMatch(new RegExp('<!DOCTYPE html>'));
+          expect(body).toMatch(new RegExp('<title>One App</title>'));
+          expect(body).toMatch(new RegExp('<meta name="application-name" content="one-app">'));
+          expect(body).toMatch(
+            new RegExp(
+              '<p style="display: flex; justify-content: center; padding: 10px 15px 40px;">Sorry, we are unable to load this page at this time. Here is a custom error page though.</p>'
+            ));
+        });
+      });
     });
   });
 });
