@@ -34,7 +34,6 @@ describe('runTime', () => {
   const origEnvVarVals = {};
   [
     'NODE_ENV',
-    'NODE_HEAPDUMP_OPTIONS',
     'HTTP_PORT',
     'HTTP_METRICS_PORT',
     'HOLOCRON_MODULE_MAP_URL',
@@ -123,14 +122,6 @@ describe('runTime', () => {
 
     it('only allows for values to be set to either development or production', () => {
       expect(nodeEnv.valid).toMatchSnapshot();
-    });
-  });
-
-  describe('NODE_HEAPDUMP_OPTIONS', () => {
-    const heapdumpOptions = getEnvVarConfig('NODE_HEAPDUMP_OPTIONS');
-
-    it('defaults to config of not writing default heapdumps', () => {
-      expect(heapdumpOptions.defaultValue).toBe('nosignal');
     });
   });
 
