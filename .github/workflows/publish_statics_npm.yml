@@ -44,9 +44,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.client_payload.docker_tag_version }}
-          release_name: Release ${{ github.event.client_payload.docker_tag_version }}
-          draft: false
+          tag_name: v${{ steps.set_tag_version.outputs.tagversion }}
+          release_name: Release v${{ steps.release_tag.outputs.releasetag }}
+          draft: true
           prerelease: false
       - name: Upload Release Assets
         id: upload-release-asset
