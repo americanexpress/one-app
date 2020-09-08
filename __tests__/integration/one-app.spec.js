@@ -16,11 +16,14 @@
 
 // Headers are under a key with a dangling underscore
 /* eslint-disable no-underscore-dangle */
+import { promises as fs } from 'fs';
+import path from 'path';
+
 import fetch from 'cross-fetch';
 import yargs, { argv } from 'yargs';
 import parsePrometheusTextFormat from 'parse-prometheus-text-format';
 
-import { setUpTestRunner, tearDownTestRunner } from './helpers/testRunner';
+import { setUpTestRunner, tearDownTestRunner, sendSignal } from './helpers/testRunner';
 import { waitFor } from './helpers/wait';
 import {
   deployBrokenModule,
@@ -1376,4 +1379,50 @@ describe('Scan app instance for console errors', () => {
       });
     });
   }
+});
+
+describe('heapdump', () => {
+  const oneAppLocalPortToUse = getRandomPortNumber();
+
+  beforeAll(async () => {
+    await setUpTestRunner({ oneAppLocalPortToUse, skipBrowser: true });
+  });
+
+  afterAll(async () => {
+    await tearDownTestRunner();
+    await waitFor(500);
+  });
+
+  it('writes a heapdump to /tmp on a SIGUSR2 signal', async () => {
+    const tmpMountDir = path.resolve(__dirname, '../../prod-sample/one-app/tmp');
+    // set up log watchers first to avoid semblance of a race condition
+    const aboutToWritePromise = searchForNextLogMatch(/about to write a heapdump to .+/);
+    // slower in Travis than on local machines
+    const didWritePromise = searchForNextLogMatch(/wrote heapdump out to .+/, 20e3);
+    await sendSignal('one-app', 'SIGUSR2');
+
+    const aboutToWriteRaw = await aboutToWritePromise;
+    const didWriteRaw = await didWritePromise;
+
+    const aboutToWriteFilePath = aboutToWriteRaw
+      .replace(/^about to write a heapdump to /, '')
+      .replace(/".+$/, '');
+
+    const didWriteFilePath = didWriteRaw
+      .replace(/^wrote heapdump out to /, '')
+      .replace(/".+$/, '');
+
+    expect(aboutToWriteFilePath).toEqual(didWriteFilePath);
+    expect(path.dirname(didWriteFilePath)).toBe('/tmp');
+    const didWriteFile = path.basename(didWriteFilePath);
+    const dirContents = await fs.readdir(tmpMountDir);
+    expect(dirContents).toContain(didWriteFile);
+
+    const { size } = await fs.stat(path.join(tmpMountDir, didWriteFile));
+    const oneMegabyte = 1024 * 1024;
+    // at the time of writing size was observed to be 14-15MB but uncertain if this
+    // is affected by my test development
+    expect(size).toBeGreaterThanOrEqual(10 * oneMegabyte);
+    expect(size).toBeLessThanOrEqual(100 * oneMegabyte);
+  });
 });

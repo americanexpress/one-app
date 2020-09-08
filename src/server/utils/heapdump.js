@@ -13,29 +13,33 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+import fs from 'fs';
+import v8 from 'v8';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
 
-// NODE_HEAPDUMP_OPTIONS=nosignal by default in server/config/env/runTime
-let heapdump;
-try {
-  // binary might not be compatible for non-docker distributions
-  heapdump = require('heapdump'); // eslint-disable-line global-require, import/no-extraneous-dependencies, import/no-unresolved
-} catch (err) {
+const pipelinePromise = promisify(pipeline);
+
+// --report-on-signal added which also listens on SIGUSR2 by default
+// https://nodejs.org/api/report.html
+// if someone is starting node with this option let them know about heapdumps
+if (process.execArgv.includes('--report-on-signal')) {
   console.warn(
-    'unable to setup writing heapdumps',
-    process.env.NODE_ENV === 'development' ? err.message : err
+    '--report-on-signal listens for SIGUSR2 by default, be aware that SIGUSR2 also triggers heapdumps. Use --report-signal to avoid heapdump side-effects https://nodejs.org/api/report.html'
   );
 }
 
-if (heapdump && process.env.NODE_HEAPDUMP_OPTIONS === 'nosignal') {
-  process.on('SIGUSR2', () => {
-    const targetFilename = `/tmp/heapdump-${process.pid}-${Date.now()}.heapsnapshot`;
-    console.warn(`about to write a heapdump to ${targetFilename}`);
-    heapdump.writeSnapshot(targetFilename, (err, writtenFilename) => {
-      if (err) {
-        console.error(`unable to write heapdump ${writtenFilename}`, err);
-      } else {
-        console.warn(`wrote heapdump out to ${writtenFilename}`);
-      }
-    });
-  });
-}
+process.on('SIGUSR2', async () => {
+  const targetFilename = `/tmp/heapdump-${process.pid}-${Date.now()}.heapsnapshot`;
+  console.warn(`about to write a heapdump to ${targetFilename}`);
+  try {
+    await pipelinePromise(
+      v8.getHeapSnapshot(),
+      fs.createWriteStream(targetFilename)
+    );
+  } catch (err) {
+    console.error('unable to write heapdump', err);
+    return;
+  }
+  console.warn(`wrote heapdump out to ${targetFilename}`);
+});
