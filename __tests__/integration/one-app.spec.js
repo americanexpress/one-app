@@ -883,10 +883,7 @@ describe('Tests that require Docker setup', () => {
           expect(body).toMatch(new RegExp('<!DOCTYPE html>'));
           expect(body).toMatch(new RegExp('<title>One App</title>'));
           expect(body).toMatch(new RegExp('<meta name="application-name" content="one-app">'));
-          expect(body).toMatch(
-            new RegExp(
-              '<p style="display: flex; justify-content: center; padding: 10px 15px 40px;">Sorry, we are unable to load this page at this time. Here is a custom error page though.</p>'
-            ));
+          expect(body).toContain('<p style="display: flex; justify-content: center; padding: 10px 15px 40px;">Sorry, we are unable to load this page at this time. Here is a custom error page though.</p>');
         });
       });
     });
