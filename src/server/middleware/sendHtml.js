@@ -70,9 +70,9 @@ export async function setErrorPage(fallbackUrl) {
   if (!contentType.includes('text/html')) {
     throw new Error('[appConfig/errorPageUrl] Content-Type was not of type text/html');
   }
-  // If the content length is over 50kb throw an error
-  if (contentLength > 50000) {
-    throw new Error('[appConfig/errorPageUrl] Content-Length was over 50Kb');
+  // If the content length is over 244kb throw an error
+  if (contentLength > 250e3) {
+    console.warn('[appConfig/errorPageUrl] Content-Length is over 244Kb and may have an impact on performance');
   }
   // Read the response as text.
   errorPage = await response.text();

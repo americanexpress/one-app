@@ -109,6 +109,7 @@ jest.mock('../../../src/universal/utils/transit', () => ({
 jest.spyOn(console, 'info').mockImplementation(() => {});
 jest.spyOn(console, 'log').mockImplementation(() => {});
 jest.spyOn(console, 'error').mockImplementation(() => {});
+jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
 
 describe('sendHtml', () => {
   const appHtml = '<p>Why, hello!</p>';
@@ -935,13 +936,13 @@ describe('sendHtml', () => {
         text: () => Promise.resolve(mockResponse),
         headers: new global.Headers({
           'Content-Type': 'text/html',
-          'Content-Length': 75000,
+          'Content-Length': 750000,
         }),
       }));
 
-      await expect(setErrorPage(errorPageUrl)).rejects.toEqual(
-        new Error('[appConfig/errorPageUrl] Content-Length was over 50Kb')
-      );
+      await setErrorPage(errorPageUrl);
+      expect(console.warn).toHaveBeenCalledTimes(1);
+      expect(console.warn).toHaveBeenCalledWith('[appConfig/errorPageUrl] Content-Length is over 244Kb and may have an impact on performance');
     });
   });
 
