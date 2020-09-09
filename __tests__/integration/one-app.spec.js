@@ -866,7 +866,7 @@ describe('Tests that require Docker setup', () => {
       const loadCustomErrorPageRoot = async () => {
         await addModuleToModuleMap({
           moduleName: 'frank-lloyd-root',
-          version: '0.0.4',
+          version: '0.0.3',
         });
         // wait for change to be picked up
         await waitFor(5000);
