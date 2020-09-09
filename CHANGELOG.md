@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.6.0](https://github.com/americanexpress/one-app/compare/v5.5.1...v5.6.0) (2020-09-09)
+
+
+### Features
+
+* **server:** use native V8 heapdump ([794ff35](https://github.com/americanexpress/one-app/commit/794ff355b4b89457937aa081651aee10c48d8464))
+
+
 ## [5.5.1](https://github.com/americanexpress/one-app/compare/v5.5.0...v5.5.1) (2020-09-02)
 
 
