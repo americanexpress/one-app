@@ -28,7 +28,11 @@ const deepMergeObjects = require('../../../src/server/utils/deepMergeObjects');
 const prodSampleDir = path.resolve('./prod-sample/');
 const pathToDockerComposeTestFile = path.resolve(prodSampleDir, 'docker-compose.test.yml');
 
-const setUpTestRunner = async ({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse } = {}) => {
+const setUpTestRunner = async ({
+  oneAppLocalPortToUse,
+  oneAppMetricsLocalPortToUse,
+  skipBrowser = false,
+} = {}) => {
   const pathToBaseDockerComposeFile = path.resolve(prodSampleDir, 'docker-compose.yml');
   const seleniumServerPort = getRandomPortNumber();
   // create docker compose file from base with changes needed for tests
@@ -53,8 +57,11 @@ const setUpTestRunner = async ({ oneAppLocalPortToUse, oneAppMetricsLocalPortToU
       },
     }
   );
-
-  delete testDockerComposeFileContents.services['selenium-chrome'].entrypoint;
+  if (skipBrowser) {
+    delete testDockerComposeFileContents.services['selenium-chrome'];
+  } else {
+    delete testDockerComposeFileContents.services['selenium-chrome'].entrypoint;
+  }
 
   fs.writeFileSync(pathToDockerComposeTestFile, yaml.safeDump(testDockerComposeFileContents));
 
@@ -73,7 +80,7 @@ const setUpTestRunner = async ({ oneAppLocalPortToUse, oneAppMetricsLocalPortToU
   try {
     await Promise.all([
       oneAppLocalPortToUse ? waitUntilServerIsUp(`https://localhost:${oneAppLocalPortToUse}/success`, serverStartupTimeout) : Promise.resolve(),
-      waitUntilServerIsUp(`http://localhost:${seleniumServerPort}`, serverStartupTimeout),
+      skipBrowser ? Promise.resolve() : waitUntilServerIsUp(`http://localhost:${seleniumServerPort}`, serverStartupTimeout),
     ]);
   } catch (err) {
     // logWatcherDuplex will buffer the logs until piped out.
@@ -82,6 +89,10 @@ const setUpTestRunner = async ({ oneAppLocalPortToUse, oneAppMetricsLocalPortToU
       '🚨 Either of the One App, Selenium, or Nginx servers failed to be pulled, built, and started '
       + `within ${serverStartupTimeout}ms. See logs for details.`
     );
+  }
+
+  if (skipBrowser) {
+    return {};
   }
 
   const browser = await remote({
@@ -102,7 +113,7 @@ const setUpTestRunner = async ({ oneAppLocalPortToUse, oneAppMetricsLocalPortToU
   return { browser };
 };
 
-const tearDownTestRunner = async ({ browser }) => {
+const tearDownTestRunner = async ({ browser } = {}) => {
   fs.removeSync(pathToDockerComposeTestFile);
   if (browser) { await browser.deleteSession(); }
 
@@ -116,7 +127,44 @@ const tearDownTestRunner = async ({ browser }) => {
   }
 };
 
+function spawnAsync(...args) {
+  const [, , options = {}] = args;
+  return new Promise((res, rej) => {
+    const spawnedProcess = childProcess.spawn(...args);
+
+    spawnedProcess
+      .on('error', rej)
+      .on('close', (exitCode) => {
+        if (exitCode !== 0) {
+          return rej(exitCode);
+        }
+        return res(exitCode);
+      });
+
+    const { stdio = ['pipe', 'pipe', 'pipe'] } = options;
+    if (stdio[1] === 'pipe') {
+      spawnedProcess.stderr.pipe(process.stderr);
+    }
+    if (stdio[2] === 'pipe') {
+      spawnedProcess.stdout.pipe(process.stdout);
+    }
+  });
+}
+
+function sendSignal(service, signal = 'SIGKILL') {
+  return spawnAsync(
+    'docker-compose',
+    [
+      '-f', pathToDockerComposeTestFile,
+      'kill',
+      '-s', signal,
+      service,
+    ]
+  );
+}
+
 module.exports = {
   setUpTestRunner,
   tearDownTestRunner,
+  sendSignal,
 };

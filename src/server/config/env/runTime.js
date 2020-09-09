@@ -43,11 +43,6 @@ const runTime = [
     valid: ['development', 'production'],
     defaultValue: 'production',
   },
-  // heapdump config
-  {
-    name: 'NODE_HEAPDUMP_OPTIONS',
-    defaultValue: 'nosignal',
-  },
   // IPv4 port to bind on
   {
     name: 'HTTP_PORT',
