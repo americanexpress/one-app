@@ -1256,6 +1256,16 @@ describe('Tests that can run against either local Docker setup or remote One App
             );
           });
         });
+        describe('render text only', () => {
+          test('responds with text only without HTML', async () => {
+            const response = await fetch(`${appInstanceUrls.fetchUrl}/text-only/en-US/frank-the-parrot?message=Hello!`, defaultFetchOpts);
+            const body = await response.text();
+            expect(response.headers.get('content-type')).toEqual('text/plain; charset=utf-8');
+            expect(body).toBe(
+              ' https://intranet-origin-dev.example.com/some-api/v1  Hello! '
+            );
+          });
+        });
       });
       describe('static error page', () => {
         test('responds with default error page on rendering error', async () => {

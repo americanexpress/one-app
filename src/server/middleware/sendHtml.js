@@ -278,14 +278,6 @@ export function renderPartial({
   return styles + html;
 }
 
-export function renderAsText({
-  html: initialHtml,
-  allowedTags,
-  tagReplacement,
-}) {
-  return striptags(initialHtml, allowedTags, tagReplacement);
-}
-
 // TODO add additional client side scripts
 export default function sendHtml(req, res) {
   let body;
@@ -313,8 +305,8 @@ export default function sendHtml(req, res) {
     const disableStyles = clientInitialState.getIn(['rendering', 'disableStyles']);
     const renderPartialOnly = clientInitialState.getIn(['rendering', 'renderPartialOnly']);
     const renderTextOnly = clientInitialState.getIn(['rendering', 'renderTextOnly', 'setTextOnly']);
-    const tagReplacement = clientInitialState.getIn(['rendering', 'renderTextOnly', 'tagReplacement']);
-    const allowedTags = clientInitialState.getIn(['rendering', 'renderTextOnly', 'allowedTags']);
+    const htmlTagReplacement = clientInitialState.getIn(['rendering', 'renderTextOnly', 'htmlTagReplacement']);
+    const allowedHtmlTags = clientInitialState.getIn(['rendering', 'renderTextOnly', 'allowedHtmlTags']);
 
     if (renderPartialOnly) {
       return safeSend(res, renderPartial({ html: req.appHtml, store }));
@@ -322,7 +314,7 @@ export default function sendHtml(req, res) {
 
     if (renderTextOnly) {
       res.setHeader('content-type', 'text/plain');
-      return safeSend(res, renderAsText({ html: req.appHtml, tagReplacement, allowedTags }));
+      return safeSend(res, striptags(req.appHtml, allowedHtmlTags, htmlTagReplacement));
     }
 
     const chunkAssets = isLegacy ? legacyBrowserChunkAssets : modernBrowserChunkAssets;
