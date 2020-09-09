@@ -83,5 +83,4 @@ export default {
     ],
   },
   createSsrFetch: createFrankLikeFetch,
-  errorPageUrl: 'https://sample-cdn.frank/error.html',
 };
