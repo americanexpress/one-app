@@ -91,7 +91,7 @@ a partial render can source props from the request body via initial state buildi
 The Holocron config adds a reducer which stores the props from the request body.
 
 ```js
-// ...
+// continued RootModule
 
 const reducer = (state = fromJS({})) => state;
 
