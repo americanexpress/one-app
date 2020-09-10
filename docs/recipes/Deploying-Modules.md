@@ -14,7 +14,7 @@
 
 Deploying holocron modules consists on two steps: 
 
-1  Upload the contents of the `build` folder to your CDN of choice.
+1. Upload the contents of the `build` folder to your CDN of choice.
 2. Update the [module map](../api/server/Module-Map-Schema.md) to point to the newly published static assets.
 
 In the following example, we will use Vercel to deploy a holocron module and a manual script to deploy the module map.
@@ -41,7 +41,7 @@ You can place this script wherever you would like. However, the following step e
 
 > Note: The manual script presented below is just an example on how to update the module map by downloading your current module map, updating it to include the new deployed assets and re-uploading it, however, this approach doesn't handle concurrency.
 There could be a case where two deployments running on different pipelines try to update the module map at the same time and a race condition might occur where the last deployment will override the contents of the first. If you want to avoid concurrency issues, we recommend to adopt
-a "locking" mechanism as part of your CI to prevent the module map from being updated while another deployment is already in process.  
+a "locking" mechanism as part of your CI to prevent the module map from being updated while another deployment is already in progress.  
 
 ```javascript
 const fs = require('fs-extra');
@@ -169,3 +169,5 @@ Production: https://[YOUR REPO NAME].vercel.app [6s]
 ```
 
 You can inspect the contents of your module map deployed to Vercel to verify that it contains the links to the deployed assets of your modules.
+
+The running One App instance that points to your updated module map will automatically pull the newly deployed modules and update your application without the need for a server restart.
