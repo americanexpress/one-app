@@ -59,6 +59,7 @@ if (!global.BROWSER) {
         },
       },
     },
+    errorPageUrl: 'https://sample-cdn.frank/error.html',
   };
 }
 
