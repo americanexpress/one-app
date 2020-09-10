@@ -61,21 +61,26 @@ export function safeSend(res, ...payload) {
 let errorPage;
 
 export async function setErrorPage(fallbackUrl) {
-  const timeoutFetch = createTimeoutFetch(6e3)(fetch);
-  const response = await timeoutFetch(fallbackUrl);
-  const contentType = response.headers.get('content-type');
-  const contentLength = response.headers.get('content-length');
+  try {
+    const timeoutFetch = createTimeoutFetch(6e3)(fetch);
+    const response = await timeoutFetch(fallbackUrl);
+    const contentType = response.headers.get('content-type');
+    const contentLength = response.headers.get('content-length');
 
-  // If the Content-Type is not text/html throw an error
-  if (!contentType.includes('text/html')) {
-    throw new Error('[appConfig/errorPageUrl] Content-Type was not of type text/html');
+    // Warn if the Content-Type is not text/html
+    if (!contentType.includes('text/html')) {
+      console.warn('[appConfig/errorPageUrl] Content-Type was not of type text/html and may not render correctly');
+    }
+    // Warn if the content length is over 244kb
+    if (contentLength > 250e3) {
+      console.warn('[appConfig/errorPageUrl] Content-Length is over 244Kb and may have an impact on performance');
+    }
+    // Read the response as text.
+    errorPage = await response.text();
+  } catch (e) {
+    // Warn if the URL cannot be fetched
+    console.warn('Could not fetch the URL', e);
   }
-  // If the content length is over 244kb throw an error
-  if (contentLength > 250e3) {
-    console.warn('[appConfig/errorPageUrl] Content-Length is over 244Kb and may have an impact on performance');
-  }
-  // Read the response as text.
-  errorPage = await response.text();
   return errorPage;
 }
 
@@ -86,6 +91,7 @@ export async function renderStaticErrorPage(res) {
   console.info(`renderStaticErrorPage status ${res.statusCode}`);
 
   if (errorPage) {
+    console.log('INSIDE IF');
     safeSend(res, errorPage);
   } else {
     let message = 'Sorry, we are unable to load this page at this time. Please try again later.';

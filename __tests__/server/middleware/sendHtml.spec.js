@@ -839,7 +839,18 @@ describe('sendHtml', () => {
       expect(res.send.mock.calls[0][0]).not.toMatch('[object ');
       expect(res.send.mock.calls[0][0]).not.toContain('undefined');
     });
+    it('returns default error page if fetching custom error page url fails', async () => {
+      const errorPageUrl = 'https://example.com';
+      const fetchError = new Error('getaddrinfo ENOTFOUND');
+      global.fetch = jest.fn(() => Promise.reject(fetchError));
 
+      await setErrorPage(errorPageUrl);
+      renderStaticErrorPage(res);
+
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(res.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
+    });
     it('returns provided error page if provided', async () => {
       const errorPageUrl = 'https://example.com';
       const mockResponse = `<!doctype html>
@@ -918,7 +929,7 @@ describe('sendHtml', () => {
       expect(await data.timeout).toBe(6000);
     });
 
-    it('throws an error if content-type is not text/html', async () => {
+    it('warns if content-type is not text/html', async () => {
       global.fetch = jest.fn(() => Promise.resolve({
         text: () => Promise.resolve(mockResponse),
         headers: new global.Headers({
@@ -926,12 +937,21 @@ describe('sendHtml', () => {
         }),
       }));
 
-      await expect(setErrorPage(errorPageUrl)).rejects.toEqual(
-        new Error('[appConfig/errorPageUrl] Content-Type was not of type text/html')
-      );
+      await setErrorPage(errorPageUrl);
+      expect(console.warn).toHaveBeenCalledTimes(1);
+      expect(console.warn).toHaveBeenCalledWith('[appConfig/errorPageUrl] Content-Type was not of type text/html and may not render correctly');
     });
 
-    it('throws an error if content-length is greater than 50Kb', async () => {
+    it('warns if url cannot be fetched', async () => {
+      const fetchError = new Error('getaddrinfo ENOTFOUND');
+      global.fetch = jest.fn(() => Promise.reject(fetchError));
+
+      await setErrorPage(errorPageUrl);
+      expect(console.warn).toHaveBeenCalledTimes(1);
+      expect(console.warn).toHaveBeenCalledWith('Could not fetch the URL', fetchError);
+    });
+
+    it('warns if content-length is greater than 50Kb', async () => {
       global.fetch = jest.fn(() => Promise.resolve({
         text: () => Promise.resolve(mockResponse),
         headers: new global.Headers({
