@@ -951,7 +951,7 @@ describe('sendHtml', () => {
       expect(console.warn).toHaveBeenCalledWith('Could not fetch the URL', fetchError);
     });
 
-    it('warns if content-length is greater than 50Kb', async () => {
+    it('warns if content-length is greater than 244Kb', async () => {
       global.fetch = jest.fn(() => Promise.resolve({
         text: () => Promise.resolve(mockResponse),
         headers: new global.Headers({

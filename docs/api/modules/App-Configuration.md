@@ -473,7 +473,7 @@ if (!global.BROWSER) {
 }
 ```
 
-The `errorPageUrl` directive is useful for supplying a URL to a custom error page. This URL needs to return a `Content-Type` of `text/html` and a `Content-Length` of less than `50000`. The URL will get called when your root module is loaded and is rendered if and when an error occurs.
+The `errorPageUrl` directive is useful for supplying a URL to a custom error page. This URL should return a `Content-Type` of `text/html` and a `Content-Length` of less than `244000`. The URL will get called when your root module is loaded and is rendered if and when an error occurs. It is recommended that you keep the custom error page as small as possible.
 
 ## `validateStateConfig`
 **Module Type**

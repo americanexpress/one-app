@@ -91,7 +91,6 @@ export async function renderStaticErrorPage(res) {
   console.info(`renderStaticErrorPage status ${res.statusCode}`);
 
   if (errorPage) {
-    console.log('INSIDE IF');
     safeSend(res, errorPage);
   } else {
     let message = 'Sorry, we are unable to load this page at this time. Please try again later.';
