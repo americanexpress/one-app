@@ -4,12 +4,16 @@
 
 # Partial Rendering
 
+In this recipe, we will go over the setup required to start using partial rendering with One App,
+in a root Holocron module. We will use the URL to select a module and a `POST` body to populate
+the props that we want passed into that module.
+
+**Overview**
+
 Renders static markup from a Holocron module, rather than a complete page. Useful for reusing a One
 App Module's markup on a non One App web page. This will only work when dispatched on the server.
 
-In this recipe, we will go over the setup required to start using partial rendering with One App, in a root Holocron module.
-
-**API Overview**
+**API Reference**
 
 * [`setRenderPartialOnly`](https://github.com/americanexpress/one-app-ducks#setrenderpartialonly) from [`@americanexpress/one-app-ducks`](https://github.com/americanexpress/one-app-ducks)
 
@@ -118,6 +122,40 @@ RootModule.childRoutes = (store) => [
   // the partials ModuleRoute
   createPartialRoute(getPartialRenderProps(store)),
 ];
+```
+
+**Sample Module**
+
+If we start One App locally, we can use the url `http://localhost:3000/partials/child-module`
+and expect the `child-module` to respond with its rendered content only.
+
+> If you want to learn more on how to run One App locally, please [view the guide](./Running-Existing-App-Locally.md)
+
+`child-module`
+```jsx
+import React from 'react';
+
+export default function ChildModule({ greeting = 'Hello There' }) {
+  return (
+    <p>
+      <span>{greeting}!</span>
+    </p>
+  );
+}
+```
+
+**Making The Request**
+
+To see partial rendering in action after we set everything up, we can make a `POST`
+request and use the body to render the desired HTML partial.
+
+```js
+fetch('http://localhost:3000/partials/child-module', {
+  method: 'POST',
+  body: JSON.stringify({
+    greeting: 'Guten Tag',
+  }),
+}).then((response) => response.text());
 ```
 
 ## Configuration
