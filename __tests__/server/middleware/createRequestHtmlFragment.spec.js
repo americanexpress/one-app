@@ -339,7 +339,8 @@ describe('createRequestHtmlFragment', () => {
     const middleware = createRequestHtmlFragment({ createRoutes });
     getState.mockImplementationOnce(() => fromJS({
       rendering: {
-        renderTextOnly: { setTextOnly: true, tagReplacement: '', allowedTags: [] },
+        renderTextOnly: true,
+        renderTextOnlyOptions: { htmlTagReplacement: '', allowedHtmlTags: [] },
       },
     }));
     await middleware(req, res, next);
