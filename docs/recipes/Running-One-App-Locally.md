@@ -12,11 +12,7 @@ git clone https://github.com/americanexpress/one-app.git
 
 After it has finished cloning, go ahead and `cd` into `one-app` and run `npm install`
 
-If you are already on your way to building your application using One App or have an already built
-application with One App then you can either serve your local modules to One App or have One App
-point to a remote module map it can use to fetch modules:
-
-To serve modules to One App:
+In order to work with your modules locally, you will need to serve your modules to One App (make sure you run `npm run build` or `npm run watch:build` in your module beforehand):
 
 ```bash
 npm run serve-module <path/to/your/module> <path/to/another/module>
