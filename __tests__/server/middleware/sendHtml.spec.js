@@ -514,7 +514,8 @@ describe('sendHtml', () => {
             }),
             intl: fromJS({ activeLocale: 'en-US' }),
             rendering: fromJS({
-              renderTextOnly: { setTextOnly: true, htmlTagReplacement: '', allowedHtmlTags: [] },
+              renderTextOnly: true,
+              renderTextOnlyOptions: { htmlTagReplacement: '', allowedHtmlTags: [] },
             }),
           })),
         };

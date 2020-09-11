@@ -304,9 +304,9 @@ export default function sendHtml(req, res) {
     const disableScripts = clientInitialState.getIn(['rendering', 'disableScripts']);
     const disableStyles = clientInitialState.getIn(['rendering', 'disableStyles']);
     const renderPartialOnly = clientInitialState.getIn(['rendering', 'renderPartialOnly']);
-    const renderTextOnly = clientInitialState.getIn(['rendering', 'renderTextOnly', 'setTextOnly']);
-    const htmlTagReplacement = clientInitialState.getIn(['rendering', 'renderTextOnly', 'htmlTagReplacement']);
-    const allowedHtmlTags = clientInitialState.getIn(['rendering', 'renderTextOnly', 'allowedHtmlTags']);
+    const renderTextOnly = clientInitialState.getIn(['rendering', 'renderTextOnly']);
+    const htmlTagReplacement = clientInitialState.getIn(['rendering', 'renderTextOnlyOptions', 'htmlTagReplacement']);
+    const allowedHtmlTags = clientInitialState.getIn(['rendering', 'renderTextOnlyOptions', 'allowedHtmlTags']);
 
     if (renderPartialOnly) {
       return safeSend(res, renderPartial({ html: req.appHtml, store }));
