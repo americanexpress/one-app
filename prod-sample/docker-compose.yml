@@ -21,6 +21,7 @@ services:
       - './one-app/one-app-privkey.pem:/opt/key.pem'
       - './nginx/nginx-cert.pem:/opt/nginx-cert.pem'
       - './extra-certs.pem:/opt/extra-certs.pem'
+      - './one-app/tmp:/tmp'
     networks:
       one-app-at-test-network:
     depends_on:
