@@ -877,7 +877,7 @@ describe('Tests that require Docker setup', () => {
       });
       describe('successful fetch of error page', () => {
         beforeAll(loadCustomErrorPageRoot);
-        test('responses with custom error page', async () => {
+        test('responds with a custom error page', async () => {
           const response = await fetch(
             `${appAtTestUrls.fetchUrl}/%c0.%c0./%c0.%c0./%c0.%c0./%c0.%c0./winnt/win.ini`,
             defaultFetchOptions

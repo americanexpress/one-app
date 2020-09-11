@@ -851,7 +851,7 @@ describe('sendHtml', () => {
       expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
       expect(res.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
     });
-    it('returns provided error page if provided', async () => {
+    it('returns a custom error page if provided', async () => {
       const errorPageUrl = 'https://example.com';
       const mockResponse = `<!doctype html>
       <html>
