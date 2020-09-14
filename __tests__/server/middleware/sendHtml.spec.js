@@ -851,6 +851,30 @@ describe('sendHtml', () => {
       expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
       expect(res.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
     });
+    it('uses the default error page if custom error page does not 200', async () => {
+      const errorPageUrl = 'https://example.com';
+
+      global.fetch = jest.fn(() => Promise.resolve({
+        headers: new global.Headers({
+          'Content-Type': 'text/html',
+        }),
+        status: 500,
+      }));
+
+      await setErrorPage(errorPageUrl);
+      renderStaticErrorPage(res);
+
+      const data = await global.fetch.mock.results[0].value;
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
+      expect(await data.timeout).toBe(6000);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(console.warn).toHaveBeenCalledWith('Custom error page did not return a status of 200... Falling back to default error page');
+      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(res.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
+      expect(res.send.mock.calls[0][0]).toContain('Sorry, we are unable to load this page at this time. Please try again later.');
+    });
     it('returns a custom error page if provided', async () => {
       const errorPageUrl = 'https://example.com';
       const mockResponse = `<!doctype html>
@@ -874,6 +898,7 @@ describe('sendHtml', () => {
         headers: new global.Headers({
           'Content-Type': 'text/html',
         }),
+        status: 200,
       }));
 
       await setErrorPage(errorPageUrl);
@@ -917,6 +942,7 @@ describe('sendHtml', () => {
         headers: new global.Headers({
           'Content-Type': 'text/html',
         }),
+        status: 200,
       }));
 
       setErrorPage(errorPageUrl);
@@ -935,6 +961,7 @@ describe('sendHtml', () => {
         headers: new global.Headers({
           'Content-Type': 'text/plain',
         }),
+        status: 200,
       }));
 
       await setErrorPage(errorPageUrl);
@@ -958,6 +985,7 @@ describe('sendHtml', () => {
           'Content-Type': 'text/html',
           'Content-Length': 750000,
         }),
+        status: 200,
       }));
 
       await setErrorPage(errorPageUrl);

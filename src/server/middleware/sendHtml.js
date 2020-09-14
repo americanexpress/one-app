@@ -75,6 +75,11 @@ export async function setErrorPage(fallbackUrl) {
     if (contentLength > 250e3) {
       console.warn('[appConfig/errorPageUrl] Content-Length is over 244Kb and may have an impact on performance');
     }
+
+    if (response.status !== 200) {
+      console.warn('Custom error page did not return a status of 200... Falling back to default error page');
+      return errorPage;
+    }
     // Read the response as text.
     errorPage = await response.text();
   } catch (e) {
