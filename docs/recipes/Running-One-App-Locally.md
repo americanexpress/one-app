@@ -10,7 +10,7 @@ To run One App locally, you need to make sure that you are on at least Node 12 o
 git clone https://github.com/americanexpress/one-app.git
 ```
 
-After it has finished cloning, go ahead and `cd` into `one-app` and run `npm install`
+After it has finished cloning, `cd` into `one-app` and run `npm install`
 
 In order to work with your modules locally, you will need to serve your modules to One App (make sure you run `npm run build` or `npm run watch:build` in your module beforehand):
 
