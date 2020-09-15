@@ -853,12 +853,13 @@ describe('sendHtml', () => {
     });
     it('uses the default error page if custom error page does not 200', async () => {
       const errorPageUrl = 'https://example.com';
+      const statusCode = 500;
 
       global.fetch = jest.fn(() => Promise.resolve({
         headers: new global.Headers({
           'Content-Type': 'text/html',
         }),
-        status: 500,
+        status: statusCode,
       }));
 
       await setErrorPage(errorPageUrl);
@@ -870,7 +871,7 @@ describe('sendHtml', () => {
       expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
       expect(await data.timeout).toBe(6000);
       expect(res.send).toHaveBeenCalledTimes(1);
-      expect(console.warn).toHaveBeenCalledWith('Custom error page did not return a status of 200... Falling back to default error page');
+      expect(console.warn).toHaveBeenCalledWith('Failed to fetch custom error page with status:', statusCode);
       expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
       expect(res.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
       expect(res.send.mock.calls[0][0]).toContain('Sorry, we are unable to load this page at this time. Please try again later.');

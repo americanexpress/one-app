@@ -67,6 +67,11 @@ export async function setErrorPage(fallbackUrl) {
     const contentType = response.headers.get('content-type');
     const contentLength = response.headers.get('content-length');
 
+    // Warn if status is not a 200 and return errorPage
+    if (response.status !== 200) {
+      console.warn('Failed to fetch custom error page with status:', response.status);
+      return errorPage;
+    }
     // Warn if the Content-Type is not text/html
     if (!contentType.includes('text/html')) {
       console.warn('[appConfig/errorPageUrl] Content-Type was not of type text/html and may not render correctly');
@@ -74,11 +79,6 @@ export async function setErrorPage(fallbackUrl) {
     // Warn if the content length is over 244kb
     if (contentLength > 250e3) {
       console.warn('[appConfig/errorPageUrl] Content-Length is over 244Kb and may have an impact on performance');
-    }
-
-    if (response.status !== 200) {
-      console.warn('Custom error page did not return a status of 200... Falling back to default error page');
-      return errorPage;
     }
     // Read the response as text.
     errorPage = await response.text();
