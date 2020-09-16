@@ -2,6 +2,7 @@ name: Commit Linting
 on: pull_request
 jobs:
   one-app-unit-tests:
+    if: (github.actor!= 'dependabot[bot]') && (contains(github.head_ref, 'dependabot/') == false)
     name: Commit Linting
     runs-on: ubuntu-latest
     steps:

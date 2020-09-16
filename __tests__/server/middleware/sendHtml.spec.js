@@ -19,6 +19,7 @@ import sendHtml, {
   renderStaticErrorPage,
   renderModuleScripts,
   safeSend,
+  setErrorPage,
 } from '../../../src/server/middleware/sendHtml';
 // _client is a method to control the mock
 // eslint-disable-next-line import/named
@@ -37,6 +38,15 @@ jest.mock('holocron', () => ({
     module.ssrStyles.getFullSheet = () => '.class { background: red; }';
     return module;
   },
+}));
+jest.mock('@americanexpress/fetch-enhancers', () => ({
+  createTimeoutFetch: jest.fn(
+    (timeout) => (next) => (url) => next(url)
+      .then((res) => {
+        res.timeout = timeout;
+        return res;
+      })
+  ),
 }));
 jest.mock('../../../src/server/utils/stateConfig');
 jest.mock('../../../src/server/utils/readJsonFile', () => (filePath) => {
@@ -99,6 +109,7 @@ jest.mock('../../../src/universal/utils/transit', () => ({
 jest.spyOn(console, 'info').mockImplementation(() => {});
 jest.spyOn(console, 'log').mockImplementation(() => {});
 jest.spyOn(console, 'error').mockImplementation(() => {});
+jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
 
 describe('sendHtml', () => {
   const appHtml = '<p>Why, hello!</p>';
@@ -777,6 +788,9 @@ describe('sendHtml', () => {
   });
 
   describe('renderStaticErrorPage', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
     it('sends default static error page', () => {
       renderStaticErrorPage(res);
       expect(res.send).toHaveBeenCalledTimes(1);
@@ -825,7 +839,162 @@ describe('sendHtml', () => {
       expect(res.send.mock.calls[0][0]).not.toMatch('[object ');
       expect(res.send.mock.calls[0][0]).not.toContain('undefined');
     });
+    it('returns default error page if fetching custom error page url fails', async () => {
+      const errorPageUrl = 'https://example.com';
+      const fetchError = new Error('getaddrinfo ENOTFOUND');
+      global.fetch = jest.fn(() => Promise.reject(fetchError));
+
+      await setErrorPage(errorPageUrl);
+      renderStaticErrorPage(res);
+
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(res.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
+    });
+    it('uses the default error page if custom error page does not 200', async () => {
+      const errorPageUrl = 'https://example.com';
+      const statusCode = 500;
+
+      global.fetch = jest.fn(() => Promise.resolve({
+        headers: new global.Headers({
+          'Content-Type': 'text/html',
+        }),
+        status: statusCode,
+      }));
+
+      await setErrorPage(errorPageUrl);
+      renderStaticErrorPage(res);
+
+      const data = await global.fetch.mock.results[0].value;
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
+      expect(await data.timeout).toBe(6000);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(console.warn).toHaveBeenCalledWith('Failed to fetch custom error page with status:', statusCode);
+      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(res.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
+      expect(res.send.mock.calls[0][0]).toContain('Sorry, we are unable to load this page at this time. Please try again later.');
+    });
+    it('returns a custom error page if provided', async () => {
+      const errorPageUrl = 'https://example.com';
+      const mockResponse = `<!doctype html>
+      <html>
+      <head>
+        <title>Custom Error Page</title>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body>
+        <div>
+          <h1>Custom Error Page</h1>
+          <p>This is a custom error page.</p>
+        </div>
+      </body>
+      </html>`;
+
+      global.fetch = jest.fn(() => Promise.resolve({
+        text: () => Promise.resolve(mockResponse),
+        headers: new global.Headers({
+          'Content-Type': 'text/html',
+        }),
+        status: 200,
+      }));
+
+      await setErrorPage(errorPageUrl);
+      renderStaticErrorPage(res);
+
+      const data = await global.fetch.mock.results[0].value;
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
+      expect(await data.text()).toBe(mockResponse);
+      expect(await data.timeout).toBe(6000);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.send.mock.calls[0][0]).toContain('<!doctype html>');
+      expect(res.send.mock.calls[0][0]).toContain('<h1>Custom Error Page</h1>');
+    });
   });
+
+  describe('setErrorPage', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    const errorPageUrl = 'https://example.com';
+    const mockResponse = `<!doctype html>
+  <html>
+  <head>
+    <title>Custom Error Page</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div>
+      <h1>Custom Error Page</h1>
+      <p>This is a custom error page.</p>
+    </div>
+  </body>
+  </html>`;
+    it('fetches errorPageUrl', async () => {
+      global.fetch = jest.fn(() => Promise.resolve({
+        text: () => Promise.resolve(mockResponse),
+        headers: new global.Headers({
+          'Content-Type': 'text/html',
+        }),
+        status: 200,
+      }));
+
+      setErrorPage(errorPageUrl);
+
+      const data = await global.fetch.mock.results[0].value;
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
+      expect(await data.text()).toBe(mockResponse);
+      expect(await data.timeout).toBe(6000);
+    });
+
+    it('warns if content-type is not text/html', async () => {
+      global.fetch = jest.fn(() => Promise.resolve({
+        text: () => Promise.resolve(mockResponse),
+        headers: new global.Headers({
+          'Content-Type': 'text/plain',
+        }),
+        status: 200,
+      }));
+
+      await setErrorPage(errorPageUrl);
+      expect(console.warn).toHaveBeenCalledTimes(1);
+      expect(console.warn).toHaveBeenCalledWith('[appConfig/errorPageUrl] Content-Type was not of type text/html and may not render correctly');
+    });
+
+    it('warns if url cannot be fetched', async () => {
+      const fetchError = new Error('getaddrinfo ENOTFOUND');
+      global.fetch = jest.fn(() => Promise.reject(fetchError));
+
+      await setErrorPage(errorPageUrl);
+      expect(console.warn).toHaveBeenCalledTimes(1);
+      expect(console.warn).toHaveBeenCalledWith('Could not fetch the URL', fetchError);
+    });
+
+    it('warns if content-length is greater than 244Kb', async () => {
+      global.fetch = jest.fn(() => Promise.resolve({
+        text: () => Promise.resolve(mockResponse),
+        headers: new global.Headers({
+          'Content-Type': 'text/html',
+          'Content-Length': 750000,
+        }),
+        status: 200,
+      }));
+
+      await setErrorPage(errorPageUrl);
+      expect(console.warn).toHaveBeenCalledTimes(1);
+      expect(console.warn).toHaveBeenCalledWith('[appConfig/errorPageUrl] Content-Length is over 244Kb and may have an impact on performance');
+    });
+  });
+
   describe('safeSend', () => {
     it('should res.send if no headers were sent', () => {
       const fakeRes = {
