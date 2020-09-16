@@ -49,4 +49,5 @@ export default {
       },
     },
   },
+  errorPageUrl: 'https://sample-cdn.frank/error.html',
 };

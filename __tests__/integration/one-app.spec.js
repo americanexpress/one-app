@@ -862,6 +862,32 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
+    describe('custom error page', () => {
+      const loadCustomErrorPageRoot = async () => {
+        await addModuleToModuleMap({
+          moduleName: 'frank-lloyd-root',
+          version: '0.0.2',
+        });
+        // wait for change to be picked up
+        await waitFor(5000);
+      };
+
+      afterAll(() => {
+        writeModuleMap(originalModuleMap);
+      });
+      describe('successful fetch of error page', () => {
+        beforeAll(loadCustomErrorPageRoot);
+        test('responds with a custom error page', async () => {
+          const response = await fetch(
+            `${appAtTestUrls.fetchUrl}/%c0.%c0./%c0.%c0./%c0.%c0./%c0.%c0./winnt/win.ini`,
+            defaultFetchOptions
+          );
+          const body = await response.text();
+          expect(body).toContain('Here is a custom error page though.');
+        });
+      });
+    });
+
     describe('progressive web app', () => {
       const scriptUrl = `${appAtTestUrls.fetchUrl}/_/pwa/service-worker.js`;
       const webManifestUrl = `${appAtTestUrls.fetchUrl}/_/pwa/manifest.webmanifest`;
