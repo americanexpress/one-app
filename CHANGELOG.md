@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.6.0](https://github.com/americanexpress/one-app/compare/v5.5.1...v5.6.0) (2020-09-16)
+
+
+### Features
+
+* **sendHtml:** allow custom error page ([#281](https://github.com/americanexpress/one-app/issues/281)) ([73eb8a7](https://github.com/americanexpress/one-app/commit/73eb8a72e7f20e66d5a6313c3a103b20c0ed0143))
+* **server:** use native V8 heapdump ([794ff35](https://github.com/americanexpress/one-app/commit/794ff355b4b89457937aa081651aee10c48d8464))
+
+
 ## [5.5.1](https://github.com/americanexpress/one-app/compare/v5.5.0...v5.5.1) (2020-09-02)
 
 
