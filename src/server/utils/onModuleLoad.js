@@ -26,6 +26,7 @@ import { setCreateSsrFetch } from './createSsrFetch';
 import { setEventLoopDelayThreshold } from './createCircuitBreaker';
 import { configurePWA } from '../middleware/pwa';
 import { validatePWAConfig } from './validation';
+import { setErrorPage } from '../middleware/sendHtml';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
@@ -79,6 +80,7 @@ export default function onModuleLoad({
       createSsrFetch,
       eventLoopDelayThreshold,
       pwa,
+      errorPageUrl,
       // Child Module Specific
       requiredExternals,
       validateStateConfig,
@@ -112,6 +114,9 @@ export default function onModuleLoad({
     clearModulesUsingExternals();
     if (provideStateConfig) {
       setStateConfig(provideStateConfig);
+    }
+    if (errorPageUrl) {
+      setErrorPage(errorPageUrl);
     }
     setCorsOrigins(corsOrigins);
     extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
