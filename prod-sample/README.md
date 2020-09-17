@@ -63,7 +63,7 @@ and bundled from source when `npm run start:prod-sample` is run.
 
 To aid local production testing use the `deploy-prod-sample-module` script to deploy any module to
 `prod-sample`. This script will create a production build of the module and publish it to the `prod-sample` cdn.
-After it's been published the script will enable to module to be deployed to the `prod-sample` one-app server by
+After it's been published the script will enable a module to be deployed to the `prod-sample` one-app server by
 updating the `prod-sample` module map.
 
 ```bash
@@ -77,5 +77,4 @@ $ node ./scripts/deploy-prod-sample-module.js --module-path="../path-to-module/[
 | `--module-path` |  relative path to the module |`--module-path="../relative-path/[your-module]"` | X |
 | `--skip-install` |  don't install before building module |`--skip-install=true` |  |
 | `--skip-build` |  don't build the module |`--skip-build=true` |  |
-
 
