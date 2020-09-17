@@ -29,6 +29,7 @@
     "test:lockfile": "lockfile-lint -p package-lock.json -t npm -a npm -o https: -c -i",
     "test:lint": "eslint --ext js,jsx,md,snap .",
     "start": "node lib/server/index.js",
+    "start:inspect": "node --inspect --expose-gc lib/server/index.js",
     "test:unit": "jest --testPathIgnorePatterns integration --config jest.config.js",
     "pretest:integration": "concurrently \"npm run build:prod-sample\" \"docker-compose -f ./prod-sample/docker-compose.yml pull nginx selenium-chrome\" --kill-others-on-fail -n build-prod-sample,build-dependency-images",
     "test:integration": "JEST_TEST_REPORT_PATH=./test-results/integration-test-report.html jest integration --config jest.integration.config.js --forceExit",
