@@ -19,6 +19,7 @@ if (!global.BROWSER) {
     pwa,
     createSsrFetch,
     eventLoopDelayThreshold,
+    errorPageUrl,
     /* Child Module Specific */
     validateStateConfig,
     requiredSafeRequestRestrictedAttributes,
@@ -65,6 +66,7 @@ export default MyModule;
   - [`extendSafeRequestRestrictedAttributes`](#extendsaferequestrestrictedattributes)
   - [`createSsrFetch`](#createssrfetch)
   - [`eventLoopDelayThreshold`](#eventloopdelaythreshold)
+  - [`errorPageUrl`](#errorpageurl)
   - [`validateStateConfig`](#validatestateconfig)
   - [`requiredSafeRequestRestrictedAttributes`](#requiredsaferequestrestrictedattributes)
 
@@ -455,6 +457,25 @@ The `eventLoopDelayThreshold` directive accepts a number representing the thresh
 **📘 More Information**
 * [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
 * Library: [Opossum](https://nodeshift.dev/opossum/)
+
+## `errorPageUrl`
+
+**Module Type**
+
+- ✅ Root Module
+- 🚫 Child Module
+
+**Shape**
+
+```js
+if (!global.BROWSER) {
+  Module.appConfig = {
+    errorPageUrl: String,
+  };
+}
+```
+
+The `errorPageUrl` directive is useful for supplying a URL to a custom error page. This URL should return a `Content-Type` of `text/html` and a `Content-Length` of less than `244000`. The URL will get called when your root module is loaded and is rendered if and when an error occurs. It is recommended that you keep the custom error page as small as possible.
 
 ## `validateStateConfig`
 **Module Type**

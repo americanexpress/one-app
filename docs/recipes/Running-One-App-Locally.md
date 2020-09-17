@@ -2,13 +2,17 @@
 [👈 Return to Overview](./README.md)
 <!--ONE-DOCS-HIDE end-->
 
-# Running Existing App Locally
+# Running One App Locally
 
-If you are already on your way to building your application using One App or have an already built
-application with One App then you can either serve your local modules to One App or have One App
-point to a remote module map it can use to fetch modules:
+To run One App locally, you need to make sure that you are on Node 12 or greater. After that, go ahead and clone One App:
 
-To serve modules to One App:
+```bash
+git clone https://github.com/americanexpress/one-app.git
+```
+
+After it has finished cloning, `cd` into `one-app` and run `npm install`
+
+In order to work with your modules locally, you will need to serve your modules to One App (make sure you run `npm run build` or `npm run watch:build` in your module beforehand):
 
 ```bash
 npm run serve-module <path/to/your/module> <path/to/another/module>
@@ -30,7 +34,7 @@ NODE_ENV=development npm start -- --module-map-url=<your-remote-module-map-url> 
 The `drop-module` command allows you to stop serving a module:
 
 ```bash
-$ npm run drop-module <module-name>
+npm run drop-module <module-name>
 ```
 
 The `log-format` option allows you to specify how you would like One App logs presented to you:
