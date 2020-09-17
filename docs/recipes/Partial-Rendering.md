@@ -306,7 +306,7 @@ export default function EmailPartialsChildModule() {
 ```
 
 Do keep in mind that partial rendering is meant to be performed server-side, we should not attempt
-this example above in the browser in normal circumstances.
+this example above in the browser under normal circumstances.
 
 ## One App Configuration
 
