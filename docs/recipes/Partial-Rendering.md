@@ -128,7 +128,7 @@ RootModule.childRoutes = (store) => [
 If we start One App locally, we can use the url `http://localhost:3000/partials/greet`
 and expect the `greeting-module` to respond with its rendered content only.
 
-> If you want to learn more on how to run One App locally, please [view the guide](./Running-Existing-App-Locally.md)
+> If you want to learn more on how to run One App locally, please [view the guide](./Running-One-App-Locally.md)
 
 `greeting-module`
 ```jsx
