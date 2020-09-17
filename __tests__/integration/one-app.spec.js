@@ -1119,17 +1119,14 @@ describe('Tests that require Docker setup', () => {
 
                 const cacheKeys = await browser.executeAsync(getCacheKeys);
                 const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
+                const culturedFrankieUrl = holocronModuleMap.modules['cultured-frankie'].browser.url.replace(
+                  'cultured-frankie.browser.js',
+                  'es-mx/cultured-frankie.json'
+                );
                 // we should not expect an additional lang pack to be added,
                 // rather it replaces the other one used by any given module
                 expect(cacheMap.get('__sw/lang-packs')).toHaveLength(1);
-                expect(cacheMap.get('__sw/lang-packs')).toEqual(
-                  [
-                    holocronModuleMap.modules['cultured-frankie'].browser.url.replace(
-                      'cultured-frankie.browser.js',
-                      'es-mx/cultured-frankie.json'
-                    ),
-                  ]
-                );
+                expect(cacheMap.get('__sw/lang-packs')).toEqual([culturedFrankieUrl]);
               });
             });
           });
