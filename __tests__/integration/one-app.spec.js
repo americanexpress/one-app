@@ -1067,7 +1067,7 @@ describe('Tests that require Docker setup', () => {
                   // the module chunk
                   holocronModuleMap.modules['franks-burgers'].browser.url.replace(
                     'franks-burgers.browser.js',
-                    'Burger.franks-burgers.chunk.browser.js'
+                    'Burger.chunk.browser.js'
                   ),
                 ]
               );
