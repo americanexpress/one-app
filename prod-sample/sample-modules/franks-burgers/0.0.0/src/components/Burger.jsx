@@ -15,14 +15,11 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
 
 export default function Burger() {
   return (
     <article id="franks-burger">
-      <p>
-        <FormattedMessage id="franks-burger" />
-      </p>
+      <p>Burger</p>
     </article>
   );
 }
