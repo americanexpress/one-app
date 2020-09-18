@@ -1001,10 +1001,10 @@ describe('Tests that require Docker setup', () => {
 
               await expect(browser.executeAsync(getCacheMatch, shell)).resolves.toBeDefined();
               await expect(browser.executeAsync(getCacheMatch, manifest)).resolves.toBeDefined();
-              expect(cacheMap.get('__sw/offline')).toContain([
+              expect(cacheMap.get('__sw/offline').sort()).toEqual([
                 manifest,
                 shell,
-              ]);
+              ].sort());
             });
 
             test('caches the app assets and entry root module', async () => {
@@ -1067,7 +1067,7 @@ describe('Tests that require Docker setup', () => {
                   // the module chunk
                   holocronModuleMap.modules['franks-burgers'].browser.url.replace(
                     'franks-burgers.browser.js',
-                    'Burger.chunk.browser.js'
+                    'Burger.franks-burgers.chunk.browser.js'
                   ),
                 ]
               );
