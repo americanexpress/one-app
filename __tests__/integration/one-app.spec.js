@@ -1001,7 +1001,7 @@ describe('Tests that require Docker setup', () => {
 
               await expect(browser.executeAsync(getCacheMatch, shell)).resolves.toBeDefined();
               await expect(browser.executeAsync(getCacheMatch, manifest)).resolves.toBeDefined();
-              expect(cacheMap.get('__sw/offline')).toEqual([
+              expect(cacheMap.get('__sw/offline')).toContain([
                 manifest,
                 shell,
               ]);
