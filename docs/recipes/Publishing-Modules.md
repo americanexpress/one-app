@@ -2,22 +2,22 @@
 [👈 Return to Overview](./README.md)
 <!--ONE-DOCS-HIDE end-->
 
-# Deploying Modules
+# Publishing Modules
 
 ## 📖 Table of Contents
-* [Deployment Overview](deployment-overview)
+* [Overview](overview)
 * [Creating a Module Map](#creating-a-module-map)
 * [Update Module Map Script](#update-module-map-script)
 * [Deploying to Vercel with GitHub Actions](#deploying-to-vercel-with-github-actions)
 
-## Deployment Overview
+## Overview
 
-Deploying holocron modules consists on two steps: 
+Publishing Holocron modules consists on two steps: 
 
-1. Upload the contents of the `build` folder to your CDN of choice.
-2. Update the [module map](../api/server/Module-Map-Schema.md) to point to the newly published static assets.
+1. Upload the contents of the `build` folder to your CDN of choice. This publishes your module's static assets similar to when you release an npm dependency.
+2. Update the [module map](../api/server/Module-Map-Schema.md) to point to the newly published static assets. This will tell One App to consume that published/released module version.
 
-In the following example, we will use Vercel to deploy a holocron module and a manual script to deploy the module map.
+In the following example, we will use Vercel to publish a holocron module and a manual script to deploy the module map.
  
 ### Creating a Module Map
 
@@ -93,10 +93,12 @@ updateModuleMap().catch((err) => {
   console.log(err);
 });
 ```
+>Note: Vercel only allows you to upload a single folder per project, this means that every holocron module will have its own URL and project name. Other CDNs like Cloudfront / Amazon S3 allow you to upload multiple folders. 
+>In that case, you can adjust the script above to include module name as the folder that contains the static assets for each holocron module. 
 
 ## Deploying to Vercel with GitHub Actions
 
-[Vercel](https://vercel.com/home) allows you to deploy statics assets such as your modules. We will accomplish this by using [GitHub Actions](https://github.com/features/actions).
+[Vercel](https://vercel.com/home) allows you to publish statics assets such as your modules. We will accomplish this by using [GitHub Actions](https://github.com/features/actions).
 
 This deploy action uses the `vercel-cli` so you will need a create [token with Vercel](https://vercel.com/account/tokens) and then add a new variable called `VERCEL_TOKEN` to the `Secrets` section of your repository on Github.
 
