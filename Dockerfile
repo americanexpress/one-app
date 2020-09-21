@@ -40,8 +40,8 @@ EXPOSE 3001
 EXPOSE 3002
 EXPOSE 3005
 WORKDIR /opt/one-app
-USER $USER
 RUN chown node:node /opt/one-app
+USER $USER
 CMD ["node", "lib/server"]
 COPY --from=builder --chown=node:node /opt/one-app/development ./
 
