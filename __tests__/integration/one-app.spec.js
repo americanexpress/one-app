@@ -1001,10 +1001,12 @@ describe('Tests that require Docker setup', () => {
 
               await expect(browser.executeAsync(getCacheMatch, shell)).resolves.toBeDefined();
               await expect(browser.executeAsync(getCacheMatch, manifest)).resolves.toBeDefined();
-              expect(cacheMap.get('__sw/offline')).toEqual([
-                manifest,
-                shell,
-              ]);
+              expect(cacheMap.get('__sw/offline')).toEqual(
+                expect.arrayContaining([
+                  manifest,
+                  shell,
+                ])
+              );
             });
 
             test('caches the app assets and entry root module', async () => {
@@ -1017,17 +1019,16 @@ describe('Tests that require Docker setup', () => {
               const holocronModuleMap = readModuleMap();
               const cacheKeys = await browser.executeAsync(getCacheKeys);
               const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
+              const oneAppCacheURLs = cacheMap.get('__sw/one-app').map((url) => url.replace(
+                url.match(oneAppVersionRegExp)[1],
+                '[one-app-version]'
+              ));
 
               expect(cacheMap.get('__sw/lang-packs')).toBeUndefined();
               expect(cacheMap.get('__sw/modules')).toEqual([
                 holocronModuleMap.modules['frank-lloyd-root'].browser.url,
               ]);
-              expect(
-                cacheMap.get('__sw/one-app').map((url) => url.replace(
-                  url.match(oneAppVersionRegExp)[1],
-                  '[one-app-version]'
-                ))
-              ).toEqual(
+              expect(oneAppCacheURLs).toEqual(
                 expect.arrayContaining(
                   [
                     // the build output directory uses the git sha which
@@ -1057,19 +1058,19 @@ describe('Tests that require Docker setup', () => {
               const holocronModuleMap = readModuleMap();
               const cacheKeys = await browser.executeAsync(getCacheKeys);
               const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
+              const burgerChunkURL = holocronModuleMap.modules['franks-burgers'].browser.url.replace(
+                'franks-burgers.browser.js',
+                'Burger.chunk.browser.js'
+              );
 
               expect(cacheMap.get('__sw/modules')).toHaveLength(4);
               expect(cacheMap.get('__sw/modules')).toEqual(
-                [
+                expect.arrayContaining([
                   holocronModuleMap.modules['frank-lloyd-root'].browser.url,
                   holocronModuleMap.modules['preview-frank'].browser.url,
                   holocronModuleMap.modules['franks-burgers'].browser.url,
-                  // the module chunk
-                  holocronModuleMap.modules['franks-burgers'].browser.url.replace(
-                    'franks-burgers.browser.js',
-                    'Burger.franks-burgers.chunk.browser.js'
-                  ),
-                ]
+                  burgerChunkURL,
+                ])
               );
             });
           });
