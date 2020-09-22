@@ -15,81 +15,40 @@
  */
 
 import React, { Suspense } from 'react';
-import PropTypes from 'prop-types';
-import { loadLanguagePack } from '@americanexpress/one-app-ducks';
-import { FormattedMessage, IntlProvider } from 'react-intl';
-import { connect } from 'react-redux';
-import { fromJS } from 'immutable';
 
+// Naming our chunk is very important for a human readable file name,
+// remember to use "webpackChunkName"
 const Burger = React.lazy(() => import(/* webpackChunkName: 'Burger' */ './Burger'));
 
-const FranksBurgers = ({
-  languageData,
-  localeName,
-  moduleLoadStatus,
-}) => {
+const FranksBurgers = () => {
   // we rely on user interaction to load our chunk and render it afterwards
   const [loadBurger, setBurgerLoad] = React.useState(false);
 
   return (
-    <IntlProvider locale={localeName} messages={languageData}>
-      {(moduleLoadStatus === 'loaded' ? (
-        <section>
-          <header>
-            <h1 id="franks-opening-line">
-              <FormattedMessage id="franks-opening-line" />
-            </h1>
-          </header>
+    <section>
+      <header>
+        <h1 id="franks-opening-line">
+          Welcome to Franks Burgers! The best burgers in town.
+        </h1>
+      </header>
 
-          {loadBurger ? (
-            <Suspense fallback={<p><FormattedMessage id="loading" /></p>}>
-              <Burger />
-            </Suspense>
-          ) : null}
+      {loadBurger ? (
+        <Suspense fallback={<p>Loading...</p>}>
+          <Burger />
+        </Suspense>
+      ) : null}
 
-          <footer>
-            <button id="order-burger-btn" type="button" onClick={() => setBurgerLoad((state) => !state)}>
-              <FormattedMessage id="franks-cta" />
-            </button>
-          </footer>
-        </section>
-      ) : (
-        <p><FormattedMessage id="loading" /></p>
-      ))}
-    </IntlProvider>
+      <footer>
+        <button id="order-burger-btn" type="button" onClick={() => setBurgerLoad((state) => !state)}>
+          Order Burger
+        </button>
+      </footer>
+    </section>
   );
-};
-
-FranksBurgers.propTypes = {
-  moduleLoadStatus: PropTypes.string.isRequired,
-  localeName: PropTypes.string.isRequired,
-  languageData: PropTypes.shape({
-    loading: PropTypes.string,
-    'franks-opening-line': PropTypes.string,
-    'franks-cta': PropTypes.string,
-    'franks-burger': PropTypes.string,
-  }).isRequired,
 };
 
 FranksBurgers.holocron = {
   name: 'franks-burgers',
-  options: { ssr: true },
-  loadModuleData: ({ store: { dispatch } }) => dispatch(
-    loadLanguagePack('franks-burgers', { fallbackLocale: 'en-US' })
-  ),
 };
 
-const mapStateToProps = (state) => {
-  const localeName = state.getIn(['intl', 'activeLocale']);
-  const languagePack = state.getIn(
-    ['intl', 'languagePacks', localeName, 'franks-burgers'],
-    fromJS({})
-  ).toJS();
-
-  return {
-    languageData: languagePack && languagePack.data ? languagePack.data : {},
-    localeName,
-  };
-};
-
-export default connect(mapStateToProps)(FranksBurgers);
+export default FranksBurgers;
