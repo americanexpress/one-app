@@ -115,7 +115,7 @@
     "react-redux": "^7.2.0",
     "redux": "^4.0.5",
     "redux-lifesaver": "^2.1.0",
-    "regenerator-runtime": "^0.13.5",
+    "regenerator-runtime": "^0.13.7",
     "reselect": "^4.0.0",
     "semver": "^7.3.2",
     "serialize-error": "^7.0.1",
