@@ -39,28 +39,32 @@ export default function watchLocalModules() {
   const watcher = chokidar.watch(moduleDirectory, { awaitWriteFinish: true });
 
   watcher.on('change', async (changedPath) => {
-    if (!changedPath.endsWith('.node.js')) return;
+    try {
+      if (!changedPath.endsWith('.node.js')) return;
 
-    const match = changedPath.substring(moduleDirectory.length).match(/\/([^/]+)\/([^/]+)/);
-    if (!match) return;
-    const [, moduleNameChangeDetectedIn] = match;
+      const match = changedPath.substring(moduleDirectory.length).match(/\/([^/]+)\/([^/]+)/);
+      if (!match) return;
+      const [, moduleNameChangeDetectedIn] = match;
 
-    const moduleMap = JSON.parse(fs.readFileSync(moduleMapPath, 'utf8'));
+      const moduleMap = JSON.parse(fs.readFileSync(moduleMapPath, 'utf8'));
 
-    const moduleData = moduleMap.modules[moduleNameChangeDetectedIn];
-    const oneAppDevCdnAddress = `http://${ip}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`;
+      const moduleData = moduleMap.modules[moduleNameChangeDetectedIn];
+      const oneAppDevCdnAddress = `http://${ip}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`;
 
-    moduleData.browser.url = moduleData.browser.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
-    moduleData.legacyBrowser.url = moduleData.legacyBrowser.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
-    moduleData.node.url = moduleData.node.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
+      moduleData.browser.url = moduleData.browser.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
+      moduleData.legacyBrowser.url = moduleData.legacyBrowser.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
+      moduleData.node.url = moduleData.node.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
 
-    const module = addHigherOrderComponent(await loadModule(
-      moduleNameChangeDetectedIn,
-      moduleData,
-      onModuleLoad
-    ));
+      const module = addHigherOrderComponent(await loadModule(
+        moduleNameChangeDetectedIn,
+        moduleData,
+        onModuleLoad
+      ));
 
-    const modules = getModules().set(moduleNameChangeDetectedIn, module);
-    resetModuleRegistry(modules, getModuleMap());
+      const modules = getModules().set(moduleNameChangeDetectedIn, module);
+      resetModuleRegistry(modules, getModuleMap());
+    } catch (error) {
+      console.error(error);
+    }
   });
 }
