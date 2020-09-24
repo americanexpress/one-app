@@ -4,7 +4,6 @@ on:
    branches:
     - master
     - prepare-release
-    - nellyk-patch-1
 jobs:
   one-app-integration:
     name:  One App Integration Tests
