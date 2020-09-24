@@ -4,6 +4,7 @@ on:
    branches:
     - master
     - prepare-release
+    - nellyk-patch-1
 jobs:
   one-app-integration:
     name:  One App Integration Tests
@@ -34,12 +35,12 @@ jobs:
         env:
          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-        run: npx surge teardown ${{ secrets.SURGE_TOKEN }}
+        run: npx surge teardown https://one-app-statics.surge.sh
       - name: Move sample modules to Surge
         env:
          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-        run: npx surge sample-module-bundles ${{ secrets.SURGE_TOKEN }}
+        run: npx surge sample-module-bundles https://one-app-statics.surge.sh
       - name: Login to Heroku Container Registry
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
