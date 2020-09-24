@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.6.1](https://github.com/americanexpress/one-app/compare/v5.6.0...v5.6.1) (2020-09-23)
+
+
+### Bug Fixes
+
+* **dockerfile:** set user after chown ([#305](https://github.com/americanexpress/one-app/issues/305)) ([105ddbf](https://github.com/americanexpress/one-app/commit/105ddbf7be36f20fee9f345895d941b88d37020d))
+* **integration-tests:** simplify franks burgers ([4a90b98](https://github.com/americanexpress/one-app/commit/4a90b9859f19d974b6724e41fe2c10e6392a553a))
+* **watchLocalModules:** fix watcher crashing due to build errors ([#306](https://github.com/americanexpress/one-app/issues/306)) ([9290d92](https://github.com/americanexpress/one-app/commit/9290d921572f3dedb719097d6c7beaf594acc5b5))
+
+
 # [5.6.0](https://github.com/americanexpress/one-app/compare/v5.5.1...v5.6.0) (2020-09-16)
 
 
