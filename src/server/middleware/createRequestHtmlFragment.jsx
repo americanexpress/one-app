@@ -21,7 +21,7 @@ import { RouterContext, matchPromise } from '@americanexpress/one-app-router';
 import { composeModules } from 'holocron';
 import createCircuitBreaker from '../utils/createCircuitBreaker';
 
-import { renderForString, renderForStaticMarkup } from '../utils/reactRendering';
+import { getRenderMethodName, renderForStaticMarkup, renderForString } from '../utils/reactRendering';
 
 const getModuleData = async ({ dispatch, modules }) => {
   await dispatch(composeModules(modules));
@@ -77,10 +77,9 @@ export default function createRequestHtmlFragment({ createRoutes }) {
         }));
 
       const state = store.getState();
-      const disableScripts = state.getIn(['rendering', 'disableScripts']);
-      const renderPartialOnly = state.getIn(['rendering', 'renderPartialOnly']);
 
-      if (disableScripts || renderPartialOnly) {
+
+      if (getRenderMethodName(state) === 'renderForStaticMarkup') {
         await dispatch(composeModules(routeModules));
       } else {
         const fallback = await getModuleDataBreaker.fire({ dispatch, modules: routeModules });
@@ -92,7 +91,7 @@ export default function createRequestHtmlFragment({ createRoutes }) {
         }
       }
 
-      const renderMethod = disableScripts || renderPartialOnly
+      const renderMethod = getRenderMethodName(state) === 'renderForStaticMarkup'
         ? renderForStaticMarkup : renderForString;
 
       /* eslint-disable react/jsx-props-no-spreading */
