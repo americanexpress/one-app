@@ -19,6 +19,7 @@
 import { Set as iSet, Map as iMap } from 'immutable';
 import { createTimeoutFetch } from '@americanexpress/fetch-enhancers';
 
+import striptags from 'striptags';
 import transit from '../../universal/utils/transit';
 import { setConfig } from '../../universal/ducks/config';
 import jsonStringifyForScript from '../utils/jsonStringifyForScript';
@@ -336,9 +337,17 @@ export default function sendHtml(req, res) {
     const disableScripts = clientInitialState.getIn(['rendering', 'disableScripts']);
     const disableStyles = clientInitialState.getIn(['rendering', 'disableStyles']);
     const renderPartialOnly = clientInitialState.getIn(['rendering', 'renderPartialOnly']);
+    const renderTextOnly = clientInitialState.getIn(['rendering', 'renderTextOnly']);
+    const htmlTagReplacement = clientInitialState.getIn(['rendering', 'renderTextOnlyOptions', 'htmlTagReplacement']);
+    const allowedHtmlTags = clientInitialState.getIn(['rendering', 'renderTextOnlyOptions', 'allowedHtmlTags']);
 
     if (renderPartialOnly) {
       return safeSend(res, renderPartial({ html: req.appHtml, store }));
+    }
+
+    if (renderTextOnly) {
+      res.setHeader('content-type', 'text/plain');
+      return safeSend(res, striptags(req.appHtml, allowedHtmlTags, htmlTagReplacement));
     }
 
     const chunkAssets = isLegacy ? legacyBrowserChunkAssets : modernBrowserChunkAssets;

@@ -45,7 +45,8 @@ FrankLloydRoot.childRoutes = (store) => [
   <ModuleRoute path="success" component={HelloWorldComponent} />,
   <ModuleRoute path="healthy-frank" moduleName="healthy-frank" />,
   <ModuleRoute path="demo/:moduleName" moduleName="preview-frank" />,
-  <ModuleRoute path="html-partial/:locale/:moduleName" component={Partial} onEnter={onPartialRouteEnter(store)} />,
+  <ModuleRoute path="html-partial/:locale/:moduleName" component={Partial} onEnter={onPartialRouteEnter(store, true)} />,
+  <ModuleRoute path="text-only/:locale/:moduleName" component={Partial} onEnter={onPartialRouteEnter(store, false, true)} />,
 ];
 
 FrankLloydRoot.propTypes = {
