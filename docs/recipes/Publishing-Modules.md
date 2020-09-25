@@ -5,10 +5,11 @@
 # Publishing Modules
 
 ## 📖 Table of Contents
-* [Overview](overview)
+* [Overview](#overview)
 * [Creating a Module Map](#creating-a-module-map)
 * [Update Module Map Script](#update-module-map-script)
 * [Deploying to Vercel with GitHub Actions](#deploying-to-vercel-with-github-actions)
+* [Updating the Content Security Policy](#updating-the-content-security-policy)
 
 ## Overview
 
@@ -173,3 +174,35 @@ Production: https://[YOUR REPO NAME].vercel.app [6s]
 You can inspect the contents of your module map deployed to Vercel to verify that it contains the links to the deployed assets of your modules.
 
 The running One App instance that points to your updated module map will automatically pull the newly deployed modules and update your application without the need for a server restart.
+
+## Updating the Content Security Policy
+
+One App enforces the [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) by default. You must add to the CSP the URL where your module's statics are loaded from, otherwise you will get a CSP violation and your modules will fail to load in Production.
+
+For example, to add Vercel to the Content Security Policy, add the `*.vercel.app` domain to the `connectSrc` and `scriptSrc` directives in your Root Module's `appConfig.js` file under the csp section: 
+```javascript
+export default contentSecurityPolicyBuilder({
+  directives: {
+    reportUri: process.env.ONE_CLIENT_CSP_REPORTING_URL,
+    defaultSrc: [
+      "'self'",
+    ],
+    scriptSrc: [
+      "'self'",
+      '*.vercel.app',
+    ],
+    imgSrc: [
+      "'self'",
+    ],
+    styleSrc: [
+      "'self'",
+      "'unsafe-inline'",
+    ],
+    connectSrc: [
+      "'self'",
+      '*.vercel.app',
+    ],
+  },
+});
+``` 
+For more information on how to configure One App and the CSP please refer to this section: [App Configuration](../api/modules/App-Configuration.md#csp)
