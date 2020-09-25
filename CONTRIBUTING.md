@@ -84,7 +84,7 @@ To auto fix eslint rule failures that are autofixable run `npm run test:lint -- 
 
 ### Opening the PR
 
-* [Fork the One App repository](https://github.com/americanexpress/one-app/fork), open a PR to `master`, and follow the guidelines outlined in this document.
+* [Fork the One App repository](https://github.com/americanexpress/one-app/fork), open a PR to `main`, and follow the guidelines outlined in this document.
 
 ### Pull Request Guidelines
 

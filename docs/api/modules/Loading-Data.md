@@ -17,7 +17,7 @@ When [Holocron Modules](#modules) are composed and loaded on the Server and Clie
 
 > ☠ `Module.loadModuleData` has been relocated to [`Module.holocron.loadModuleData`](#moduleholocronloadmoduledata)
 
-<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app@master/docs/api/modules/App-Configuration.md" id="createSsrFetch" parentHeaderLevel="1" start-->
+<!--ONE-DOCS path="https://cdn.jsdelivr.net/gh/americanexpress/one-app@main/docs/api/modules/App-Configuration.md" id="createSsrFetch" parentHeaderLevel="1" start-->
 
 ## `Module.appConfig.createSsrFetch`
 
@@ -27,7 +27,7 @@ Please see [`createSsrFetch`](./App-Configuration.md#createssrfetch) in the [App
 
 ## Holocron Module Configuration
 
-Please see the [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/master/packages/holocron/docs/api/README.md#holocron-module-configuration) from the Holocron API Docs for more information about other properties.
+Please see the [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/main/packages/holocron/docs/api/README.md#holocron-module-configuration) from the Holocron API Docs for more information about other properties.
 
 ### `Module.holocron.loadModuleData`
 
