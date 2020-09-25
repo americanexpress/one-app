@@ -4,6 +4,7 @@ on:
    branches:
     - master
     - prepare-release
+    - nellyk-patch-1
 jobs:
   one-app-integration:
     name:  One App Integration Tests
@@ -28,18 +29,18 @@ jobs:
          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
         run:  |
-         npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=https://one-app-statics.surge.sh
+         npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=${{ secrets.SURGE_DOMAIN }}
          echo 'https://one-app-sample.herokuapp.com' >> sample-module-bundles/CORS
       - name: Teardown Surge
         env:
          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-        run: npx surge teardown https://one-app-statics.surge.sh
+        run: npx surge teardown ${{ secrets.SURGE_DOMAIN }}
       - name: Move sample modules to Surge
         env:
          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-        run: npx surge sample-module-bundles https://one-app-statics.surge.sh
+        run: npx surge sample-module-bundles ${{ secrets.SURGE_DOMAIN }}
       - name: Login to Heroku Container Registry
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
