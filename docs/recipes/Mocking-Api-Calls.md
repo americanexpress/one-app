@@ -18,7 +18,7 @@
 
 `someApiUrl` is set within the `appConfig` of the module. Check out the [One App configurations guide to learn more](../modules/App-Configuration.md#provideStateConfig).
 
-2. Configure the Parrot scenarios. When modules are generated using [One App module generator](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module) a mock folder is created, this contains sample scenarios.
+2. Configure the Parrot scenarios. When modules are generated using [One App module generator](https://github.com/americanexpress/one-app-cli/tree/main/packages/generator-one-app-module) a mock folder is created, this contains sample scenarios.
 
    > 🐦 [Parrot](https://github.com/americanexpress/parrot) is a set of tools that allow you to create HTTP mocks
    > and organize them into scenarios in order to develop your app against different sets of data.
@@ -40,7 +40,7 @@
   
     ### `dev-middleware.js`
   
-   `dev-middleware.js` allows you to setup a custom middleware configuration. This file is created by default when [One App module generator](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module) is used. Ensure that [`parrot-middleware`](https://github.com/americanexpress/parrot/tree/master/packages/parrot-middleware) is installed.
+   `dev-middleware.js` allows you to setup a custom middleware configuration. This file is created by default when [One App module generator](https://github.com/americanexpress/one-app-cli/tree/main/packages/generator-one-app-module) is used. Ensure that [`parrot-middleware`](https://github.com/americanexpress/parrot/tree/master/packages/parrot-middleware) is installed.
 
    **Running within One App**
 
@@ -52,7 +52,7 @@
 
    **Using One App runner**
 
-    When using [one-app-runner](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-runner), this can be configured within the `package.json` under `"one-amex" -> "runner" -> "parrotMiddleware "`:
+    When using [one-app-runner](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner), this can be configured within the `package.json` under `"one-amex" -> "runner" -> "parrotMiddleware "`:
   
    ```json
     "one-amex": {
@@ -87,7 +87,7 @@
 
    **Using One App runner**
 
-   When using [one-app-runner](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-runner), this can be setup within the `package.json` as follows:
+   When using [one-app-runner](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner), this can be setup within the `package.json` as follows:
   
     ```json
     "one-amex": {
@@ -119,8 +119,8 @@
 
 **📘 More Information**
 
-* [parrot-middleware](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-runner#parrot-middleware-optional)
-* [dev-endpoints](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-runner#dev-endpoints-optional)
+* [parrot-middleware](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner#parrot-middleware-optional)
+* [dev-endpoints](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner#dev-endpoints-optional)
 * [Loading Data](../api/modules/Loading-Data.md)
 
 

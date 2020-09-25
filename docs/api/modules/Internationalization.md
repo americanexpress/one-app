@@ -22,7 +22,7 @@ the locale directory with filenames using the [BCP-47](https://tools.ietf.org/ht
 
 ## Locale Structure
 
-Following the below structure will allow [`one-app-locale-bundler`](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-locale-bundler) to correctly
+Following the below structure will allow [`one-app-locale-bundler`](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-locale-bundler) to correctly
 bundle your locale files.
 
 Module Root:
@@ -67,7 +67,7 @@ Example `en-US.json`:
 
 ### Environment Specific Data
 
-[`one-app-locale-bundler`](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-locale-bundler) also allows your module to provide environment
+[`one-app-locale-bundler`](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-locale-bundler) also allows your module to provide environment
 specific data. Currently One App supports three different environments;
 production, qa and integration (development).
 
