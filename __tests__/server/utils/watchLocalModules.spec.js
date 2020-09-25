@@ -66,6 +66,7 @@ jest.mock('fs', () => {
     readFileSync: jest.fn(actual.readFileSync),
   };
 });
+jest.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('watchLocalModules', () => {
   beforeEach(() => jest.clearAllMocks());
@@ -121,6 +122,49 @@ describe('watchLocalModules', () => {
       require('../../../src/server/utils/onModuleLoad').default
     );
     expect(getModules().get(moduleName)).toBe(updatedModule);
+  });
+
+  it('handles a rejection properly', async () => {
+    const moduleName = 'some-module';
+    const moduleVersion = '1.0.1';
+    const moduleMapSample = {
+      modules: {
+        [moduleName]: {
+          node: {
+            integrity: '133',
+            url: `https://example.com/cdn/${moduleName}/${moduleVersion}/${moduleName}-node.js`,
+          },
+          browser: {
+            integrity: '234',
+            url: `https://example.com/cdn/${moduleName}/${moduleVersion}/${moduleName}-browser.js`,
+          },
+          legacyBrowser: {
+            integrity: '134633',
+            url: `https://example.com/cdn/${moduleName}/${moduleVersion}/${moduleName}-legacy.browser.js`,
+          },
+        },
+      },
+    };
+    fs.readFileSync.mockImplementationOnce(() => JSON.stringify(moduleMapSample));
+    const modulePath = path.resolve(__dirname, `../../../static/modules/${moduleName}/${moduleVersion}/${moduleName}.node.js`);
+    const originalModule = () => null;
+    const updatedModule = () => null;
+    const modules = fromJS({ [moduleName]: originalModule });
+    const moduleMap = fromJS(moduleMapSample);
+    resetModuleRegistry(modules, moduleMap);
+    watchLocalModules();
+    const changeListener = chokidar.getListeners().change;
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    loadModule.mockReturnValueOnce(Promise.reject(updatedModule));
+    await changeListener(modulePath);
+    expect(loadModule).toHaveBeenCalledWith(
+      moduleName,
+      moduleMapSample.modules[moduleName],
+      require('../../../src/server/utils/onModuleLoad').default
+    );
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(console.error).toHaveBeenCalledWith(updatedModule);
   });
 
   it('should ignore when the regex doesn\'t match', async () => {

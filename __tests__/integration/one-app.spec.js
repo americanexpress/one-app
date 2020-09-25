@@ -1001,10 +1001,10 @@ describe('Tests that require Docker setup', () => {
 
               await expect(browser.executeAsync(getCacheMatch, shell)).resolves.toBeDefined();
               await expect(browser.executeAsync(getCacheMatch, manifest)).resolves.toBeDefined();
-              expect(cacheMap.get('__sw/offline')).toEqual([
+              expect(cacheMap.get('__sw/offline').sort()).toEqual([
                 manifest,
                 shell,
-              ]);
+              ].sort());
             });
 
             test('caches the app assets and entry root module', async () => {
@@ -1017,17 +1017,16 @@ describe('Tests that require Docker setup', () => {
               const holocronModuleMap = readModuleMap();
               const cacheKeys = await browser.executeAsync(getCacheKeys);
               const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
+              const oneAppCacheURLs = cacheMap.get('__sw/one-app').map((url) => url.replace(
+                url.match(oneAppVersionRegExp)[1],
+                '[one-app-version]'
+              ));
 
               expect(cacheMap.get('__sw/lang-packs')).toBeUndefined();
               expect(cacheMap.get('__sw/modules')).toEqual([
                 holocronModuleMap.modules['frank-lloyd-root'].browser.url,
               ]);
-              expect(
-                cacheMap.get('__sw/one-app').map((url) => url.replace(
-                  url.match(oneAppVersionRegExp)[1],
-                  '[one-app-version]'
-                ))
-              ).toEqual(
+              expect(oneAppCacheURLs).toEqual(
                 expect.arrayContaining(
                   [
                     // the build output directory uses the git sha which
@@ -1057,19 +1056,20 @@ describe('Tests that require Docker setup', () => {
               const holocronModuleMap = readModuleMap();
               const cacheKeys = await browser.executeAsync(getCacheKeys);
               const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
+              const burgerChunkURL = holocronModuleMap.modules['franks-burgers'].browser.url.replace(
+                'franks-burgers.browser.js',
+                'Burger.chunk.browser.js'
+              );
 
               expect(cacheMap.get('__sw/modules')).toHaveLength(4);
               expect(cacheMap.get('__sw/modules')).toEqual(
-                [
+                expect.arrayContaining([
                   holocronModuleMap.modules['frank-lloyd-root'].browser.url,
                   holocronModuleMap.modules['preview-frank'].browser.url,
                   holocronModuleMap.modules['franks-burgers'].browser.url,
                   // the module chunk
-                  holocronModuleMap.modules['franks-burgers'].browser.url.replace(
-                    'franks-burgers.browser.js',
-                    'Burger.franks-burgers.chunk.browser.js'
-                  ),
-                ]
+                  burgerChunkURL,
+                ])
               );
             });
           });
@@ -1422,6 +1422,16 @@ describe('Tests that can run against either local Docker setup or remote One App
             const body = await response.text();
             expect(body).toBe(
               '<style class="ssr-css">.frank-lloyd-root__styles__stylish___2aiGw{color:orchid}</style><pre class="value-provided-from-config">https://intranet-origin-dev.example.com/some-api/v1</pre><span class="message">Hello!</span>'
+            );
+          });
+        });
+        describe('render text only', () => {
+          test('responds with text only without HTML', async () => {
+            const response = await fetch(`${appInstanceUrls.fetchUrl}/text-only/en-US/frank-the-parrot?message=Hello!`, defaultFetchOpts);
+            const body = await response.text();
+            expect(response.headers.get('content-type')).toEqual('text/plain; charset=utf-8');
+            expect(body).toBe(
+              ' https://intranet-origin-dev.example.com/some-api/v1  Hello! '
             );
           });
         });
