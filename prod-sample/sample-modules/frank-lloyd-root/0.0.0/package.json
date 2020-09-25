@@ -9,7 +9,7 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@americanexpress/one-app-ducks": "^4.0.0",
+    "@americanexpress/one-app-ducks": "^4.2.0",
     "content-security-policy-builder": "^2.1.0",
     "holocron": "^1.1.0",
     "holocron-module-route": "^1.1.0",
