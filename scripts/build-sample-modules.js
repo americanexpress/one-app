@@ -18,18 +18,16 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const util = require('util');
-const childProcess = require('child_process');
 const { argv } = require('yargs');
-
-const promisifiedExec = util.promisify(childProcess.exec);
 
 const {
   sanitizeEnvVars,
   nginxOriginStaticsRootDir,
   sampleModulesDir,
-  promisifySpawn,
   sampleProdDir,
+  npmInstall,
+  npmProductionBuild,
+  getGitSha,
 } = require('./utils');
 
 const nginxOriginStaticsModulesDir = path.resolve(nginxOriginStaticsRootDir, 'modules');
@@ -41,31 +39,6 @@ const bundleStaticsOrigin = argv.bundleStaticsOrigin || 'https://sample-cdn.fran
 
 const sanitizedEnvVars = sanitizeEnvVars();
 
-async function npmInstall(directory, moduleName, version) {
-  console.time(`${moduleName}@${version}`);
-  console.log(`⬇️  Installing ${moduleName}@${version}...`);
-  try {
-    await promisifySpawn('npm ci', { cwd: directory, shell: true, env: { ...sanitizedEnvVars, NODE_ENV: 'development', NPM_CONFIG_PRODUCTION: false } });
-  } catch (error) {
-    console.error(`🚨 ${moduleName}@${version} failed to install:`);
-    throw error;
-  }
-  console.log(`✅ ‍${moduleName}@${version} Installed!`);
-  console.timeEnd(`${moduleName}@${version}`);
-}
-
-async function npmProductionBuild(directory, moduleName, version) {
-  console.time(`${moduleName}@${version}`);
-  console.log(`🛠  Building ${moduleName}@${version}...`);
-  try {
-    await promisifySpawn('npm run build', { shell: true, cwd: directory, env: { ...sanitizedEnvVars, NODE_ENV: 'production' } });
-  } catch (error) {
-    console.error(`🚨 ${moduleName}@${version} failed to build:`);
-    throw error;
-  }
-  console.log(`✅ ‍${moduleName}@${version} Built!`);
-  console.timeEnd(`${moduleName}@${version}`);
-}
 
 async function updateModuleVersion(directory, moduleVersion) {
   const packageJsonPath = path.resolve(directory, 'package.json');
@@ -91,11 +64,20 @@ const buildModule = async (pathToModule) => {
   const moduleVersion = path.basename(directory);
   const moduleName = path.basename(path.resolve(directory, '..'));
   await updateModuleVersion(directory, moduleVersion);
-  await npmInstall(directory, moduleName, moduleVersion);
-  await npmProductionBuild(directory, moduleName, moduleVersion);
+  await npmInstall({
+    directory,
+    moduleName,
+    moduleVersion,
+    envVars: sanitizedEnvVars,
+  });
+  await npmProductionBuild({
+    directory,
+    moduleName,
+    moduleVersion,
+    envVars: sanitizedEnvVars,
+  });
   // use one app git commit sha as module version
-  const { stdout } = await promisifiedExec('git rev-parse --short HEAD');
-  const gitSha = stdout.trim();
+  const gitSha = getGitSha();
   const pathToModuleBuildDir = path.resolve(`${pathToModule}/build/`);
   const pathToBundleIntegrityManifest = path.join(`${pathToModule}/bundle.integrity.manifest.json`);
   const pathToOriginModuleStatics = path.resolve(`${nginxOriginStaticsModulesDir}/${gitSha}/${moduleName}`);
