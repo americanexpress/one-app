@@ -103,10 +103,9 @@ updateModuleMap().catch((err) => {
 
 This deploy action uses the `vercel-cli` so you will need a create [token with Vercel](https://vercel.com/account/tokens) and then add a new variable called `VERCEL_TOKEN` to the `Secrets` section of your repository on Github.
 
-The below action runs whenever a release is created or a push to master occurs. You do not need to install or add `vercel-cli` to your `package.json` as the `vercel` command is available within GitHub actions.
+The below action runs whenever a release is created or a push to main occurs. You do not need to install or add `vercel-cli` to your `package.json` as the `vercel` command is available within GitHub actions.
 
 Create a new `.github/workflows/deploy.yml` file in the root folder of your module
-
 
 ```yml
 name: Deploy
@@ -116,7 +115,7 @@ on:
     types: [created]
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:

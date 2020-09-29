@@ -2,7 +2,7 @@ name: One App Integration Tests
 on:
  push:
    branches:
-    - master
+    - main
     - prepare-release
 jobs:
   one-app-integration:
@@ -54,5 +54,3 @@ jobs:
         run: heroku container:release web -a ${{ secrets.HEROKU_APP_ID }}
       - name: Run Integration Tests on Heroku
         run: ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true npm run test:integration -- --remote-one-app-environment=${{ secrets.HEROKU_APP_URL }}
-
-

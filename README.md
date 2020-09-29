@@ -1,8 +1,8 @@
-[one-app-bundler]: https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler
+[one-app-bundler]: https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler
 [React]: http://reactjs.org/
 
 <h1 align="center">
-  <img src='https://github.com/americanexpress/one-app/raw/master/one-app.png' alt="One App - One Amex" width='50%'/>
+  <img src='https://github.com/americanexpress/one-app/raw/main/one-app.png' alt="One App - One Amex" width='50%'/>
 </h1>
 
 ![One App Docker Release](https://github.com/americanexpress/one-app/workflows/One%20App%20Docker%20Release/badge.svg)
@@ -47,7 +47,7 @@ Want to get paid for your contributions to `one-app`?
 
 ### Quick Start
 
-#### Build a Module with [generator-one-app-module](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module)
+#### Build a Module with [generator-one-app-module](https://github.com/americanexpress/one-app-cli/tree/main/packages/generator-one-app-module)
 
 The easiest way to do this is via [`npx`](https://blog.npmjs.org/post/162869356040/introducing-npx-an-npm-package-runner) (comes with `npm` versions 5.2.0 and above). Run the following command in the directory you want your module to live:
 
@@ -56,7 +56,7 @@ export NODE_ENV=development
 npx -p yo -p @americanexpress/generator-one-app-module -- yo @americanexpress/one-app-module
 ```
 
-This will use the [One App Module Generator](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module) to generate a basic One App module.
+This will use the [One App Module Generator](https://github.com/americanexpress/one-app-cli/tree/main/packages/generator-one-app-module) to generate a basic One App module.
 
 #### Clone and Install One App
 
@@ -120,11 +120,11 @@ It is possible for your application to consist of only the root module, however 
 
 For a module to act as the root module the only requirements are:
 
-- Returns a React component bundled with [one-app-bundler](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler).
+- Returns a React component bundled with [one-app-bundler](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler).
 - Provides a valid [content security policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) though the [appConfig](./docs/api/modules/App-Configuration.md) static.
 
 **📘 More Information**
-* Root Module example: [frank-lloyd-root](https://github.com/americanexpress/one-app/blob/master/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/components/FrankLloydRoot.jsx)
+* Root Module example: [frank-lloyd-root](https://github.com/americanexpress/one-app/blob/main/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/components/FrankLloydRoot.jsx)
 * [App Configuration in your Root Module](./docs/api/modules/App-Configuration.md)
 * [What are Holocron Modules?](./docs/api/README.md)
 * [Useful Local Development Commands / Options](./docs/recipes/Running-Existing-App-Locally.md)

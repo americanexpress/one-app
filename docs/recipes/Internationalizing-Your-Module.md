@@ -4,7 +4,7 @@
 
 # Internationalizing Your Module
 
-This guide demonstrates how to get started with Internationalization with [react-intl](https://github.com/formatjs/react-intl). **In fact, if you created your module with the [One App Module Generator](https://github.com/americanexpress/one-app-cli/tree/master/packages/generator-one-app-module) (highly recommended), most of the work is already done!** You can skip ahead to ahead to [Accessing Intl in Child Components](#-accessing-intl-in-child-components). 
+This guide demonstrates how to get started with Internationalization with [react-intl](https://github.com/formatjs/react-intl). **In fact, if you created your module with the [One App Module Generator](https://github.com/americanexpress/one-app-cli/tree/main/packages/generator-one-app-module) (highly recommended), most of the work is already done!** You can skip ahead to ahead to [Accessing Intl in Child Components](#-accessing-intl-in-child-components). 
 
 However, if you are creating a module from scratch or to better understand the pieces of internationalization in a module, begin at [Component Creation](#-component-creation).
 
@@ -35,7 +35,7 @@ export default Child;
 
 ## Module Locale Files
 
-Next create the locale files. [one-app-locale-bundler](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-locale-bundler) will bundle the locale files as a part of [one-app-bundler](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler). More information about locale folder stucture and naming can be found in the [README](https://github.com/americanexpress/one-app-cli/blob/master/packages/one-app-locale-bundler/README.md).
+Next create the locale files. [one-app-locale-bundler](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-locale-bundler) will bundle the locale files as a part of [one-app-bundler](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler). More information about locale folder stucture and naming can be found in the [README](https://github.com/americanexpress/one-app-cli/blob/main/packages/one-app-locale-bundler/README.md).
 
 Create a folder structure and content as follows (locale must follow BCP-47):
 ```
@@ -60,7 +60,7 @@ Create a folder structure and content as follows (locale must follow BCP-47):
 
 ## Module Creation
 
-Turn the `Parent` component into a module. The parent module will use [compose](https://redux.js.org/api/compose/) from [Redux](https://redux.js.org/) and `holocron` from [holocron](https://github.com/americanexpress/holocron/tree/master/packages/holocron).
+Turn the `Parent` component into a module. The parent module will use [compose](https://redux.js.org/api/compose/) from [Redux](https://redux.js.org/) and `holocron` from [holocron](https://github.com/americanexpress/holocron/tree/main/packages/holocron).
 
 Install Redux and Holocron:
 ```
