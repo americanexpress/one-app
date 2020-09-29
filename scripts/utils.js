@@ -15,7 +15,7 @@
  */
 
 const { resolve } = require('path');
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 
 const sampleProdDir = resolve('./prod-sample/');
 const sampleModulesDir = resolve(sampleProdDir, 'sample-modules');
@@ -54,10 +54,48 @@ const promisifySpawn = (...args) => new Promise((res, rej) => {
   });
 });
 
+async function npmInstall({
+  directory, moduleName, moduleVersion, envVars = {},
+}) {
+  console.time(`${moduleName}@${moduleVersion}`);
+  console.log(`⬇️  Installing ${moduleName}@${moduleVersion}...`);
+  try {
+    await promisifySpawn('npm ci', { cwd: directory, shell: true, env: { ...envVars, NODE_ENV: 'development', NPM_CONFIG_PRODUCTION: false } });
+  } catch (error) {
+    console.error(`🚨 ${moduleName}@${moduleVersion} failed to install:`);
+    throw error;
+  }
+  console.log(`✅ ‍${moduleName}@${moduleVersion} Installed!`);
+  console.timeEnd(`${moduleName}@${moduleVersion}`);
+}
+
+async function npmProductionBuild({
+  directory, moduleName, moduleVersion, envVars = {},
+}) {
+  console.time(`${moduleName}@${moduleVersion}`);
+  console.log(`🛠  Building ${moduleName}@${moduleVersion}...`);
+  try {
+    await promisifySpawn('npm run build', { shell: true, cwd: directory, env: { ...envVars, NODE_ENV: 'production' } });
+  } catch (error) {
+    console.error(`🚨 ${moduleName}@${moduleVersion} failed to build:`);
+    throw error;
+  }
+  console.log(`✅ ‍${moduleName}@${moduleVersion} Built!`);
+  console.timeEnd(`${moduleName}@${moduleVersion}`);
+}
+
+const getGitSha = () => {
+  const stdout = execSync('git rev-parse --short HEAD').toString();
+  return stdout.trim();
+};
+
 module.exports = {
   sampleProdDir,
   sampleModulesDir,
   nginxOriginStaticsRootDir,
   sanitizeEnvVars,
   promisifySpawn,
+  npmProductionBuild,
+  npmInstall,
+  getGitSha,
 };
