@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src='https://github.com/americanexpress/one-app/raw/master/one-app.png' alt="One App - One Amex" width='50%'/>
+  <img src='https://github.com/americanexpress/one-app/raw/main/one-app.png' alt="One App - One Amex" width='50%'/>
 </h1>
 
 # One App Client Assets and CDN
@@ -52,7 +52,7 @@ and to recipients of software distributed by American Express, You reserve all
 right, title, and interest, if any, in and to Your Contributions. Please [fill
 out the Agreement](https://cla-assistant.io/americanexpress/one-app).
 
-Please see our [CONTRIBUTING.md](https://github.com/americanexpress/one-app/blob/master/CONTRIBUTING.md).
+Please see our [CONTRIBUTING.md](https://github.com/americanexpress/one-app/blob/main/CONTRIBUTING.md).
 
 ## 🗝️ License
 
@@ -61,5 +61,5 @@ Any contributions made under this project will be governed by the [Apache Licens
 
 ## 🗣️ Code of Conduct
 
-This project adheres to the [American Express Community Guidelines](https://github.com/americanexpress/one-app/blob/master/CODE_OF_CONDUCT.md).
+This project adheres to the [American Express Community Guidelines](https://github.com/americanexpress/one-app/blob/main/CODE_OF_CONDUCT.md).
 By participating, you are expected to honor these guidelines.

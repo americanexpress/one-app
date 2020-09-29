@@ -1,4 +1,4 @@
-[`one-app-bundler`]: https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler
+[`one-app-bundler`]: https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler
 [React]: http://reactjs.org/
 
 <!--ONE-DOCS-HIDE start-->
@@ -57,9 +57,9 @@ build
 `en-us` contains the language packs used for internationalization for the `en-US` locale. As this is
 an example only `en-us` is shown but in your module you may have as many or few locales as needed.
 
-`<moduleName>.browser.js` is the [modern browser bundle](https://github.com/americanexpress/babel-preset-amex/blob/master/browserlist.js#L15).
+`<moduleName>.browser.js` is the [modern browser bundle](https://github.com/americanexpress/babel-preset-amex/blob/main/browserlist.js#L15).
 
-`<moduleName>.legacy.browser.js` is the [legacy browser bundle](https://github.com/americanexpress/babel-preset-amex/blob/master/browserlist.js#L24).
+`<moduleName>.legacy.browser.js` is the [legacy browser bundle](https://github.com/americanexpress/babel-preset-amex/blob/main/browserlist.js#L24).
 
 `<moduleName>.node.js` is the server bundle.
 
