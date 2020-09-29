@@ -100,12 +100,12 @@ Contains a fully qualified `url` to a [Holocron Module] bundle location.
 Contains a hash [SRI](https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity) `integrity` string to validate the contents of a [Holocron Module] bundle.
 
 **📘 More Information**
-* Library: [One App Bundler](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler)
+* Library: [One App Bundler](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler)
 * CLI Command: [npm start](./Cli-Commands.md#start-usage)
 * [Environment Variables](./Environment-Variables.md)
 * [Development Tools](./Development-Tools.md)
 
 [☝️ Return To Top](#module-map-schema)
 
-[Holocron Module Registry]: https://github.com/americanexpress/holocron/blob/master/packages/holocron/docs/api/README.md#module-registry
+[Holocron Module Registry]: https://github.com/americanexpress/holocron/blob/main/packages/holocron/docs/api/README.md#module-registry
 [Holocron Module]: ../README.md#modules

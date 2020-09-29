@@ -39,4 +39,4 @@ jobs:
           body: 'This is an auto-generated pull request for One App release changes. Please review this PR and merge it for a release to be initiated. Please close this PR to stop a release from being initiated.'
           labels: release,automated pr,skip-release-drafter
           branch: prepare-release
-          base: master
+          base: main

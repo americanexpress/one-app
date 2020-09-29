@@ -9,7 +9,7 @@ Releases can be triggered in two ways:
 
 ## Automated release process
 
- 1. An automated pull request will be raised every Wednesday at 16:00 UTC, from a `prepare-release` branch to master. This uses [pull_request_release workflow](.github/workflows/pull_request_release.yml) and updates the [package.json](package.json), [package-lock.json](package-lock.json), [one-app-statics package.json](one-app-statics/package.json) and runs `npm run release:changelog` to generate the changelog. Behind the scene it uses [standard-version](https://github.com/conventional-changelog/standard-version) to update these file versions and [conventional-changelog](https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-changelog-cli) to generate the changelog. The commit message will be in the following format `chore(release): X.X.X` . You can update this pull request to remove or add any new changes.
+ 1. An automated pull request will be raised every Wednesday at 16:00 UTC, from a `prepare-release` branch to main. This uses [pull_request_release workflow](.github/workflows/pull_request_release.yml) and updates the [package.json](package.json), [package-lock.json](package-lock.json), [one-app-statics package.json](one-app-statics/package.json) and runs `npm run release:changelog` to generate the changelog. Behind the scene it uses [standard-version](https://github.com/conventional-changelog/standard-version) to update these file versions and [conventional-changelog](https://github.com/conventional-changelog/conventional-changelog/tree/main/packages/conventional-changelog-cli) to generate the changelog. The commit message will be in the following format `chore(release): X.X.X` . You can update this pull request to remove or add any new changes.
  2. Once a pull request is reviewed, merge the pull request and please ensure that the commit message is updated to follow this pattern  
 
     ``` bash
@@ -47,7 +47,7 @@ This process can be used to make ad hoc releases outside of wednesday release cy
 
  1. Run `npm run release` locally within your branch, this would update [package.json](package.json), [package-lock.json](package-lock.json)and [one-app-statics package.json](one-app-statics/package.json) with the new version to be released. 
  2. Run `npm run release:changelog` to generate and update the changelog.
- 3. Commit using the `chore(release): X.X.X` message format and push your changes to the branch `prepare-release`, then create a pull request to master.
+ 3. Commit using the `chore(release): X.X.X` message format and push your changes to the branch `prepare-release`, then create a pull request to main.
  4. When the changes are merged and reviewed. The same process from [step 3](#automated-release-process) above will be followed.
 
 ## FAQs
