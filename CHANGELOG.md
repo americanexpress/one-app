@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.7.0](https://github.com/americanexpress/one-app/compare/v5.6.1...v5.7.0) (2020-09-30)
+
+
+### Bug Fixes
+
+* **circuit:** disable circuit breaker in development ([#307](https://github.com/americanexpress/one-app/issues/307)) ([1d87967](https://github.com/americanexpress/one-app/commit/1d879672520c8095d2c667f46cf50e64c1d51496))
+
+
+### Features
+
+* **module-text:** remove tags and render text only ([0a1aa68](https://github.com/americanexpress/one-app/commit/0a1aa687201ce9b434a18f54b31fbca33ae5cde0))
+* **prod-sample:** deploy module util ([#308](https://github.com/americanexpress/one-app/issues/308)) ([#323](https://github.com/americanexpress/one-app/issues/323)) ([becfca5](https://github.com/americanexpress/one-app/commit/becfca55db4b260ec5a696f0d85d571623687e66))
+
+
 ## [5.6.1](https://github.com/americanexpress/one-app/compare/v5.6.0...v5.6.1) (2020-09-23)
 
 
