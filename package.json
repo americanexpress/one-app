@@ -83,7 +83,7 @@
     "@americanexpress/one-app-bundler": "^6.10.0",
     "@americanexpress/one-app-ducks": "^4.2.0",
     "@americanexpress/one-app-router": "^1.1.0",
-    "@americanexpress/vitruvius": "^2.0.0",
+    "@americanexpress/vitruvius": "^2.0.2",
     "abort-controller": "^3.0.0",
     "body-parser": "^1.19.0",
     "chalk": "^4.1.0",
