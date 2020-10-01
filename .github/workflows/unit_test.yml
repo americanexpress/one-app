@@ -1,5 +1,11 @@
 name: One App Unit and Lint Tests
-on: pull_request
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 jobs:
   one-app-unit-tests:
     name: One App Unit and Lint Tests
