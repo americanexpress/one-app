@@ -1,5 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`stateConfig methods stateConfig with dev endpoint config dev endpoints should use ip instead of localhost when useHost is passed as arg 1`] = `
+Object {
+  "someOtherApiUrl": "http://127.0.0.1:3002/some-other-api",
+}
+`;
+
+exports[`stateConfig methods stateConfig with dev endpoint config dev endpoints should use ip instead of localhost when useHost is passed as arg 2`] = `
+Object {
+  "someOtherApiUrl": "http://127.0.0.1:3002/some-other-api",
+}
+`;
+
 exports[`stateConfig methods stateConfig with dev endpoint config should show dev endpoint supplied config 1`] = `
 Object {
   "someOtherApiUrl": "http://localhost:3002/some-other-api",
