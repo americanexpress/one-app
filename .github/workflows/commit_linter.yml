@@ -9,10 +9,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
       - name: lint
         run: |
-          FIRST_COMMIT_SHA=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" ${{ github.event.pull_request.commits_url }} | jq -r '.[0].sha')
           NODE_ENV=development npm ci
-          npx commitlint --from $FIRST_COMMIT_SHA^
+          npx commitlint --from HEAD~${{ github.event.pull_request.commits }} --to HEAD
