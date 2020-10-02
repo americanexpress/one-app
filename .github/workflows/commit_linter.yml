@@ -13,4 +13,4 @@ jobs:
       - name: lint
         run: |
           NODE_ENV=development npm ci
-          npm run commitlint -- --from HEAD~${{ github.event.pull_request.commits }} --to HEAD --verbose
+          npx commitlint -- --from HEAD~${{ github.event.pull_request.commits }} --to HEAD --verbose
