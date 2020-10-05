@@ -2,7 +2,7 @@ name: One App Integration Tests
 on:
  push:
    branches:
-    - master
+    - main
     - prepare-release
 jobs:
   one-app-integration:
@@ -28,18 +28,18 @@ jobs:
          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
         run:  |
-         npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=https://one-app-statics.surge.sh
+         npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=${{ secrets.SURGE_DOMAIN }}
          echo 'https://one-app-sample.herokuapp.com' >> sample-module-bundles/CORS
       - name: Teardown Surge
         env:
          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-        run: npx surge teardown ${{ secrets.SURGE_TOKEN }}
+        run: npx surge teardown ${{ secrets.SURGE_DOMAIN }}
       - name: Move sample modules to Surge
         env:
          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
-        run: npx surge sample-module-bundles ${{ secrets.SURGE_TOKEN }}
+        run: npx surge sample-module-bundles ${{ secrets.SURGE_DOMAIN }}
       - name: Login to Heroku Container Registry
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
@@ -54,5 +54,3 @@ jobs:
         run: heroku container:release web -a ${{ secrets.HEROKU_APP_ID }}
       - name: Run Integration Tests on Heroku
         run: ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true npm run test:integration -- --remote-one-app-environment=${{ secrets.HEROKU_APP_URL }}
-
-

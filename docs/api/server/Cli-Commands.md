@@ -204,7 +204,7 @@ Please see the [Environment Variables](./Environment-Variables.md) API docs.
 
 [`concurrently`]: https://www.npmjs.com/package/concurrently
 [Babel]: https://babeljs.io/
-[One App Bundler]: https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler
+[One App Bundler]: https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler
 [Webpack]: https://webpack.js.org/
 [`prod-sample/sample-modules`]: ../../../prod-sample/sample-modules
 [Integration Tests]: #test-commands

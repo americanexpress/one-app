@@ -136,7 +136,7 @@ export default MyModule;
 
 ### Share Reakit Across Your Modules
 
-You can use [one-app-bundler's](https://github.com/americanexpress/one-app-cli/tree/master/packages/one-app-bundler)
+You can use [one-app-bundler's](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler)
 `providedExternals` and `requiredExternals` to avoid duplicating Reakit across all your modules.
 Furthermore, due to Reakit using React's context API, in order for your child modules to leverage
 this, you **MUST** add it to `providedExternals` as well as `requiredExternals`.
