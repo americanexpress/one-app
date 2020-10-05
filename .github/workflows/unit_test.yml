@@ -25,3 +25,6 @@ jobs:
         run:  npm run test:unit
       - name: npm lint test
         run:  npm run test:lint
+      - name: npm commit lint
+        run: npm run test:git-history
+   
