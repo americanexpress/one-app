@@ -17,4 +17,4 @@ jobs:
           FIRST_COMMIT_SHA=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" ${{ github.event.pull_request.commits_url }} | jq -r '.[0].sha')
           echo $FIRST_COMMIT_SHA
           NODE_ENV=development npm ci
-          npx commitlint --from $FIRST_COMMIT_SHA^
+          npm run test:git-history
