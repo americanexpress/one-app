@@ -10,7 +10,6 @@
 
 ## 📖 Table of Contents
 * [Overview](#overview)
-* [Links](#links)
 * [Setup](#setup)
 * [Offline Support](#offline-support)
 * [App Installation](#app-installation)
@@ -21,15 +20,11 @@ In this compilation of mini recipes well be getting our feet wet with Progressiv
 (PWA) in One App. We'll learn about a bit about the service worker and how to use the web
 manifest with One App. Each mini recipe below will cover UX issues and the technical
 solutions to refine your One App PWA.
-If any of these terms are new, we have [links ready to get you familiar.](#links)
+If any of these terms are new, we have links ready to get you familiar below in this section.
 We recommend going through and reviewing the links before using PWA if you haven't
 already done so.
 
-**Examples**
-
-* [`frank-lloyd-root` v0.0.3](frank-lloyd-root) sample module configures and enables PWA.
-
-## Links
+**Links**
 
 If you want to learn more about PWAs, service workers and web manifests,
 here are a collection of links that talk more about the technologies involved:
@@ -42,6 +37,10 @@ here are a collection of links that talk more about the technologies involved:
 - [Permissions](https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API)
 - [Cache](https://developer.mozilla.org/en-US/docs/Web/API/Cache)
 - [Cache Storage](https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage)
+
+**Examples**
+
+* [`frank-lloyd-root` v0.0.3](frank-lloyd-root) sample module configures and enables PWA.
 
 ## Setup
 
