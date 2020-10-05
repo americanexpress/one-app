@@ -10,23 +10,42 @@
 
 ## 📖 Table of Contents
 * [Overview](#overview)
+* [Links](#links)
+* [Setup](#setup)
 * [Offline Support](#offline-support)
 * [App Installation](#app-installation)
-* [Links](#links)
 
 ## Overview
 
 In this compilation of mini recipes well be getting our feet wet with Progressive Web Apps
-(PWA) in One App.
-We'll learn about a bit about the service worker and how to use the web manifest with
-One App. Each mini recipe below will cover UX issues and the technical solutions to refine
-your One App PWA. Let's start by configuring One App to enable the service worker.
-
-If any of these terms are new, we have [links ready to get  you familiar.](#links)
+(PWA) in One App. We'll learn about a bit about the service worker and how to use the web
+manifest with One App. Each mini recipe below will cover UX issues and the technical
+solutions to refine your One App PWA.
+If any of these terms are new, we have [links ready to get you familiar.](#links)
 We recommend going through and reviewing the links before using PWA if you haven't
 already done so.
 
-There is an [example module frank-lloyd-root version 0.0.3](frank-lloyd-root) that enables PWA.
+**Examples**
+
+* [`frank-lloyd-root` v0.0.3](frank-lloyd-root) sample module configures and enables PWA.
+
+## Links
+
+If you want to learn more about PWAs, service workers and web manifests,
+here are a collection of links that talk more about the technologies involved:
+
+- [PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
+- [Service Worker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
+- [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
+- [App Installs](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Developer_guide/Installing)
+- [Online/Offline](https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine/Online_and_offline_events)
+- [Permissions](https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API)
+- [Cache](https://developer.mozilla.org/en-US/docs/Web/API/Cache)
+- [Cache Storage](https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage)
+
+## Setup
+
+Let's start by configuring One App to enable the service worker.
 
 **One App**
 
@@ -63,10 +82,10 @@ if (!global.BROWSER) {
     pwa: {
       serviceWorker: true,
       manifest: {
-        name: 'Drums',
+        name: 'Pottery Store',
         icons: [
           {
-            src: 'https://drums.example.com/images/percussions-96.png',
+            src: 'https://drums.example.com/images/amphora-96.png',
             sizes: '96x96',
             type: 'image/png',
           },
@@ -186,9 +205,10 @@ apps to be installed and placed with other native apps on a given device. What w
 One App is a `manifest.webmanifest` and this resource is a manifest which serves like a web apps
 meta data. It contains the title, images and splash screen for an installed PWA and a
 [list of other options](https://developer.mozilla.org/en-US/docs/Web/Manifest#Members).
-We'll configure a manifest before we begin to make sure it will qualify with the browser.
+We'll configure a manifest before we begin to make sure
+[it will qualify with the browser](https://www.w3.org/TR/appmanifest/#installability-signals).
 
-When a browser concludes that our app is be a website of interest, it first
+When a browser concludes that our web app is of interest to our user, it first
 checks to see if our app has a web manifest and then meets installation standard.
 If qualified, the browser will notify the user with a native prompt to install our
 app or cancel. When a user frequents often, the prompt may appear after the page loads
@@ -199,13 +219,14 @@ when the native prompt appears and how to blend the experience with our own UI.
 
 **Manifest**
 
-Getting the webmanifest right is key to
+Getting the webmanifest right is key as it decides how different parts of our PWA will look.
+Here are a few options we recommend including:
 
 * `name: 'PWA App'` the title of the PWA
 * `short_name: 'PWA'` short version of your name
 * `start_url: '.'` open the PWA to this URL
 * `display: 'standalone'` tells the underlying web view how to display
-* `theme_color: '#f0f0f0'` applies this color is applied to the native UI
+* `theme_color: '#f0f0f0'` applies this color to the native UI
 * `background_color: '#fff'` similar to theme_color, used as background color
 * `description: 'An example PWA.'` A sentence that summarizes your app
 * `icons: [{ src, sizes, type }]` An array of image metadata
@@ -216,7 +237,7 @@ For the splash screen to apply, you will need a big enough image for it to displ
 The different icon sizes will match based on the OS settings. The rest of the config
 tweak how the PWA will be displayed.
 
-**`beforeinstallprompt`**
+[**`beforeinstallprompt`**](https://developer.mozilla.org/en-US/docs/Web/API/BeforeInstallPromptEvent)
 
 Let's suppose we want to display a branded banner when the app is ready to install. This section
 will cover how to integrate your UI with the app install native prompt. The `beforeinstallprompt`
@@ -304,7 +325,7 @@ export default function InstallBanner() {
 }
 ```
 
-**`appinstalled`**
+[**`appinstalled`**](https://developer.mozilla.org/en-US/docs/Web/API/Window/appinstalled_event)
 
 There is of course an `appinstalled` event.
 
@@ -314,18 +335,6 @@ window.addEventListener('appinstalled', () => { /* callback */ });
 
 `appinstalled` is called after a user consents & installs the PWA. Listening
 to the event gives us the chance to move the user out of the browser and into
-the PWA.
-
-## Links
-
-If you want to learn more about PWAs, service workers and web manifests,
-here are a collection of links that talk more about the technologies involved:
-
-- [PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
-- [Service Worker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
-- [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
-- [App Installs](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Developer_guide/Installing)
-- [Online/Offline](https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine/Online_and_offline_events)
-- [Permissions](https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API)
-- [Cache](https://developer.mozilla.org/en-US/docs/Web/API/Cache)
-- [Cache Storage](https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage)
+the PWA. At the time of writing, the event is being deprecated however we can
+use our `beforeinstallprompt`example above to signal to the runtime when the
+web app is installed.
