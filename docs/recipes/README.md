@@ -13,7 +13,7 @@
 * [Enabling Server Side Rendering](./Enabling-Serverside-Rendering.md) 📌
 * [Partial Rendering](./Partial-Rendering.md)
 * [Running A One App Instance Locally](./Running-One-App-Locally.md)
-* [Running In Production](./Running-In-Production.md) 🔨
+* [Running In Production](./Running-In-Production.md)
 * [Monitoring One App](./Monitoring-One-App.md) 📌
 * [Publishing Modules](Publishing-Modules.md)
 
