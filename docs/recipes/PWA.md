@@ -17,7 +17,7 @@
 ## Overview
 
 In this compilation of mini recipes well be getting our feet wet with Progressive Web Apps
-(PWA) in One App. We'll learn about a bit about the service worker and how to use the web
+(PWA) in One App. We'll learn a bit about the service worker and how to use the web
 manifest with One App. Each mini recipe below will cover UX issues and the technical
 solutions to refine your One App PWA.
 If any of these terms are new, we have links ready to get you familiar below in this section.
