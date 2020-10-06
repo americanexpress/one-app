@@ -15,7 +15,9 @@
  */
 
 jest.mock('fs', () => ({ existsSync: jest.fn() }));
+jest.mock('ip', () => ({ address: jest.fn() }));
 jest.mock('fake/path/.dev/endpoints/index.js', () => jest.fn(), { virtual: true });
+jest.mock('yargs', () => ({ argv: {} }));
 jest.mock('../../../src/server/utils/envVarAllowList', () => [
   'ONE_CLIENT_FAKE_SETTING',
   'ONE_FAKE_SETTING',
@@ -32,12 +34,18 @@ describe('stateConfig methods', () => {
   let restoreModuleStateConfig;
   let backupModuleStateConfig;
   let fs;
+  let ip;
+  let yargs;
 
   const originalEnvVars = process.env;
 
   const reloadMocks = () => {
     fs = require('fs');
+    ip = require('ip');
+    yargs = require('yargs');
     jest.spyOn(process, 'cwd').mockImplementation(() => 'fake/path/');
+    ip.address.mockImplementation(() => '127.0.0.1');
+    yargs.argv = {};
     fs.existsSync.mockImplementation(() => false);
     process.env.ONE_CONFIG_ENV = 'qa';
     provideStateConfig = {
@@ -176,6 +184,24 @@ describe('stateConfig methods', () => {
       });
       it('should show dev endpoint supplied config', () => {
         process.env.NODE_ENV = 'development';
+        // eslint-disable-next-line unicorn/import-index, import/no-unresolved
+        require('fake/path/.dev/endpoints/index.js').mockImplementation(() => ({
+          someOtherApiUrl: {
+            devProxyPath: 'some-other-api',
+            destination: 'https://intranet-origin-dev.example.com/some-other-api/v1',
+          },
+        }));
+        ({
+          setStateConfig,
+          getClientStateConfig,
+          getServerStateConfig,
+        } = require('../../../src/server/utils/stateConfig'));
+        expect(getClientStateConfig()).toMatchSnapshot();
+        expect(getServerStateConfig()).toMatchSnapshot();
+      });
+      it('dev endpoints should use ip instead of localhost when useHost is passed as arg', () => {
+        process.env.NODE_ENV = 'development';
+        yargs.argv = { useHost: true };
         // eslint-disable-next-line unicorn/import-index, import/no-unresolved
         require('fake/path/.dev/endpoints/index.js').mockImplementation(() => ({
           someOtherApiUrl: {
