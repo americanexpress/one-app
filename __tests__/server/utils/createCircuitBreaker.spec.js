@@ -78,6 +78,18 @@ describe('Circuit breaker', () => {
     expect(value).toBe(false);
   });
 
+  it('should not open the circuit when threshold not exceeded', async () => {
+    expect.assertions(2);
+    setEventLoopDelayThreshold(250);
+    jest.advanceTimersByTime(510);
+    // Need to fire the breaker once before it will open
+    await mockCircuitBreaker.fire('hola, mundo');
+    jest.clearAllMocks();
+    const value = await mockCircuitBreaker.fire('hola, mundo');
+    expect(asyncFuntionThatMightFail).toHaveBeenCalled();
+    expect(value).toBe(false);
+  });
+
   it('should not open the circuit when the root module is not loaded', async () => {
     expect.assertions(2);
     getModule.mockReturnValueOnce(false);
