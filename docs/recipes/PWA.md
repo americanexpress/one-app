@@ -10,39 +10,40 @@
 
 ## 📖 Table of Contents
 * [Overview](#overview)
-* [Setup](#setup)
+* [Getting Setup](#getting-setup)
 * [Offline Support](#offline-support)
 * [App Installation](#app-installation)
 
 ## Overview
 
-In this compilation of mini recipes well be getting our feet wet with Progressive Web Apps
-(PWA) in One App. We'll learn a bit about the service worker and how to use the web
-manifest with One App. Each mini recipe below will cover UX issues and the technical
-solutions to refine your One App PWA.
-If any of these terms are new, we have links ready to get you familiar below in this section.
-We recommend going through and reviewing the links before using PWA if you haven't
-already done so.
+In this compilation of mini recipes well be getting our feet wet with
+Progressive Web Apps (PWA) in One App. We'll learn a bit about the
+service worker and how to use the web manifest with One App. Each mini
+recipe below will cover UX issues and the technical solutions to refine
+your One App PWA.
 
-**Links**
+**Prerequisites**
 
-If you want to learn more about PWAs, service workers and web manifests,
-here are a collection of links that talk more about the technologies involved:
+If you want to learn more about PWAs in general, or about service workers
+and web manifests, here are a collection of links that talk more about the
+technologies involved:
 
 - [PWA](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
 - [Service Worker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API)
 - [Web App Manifest](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
 - [App Installs](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Developer_guide/Installing)
 - [Online/Offline](https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine/Online_and_offline_events)
-- [Permissions](https://developer.mozilla.org/en-US/docs/Web/API/Permissions_API)
 - [Cache](https://developer.mozilla.org/en-US/docs/Web/API/Cache)
 - [Cache Storage](https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage)
 
+We recommend going through and reviewing the links before using PWA if you haven't
+already done so.
+
 **Examples**
 
-* [`frank-lloyd-root` v0.0.3](frank-lloyd-root) sample module configures and enables PWA.
+* [`frank-lloyd-root@0.0.3`](frank-lloyd-root) sample module configures and enables PWA.
 
-## Setup
+## Getting Setup
 
 Let's start by configuring One App to enable the service worker.
 
@@ -63,6 +64,8 @@ a few options that we can use to turn on the service worker and create a web man
 Here is a sample configuration:
 
 ```jsx
+import React from 'react';
+
 export default function RootModule({ children }) {
   return children;
 }
@@ -72,7 +75,7 @@ RootModule.childRoutes = () => [
 ];
 
 RootModule.holocron = {
-  name: 'root-module',
+  name: 'potters-hut-root',
 };
 
 if (!global.BROWSER) {
@@ -80,11 +83,27 @@ if (!global.BROWSER) {
     // along with other config
     pwa: {
       serviceWorker: true,
+      // enables the service worker
+      scope: '/potters-hut',
+      // scopes the service worker activity
       manifest: {
-        name: 'Pottery Store',
+      // the web manifest; meta data for a PWA
+
+        name: 'Potters Hut',
+        // titles your PWA
+
+        description: 'Pan over historical pottery and modern day twists',
+        // the description provided for your PWA
+
+        start_url: '/potters-hut/pwa/start',
+        // tells the installed PWA which url to open to, which can match
+        // a module route that you can create
+
         icons: [
+        // icons allow for customizing the appearance of your PWA
+        // when the OS decides to use them
           {
-            src: 'https://drums.example.com/images/amphora-96.png',
+            src: 'https://example.com/potters-hut/images/amphora-96.png',
             sizes: '96x96',
             type: 'image/png',
           },
@@ -102,36 +121,71 @@ Once you've enabled the service worker and set up your manifest, you will
 load in a PWA ready One App. The service worker is installed automatically
 and the web manifest we've configured will be added to the rendered HTML.
 Under the hood, [`@americanexpress/one-service-worker`][one-service-worker]
-drives the service worker that One App is using.
-What you will get out of the box is caching for the `one-app` client, your modules,
-including language packs bundled in your package; One App also supports
-offline navigation, which means that when a user requests one of our pages when offline,
-`one-app` client and modules will both load up and it is because what we have already
-cached is given back to the browser when the network is down. Try testing what your modules
-do when offline.
+drives the service worker that One App is using. The service worker can be
+found at `<one-app-instance>/_/pwa/service-worker.js`.
+
+Using the `appConfig.pwa.scope` option set to `/potters-hut`, we can apply where
+to mount the service worker. This will dictate when the worker is active and
+sandboxes it to a given path. Our example config will set the scope over
+`<one-app-instance>/potters-hut` which would only apply the PWA enhancements
+under the provided scope and applied when installed.
+
+**Caching**
+
+What you will get out of the box with One App (when `serviceWorker` is enabled)
+is caching for the `one-app` client and your modules, including language
+packs bundled in your package. One App also provides offline navigation,
+which means that when a user opens our web page while offline,
+both the `one-app` client and modules will both load up - this is
+because what we have already cached by the service worker is given
+back to the browser... when the network is down.
+
+**App Shell**
+
+When there is a network connection, the cached results will continue to be
+served; avoiding network traffic to CDN servers and reserving bandwidth. One
+exception with the cache is that navigating to our web page is never cached,
+it will always call the server first then fallback to the cached app shell
+when offline. The One App app shell is used to load in the base app that will
+start the client when offline and with installed PWAs. The app shell can be
+rendered at `<one-app-instance>/_/pwa/shell`.
 
 **Your development browser matters**
 
 After you've setup, explore around for browsers that provide tools for
-the service worker, the web manifest and the cache.
-Skip to the next paragraph when you've selected a browser.
-
-**Start**
+the service worker, the web manifest and the cache. A browser we often use is
+[Chrome by Google](https://www.google.com/chrome/). The browser has a range of
+panels in its dev tools that interact with all the elements we discuss throughout.
 
 When you're ready to start, here are a few mini recipes to outfit your
 Holocron modules with PWA enhancements.
 
 ## Offline Support
 
-It's important to note that with offline support, users that do encounter
-themselves offline would find parts of the page broken because our modules
-have loaded in but rely on data.
-It is the module owners responsibility to know when the network is offline;
-to respond with an informative UX or support an offline experience for your users.
-When offline, the modules will load as normal, however checks are needed for
-`offline` if we'd want to support the offline experience, or at least inform
-the user on the state of the app and network.
-The good thing is, it's easy to find out when the network is offline:
+Supporting an offline experience for users is a privilege that native apps
+have had from the start, however with PWA we can build offline support for
+our web apps. There are plenty of positives to supporting offline:
+
+* Gives One App a native feel whether in the browser or installed as a PWA
+* Offline navigation makes our web app loadable in both environments
+* One App assets and modules are available via the cache
+
+Some costs to offline for consideration:
+* Additional work is required to support the experience
+
+**Supporting the Experience**
+
+With One App we support the base offline experience however users that do
+encounter themselves offline may find parts of the page fall apart because
+our modules may not have been built with offline in mind. While One App will
+load up along with the modules, data and other factors relying on the network
+would cause failure if not mitigated. It is the module owners responsibility to
+know when the network is offline and act with an informative UX or support an
+offline experience for your users.
+
+The first thing we need to support the offline experience is knowing when
+we're `offline` or connected. Good news, it's pretty easy to find out when
+the network is offline:
 
 ```js
 const updateOnlineStatus = () => (navigator.onLine ? 'online' : 'offline');
@@ -140,9 +194,9 @@ window.addEventListener('online', () => console.log('network status: "%s"', upda
 window.addEventListener('offline', () => console.log('network status: "%s"', updateOnlineStatus()));
 ```
 
-Let's make a React hook that uses both events.
-Once we know if/when we're on or off the network, we can make our modules
-ready for offline and tweak its behavior appropriately.
+Let's make a React hook that uses both events. Once we know if/when
+we're on or off the network, we can make our modules ready for offline
+and tweak its behavior appropriately.
 
 ```jsx
 import React from 'react';
@@ -150,7 +204,12 @@ import { isOffline } from '@americanexpress/one-service-worker';
 
 function useOffline() {
   const [offline, setOffline] = React.useState(false);
+  // since One App renders both client-side and server-side,
+  // useLayoutEffect was used to prevent the hook from running
+  // during SSR
   React.useLayoutEffect(() => {
+    // Alternatively, we can add `if (global.BROWSER) { ... }`
+    // and place any references to the `window` in that block
     const updateStatus = () => setOffline(isOffline());
     window.addEventListener('online', updateStatus);
     window.addEventListener('offline', updateStatus);
@@ -190,8 +249,8 @@ export function OfflineMode() {
 }
 
 export default function MainModule() {
- const isOffline = useOffline();
-  if (isOffline) {
+  const offline = useOffline();
+  if (offline) {
     return <OfflineMode />;
   }
   return <OnlineMode />;
@@ -202,9 +261,9 @@ export default function MainModule() {
 
 App installation bridges our web apps to a native-like experience for our users. It allows web
 apps to be installed and placed with other native apps on a given device. What we do have with
-One App is a `manifest.webmanifest` and this resource is a manifest which serves like a web apps
-meta data. It contains the title, images and splash screen for an installed PWA and a
-[list of other options](https://developer.mozilla.org/en-US/docs/Web/Manifest#Members).
+One App is a `manifest.webmanifest` and this resource serves as the meta data for a web app.
+The manifest contains the title, images and splash screen info for an installed PWA along with
+[a list of other options](https://developer.mozilla.org/en-US/docs/Web/Manifest#Members).
 We'll configure a manifest before we begin to make sure
 [it will qualify with the browser](https://www.w3.org/TR/appmanifest/#installability-signals).
 
@@ -236,6 +295,8 @@ between 96px and 512px optimally and `start_url` to be defined (usually your hom
 For the splash screen to apply, you will need a big enough image for it to display.
 The different icon sizes will match based on the OS settings. The rest of the config
 tweak how the PWA will be displayed.
+
+The webmanifest can be rendered at `<one-app-instance>/_/pwa/manifest.webmanifest`.
 
 [**`beforeinstallprompt`**](https://developer.mozilla.org/en-US/docs/Web/API/BeforeInstallPromptEvent)
 
@@ -336,5 +397,5 @@ window.addEventListener('appinstalled', () => { /* callback */ });
 `appinstalled` is called after a user consents & installs the PWA. Listening
 to the event gives us the chance to move the user out of the browser and into
 the PWA. At the time of writing, the event is being deprecated however we can
-use our `beforeinstallprompt`example above to signal to the runtime when the
+use our `beforeinstallprompt` example above to signal to the runtime when the
 web app is installed.
