@@ -2,7 +2,7 @@
 [👈 Return to Overview](./README.md)
 <!--ONE-DOCS-HIDE end-->
 
-[one-app-config]: ../api/modules/App-Configuration.md
+[one-app-config]: ../api/modules/App-Configuration.md#pwa
 [frank-lloyd-root]: ../../prod-sample/sample-modules/frank-lloyd-root/0.0.3/README.md
 [one-service-worker]: https://github.com/americanexpress/one-service-worker
 
@@ -51,14 +51,14 @@ Let's start by configuring One App to enable the service worker.
 First thing is we need to set `ONE_SERVICE_WORKER` before we run One App:
 
 ```bash
-export ONE_SERVICE_WORKER=1 || true
+export ONE_SERVICE_WORKER=true
 ```
 
 This is set to `false` by default.
 
 **Root Module**
 
-Next step is to add it to your `appConfig` on your root module. The `pwa` key has
+Next step is to add it to your `appConfig` in your root module. The `pwa` key has
 a few options that we can use to turn on the service worker and create a web manifest.
 Here is a sample configuration:
 
@@ -190,7 +190,8 @@ export function OfflineMode() {
 }
 
 export default function MainModule() {
-  if (useOffline()) {
+ const isOffline = useOffline();
+  if (isOffline) {
     return <OfflineMode />;
   }
   return <OnlineMode />;
