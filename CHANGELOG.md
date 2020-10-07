@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.8.0](https://github.com/americanexpress/one-app/compare/v5.7.0...v5.8.0) (2020-10-07)
+
+
+### Bug Fixes
+
+* **holocron:** does not check for global state on component mount ([e36b343](https://github.com/americanexpress/one-app/commit/e36b3437af6eba494583eb1e02e8f0e1370cc847))
+* **stateConfig:** use ip when useHost flag is passed ([#327](https://github.com/americanexpress/one-app/issues/327)) ([4ca50c4](https://github.com/americanexpress/one-app/commit/4ca50c466c5b56af90d7671204101225644d8423))
+* **tests/integration:** offline cache timing ([20c85e6](https://github.com/americanexpress/one-app/commit/20c85e66e103f5ebee26821f8bc7616e2e633e33))
+
+
+### Features
+
+* **csp:** loosen development to use localhost or ip '*' ([#331](https://github.com/americanexpress/one-app/issues/331)) ([1bad920](https://github.com/americanexpress/one-app/commit/1bad920d673ab72d61baf3abe77f28cdc360f696))
+
+
 # [5.7.0](https://github.com/americanexpress/one-app/compare/v5.6.1...v5.7.0) (2020-09-30)
 
 
