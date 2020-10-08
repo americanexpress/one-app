@@ -6,7 +6,7 @@
 [frank-lloyd-root]: ../../prod-sample/sample-modules/frank-lloyd-root/0.0.3/README.md
 [one-service-worker]: https://github.com/americanexpress/one-service-worker
 
-# PWA
+# Progressive One App
 
 ## 📖 Table of Contents
 * [Overview](#overview)
