@@ -10,7 +10,7 @@ The following options provide ways to ensure that server side requested data is 
 
 ## Using `loadModuleData`
 
-One App v5 introduced [`loadModuleData`](https://one-amex-docs.americanexpress.com/en-us/one-app/api/modules/loading-data) which is invoked on the server before rendering a module.
+One App v5 introduced [`loadModuleData`](https://one-amex-docs.americanexpress.com/en-us/one-app/api/modules/loading-data) which is invoked on the server and client.
 
 ```jsx
 YourModule.holocron = {
@@ -48,23 +48,22 @@ const BookList = () => {
 
 BookList.holocron = {
   loadModuleData: async ({ store: { dispatch, getState }, fetchClient }) => {
-    if (global.BROWSER) {
-      return;
-    }
-    const fetchye = makeServerFetchye({
+    if (!global.BROWSER) {
+      const fetchye = makeServerFetchye({
       // Redux store
-      store: { dispatch, getState },
-      // Use ImmutableCache as One App uses ImmutableJS
-      cache: ImmutableCache({
+        store: { dispatch, getState },
+        // Use ImmutableCache as One App uses ImmutableJS
+        cache: ImmutableCache({
         // Selector to wherever fetchye reducer exists in Redux
-        cacheSelector: (state) => state.getIn(['modules', 'my-module-root', 'fetchye']),
-      }),
-      fetchClient,
-    });
+          cacheSelector: (state) => state.getIn(['modules', 'my-module-root', 'fetchye']),
+        }),
+        fetchClient,
+      });
 
-    // async/await fetchye has same arguments as useFetchye
-    // dispatches events into the server side Redux store
-    await fetchye('http://example.com/api/books/');
+      // async/await fetchye has same arguments as useFetchye
+      // dispatches events into the server side Redux store
+      await fetchye('http://example.com/api/books/');
+    }
   },
 };
 
