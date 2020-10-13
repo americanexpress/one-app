@@ -10,7 +10,7 @@
 * [Routing and Navigation](./Routing-And-Navigation.md)
 * [Code Splitting using Holocron](./Code-Splitting-Using-Holocron.md)
 * [Internationalizing your Module](./Internationalizing-Your-Module.md)
-* [Enabling Server Side Rendering](./Enabling-Serverside-Rendering.md) 📌
+* [Enabling Server Side Rendering](./Enabling-Serverside-Rendering.md)
 * [Partial Rendering](./Partial-Rendering.md)
 * [Running A One App Instance Locally](./Running-One-App-Locally.md)
 * [Running In Production](./Running-In-Production.md)
