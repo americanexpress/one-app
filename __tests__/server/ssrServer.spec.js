@@ -17,7 +17,10 @@
 import request from 'supertest';
 
 jest.mock('express');
-jest.mock('body-parser', () => ({ json: jest.fn(() => (req, res, next) => next()) }));
+jest.mock('body-parser', () => ({
+  json: jest.fn(() => (req, res, next) => next()),
+  urlencoded: jest.fn(() => (req, res, next) => next()),
+}));
 jest.mock('../../src/server/middleware/clientErrorLogger');
 jest.mock('../../src/server/middleware/setAppVersionHeader');
 jest.mock('../../src/server/middleware/addSecurityHeaders');
@@ -109,13 +112,14 @@ describe('ssrServer', () => {
     let addFrameOptionsHeader;
     let addCacheHeaders;
     let json;
+    let urlencoded;
     let forwardedHeaderParser;
     let serviceWorker;
     let webManifest;
     let offline;
 
     function loadServer() {
-      ({ json } = require('body-parser'));
+      ({ json, urlencoded } = require('body-parser'));
       clientErrorLogger = require('../../src/server/middleware/clientErrorLogger').default;
       setAppVersionHeader = require('../../src/server/middleware/setAppVersionHeader').default;
       addSecurityHeaders = require('../../src/server/middleware/addSecurityHeaders').default;
@@ -420,6 +424,25 @@ describe('ssrServer', () => {
           .post('/route')
           .end(() => {
             expect(json).toBeCalled();
+            expect(json.mock.calls[2][0]).toHaveProperty('limit', '15kb');
+            done();
+          });
+      });
+      it('should configure urlencoded parsing with a maximum limit for render post pre-flight options calls', (done) => {
+        request(loadServer())
+          .options('/route')
+          .end(() => {
+            expect(urlencoded).toBeCalled();
+            expect(json.mock.calls[1][0]).toHaveProperty('limit', '0kb');
+            done();
+          });
+      });
+
+      it('should configure json urlencoded with a maximum limit for render post calls', (done) => {
+        request(loadServer())
+          .post('/route')
+          .end(() => {
+            expect(urlencoded).toBeCalled();
             expect(json.mock.calls[2][0]).toHaveProperty('limit', '15kb');
             done();
           });
