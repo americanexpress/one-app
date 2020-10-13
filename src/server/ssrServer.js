@@ -23,7 +23,7 @@ import path from 'path';
 import express from 'express';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import { json } from 'body-parser';
+import { json, urlencoded } from 'body-parser';
 import helmet from 'helmet';
 import cors from 'cors';
 
@@ -96,6 +96,7 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
       '*',
       addSecurityHeaders,
       json({ limit: '0kb' }), // there should be no body
+      urlencoded({ limit: '0kb' }), // there should be no body
       cors({ origin: false }) // disable CORS
     );
 
@@ -103,6 +104,7 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
       '*',
       addSecurityHeaders,
       json({ limit: '15kb' }),
+      urlencoded({ limit: '15kb' }),
       addFrameOptionsHeader,
       createRequestStore(oneApp, { useBodyForBuildingTheInitialState: true }),
       createRequestHtmlFragment(oneApp),
