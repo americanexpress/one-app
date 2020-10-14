@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.9.0](https://github.com/americanexpress/one-app/compare/v5.8.0...v5.9.0) (2020-10-14)
+
+
+### Features
+
+* **ssrServer:** enable urlencoded post data ([#313](https://github.com/americanexpress/one-app/issues/313)) ([3481dc0](https://github.com/americanexpress/one-app/commit/3481dc0bbe26865b234df01fa2effc60ad41634e))
+
+
 # [5.8.0](https://github.com/americanexpress/one-app/compare/v5.7.0...v5.8.0) (2020-10-07)
 
 
