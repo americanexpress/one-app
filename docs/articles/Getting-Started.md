@@ -5,7 +5,7 @@ One App is a web application that combines together multiple experiences into a 
 cohesive runtime. These experiences, or Holocron modules as we call them empower teams
 to craft a rich user experience that can be used to compose parts of a web page or as
 route destinations all on their own. One App was built from the ground up with Holocron
-and its micro front-end architecture, allowing engineers to seamlessly update each module
+and its micro front end architecture, allowing engineers to seamlessly update each module
 independently and collaborate across teams working together to create a product. While
 One App comes with a security standard in practice, progressive web app capability and
 many other features, its feature set can be configured by Holocron modules to your
@@ -75,7 +75,7 @@ npm run watch:build
 ```
 
 and this will watch for any changes made to your module, then update `one-app-runner`
-with the rebuilt module bundle. The command above uses`one-app-bundler`which can
+with the rebuilt module bundle. The command above uses `one-app-bundler` which can
 also be used to bundle our Holocron module.
 
 ```bash
