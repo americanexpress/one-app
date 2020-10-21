@@ -5,7 +5,7 @@ One App is a web application that combines together multiple experiences into a 
 cohesive runtime. These experiences, or Holocron modules as we call them empower teams
 to craft a rich user experience that can be used to compose parts of a web page or as
 route destinations all on their own. One App was built from the ground up with Holocron
-and its micro front end architecture, allowing engineers to seamlessly update each module
+and its micro frontend architecture, allowing engineers to seamlessly update each module
 independently and collaborate across teams working together to create a product. While
 One App comes with a security standard in practice, progressive web app capability and
 many other features, its feature set can be configured by Holocron modules to your
@@ -29,8 +29,7 @@ One App essentials to get up and running quickly.
 
 The first step to get started with One App is to generate a Holocron module.
 There are two different Holocron module types, root and child module. Let us
-start by creating a root Holocron module, the entry point to our micro front
-end.
+start by creating a root Holocron module, the entry point to our micro frontend.
 
 ```bash
 export NODE_ENV=development
