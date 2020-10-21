@@ -42,11 +42,9 @@ function listenHttps(app, cb) {
   const serverOptions = {
     key: fs.readFileSync(process.env.HTTPS_PRIVATE_KEY_PATH),
     cert: fs.readFileSync(process.env.HTTPS_PUBLIC_CERT_CHAIN_PATH),
+    minVersion: 'TLSv1.2',
   };
 
-  // TODO: support all HTTPS/TLS options
-  // https://nodejs.org/api/https.html#https_https_createserver_options_requestlistener
-  // https://nodejs.org/api/tls.html#tls_tls_createsecurecontext_options
   if (process.env.HTTPS_TRUSTED_CA_PATH) {
     Object.assign(serverOptions, {
       // self-signed certificate to the upstream load balancer
