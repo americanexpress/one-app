@@ -1,5 +1,4 @@
-Getting Started
----------------
+# Getting Started
 
 One App is a web application that combines together multiple experiences into a single,
 cohesive runtime. These experiences, or Holocron modules as we call them empower teams
@@ -21,7 +20,7 @@ One App essentials to get up and running quickly.
 * [Running One App](#running-one-app)
 * [Adding CSS Styles](#adding-css-styles)
 * [Creating Routes](#creating-routes)
-* [Module State & Data](#module-state-&-data)
+* [Module State and Data](#module-state-and-data)
 * [Configuring One App](#configuring-one-app)
 * [Development](#development)
 
@@ -229,7 +228,7 @@ MyModule.childRoutes = () => [
 >
 > [`holocron-module-route`](https://github.com/americanexpress/holocron/tree/main/packages/holocron-module-route)
 
-### Module State & Data
+### Module State and Data
 
 Holocron modules have another special property `Module.holocron` we can be added to allow us
 to configure the module. Within `holocron`, we can set keys like `reducer` to include a module
