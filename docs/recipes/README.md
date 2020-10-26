@@ -17,6 +17,7 @@
 * [Monitoring One App](./Monitoring-One-App.md) 📌
 * [Publishing Modules](Publishing-Modules.md)
 * [Progressive One App](PWA.md)
+* [Reporting Client Errors](./Reporting-Client-Errors.md)
 
 > 🔨 = This guide is a work-in-progress.
 > 📌 = This guide needs to be written.
