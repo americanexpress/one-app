@@ -90,7 +90,7 @@ describe('server listen', () => {
       listen(app, cb);
       expect(https.createServer).toHaveBeenCalledTimes(1);
       expect(https.createServer).toHaveBeenCalledWith(
-        { key: undefined, cert: undefined },
+        { key: undefined, cert: undefined, minVersion: 'TLSv1.2' },
         app
       );
       expect(https.mock.servers[0].listen).toHaveBeenCalledTimes(1);
@@ -149,7 +149,7 @@ describe('server listen', () => {
 
         expect(https.createServer).toHaveBeenCalledTimes(1);
         expect(https.createServer).toHaveBeenCalledWith(
-          { key: undefined, cert: undefined },
+          { key: undefined, cert: undefined, minVersion: 'TLSv1.2' },
           app
         );
         expect(https.mock.servers[0].listen).toHaveBeenCalledTimes(1);
@@ -204,6 +204,7 @@ describe('server listen', () => {
           {
             key: undefined,
             cert: undefined,
+            minVersion: 'TLSv1.2',
             ca: [undefined],
           },
           app
@@ -233,6 +234,7 @@ describe('server listen', () => {
           {
             key: undefined,
             cert: undefined,
+            minVersion: 'TLSv1.2',
             passphrase: undefined,
           },
           app
