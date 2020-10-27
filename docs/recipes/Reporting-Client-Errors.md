@@ -9,9 +9,9 @@
 `one-app` includes the [`errorReporting`](https://github.com/americanexpress/one-app-ducks#errorreporting-duck)
 duck from `one-app-ducks` which will log any errors reported by dispatching the [`addErrorToReport`](https://github.com/americanexpress/one-app-ducks#adderrortoreport) action. This provides your modules with a simple and efficient way to report errors from the client.
 
-When `addErrorToReport` is dispatched during SSR the `errorReporting` duck will log the reported error
+When `addErrorToReport` is dispatched during SSR, the `errorReporting` duck will log the reported error
 to `console.error`. If dispatched on the client `addErrorToReport` will result in the error being `POST`ed
-to the `reportingUrl` configured by the [`ONE_CLIENT_REPORTING_URL`](https://github.com/americanexpress/one-app/blob/main/docs/api/server/Environment-Variables.md#one_client_reporting_url).
+to the `reportingUrl` configured by the [`ONE_CLIENT_REPORTING_URL`](https://github.com/americanexpress/one-app/blob/main/docs/api/server/Environment-Variables.md#one_client_reporting_url) URL.
 
 > `ONE_CLIENT_REPORTING_URL` defaults to `/_/report/errors` in development but it will need to be set in production.
 
@@ -85,7 +85,7 @@ ErrorBoundary.propTypes = {
 export default connect()(ErrorBoundary);
 ```
 
-Read more about [error boundaries](https://reactjs.org/docs/error-boundaries.html) the React website.
+Read more about [error boundaries](https://reactjs.org/docs/error-boundaries.html) on the React website.
 
 <!--ONE-DOCS-HIDE start-->
 [☝️ Return To Top](#reporting-client-errors)
