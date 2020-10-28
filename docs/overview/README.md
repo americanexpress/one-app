@@ -14,7 +14,7 @@ The benefits to using One App include:
 
 - **Micro Frontends:** Powered by Holocron, One App allows for code splitting via independently developed, tested, and deployed Modules.
 - **Decoupled Codebases:** Each Holocron module has its own repository, reducing large and overwhelming codebases and helping developers to understand the code better. This also avoids accidental coupling by setting specific boundaries.
-- **Security:** Configurable security settings, all pages are protected by a content security policy and all modules are injected with sub-resource integrity.
+- **Security:** Configurable security settings, all pages are protected by a content security policy and all modules are loaded with sub-resource integrity.
 - **Flexibility:** An omnichannel solution to UI. Whether you're performing serverside, clientside, delivering modules as a service to web email or phone/IoT clients. One App covers this for you.
 - **Scalability:** Wrapped within an application that scales across 1,000's of engineers and multiple units of an enterprise website.
 - **Reusability:** Modules built as independent user experiences can be easily reused by multiple applications.
@@ -55,4 +55,3 @@ By Passing the `moduleMapUrl` option in the runner section of `package.json`, th
 <h1 align="center">
   <img src='https://raw.githubusercontent.com/americanexpress/one-app/docs/overview/docs/overview/images/one-app-dev.jpg' alt="One App - Development Diagram" />
 </h1>
-
