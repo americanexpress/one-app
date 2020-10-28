@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.10.1](https://github.com/americanexpress/one-app/compare/v5.10.0...v5.10.1) (2020-10-28)
+
+
+### Bug Fixes
+
+* **security:** specify min TLS version ([bc460aa](https://github.com/americanexpress/one-app/commit/bc460aa51e27a51d8d4e78d73321d43c593d1c9e))
+
+
 # [5.10.0](https://github.com/americanexpress/one-app/compare/v5.9.0...v5.10.0) (2020-10-21)
 
 
