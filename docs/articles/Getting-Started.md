@@ -1,4 +1,8 @@
-# Getting Started
+<!--ONE-DOCS-HIDE start-->
+[👈 Return to Overview](./README.md)
+<!--ONE-DOCS-HIDE end-->
+
+# Getting Started With One App
 
 One App is a web application that combines together a micro frontend of Holocron components
 into a single, cohesive runtime. Holocron modules empower teams to craft a rich user
@@ -21,7 +25,7 @@ One App essentials to get up and running quickly.
 * [Creating Routes](#creating-routes)
 * [Module State and Data](#module-state-and-data)
 * [Configuring One App](#configuring-one-app)
-* [Development](#development)
+* [Development Setup](#development-setup)
 
 ### Generating a Module
 
@@ -31,7 +35,6 @@ start by creating a root Holocron module, the entry point to our micro frontend.
 
 ```bash
 export NODE_ENV=development
-
 npx -p yo -p @americanexpress/generator-one-app-module -- yo @americanexpress/one-app-module
 ```
 
