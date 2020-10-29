@@ -334,10 +334,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 export default function MyModule() {
-  const { theme } = useSelector(
-    (state) => state.get('config'),
-    (state) => state.toJS()
-  );
+ const theme = useSelector((state) => state.getIn(['config', 'theme']));
 
   return (
     <p>
