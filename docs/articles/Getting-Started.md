@@ -1,14 +1,13 @@
 # Getting Started
 
-One App is a web application that combines together multiple experiences into a single,
-cohesive runtime. These experiences, or Holocron modules as we call them empower teams
-to craft a rich user experience that can be used to compose parts of a web page or as
-route destinations all on their own. One App was built from the ground up with Holocron
-and its micro frontend architecture, allowing engineers to seamlessly update each module
-independently and collaborate across teams working together to create a product. While
-One App comes with a security standard in practice, progressive web app capability and
-many other features, its feature set can be configured by Holocron modules to your
-exact specification.
+One App is a web application that combines together a micro frontend of Holocron components
+into a single, cohesive runtime. Holocron modules empower teams to craft a rich user
+experience that can be used to compose parts of a web page or as route destinations all
+on their own. One App was built from the ground up with Holocron and its micro frontend
+architecture, allowing engineers to seamlessly update each module independently and
+collaborate across teams working together to create a product. While One App comes with
+a security standard in practice, progressive web app capability and many other features,
+its feature set can be configured by Holocron modules to your exact specification.
 
 This guide will get us started with One App and will go over some of the
 fundamental concepts of the framework. We will start from the beginning
@@ -33,21 +32,25 @@ start by creating a root Holocron module, the entry point to our micro frontend.
 ```bash
 export NODE_ENV=development
 
-npx -p yo -p @americanexpress/generator-one-app-module \\
--- yo @americanexpress/one-app-module
+npx -p yo -p @americanexpress/generator-one-app-module -- yo @americanexpress/one-app-module
 ```
 
 Once the command is executed, you will be prompted to fill out a few questions
-about your new module before it is generated. 
+about your new module before it is generated.
 
-- Choose a name for your module.
+- Choose a name for your module
 - Select "root module"
-- Select "yes" for parrot middleware. 
-- Select "yes" for internationalization
+- Select "yes" for `parrot-middleware`
+- Select "yes" for `internationalization`
 
-> Read about `parrot middleware` and `internationalization`...
+> Read more about [`parrot-middleware`](https://github.com/americanexpress/parrot/tree/master/packages/parrot-middleware)
+> and [`internationalization`](../recipes/internationalizing-your-module)
 
 Once the root module is generated we will be able to start developing with One App.
+As we continue, we will eventually create a child Holocron module for us to use -
+the main difference between a root module and child module is that the root module
+is the entry point of the micro frontend and as we will learn more on, it plays
+a significant role in configuring One App.
 
 > #### More Info
 >
@@ -63,28 +66,38 @@ Once the root module is generated we will be able to start developing with One A
 
 ### Running One App
 
-Every Holocron module that is generated comes with pre-installed scripts. One of these scripts is `npm start` which starts up `one-app-runner`.
+Every Holocron module that is generated comes with pre-installed scripts.
+One of these scripts is `npm start` which starts up `one-app-runner`.
 
-> `one-app-runner` aids in local development by pulling a `one-app` docker image and running it with a set configuration provided in your modules `package.json`.
+> `one-app-runner` aids in local development by pulling a `one-app` docker image
+> and running it with a set configuration provided in your modules `package.json`.
 
 ```bash
 npm start
 ```
 
 When `one-app-runner` is fully loaded and running, we can navigate to `http://localhost:3000`
-and view our Holocron module in the browser. In another terminal window you can run
+and view our Holocron module in the browser.
+
+> It can take a few minutes when `one-app-runner` starts for the first time.
+
+In a new terminal window you can run:
 
 ```bash
 npm run watch:build
 ```
 
-`npm run watch:build` will watch for any changes made to your module, and rebuild the module bundle.
+`npm run watch:build` will watch for any changes made to your module,
+and rebuild the module bundle. When we're ready to publish our Holocron
+module, we can build and bundle your Holocron module by running:
 
 ```bash
 npm run build
 ```
 
-When ready to publish to production, make sure to set `NODE_ENV=production` before building.
+> When ready to publish to production, make sure to set `NODE_ENV=production`
+> before building. This will ensure a production ready Holocron module and turn
+> on key security mechanisms like SRI for Holocron module scripts.
 
 **Local Configuration**
 
@@ -96,9 +109,6 @@ tools in our ecosystem.
 {
   "name": "my-module",
   "one-amex": {
-    "bundler": {
-      "webpackConfigPath": "webpack.config.js"
-    },
     "runner": {
       "rootModuleName": "my-module",
       "modules": [
@@ -112,8 +122,6 @@ tools in our ecosystem.
 
 When you start using child modules, `one-app-runner` can include
 multiple local modules when it's configured to accept them.
-`one-app-bundler` can have it's `webpack` config extended along
-with other options.
 
 > #### More Info
 >
@@ -152,7 +160,7 @@ separate file that is used with the markup we write in our module.
 
 We can import the stylesheet into our module and use CSS modules to access the class name
 for each selector by its name. The class names are unique when they are generated which
-avoids unwanted cascading of styles in our document.
+avoids unwanted cascading of styles in our document and DOM selector collisions.
 
 `src/components/MyModule.jsx`
 
@@ -182,9 +190,7 @@ export default function MyModule() {
 One App has built in dynamic routing that uses each Holocron module to
 build out the router. There is a special property that we can assign to
 our module `Module.childRoutes` which would allow us to add routes to
-One App. `childRoutes` should be assigned a function that is given
-the Redux `store` used by the app, which can be useful when using
-route hooks like `onEnter`.
+One App.
 
 `src/components/MyModule.jsx`
 
@@ -213,6 +219,12 @@ MyModule.childRoutes = () => [
   />,
 ];
 ```
+
+`childRoutes` can be assigned a function that is given
+the Redux `store` used by the app, which can be useful when using
+route hooks like `onEnter`. If the Redux store is not needed, `childRoutes`
+can be an `array` of `Route`s and `ModuleRoute`s or a single `Route`
+if that is all that's needed.
 
 > #### More Info
 >
@@ -255,9 +267,9 @@ function DataVisualizer({ data, loaded }) {
   );
 }
 
-export default function MyModule({ moduleState = {}, moduleLoadStatus = 'loading' }) {
+export default function MyModule({ moduleState = {} }) {
   return (
-    <DataVisualizer data={moduleState} loaded={moduleLoadStatus === 'loaded'} />
+    <DataVisualizer data={moduleState} loaded={!!moduleState} />
   );
 }
 
@@ -338,7 +350,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 
 export default function MyModule() {
- const theme = useSelector((state) => state.getIn(['config', 'theme']));
+  const theme = useSelector((state) => state.getIn(['config', 'theme']));
 
   return (
     <p>
@@ -376,7 +388,12 @@ if (!global.BROWSER) {
 >
 > [`@americanexpress/one-service-worker`](https://github.com/americanexpress/one-service-worker)
 
-### Development
+### Development Setup
+
+As you continue developing with One App, you will find yourself needing more
+powerful development tools as you increasingly advance in your usage. Below are
+a few Recipes and API documentation to help you out with common development
+needs.
 
 **Recipes**
 
