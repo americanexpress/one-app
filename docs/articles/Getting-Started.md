@@ -57,9 +57,9 @@ to start developing with One App.
 
 ### Running One App
 
-Every Holocron module that is generated comes with pre-installed scripts that can
-be run afterwards. One of these scripts is the `npm start` script that starts up
-`one-app-runner`, which is our primary tool for local development.
+Every Holocron module that is generated comes with pre-installed scripts. One of these scripts is `npm start` which starts up `one-app-runner`.
+
+> `one-app-runner` aids in local development by pulling a `one-app` docker image and running it with a set configuration provided in your modules `package.json`.
 
 ```bash
 npm start
@@ -72,9 +72,7 @@ and view our Holocron module in the browser. In another terminal window you can 
 npm run watch:build
 ```
 
-and this will watch for any changes made to your module, then update `one-app-runner`
-with the rebuilt module bundle. The command above uses `one-app-bundler` which can
-also be used to bundle our Holocron module.
+`npm run watch:build` will watch for any changes made to your module, and rebuild the module bundle.
 
 ```bash
 npm run build
@@ -230,7 +228,7 @@ MyModule.childRoutes = () => [
 
 ### Module State and Data
 
-Holocron modules have another special property `Module.holocron` we can be added to allow us
+Holocron modules have a special property called `Module.holocron` that allows us
 to configure the module. Within `holocron`, we can set keys like `reducer` to include a module
 reducer with the Redux `store` used by One App. There is also `loadModuleData` that is called
 during server side render and when a Holocron module is loaded by One App. When we combine the
