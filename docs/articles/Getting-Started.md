@@ -38,10 +38,16 @@ npx -p yo -p @americanexpress/generator-one-app-module \\
 ```
 
 Once the command is executed, you will be prompted to fill out a few questions
-about your new module before it is generated. Starting off, we will want to name
-our module and make sure that it is a root module; feel free to answer as you
-wish for the other questions. Once the root module is generated we will be able
-to start developing with One App.
+about your new module before it is generated. 
+
+- Choose a name for your module.
+- Select "root module"
+- Select "yes" for parrot middleware. 
+- Select "yes" for internationalization
+
+> Read about `parrot middleware` and `internationalization`...
+
+Once the root module is generated we will be able to start developing with One App.
 
 > #### More Info
 >
