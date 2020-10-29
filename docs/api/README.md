@@ -63,5 +63,6 @@ The One App Server, `one-app`, provides a runtime for serving an HTML document w
 * [Module Map Schema](./server/Module-Map-Schema.md)
 * [Environment Variables](./server/Environment-Variables.md)
 * [Development Tools](./server/Development-Tools.md)
+* [Server Routes](./server/Routes.md)
 
 [☝️ Return To Top](#%EF%B8%8F-api)
