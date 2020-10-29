@@ -29,8 +29,8 @@ Want to get paid for your contributions to `one-app`?
 
 * [Features](#-features)
 * [Usage](#-usage)
-* [Recipes](#-recipes)
-* [API](#%EF%B8%8F-api)
+* [Recipe Docs](./docs/recipes/README.md)
+* [API Docs](./docs/api/README.md)
 * [License](#%EF%B8%8F-license)
 * [Code Of Conduct](#%EF%B8%8F-code-of-conduct)
 * [Contributing](#-contributing)
