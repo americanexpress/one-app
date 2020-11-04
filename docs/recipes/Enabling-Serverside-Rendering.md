@@ -29,7 +29,7 @@ YourModule.holocron = {
 
 ```jsx
 import React, { Fragment } from 'react';
-import ImmutableCache from 'fetchye-immutable-cache';
+import { ImmutableCache } from 'fetchye-immutable-cache';
 import { useFetchye, makServerFetchye } from 'fetchye';
 
 const BookList = () => {
