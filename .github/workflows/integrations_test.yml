@@ -3,6 +3,7 @@ on:
  push:
    branches:
     - main
+    - fix/surge-dependency
     - prepare-release
 jobs:
   one-app-integration:
@@ -29,7 +30,7 @@ jobs:
          SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
         run:  |
          npm run build:sample-modules -- --archive-built-artifacts --bundle-statics-origin=${{ secrets.SURGE_DOMAIN }}
-         echo 'https://one-app-sample.herokuapp.com' >> sample-module-bundles/CORS
+         echo ${{ secrets.HEROKU_APP_URL }} >> sample-module-bundles/CORS
       - name: Teardown Surge
         env:
          SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
