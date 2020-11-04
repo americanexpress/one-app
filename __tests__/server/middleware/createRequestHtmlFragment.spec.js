@@ -37,9 +37,9 @@ jest.mock('holocron', () => ({
 
 jest.mock('../../../src/server/utils/createCircuitBreaker', () => {
   const breaker = jest.fn();
-  const mockCreateCircuitBreaker = (asyncFuntionThatMightFail) => {
+  const mockCreateCircuitBreaker = (asyncFunctionThatMightFail) => {
     breaker.fire = jest.fn((...args) => {
-      asyncFuntionThatMightFail(...args);
+      asyncFunctionThatMightFail(...args);
       return false;
     });
     return breaker;
