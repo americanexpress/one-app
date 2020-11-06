@@ -54,16 +54,16 @@ const checkMaxEventLoopDelay = async () => {
   }
 };
 
-const createCircuitBreaker = (asyncFuntionThatMightFail) => {
-  // asyncFuntionThatMightFail should return false to indicate fallback is not needed
-  const breaker = new CircuitBreaker(asyncFuntionThatMightFail, options);
+const createCircuitBreaker = (asyncFunctionThatMightFail) => {
+  // asyncFunctionThatMightFail should return false to indicate fallback is not needed
+  const breaker = new CircuitBreaker(asyncFunctionThatMightFail, options);
   // Fallback returns true to indicate fallback behavior is needed
   breaker.fallback(() => true);
   // Check the max event loop delay every 500ms
   breaker.healthCheck(checkMaxEventLoopDelay, 500);
   // Log when circuit breaker opens and closes
-  breaker.on('open', () => console.log(`Circuit breaker [${asyncFuntionThatMightFail.name}] opened`));
-  breaker.on('close', () => console.log(`Circuit breaker [${asyncFuntionThatMightFail.name}] closed`));
+  breaker.on('open', () => console.log(`Circuit breaker [${asyncFunctionThatMightFail.name}] opened`));
+  breaker.on('close', () => console.log(`Circuit breaker [${asyncFunctionThatMightFail.name}] closed`));
   breaker.on('healthCheckFailed', (error) => console.error(error));
   // Track circuit breaker metrics
   registerCircuitBreaker(breaker);
