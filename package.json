@@ -121,7 +121,7 @@
     "serialize-error": "^7.0.1",
     "striptags": "^3.1.1",
     "transit-immutable-js": "^0.8.0",
-    "transit-js": "^0.8.861",
+    "transit-js": "^0.8.867",
     "url-polyfill": "^1.1.9",
     "uuid": "^8.1.0",
     "yargs": "^15.3.1"
