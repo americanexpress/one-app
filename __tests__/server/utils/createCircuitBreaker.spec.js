@@ -23,8 +23,8 @@ import createCircuitBreaker, {
 
 jest.useFakeTimers();
 
-const asyncFuntionThatMightFail = jest.fn(async () => false);
-const mockCircuitBreaker = createCircuitBreaker(asyncFuntionThatMightFail);
+const asyncFunctionThatMightFail = jest.fn(async () => false);
+const mockCircuitBreaker = createCircuitBreaker(asyncFunctionThatMightFail);
 
 jest.mock('holocron', () => ({
   getModule: jest.fn(() => true),
@@ -49,7 +49,7 @@ describe('Circuit breaker', () => {
     expect.assertions(2);
     const input = 'hello, world';
     const value = await mockCircuitBreaker.fire(input);
-    expect(asyncFuntionThatMightFail).toHaveBeenCalledWith(input);
+    expect(asyncFunctionThatMightFail).toHaveBeenCalledWith(input);
     expect(value).toBe(false);
   });
 
@@ -61,7 +61,7 @@ describe('Circuit breaker', () => {
     await mockCircuitBreaker.fire('hola, mundo');
     jest.clearAllMocks();
     const value = await mockCircuitBreaker.fire('hola, mundo');
-    expect(asyncFuntionThatMightFail).not.toHaveBeenCalled();
+    expect(asyncFunctionThatMightFail).not.toHaveBeenCalled();
     expect(value).toBe(true);
   });
 
@@ -74,7 +74,7 @@ describe('Circuit breaker', () => {
     await mockCircuitBreaker.fire('hola, mundo');
     jest.clearAllMocks();
     const value = await mockCircuitBreaker.fire('hola, mundo');
-    expect(asyncFuntionThatMightFail).toHaveBeenCalled();
+    expect(asyncFunctionThatMightFail).toHaveBeenCalled();
     expect(value).toBe(false);
   });
 
@@ -86,7 +86,7 @@ describe('Circuit breaker', () => {
     await mockCircuitBreaker.fire('hola, mundo');
     jest.clearAllMocks();
     const value = await mockCircuitBreaker.fire('hola, mundo');
-    expect(asyncFuntionThatMightFail).toHaveBeenCalled();
+    expect(asyncFunctionThatMightFail).toHaveBeenCalled();
     expect(value).toBe(false);
   });
 
@@ -99,7 +99,7 @@ describe('Circuit breaker', () => {
     await mockCircuitBreaker.fire('hola, mundo');
     jest.clearAllMocks();
     const value = await mockCircuitBreaker.fire('hola, mundo');
-    expect(asyncFuntionThatMightFail).toHaveBeenCalled();
+    expect(asyncFunctionThatMightFail).toHaveBeenCalled();
     expect(value).toBe(false);
   });
 
