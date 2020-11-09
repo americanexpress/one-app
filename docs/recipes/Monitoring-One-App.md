@@ -36,7 +36,7 @@ Run the following inside of One App to start the performance monitoring locally:
 
 `npm run monitor:performance`
 
-> Performance monitoring will not run with one-app-runner.
+> There is not an option to run performance monitoring with `one-app-runner`.
 
 More details for running performance monitoring can be found in the [performance readme](../../__performance__/README.md)/
 
