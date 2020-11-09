@@ -7,7 +7,7 @@
 One App includes a metrics server which exposes a set of metrics using the [prom-client](https://github.com/siimon/prom-client)
 which can be easily scraped by a service such as [Prometheus](https://prometheus.io/docs/introduction/overview/).
 Metrics will be exposed on the port configured by the environment variable `HTTP_METRICS_PORT`.
-They can collected from the `/metrics` path, for example `http://localhost:3005/metrics`.
+They can be collected from the `/metrics` path, for example `http://localhost:3005/metrics`.
 
 > HTTP_METRICS_PORT defaults to `3005`.
 
@@ -36,7 +36,7 @@ Run the following inside of One App to start the performance monitoring locally:
 
 `npm run monitor:performance`
 
-> Performance monitoring will not run with one-app runner.
+> Performance monitoring will not run with one-app-runner.
 
 More details for running performance monitoring can be found in the [performance readme](../../__performance__/README.md)/
 
