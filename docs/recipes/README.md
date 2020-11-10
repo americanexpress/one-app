@@ -14,7 +14,7 @@
 * [Partial Rendering](./Partial-Rendering.md)
 * [Running A One App Instance Locally](./Running-One-App-Locally.md)
 * [Running In Production](./Running-In-Production.md)
-* [Monitoring One App](./Monitoring-One-App.md) 📌
+* [Monitoring One App](./Monitoring-One-App.md)
 * [Publishing Modules](Publishing-Modules.md)
 * [Progressive One App](PWA.md)
 * [Reporting Client Errors](./Reporting-Client-Errors.md)
