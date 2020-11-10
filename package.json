@@ -184,7 +184,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run test:lint && npm run test:unit",
+      "pre-commit": "npm run test:lint && npm run test:unit && npm run test:lockfile",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
