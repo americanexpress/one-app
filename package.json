@@ -146,7 +146,7 @@
     "babel-preset-amex": "^3.4.0",
     "chokidar": "^3.4.0",
     "concurrently": "^5.2.0",
-    "conventional-changelog-cli": "^2.0.34",
+    "conventional-changelog-cli": "^2.1.1",
     "cross-env": "^7.0.2",
     "danger": "^10.5.0",
     "enzyme": "^3.11.0",
@@ -185,7 +185,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run test:lint && npm run test:unit",
+      "pre-commit": "npm run test:lint && npm run test:unit && npm run test:lockfile",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
