@@ -85,6 +85,8 @@ npm run monitor:performance
 
 You can now view the [Grafana metrics on localhost:3030](http://localhost:3030/d/tDGvrq7Mz/one-app-performance)
 
+> `npm run monitor:performance` will also allow you to monitor the development build of one-app.
+
 ### Run the smoke test
 
 In another new window from within `one-app/__performance__` run the following:

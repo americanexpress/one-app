@@ -170,7 +170,7 @@
     "nodemon": "^2.0.4",
     "ora": "^4.0.4",
     "parse-prometheus-text-format": "^1.1.1",
-    "prettier": "^2.0.5",
+    "prettier": "^2.1.2",
     "react-test-renderer": "^16.14.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.23.1",
@@ -179,7 +179,6 @@
     "service-worker-mock": "^2.0.5",
     "standard-version": "^9.0.0",
     "supertest": "^4.0.2",
-    "surge": "^0.21.6",
     "tar": "^6.0.5",
     "webdriverio": "^6.1.24"
   },
