@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app-statics",
-  "version": "5.10.1",
+  "version": "5.10.2",
   "description": "One App Static Assets",
   "main": "index.js",
   "scripts": {

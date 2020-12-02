@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.10.2](https://github.com/americanexpress/one-app/compare/v5.10.1...v5.10.2) (2020-12-02)
+
+
+### Bug Fixes
+
+* **clientErrorLogger:** format console error message ([#382](https://github.com/americanexpress/one-app/issues/382)) ([03da190](https://github.com/americanexpress/one-app/commit/03da190baa91aea1044de06bdc72e4e50f3ec420))
+* **typo:** circuit breaker “function” input ([#372](https://github.com/americanexpress/one-app/issues/372)) ([e1e74b9](https://github.com/americanexpress/one-app/commit/e1e74b9424b8fd573ba81eabb02e0984a8104081))
+
+
 ## [5.10.1](https://github.com/americanexpress/one-app/compare/v5.10.0...v5.10.1) (2020-10-28)
 
 
