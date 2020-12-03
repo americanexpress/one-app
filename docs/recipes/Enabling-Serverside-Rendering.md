@@ -4,7 +4,7 @@
 
 # Enabling Server-side Rendering
 
-One App will always attempt render your module on the server before sending html back to the client. However, it won't wait for any asynchronous tasks, such as data fetching, to complete before doing so.
+One App will always attempt to render your module on the server before sending html back to the client. However, it won't wait for any asynchronous tasks, such as data fetching, to complete before doing so.
 
 The following options provide ways to ensure that server side requested data is included as part of the initial render.
 
