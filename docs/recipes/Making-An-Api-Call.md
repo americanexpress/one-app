@@ -100,7 +100,7 @@ The modules reducer would handle those dispatched actions so the module would be
 
 ## Duplicate Calls Across modules
 
-When adding response data to the redux store it can be tempting to try to \access this directly in other modules. This is **not** a recommended approach as you should aim to have modules as independent as possible.
+When adding response data to the redux store it can be tempting to try to access this directly in other modules. This is **not** a recommended approach as you should aim to have modules as independent as possible.
 
 You could also choose to bubble up your data fetching the the root module and pass down the data as props, which is a common approach with React applications, however this will result in closer coupling between child and root module.
 
@@ -276,4 +276,6 @@ export default BooksModule;
 
 Please note that this low config approach relies on the conventions shown above. If the reducer or provider is not setup correctly in the root module you will not benefit from the caching. The `fetchye-one-app` helpers are designed to meet the majority of use cases and may not meet your requirements. It is possible to have a custom configuration using the `fetchye-redux-provider` and `fetchye-immutable-cache` however this could lead to cache misses and unutilized server side calls by modules not using the same configuration.
 
+<!--ONE-DOCS-HIDE start-->
 [☝️ Return To Top](#Making-An-Api-Call)
+<!--ONE-DOCS-HIDE end-->
