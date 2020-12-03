@@ -30,7 +30,7 @@ YourModule.holocron = {
 ```jsx
 import React, { Fragment } from 'react';
 import { ImmutableCache } from 'fetchye-immutable-cache';
-import { useFetchye, makServerFetchye } from 'fetchye';
+import { useFetchye, makeServerFetchye } from 'fetchye';
 
 const BookList = () => {
   const { isLoading, data } = useFetchye('http://example.com/api/books/');
