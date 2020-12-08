@@ -35,7 +35,7 @@ Holocron's `RenderModule` provides an alternate method to rendering another modu
 const ParentModule = () => (
   <div>
     <h1>I am the parent module</h1>
-    <RenderModule moduleName="child-module" props={{ greeting: 'hello' }} />;
+    <RenderModule moduleName="child-module" props={{ greeting: 'hello' }} />
   </div>
 );
 ```

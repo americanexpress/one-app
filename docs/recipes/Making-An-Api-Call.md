@@ -102,7 +102,7 @@ The modules reducer would handle those dispatched actions so the module would be
 
 When adding response data to the redux store it can be tempting to try to access this directly in other modules. This is **not** a recommended approach as you should aim to have modules as independent as possible.
 
-You could also choose to bubble up your data fetching the the root module and pass down the data as props, which is a common approach with React applications, however this will result in closer coupling between child and root modules.
+You could also choose to bubble up your data fetching to the root module and pass down the data as props, which is a common approach with React applications, however this will result in closer coupling between child and root modules.
 
 ## Fetchye
 
