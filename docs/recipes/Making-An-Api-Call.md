@@ -13,27 +13,27 @@ A basic data fetching example in a client side React app might look like the fol
 
 ```jsx
 const BooksModule = () => {
-  const [{ Books, isLoading, fetchError }, setData] = useState({});
+  const [{ books, isLoading, fetchError }, setData] = useState({});
 
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        setData({ Books, isLoading: true, fetchError: false });
+        setData({ books, isLoading: true, fetchError: false });
         const response = await fetch('https://some-data-server.com/api/v1/books');
         if (response.ok) {
           const newBooks = await response.json();
-          setData({ Books: newBooks, isLoading: false });
+          setData({ books: newBooks, isLoading: false });
         } else {
-          setData({ Books, isLoading: false, fetchError: true });
+          setData({ books, isLoading: false, fetchError: true });
         }
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error('Failed to fetch Books:', e);
-        setData({ Books, isLoading: false, fetchError: true });
+        setData({ books, isLoading: false, fetchError: true });
       }
     };
     fetchBooks();
-  }, [id]);
+  });
 
   if (isLoading) {
     return <p>Loading...</p>;
