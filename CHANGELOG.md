@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.10.3](https://github.com/americanexpress/one-app/compare/v5.10.2...v5.10.3) (2020-12-09)
+
+
+### Bug Fixes
+
+* **tagging/workflow:** use ::set-output over ::set-env ([#390](https://github.com/americanexpress/one-app/issues/390)) ([b6874f7](https://github.com/americanexpress/one-app/commit/b6874f7d1590cfc330d365398687586e81a98a24))
+
+
 ## [5.10.2](https://github.com/americanexpress/one-app/compare/v5.10.1...v5.10.2) (2020-12-02)
 
 
