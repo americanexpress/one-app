@@ -9,7 +9,7 @@
 Making API calls within a One App module has some additional considerations over a
 traditional client side React application.
 
-A basic data fetching example in a client side React app might look like the following:
+A basic data fetching example in a client side React app using the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) might look like the following:
 
 ```jsx
 const BooksModule = () => {
