@@ -5,7 +5,8 @@
 # 👩‍🍳 Recipes
 
 * [Adding Styles](./Adding-Styles.md) 🔨
-* [Making an API call](./Making-An-Api-Call.md) 📌
+* [Making an API call](./Making-An-Api-Call.md)
+* [Module Composition](./Module-Composition.md)
 * [Mocking your API calls for Local Development](./Mocking-Api-Calls.md)
 * [Routing and Navigation](./Routing-And-Navigation.md)
 * [Code Splitting using Holocron](./Code-Splitting-Using-Holocron.md)
@@ -18,6 +19,7 @@
 * [Publishing Modules](Publishing-Modules.md)
 * [Progressive One App](PWA.md)
 * [Reporting Client Errors](./Reporting-Client-Errors.md)
+* [Post to Modules](./Post-To-Modules.md) 🔨
 
 > 🔨 = This guide is a work-in-progress.
 > 📌 = This guide needs to be written.
