@@ -4,7 +4,7 @@
 
 # Welcome to One App
 
-As applications start to scale, and you start adding more developers to the project and new teams are created, it becomes increasingly difficult to release with confidence and to effectively collaborate without requiring large amounts of coordination and communication between teams. 
+As applications start to scale, and you start adding more developers to the project and new teams are created, it becomes increasingly difficult to release with confidence and to effectively collaborate without requiring large amounts of coordination and communication between teams.
 
 One App helps solve this problem by providing a framework to build quality, modularized web applications. It helps you break the "Frontend Monolith" and split your application via independently developed, tested, and deployed **Micro Frontends** in the form of **Holocron Modules**.
 
@@ -26,7 +26,7 @@ The One App ecosystem draws a clear line between the App and React components th
 
 ## How does it work?
 
-One App is the Node.js server that acts as the orchestrator and stitches all your modules together as well as Server-Side Render your application. One App is also responsible for setting up the global redux store with middleware and reducers that all Modules will have access to, and kicking off the rendering of these Modules. 
+One App is the Node.js server that acts as the orchestrator and stitches all your modules together as well as Server-Side Render your application. One App is also responsible for setting up the global redux store with middleware and reducers that all Modules will have access to, and kicking off the rendering of these Modules.
 
 [Holocron](https://one-amex-docs.americanexpress.com/en-us/holocron/api/) is the integral library that enables One App and Modules to be separate during development and come back together during production.
 
@@ -41,7 +41,7 @@ The module map is a simple JSON file that contains the list of Holocron modules,
 Modules can be deployed to any location and they don’t even have to be on the same CDN.
 
 <h1 align="center">
-  <img src='https://raw.githubusercontent.com/americanexpress/one-app/docs/overview/docs/overview/images/oneapp-production.jpg' alt="One App - Production Diagram" />
+  <img src='https://raw.githubusercontent.com/americanexpress/one-app/main/docs/overview/images/oneapp-production.jpg' alt="One App - Production Diagram" />
 </h1>
 
 ## In Development
@@ -55,5 +55,5 @@ By Passing the `moduleMapUrl` option in the runner section of `package.json`, th
 > Note: You can also serve modules without Docker by [cloning and starting the One App server locally](https://github.com/americanexpress/one-app#clone-and-install-one-app).
 
 <h1 align="center">
-  <img src='https://raw.githubusercontent.com/americanexpress/one-app/docs/overview/docs/overview/images/one-app-dev.jpg' alt="One App - Development Diagram" />
+  <img src='https://raw.githubusercontent.com/americanexpress/one-app/main/docs/overview/images/one-app-dev.jpg' alt="One App - Development Diagram" />
 </h1>
