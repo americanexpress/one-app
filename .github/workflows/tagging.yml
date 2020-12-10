@@ -13,23 +13,26 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: get commit message
+        id: get-commit-message
         shell: bash
         run: |
-          echo ::set-env name=commitmsg::$(git log --format=%B -n 1 ${{ github.event.after }})
-          echo $commitmsg
+          commitmessage=$(git log --format=%B -n 1 ${{ github.event.after }})
+          echo ::set-output name=message::"\"$commitmessage"\"
+          echo ${{ steps.get-commit-message.outputs.message }}
       - name: get tag version
+        id: get-tag-version
         run: |
-          echo ::set-env name=tagversion::$( egrep -o '([0-9]+\.){2}(\*|[0-9]+)(-\S*)?' <<< ${commitmsg} )
-          echo v$tagversion
+          echo ::set-output name=tagversion::$( egrep -o '([0-9]+\.){2}(\*|[0-9]+)(-\S*)?' <<< ${{ steps.get-commit-message.outputs.message }} )
+          echo v${{ steps.get-tag-version.outputs.tagversion }}
       - name: set tag version
-        id: set_tag_version
+        id: set-tag-version
         run: |
           git config --local user.email "one.amex@aexp.com"
           git config --local user.name "OneAmexBot"
-          echo ${tagversion}
-          git tag v${tagversion}
+          echo ${{ steps.get-tag-version.outputs.tagversion }}
+          git tag v${{ steps.get-tag-version.outputs.tagversion }}
           git push origin --tags
-          echo ::set-output name=action_tag::v${tagversion}
+          echo ::set-output name=action_tag::v${{ steps.get-tag-version.outputs.tagversion }}
       - name: Trigger Image Publishing
         uses: octokit/request-action@v2.x
         id: dispatch_one-app-docker-tag-check
@@ -38,6 +41,6 @@ jobs:
           repository: ${{ github.repository }}
           mediaType: '{"previews": ["everest"]}'
           event_type: "one-app-docker-tag-check"
-          client_payload: '{"tagversion": "${{ steps.set_tag_version.outputs.action_tag }}"}'
+          client_payload: '{"tagversion": "${{ steps.set-tag-version.outputs.action_tag }}"}'
         env:
           GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}
