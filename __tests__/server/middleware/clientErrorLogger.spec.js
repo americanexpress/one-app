@@ -15,11 +15,13 @@
  */
 
 import { createRequest, createResponse } from 'node-mocks-http';
+import util from 'util';
 
 describe('clientErrorLogger', () => {
   let clientErrorLogger;
   jest.spyOn(console, 'error').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
+  jest.spyOn(util, 'inspect').mockImplementation(() => {});
 
   function load(nodeEnv) {
     if (typeof nodeEnv !== 'string') {
@@ -96,7 +98,8 @@ describe('clientErrorLogger', () => {
       console.error.mockClear();
       clientErrorLogger(req, res);
       expect(console.error).toHaveBeenCalledTimes(1);
-      const logged = console.error.mock.calls[0][0];
+      expect(util.inspect).toHaveBeenCalledTimes(1);
+      const logged = util.inspect.mock.calls[0][0];
       expect(logged).toBeInstanceOf(Error);
       expect(logged).toHaveProperty('name', 'ClientReportedError');
       expect(logged).toHaveProperty('stack', 'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n');
