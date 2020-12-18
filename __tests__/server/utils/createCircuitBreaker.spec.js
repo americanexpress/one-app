@@ -56,7 +56,7 @@ describe('Circuit breaker', () => {
   it('should open the circuit when event loop delay threshold is exceeded', async () => {
     expect.assertions(2);
     setEventLoopDelayThreshold(-1);
-    jest.advanceTimersByTime(510);
+    jest.advanceTimersByTime(5e3 + 10);
     // Need to fire the breaker once before it will open
     await mockCircuitBreaker.fire('hola, mundo');
     jest.clearAllMocks();
@@ -69,7 +69,7 @@ describe('Circuit breaker', () => {
     process.env.NODE_ENV = 'development';
     expect.assertions(2);
     setEventLoopDelayThreshold(-1);
-    jest.advanceTimersByTime(510);
+    jest.advanceTimersByTime(5e3 + 10);
     // Need to fire the breaker once before it will open
     await mockCircuitBreaker.fire('hola, mundo');
     jest.clearAllMocks();
@@ -81,7 +81,7 @@ describe('Circuit breaker', () => {
   it('should not open the circuit when threshold not exceeded', async () => {
     expect.assertions(2);
     setEventLoopDelayThreshold(250);
-    jest.advanceTimersByTime(510);
+    jest.advanceTimersByTime(5e3 + 10);
     // Need to fire the breaker once before it will open
     await mockCircuitBreaker.fire('hola, mundo');
     jest.clearAllMocks();
@@ -94,7 +94,7 @@ describe('Circuit breaker', () => {
     expect.assertions(2);
     getModule.mockReturnValueOnce(false);
     setEventLoopDelayThreshold(-1);
-    jest.advanceTimersByTime(510);
+    jest.advanceTimersByTime(5e3 + 10);
     // Need to fire the breaker once before it will open
     await mockCircuitBreaker.fire('hola, mundo');
     jest.clearAllMocks();
@@ -106,7 +106,7 @@ describe('Circuit breaker', () => {
   it('should log when the healthcheck fails', async () => {
     expect.assertions(1);
     setEventLoopDelayThreshold(-1);
-    jest.advanceTimersByTime(510);
+    jest.advanceTimersByTime(5e3 + 10);
     await mockCircuitBreaker.fire('hola, mundo');
     expect(consoleErrorSpy.mock.calls).toMatchInlineSnapshot(`
       Array [
