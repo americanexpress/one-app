@@ -6,6 +6,8 @@
 
 A key part of working with One App is module composition. Modules can be rendered inside one another by either using `ModuleRoute` or `RenderModule`.
 
+> Modules that you plan on rendering need to be added to your [module map](../api/server/Module-Map-Schema.md) before they can be rendered.
+
 ## `ModuleRoute`
 
 `ModuleRoute` from `holocron-module-route` allows modules to dynamically load other modules
