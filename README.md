@@ -145,6 +145,10 @@ Our API Docs break down each part of our public APIs for One App and its support
 
 Please visit our [API Docs](./docs/api/README.md).
 
+## 🧑‍🔧 Troubleshooting
+
+Our [troubleshooting docs](./docs/troubleshooting/README.md) break down common issues users run into while working with One App.
+
 ## 🏆 Contributing
 
 We welcome Your interest in the American Express Open Source Community on Github.
