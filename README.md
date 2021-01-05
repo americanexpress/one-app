@@ -37,12 +37,13 @@ Want to get paid for your contributions to `one-app`?
 
 ## ✨ Features
 
-- Modular design allowing for groups of UI components to be independently developed, tested, and deployed.
-- Server side rendering as a first class citizen.
-- Easy configuration management.
-- Built-in internationalization.
-- Built-in dynamic routing.
+* Modular design allowing for groups of UI components to be independently developed, tested, and deployed.
+* Easy configuration management.
+* Server side rendering as a first class citizen.
+* Built-in internationalization.
+* Built-in dynamic routing.
 
+For a breakdown on these features and an architectural overview, take a look at our [overview documentation](./docs/overview/README.md)
 ## 🤹‍ Usage
 
 ### Quick Start
@@ -124,6 +125,8 @@ For a module to act as the root module the only requirements are:
 - Provides a valid [content security policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) though the [appConfig](./docs/api/modules/App-Configuration.md) static.
 
 **📘 More Information**
+
+* [Getting Started Guide](./docs/overview/Getting-Started.md)
 * Root Module example: [frank-lloyd-root](https://github.com/americanexpress/one-app/blob/main/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/components/FrankLloydRoot.jsx)
 * [App Configuration in your Root Module](./docs/api/modules/App-Configuration.md)
 * [What are Holocron Modules?](./docs/api/README.md)
