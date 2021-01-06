@@ -6,7 +6,7 @@
 
 A key part of working with One App is module composition. Modules can be rendered inside one another by either using `ModuleRoute` or `RenderModule`.
 
-> Modules that you plan on rendering need to be added to your [module map](../api/server/Module-Map-Schema.md) before they can be rendered.
+> Modules that you plan on rendering need to be added to your [module map](../api/server/Module-Map-Schema.md) before they can be rendered. They can either be added to your module's `one-amex` section in your `package.json` to be used with [one-app-runner](https://one-amex-docs.americanexpress.com/en-us/one-app-runner/api/) or running the `serve-module` command inside of a local version of `one-app`.
 
 ## `ModuleRoute`
 
