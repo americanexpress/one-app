@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.11.0](https://github.com/americanexpress/one-app/compare/v5.10.2...v5.11.0) (2021-01-06)
+
+
+### Bug Fixes
+
+* **tagging/workflow:** use ::set-output over ::set-env ([#390](https://github.com/americanexpress/one-app/issues/390)) ([b6874f7](https://github.com/americanexpress/one-app/commit/b6874f7d1590cfc330d365398687586e81a98a24))
+
+
+### Features
+
+* **createCircuitBreaker:** increase healthcheck interval to 5s ([#397](https://github.com/americanexpress/one-app/issues/397)) ([6f7f222](https://github.com/americanexpress/one-app/commit/6f7f2221fbfcdb6838f3f74226e73437687f5c9c))
+
+
 ## [5.10.2](https://github.com/americanexpress/one-app/compare/v5.10.1...v5.10.2) (2020-12-02)
 
 
