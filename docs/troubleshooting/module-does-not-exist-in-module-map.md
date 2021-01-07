@@ -4,7 +4,7 @@
 
 Sometimes you might want to compose a module from multiple smaller modules using either [iguazu-holocron](https://github.com/americanexpress/holocron/tree/main/packages/iguazu-holocron) or [RenderModule](https://github.com/americanexpress/holocron/blob/main/packages/holocron/docs/api/README.md#rendermodule). However, if you have not added the module you are trying to load to your [module-map](../api/server/Module-Map-Schema), it will fail to load.
 
-Furthermore, if you are calling `RenderModule` but not calling `composeModules` in `loadModuleData`, this will result in a warning stating that the module is not in the module map.
+Furthermore, if you are calling `RenderModule` but not calling [composeModules](https://one-amex-docs.americanexpress.com/en-us/holocron/api/#composemodules) in `loadModuleData`, this will result in a warning stating that the module is not in the module map.
 
 #### Possible Ways to Fix It
 
