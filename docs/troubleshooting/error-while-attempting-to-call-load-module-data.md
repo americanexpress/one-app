@@ -2,4 +2,8 @@
 
 #### Why This Error Occurred
 
-If an error occurs in your modules `loadModuleData` during the render cycle, it will throw this error.
+This is usually an uncaught error in the `loadModuleData` promise chain that bubbles up and gets caught by One App.
+
+#### Possible Ways to Fix It
+
+Add a `try/catch` in your promise chain to debug the actual error that is being produced.
