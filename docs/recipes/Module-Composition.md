@@ -6,12 +6,17 @@
 
 A key part of working with One App is module composition. Modules can be rendered inside one another by either using `ModuleRoute` or `RenderModule`.
 
+> Modules that you plan on rendering need to be added to your [module map](../api/server/Module-Map-Schema.md) before they can be rendered. They can either be added to your module's `one-amex` section in your `package.json` to be used with [one-app-runner](https://one-amex-docs.americanexpress.com/en-us/one-app-runner/api/) or running the `serve-module` command inside of a local version of `one-app`.
+
 ## `ModuleRoute`
 
 `ModuleRoute` from `holocron-module-route` allows modules to dynamically load other modules
 as a child route. This can be done on any module as routing is not limited to the root module:
 
 ```jsx
+// Other imports
+import ModuleRoute from 'holocron-module-route';
+
 ParentModule.childRoutes = () => [
   <ModuleRoute
     path="childModule"
@@ -32,6 +37,9 @@ const ChildModule = ({ route: { greeting } } = {}) => <h1>{greeting}</h1>;
 Holocron's `RenderModule` provides an alternate method to rendering another module:
 
 ```jsx
+// Other imports
+import { RenderModule } from 'holocron';
+
 const ParentModule = () => (
   <div>
     <h1>I am the parent module</h1>
@@ -45,6 +53,11 @@ loaded into our client before it can be rendered. We can do this by
 dispatching either `loadModule` or `composeModules` in our parent modules `loadModuleData`.
 
 ```jsx
+// Other imports
+import { composeModules } from 'holocron';
+
+// Module Code
+
 ParentModule.holocron = {
   loadModuleData: async ({ store: { dispatch }, ownProps }) => {
     await dispatch(composeModules([{ name: 'child-module' }]));
