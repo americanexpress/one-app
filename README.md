@@ -130,7 +130,7 @@ For a module to act as the root module the only requirements are:
 * Root Module example: [frank-lloyd-root](https://github.com/americanexpress/one-app/blob/main/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/components/FrankLloydRoot.jsx)
 * [App Configuration in your Root Module](./docs/api/modules/App-Configuration.md)
 * [What are Holocron Modules?](./docs/api/README.md)
-* [Useful Local Development Commands / Options](./docs/recipes/Running-Existing-App-Locally.md)
+* [Useful Local Development Commands / Options](./docs/recipes/Running-One-App-Locally.md)
 
 
 ## 👩‍🍳 Recipes
