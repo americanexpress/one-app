@@ -81,7 +81,7 @@
     "@americanexpress/fetch-enhancers": "^1.0.3",
     "@americanexpress/lumberjack": "^1.1.4",
     "@americanexpress/one-app-bundler": "^6.11.0",
-    "@americanexpress/one-app-ducks": "^4.2.2",
+    "@americanexpress/one-app-ducks": "^4.3.0",
     "@americanexpress/one-app-router": "^1.1.0",
     "@americanexpress/vitruvius": "^2.0.2",
     "abort-controller": "^3.0.0",
