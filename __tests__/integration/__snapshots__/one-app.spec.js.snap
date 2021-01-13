@@ -71,6 +71,7 @@ Array [
   "oneapp_holocron_module_map_poll_total",
   "oneapp_holocron_module_map_poll_wait_seconds",
   "oneapp_holocron_module_map_updated_total",
+  "oneapp_intl_cache_size_total",
   "oneapp_version_info",
   "process_cpu_seconds_total",
   "process_cpu_system_seconds_total",

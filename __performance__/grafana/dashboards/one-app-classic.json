@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1598299567756,
+  "iteration": 1610468516396,
   "links": [],
   "panels": [
     {
@@ -250,8 +250,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.1",
+      "pluginVersion": "7.3.6",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -345,8 +348,11 @@
       "lines": true,
       "linewidth": 1,
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.1",
+      "pluginVersion": "7.3.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -437,8 +443,11 @@
       "lines": true,
       "linewidth": 1,
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.1",
+      "pluginVersion": "7.3.6",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -531,8 +540,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.1",
+      "pluginVersion": "7.3.6",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -640,8 +652,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null as zero",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.1",
+      "pluginVersion": "7.3.6",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -736,8 +751,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.1",
+      "pluginVersion": "7.3.6",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -797,13 +815,112 @@
       }
     },
     {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "$datasource",
+      "description": "Estimated size of the language pack cache on the server",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "hiddenSeries": false,
+      "id": 48,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null as zero",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "7.3.6",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "expr": "oneapp_intl_cache_size_total",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Server Langpack cache: {{podname}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Language Pack Server Cache",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:466",
+          "format": "decbytes",
+          "label": "",
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:467",
+          "format": "decbits",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
       "collapsed": false,
       "datasource": null,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 21
+        "y": 29
       },
       "id": 4,
       "panels": [],
@@ -829,7 +946,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 22
+        "y": 30
       },
       "hiddenSeries": false,
       "id": 8,
@@ -848,8 +965,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.1",
+      "pluginVersion": "7.3.6",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -942,7 +1062,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 30
+        "y": 38
       },
       "hiddenSeries": false,
       "id": 6,
@@ -959,8 +1079,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.1",
+      "pluginVersion": "7.3.6",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1037,7 +1160,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 30
+        "y": 38
       },
       "hiddenSeries": false,
       "id": 2,
@@ -1054,8 +1177,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.1",
+      "pluginVersion": "7.3.6",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1145,7 +1271,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 46
       },
       "id": 14,
       "panels": [],
@@ -1170,7 +1296,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 47
       },
       "hiddenSeries": false,
       "id": 16,
@@ -1187,8 +1313,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.1",
+      "pluginVersion": "7.3.6",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1254,7 +1383,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 47
+        "y": 55
       },
       "id": 10,
       "panels": [],
@@ -1279,7 +1408,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 48
+        "y": 56
       },
       "hiddenSeries": false,
       "id": 12,
@@ -1296,8 +1425,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.1",
+      "pluginVersion": "7.3.6",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1384,7 +1516,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 57
+        "y": 65
       },
       "id": 42,
       "panels": [],
@@ -1409,7 +1541,7 @@
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 58
+        "y": 66
       },
       "hiddenSeries": false,
       "id": 40,
@@ -1426,8 +1558,11 @@
       "linewidth": 1,
       "links": [],
       "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
       "percentage": false,
-      "pluginVersion": "7.1.1",
+      "pluginVersion": "7.3.6",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1510,7 +1645,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 58
+        "y": 66
       },
       "heatmap": {},
       "hideZeroBuckets": false,
@@ -1569,6 +1704,7 @@
           "text": "10m",
           "value": "10m"
         },
+        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "Rate Granularity:",
@@ -1622,6 +1758,7 @@
           "text": "Prometheus",
           "value": "Prometheus"
         },
+        "error": null,
         "hide": 2,
         "includeAll": false,
         "label": null,
@@ -1667,5 +1804,5 @@
   "timezone": "browser",
   "title": "One App Classic",
   "uid": "100000073",
-  "version": 1
+  "version": 2
 }
