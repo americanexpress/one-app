@@ -18,6 +18,7 @@ import { incrementCounter } from './counters';
 import { incrementGauge, setGauge, resetGauge } from './gauges';
 
 import holocron from './holocron';
+import intlCache from './intl-cache';
 import * as appVersion from './app-version';
 
 export {
@@ -32,4 +33,5 @@ export {
   // metrics
   holocron,
   appVersion,
+  intlCache,
 };

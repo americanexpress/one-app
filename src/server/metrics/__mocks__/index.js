@@ -25,6 +25,10 @@ const holocron = {
   moduleMapPollWait: 'module_map_poll_wait',
 };
 
+const intlCache = {
+  cacheSize: 'cache_size',
+};
+
 const appVersion = { info: 'info' };
 
 export {
@@ -39,4 +43,5 @@ export {
   // metrics
   holocron,
   appVersion,
+  intlCache,
 };
