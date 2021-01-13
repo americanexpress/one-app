@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.11.0](https://github.com/americanexpress/one-app/compare/v5.10.2...v5.11.0) (2021-01-13)
+
+
+
+
+### Features
+
+* **createCircuitBreaker:** increase healthcheck interval to 5s ([#397](https://github.com/americanexpress/one-app/issues/397)) ([6f7f222](https://github.com/americanexpress/one-app/commit/6f7f2221fbfcdb6838f3f74226e73437687f5c9c))
+* **metrics:** track intl cache size ([#406](https://github.com/americanexpress/one-app/issues/406)) ([de65e10](https://github.com/americanexpress/one-app/commit/de65e10e385fe40642f5e6e42ad4f0e29c5d439e))
+
+
 ## [5.10.2](https://github.com/americanexpress/one-app/compare/v5.10.1...v5.10.2) (2020-12-02)
 
 
