@@ -56,5 +56,5 @@ describe('index', () => {
 
   it('exports holocron', () => expect(index).toHaveProperty('holocron', holocron));
 
-  it('exports intlCacje', () => expect(index).toHaveProperty('intlCache', intlCache));
+  it('exports intlCache', () => expect(index).toHaveProperty('intlCache', intlCache));
 });
