@@ -5,9 +5,6 @@ All notable changes to this project will be documented in this file. See [standa
 # [5.11.0](https://github.com/americanexpress/one-app/compare/v5.10.2...v5.11.0) (2021-01-13)
 
 
-### Bug Fixes
-
-* **tagging/workflow:** use ::set-output over ::set-env ([#390](https://github.com/americanexpress/one-app/issues/390)) ([b6874f7](https://github.com/americanexpress/one-app/commit/b6874f7d1590cfc330d365398687586e81a98a24))
 
 
 ### Features
