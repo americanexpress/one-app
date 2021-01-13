@@ -7,7 +7,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Bug Fixes
 
-* **docs:** rename pwa recipe ([0f2f054](https://github.com/americanexpress/one-app/commit/0f2f0546944e0c5f2a0481daa83f897ec13d294d))
 * **tagging/workflow:** use ::set-output over ::set-env ([#390](https://github.com/americanexpress/one-app/issues/390)) ([b6874f7](https://github.com/americanexpress/one-app/commit/b6874f7d1590cfc330d365398687586e81a98a24))
 
 
