@@ -12,10 +12,10 @@ jobs:
       - run: git fetch --prune --unshallow
       - uses: actions/cache@v2
         with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-         ${{ runner.os }}-node-
+         path: ~/.npm
+         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+         restore-keys: |
+          ${{ runner.os }}-node-
       - uses: actions/setup-node@v1
         with:
           node-version: 12.x
