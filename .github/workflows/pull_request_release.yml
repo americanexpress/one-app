@@ -10,12 +10,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: git fetch --prune --unshallow
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+         path: ~/.npm
+         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+         restore-keys: |
+          ${{ runner.os }}-node-
       - uses: actions/setup-node@v1
         with:
           node-version: 12.x
@@ -29,11 +29,10 @@ jobs:
           git add .
           git commit -m "docs(changelog): update"
       - name: Create release pull request
-        uses: peter-evans/create-pull-request@v2
+        uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.PA_TOKEN }}
           commit-message: One App Prepare Release
-          committer: 'OneAmexBot <one.amex@aexp.com>'
           author: 'OneAmexBot <one.amex@aexp.com>'
           title: 'One App Prepare Release'
           body: 'This is an auto-generated pull request for One App release changes. Please review this PR and merge it for a release to be initiated. Please close this PR to stop a release from being initiated.'
