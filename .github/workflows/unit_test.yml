@@ -1,5 +1,5 @@
 name: One App Unit and Lint Tests
-on: 
+on:
   pull_request:
   push:
     branches:
@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - uses: actions/cache@v1
+      - uses: actions/cache@v2
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -36,4 +36,4 @@ jobs:
         run:  npm run test:lint
       - name: npm commit lint
         run: npm run test:git-history
-   
+
