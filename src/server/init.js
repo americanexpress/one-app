@@ -19,6 +19,7 @@ import 'regenerator-runtime/runtime';
 import 'cross-fetch/polyfill';
 import 'make-promises-safe';
 
+import './config/env/precheck';
 import './polyfill/intl';
 import './config/env/argv';
 import './utils/logging/setup';
