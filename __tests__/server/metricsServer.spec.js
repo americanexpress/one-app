@@ -17,6 +17,9 @@
 import request from 'supertest';
 
 describe('metricsServer', () => {
+  jest.mock('../../src/server/metrics/intl-cache', () => ({
+    cacheSizeCollector: 'cacheSizeCollector',
+  }));
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -42,6 +45,11 @@ describe('metricsServer', () => {
     it('collects default metrics', () => {
       load();
       expect(client.collectDefaultMetrics).toHaveBeenCalledTimes(1);
+    });
+
+    it('registers intl cache collector', () => {
+      load();
+      expect(client.register.registerCollector).toHaveBeenCalledWith('cacheSizeCollector');
     });
   });
 
