@@ -20,8 +20,10 @@ import { register as metricsRegister, collectDefaultMetrics } from 'prom-client'
 
 import logging from './utils/logging/serverMiddleware';
 import healthCheck from './middleware/healthCheck';
+import { cacheSizeCollector } from './metrics/intl-cache';
 
 collectDefaultMetrics();
+metricsRegister.registerCollector(cacheSizeCollector);
 
 export function createMetricsServer() {
   const app = express();
