@@ -8,7 +8,6 @@ jest.doMock(path.join(process.cwd(), 'static', 'module-map.json'), () => {
 describe('env', () => {
   test('moduleMap field is undefined if module map path non-existent', () => {
     const environment = require('../../../../src/server/config/env/env');
-    console.log(environment);
     expect(environment.default.moduleMap).toBe('no such path');
     expect(environment.default.rootModuleNameDuplicate).toBeFalsy();
   });
