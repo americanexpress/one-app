@@ -93,6 +93,7 @@
     "cors": "^2.8.5",
     "create-shared-react-context": "^1.0.3",
     "cross-fetch": "^3.0.6",
+    "es-aggregate-error": "^1.0.5",
     "express": "^4.17.1",
     "helmet": "^3.22.0",
     "holocron": "^1.1.1",
