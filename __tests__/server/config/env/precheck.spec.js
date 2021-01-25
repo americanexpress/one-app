@@ -32,7 +32,7 @@ const badDevEnvWithModuleMapUrl = {
 
 const goodDevEnvWithModuleMapUrl = {
   NODE_ENV: 'development',
-  moduleMap: 'https://aexp.com',
+  moduleMap: 'https://asdf.com',
   rootModuleName: 'happy-module',
 };
 
@@ -43,18 +43,18 @@ const badProdEnv = {
   ONE_CLIENT_REPORTING_URL: undefined,
   ONE_CLIENT_CSP_REPORTING_URL: undefined,
   ONE_CLIENT_ROOT_MODULE_NAME: undefined,
-  ONE_CLIENT_CDN_URL: 'https://aexp.com',
+  ONE_CLIENT_CDN_URL: 'https://asdf.com',
   ONE_CONFIG_ENV: undefined,
   rootModuleNameDuplicate: true,
 };
 
 const goodProdEnv = {
   NODE_ENV: 'production',
-  HOLOCRON_MODULE_MAP_URL: 'https://aexp.com',
-  ONE_CLIENT_REPORTING_URL: 'https://aexp.com',
-  ONE_CLIENT_CSP_REPORTING_URL: 'https://aexp.com',
-  ONE_CLIENT_ROOT_MODULE_NAME: 'https://aexp.com',
-  ONE_CLIENT_CDN_URL: 'https://aexp.com/',
+  HOLOCRON_MODULE_MAP_URL: 'https://asdf.com',
+  ONE_CLIENT_REPORTING_URL: 'https://asdf.com',
+  ONE_CLIENT_CSP_REPORTING_URL: 'https://asdf.com',
+  ONE_CLIENT_ROOT_MODULE_NAME: 'https://asdf.com',
+  ONE_CLIENT_CDN_URL: 'https://asdf.com/',
   ONE_CONFIG_ENV: 'test',
   rootModuleNameDuplicate: false,
 };
