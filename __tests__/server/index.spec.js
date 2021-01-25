@@ -96,6 +96,8 @@ describe('server index', () => {
     jest.doMock('../../src/server/shutdown', () => ({ addServer, shutdown }));
 
     jest.doMock('../../src/server/utils/pollModuleMap', () => jest.fn());
+    jest.doMock('../../src/server/config/env/run', () => jest.fn());
+    jest.doMock('../../src/server/config/env/env', () => jest.fn());
     jest.doMock('../../src/server/config/env/runTime', () => jest.fn());
     jest.doMock('../../src/server/utils/heapdump', () => {});
     jest.doMock('../../src/server/utils/watchLocalModules', () => ({ default: jest.fn() }));
