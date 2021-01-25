@@ -3,11 +3,6 @@ const precheckMock = {
   default: jest.fn(),
 };
 
-const environmentMock = {
-  __esModule: true,
-  default: {},
-};
-
 jest.doMock('../../../../src/server/config/env/precheck', () => precheckMock);
 
 
