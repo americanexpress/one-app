@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`intl-cache creates a gauge named size 1`] = `
+Array [
+  Object {
+    "help": "estimated intl server cache size",
+    "name": "oneapp_intl_cache_size_total",
+  },
+]
+`;
+
+exports[`intl-cache exports the metric names 1`] = `
+Object {
+  "cacheSizeCollector": [Function],
+  "default": Object {
+    "cacheSize": "oneapp_intl_cache_size_total",
+  },
+}
+`;

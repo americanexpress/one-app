@@ -16,11 +16,13 @@
 
 import * as appVersion from '../../../src/server/metrics/app-version';
 import holocron from '../../../src/server/metrics/holocron';
+import intlCache from '../../../src/server/metrics/intl-cache';
 
 import * as index from '../../../src/server/metrics';
 
 jest.mock('../../../src/server/metrics/app-version', () => ({ appVersion: 'app-version' }));
 jest.mock('../../../src/server/metrics/holocron', () => ({ holcron: 'holocron' }));
+jest.mock('../../../src/server/metrics/intl-cache', () => ({ intlCache: 'intl-cache' }));
 
 describe('index', () => {
   // counters
@@ -53,4 +55,6 @@ describe('index', () => {
   it('exports appVersion', () => expect(index).toHaveProperty('appVersion', appVersion));
 
   it('exports holocron', () => expect(index).toHaveProperty('holocron', holocron));
+
+  it('exports intlCache', () => expect(index).toHaveProperty('intlCache', intlCache));
 });
