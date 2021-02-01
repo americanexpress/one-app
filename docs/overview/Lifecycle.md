@@ -2,30 +2,44 @@
 [👈 Return to Overview](./README.md)
 <!--ONE-DOCS-HIDE end-->
 
+[one-app-dev-cdn]: https://github.com/americanexpress/one-app-dev-cdn
+[one-app-dev-proxy]: https://github.com/americanexpress/one-app-dev-proxy
+[one-app-runner]: https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner
+[one-app-router]: https://github.com/americanexpress/one-app-router
+[one-app-router-route]: https://github.com/americanexpress/one-app-router/blob/main/docs/API.md#route
+[one-app-router-router]: https://github.com/americanexpress/one-app-router/blob/main/docs/API.md#router
+[holocron-module-route]: https://github.com/americanexpress/holocron/tree/main/packages/holocron-module-route#moduleroute
+[create-holocron-store]: https://github.com/americanexpress/holocron/tree/main/packages/holocron/docs/api#createholocronstore
+[render-module]: https://github.com/americanexpress/holocron/tree/main/packages/holocron/docs/api#rendermodule
+[react-helmet]: https://github.com/nfl/react-helmet
+[helmet]: https://github.com/helmetjs/helmet
+
 # One App Life Cycles
 
 In this guide, we'll break down what happens when One App starts up,
-renders a Holocron module and how you can configure the behavior of
+renders a Holocron module and how we can configure the behavior of
 One App (and it's life cycles) via configuration.
 
 ## 📖 Table of Contents
 * [One App Server](#one-app-server)
   * [Server Settings](#server-settings)
   * [Holocron Runtime](#holocron-runtime)
+* [Runtime App Configuration](#runtime-app-configuration)
 * [Server Side Rendering](#server-side-rendering)
-  * [Render Path](#render-path)
+  * [Rendering Life Cycle](#rendering-life-cycle)
   * [Partial Renders](#partial-renders)
 
 ## One App Server
 
 When the One App server first boots up, there are a series of steps
-undertaken.
+undertaken before the server becomes operational - configuring One App
+based on environment settings is the first step, followed by pre-loading
+all the Holocron modules onto the server.
 
 ### Server Settings
 
-This section will cover the main environment variables used by One App.
-The first step One App takes is configuration, which can be done via
-command line arguments and environment variables.
+This section will cover the main environment variables used by One App,
+and the how each can alter the way One App is ran.
 
 **Core Configuration**
 
@@ -51,12 +65,12 @@ would not know which module to load and render from the module map (discussed be
 **Development Environment**
 
 In development mode, One App spins up a development CDN and API
-server that run on `localhost` which `@americanexpress/one-app-runner`
+server that run on `localhost` which [`@americanexpress/one-app-runner`](one-app-runner)
 also utilizes. We can configure the ports to use for the
 development CDN and proxy servers ran alongside One App. By
-default, One App is ran on port `3000`, the development CDN
-is ran on port `3001` and the development proxy is on port `3002`.
-To modify any of the three ports (`NODE_ENV === development`):
+default, One App is ran on port `3000`, the [`@americanexpress/one-app-dev-cdn`](one-app-dev-cdn) development CDN
+is ran on port `3001` and the development proxy server [`@americanexpress/one-app-dev-proxy`](one-app-dev-proxy)
+is ran on port `3002`. To modify any of the three ports:
 
 >  * [`HTTP_PORT`](../api/server/environment-variables#http_port)
 >  * [`HTTP_ONE_APP_DEV_CDN_PORT`](../api/server/environment-variables#http_one_app_dev_cdn_port)
@@ -74,8 +88,7 @@ The metrics server runs on port `3005` by default, to change the port:
 There are mandatory environment variables that need to be supplied to run One App
 and there are others to configure aspects of the One App runtime such as reporting
 URLs for errors and CSP violations that occurred on the client. You will need to
-include the environment variables below to run One App in production mode
-(`NODE_ENV === production`):
+include the environment variables below to run One App in production mode:
 
 >  * [`ONE_CLIENT_CDN_URL`](../api/server/environment-variables#one_client_cdn_url) ⚠️
 >  * [`ONE_CLIENT_REPORTING_URL`](../api/server/environment-variables#one_client_reporting_url) ⚠️
@@ -103,13 +116,12 @@ Before One App can start rendering HTML documents from the server, the app will
 preload every Holocron module defined in the Holocron module map. This module map
 is comprised of every module to be used by One App, including the root module which
 serves as our entry point.
-
-[link module map schema]
+[You can read more about the module map and how it is structured.](../api/server/Module-Map-Schema.md)
 
 One App uses the environment variable `HOLOCRON_MODULE_MAP_URL` to configure from where
 the module map is loaded (as `JSON`). In `development`, there is a local CDN ran alongside One App
 to serve local modules and the module map - please note that when running One App directly
-(repository or Docker image) or using `one-app-runner` will automatically configure this for you.
+(repository or Docker image) or using `one-app-runner` will automatically configure this for us.
 When in `production` mode, this variable is required.
 
 >  * [`HOLOCRON_MODULE_MAP_URL`](../api/server/environment-variables#holocron_module_map_url) ⚠️
@@ -134,7 +146,7 @@ URL supplied by the user to observe for any changes. If a Holocron module is add
 updated or removed from the module map, changed modules will be re-installed into
 memory.
 
-**Runtime App Configuration**
+## Runtime App Configuration
 
 As we discussed in the [Getting Started Guide](../Getting-Started.md), each
 Holocron module can supply an [`appConfig`](../api/modules/App-Configuration.md)
@@ -156,44 +168,73 @@ if (!global.BROWSER) {
 }
 ```
 
-You can use this additional configuration interface to further tweak
-One App to your needs. The only requirement is that the root module
+We can use this additional configuration interface to further tweak
+One App to our needs. The only requirement is that the root module
 needs to be configured with a valid CSP.
 
 ## Server Side Rendering
 
 When One App has loaded all of our modules and started the `express` server,
 the app becomes ready to render our Holocron modules. There are a few ways that
-One App can render your Holocron modules:
+One App can render our Holocron modules:
 
 - default render path, using the request URL to render the modules that match
 - partial renders, renders only the selected Holocron module in isolation
 
 We will cover both rendering modes and step through what happens when One App
-gets a request. We will also use `Module.appConfig` to configure many aspects
-of One App; from how Holocron modules loads data or render, we can tweak One App
-to fit our use cases.
+gets a request. We can use `Module.appConfig` to configure key aspects for server
+side rendering (SSR) in One App to fit our use cases.
 
-### Render Path
+### Rendering Life Cycle
 
-Once a request reaches the One App server, the app creates a Holocron Redux store per request
+Once a request reaches the One App server, the app begins the render cycle
+by assigning various headers to the response before the html is rendered.
+
+**Routing**
+
+One App [creates a Holocron Redux store](create-holocron-store) per request
 then matches the request URL to determine which modules to render. The route is matched using
-`@americanexpress/one-app-router` and composed later on using the `Router`.
+[`@americanexpress/one-app-router`][one-app-router] and composes all the [`ModuleRoute`s](holocron-module-route) and
+[`Route`s](one-app-router-route) as render props for the [`Router`](one-app-router-router).
+
+```jsx
+import React from 'react';
+import ModuleRoute from 'holocron-module-route';
+
+export default function MyModule({ children }) {
+  return children;
+}
+
+MyModule.holocron = {
+  name: 'my-module',
+};
+
+MyModule.childRoutes = () => [
+  <ModuleRoute moduleName="my-module">
+    <ModuleRoute moduleName="my-layout-module">
+      <ModuleRoute moduleName="landing-page-module" path="/" />
+    </ModuleRoute>
+  </ModuleRoute>,
+];
+```
+
+**Data Loading**
 
 `loadModuleData` is ran for all the Holocron modules that matched the request URL
 before any rendering is done server side. We can use the `loadModuleData` for
 updating the store with a response from an API:
 
 ```jsx
+import React from 'react';
 import { composeModules, RenderModule } from 'holocron';
 
 export default function MyModule() {
-  return <RenderModule moduleName="my-other-module" />
+  return <RenderModule moduleName="my-other-module" />;
 }
 
 export async function loadModuleData({ store, fetchClient, ownProps }) {
   const { dispatch, getState } = store;
-  const config = getState().getIn(['config', 'my-url'])
+  const config = getState().getIn(['config', 'my-url']);
   // we can preload Holocron modules
   await dispatch(composeModules([{ name: 'my-other-module', props: ownProps }]));
   // update the store based on API
@@ -217,7 +258,7 @@ There's a few `Module.appConfig`s that we can utilize to cater to our use cases:
 > `Module.appConfig.createSsrFetch` can be used to compose a `fetchClient` that is provided to
 > the `loadModuleData` function
 
-> `Module.appConfig.extendSafeRequestRestrictedAttributes` allows you to include cookies and headers
+> `Module.appConfig.extendSafeRequestRestrictedAttributes` allows us to include cookies and headers
 > from the request, this will allow `loadModuleData` calls to have credentials if calling an API
 
 Do note, the `ownProps` will vary between server and browser. The browser will receive
@@ -229,21 +270,22 @@ async function loadModuleData({ ownProps }) {
 }
 ```
 
+**Rendering**
+
 After loading the module data, the root module and the child modules that matched
 the request URL are composed and rendered according to their `path`. This will
 generate the HTML body that will be sent to the server.
 
 If we want to update the `<head />` of the HTML document,
-React Helmet is bundled with One App and integrated into the
-server side rendering. We can set up our meta tags, social cards,
-SEO or add styles inside with `Helmet` and it will reflect in the
-rendered markup:
+[`react-helmet`](react-helmet) is bundled with One App and integrated into the
+server side rendering. We can set up our title, meta tags, link styles to the
+document using `Helmet`:
 
 ```jsx
 import React from 'react';
 import Helmet from 'react-helmet';
 
-export default function RootModule({ children }) {
+export default function MyModule({ children }) {
   return (
     <React.Fragment>
       <Helmet>
@@ -256,12 +298,15 @@ export default function RootModule({ children }) {
 }
 ```
 
-Some of the headers you can expect from the SSR HTML document:
+**Response**
+
+These are some of the headers we can expect from the
+server-side rendered HTML document:
 
 > * `Content-Security-Policy`: set from `Module.appConfig.csp`
 > * `Cache-Control` & `Pragma`: preset caching by One App
 > * `One-App-Version`: current One App version used
-> * `helmet`: security headers provided by `helmet`
+> * [`helmet`](helmet): security headers provided by `helmet`
 
 ### Partials Renders
 
