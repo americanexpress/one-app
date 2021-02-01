@@ -30,6 +30,7 @@ import { configurePWA } from '../../../../src/server/middleware/pwa/config';
 
 import createOfflineMiddleware from '../../../../src/server/middleware/pwa/offline';
 
+jest.mock('yargs', () => ({ argv: {} })); // we are importing yargs in stateConfig and needs to be mocked
 jest.mock('../../../../src/server/middleware/sendHtml', () => jest.fn());
 jest.mock('fs', () => ({
   existsSync: () => false,

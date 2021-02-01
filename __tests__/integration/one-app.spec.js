@@ -992,6 +992,8 @@ describe('Tests that require Docker setup', () => {
 
               await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
+              await waitFor(500);
+
               const cacheKeys = await browser.executeAsync(getCacheKeys);
               const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
               const [shell, manifest] = [
@@ -1287,6 +1289,27 @@ describe('Tests that can run against either local Docker setup or remote One App
               legacy: 'application',
               sendingData: 'in POSTs',
             }),
+          }
+        );
+
+        const pageHtml = await response.text();
+        const data = JSON.parse(pageHtml.match(/<pre>([^<]+)<\/pre>/)[1].replace(/&quot;/g, '"'));
+        expect(data).toHaveProperty('req.body');
+        expect(data.req.body).toEqual({
+          legacy: 'application',
+          sendingData: 'in POSTs',
+        });
+      });
+      test('app passes urlencoded POST data to modules via vitruvius', async () => {
+        const response = await fetch(
+          `${appInstanceUrls.fetchUrl}/vitruvius`,
+          {
+            ...defaultFetchOpts,
+            method: 'POST',
+            headers: {
+              'content-type': 'application/x-www-form-urlencoded',
+            },
+            body: 'legacy=application&sendingData=in POSTs',
           }
         );
 

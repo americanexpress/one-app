@@ -2,6 +2,65 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.11.0](https://github.com/americanexpress/one-app/compare/v5.10.2...v5.11.0) (2021-01-13)
+
+
+
+
+### Features
+
+* **createCircuitBreaker:** increase healthcheck interval to 5s ([#397](https://github.com/americanexpress/one-app/issues/397)) ([6f7f222](https://github.com/americanexpress/one-app/commit/6f7f2221fbfcdb6838f3f74226e73437687f5c9c))
+* **metrics:** track intl cache size ([#406](https://github.com/americanexpress/one-app/issues/406)) ([de65e10](https://github.com/americanexpress/one-app/commit/de65e10e385fe40642f5e6e42ad4f0e29c5d439e))
+
+
+## [5.10.2](https://github.com/americanexpress/one-app/compare/v5.10.1...v5.10.2) (2020-12-02)
+
+
+### Bug Fixes
+
+* **clientErrorLogger:** format console error message ([#382](https://github.com/americanexpress/one-app/issues/382)) ([03da190](https://github.com/americanexpress/one-app/commit/03da190baa91aea1044de06bdc72e4e50f3ec420))
+* **typo:** circuit breaker “function” input ([#372](https://github.com/americanexpress/one-app/issues/372)) ([e1e74b9](https://github.com/americanexpress/one-app/commit/e1e74b9424b8fd573ba81eabb02e0984a8104081))
+
+
+## [5.10.1](https://github.com/americanexpress/one-app/compare/v5.10.0...v5.10.1) (2020-10-28)
+
+
+### Bug Fixes
+
+* **security:** specify min TLS version ([bc460aa](https://github.com/americanexpress/one-app/commit/bc460aa51e27a51d8d4e78d73321d43c593d1c9e))
+
+
+# [5.10.0](https://github.com/americanexpress/one-app/compare/v5.9.0...v5.10.0) (2020-10-21)
+
+
+### Features
+
+* **react:** update react to 16.14.0 ([be92d96](https://github.com/americanexpress/one-app/commit/be92d96ef46a54b408d71111728ece84af093b9e))
+
+
+# [5.9.0](https://github.com/americanexpress/one-app/compare/v5.8.0...v5.9.0) (2020-10-14)
+
+
+### Features
+
+* **ssrServer:** enable urlencoded post data ([#313](https://github.com/americanexpress/one-app/issues/313)) ([3481dc0](https://github.com/americanexpress/one-app/commit/3481dc0bbe26865b234df01fa2effc60ad41634e))
+
+
+# [5.8.0](https://github.com/americanexpress/one-app/compare/v5.7.0...v5.8.0) (2020-10-07)
+
+
+### Bug Fixes
+
+* **holocron:** does not check for global state on component mount ([e36b343](https://github.com/americanexpress/one-app/commit/e36b3437af6eba494583eb1e02e8f0e1370cc847))
+* **stateConfig:** use ip when useHost flag is passed ([#327](https://github.com/americanexpress/one-app/issues/327)) ([4ca50c4](https://github.com/americanexpress/one-app/commit/4ca50c466c5b56af90d7671204101225644d8423))
+* **tests/integration:** offline cache timing ([20c85e6](https://github.com/americanexpress/one-app/commit/20c85e66e103f5ebee26821f8bc7616e2e633e33))
+
+
+### Features
+
+* **csp:** loosen development to use localhost or ip '*' ([#331](https://github.com/americanexpress/one-app/issues/331)) ([1bad920](https://github.com/americanexpress/one-app/commit/1bad920d673ab72d61baf3abe77f28cdc360f696))
+
+
 # [5.7.0](https://github.com/americanexpress/one-app/compare/v5.6.1...v5.7.0) (2020-09-30)
 
 

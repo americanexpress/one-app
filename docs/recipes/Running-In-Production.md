@@ -20,6 +20,7 @@ One App can be started via docker or if built from source by running `node lib/s
 * [Building and Deploying a Holocron Module Map](#building-and-deploying-a-holocron-module-map)
 * [Building One App](#building-one-app)
 * [Configuring One App](#configuring-one-app)
+* [Deploying to AWS Elastic Beanstalk](#deploying-to-aws-elastic-beanstalk)
 
 ## Building And Deploying Holocron Modules
 
@@ -130,6 +131,8 @@ and then publish the file to a static server. Just like with module assets One A
 opinion of where the module map is published, it only cares that the module map is accessible shaped
 correctly.
 
+For a complete example on how to deploy your modules and how to update your module map, please visit the [Publishing Modules Recipe](Publishing-Modules.md).
+
 ## Building One App
 
 You can build the One App [Docker](https://www.docker.com/) image and run it in your cloud / data center of choice:
@@ -152,8 +155,68 @@ NODE_ENV=production npm run build
 
 ## Configuring One App
 
-One App is configured via [environment variables](#). There are a few
+One App is configured via [environment variables](../api/server/Environment-Variables.md). There are a few
 environment variables that are required for One App to start up including the one used to let One App
 know where to fetch a module map from as described above.
+
+### Minimum Required Environment Variables:
+
+In order for One App to start after it has been deployed, the following environment variables must be set before attempting to deploy / start the One App container:
+
+- `HOLOCRON_MODULE_MAP_URL`
+- `ONE_CLIENT_CDN_URL`
+- `ONE_CLIENT_CSP_REPORTING_URL`
+- `ONE_CLIENT_REPORTING_URL`
+- `ONE_CLIENT_ROOT_MODULE_NAME`
+
+
+Example:
+
+```bash
+HOLOCRON_MODULE_MAP_URL="https://example-module-map.vercel.app/"
+ONE_CLIENT_CDN_URL="https://www.my-app-domain.com/_/static/"
+ONE_CLIENT_CSP_REPORTING_URL="https://www.my-app-domain.com/_/report/security/csp-violation"
+ONE_CLIENT_REPORTING_URL="https://www.my-app-domain.com/_/report/errors"
+ONE_CLIENT_ROOT_MODULE_NAME="my-root-module-name"
+```
+
+## Deploying to AWS Elastic Beanstalk
+
+Prerequisites:
+
+- AWS account
+- A valid module map with at least the root module published and deployed. You can follow [this guide](Publishing-Modules.md) to create your module map and deploy your modules.
+
+You can deploy the published [One App production image](https://hub.docker.com/r/oneamex/one-app) from Docker Hub to Elastic Beanstalk by following these steps:
+
+1. Go to the AWS console, select Elastic Beanstalk and click on "Create Application".
+2. Give your application a name and select "Docker" as the platform.
+3. Select "Sample Application" and click "Create Application".
+4. Before we can upload and install the One App image to our new environment, we need to add the [Minimum Required Environment Variables](#minimum-required-environment-variables). Click on the "Configuration" of your new environment,
+under the "Software" category click "Edit". Enter all the required environment variables under the "Environment Properties" section.
+
+> Important: Ensure that you have entered a valid `HOLOCRON_MODULE_MAP_URL` that is publicly accessible and that at least the root module specified in `ONE_CLIENT_ROOT_MODULE_NAME` is published; failure to do so, will result in One App crashing and unable to start.
+
+
+5. Click on "Upload and deploy". You will need to upload a `Dockerrun.aws.json` file that contains the following:
+
+ ```json
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "oneamex/one-app:latest"
+  },
+  "Ports": [
+    {
+      "ContainerPort": "3000"
+    }
+  ]
+}
+```
+> Note: You can select the desired version of One App deployed to Docker Hub instead of latest by changing the tag in the image name.
+
+After the deployment is complete, you can navigate to your application by clicking on "Go to environment". If the application health displays an error, One App might be failing to start due to a missing environment variable or missing configuration. You can request the logs and the console should display the reason why One App is crashing.
+
+More information on how to deploy Docker containers on AWS Elastic Beanstalk can be found on the official [AWS Documentation](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_docker.html). 
 
 [☝️ Return To Top](#running-in-production)
