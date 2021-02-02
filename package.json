@@ -150,7 +150,7 @@
     "cross-env": "^7.0.3",
     "danger": "^10.6.0",
     "enzyme": "^3.11.0",
-    "enzyme-to-json": "^3.5.0",
+    "enzyme-to-json": "^3.6.1",
     "eslint": "^7.12.1",
     "eslint-config-amex": "^11.2.0",
     "eslint-plugin-es": "^3.0.1",
