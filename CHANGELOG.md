@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.11.1](https://github.com/americanexpress/one-app/compare/v5.11.0...v5.11.1) (2021-02-03)
+
+
+### Bug Fixes
+
+* **holocron-module-route:** udpates returns promises ([#413](https://github.com/americanexpress/one-app/issues/413)) ([6aa086a](https://github.com/americanexpress/one-app/commit/6aa086a88c34709d818fabab05e3cfb68b5aeeb6))
+
+
 # [5.11.0](https://github.com/americanexpress/one-app/compare/v5.10.2...v5.11.0) (2021-01-13)
 
 
