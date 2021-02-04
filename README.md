@@ -28,9 +28,8 @@ Want to get paid for your contributions to `one-app`?
 ## 📖 Table of Contents
 
 * [Features](#-features)
-* [Usage](#-usage)
-* [Recipe Docs](./docs/recipes/README.md)
-* [API Docs](./docs/api/README.md)
+* [Quick Start](#-quick-start)
+* [Documentation](#-documentation)
 * [License](#%EF%B8%8F-license)
 * [Code Of Conduct](#%EF%B8%8F-code-of-conduct)
 * [Contributing](#-contributing)
@@ -44,22 +43,37 @@ Want to get paid for your contributions to `one-app`?
 * Built-in dynamic routing.
 
 For a breakdown on these features and an architectural overview, take a look at our [overview documentation](./docs/overview/README.md)
-## 🤹‍ Usage
 
-### Quick Start
+## 🚀‍ Quick Start
 
-#### Build a Module with [generator-one-app-module](https://github.com/americanexpress/one-app-cli/tree/main/packages/generator-one-app-module)
+### Create a Module with [generator-one-app-module](https://github.com/americanexpress/one-app-cli/tree/main/packages/generator-one-app-module)
 
-The easiest way to do this is via [`npx`](https://blog.npmjs.org/post/162869356040/introducing-npx-an-npm-package-runner) (comes with `npm` versions 5.2.0 and above). Run the following command in the directory you want your module to live:
+The easiest way to do this is via [`npx`](https://blog.npmjs.org/post/162869356040/introducing-npx-an-npm-package-runner) (comes with `npm` versions 5.2.0 and above). This will use the [One App Module Generator](https://github.com/americanexpress/one-app-cli/tree/main/packages/generator-one-app-module) to generate a basic One App module.
+
+Run the following command in the directory you want your module to live:
 
 ```bash
 export NODE_ENV=development
 npx -p yo -p @americanexpress/generator-one-app-module -- yo @americanexpress/one-app-module
 ```
+Select the `root module` option when asked.
 
-This will use the [One App Module Generator](https://github.com/americanexpress/one-app-cli/tree/main/packages/generator-one-app-module) to generate a basic One App module.
+> [Docker](https://www.docker.com/) is required for this next step
 
-#### Clone and Install One App
+When the generator has finished:
+
+```bash
+cd ./[your-module-name]
+npm start
+```
+
+Visit `localhost:3000`
+
+Please follow the [Getting Started](./docs/Getting-Started.md) guide for more information.
+
+### Clone and Install One App Locally
+
+> When you want to work on One App directly or are unable to use [One App Runner](./guides/One-App-Runner.md)
 
 ```bash
 export NODE_ENV=development
@@ -68,12 +82,14 @@ cd one-app
 npm ci --no-optional
 ```
 
-#### Serve your Module to One App
+### Serve local Module's to One App
+
+> When you are directly running the One App server locally and would like to load a local Module
 
 At the root of your `one-app` repo, run:
 
 ```bash
-npm run serve-module <local-path-to-generated-module>
+npm run serve-module <path-to-local-module>
 # e.g. npm run serve-module ../my-first-module
 ```
 
@@ -94,19 +110,6 @@ one-app/static
 
 Paired with the built-in [one-app-dev-cdn](https://github.com/americanexpress/one-app-dev-cdn) library, you're able to utilize the [Holocron Module Map](./docs/api/server/Module-Map-Schema.md) while running your entire One App instance locally. No need to deploy and fetch remote assets from a CDN at this step.
 
-#### Declare the module as your Root Module and start One App:
-
-Start up One App and declare your new module as the [Root Module](#the-root-module):
-
-```bash
-npm start -- --root-module-name=<module-name>
-# e.g. npm start -- --root-module-name=my-first-module
-```
-
-This starts One App and makes it available at http://localhost:3000/ where you can see it in action!
-
-Open another terminal window, run `npm run watch:build` in your module's directory and make some edits to the module. One App will pick up these changes and update the module bundles accordingly. When you reload your browser window, One App will be displaying your updated module.
-
 ### The Root Module
 
 The root module serves as the entry point for one-app to load an application.
@@ -124,30 +127,26 @@ For a module to act as the root module the only requirements are:
 - Returns a React component bundled with [one-app-bundler](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler).
 - Provides a valid [content security policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) though the [appConfig](./docs/api/modules/App-Configuration.md) static.
 
-**📘 More Information**
+### Declaring a module as your Root Module and start One App:
 
-* [Getting Started Guide](./docs/overview/Getting-Started.md)
-* Root Module example: [frank-lloyd-root](https://github.com/americanexpress/one-app/blob/main/prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/components/FrankLloydRoot.jsx)
-* [App Configuration in your Root Module](./docs/api/modules/App-Configuration.md)
-* [What are Holocron Modules?](./docs/api/README.md)
-* [Useful Local Development Commands / Options](./docs/recipes/Running-One-App-Locally.md)
+Start up One App and declare your new module as the [Root Module](#the-root-module):
 
+```bash
+npm start -- --root-module-name=<module-name>
+# e.g. npm start -- --root-module-name=my-first-module
+```
 
-## 👩‍🍳 Recipes
+This starts One App and makes it available at http://localhost:3000/ where you can see it in action!
 
-Recipes feature our guided tutorials and walkthroughs of building Holocron Modules and running the `one-app` Server runtime.
+Open another terminal window, run `npm run watch:build` in your module's directory and make some edits to the module. One App will pick up these changes and update the module bundles accordingly. When you reload your browser window, One App will be displaying your updated module.
 
-Please visit our [Recipe Docs](./docs/recipes/README.md).
+## 📜 Documentation
 
-## 🎛️ API
-
-Our API Docs break down each part of our public APIs for One App and its supporting libraries (e.g. Holocron, `one-app-ducks`, etc).
-
-Please visit our [API Docs](./docs/api/README.md).
-
-## 🧑‍🔧 Troubleshooting
-
-Our [troubleshooting docs](./docs/troubleshooting/README.md) break down common issues users run into while working with One App.
+* [One App Overview](./docs/overview/README.md)
+* [Getting Started](./docs/overview/Getting-Started.md)
+* [Guides](./docs/guides/README.md)
+* [API](./docs/api/README.md)
+* [Troubleshooting](./docs/troubleshooting/README.md)
 
 ## 🏆 Contributing
 

@@ -1,5 +1,5 @@
 <!--ONE-DOCS-HIDE start-->
-[👈 Return to README](../README.md)
+[👈 Return to Documentation](../../README.md#-documentation)
 <!--ONE-DOCS-HIDE end-->
 
 # Welcome to One App
@@ -57,3 +57,7 @@ By Passing the `moduleMapUrl` option in the runner section of `package.json`, th
 <h1 align="center">
   <img src='https://raw.githubusercontent.com/americanexpress/one-app/main/docs/overview/images/one-app-dev.jpg' alt="One App - Development Diagram" />
 </h1>
+
+<!--ONE-DOCS-HIDE start-->
+[☝️ Return To Top](#-welcome-to-one-app)
+<!--ONE-DOCS-HIDE end-->
