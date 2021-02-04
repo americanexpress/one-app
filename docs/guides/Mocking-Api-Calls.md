@@ -5,7 +5,7 @@
 # Mocking your API calls for Local Development
 
 
-1.  Call the API following [making an API Call guide](../../recipes/Making-An-API-Call.md). The API call would be similar to this:
+1.  Call the API following [making an API Call guide](../../guides/Making-An-API-Call.md). The API call would be similar to this:
 
     ```javascript
     const loadModuleData = async ({ store, fetchClient }) => {
@@ -37,9 +37,9 @@
    Update `mock/scenarios.js` to accommodate all the scenarios that you'd like to mock using Parrot. Refer to [Parrot scenarios](https://github.com/americanexpress/parrot/blob/master/SCENARIOS.md) to learn how you can setup different scenarios.
 
 3. Set up the `dev-middleware.js` and `dev.endpoints.js`.
-  
+
     ### `dev-middleware.js`
-  
+
    `dev-middleware.js` allows you to setup a custom middleware configuration. This file is created by default when [One App module generator](https://github.com/americanexpress/one-app-cli/tree/main/packages/generator-one-app-module) is used. Ensure that [`parrot-middleware`](https://github.com/americanexpress/parrot/tree/master/packages/parrot-middleware) is installed.
 
    **Running within One App**
@@ -53,7 +53,7 @@
    **Using One App runner**
 
     When using [one-app-runner](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner), this can be configured within the `package.json` under `"one-amex" -> "runner" -> "parrotMiddleware "`:
-  
+
    ```json
     "one-amex": {
         "runner": {
@@ -79,7 +79,7 @@
 
    **Running within One App**
 
-   Use the `set-dev-endpoints` command to link your module's dev endpoints file to One App. Navigate to your local One App directory and run the following command: 
+   Use the `set-dev-endpoints` command to link your module's dev endpoints file to One App. Navigate to your local One App directory and run the following command:
 
    ```bash
     npm run set-dev-endpoints [path-to-your-module]/dev.endpoints.js
@@ -88,7 +88,7 @@
    **Using One App runner**
 
    When using [one-app-runner](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner), this can be setup within the `package.json` as follows:
-  
+
     ```json
     "one-amex": {
       "runner": {
