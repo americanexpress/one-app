@@ -69,7 +69,7 @@ then these will need to be performed before the One App server renders the modul
 
 `loadModuleData` will be invoked before a module is rendered on the One App server. This happens when modules are loaded using [`ModuleRoute`](https://github.com/americanexpress/holocron/tree/main/packages/holocron-module-route) or [`composeModules`](https://github.com/americanexpress/holocron/blob/main/packages/holocron/docs/api/README.md#composemodules). `loadModuleData` will also be called on the client when the Holocron module mounts and receives props.
 
-> You can read more about how to use `ModuleRoute` in [Routing-And-Navigation](./Routing-And-Navigation.md) and `composeModules` in the [Module-Composition](./Module-Composition.md) recipes.
+> You can read more about how to use `ModuleRoute` in [Routing-And-Navigation](./Routing-And-Navigation.md) and `composeModules` in the [Module-Composition](./Module-Composition.md) guide.
 
 Here is an example using `loadModuleData` to server side data fetch for the above example:
 
