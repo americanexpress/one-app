@@ -1,5 +1,5 @@
 <!--ONE-DOCS-HIDE start-->
-[👈 Return to Overview](./README.md)
+[👈 Return to Documentation](../../README.md#-documentation)
 <!--ONE-DOCS-HIDE end-->
 
 # Getting Started With One App
@@ -47,7 +47,7 @@ about your new module before it is generated.
 - Select "yes" for `internationalization`
 
 > Read more about [`parrot-middleware`](https://github.com/americanexpress/parrot/tree/master/packages/parrot-middleware)
-> and [`internationalization`](../recipes/internationalizing-your-module)
+> and [`internationalization`](../guides/internationalizing-your-module)
 
 Once the root module is generated we will be able to start developing with One App.
 As we continue, we will eventually create a child Holocron module for us to use -
@@ -128,13 +128,13 @@ multiple local modules when it's configured to accept them.
 
 > #### More Info
 >
-> **Recipes**
+> **Guides**
 >
-> [Run One App Locally](../recipes/running-one-app-locally)
+> [Run One App Locally](../guides/running-one-app-locally)
 >
-> [Running In Production](../recipes/running-in-production)
+> [Running In Production](../guides/running-in-production)
 >
-> [Publishing Modules](../recipes/publishing-modules)
+> [Publishing Modules](../guides/publishing-modules)
 >
 > ##### Packages
 >
@@ -184,9 +184,9 @@ export default function MyModule() {
 
 > #### More Info
 >
-> **Recipes**
+> **Guides**
 >
-> [Adding Styles Recipe](../recipes/adding-styles)
+> [Adding Styles Recipe](../guides/adding-styles)
 
 ### Creating Routes
 
@@ -237,9 +237,9 @@ if that is all that's needed.
 >
 > [Loading Modules](../api/modules/loading-modules)
 >
-> **Recipes**
+> **Guides**
 >
-> [Code Splitting Using Holocron](../recipes/code-splitting-using-holocron)
+> [Code Splitting Using Holocron](../guides/code-splitting-using-holocron)
 >
 > ##### Packages
 >
@@ -305,11 +305,11 @@ learn about in the next section.
 >
 > [State Management](../api/modules/state-management)
 >
-> **Recipes**
+> **Guides**
 >
-> [Enabling Server Side Render](../recipes/enabling-serverside-rendering)
+> [Enabling Server Side Render](../guides/enabling-serverside-rendering)
 >
-> [Internationalization](../recipes/internationalizing-your-module)
+> [Internationalization](../guides/internationalizing-your-module)
 >
 > ##### Packages
 >
@@ -379,11 +379,11 @@ if (!global.BROWSER) {
 >
 > [Module Map Schema](../api/server/module-map-schema)
 >
-> **Recipes**
+> **Guides**
 >
-> [Partial Rendering](../recipes/partial-rendering)
+> [Partial Rendering](../guides/partial-rendering)
 >
-> [Progressive Web App](../recipes/PWA.md)
+> [Progressive Web App](../guides/PWA.md)
 >
 > ##### Packages
 >
@@ -395,13 +395,18 @@ if (!global.BROWSER) {
 
 As you continue developing with One App, you will find yourself needing more
 powerful development tools as you increasingly advance in your usage. Below are
-a few Recipes and API documentation to help you out with common development
+a few Guides and API documentation to help you out with common development
 needs.
 
-**Recipes**
+**Guides**
 
-* [Mocking API Calls](../recipes/mocking-api-calls)
+* [Mocking API Calls](../guides/mocking-api-calls)
 
 **API**
 
 * [CLI Commands](../api/server/cli-commands)
+
+
+<!--ONE-DOCS-HIDE start-->
+[☝️ Return To Top](#-getting-started-with-one-app)
+<!--ONE-DOCS-HIDE end-->

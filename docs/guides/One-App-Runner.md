@@ -21,7 +21,7 @@ npx -p yo -p @americanexpress/generator-one-app-module -- yo @americanexpress/on
 
 ## Minimum Required Configuration:
 
-The `dockerImage` and `rootModuleName` options are required for One App Runner to start. 
+The `dockerImage` and `rootModuleName` options are required for One App Runner to start.
 
 `package.json`
 
@@ -38,7 +38,7 @@ Additionally, your **Root Module** needs to be loaded by either adding it to the
 
 ## Serving other Modules
 
-One App Runner allows you to load other modules as well as your entire application locally by passing the [`moduleMapUrl`](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner#module-map-url) option to point to your [deployed module map](../recipes/Running-In-Production.md#building-and-deploying-a-holocron-module-map).
+One App Runner allows you to load other modules as well as your entire application locally by passing the [`moduleMapUrl`](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner#module-map-url) option to point to your [deployed module map](../guides/Running-In-Production.md#building-and-deploying-a-holocron-module-map).
 
 If you haven't deployed any modules to a CDN yet or you want to load additional modules locally, you can use the [`modules array`](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner#modules-optional) option to add the relative paths of modules that you wish to load from your machine.
 ```json
