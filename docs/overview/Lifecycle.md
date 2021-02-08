@@ -8,6 +8,9 @@
 [one-app-router]: https://github.com/americanexpress/one-app-router
 [one-app-router-route]: https://github.com/americanexpress/one-app-router/blob/main/docs/API.md#route
 [one-app-router-router]: https://github.com/americanexpress/one-app-router/blob/main/docs/API.md#router
+[one-app-ducks]: https://github.com/americanexpress/one-app-ducks
+[render-partial-only]: https://github.com/americanexpress/one-app-ducks#setrenderpartialonly
+[render-text-only]: https://github.com/americanexpress/one-app-ducks#setrendertextonly
 [holocron-module-route]: https://github.com/americanexpress/holocron/tree/main/packages/holocron-module-route#moduleroute
 [create-holocron-store]: https://github.com/americanexpress/holocron/tree/main/packages/holocron/docs/api#createholocronstore
 [render-module]: https://github.com/americanexpress/holocron/tree/main/packages/holocron/docs/api#rendermodule
@@ -27,7 +30,8 @@ One App (and it's life cycles) via configuration.
 * [Runtime App Configuration](#runtime-app-configuration)
 * [Server Side Rendering](#server-side-rendering)
   * [Rendering Life Cycle](#rendering-life-cycle)
-  * [Partial Renders](#partial-renders)
+  * [Partials Rendering](#partials-rendering)
+  * [Text Rendering](#text-rendering)
 
 ## One App Server
 
@@ -308,20 +312,33 @@ server-side rendered HTML document:
 > * `One-App-Version`: current One App version used
 > * [`helmet`](helmet): security headers provided by `helmet`
 
-### Partials Renders
+### Partials Rendering
 
-One App can be configured to statically render Holocron modules as an independent
-entry point when rendered as a partial, regardless of URL path structures
-defined with `Module.childRoutes` and `ModuleRoute` - this is made possible by
-the micro-frontend driven architecture baked into One App, and can be utilized
-to render modules individually. Partial renders gives us the ability to generate
-emails, templates or any static HTML rendered by a Holocron module.
+Partial renders gives us the ability to generate emails, templates
+or any static HTML rendered by a Holocron module. One App can be
+configured to statically render Holocron modules (via `ReactDOMServer.renderToStaticMarkup`).
 
-Both the standard and partial rendering follow the same lifecycle,
-with the key difference being the designated entry module being rendered.
-While the root module will wrap the designated entry module, the designated
-module being rendered as a partial acts as an entry module during a partial
-render and its child routes will be rendered in the React tree.
+Configuring a module to be rendered as static HTML can be done using
+[`setRenderPartialOnly`](render-partial-only) from [`@americanexpress/one-app-ducks`](one-app-ducks)
+in the modules `loadModuleData` Holocron config.
+
+```jsx
+import React from 'react';
+import { setRenderPartialOnly } from '@americanexpress/one-app-ducks';
+
+export default function MyModule({ children }) {
+  return children;
+}
+
+export function loadModuleData({ store, fetchClient, ownProps }) {
+  store.dispatch(setRenderPartialOnly(true));
+}
+
+MyModule.holocron = {
+  name: 'my-module',
+  loadModuleData,
+};
+```
 
 Passing props to our partial module when rendering can be carried out in a few ways.
 To enable rendering modules using `POST` requests to supply props, we can
@@ -333,3 +350,33 @@ running One App.
 There is a [Partial Rendering Recipe](../recipes/Partial-Rendering.md) that goes into
 depth on how to implement this render mode in a few ways (which includes
 and example with `ONE_ENABLE_POST_TO_MODULE_ROUTES`).
+
+### Text Rendering
+
+Text rendering provides One App with a means to render static textual context like
+`robots.txt` or other plain text assets the same way we render our modules.
+
+Configuring a module to be rendered as static text can be done using
+[`setRenderTextOnly`](render-text-only) from [`@americanexpress/one-app-ducks`](one-app-ducks)
+in the modules `loadModuleData` Holocron config.
+
+```jsx
+import React from 'react';
+import { setRenderTextOnly } from '@americanexpress/one-app-ducks';
+
+export default function MyModule({ children }) {
+  return 'plain text module';
+}
+
+export function loadModuleData({ store, fetchClient, ownProps }) {
+  store.dispatch(setRenderTextOnly(true));
+}
+
+MyModule.holocron = {
+  name: 'my-module',
+  loadModuleData,
+};
+```
+
+Text rendering can be combined with `ONE_ENABLE_POST_TO_MODULE_ROUTES` to
+allow for dynamic results based on a `POST` request to One App.
