@@ -183,7 +183,8 @@ the app becomes ready to render our Holocron modules. There are a few ways that
 One App can render our Holocron modules:
 
 - default render path, using the request URL to render the modules that match
-- partial renders, renders only the selected Holocron module in isolation
+- partial renders, renders a module as static HTML
+- text renders, renders a module as plain text
 
 We will cover both rendering modes and step through what happens when One App
 gets a request. We can use `Module.appConfig` to configure key aspects for server
