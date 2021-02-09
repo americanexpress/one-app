@@ -130,7 +130,13 @@ multiple local modules when it's configured to accept them.
 >
 > **Guides**
 >
+> **Development**
+>
 > [Run One App Locally](../guides/running-one-app-locally)
+>
+> [Mocking API Calls](../guides/mocking-api-calls)
+>
+> **Production**
 >
 > [Running In Production](../guides/running-in-production)
 >
@@ -239,6 +245,8 @@ if that is all that's needed.
 >
 > **Guides**
 >
+> [Module Composition](../guides/module-composition)
+>
 > [Code Splitting Using Holocron](../guides/code-splitting-using-holocron)
 >
 > ##### Packages
@@ -307,6 +315,8 @@ learn about in the next section.
 >
 > **Guides**
 >
+> [Making An API Call](../guides/making-an-api-call)
+>
 > [Enabling Server Side Render](../guides/enabling-serverside-rendering)
 >
 > [Internationalization](../guides/internationalizing-your-module)
@@ -321,91 +331,14 @@ learn about in the next section.
 >
 > [`reselect`](https://github.com/reduxjs/reselect)
 
-### Configuring One App
+___
 
-When One App first starts up on the server, it loads in all the modules
-and looks for `Module.appConfig` in each module to configure the app runtime.
-The root module is used to configure many aspects of One App, including the
-state configuration that is available for every module to use when rendering.
+**Up Next**
 
-`src/appConfig.js`
-
-```js
-export default {
-  csp: "default-src 'self';",
-  providedStateConfig: {
-    theme: {
-      client: 'my-theme-name',
-      server: 'my-theme-name',
-    },
-  },
-};
-```
-
-The `appConfig` property is meant strictly for the server side,
-take advantage of `global.BROWSER` to ensure that the `appConfig`
-is only bundled with the server side build.
-
-`src/components/MyModule.jsx`
-
-```jsx
-import React from 'react';
-import { useSelector } from 'react-redux';
-
-export default function MyModule() {
-  const theme = useSelector((state) => state.getIn(['config', 'theme']));
-
-  return (
-    <p>
-      Theme Configuration:
-      {theme}
-    </p>
-  );
-}
-
-if (!global.BROWSER) {
-  // eslint-disable-next-line global-require
-  MyModule.appConfig = require('../appConfig.js');
-}
-```
-
-> #### More Info
->
-> **API**
->
-> [App Configuration](../api/modules/app-configuration)
->
-> [Environment Variables](../api/server/environment-variables)
->
-> [Module Map Schema](../api/server/module-map-schema)
->
-> **Guides**
->
-> [Partial Rendering](../guides/partial-rendering)
->
-> [Progressive Web App](../guides/PWA.md)
->
-> ##### Packages
->
-> [`@americanexpress/one-app-ducks`](https://github.com/americanexpress/one-app-ducks)
->
-> [`@americanexpress/one-service-worker`](https://github.com/americanexpress/one-service-worker)
-
-### Development Setup
-
-As you continue developing with One App, you will find yourself needing more
-powerful development tools as you increasingly advance in your usage. Below are
-a few Guides and API documentation to help you out with common development
-needs.
-
-**Guides**
-
-* [Mocking API Calls](../guides/mocking-api-calls)
-
-**API**
-
-* [CLI Commands](../api/server/cli-commands)
-
+Check out the [Configuration guide](./configuration) to grasp
+how we can use environment variables and Holocron module app
+configuration to cater to our needs as well as utilize features
+in One App.
 
 <!--ONE-DOCS-HIDE start-->
 [☝️ Return To Top](#-getting-started-with-one-app)

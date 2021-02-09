@@ -2,8 +2,6 @@
 [👈 Return to Overview](./README.md)
 <!--ONE-DOCS-HIDE end-->
 
-[one-app-dev-cdn]: https://github.com/americanexpress/one-app-dev-cdn
-[one-app-dev-proxy]: https://github.com/americanexpress/one-app-dev-proxy
 [one-app-runner]: https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner
 [one-app-router]: https://github.com/americanexpress/one-app-router
 [one-app-router-route]: https://github.com/americanexpress/one-app-router/blob/main/docs/API.md#route
@@ -25,11 +23,13 @@ One App (and it's life cycles) via configuration.
 
 ## 📖 Table of Contents
 * [One App Server](#one-app-server)
-  * [Server Settings](#server-settings)
-  * [Holocron Runtime](#holocron-runtime)
-* [Runtime App Configuration](#runtime-app-configuration)
+* [Holocron Runtime](#holocron-runtime)
 * [Server Side Rendering](#server-side-rendering)
-  * [Rendering Life Cycle](#rendering-life-cycle)
+  * [Render Life Cycle](#render-life-cycle)
+    * [Routing](#routing)
+    * [Data Loading](#data-loading)
+    * [Rendering](#rendering)
+    * [Response](#response)
   * [Partials Rendering](#partials-rendering)
   * [Text Rendering](#text-rendering)
 
@@ -40,81 +40,7 @@ undertaken before the server becomes operational - configuring One App
 based on environment settings is the first step, followed by pre-loading
 all the Holocron modules onto the server.
 
-### Server Settings
-
-This section will cover the main environment variables used by One App,
-and the how each can alter the way One App is ran.
-
-**Core Configuration**
-
-One App behaves differently depending on which node environment it is
-running under, thus whenever One App is ran, `NODE_ENV` must be defined
-with either `development` or `production`.
-
->  * [`NODE_ENV`](../api/server/environment-variables#node_env) ⚠️
-
-One App has a uniform value used to indicate which environment the app is
-running in. `ONE_CONFIG_ENV` is used internally as well as usable in our
-modules (to render per environment).
-
->  * [`ONE_CONFIG_ENV`](../api/server/environment-variables#one_config_env) ⚠️
-
-The One App micro-frontend architecture utilizes an entry point to render
-the entire app. This entry point is our root Holocron module and its name
-can be set with `ONE_CLIENT_ROOT_MODULE_NAME`. Without this value, One App
-would not know which module to load and render from the module map (discussed below).
-
->  * [`ONE_CLIENT_ROOT_MODULE_NAME`](../api/server/environment-variables#one_client_root_module_name) ⚠️
-
-**Development Environment**
-
-In development mode, One App spins up a development CDN and API
-server that run on `localhost` which [`@americanexpress/one-app-runner`](one-app-runner)
-also utilizes. We can configure the ports to use for the
-development CDN and proxy servers ran alongside One App. By
-default, One App is ran on port `3000`, the [`@americanexpress/one-app-dev-cdn`](one-app-dev-cdn) development CDN
-is ran on port `3001` and the development proxy server [`@americanexpress/one-app-dev-proxy`](one-app-dev-proxy)
-is ran on port `3002`. To modify any of the three ports:
-
->  * [`HTTP_PORT`](../api/server/environment-variables#http_port)
->  * [`HTTP_ONE_APP_DEV_CDN_PORT`](../api/server/environment-variables#http_one_app_dev_cdn_port)
->  * [`HTTP_ONE_APP_DEV_PROXY_SERVER_PORT`](../api/server/environment-variables#http_one_app_dev_proxy_server_port)
-
-There is a metrics server that runs in development and production,
-which tracks certain activities happening internally and reports the
-metrics on demand (during local development `http://localhost:3005/metrics`).
-The metrics server runs on port `3005` by default, to change the port:
-
->  * [`HTTP_METRICS_PORT`](../api/server/environment-variables#http_metrics_port)
-
-**Production Environment**
-
-There are mandatory environment variables that need to be supplied to run One App
-and there are others to configure aspects of the One App runtime such as reporting
-URLs for errors and CSP violations that occurred on the client. You will need to
-include the environment variables below to run One App in production mode:
-
->  * [`ONE_CLIENT_CDN_URL`](../api/server/environment-variables#one_client_cdn_url) ⚠️
->  * [`ONE_CLIENT_REPORTING_URL`](../api/server/environment-variables#one_client_reporting_url) ⚠️
->  * [`ONE_CLIENT_CSP_REPORTING_URL`](../api/server/environment-variables#one_client_csp_reporting_url) ⚠️
-
-While `HOLOCRON_MODULE_MAP_URL` is a required environment variable in `production`,
-we will go into greater depths on this variable [in the next section on Holocron runtime.](#holocron-runtime)
-
->  * [`HOLOCRON_MODULE_MAP_URL`](../api/server/environment-variables#holocron_module_map_url) ⚠️
-
-As we get to production, we can configure a certificate for One App
-to use and the HTTPS `port` provided (no defaults) for One App. In addition,
-the IP address can be set as well (defaults to `0.0.0.0` during production):
-
->  * [`IP_ADDRESS`](../api/server/environment-variables#ip_address)
->  * [`HTTPS_PORT`](../api/server/environment-variables#https_port) ⚠️
->  * [`HTTPS_PRIVATE_KEY_PASS_FILE_PATH`](../api/server/environment-variables#https_private_key_pass_file_path) ⚠️
->  * [`HTTPS_PRIVATE_KEY_PATH`](../api/server/environment-variables#https_private_key_path) ⚠️
->  * [`HTTPS_PUBLIC_CERT_CHAIN_PATH`](../api/server/environment-variables#https_public_cert_chain_path) ⚠️
->  * [`HTTPS_TRUSTED_CA_PATH`](../api/server/environment-variables#https_trusted_ca_path) ⚠️
-
-### Holocron Runtime
+## Holocron Runtime
 
 Before One App can start rendering HTML documents from the server, the app will
 preload every Holocron module defined in the Holocron module map. This module map
@@ -125,8 +51,8 @@ serves as our entry point.
 One App uses the environment variable `HOLOCRON_MODULE_MAP_URL` to configure from where
 the module map is loaded (as `JSON`). In `development`, there is a local CDN ran alongside One App
 to serve local modules and the module map - please note that when running One App directly
-(repository or Docker image) or using `one-app-runner` will automatically configure this for us.
-When in `production` mode, this variable is required.
+(repository or Docker image) or using [`one-app-runner`](one-app-runner) will automatically configure
+this for us. When in `production` mode, this variable has no default and is required.
 
 >  * [`HOLOCRON_MODULE_MAP_URL`](../api/server/environment-variables#holocron_module_map_url) ⚠️
 
@@ -139,10 +65,9 @@ You can further configure the behavior of Holocron with the Server Settings belo
 
 One App will first fetch the Holocron module map using the provided URL
 and proceeds to load every module defined in the module map into memory.
-If a module failed to load for any reason or when validating, One App will
-log the error and recover gracefully, adding the module to a `block` list until
-updated. Holocron modules are reloaded whenever the module map is polled and does
-not match what is on the server.
+If a module failed to load on start, One App will also fail to load.
+
+**Post Setup**
 
 After the modules are loaded and validated, One App can start accepting requests.
 Once One App becomes operational, it begins to periodically poll the module map
@@ -150,31 +75,12 @@ URL supplied by the user to observe for any changes. If a Holocron module is add
 updated or removed from the module map, changed modules will be re-installed into
 memory.
 
-## Runtime App Configuration
+If a module failed to load for any reason or when validating, One App will
+log the error and recover gracefully, adding the module to a `block` list until
+updated. Holocron modules are reloaded whenever the module map is polled and does
+not match what is on the server.
 
-As we discussed in the [Getting Started Guide](../Getting-Started.md), each
-Holocron module can supply an [`appConfig`](../api/modules/App-Configuration.md)
-that is executed on and configures the server.
-
-An example `Module.appConfig`:
-
-```jsx
-import React from 'react';
-
-export default function RootModule({ children }) {
-  return children;
-}
-
-if (!global.BROWSER) {
-  RootModule.appConfig = {
-    csp: 'default-src \'self\'',
-  };
-}
-```
-
-We can use this additional configuration interface to further tweak
-One App to our needs. The only requirement is that the root module
-needs to be configured with a valid CSP.
+> Holocron modules will not be added to the `block` list when in development
 
 ## Server Side Rendering
 
@@ -186,16 +92,16 @@ One App can render our Holocron modules:
 - partial renders, renders a module as static HTML
 - text renders, renders a module as plain text
 
-We will cover both rendering modes and step through what happens when One App
-gets a request. We can use `Module.appConfig` to configure key aspects for server
-side rendering (SSR) in One App to fit our use cases.
+We will step through what happens when One App gets a request and cover each
+rendering mode listed. We can use `Module.appConfig` to configure key aspects
+for server side rendering (SSR) in One App to fit our use cases.
 
-### Rendering Life Cycle
+### Render Life Cycle
 
 Once a request reaches the One App server, the app begins the render cycle
-by assigning various headers to the response before the html is rendered.
+by assigning various headers to the response before the HTML is rendered.
 
-**Routing**
+#### **Routing**
 
 One App [creates a Holocron Redux store](create-holocron-store) per request
 then matches the request URL to determine which modules to render. The route is matched using
@@ -223,7 +129,7 @@ MyModule.childRoutes = () => [
 ];
 ```
 
-**Data Loading**
+#### **Data Loading**
 
 `loadModuleData` is ran for all the Holocron modules that matched the request URL
 before any rendering is done server side. We can use the `loadModuleData` for
@@ -275,7 +181,7 @@ async function loadModuleData({ ownProps }) {
 }
 ```
 
-**Rendering**
+#### **Rendering**
 
 After loading the module data, the root module and the child modules that matched
 the request URL are composed and rendered according to their `path`. This will
@@ -303,7 +209,7 @@ export default function MyModule({ children }) {
 }
 ```
 
-**Response**
+#### **Response**
 
 These are some of the headers we can expect from the
 server-side rendered HTML document:
@@ -381,3 +287,18 @@ MyModule.holocron = {
 
 Text rendering can be combined with `ONE_ENABLE_POST_TO_MODULE_ROUTES` to
 allow for dynamic results based on a `POST` request to One App.
+
+> ### More Info
+>
+> **Guides**
+>
+> [Partial Rendering](../guides/partial-rendering)
+>
+> #### Packages
+>
+> [`@americanexpress/one-app-ducks`](https://github.com/americanexpress/one-app-ducks)
+
+
+<!--ONE-DOCS-HIDE start-->
+[☝️ Return To Top](#one-app-life-cycles)
+<!--ONE-DOCS-HIDE end-->
