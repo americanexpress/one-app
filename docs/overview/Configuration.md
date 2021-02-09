@@ -52,6 +52,8 @@ include the environment variables below to run One App in production mode:
 >  * [`ONE_CLIENT_REPORTING_URL`](../api/server/environment-variables#one_client_reporting_url) ⚠️
 >  * [`ONE_CLIENT_CSP_REPORTING_URL`](../api/server/environment-variables#one_client_csp_reporting_url) ⚠️
 
+> During development, there will be defaults set for these three environment variables.
+
 While `HOLOCRON_MODULE_MAP_URL` is a required environment variable in `production`,
 we will go into greater depths on this variable [in the next section on Holocron runtime.](./lifecycle#holocron-runtime)
 
