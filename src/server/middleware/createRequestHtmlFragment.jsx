@@ -17,11 +17,16 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import url, { Url } from 'url';
+import util from 'util';
 import { RouterContext, matchPromise } from '@americanexpress/one-app-router';
 import { composeModules } from 'holocron';
 import createCircuitBreaker from '../utils/createCircuitBreaker';
 
-import { getRenderMethodName, renderForStaticMarkup, renderForString } from '../utils/reactRendering';
+import {
+  getRenderMethodName,
+  renderForStaticMarkup,
+  renderForString,
+} from '../utils/reactRendering';
 
 const getModuleData = async ({ dispatch, modules }) => {
   await dispatch(composeModules(modules));
@@ -37,7 +42,10 @@ export default function createRequestHtmlFragment({ createRoutes }) {
       const { dispatch } = store;
       const routes = createRoutes(store);
 
-      const { redirectLocation, renderProps } = await matchPromise({ routes, location: req.url });
+      const { redirectLocation, renderProps } = await matchPromise({
+        routes,
+        location: req.url,
+      });
       if (redirectLocation) {
         // support redirecting outside our app (i.e. domain/origin)
         // store more than pathname and search as a Url object as redirectLocation.state
@@ -78,11 +86,13 @@ export default function createRequestHtmlFragment({ createRoutes }) {
 
       const state = store.getState();
 
-
       if (getRenderMethodName(state) === 'renderForStaticMarkup') {
         await dispatch(composeModules(routeModules));
       } else {
-        const fallback = await getModuleDataBreaker.fire({ dispatch, modules: routeModules });
+        const fallback = await getModuleDataBreaker.fire({
+          dispatch,
+          modules: routeModules,
+        });
 
         if (fallback) {
           req.appHtml = '';
@@ -92,7 +102,8 @@ export default function createRequestHtmlFragment({ createRoutes }) {
       }
 
       const renderMethod = getRenderMethodName(state) === 'renderForStaticMarkup'
-        ? renderForStaticMarkup : renderForString;
+        ? renderForStaticMarkup
+        : renderForString;
 
       /* eslint-disable react/jsx-props-no-spreading */
       const { renderedString, helmetInfo } = renderMethod(
@@ -104,7 +115,7 @@ export default function createRequestHtmlFragment({ createRoutes }) {
       req.appHtml = renderedString;
       req.helmetInfo = helmetInfo;
     } catch (err) {
-      console.error(`error creating request HTML fragment for ${req.url}`, err);
+      console.error(util.format('error creating request HTML fragment for %s', req.url), err);
     }
 
     return next();
