@@ -54,14 +54,14 @@ to serve local modules and the module map - please note that when running One Ap
 (repository or Docker image) or using [`one-app-runner`](one-app-runner) will automatically configure
 this for us. When in `production` mode, this variable has no default and is required.
 
->  * [`HOLOCRON_MODULE_MAP_URL`](../api/server/environment-variables#holocron_module_map_url) ⚠️
+>  * [`HOLOCRON_MODULE_MAP_URL`](../api/server/environment-variables.md#holocron_module_map_url) ⚠️
 
 You can further configure the behavior of Holocron with the Server Settings below:
 
->  * [`HOLOCRON_SERVER_MAX_MODULES_RETRY`](../api/server/environment-variables#holocron_server_max_modules_retry)
->  * [`HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`](../api/server/environment-variables#holocron_server_max_sim_modules_fetch)
->  * [`ONE_MAP_POLLING_MAX`](../api/server/environment-variables#one_map_polling_max)
->  * [`ONE_MAP_POLLING_MIN`](../api/server/environment-variables#one_map_polling_min)
+>  * [`HOLOCRON_SERVER_MAX_MODULES_RETRY`](../api/server/environment-variables.md#holocron_server_max_modules_retry)
+>  * [`HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`](../api/server/environment-variables.md#holocron_server_max_sim_modules_fetch)
+>  * [`ONE_MAP_POLLING_MAX`](../api/server/environment-variables.md#one_map_polling_max)
+>  * [`ONE_MAP_POLLING_MIN`](../api/server/environment-variables.md#one_map_polling_min)
 
 One App will first fetch the Holocron module map using the provided URL
 and proceeds to load every module defined in the module map into memory.
@@ -105,7 +105,7 @@ by assigning various headers to the response before the HTML is rendered.
 
 One App [creates a Holocron Redux store](create-holocron-store) per request
 then matches the request URL to determine which modules to render. The route is matched using
-[`@americanexpress/one-app-router`][one-app-router] and composes all the [`ModuleRoute`s](holocron-module-route) and
+[`@americanexpress/one-app-router`](one-app-router) and composes all the [`ModuleRoute`s](holocron-module-route) and
 [`Route`s](one-app-router-route) as render props for the [`Router`](one-app-router-router).
 
 ```jsx
@@ -252,9 +252,9 @@ To enable rendering modules using `POST` requests to supply props, we can
 include the environment variable `ONE_ENABLE_POST_TO_MODULE_ROUTES` when
 running One App.
 
->  * [`ONE_ENABLE_POST_TO_MODULE_ROUTES`](../api/server/environment-variables#one_enable_post_to_module_routes)
+>  * [`ONE_ENABLE_POST_TO_MODULE_ROUTES`](../api/server/environment-variables.md#one_enable_post_to_module_routes)
 
-There is a [Partial Rendering Recipe](../recipes/Partial-Rendering.md) that goes into
+There is a [Partial Rendering Recipe](../guides/Partial-Rendering.md) that goes into
 depth on how to implement this render mode in a few ways (which includes
 and example with `ONE_ENABLE_POST_TO_MODULE_ROUTES`).
 
@@ -292,11 +292,11 @@ allow for dynamic results based on a `POST` request to One App.
 >
 > **Guides**
 >
-> [Partial Rendering](../guides/partial-rendering)
+> [Partial Rendering](../guides/partial-rendering.md)
 >
 > #### Packages
 >
-> [`@americanexpress/one-app-ducks`](https://github.com/americanexpress/one-app-ducks)
+> [`@americanexpress/one-app-ducks`](one-app-ducks)
 
 
 <!--ONE-DOCS-HIDE start-->
