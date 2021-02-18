@@ -26,16 +26,14 @@ jobs:
           token: ${{ secrets.PA_TOKEN }}
           issue: ${{ github.event.issue.number }}
           comment: >
-            Hey @${{ github.event.issue.user.login }}!
-            We really appreciate you taking the time to report an issue. The
-            collaborators on this project attempt to help as many people as
-            possible, but we're a limited number of volunteers, so it's
-            possible this won't be addressed swiftly.
+            Hey @${{ github.event.issue.user.login }}! We really appreciate you taking the time to
+            report an issue. The collaborators on this project attempt to help as many people as
+            possible, but we're a limited number of volunteers, so it's possible this won't be
+            addressed swiftly.
 
 
-            If you need any help, you can request an [invite](https://join.slack.com/t/one-amex/shared_invite/enQtOTA0MzEzODExODEwLTlmYzI1Y2U2ZDEwNWJjOTAxYTlmZTYzMjUyNzQyZTdmMWIwZGJmZDM2MDZmYzVjMDk5OWU4OGIwNjJjZWRhMjY)
-            to our [Slack community](https://one-amex.slack.com) that typically always has someone
-            willing to help."
+            If you need any help, you can ask in our [GitHub
+            Discussions](https://github.com/americanexpress/one-app/discussions)."
 
   needs_info:
     name: Needs Info
@@ -50,13 +48,11 @@ jobs:
           token: ${{ secrets.PA_TOKEN }}
           issue: ${{ github.event.issue.number }}
           comment: >
-            Hi @${{ github.event.issue.user.login }}!
-            This issue is missing some important information we'll need
-            to be able to reproduce this issue.
+            Hi @${{ github.event.issue.user.login }}! This issue is missing some important
+            information we'll need to be able to reproduce this issue.
 
 
-            Please make sure you have the following information documented in
-            this ticket:
+            Please make sure you have the following information documented in this ticket:
 
             1. The current (incorrect) behavior you're seeing
 
@@ -65,5 +61,5 @@ jobs:
             3. A [short, self-contained example](http://sscce.org/)
 
 
-            Please provide a link to a new and minimal repository with instructions on
-            how to build/replicate the issue.
+            Please provide a link to a new and minimal repository with instructions on how to
+            build/replicate the issue.
