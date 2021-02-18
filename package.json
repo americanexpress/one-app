@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "5.11.0",
+  "version": "5.11.1",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
@@ -153,7 +153,7 @@
     "enzyme-to-json": "^3.6.1",
     "eslint": "^7.12.1",
     "eslint-config-amex": "^11.2.0",
-    "eslint-plugin-es": "^3.0.1",
+    "eslint-plugin-es": "^4.1.0",
     "find-up": "^4.1.0",
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",

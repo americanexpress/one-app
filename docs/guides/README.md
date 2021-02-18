@@ -1,8 +1,8 @@
 <!--ONE-DOCS-HIDE start-->
-[👈 Return to README](../../README.md)
+[👈 Return to Documentation](../../README.md#-documentation)
 <!--ONE-DOCS-HIDE end-->
 
-# 👩‍🍳 Recipes
+# 🧭 Guides
 
 * [Adding Styles](./Adding-Styles.md) 🔨
 * [Making an API call](./Making-An-Api-Call.md)
@@ -25,4 +25,7 @@
 > 🔨 = This guide is a work-in-progress.
 > 📌 = This guide needs to be written.
 
-[☝️ Return To Top](#-recipes)
+<!--ONE-DOCS-HIDE start-->
+[☝️ Return To Top](#-guides)
+
+<!--ONE-DOCS-HIDE end-->

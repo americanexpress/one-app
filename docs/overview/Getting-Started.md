@@ -1,6 +1,21 @@
 <!--ONE-DOCS-HIDE start-->
-[👈 Return to Overview](./README.md)
+[👈 Return to Documentation](../../README.md#-documentation)
 <!--ONE-DOCS-HIDE end-->
+
+[one-app]: https://github.com/americanexpress/one-app
+[holocron]: https://github.com/americanexpress/holocron/tree/main/packages/holocron
+[one-app-runner]: https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner
+[one-app-bundler]: https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler
+[one-app-router]: https://github.com/americanexpress/one-app-router
+[holocron-module-route]: https://github.com/americanexpress/holocron/tree/main/packages/holocron-module-route
+[parrot-middleware]: https://github.com/americanexpress/parrot/tree/main/packages/parrot-middleware
+
+[react]: https://reactjs.org/
+[react-dom]: https://reactjs.org/docs/react-dom.html
+[redux]: https://redux.js.org/
+[react-redux]: https://react-redux.js.org/
+[immutable-js]: https://immutable-js.github.io/immutable-js/
+[reselect]: https://github.com/reduxjs/reselect
 
 # Getting Started With One App
 
@@ -46,8 +61,8 @@ about your new module before it is generated.
 - Select "yes" for `parrot-middleware`
 - Select "yes" for `internationalization`
 
-> Read more about [`parrot-middleware`](https://github.com/americanexpress/parrot/tree/master/packages/parrot-middleware)
-> and [`internationalization`](../recipes/internationalizing-your-module)
+> Read more about [`parrot-middleware`](parrot-middleware)
+> and [`internationalization`](../guides/internationalizing-your-module.md)
 
 Once the root module is generated we will be able to start developing with One App.
 As we continue, we will eventually create a child Holocron module for us to use -
@@ -57,15 +72,15 @@ a significant role in configuring One App.
 
 > #### More Info
 >
-> [One App](https://github.com/americanexpress/one-app)
+> [One App](one-app)
 >
 > ##### Packages
 >
-> [`react`](https://reactjs.org/)
+> [`react`](react)
 >
-> [`react-dom`](https://reactjs.org/docs/react-dom.html)
+> [`react-dom`](react-dom)
 >
-> [`holocron`](https://github.com/americanexpress/holocron/tree/main/packages/holocron)
+> [`holocron`](holocron)
 
 ### Running One App
 
@@ -128,19 +143,25 @@ multiple local modules when it's configured to accept them.
 
 > #### More Info
 >
-> **Recipes**
+> **Guides**
 >
-> [Run One App Locally](../recipes/running-one-app-locally)
+> **Development**
 >
-> [Running In Production](../recipes/running-in-production)
+> [Run One App Locally](../guides/running-one-app-locally.md)
 >
-> [Publishing Modules](../recipes/publishing-modules)
+> [Mocking API Calls](../guides/mocking-api-calls.md)
+>
+> **Production**
+>
+> [Running In Production](../guides/running-in-production.md)
+>
+> [Publishing Modules](../guides/publishing-modules.md)
 >
 > ##### Packages
 >
-> [`@americanexpress/one-app-runner`](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-runner)
+> [`@americanexpress/one-app-runner`](one-app-runner)
 >
-> [`@americanexpress/one-app-bundler`](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler)
+> [`@americanexpress/one-app-bundler`](one-app-bundler)
 
 ### Adding CSS Styles
 
@@ -184,9 +205,9 @@ export default function MyModule() {
 
 > #### More Info
 >
-> **Recipes**
+> **Guides**
 >
-> [Adding Styles Recipe](../recipes/adding-styles)
+> [Adding Styles Recipe](../guides/adding-styles)
 
 ### Creating Routes
 
@@ -233,19 +254,21 @@ if that is all that's needed.
 >
 > **API**
 >
-> [Routing](../api/modules/routing)
+> [Routing](../api/modules/routing.md)
 >
-> [Loading Modules](../api/modules/loading-modules)
+> [Loading Modules](../api/modules/loading-modules.md)
 >
-> **Recipes**
+> **Guides**
 >
-> [Code Splitting Using Holocron](../recipes/code-splitting-using-holocron)
+> [Module Composition](../guides/module-composition.md)
+>
+> [Code Splitting Using Holocron](../guides/code-splitting-using-holocron.md)
 >
 > ##### Packages
 >
-> [`@americanexpress/one-app-router`](https://github.com/americanexpress/one-app-router/tree/master)
+> [`@americanexpress/one-app-router`](one-app-router)
 >
-> [`holocron-module-route`](https://github.com/americanexpress/holocron/tree/main/packages/holocron-module-route)
+> [`holocron-module-route`](holocron-module-route)
 
 ### Module State and Data
 
@@ -301,107 +324,37 @@ learn about in the next section.
 >
 > **API**
 >
-> [Loading Data](../api/modules/loading-data)
+> [Loading Data](../api/modules/loading-data.md)
 >
-> [State Management](../api/modules/state-management)
+> [State Management](../api/modules/state-management.md)
 >
-> **Recipes**
+> **Guides**
 >
-> [Enabling Server Side Render](../recipes/enabling-serverside-rendering)
+> [Making An API Call](../guides/making-an-api-call.md)
 >
-> [Internationalization](../recipes/internationalizing-your-module)
+> [Enabling Server Side Render](../guides/enabling-serverside-rendering.md)
 >
-> ##### Packages
->
-> [`immutable`](https://immutable-js.github.io/immutable-js/)
->
-> [`redux`](https://redux.js.org/)
->
-> [`react-redux`](https://react-redux.js.org/)
->
-> [`reselect`](https://github.com/reduxjs/reselect)
-
-### Configuring One App
-
-When One App first starts up on the server, it loads in all the modules
-and looks for `Module.appConfig` in each module to configure the app runtime.
-The root module is used to configure many aspects of One App, including the
-state configuration that is available for every module to use when rendering.
-
-`src/appConfig.js`
-
-```js
-export default {
-  csp: "default-src 'self';",
-  providedStateConfig: {
-    theme: {
-      client: 'my-theme-name',
-      server: 'my-theme-name',
-    },
-  },
-};
-```
-
-The `appConfig` property is meant strictly for the server side,
-take advantage of `global.BROWSER` to ensure that the `appConfig`
-is only bundled with the server side build.
-
-`src/components/MyModule.jsx`
-
-```jsx
-import React from 'react';
-import { useSelector } from 'react-redux';
-
-export default function MyModule() {
-  const theme = useSelector((state) => state.getIn(['config', 'theme']));
-
-  return (
-    <p>
-      Theme Configuration:
-      {theme}
-    </p>
-  );
-}
-
-if (!global.BROWSER) {
-  // eslint-disable-next-line global-require
-  MyModule.appConfig = require('../appConfig.js');
-}
-```
-
-> #### More Info
->
-> **API**
->
-> [App Configuration](../api/modules/app-configuration)
->
-> [Environment Variables](../api/server/environment-variables)
->
-> [Module Map Schema](../api/server/module-map-schema)
->
-> **Recipes**
->
-> [Partial Rendering](../recipes/partial-rendering)
->
-> [Progressive Web App](../recipes/PWA.md)
+> [Internationalization](../guides/internationalizing-your-module.md)
 >
 > ##### Packages
 >
-> [`@americanexpress/one-app-ducks`](https://github.com/americanexpress/one-app-ducks)
+> [`immutable`](immutable-js)
 >
-> [`@americanexpress/one-service-worker`](https://github.com/americanexpress/one-service-worker)
+> [`redux`](redux)
+>
+> [`react-redux`](react-redux)
+>
+> [`reselect`](reselect)
 
-### Development Setup
+___
 
-As you continue developing with One App, you will find yourself needing more
-powerful development tools as you increasingly advance in your usage. Below are
-a few Recipes and API documentation to help you out with common development
-needs.
+**Up Next**
 
-**Recipes**
+Check out the [Configuration guide](./configuration.md) to grasp
+how we can use environment variables and Holocron module app
+configuration to cater to our needs as well as utilize features
+in One App.
 
-* [Mocking API Calls](../recipes/mocking-api-calls)
-
-**API**
-
-* [CLI Commands](../api/server/cli-commands)
+<!--ONE-DOCS-HIDE start-->
+[☝️ Return To Top](#-getting-started-with-one-app)
+<!--ONE-DOCS-HIDE end-->
