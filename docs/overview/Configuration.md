@@ -11,11 +11,10 @@
 # One App Configuration
 
 ## 📖 Table of Contents
-* [One App Server](#one-app-server)
-  * [Metrics Server](#metrics-server)
-* [One App Runtime Configuration](#one-app-runtime-configuration)
+* [Server Configuration](#server-configuration)
+* [Runtime Configuration](#runtime-configuration)
 
-## One App Server
+## Server Configuration
 
 This section will cover the main environment variables used by One App,
 and the how each can alter the way One App is ran.
@@ -26,20 +25,20 @@ One App behaves differently depending on which node environment it is
 running under, thus whenever One App is ran, `NODE_ENV` must be defined
 with either `development` or `production`.
 
->  * [`NODE_ENV`](../api/server/environment-variables#node_env) ⚠️
+>  * [`NODE_ENV`](../api/server/environment-variables.md#node_env) ⚠️
 
 One App has a uniform value used to indicate which environment the app is
 running in. `ONE_CONFIG_ENV` is used internally as well as usable in our
 modules (to render per environment).
 
->  * [`ONE_CONFIG_ENV`](../api/server/environment-variables#one_config_env) ⚠️
+>  * [`ONE_CONFIG_ENV`](../api/server/environment-variables.md#one_config_env) ⚠️
 
 The One App micro-frontend architecture utilizes an entry point to render
 the entire app. This entry point is our root Holocron module and its name
 can be set with `ONE_CLIENT_ROOT_MODULE_NAME`. Without this value, One App
 would not know which module to load and render from the module map (discussed below).
 
->  * [`ONE_CLIENT_ROOT_MODULE_NAME`](../api/server/environment-variables#one_client_root_module_name) ⚠️
+>  * [`ONE_CLIENT_ROOT_MODULE_NAME`](../api/server/environment-variables.md#one_client_root_module_name) ⚠️
 
 **Production Environment**
 
@@ -48,27 +47,27 @@ and there are others to configure aspects of the One App runtime such as reporti
 URLs for errors and CSP violations that occurred on the client. You will need to
 include the environment variables below to run One App in production mode:
 
->  * [`ONE_CLIENT_CDN_URL`](../api/server/environment-variables#one_client_cdn_url) ⚠️
->  * [`ONE_CLIENT_REPORTING_URL`](../api/server/environment-variables#one_client_reporting_url) ⚠️
->  * [`ONE_CLIENT_CSP_REPORTING_URL`](../api/server/environment-variables#one_client_csp_reporting_url) ⚠️
+>  * [`ONE_CLIENT_CDN_URL`](../api/server/environment-variables.md#one_client_cdn_url) ⚠️
+>  * [`ONE_CLIENT_REPORTING_URL`](../api/server/environment-variables.md#one_client_reporting_url) ⚠️
+>  * [`ONE_CLIENT_CSP_REPORTING_URL`](../api/server/environment-variables.md#one_client_csp_reporting_url) ⚠️
 
 > During development, there will be defaults set for these three environment variables.
 
 While `HOLOCRON_MODULE_MAP_URL` is a required environment variable in `production`,
 we will go into greater depths on this variable [in the next section on Holocron runtime.](./lifecycle#holocron-runtime)
 
->  * [`HOLOCRON_MODULE_MAP_URL`](../api/server/environment-variables#holocron_module_map_url) ⚠️
+>  * [`HOLOCRON_MODULE_MAP_URL`](../api/server/environment-variables.md#holocron_module_map_url) ⚠️
 
 As we get to production, we can configure a certificate for One App
 to use and the HTTPS `port` provided (no defaults) for One App. In addition,
 the IP address can be set as well (defaults to `0.0.0.0` during production):
 
->  * [`IP_ADDRESS`](../api/server/environment-variables#ip_address)
->  * [`HTTPS_PORT`](../api/server/environment-variables#https_port) ⚠️
->  * [`HTTPS_PRIVATE_KEY_PASS_FILE_PATH`](../api/server/environment-variables#https_private_key_pass_file_path) ⚠️
->  * [`HTTPS_PRIVATE_KEY_PATH`](../api/server/environment-variables#https_private_key_path) ⚠️
->  * [`HTTPS_PUBLIC_CERT_CHAIN_PATH`](../api/server/environment-variables#https_public_cert_chain_path) ⚠️
->  * [`HTTPS_TRUSTED_CA_PATH`](../api/server/environment-variables#https_trusted_ca_path) ⚠️
+>  * [`IP_ADDRESS`](../api/server/environment-variables.md#ip_address)
+>  * [`HTTPS_PORT`](../api/server/environment-variables.md#https_port) ⚠️
+>  * [`HTTPS_PRIVATE_KEY_PASS_FILE_PATH`](../api/server/environment-variables.md#https_private_key_pass_file_path) ⚠️
+>  * [`HTTPS_PRIVATE_KEY_PATH`](../api/server/environment-variables.md#https_private_key_path) ⚠️
+>  * [`HTTPS_PUBLIC_CERT_CHAIN_PATH`](../api/server/environment-variables.md#https_public_cert_chain_path) ⚠️
+>  * [`HTTPS_TRUSTED_CA_PATH`](../api/server/environment-variables.md#https_trusted_ca_path) ⚠️
 
 **Metrics Server**
 
@@ -77,7 +76,7 @@ which tracks certain activities happening internally and reports the
 metrics on demand (during local development `http://localhost:3005/metrics`).
 The metrics server runs on port `3005` by default, to change the port:
 
->  * [`HTTP_METRICS_PORT`](../api/server/environment-variables#http_metrics_port)
+>  * [`HTTP_METRICS_PORT`](../api/server/environment-variables.md#http_metrics_port)
 
 **Development Environment**
 
@@ -89,25 +88,25 @@ default, One App is ran on port `3000`, the [`@americanexpress/one-app-dev-cdn`]
 is ran on port `3001` and the development proxy server [`@americanexpress/one-app-dev-proxy`](one-app-dev-proxy)
 is ran on port `3002`. To modify any of the three ports:
 
->  * [`HTTP_PORT`](../api/server/environment-variables#http_port)
->  * [`HTTP_ONE_APP_DEV_CDN_PORT`](../api/server/environment-variables#http_one_app_dev_cdn_port)
->  * [`HTTP_ONE_APP_DEV_PROXY_SERVER_PORT`](../api/server/environment-variables#http_one_app_dev_proxy_server_port)
+>  * [`HTTP_PORT`](../api/server/environment-variables.md#http_port)
+>  * [`HTTP_ONE_APP_DEV_CDN_PORT`](../api/server/environment-variables.md#http_one_app_dev_cdn_port)
+>  * [`HTTP_ONE_APP_DEV_PROXY_SERVER_PORT`](../api/server/environment-variables.md#http_one_app_dev_proxy_server_port)
 
 > ### More Info
 >
 > **API**
 >
-> [Environment Variables](../api/server/environment-variables)
+> [Environment Variables](../api/server/environment-variables.md)
 >
-> [Module Map Schema](../api/server/module-map-schema)
+> [Module Map Schema](../api/server/module-map-schema.md)
 >
 > **Guides**
 >
-> [Monitoring One App](../guides/monitoring-one-app)
+> [Monitoring One App](../guides/monitoring-one-app.md)
 >
-> [Post Request To Modules](../guides/post-to-modules)
+> [Post Request To Modules](../guides/post-to-modules.md)
 
-## One App Runtime Configuration
+## Runtime Configuration
 
 When One App first starts up on the server, it loads in all the modules
 and looks for `Module.appConfig` in each module to configure the app runtime.
@@ -159,7 +158,7 @@ if (!global.BROWSER) {
 >
 > **API**
 >
-> [App Configuration](../api/modules/app-configuration)
+> [App Configuration](../api/modules/app-configuration.md)
 >
 > **Guides**
 >
@@ -173,7 +172,7 @@ ___
 
 **Up Next**
 
-Check out the [Life Cycle guide](./lifecycle) to get into the
+Check out the [Life Cycle guide](./Lifecycle.md) to get into the
 intricacies of what happens when One App starts up, when it
 is rendering and how we can configure One App further to influence
 how One App is ran.
