@@ -1,5 +1,5 @@
 [one-app-bundler]: https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler
-[React]: http://reactjs.org/
+[react]: http://reactjs.org/
 
 <h1 align="center">
   <img src='https://github.com/americanexpress/one-app/raw/main/one-app.png' alt="One App - One Amex" width='50%'/>
@@ -10,7 +10,7 @@
 ![One App Unit and Lint Tests](https://github.com/americanexpress/one-app/workflows/One%20App%20Unit%20and%20Lint%20Tests/badge.svg)
 
 One App is a fresh take on web application development. It consists of a
-[Node.js](https://nodejs.org) server that serves up a single page app built using [React](http://reactjs.org/) components
+[Node.js](https://nodejs.org) server that serves up a single page app built using [React] components
 and makes use of [Holocron](https://github.com/americanexpress/holocron) to allow for code splitting
 via independently developed, tested, and deployed **Holocron Modules**.
 
