@@ -15,7 +15,7 @@
  */
 
 import path from 'path';
-
+import fs from 'fs';
 import findUp from 'find-up';
 import request from 'supertest';
 
@@ -36,6 +36,7 @@ describe('devHolocronCDN', () => {
 
     beforeEach(() => {
       jest.resetModules();
+      jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
       jest.mock('cors', () => jest.fn(() => (req, res, next) => next()));
       jest.mock('@americanexpress/one-app-dev-cdn', () => jest.fn(() => (req, res, next) => next()));
     });
@@ -77,6 +78,27 @@ describe('devHolocronCDN', () => {
             localDevPublicPath: path.join(path.dirname(filepath), 'static'),
             remoteModuleMapUrl: moduleMapUrl,
             useLocalModules: true,
+          });
+        });
+    });
+
+    it('does not require useLocalModules when no static module-map', () => {
+      fs.existsSync.mockImplementationOnce(() => false);
+      const moduleMapUrl = 'https://example.com/module-map.json';
+      process.argv = [
+        '',
+        '',
+        '--module-map-url',
+        moduleMapUrl,
+      ];
+
+      load();
+      return findUp('package.json')
+        .then((filepath) => {
+          expect(oneAppDevCdn).toHaveBeenCalledWith({
+            localDevPublicPath: path.join(path.dirname(filepath), 'static'),
+            remoteModuleMapUrl: moduleMapUrl,
+            useLocalModules: false,
           });
         });
     });

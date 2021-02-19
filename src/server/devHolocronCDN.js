@@ -17,11 +17,13 @@
 /* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true }] */
 
 import path from 'path';
-
+import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
 import { argv } from 'yargs';
 import oneAppDevCdn from '@americanexpress/one-app-dev-cdn';
+
+const hasLocalModuleMap = () => fs.existsSync(path.join(process.cwd(), 'static', 'module-map.json'));
 
 const app = express();
 
@@ -29,7 +31,7 @@ app.use(cors());
 app.use('/static', oneAppDevCdn({
   localDevPublicPath: path.join(__dirname, '../../static'),
   remoteModuleMapUrl: argv.moduleMapUrl,
-  useLocalModules: true,
+  useLocalModules: hasLocalModuleMap(),
   appPort: process.env.HTTP_PORT,
   useHost: argv.useHost,
 }));
