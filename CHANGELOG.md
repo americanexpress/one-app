@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.11.2](https://github.com/americanexpress/one-app/compare/v5.11.1...v5.11.2) (2021-02-24)
+
+
+### Bug Fixes
+
+* **deps:** bump one-app-ducks to 4.3.1 ([5aaf56a](https://github.com/americanexpress/one-app/commit/5aaf56abf22f9f9c0f57d6f3c1fc3082029ad2a2))
+* **dev-holocron-cdn:** allow no local module map ([#433](https://github.com/americanexpress/one-app/issues/433)) ([58e1f7d](https://github.com/americanexpress/one-app/commit/58e1f7daf52f2896fa558a6c542dda689bde2ae3))
+* **middleware:** use util.format in createRequestHtmlFragment ([0bfd1b7](https://github.com/americanexpress/one-app/commit/0bfd1b79e67a78bc09f6201ef04ce173714c87ae))
+
+
 ## [5.11.1](https://github.com/americanexpress/one-app/compare/v5.11.0...v5.11.1) (2021-02-03)
 
 
