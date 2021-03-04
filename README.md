@@ -84,7 +84,7 @@ Please follow the [Getting Started](./docs/Getting-Started.md) guide for more in
 ### Clone and Install One App Locally
 
 > When you want to work on One App directly or are unable to use
-> [One App Runner](./guides/One-App-Runner.md)
+> [One App Runner](./docs/guides/One-App-Runner.md)
 
 ```bash
 export NODE_ENV=development
