@@ -243,14 +243,33 @@ describe(fetchCacheResource.name, () => {
     jest.clearAllMocks();
   });
 
-  test('calls "match" on the cache falling back to "fetch"  and finally runs invalidation', async () => {
-    expect.assertions(5);
+  test('it does not call setCacheResource if response status is not 200', async () => {
+    expect.assertions(6);
 
     const clone = jest.fn(() => 'clone');
     const waitUntil = jest.fn();
     const meta = { ...mockMetaData };
     const event = { request: { url: meta.url, clone }, waitUntil };
-    const response = { clone };
+    const response = { clone, status: 404 };
+
+    fetch.mockImplementationOnce(() => Promise.resolve(response));
+
+    await expect(fetchCacheResource(event, meta)).resolves.toBe(response);
+    expect(clone).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(match).toHaveBeenCalledTimes(1);
+    expect(match).toHaveBeenCalledWith('clone', { cacheName: mockMetaData.cacheName });
+    expect(waitUntil).toHaveBeenCalledTimes(1);
+  });
+
+  test('calls "match" on the cache falling back to "fetch" and finally runs invalidation', async () => {
+    expect.assertions(6);
+
+    const clone = jest.fn(() => 'clone');
+    const waitUntil = jest.fn();
+    const meta = { ...mockMetaData };
+    const event = { request: { url: meta.url, clone }, waitUntil };
+    const response = { clone, status: 200 };
 
     fetch.mockImplementationOnce(() => Promise.resolve(response));
 
@@ -259,6 +278,7 @@ describe(fetchCacheResource.name, () => {
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(match).toHaveBeenCalledTimes(1);
     expect(match).toHaveBeenCalledWith('clone', { cacheName: mockMetaData.cacheName });
+    expect(waitUntil).toHaveBeenCalledTimes(2);
   });
 
   test('calls "match" and responds from the cache', async () => {
@@ -268,7 +288,7 @@ describe(fetchCacheResource.name, () => {
     const waitUntil = jest.fn();
     const meta = { ...mockMetaData };
     const event = { request: { url: meta.url, clone }, waitUntil };
-    const response = { clone };
+    const response = { clone, status: 200 };
 
     match.mockImplementationOnce(() => Promise.resolve(response));
 

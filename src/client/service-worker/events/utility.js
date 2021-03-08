@@ -127,7 +127,12 @@ export function fetchCacheResource(event, meta) {
   return match(event.request.clone(), { cacheName: meta.cacheName })
     .then(
       (cachedResponse) => cachedResponse
-      || fetch(event.request.clone()).then(setCacheResource(event, meta))
+      || fetch(event.request.clone()).then((response) => {
+        if (response.status === 200) {
+          return setCacheResource(event, meta)(response);
+        }
+        return response;
+      })
     )
     .then(invalidateCacheResource(event, meta));
 }
