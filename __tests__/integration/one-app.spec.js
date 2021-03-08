@@ -992,7 +992,7 @@ describe('Tests that require Docker setup', () => {
 
               await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
-              await waitFor(500);
+              await waitFor(5000);
 
               const cacheKeys = await browser.executeAsync(getCacheKeys);
               const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
