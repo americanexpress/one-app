@@ -1014,7 +1014,7 @@ describe('Tests that require Docker setup', () => {
 
               await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
-              await waitFor(500);
+              await waitFor(5000);
 
               const holocronModuleMap = readModuleMap();
               const cacheKeys = await browser.executeAsync(getCacheKeys);
