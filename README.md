@@ -79,7 +79,7 @@ npm start
 
 Visit `localhost:3000`
 
-Please follow the [Getting Started](./docs/Getting-Started.md) guide for more information.
+Please follow the [Getting Started](./docs/overview/Getting-Started.md) guide for more information.
 
 ### Clone and Install One App Locally
 
