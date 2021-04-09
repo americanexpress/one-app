@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.11.3](https://github.com/americanexpress/one-app/compare/v5.11.2...v5.11.3) (2021-04-07)
+
+
+### Bug Fixes
+
+* **one-app-dev-cdn:** handle uncaught promise ([#476](https://github.com/americanexpress/one-app/issues/476)) ([324bfa3](https://github.com/americanexpress/one-app/commit/324bfa3203bf1cc8ab2dad5996c398da16cbb90b))
+
+
 ## [5.11.2](https://github.com/americanexpress/one-app/compare/v5.11.1...v5.11.2) (2021-02-24)
 
 
