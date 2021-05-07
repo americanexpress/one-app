@@ -87,7 +87,7 @@ const runCommandInModule = async (
 async function npmInstall({
   directory, moduleName, moduleVersion, envVars = {},
 }) {
-  runCommandInModule({
+  return runCommandInModule({
     directory, moduleName, moduleVersion, envVars,
   }, 'npm ci');
 }
