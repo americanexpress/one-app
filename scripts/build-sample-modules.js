@@ -23,11 +23,12 @@ const { argv } = require('yargs');
 const {
   sanitizeEnvVars,
   nginxOriginStaticsRootDir,
-  sampleModulesDir,
+  getModuleDetailsFromPath,
   sampleProdDir,
   npmInstall,
   npmProductionBuild,
   getGitSha,
+  getModuleVersionPaths,
 } = require('./utils');
 
 const nginxOriginStaticsModulesDir = path.resolve(nginxOriginStaticsRootDir, 'modules');
@@ -60,9 +61,7 @@ async function updateModuleVersion(directory, moduleVersion) {
 }
 
 const buildModule = async (pathToModule) => {
-  const directory = path.resolve(pathToModule);
-  const moduleVersion = path.basename(directory);
-  const moduleName = path.basename(path.resolve(directory, '..'));
+  const { moduleName, moduleVersion, directory } = getModuleDetailsFromPath(pathToModule);
   await updateModuleVersion(directory, moduleVersion);
   await npmInstall({
     directory,
@@ -92,33 +91,9 @@ const buildModule = async (pathToModule) => {
   };
 };
 
-const selectDirectories = (dirContents) => dirContents
-  .filter((item) => item.isDirectory())
-  .map((item) => item.name);
-
 const buildAllSampleModules = async () => {
-  const sampleModulesDirContents = await fs.readdir(sampleModulesDir, { withFileTypes: true });
-  const sampleModuleNames = selectDirectories(sampleModulesDirContents);
-  const moduleNameVersions = {};
-  // Map and resolve array of promises from reading version directories
-  await Promise.all(
-    sampleModuleNames
-      .map(async (moduleName) => {
-        const versions = selectDirectories(
-          await fs.readdir(path.join(sampleModulesDir, moduleName), { withFileTypes: true })
-        );
-        moduleNameVersions[moduleName] = versions;
-      })
-  );
-
-  const moduleBuildPromises = [];
-  Object.entries(moduleNameVersions).forEach(([moduleName, versions]) => {
-    versions.forEach((version) => {
-      const pathToModule = path.resolve(sampleModulesDir, moduleName, version);
-      moduleBuildPromises.push(buildModule(pathToModule));
-    });
-  });
-  return Promise.all(moduleBuildPromises);
+  const moduleVersionPaths = await getModuleVersionPaths();
+  return Promise.all(moduleVersionPaths.map((modulePath) => buildModule(modulePath)));
 };
 
 const doWork = async () => {
