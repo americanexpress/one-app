@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "5.11.3",
+  "version": "5.11.4",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
@@ -121,7 +121,7 @@
     "serialize-error": "^7.0.1",
     "striptags": "^3.1.1",
     "transit-immutable-js": "^0.8.0",
-    "transit-js": "^0.8.867",
+    "transit-js": "^0.8.874",
     "url-polyfill": "^1.1.9",
     "uuid": "^8.3.2",
     "yargs": "^15.3.1"
@@ -168,7 +168,7 @@
     "mkdirp": "^1.0.4",
     "node-mocks-http": "^1.10.1",
     "nodemon": "^2.0.7",
-    "ora": "^5.1.0",
+    "ora": "^5.4.0",
     "parse-prometheus-text-format": "^1.1.1",
     "prettier": "^2.2.1",
     "react-test-renderer": "^16.14.0",

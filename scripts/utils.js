@@ -14,12 +14,13 @@
  * permissions and limitations under the License.
  */
 
-const { resolve } = require('path');
+const fs = require('fs-extra');
+const path = require('path');
 const { spawn, execSync } = require('child_process');
 
-const sampleProdDir = resolve('./prod-sample/');
-const sampleModulesDir = resolve(sampleProdDir, 'sample-modules');
-const nginxOriginStaticsRootDir = resolve(sampleProdDir, 'nginx', 'origin-statics');
+const sampleProdDir = path.resolve('./prod-sample/');
+const sampleModulesDir = path.resolve(sampleProdDir, 'sample-modules');
+const nginxOriginStaticsRootDir = path.resolve(sampleProdDir, 'nginx', 'origin-statics');
 
 const sanitizeEnvVars = () => {
   const sanitizedEnvVars = {};
@@ -54,19 +55,41 @@ const promisifySpawn = (...args) => new Promise((res, rej) => {
   });
 });
 
+const runCommandInModule = async (
+  {
+    directory,
+    moduleName,
+    moduleVersion,
+    envVars = {},
+  },
+  command
+) => {
+  console.time(`${moduleName}@${moduleVersion}`);
+  console.log(`⚙️ Performing ${command} on ${moduleName}@${moduleVersion}...`);
+  try {
+    await promisifySpawn(command, {
+      cwd: directory,
+      shell: true,
+      env: {
+        ...envVars,
+        NODE_ENV: 'development',
+        NPM_CONFIG_PRODUCTION: false,
+      },
+    });
+  } catch (error) {
+    console.error(`🚨 ${moduleName}@${moduleVersion} failed ${command}:`, error);
+    throw error;
+  }
+  console.log(`✅ ‍${moduleName}@${moduleVersion} successfully ran ${command}`);
+  console.timeEnd(`${moduleName}@${moduleVersion}`);
+};
+
 async function npmInstall({
   directory, moduleName, moduleVersion, envVars = {},
 }) {
-  console.time(`${moduleName}@${moduleVersion}`);
-  console.log(`⬇️  Installing ${moduleName}@${moduleVersion}...`);
-  try {
-    await promisifySpawn('npm ci', { cwd: directory, shell: true, env: { ...envVars, NODE_ENV: 'development', NPM_CONFIG_PRODUCTION: false } });
-  } catch (error) {
-    console.error(`🚨 ${moduleName}@${moduleVersion} failed to install:`);
-    throw error;
-  }
-  console.log(`✅ ‍${moduleName}@${moduleVersion} Installed!`);
-  console.timeEnd(`${moduleName}@${moduleVersion}`);
+  return runCommandInModule({
+    directory, moduleName, moduleVersion, envVars,
+  }, 'npm ci');
 }
 
 async function npmProductionBuild({
@@ -89,6 +112,46 @@ const getGitSha = () => {
   return stdout.trim();
 };
 
+const selectDirectories = (dirContents) => dirContents
+  .filter((item) => item.isDirectory())
+  .map((item) => item.name);
+
+const getSampleModuleVersions = async () => {
+  const sampleModulesDirContents = await fs.readdir(sampleModulesDir, { withFileTypes: true });
+  const sampleModuleNames = selectDirectories(sampleModulesDirContents);
+  const moduleNameVersions = {};
+  // Map and resolve array of promises from reading version directories
+  await Promise.all(
+    sampleModuleNames
+      .map(async (moduleName) => {
+        const versions = selectDirectories(
+          await fs.readdir(path.join(sampleModulesDir, moduleName), { withFileTypes: true })
+        );
+        moduleNameVersions[moduleName] = versions;
+      })
+  );
+  return moduleNameVersions;
+};
+
+const getModuleVersionPaths = async () => {
+  const modulePaths = [];
+  const sampleModuleVersions = await getSampleModuleVersions();
+  Object.entries(sampleModuleVersions).forEach(([moduleName, versions]) => {
+    versions.forEach((version) => {
+      const pathToModuleVersion = path.resolve(sampleModulesDir, moduleName, version);
+      modulePaths.push(pathToModuleVersion);
+    });
+  });
+  return modulePaths;
+};
+
+const getModuleDetailsFromPath = (pathToModule) => {
+  const directory = path.resolve(pathToModule);
+  const moduleVersion = path.basename(directory);
+  const moduleName = path.basename(path.resolve(directory, '..'));
+  return { moduleName, moduleVersion, directory };
+};
+
 module.exports = {
   sampleProdDir,
   sampleModulesDir,
@@ -98,4 +161,8 @@ module.exports = {
   npmProductionBuild,
   npmInstall,
   getGitSha,
+  getSampleModuleVersions,
+  getModuleVersionPaths,
+  getModuleDetailsFromPath,
+  runCommandInModule,
 };
