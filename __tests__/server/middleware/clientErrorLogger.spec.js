@@ -100,7 +100,8 @@ describe('clientErrorLogger', () => {
       expect(console.error).toHaveBeenCalledTimes(1);
       expect(util.inspect).toHaveBeenCalledTimes(1);
       const logged = util.inspect.mock.calls[0][0];
-      expect(logged).toBeInstanceOf(Error);
+      expect(logged).toBeInstanceOf(Object);
+      expect(logged).toHaveProperty('message', 'something broke');
       expect(logged).toHaveProperty('name', 'ClientReportedError');
       expect(logged).toHaveProperty('stack', 'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n');
       expect(logged).toHaveProperty('userAgent', 'Browser/9.0 (Computer; Hardware Software 19_4_0) PackMule/537.36 (UHTML, like Salamander) Browser/99.2.5.0 Browser/753.36');

@@ -44,8 +44,8 @@ export default function clientErrorLogger(req, res) {
         const {
           msg, stack, href, otherData,
         } = raw;
-        const err = new Error(msg);
-        Object.assign(err, {
+        const clientError = {
+          message: msg,
           name: 'ClientReportedError',
           stack,
           userAgent,
@@ -54,8 +54,8 @@ export default function clientErrorLogger(req, res) {
             ...otherData,
             correlationId,
           },
-        });
-        console.error(util.inspect(err, false, 10, true));
+        };
+        console.error(util.inspect(clientError, false, 10, true));
       });
     } else {
       // drop on the floor, this is the wrong interface
