@@ -9,11 +9,11 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "react": "^16.12.0"
+    "react": "^16.14.0"
   },
   "devDependencies": {
     "@americanexpress/one-app-bundler": "^6.12.0",
-    "babel-preset-amex": "^3.3.0",
+    "babel-preset-amex": "^3.5.0",
     "rimraf": "^3.0.1"
   }
 }

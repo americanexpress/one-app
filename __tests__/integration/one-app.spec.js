@@ -738,23 +738,26 @@ describe('Tests that require Docker setup', () => {
         describe('child module `requiredExternals` valid usage', () => {
           const providedExternalsModuleValidation = /Module late-frank attempted to provide externals/;
 
-          const moduleName = 'late-frank';
-          const version = '0.0.2';
-
           let providedExternalsWarning;
 
           beforeAll(async () => {
             providedExternalsWarning = searchForNextLogMatch(providedExternalsModuleValidation);
             await addModuleToModuleMap({
-              moduleName,
-              version,
+              moduleName: 'frank-lloyd-root',
+              version: '0.0.2',
+            });
+            await addModuleToModuleMap({
+              moduleName: 'late-frank',
+              version: '0.0.2',
             });
             // not ideal but need to wait for app to poll;
             await waitFor(5000);
           });
 
-          afterAll(() => {
+          afterAll(async () => {
             writeModuleMap(originalModuleMap);
+            // not ideal but need to wait for app to poll;
+            await waitFor(5000);
           });
 
           test('does not write a warning to log if a child module is configured with `requiredExternals`', async () => {
