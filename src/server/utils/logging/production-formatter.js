@@ -86,6 +86,10 @@ function leadingErrorWithOtherArgs(level, ...args) {
     };
   }
 
+  if (err.name === 'ServerSideReportedError') {
+    entry.metaData = err.metaData;
+  }
+
   if (args.length > 1) {
     const allButFirst = [...args];
     allButFirst.shift();

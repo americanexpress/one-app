@@ -15,7 +15,6 @@
  */
 
 // /_/report/errors
-import util from 'util';
 
 const nodeEnvIsDevelopment = process.env.NODE_ENV === 'development';
 
@@ -42,11 +41,11 @@ export default function clientErrorLogger(req, res) {
           return;
         }
         const {
-          msg, stack, href, otherData,
+          msg, stack, type, href, otherData,
         } = raw;
-        const clientError = {
-          message: msg,
-          name: 'ClientReportedError',
+        const err = new Error(msg);
+        Object.assign(err, {
+          name: type,
           stack,
           userAgent,
           uri: href,
@@ -54,8 +53,8 @@ export default function clientErrorLogger(req, res) {
             ...otherData,
             correlationId,
           },
-        };
-        console.error(util.inspect(clientError, false, 10, true));
+        });
+        console.error(err);
       });
     } else {
       // drop on the floor, this is the wrong interface

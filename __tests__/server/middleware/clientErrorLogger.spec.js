@@ -15,13 +15,11 @@
  */
 
 import { createRequest, createResponse } from 'node-mocks-http';
-import util from 'util';
 
 describe('clientErrorLogger', () => {
   let clientErrorLogger;
   jest.spyOn(console, 'error').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(util, 'inspect').mockImplementation(() => {});
 
   function load(nodeEnv) {
     if (typeof nodeEnv !== 'string') {
@@ -80,6 +78,7 @@ describe('clientErrorLogger', () => {
         body: [{
           msg: 'something broke',
           stack: 'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n',
+          type: 'ClientReportedError',
           href: 'https://example.com/page-the/error/occurred-on',
           otherData: {
             moduleID: 'dynamic-layout',
@@ -98,10 +97,8 @@ describe('clientErrorLogger', () => {
       console.error.mockClear();
       clientErrorLogger(req, res);
       expect(console.error).toHaveBeenCalledTimes(1);
-      expect(util.inspect).toHaveBeenCalledTimes(1);
-      const logged = util.inspect.mock.calls[0][0];
-      expect(logged).toBeInstanceOf(Object);
-      expect(logged).toHaveProperty('message', 'something broke');
+      const logged = console.error.mock.calls[0][0];
+      expect(logged).toBeInstanceOf(Error);
       expect(logged).toHaveProperty('name', 'ClientReportedError');
       expect(logged).toHaveProperty('stack', 'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n');
       expect(logged).toHaveProperty('userAgent', 'Browser/9.0 (Computer; Hardware Software 19_4_0) PackMule/537.36 (UHTML, like Salamander) Browser/99.2.5.0 Browser/753.36');
