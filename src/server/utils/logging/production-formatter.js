@@ -84,9 +84,7 @@ function leadingErrorWithOtherArgs(level, ...args) {
       },
       metaData: err.metaData,
     };
-  }
-
-  if (err.name === 'ServerSideReportedError') {
+  } else if (err.metaData) {
     entry.metaData = err.metaData;
   }
 

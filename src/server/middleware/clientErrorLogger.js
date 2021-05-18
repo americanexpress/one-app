@@ -41,11 +41,11 @@ export default function clientErrorLogger(req, res) {
           return;
         }
         const {
-          msg, stack, type, href, otherData,
+          msg, stack, href, otherData,
         } = raw;
         const err = new Error(msg);
         Object.assign(err, {
-          name: type,
+          name: 'ClientReportedError',
           stack,
           userAgent,
           uri: href,

@@ -170,11 +170,10 @@ describe('production-formatter', () => {
       expect(JSON.parse(entry)).toMatchSnapshot();
     });
 
-    it('encodes ServerSideReported Error as parseable JSON', () => {
+    it('encodes Server Rerported Error as parseable JSON with nested metadata objects', () => {
       function buildServerSideErrorEntry() {
         const error = new Error('something broke');
         Object.assign(error, {
-          name: 'ServerSideReportedError',
           stack: 'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n',
           metaData: {
             moduleID: 'healthy-frank',

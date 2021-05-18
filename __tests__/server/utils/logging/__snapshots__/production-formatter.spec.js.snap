@@ -51,7 +51,7 @@ Object {
 }
 `;
 
-exports[`production-formatter errors encodes ServerSideReported Error as parseable JSON 1`] = `
+exports[`production-formatter errors encodes Server Rerported Error as parseable JSON with nested metadata objects 1`] = `
 Object {
   "application": Object {
     "name": "One App",
@@ -63,7 +63,7 @@ Object {
   },
   "error": Object {
     "message": "something broke",
-    "name": "ServerSideReportedError",
+    "name": "Error",
     "stacktrace": "Error: something broke
     at methodA (resource-a.js:1:1)
     at methodB (resource-b.js:1:1)

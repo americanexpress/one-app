@@ -78,7 +78,6 @@ describe('clientErrorLogger', () => {
         body: [{
           msg: 'something broke',
           stack: 'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n',
-          type: 'ClientReportedError',
           href: 'https://example.com/page-the/error/occurred-on',
           otherData: {
             moduleID: 'dynamic-layout',
