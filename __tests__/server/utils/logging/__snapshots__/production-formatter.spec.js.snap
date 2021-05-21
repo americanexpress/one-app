@@ -51,7 +51,7 @@ Object {
 }
 `;
 
-exports[`production-formatter errors encodes Server Rerported Error as parseable JSON with nested metadata objects 1`] = `
+exports[`production-formatter errors encodes Server Reported Error as parseable JSON with nested metadata objects 1`] = `
 Object {
   "application": Object {
     "name": "One App",
