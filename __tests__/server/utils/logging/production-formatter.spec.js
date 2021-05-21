@@ -170,7 +170,7 @@ describe('production-formatter', () => {
       expect(JSON.parse(entry)).toMatchSnapshot();
     });
 
-    it('encodes Server Rerported Error as parseable JSON with nested metadata objects', () => {
+    it('encodes Server Reported Error as parseable JSON with nested metadata objects', () => {
       function buildServerSideErrorEntry() {
         const error = new Error('something broke');
         Object.assign(error, {
