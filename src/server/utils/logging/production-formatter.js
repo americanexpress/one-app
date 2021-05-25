@@ -84,6 +84,8 @@ function leadingErrorWithOtherArgs(level, ...args) {
       },
       metaData: err.metaData,
     };
+  } else if (err.metaData) {
+    entry.metaData = err.metaData;
   }
 
   if (args.length > 1) {

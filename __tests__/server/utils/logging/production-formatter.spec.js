@@ -169,6 +169,33 @@ describe('production-formatter', () => {
       expect(() => JSON.parse(entry)).not.toThrowError();
       expect(JSON.parse(entry)).toMatchSnapshot();
     });
+
+    it('encodes Server Reported Error as parseable JSON with nested metadata objects', () => {
+      function buildServerSideErrorEntry() {
+        const error = new Error('something broke');
+        Object.assign(error, {
+          stack: 'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n',
+          metaData: {
+            moduleID: 'healthy-frank',
+            nestedObject: {
+              level1: {
+                level2: {
+                  level3: {
+                    level4: 'logs nested objects correctly',
+                  },
+                },
+              },
+            },
+          },
+        });
+        return error;
+      }
+
+      load();
+      const entry = formatter('error', buildServerSideErrorEntry());
+      expect(() => JSON.parse(entry)).not.toThrowError();
+      expect(JSON.parse(entry)).toMatchSnapshot();
+    });
   });
 
   describe('types', () => {

@@ -15,7 +15,6 @@
  */
 
 // /_/report/errors
-import util from 'util';
 
 const nodeEnvIsDevelopment = process.env.NODE_ENV === 'development';
 
@@ -55,7 +54,7 @@ export default function clientErrorLogger(req, res) {
             correlationId,
           },
         });
-        console.error(util.inspect(err, false, 10, true));
+        console.error(err);
       });
     } else {
       // drop on the floor, this is the wrong interface
