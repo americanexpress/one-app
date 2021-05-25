@@ -9,18 +9,18 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@americanexpress/one-app-ducks": "^4.2.0",
+    "@americanexpress/one-app-ducks": "^4.3.2",
     "content-security-policy-builder": "^2.1.0",
-    "holocron": "^1.1.0",
-    "holocron-module-route": "^1.1.0",
+    "holocron": "^1.1.4",
+    "holocron-module-route": "^1.1.4",
     "immutable": "^4.0.0-0",
     "ip": "^1.1.5",
     "prop-types": "^15.5.9",
-    "react": "^16.4.2",
-    "react-helmet": "^6.0.0",
-    "react-immutable-proptypes": "^2.1.0",
-    "react-redux": "^7.1.1",
-    "redux": "^4.0.4"
+    "react": "^16.14.0",
+    "react-helmet": "^6.1.0",
+    "react-immutable-proptypes": "^2.2.0",
+    "react-redux": "^7.2.4",
+    "redux": "^4.1.0"
   },
   "devDependencies": {
     "@americanexpress/one-app-bundler": "^6.12.0",

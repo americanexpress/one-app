@@ -9,9 +9,9 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@emotion/core": "^10.0.27",
-    "react": "^16.4.2",
-    "react-intl": "^3.6.0"
+    "@emotion/core": "^10.1.1",
+    "react": "^16.14.0",
+    "react-intl": "^3.12.1"
   },
   "devDependencies": {
     "@americanexpress/one-app-bundler": "^6.12.0",
