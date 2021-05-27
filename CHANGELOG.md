@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.11.5](https://github.com/americanexpress/one-app/compare/v5.11.4...v5.11.5) (2021-05-26)
+
+
+### Bug Fixes
+
+* **clientErrorLogger:** add metaData to server side reported error ([2ca064f](https://github.com/americanexpress/one-app/commit/2ca064f0d7f380a1a2c33b7944608bcead7241f4))
+
+
 ## [5.11.4](https://github.com/americanexpress/one-app/compare/v5.11.3...v5.11.4) (2021-04-21)
 
 

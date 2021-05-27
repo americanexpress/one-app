@@ -51,6 +51,42 @@ Object {
 }
 `;
 
+exports[`production-formatter errors encodes Server Reported Error as parseable JSON with nested metadata objects 1`] = `
+Object {
+  "application": Object {
+    "name": "One App",
+    "version": "1.2.3-abc123",
+  },
+  "device": Object {
+    "agent": "Darwin x64",
+    "id": "host-123:1234",
+  },
+  "error": Object {
+    "message": "something broke",
+    "name": "Error",
+    "stacktrace": "Error: something broke
+    at methodA (resource-a.js:1:1)
+    at methodB (resource-b.js:1:1)
+",
+  },
+  "level": "error",
+  "metaData": Object {
+    "moduleID": "healthy-frank",
+    "nestedObject": Object {
+      "level1": Object {
+        "level2": Object {
+          "level3": Object {
+            "level4": "logs nested objects correctly",
+          },
+        },
+      },
+    },
+  },
+  "schemaVersion": "0.3.0",
+  "timestamp": "2018-03-02T02:39:32.948Z",
+}
+`;
+
 exports[`production-formatter errors encodes as parseable JSON 1`] = `
 Object {
   "application": Object {
