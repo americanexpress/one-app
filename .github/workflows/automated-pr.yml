@@ -1,7 +1,7 @@
 name: Dependabot Pull Request
 on:
   schedule:
-  - cron: "0 16 * * 4"
+  - cron: "0 13 * * 1"
 jobs:
   productionPromotion:
     runs-on: ubuntu-latest
