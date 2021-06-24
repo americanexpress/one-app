@@ -94,16 +94,7 @@ describe('serverMiddleware', () => {
     expect(startTimer).toHaveBeenCalledWith(res);
   });
 
-  it('logs the request & response when the response finishes', () => {
-    const { req, res, next } = createReqResNext();
-    logger.info.mockClear();
-    serverMiddleware(req, res, next);
-    findMockCallForEvent(res, 'finish')();
-    expect(logger.info).toHaveBeenCalledTimes(1);
-    expect(logger.info.mock.calls[0]).toMatchSnapshot();
-  });
-
-  it('logs the request & response when the response cannot finish', () => {
+  it('logs the request & response when the response closes', () => {
     const { req, res, next } = createReqResNext();
     logger.info.mockClear();
     serverMiddleware(req, res, next);
@@ -120,7 +111,7 @@ describe('serverMiddleware', () => {
         .mockImplementationOnce(() => 56)
         .mockImplementationOnce(() => 34);
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.timings).toHaveProperty('ttfb', 22);
@@ -133,7 +124,7 @@ describe('serverMiddleware', () => {
         .mockImplementationOnce(() => undefined)
         .mockImplementationOnce(() => undefined);
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.timings).toHaveProperty('ttfb', null);
@@ -145,7 +136,7 @@ describe('serverMiddleware', () => {
       req.headers.host = expected;
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('host', expected);
@@ -156,7 +147,7 @@ describe('serverMiddleware', () => {
       delete req.headers.host;
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('host', null);
@@ -169,7 +160,7 @@ describe('serverMiddleware', () => {
       delete req.headers.referer;
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('referrer', expected);
@@ -182,7 +173,7 @@ describe('serverMiddleware', () => {
       req.headers.referer = expected;
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('referrer', expected);
@@ -194,7 +185,7 @@ describe('serverMiddleware', () => {
       delete req.headers.referer;
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('referrer', null);
@@ -206,7 +197,7 @@ describe('serverMiddleware', () => {
       req.headers['user-agent'] = expected;
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('userAgent', expected);
@@ -217,7 +208,7 @@ describe('serverMiddleware', () => {
       delete req.headers['user-agent'];
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('userAgent', null);
@@ -229,7 +220,7 @@ describe('serverMiddleware', () => {
       res.privateHeaderStore.location = expected;
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('location', expected);
@@ -240,7 +231,7 @@ describe('serverMiddleware', () => {
       delete res.privateHeaderStore.location;
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('location', undefined);
@@ -252,7 +243,7 @@ describe('serverMiddleware', () => {
       req.headers.forwarded = expected;
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('forwarded', expected);
@@ -263,7 +254,7 @@ describe('serverMiddleware', () => {
       delete req.headers.forwarded;
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('forwarded', null);
@@ -275,7 +266,7 @@ describe('serverMiddleware', () => {
       req.headers['x-forwarded-for'] = expected;
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('forwardedFor', expected);
@@ -286,7 +277,7 @@ describe('serverMiddleware', () => {
       delete req.headers['x-forwarded-for'];
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('forwardedFor', null);
@@ -298,7 +289,7 @@ describe('serverMiddleware', () => {
       req.store = { getState: () => fromJS({ intl: fromJS({ activeLocale: expected }) }) };
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('locale', expected);
@@ -309,7 +300,7 @@ describe('serverMiddleware', () => {
       delete req.store;
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('locale', undefined);
@@ -329,7 +320,7 @@ describe('serverMiddleware', () => {
       const { req, res, next } = createReqResNext();
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       expect(customConfigureRequestLog.mock.calls[0][0].req).toEqual(req);
       expect(customConfigureRequestLog.mock.calls[0][0].res).toEqual(res);
@@ -342,7 +333,7 @@ describe('serverMiddleware', () => {
       const { req, res, next } = createReqResNext();
       logger.info.mockClear();
       serverMiddleware(req, res, next);
-      findMockCallForEvent(res, 'finish')();
+      findMockCallForEvent(res, 'close')();
       expect(logger.info).toHaveBeenCalledTimes(1);
       expect(customConfigureRequestLog).not.toHaveBeenCalled();
     });
