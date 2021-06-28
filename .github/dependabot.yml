@@ -12,6 +12,7 @@ updates:
       - "one app"
     allow:
       - dependency-type: "direct"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/cultured-frankie/0.0.0"
     schedule:
@@ -24,6 +25,7 @@ updates:
       - "cultured frankie v0.0.0"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/cultured-frankie/0.0.1"
     schedule:
@@ -36,6 +38,7 @@ updates:
       - "cultured frankie v0.0.1"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-lloyd-root/0.0.0"
     schedule:
@@ -48,6 +51,7 @@ updates:
       - "frank lloyd root v0.0.0"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-lloyd-root/0.0.1"
     schedule:
@@ -60,6 +64,7 @@ updates:
       - "frank lloyd root v0.0.1"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-lloyd-root/0.0.2"
     schedule:
@@ -72,6 +77,7 @@ updates:
       - "frank lloyd root v0.0.2"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-lloyd-root/0.0.3"
     schedule:
@@ -84,6 +90,7 @@ updates:
       - "frank lloyd root v0.0.3"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/frank-the-parrot/0.0.0"
     schedule:
@@ -96,6 +103,7 @@ updates:
       - "frank the parrot v0.0.0"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/franks-burgers/0.0.0"
     schedule:
@@ -108,6 +116,7 @@ updates:
       - "franks burgers v0.0.0"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/healthy-frank/0.0.0"
     schedule:
@@ -120,6 +129,7 @@ updates:
       - "healthy frank v0.0.0"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/late-frank/0.0.0"
     schedule:
@@ -132,6 +142,7 @@ updates:
       - "late frank v0.0.0"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/late-frank/0.0.1"
     schedule:
@@ -144,6 +155,7 @@ updates:
       - "late frank v0.0.1"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/late-frank/0.0.2"
     schedule:
@@ -156,6 +168,7 @@ updates:
       - "late frank v0.0.2"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/needy-frank/0.0.0"
     schedule:
@@ -168,6 +181,7 @@ updates:
       - "needy frank v0.0.0"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/needy-frank/0.0.1"
     schedule:
@@ -180,6 +194,7 @@ updates:
       - "needy frank v0.0.1"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/picky-frank/0.0.0"
     schedule:
@@ -192,6 +207,7 @@ updates:
       - "picky frank v0.0.0"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/picky-frank/0.0.1"
     schedule:
@@ -204,6 +220,7 @@ updates:
       - "picky frank v0.0.1"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/preview-frank/0.0.0"
     schedule:
@@ -216,6 +233,7 @@ updates:
       - "preview frank v0.0.0"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/ssr-frank/0.0.0"
     schedule:
@@ -228,6 +246,7 @@ updates:
       - "ssr frank v0.0.0"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/vitruvius-franklin/0.0.0"
     schedule:
@@ -240,6 +259,7 @@ updates:
       - "vitruvius franklin v0.0.0"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
   - package-ecosystem: "npm"
     directory: "/prod-samples/sample-modules/vitruvius-franklin/0.0.1"
     schedule:
@@ -252,6 +272,7 @@ updates:
       - "vitruvius franklin v0.0.1"
     allow:
       - dependency-type: "production"
+    target-branch: "dependabot-changes"  
 
   # Enable version updates for Docker
   - package-ecosystem: "docker"
@@ -261,7 +282,7 @@ updates:
     labels:
       - "docker"
       - "dependabot"
-
+    target-branch: "dependabot-changes"  
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/.github/workflows"
@@ -270,3 +291,4 @@ updates:
     labels:
       - "github-actions"
       - "dependabot"
+    target-branch: "dependabot-changes"  
