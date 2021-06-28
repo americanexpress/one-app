@@ -62,7 +62,6 @@ The One App Server, `one-app`, provides a runtime for serving an HTML document w
 * [CLI Commands](./server/Cli-Commands.md)
 * [Module Map Schema](./server/Module-Map-Schema.md)
 * [Environment Variables](./server/Environment-Variables.md)
-* [Development Tools](./server/Development-Tools.md)
 * [Server Routes](./server/Routes.md)
 
 <!--ONE-DOCS-HIDE start-->
