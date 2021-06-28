@@ -1,0 +1,19 @@
+name: Dependabot Pull Request
+on:
+  schedule:
+  - cron: "0 13 * * 1"
+jobs:
+  productionPromotion:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+      - name: Keep dependabot branch upto date
+        run: |
+          git fetch origin dependabot-changes:dependabot-changes
+          git reset --hard dependabot-changes
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          branch: dependabot-changes
