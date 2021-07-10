@@ -102,8 +102,6 @@ export const setConfigureRequestLog = (newConfigureRequestLog = passThrough) => 
 export default function serverMiddleware(req, res, next) {
   startTimer(req);
   monkeypatches.attachSpy(res, 'writeHead', () => startTimer(res));
-  res.on('finish', () => logClientRequest(req, res));
-  res.on('close', () => logClientRequest(req, res)); // TODO: mention the different status?
-
+  res.on('close', () => logClientRequest(req, res));
   setImmediate(next);
 }

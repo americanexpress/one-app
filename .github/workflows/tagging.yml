@@ -16,7 +16,7 @@ jobs:
         id: get-commit-message
         shell: bash
         run: |
-          commitmessage=$(git log --format=%B -n 1 ${{ github.event.after }})
+          commitmessage=$(git log --format=%s -n 1 ${{ github.event.after }})
           echo ::set-output name=message::"\"$commitmessage"\"
           echo ${{ steps.get-commit-message.outputs.message }}
       - name: get tag version
