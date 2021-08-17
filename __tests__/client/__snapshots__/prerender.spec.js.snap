@@ -1,22 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`moveHelmetScripts should only move scripts that were injected by react-helmet, ignoring others: helmet scripts 1`] = `
-NodeList [
-  <script
-    data-react-helmet="true"
-    src="hello.js"
-  />,
-  <script
-    data-react-helmet="true"
-    src="world.js"
-  />,
-  <script
-    data-react-helmet="true"
-    src="baz.js"
-  />,
-]
-`;
-
 exports[`moveHelmetScripts should only move scripts that were injected by react-helmet, ignoring others: non-helmet scripts 1`] = `
 NodeList [
   <script
@@ -24,6 +7,15 @@ NodeList [
   />,
   <script
     src="bar.js"
+  />,
+]
+`;
+
+exports[`moveHelmetScripts should remove helmet scripts from the body and only append helmet scripts to the head if react-helmet has not already injected them: head helmet scripts 1`] = `
+Array [
+  <script
+    data-react-helmet="true"
+    src="hello.js"
   />,
 ]
 `;
