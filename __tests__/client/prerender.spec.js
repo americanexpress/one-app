@@ -167,7 +167,21 @@ describe('moveHelmetScripts', () => {
     document.addEventListener.mock.calls[0][1]();
 
     expect(document.querySelectorAll('body script')).toMatchSnapshot('non-helmet scripts');
-    expect(document.querySelectorAll('head script')).toMatchSnapshot('helmet scripts');
+  });
+
+  it('should remove helmet scripts from the body and only append helmet scripts to the head if react-helmet has not already injected them', () => {
+    const scriptForBody = createScript({ src: 'hello.js', helmet: true });
+    const scriptForHead = createScript({ src: 'hello.js', helmet: true });
+
+    document.body.appendChild(scriptForBody);
+    document.head.appendChild(scriptForHead);
+
+    moveHelmetScripts();
+    document.addEventListener.mock.calls[0][1]();
+    const scriptsFromHead = [...document.head.querySelectorAll('script')];
+    expect([...document.body.querySelectorAll('script')].length).toEqual(0);
+    expect(scriptsFromHead).toMatchSnapshot('head helmet scripts');
+    expect(scriptsFromHead.length).toEqual(1);
   });
 
   it('should not expect NodeList to have forEach due to IE', () => {
