@@ -46,9 +46,16 @@ export function loadPrerenderScripts(initialState) {
 
 export function moveHelmetScripts() {
   document.addEventListener('DOMContentLoaded', () => {
-    const helmetScripts = [...document.querySelectorAll('script[data-react-helmet]')];
-    helmetScripts.forEach((script) => document.body.removeChild(script));
-    helmetScripts.forEach((script) => document.head.appendChild(script));
+    const headHelmetScripts = [...document.head.querySelectorAll('script[data-react-helmet]')];
+    const bodyHelmetScripts = [...document.body.querySelectorAll('script[data-react-helmet]')];
+
+    bodyHelmetScripts.forEach((script) => document.body.removeChild(script));
+
+    // If the helmet scripts exist in the head then we can assume that the body
+    // scripts were already added by react-helmet
+    if (headHelmetScripts.length === 0) {
+      bodyHelmetScripts.forEach((script) => document.head.appendChild(script));
+    }
   });
 }
 

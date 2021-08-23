@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.11.6](https://github.com/americanexpress/one-app/compare/v5.11.5...v5.11.6) (2021-06-23)
+
+
+### Bug Fixes
+
+* **requestLog:** only log on close ([#526](https://github.com/americanexpress/one-app/issues/526)) ([d57b26b](https://github.com/americanexpress/one-app/commit/d57b26b896d1418429fbfe12edd3d7b81a4c391c))
+
+
 ## [5.11.5](https://github.com/americanexpress/one-app/compare/v5.11.4...v5.11.5) (2021-05-26)
 
 
