@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.11.7](https://github.com/americanexpress/one-app/compare/v5.11.6...v5.11.7) (2021-08-25)
+
+
+### Bug Fixes
+
+* **helmet:** fixes race condition with react-helmet ([#534](https://github.com/americanexpress/one-app/issues/534)) ([36f65d9](https://github.com/americanexpress/one-app/commit/36f65d9bdc42a8f31d751f40cc422c35a81445d1))
+
+
 ## [5.11.6](https://github.com/americanexpress/one-app/compare/v5.11.5...v5.11.6) (2021-06-23)
 
 
