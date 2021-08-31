@@ -144,7 +144,7 @@
     "amex-jest-preset-react": "^6.1.0",
     "babel-eslint": "^10.1.0",
     "babel-preset-amex": "^3.5.0",
-    "chokidar": "^3.5.1",
+    "chokidar": "^3.5.2",
     "concurrently": "^6.0.2",
     "conventional-changelog-cli": "^2.1.1",
     "cross-env": "^7.0.3",
