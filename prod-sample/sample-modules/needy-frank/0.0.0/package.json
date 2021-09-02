@@ -14,11 +14,11 @@
     "iguazu-holocron": "^1.1.4",
     "iguazu-rest": "^1.10.1",
     "iguazu-rpc": "^1.6.1",
-    "object-hash": "^2.1.1",
+    "object-hash": "^2.2.0",
     "prop-types": "^15.5.9",
     "react": "^16.14.0",
     "react-redux": "^7.2.4",
-    "redux": "^4.1.0",
+    "redux": "^4.1.1",
     "redux-immutable": "^4.0.0",
     "redux-thunk": "^2.3.0"
   },
