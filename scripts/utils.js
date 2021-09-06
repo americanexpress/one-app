@@ -89,7 +89,7 @@ async function npmInstall({
 }) {
   return runCommandInModule({
     directory, moduleName, moduleVersion, envVars,
-  }, 'npm ci');
+  }, 'npm install');
 }
 
 async function npmProductionBuild({

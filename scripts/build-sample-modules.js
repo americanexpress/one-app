@@ -43,20 +43,12 @@ const sanitizedEnvVars = sanitizeEnvVars();
 
 async function updateModuleVersion(directory, moduleVersion) {
   const packageJsonPath = path.resolve(directory, 'package.json');
-  const packageLockPath = path.resolve(directory, 'package-lock.json');
   // eslint-disable-next-line global-require, import/no-dynamic-require
   const packageJson = require(packageJsonPath);
-  // eslint-disable-next-line global-require, import/no-dynamic-require
-  const packageLock = require(packageLockPath);
   const updatedPackageJson = { ...packageJson, version: moduleVersion };
-  const updatedPackageLock = { ...packageLock, version: moduleVersion };
 
   await fs.writeFile(
     packageJsonPath, JSON.stringify(updatedPackageJson, null, 2)
-  );
-
-  await fs.writeFile(
-    packageLockPath, JSON.stringify(updatedPackageLock, null, 2)
   );
 }
 
