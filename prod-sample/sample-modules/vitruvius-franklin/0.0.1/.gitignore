@@ -1,8 +1,0 @@
-# node/npm
-node_modules
-*.log
-
-# build
-build
-.webpack-stats.*
-bundle.integrity.manifest.json
