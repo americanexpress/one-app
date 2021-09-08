@@ -26,13 +26,13 @@ exports[`initClient should use ReactDOM.render if renderMode is "render" 1`] = `
 <Provider
   store={
     Object {
+      "@@observable": [Function],
       "dispatch": [Function],
       "getState": [Function],
       "modules": Immutable.Map {},
       "rebuildReducer": [Function],
       "replaceReducer": [Function],
       "subscribe": [Function],
-      Symbol(observable): [Function],
     }
   }
 >
@@ -47,13 +47,13 @@ exports[`initClient should use strict mode 1`] = `
 <Provider
   store={
     Object {
+      "@@observable": [Function],
       "dispatch": [Function],
       "getState": [Function],
       "modules": Immutable.Map {},
       "rebuildReducer": [Function],
       "replaceReducer": [Function],
       "subscribe": [Function],
-      Symbol(observable): [Function],
     }
   }
 >
