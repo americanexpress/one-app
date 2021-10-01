@@ -253,6 +253,20 @@ describe('onModuleLoad', () => {
     expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.11' } }, moduleName: 'my-awesome-module' })).toThrowErrorMatchingSnapshot();
   });
 
+  it('logs a warning if the root module provides an incompatible version of a required external and DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS is set to true', () => {
+    process.env.DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS = true;
+    RootModule[CONFIGURATION_KEY].providedExternals = {
+      'dep-a': { version: '2.1.0', module: () => 0 },
+    };
+    const configuration = {
+      requiredExternals: {
+        'dep-a': '^2.1.1',
+      },
+    };
+    expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.10' } }, moduleName: 'my-awesome-module' })).not.toThrow();
+    expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('keeps track of the externals a module is using', () => {
     RootModule[CONFIGURATION_KEY] = {
       providedExternals: {

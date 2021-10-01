@@ -147,7 +147,11 @@ export default function onModuleLoad({
       if (!providedExternal) {
         messages.push(`External '${externalName}' is required by ${moduleName}, but is not provided by the root module`);
       } else if (!semver.satisfies(providedExternal.version, requestedExternalVersion)) {
-        messages.push(`${externalName}@${requestedExternalVersion} is required by ${moduleName}, but the root module provides ${providedExternal.version}`);
+        if (process.env.DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS) {
+          console.warn(`${externalName}@${requestedExternalVersion} is required by ${moduleName}, but the root module provides ${providedExternal.version}`);
+        } else {
+          messages.push(`${externalName}@${requestedExternalVersion} is required by ${moduleName}, but the root module provides ${providedExternal.version}`);
+        }
       }
     });
 
