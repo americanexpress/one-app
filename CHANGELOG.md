@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.11.8](https://github.com/americanexpress/one-app/compare/v5.11.7...v5.11.8) (2021-10-06)
+
+
 ## [5.11.7](https://github.com/americanexpress/one-app/compare/v5.11.6...v5.11.7) (2021-08-25)
 
 
