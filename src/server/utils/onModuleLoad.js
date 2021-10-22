@@ -148,7 +148,7 @@ export default function onModuleLoad({
         messages.push(`External '${externalName}' is required by ${moduleName}, but is not provided by the root module`);
       } else if (!semver.satisfies(providedExternal.version, requestedExternalVersion)) {
         const failedExternalMessage = `${externalName}@${requestedExternalVersion} is required by ${moduleName}, but the root module provides ${providedExternal.version}`;
-        if (process.env.DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS) {
+        if (process.env.ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS) {
           console.warn(failedExternalMessage);
         } else {
           messages.push(failedExternalMessage);

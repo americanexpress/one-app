@@ -33,7 +33,7 @@ One App can be configured via Environment Variables:
   * [`NODE_ENV`](#node_env) ⚠️
   * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
   * [`ONE_CONFIG_ENV`](#one_config_env) ⚠️
-  * [`DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS`](#dangerously_accept_breaking_externals)
+  * [`ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS`](#ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS)
 * Server Settings
   * [`HOLOCRON_SERVER_MAX_MODULES_RETRY`](#holocron_server_max_modules_retry)
   * [`HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`](#holocron_server_max_sim_modules_fetch)
@@ -511,7 +511,7 @@ ONE_CONFIG_ENV=staging
 ONE_CONFIG_ENV=undefined
 ```
 
-## `DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS`
+## `ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS`
 
 **Runs In**
 * ✅ Production
@@ -522,17 +522,17 @@ This flag is meant to ease the transition to newer versions of externals. It sho
 
 **Shape**
 ```bash
-DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=true
+ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=true
 ```
 
 **Example**
 ```bash
-DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=true
+ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=true
 ```
 
 **Default Value**
 ```bash
-DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=undefined
+ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=undefined
 ```
 
 

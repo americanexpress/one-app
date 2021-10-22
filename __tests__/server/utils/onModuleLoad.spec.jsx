@@ -253,8 +253,8 @@ describe('onModuleLoad', () => {
     expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.11' } }, moduleName: 'my-awesome-module' })).toThrowErrorMatchingSnapshot();
   });
 
-  it('logs a warning if the root module provides an incompatible version of a required external and DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS is set to true', () => {
-    process.env.DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS = true;
+  it('logs a warning if the root module provides an incompatible version of a required external and ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS is set to true', () => {
+    process.env.ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS = true;
     RootModule[CONFIGURATION_KEY].providedExternals = {
       'dep-a': { version: '2.1.0', module: () => 0 },
     };
