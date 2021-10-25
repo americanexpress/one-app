@@ -33,6 +33,7 @@ One App can be configured via Environment Variables:
   * [`NODE_ENV`](#node_env) ⚠️
   * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
   * [`ONE_CONFIG_ENV`](#one_config_env) ⚠️
+  * [`ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS`](#ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS)
 * Server Settings
   * [`HOLOCRON_SERVER_MAX_MODULES_RETRY`](#holocron_server_max_modules_retry)
   * [`HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`](#holocron_server_max_sim_modules_fetch)
@@ -509,6 +510,31 @@ ONE_CONFIG_ENV=staging
 ```bash
 ONE_CONFIG_ENV=undefined
 ```
+
+## `ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS`
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+If set to `true`, one-app will not throw an error when externals provided by the root module and externals required by child modules have conflicting semver ranges.
+This flag is meant to ease the transition to newer versions of externals. It should not be kept on for long as mismatching versions of packages can cause unexpected issues.
+
+**Shape**
+```bash
+ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=true
+```
+
+**Example**
+```bash
+ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=true
+```
+
+**Default Value**
+```bash
+ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=undefined
+```
+
 
 ## `ONE_ENABLE_POST_TO_MODULE_ROUTES`
 
