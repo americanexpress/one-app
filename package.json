@@ -130,7 +130,7 @@
     "@americanexpress/one-app-dev-cdn": "^3.3.1",
     "@americanexpress/one-app-dev-proxy": "^1.0.0",
     "@americanexpress/one-service-worker": "^1.0.4",
-    "@babel/cli": "^7.15.7",
+    "@babel/cli": "^7.16.0",
     "@babel/core": "^7.12.10",
     "@babel/node": "^7.12.10",
     "@babel/register": "^7.12.10",
