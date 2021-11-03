@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.12.0](https://github.com/americanexpress/one-app/compare/v5.11.7...v5.12.0) (2021-10-27)
+
+
+### Features
+
+* **externals:** added flag to not throw if externals versions have a mismatch ([#591](https://github.com/americanexpress/one-app/issues/591)) ([232d83e](https://github.com/americanexpress/one-app/commit/232d83e99ac838ca2623fb6f2742cc25b3fcb7bf))
+
+
 ## [5.11.7](https://github.com/americanexpress/one-app/compare/v5.11.6...v5.11.7) (2021-08-25)
 
 
