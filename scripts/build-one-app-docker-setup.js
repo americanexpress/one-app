@@ -102,7 +102,14 @@ const doWork = async () => {
     );
   }
 
-  const extraCertsExists = await fs.exists(path.join(sampleProdDir, 'extra-certs.pem'));
+  let extraCertsExists = true;
+
+  try {
+    await fs.access(path.join(sampleProdDir, 'extra-certs.pem'));
+  } catch (err) {
+    extraCertsExists = false;
+  }
+
   if (extraCertsExists) {
     await fs.unlink(path.join(sampleProdDir, 'extra-certs.pem'));
     console.log('✅ Removed old extra-certs.pem');
