@@ -22,6 +22,8 @@ import getObjectValueAtPath from '../../src/server/utils/getObjectValueAtPath';
 const set = require('lodash.set');
 
 jest.useFakeTimers();
+jest.spyOn(global, 'setTimeout');
+jest.spyOn(global, 'setInterval');
 
 describe('badPartMonkeypatches', () => {
   // eslint-disable-next-line no-console
