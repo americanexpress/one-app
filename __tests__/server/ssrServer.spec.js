@@ -642,7 +642,8 @@ describe('ssrServer', () => {
           }
 
           expect(res.status).toEqual(201);
-          expect(console.error).toHaveBeenCalledTimes(1);
+          // Called twice because express also calls console.error in test
+          expect(console.error).toHaveBeenCalledTimes(2);
           expect(console.error).toHaveBeenCalledWith(middlewareError, 'express application error: method GET, url "/anything", correlationId "undefined", headersSent: true');
           expect(res.text).toMatch('hello');
           return done();

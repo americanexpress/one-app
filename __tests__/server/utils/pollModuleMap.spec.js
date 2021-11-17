@@ -15,6 +15,9 @@
  */
 
 jest.useFakeTimers();
+jest.spyOn(global, 'setTimeout');
+jest.spyOn(global, 'setInterval');
+jest.spyOn(global, 'setImmediate');
 
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
