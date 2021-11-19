@@ -15,10 +15,12 @@
  */
 import fs from 'fs';
 import v8 from 'v8';
-import { pipeline } from 'stream';
+import { finished } from 'stream';
 import { promisify } from 'util';
 
-const pipelinePromise = promisify(pipeline);
+// Use `promisify(finished)` instead of importing from `stream/promises` for Node 12 compatibility
+// TODO: switch to import from `stream/promises` in v6.0.0 release when Node 12 support is dropped
+const finishedPromise = promisify(finished);
 
 // --report-on-signal added which also listens on SIGUSR2 by default
 // https://nodejs.org/api/report.html
@@ -32,11 +34,12 @@ if (process.execArgv.includes('--report-on-signal')) {
 process.on('SIGUSR2', async () => {
   const targetFilename = `/tmp/heapdump-${process.pid}-${Date.now()}.heapsnapshot`;
   console.warn(`about to write a heapdump to ${targetFilename}`);
+  const heapStream = v8.getHeapSnapshot();
+  const fileStream = fs.createWriteStream(targetFilename);
+
   try {
-    await pipelinePromise(
-      v8.getHeapSnapshot(),
-      fs.createWriteStream(targetFilename)
-    );
+    heapStream.pipe(fileStream);
+    await finishedPromise(fileStream);
   } catch (err) {
     console.error('unable to write heapdump', err);
     return;
