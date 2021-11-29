@@ -244,6 +244,7 @@ describe('createRequestHtmlFragment', () => {
   });
 
   it('should catch any errors and call the next middleware', () => {
+    expect.assertions(3);
     let error;
     try {
       let empty;
@@ -254,7 +255,6 @@ describe('createRequestHtmlFragment', () => {
     } catch (err) {
       error = err;
     }
-    expect.assertions(3);
     const createRequestHtmlFragment = require(
       '../../../src/server/middleware/createRequestHtmlFragment'
     ).default;
