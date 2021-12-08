@@ -84,4 +84,5 @@ module.exports = {
   retrieveModuleIntegrityDigests,
   writeModuleMap,
   readModuleMap,
+  testCdnUrl,
 };
