@@ -62,8 +62,8 @@ describe('Tests that require Docker setup', () => {
     const oneAppLocalPortToUse = getRandomPortNumber();
     const oneAppMetricsLocalPortToUse = getRandomPortNumber();
     let browser;
-    const moduleName = 'cultured-frankie';
-    const version = '0.0.1';
+    const moduleName = 'unhealthy-frank';
+    const version = '0.0.0';
     beforeAll(async () => {
       originalModuleMap = readModuleMap();
 
@@ -89,7 +89,7 @@ describe('Tests that require Docker setup', () => {
       ] = revertErrorMatch.exec(loggedError);
       const gitSha = await retrieveGitSha();
       await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
-      expect(problemModule).toBe('cultured-frankie');
+      expect(problemModule).toBe(moduleName);
       expect(problemModuleUrl).toBe(`${testCdnUrl}/${gitSha}/${moduleName}/${version}/${moduleName}.node.js`);
       // eslint-disable-next-line no-useless-escape
       expect(workingUrl).toBe(moduleName);
@@ -118,6 +118,7 @@ describe('Tests that require Docker setup', () => {
 
     beforeAll(async () => {
       removeModuleFromModuleMap('late-frank');
+      removeModuleFromModuleMap('unhealthy-frank');
       originalModuleMap = readModuleMap();
       ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse }));
     });
@@ -750,7 +751,7 @@ describe('Tests that require Docker setup', () => {
           const moduleName = 'cultured-frankie';
           const version = '0.0.1';
 
-          afterAll(() => {
+          afterEach(() => {
             writeModuleMap(originalModuleMap);
           });
 
@@ -789,6 +790,30 @@ describe('Tests that require Docker setup', () => {
             expect(problemModuleUrl).toBe(`${testCdnUrl}/${gitSha}/${moduleName}/${version}/${moduleName}.node.js`);
             // eslint-disable-next-line no-useless-escape
             expect(workingUrl).toBe(`${testCdnUrl}/${gitSha}/${moduleName}/0.0.0/${moduleName}.node.js\"}`);
+          });
+          test('fails to get external `semver` for child module as an unsupplied `requiredExternal` for new module in mooduleMap', async () => {
+            const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Ignoring (?<ignoredModule>.*) until .*/;
+            const requiredExternalsError = searchForNextLogMatch(revertErrorMatch);
+            const modName = 'unhealthy-frank';
+            const modVersion = '0.0.0';
+            await addModuleToModuleMap({
+              moduleName: modName,
+              version: modVersion,
+            });
+            // not ideal but need to wait for app to poll;
+            await waitFor(5000);
+            const loggedError = await requiredExternalsError;
+            const [,
+              problemModule,
+              problemModuleUrl,
+              ignoredModule,
+            ] = revertErrorMatch.exec(loggedError);
+            const gitSha = await retrieveGitSha();
+            await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
+            expect(problemModule).toBe(modName);
+            expect(problemModuleUrl).toBe(`${testCdnUrl}/${gitSha}/${modName}/${modVersion}/${modName}.node.js`);
+            // eslint-disable-next-line no-useless-escape
+            expect(ignoredModule).toBe(modName);
           });
 
           test('does not modify the original version "0.0.0" of the failing module', async () => {
