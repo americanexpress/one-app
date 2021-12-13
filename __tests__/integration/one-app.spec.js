@@ -118,7 +118,6 @@ describe('Tests that require Docker setup', () => {
 
     beforeAll(async () => {
       removeModuleFromModuleMap('late-frank');
-      removeModuleFromModuleMap('unhealthy-frank');
       originalModuleMap = readModuleMap();
       ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse }));
     });
@@ -812,7 +811,6 @@ describe('Tests that require Docker setup', () => {
             await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
             expect(problemModule).toBe(modName);
             expect(problemModuleUrl).toBe(`${testCdnUrl}/${gitSha}/${modName}/${modVersion}/${modName}.node.js`);
-            // eslint-disable-next-line no-useless-escape
             expect(ignoredModule).toBe(modName);
           });
 
