@@ -69,7 +69,9 @@ const csp = () => (req, res, next) => {
   }
 
   res.scriptNonce = scriptNonce;
+  // if (policy !== ' ' || policy !== '*') {
   res.setHeader('Content-Security-Policy', updatedPolicy);
+  // }
   next();
 };
 

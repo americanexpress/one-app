@@ -98,6 +98,7 @@ export default function onModuleLoad({
   }
 
   const serverStateConfig = getServerStateConfig();
+
   const clientStateConfig = getClientStateConfig();
 
   if (validateStateConfig) {
@@ -106,11 +107,14 @@ export default function onModuleLoad({
       client: clientStateConfig,
     });
   }
+  const cspCheck = () => {
+    if (!csp && !process.env.ONE_DANGER_DISABLE_CSP) {
+      throw new Error('Root module must provide a valid content security policy. THISI IS A TEST');
+    }
+  };
 
   if (moduleName === serverStateConfig.rootModuleName) {
-    if (!csp) {
-      throw new Error('Root module must provide a valid content security policy');
-    }
+    cspCheck();
     clearModulesUsingExternals();
     if (provideStateConfig) {
       setStateConfig(provideStateConfig);
