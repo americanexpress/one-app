@@ -62,7 +62,12 @@ const csp = () => (req, res, next) => {
   let updatedPolicy;
   if (process.env.NODE_ENV === 'development') {
     const developmentAdditions = `${ip.address()}:* localhost:*`;
-    const updatedScriptSrc = insertSource(policy, 'script-src', `'nonce-${scriptNonce}' ${developmentAdditions}`);
+    let updatedScriptSrc;
+    if (process.env.ONE_CSP_ALLOW_INLINE_SCRIPTS === 'true') {
+      updatedScriptSrc = insertSource(policy, 'script-src', developmentAdditions);
+    } else {
+      updatedScriptSrc = insertSource(policy, 'script-src', `'nonce-${scriptNonce}' ${developmentAdditions}`);
+    }
     updatedPolicy = insertSource(updatedScriptSrc, 'connect-src', developmentAdditions);
   } else {
     updatedPolicy = insertSource(policy, 'script-src', `'nonce-${scriptNonce}'`);
