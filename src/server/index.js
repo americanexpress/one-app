@@ -97,7 +97,7 @@ if (process.env.NODE_ENV === 'development') {
 
   serverChain = Promise.resolve()
     .then(() => new Promise((res, rej) => addServer(
-      devHolocronCDN.listen(oneAppDevCdnPort, (err) => {
+      devHolocronCDN.listen({ port: oneAppDevCdnPort, host: '0.0.0.0' }, (err) => {
         if (err) {
           rej(err);
         } else {

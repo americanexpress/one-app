@@ -18,22 +18,18 @@
 
 import path from 'path';
 import fs from 'fs';
-import express from 'express';
-import cors from 'cors';
 import { argv } from 'yargs';
 import oneAppDevCdn from '@americanexpress/one-app-dev-cdn';
 
 const hasLocalModuleMap = () => fs.existsSync(path.join(process.cwd(), 'static', 'module-map.json'));
 
-const app = express();
-
-app.use(cors());
-app.use('/static', oneAppDevCdn({
+const app = oneAppDevCdn({
   localDevPublicPath: path.join(__dirname, '../../static'),
   remoteModuleMapUrl: argv.moduleMapUrl,
   useLocalModules: hasLocalModuleMap(),
   appPort: process.env.HTTP_PORT,
   useHost: argv.useHost,
-}));
+  routePrefix: '/static',
+});
 
 export default app;

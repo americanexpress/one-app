@@ -127,7 +127,7 @@
     "yargs": "^15.3.1"
   },
   "devDependencies": {
-    "@americanexpress/one-app-dev-cdn": "^3.3.1",
+    "@americanexpress/one-app-dev-cdn": "file:../one-app-dev-cdn/americanexpress-one-app-dev-cdn-3.3.2.tgz",
     "@americanexpress/one-app-dev-proxy": "^1.0.0",
     "@americanexpress/one-service-worker": "^1.0.4",
     "@babel/cli": "^7.16.0",
