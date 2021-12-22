@@ -62,6 +62,16 @@ describe('csp', () => {
       expect(headers).not.toHaveProperty('content-security-policy-report-only');
     });
 
+    it('does not set csp header if one_danger_disable_csp is present', () => {
+      process.env.ONE_DANGER_DISABLE_CSP = '*';
+      const cspMiddleware = requireCSP().default;
+      cspMiddleware()(req, res, next);
+      // eslint-disable-next-line no-underscore-dangle
+      const headers = res._getHeaders();
+      expect(headers).not.toHaveProperty('content-security-policy');
+      delete process.env.ONE_DANGER_DISABLE_CSP;
+    });
+
     it('defaults to production csp', () => {
       delete process.env.NODE_ENV;
       const cspMiddleware = requireCSP().default;

@@ -49,7 +49,7 @@ export const cspCache = {
 };
 
 export function updateCSP(csp) {
-  cspCache.policy = csp;
+  cspCache.policy = csp || '';
 }
 
 export function getCSP() {
@@ -69,9 +69,10 @@ const csp = () => (req, res, next) => {
   }
 
   res.scriptNonce = scriptNonce;
-  // if (policy !== ' ' || policy !== '*') {
-  res.setHeader('Content-Security-Policy', updatedPolicy);
-  // }
+
+  if (!process.env.ONE_DANGER_DISABLE_CSP) {
+    res.setHeader('Content-Security-Policy', updatedPolicy);
+  }
   next();
 };
 

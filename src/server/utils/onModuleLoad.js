@@ -109,12 +109,14 @@ export default function onModuleLoad({
   }
   const cspCheck = () => {
     if (!csp && !process.env.ONE_DANGER_DISABLE_CSP) {
-      throw new Error('Root module must provide a valid content security policy. THISI IS A TEST');
+      console.log(csp);
+      throw new Error('Root module must provide a valid content security policy. THIS IS A TEST');
     }
   };
 
   if (moduleName === serverStateConfig.rootModuleName) {
     cspCheck();
+    console.log(csp);
     clearModulesUsingExternals();
     if (provideStateConfig) {
       setStateConfig(provideStateConfig);
