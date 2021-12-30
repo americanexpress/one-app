@@ -64,6 +64,18 @@ function validateConfig(configValidators, config) {
 
 export const CONFIGURATION_KEY = 'appConfig';
 
+export function cspCheck(csp) {
+  if (!csp && !process.env.ONE_DANGER_DISABLE_CSP) {
+    throw new Error('Root module must provide a valid content security policy. If you would like to bypass this, set the ONE_DANGER_DISABLE_CSP enviornment variable to *, and NODE_ENV to development.');
+  }
+  if (process.env.ONE_DANGER_DISABLE_CSP && process.env.NODE_ENV !== 'development') {
+    throw new Error('If you are trying to bypass csp requirment, NODE_ENV must also be set to development.');
+  }
+  if (process.env.ONE_DANGER_DISABLE_CSP && process.env.NODE_ENV === 'development') {
+    console.warn('ONE_DANGER_DISABLE_CSP present and NODE_ENV set to development. Csp Header will not be set.');
+  }
+}
+
 export default function onModuleLoad({
   module,
   moduleName,
@@ -107,16 +119,9 @@ export default function onModuleLoad({
       client: clientStateConfig,
     });
   }
-  const cspCheck = () => {
-    if (!csp && !process.env.ONE_DANGER_DISABLE_CSP) {
-      console.log(csp);
-      throw new Error('Root module must provide a valid content security policy. THIS IS A TEST');
-    }
-  };
 
   if (moduleName === serverStateConfig.rootModuleName) {
-    cspCheck();
-    console.log(csp);
+    cspCheck(csp);
     clearModulesUsingExternals();
     if (provideStateConfig) {
       setStateConfig(provideStateConfig);

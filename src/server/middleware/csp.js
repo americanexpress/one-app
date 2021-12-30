@@ -49,7 +49,7 @@ export const cspCache = {
 };
 
 export function updateCSP(csp) {
-  cspCache.policy = csp || '';
+  cspCache.policy = csp;
 }
 
 export function getCSP() {

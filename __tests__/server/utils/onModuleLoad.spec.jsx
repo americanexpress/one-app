@@ -21,6 +21,7 @@ import onModuleLoad, {
   setModulesUsingExternals,
   getModulesUsingExternals,
   CONFIGURATION_KEY,
+  cspCheck,
 } from '../../../src/server/utils/onModuleLoad';
 // This named export exists only on the mock
 // eslint-disable-next-line import/named
@@ -59,6 +60,7 @@ jest.mock('../../../src/server/middleware/sendHtml.js', () => ({
 
 const RootModule = () => <h1>Hello, world</h1>;
 const csp = "default: 'none'";
+const missingCsp = '';
 describe('onModuleLoad', () => {
   const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => null);
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => null);
@@ -439,5 +441,23 @@ describe('onModuleLoad', () => {
     });
 
     expect(setConfigureRequestLog).toHaveBeenCalledWith(configureRequestLog);
+  });
+  it('Throws error if csp and ONE_DANGER_DISABLE_CSP is not set', () => {
+    expect(() => cspCheck(missingCsp)).toThrow('Root module must provide a valid content security policy. If you would like to bypass this, set the ONE_DANGER_DISABLE_CSP enviornment variable to *, and NODE_ENV to development.');
+  });
+  it('Throws error if ONE_DANGER_DISABLE_CSP is set, and NODE_ENV is not in development', () => {
+    process.env.ONE_DANGER_DISABLE_CSP = '*';
+    delete process.env.NODE_ENV;
+    expect(() => cspCheck(missingCsp)).toThrow('If you are trying to bypass csp requirment, NODE_ENV must also be set to development.');
+    process.env.NODE_ENV = 'development';
+    delete process.env.ONE_DANGER_DISABLE_CSP;
+  });
+  it('Warns that csp header will not be set because ONE_DANGER_DISABLE_CSP is present and NODE_ENV is in development', () => {
+    process.env.ONE_DANGER_DISABLE_CSP = '*';
+    process.env.NODE_ENV = 'development';
+    cspCheck(missingCsp);
+    expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+    delete process.env.ONE_DANGER_DISABLE_CSP;
+    delete process.env.NODE_ENV;
   });
 });
