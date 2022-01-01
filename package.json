@@ -154,7 +154,7 @@
     "eslint": "^7.12.1",
     "eslint-config-amex": "^11.2.0",
     "eslint-plugin-es": "^4.1.0",
-    "find-up": "^5.0.0",
+    "find-up": "^6.2.0",
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
     "https-proxy-agent": "^5.0.0",
