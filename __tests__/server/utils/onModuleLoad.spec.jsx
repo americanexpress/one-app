@@ -60,7 +60,7 @@ jest.mock('../../../src/server/middleware/sendHtml.js', () => ({
 
 const RootModule = () => <h1>Hello, world</h1>;
 const csp = "default: 'none'";
-const missingCsp = '';
+const missingCsp = undefined;
 describe('onModuleLoad', () => {
   const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => null);
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => null);
