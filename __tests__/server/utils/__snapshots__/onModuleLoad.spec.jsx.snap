@@ -12,4 +12,4 @@ exports[`onModuleLoad throws if the root module provides an incompatible version
 
 exports[`onModuleLoad throws when the one app version is incompatible 1`] = `"some-module@1.0.2 is not compatible with this version of one-app (4.43.0-0), it requires ~4.41.0."`;
 
-exports[`onModuleLoad validates csp added to the root module 1`] = `"Root module must provide a valid content security policy. If you would like to bypass this, set the ONE_DANGER_DISABLE_CSP enviornment variable to *, and NODE_ENV to development."`;
+exports[`onModuleLoad validates csp added to the root module 1`] = `"Root module must provide a valid content security policy."`;
