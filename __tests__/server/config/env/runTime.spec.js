@@ -14,7 +14,6 @@
  * permissions and limitations under the License.
  */
 
-
 jest.mock('ip', () => ({
   address: () => 'localhost',
 }));

@@ -70,7 +70,6 @@ describe('csp', () => {
       // eslint-disable-next-line no-underscore-dangle
       const headers = res._getHeaders();
       expect(headers).not.toHaveProperty('content-security-policy');
-      process.env.ONE_DANGER_DISABLE_CSP = 'false';
     });
 
     it('defaults to production csp', () => {
