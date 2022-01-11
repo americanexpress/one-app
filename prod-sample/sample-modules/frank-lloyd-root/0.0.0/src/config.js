@@ -21,7 +21,7 @@ export default {
   eventLoopDelayThreshold: Infinity,
   csp,
   corsOrigins: [/\.example.com$/],
-  configureRequestLog: ({ req, log = {} }) => {
+  configureRequestLog: ({ req, log = { request: { metaData: {} } } }) => {
     const clonedLog = JSON.parse(JSON.stringify(log));
     const { cookies } = req;
 
