@@ -1,12 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`createRequestHtmlFragment should catch any errors and call the next middleware 1`] = `
-Array [
-  "error creating request HTML fragment for http://example.com/request",
-  [TypeError: Cannot read property 'dispatch' of undefined],
-]
-`;
-
 exports[`createRequestHtmlFragment should preload data for matched route components 1`] = `
 Array [
   Object {
