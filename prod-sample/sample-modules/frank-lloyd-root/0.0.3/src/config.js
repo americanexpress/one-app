@@ -28,7 +28,7 @@ const description = 'A Progressive Web App ready Holocron Module';
 export default {
   csp,
   pwa,
-  configureRequestLog: ({ req, log = {} }) => {
+  configureRequestLog: ({ req, log = { request: { metaData: {} } } }) => {
     const clonedLog = JSON.parse(JSON.stringify(log));
     const { cookies } = req;
 
