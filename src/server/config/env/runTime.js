@@ -44,22 +44,28 @@ const runTime = [
     defaultValue: 'production',
   },
   {
-    name: 'ONE_DANGER_DISABLE_CSP',
+    name: 'ONE_DANGEROUSLY_DISABLE_CSP',
     normalize: (input) => {
-      const parsed = input.toLowerCase();
-      if (parsed === 'true' && process.env.NODE_ENV !== 'development') {
-        throw new Error('If you are trying to bypass csp requirment, NODE_ENV must also be set to development.');
+      try {
+        return JSON.parse(input.toLowerCase());
+      } catch (e) {
+        return input;
       }
-      if (parsed === 'true' && process.env.NODE_ENV === 'development') {
-        console.warn('ONE_DANGER_DISABLE_CSP present and NODE_ENV set to development. Csp Header will not be set.');
-      }
-      if (parsed === 'false') {
-        return parsed;
-      }
-      return parsed;
     },
-    valid: ['true', 'false'],
-    defaultValue: 'false',
+    validate: (input) => {
+      if (input && process.env.NODE_ENV !== 'development') {
+        throw new Error('If you are trying to bypass CSP requirement, NODE_ENV must also be set to development.');
+      }
+      if (input && process.env.NODE_ENV === 'development') {
+        console.warn('ONE_DANGEROUSLY_DISABLE_CSP is true and NODE_ENV is set to development. Content-Security-Policy header will not be set.');
+      }
+      if (!input) {
+        return input;
+      }
+      return input;
+    },
+    valid: [true, false],
+    defaultValue: false,
   },
   // IPv4 port to bind on
   {

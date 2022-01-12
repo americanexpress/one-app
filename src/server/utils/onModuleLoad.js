@@ -65,7 +65,7 @@ function validateConfig(configValidators, config) {
 export const CONFIGURATION_KEY = 'appConfig';
 
 export function validateCspIsPresent(csp) {
-  if (!csp && process.env.ONE_DANGER_DISABLE_CSP === 'false') {
+  if (!csp && process.env.ONE_DANGER_DISABLE_CSP !== 'true') {
     throw new Error('Root module must provide a valid content security policy.');
   }
 }
