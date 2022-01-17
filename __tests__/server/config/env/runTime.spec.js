@@ -131,28 +131,29 @@ describe('runTime', () => {
     const disableCspEnv = getEnvVarConfig('ONE_DANGEROUSLY_DISABLE_CSP');
 
     it('throws error if ONE_DANGEROUSLY_DISABLE_CSP is set to true and NODE_ENV is not in development', () => {
-      expect(() => disableCspEnv.validate(true)).toThrowError('If you are trying to bypass CSP requirement, NODE_ENV must also be set to development.');
+      expect(() => disableCspEnv.validate('true')).toThrowError('If you are trying to bypass CSP requirement, NODE_ENV must also be set to development.');
     });
 
     it('warns console if both ONE_DANGEROUSLY_DISABLE_CSP and NODE_ENV are set properly', () => {
       process.env.NODE_ENV = 'development';
-      expect(() => disableCspEnv.validate(true)).not.toThrow();
+      disableCspEnv.validate('true');
+      expect(console.warn).toHaveBeenCalledWith('ONE_DANGEROUSLY_DISABLE_CSP is true and NODE_ENV is set to development. Content-Security-Policy header will not be set.');
     });
 
     it('does not warn or throw if ONE_DANGEROUSLY_DISABLE_CSP is set to false', () => {
-      expect(() => disableCspEnv.validate(false)).not.toThrow();
+      expect(() => disableCspEnv.validate('false')).not.toThrow();
     });
 
-    it('parses input provided and returns it in lowercase.', () => {
-      expect(disableCspEnv.normalize('true')).toBe(true);
+    it('parses input and returns it in lowercase', () => {
+      expect(disableCspEnv.normalize('TRUE')).toBe('true');
     });
 
-    it('return value even if it is not valid', () => {
-      expect(disableCspEnv.normalize('nonBoolean')).toBe('nonBoolean');
+    it('returns the original string if not parsable', () => {
+      expect(disableCspEnv.normalize(1)).toBe(1);
     });
 
     it('has a default value', () => {
-      expect(disableCspEnv.defaultValue).toBe(false);
+      expect(disableCspEnv.defaultValue).toBe('false');
     });
   });
 

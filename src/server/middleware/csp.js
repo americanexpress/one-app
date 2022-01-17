@@ -49,7 +49,7 @@ export const cspCache = {
 };
 
 export function updateCSP(csp) {
-  cspCache.policy = csp;
+  cspCache.policy = csp || '';
 }
 
 export function getCSP() {
@@ -70,7 +70,7 @@ const csp = () => (req, res, next) => {
 
   res.scriptNonce = scriptNonce;
 
-  if (process.env.ONE_DANGER_DISABLE_CSP !== 'true') {
+  if (process.env.ONE_DANGEROUSLY_DISABLE_CSP !== 'true') {
     res.setHeader('Content-Security-Policy', updatedPolicy);
   }
   next();
