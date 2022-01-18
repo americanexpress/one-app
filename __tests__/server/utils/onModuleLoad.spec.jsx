@@ -66,7 +66,7 @@ describe('onModuleLoad', () => {
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => null);
 
   beforeEach(() => {
-    process.env.ONE_DANGER_DISABLE_CSP = 'false';
+    process.env.ONE_DANGEROUSLY_DISABLE_CSP = 'false';
     global.getTenantRootModule = () => RootModule;
     jest.resetAllMocks();
     getServerStateConfig.mockImplementation(() => ({
@@ -443,7 +443,7 @@ describe('onModuleLoad', () => {
 
     expect(setConfigureRequestLog).toHaveBeenCalledWith(configureRequestLog);
   });
-  it('Throws error if csp and ONE_DANGER_DISABLE_CSP is not set', () => {
+  it('Throws error if csp and ONE_DANGEROUSLY_DISABLE_CSP is not set', () => {
     expect(() => validateCspIsPresent(missingCsp)).toThrow('Root module must provide a valid content security policy.');
   });
 });

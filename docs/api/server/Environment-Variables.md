@@ -34,6 +34,7 @@ One App can be configured via Environment Variables:
   * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
   * [`ONE_CONFIG_ENV`](#one_config_env) ⚠️
   * [`ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS`](#ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS)
+  * [`ONE_DANGEROUSLY_DISABLE_CSP`](#ONE_DANGEROUSLY_DISABLE_CSP)
 * Server Settings
   * [`HOLOCRON_SERVER_MAX_MODULES_RETRY`](#holocron_server_max_modules_retry)
   * [`HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`](#holocron_server_max_sim_modules_fetch)
@@ -533,6 +534,30 @@ ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=true
 **Default Value**
 ```bash
 ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=undefined
+```
+
+
+## `ONE_DANGEROUSLY_DISABLE_CSP`
+
+**Runs In**
+* 🚫 Production
+* ✅ Development
+
+If set to `true`, one-app will not throw an error when a valid csp is not present. This flag is meant to allow any module to be ran as a root module and also allow root modules to bypass the csp requirement so long as NODE_ENV is in development. So long as NODE_ENV is in development and ONE_DANGEROUSLY_DISABLE_CSP is true a csp header will not be set. 
+
+**Shape**
+```bash
+ONE_DANGEROUSLY_DISABLE_CSP=true
+```
+
+**Example**
+```bash
+ONE_DANGEROUSLY_DISABLE_CSP=true
+```
+
+**Default Value**
+```bash
+ONE_DANGEROUSLY_DISABLE_CSP=false
 ```
 
 
