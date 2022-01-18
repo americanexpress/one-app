@@ -543,7 +543,7 @@ ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=undefined
 * 🚫 Production
 * ✅ Development
 
-If set to `true`, one-app will not throw an error when a valid csp is not present. This flag is meant to allow any module to be ran as a root module and also allow root modules to bypass the csp requirement so long as NODE_ENV is in development. So long as NODE_ENV is in development and ONE_DANGEROUSLY_DISABLE_CSP is true a csp header will not be set. 
+If set to `true`, one-app will not throw an error when a valid Content Security Policy (CSP) is not present. This flag is meant to allow any module to be ran as a root module and to allow root modules to bypass the CSP requirement so long as `NODE_ENV` is `development`. When `NODE_ENV` is `development` and `ONE_DANGEROUSLY_DISABLE_CSP` is `true` a CSP header will not be set. 
 
 **Shape**
 ```bash

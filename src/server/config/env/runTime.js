@@ -45,13 +45,7 @@ const runTime = [
   },
   {
     name: 'ONE_DANGEROUSLY_DISABLE_CSP',
-    normalize: (input) => {
-      try {
-        return input.toLowerCase();
-      } catch (e) {
-        return input;
-      }
-    },
+    normalize: (input) => input.toLowerCase(),
     validate: (input) => {
       if (input === 'true' && process.env.NODE_ENV !== 'development') {
         throw new Error('If you are trying to bypass CSP requirement, NODE_ENV must also be set to development.');
@@ -59,10 +53,6 @@ const runTime = [
       if (input === 'true' && process.env.NODE_ENV === 'development') {
         console.warn('ONE_DANGEROUSLY_DISABLE_CSP is true and NODE_ENV is set to development. Content-Security-Policy header will not be set.');
       }
-      if (input === 'false') {
-        return input;
-      }
-      return input;
     },
     valid: ['true', 'false'],
     defaultValue: 'false',

@@ -130,7 +130,7 @@ describe('runTime', () => {
   describe('ONE_DANGEROUSLY_DISABLE_CSP', () => {
     const disableCspEnv = getEnvVarConfig('ONE_DANGEROUSLY_DISABLE_CSP');
 
-    it('throws error if ONE_DANGEROUSLY_DISABLE_CSP is set to true and NODE_ENV is not in development', () => {
+    it('throws error if ONE_DANGEROUSLY_DISABLE_CSP is set to true and NODE_ENV is not development', () => {
       expect(() => disableCspEnv.validate('true')).toThrowError('If you are trying to bypass CSP requirement, NODE_ENV must also be set to development.');
     });
 
@@ -146,10 +146,6 @@ describe('runTime', () => {
 
     it('parses input and returns it in lowercase', () => {
       expect(disableCspEnv.normalize('TRUE')).toBe('true');
-    });
-
-    it('returns the original string if not parsable', () => {
-      expect(disableCspEnv.normalize(1)).toBe(1);
     });
 
     it('has a default value', () => {
