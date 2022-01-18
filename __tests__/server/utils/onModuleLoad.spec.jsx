@@ -446,4 +446,8 @@ describe('onModuleLoad', () => {
   it('Throws error if csp and ONE_DANGEROUSLY_DISABLE_CSP is not set', () => {
     expect(() => validateCspIsPresent(missingCsp)).toThrow('Root module must provide a valid content security policy.');
   });
+
+  it('Does not throw if valid csp is present', () => {
+    expect(() => validateCspIsPresent(csp)).not.toThrow();
+  });
 });
