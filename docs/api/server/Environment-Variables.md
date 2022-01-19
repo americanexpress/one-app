@@ -547,7 +547,7 @@ If set to `true`, one-app will not throw an error when a valid Content Security 
 
 **Shape**
 ```bash
-ONE_DANGEROUSLY_DISABLE_CSP=true
+ONE_DANGEROUSLY_DISABLE_CSP=Boolean
 ```
 
 **Example**
