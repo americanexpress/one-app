@@ -30,6 +30,7 @@ describe('csp', () => {
 
   beforeEach(() => {
     jest.resetModules();
+    process.env.ONE_DANGEROUSLY_DISABLE_CSP = 'false';
   });
 
   describe('middleware', () => {
@@ -60,6 +61,15 @@ describe('csp', () => {
       const headers = res._getHeaders();
       expect(headers).toHaveProperty('content-security-policy');
       expect(headers).not.toHaveProperty('content-security-policy-report-only');
+    });
+
+    it('does not set csp header if ONE_DANGEROUSLY_DISABLE_CSP is present', () => {
+      process.env.ONE_DANGEROUSLY_DISABLE_CSP = 'true';
+      const cspMiddleware = requireCSP().default;
+      cspMiddleware()(req, res, next);
+      // eslint-disable-next-line no-underscore-dangle
+      const headers = res._getHeaders();
+      expect(headers).not.toHaveProperty('Content-Security-Policy');
     });
 
     it('defaults to production csp', () => {
