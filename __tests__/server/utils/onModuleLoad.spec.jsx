@@ -21,6 +21,7 @@ import onModuleLoad, {
   setModulesUsingExternals,
   getModulesUsingExternals,
   CONFIGURATION_KEY,
+  validateCspIsPresent,
 } from '../../../src/server/utils/onModuleLoad';
 // This named export exists only on the mock
 // eslint-disable-next-line import/named
@@ -59,11 +60,13 @@ jest.mock('../../../src/server/middleware/sendHtml.js', () => ({
 
 const RootModule = () => <h1>Hello, world</h1>;
 const csp = "default: 'none'";
+const missingCsp = undefined;
 describe('onModuleLoad', () => {
   const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => null);
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => null);
 
   beforeEach(() => {
+    process.env.ONE_DANGEROUSLY_DISABLE_CSP = 'false';
     global.getTenantRootModule = () => RootModule;
     jest.resetAllMocks();
     getServerStateConfig.mockImplementation(() => ({
@@ -439,5 +442,12 @@ describe('onModuleLoad', () => {
     });
 
     expect(setConfigureRequestLog).toHaveBeenCalledWith(configureRequestLog);
+  });
+  it('Throws error if csp and ONE_DANGEROUSLY_DISABLE_CSP is not set', () => {
+    expect(() => validateCspIsPresent(missingCsp)).toThrow('Root module must provide a valid content security policy.');
+  });
+
+  it('Does not throw if valid csp is present', () => {
+    expect(() => validateCspIsPresent(csp)).not.toThrow();
   });
 });

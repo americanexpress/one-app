@@ -43,6 +43,20 @@ const runTime = [
     valid: ['development', 'production'],
     defaultValue: 'production',
   },
+  {
+    name: 'ONE_DANGEROUSLY_DISABLE_CSP',
+    normalize: (input) => input.toLowerCase(),
+    validate: (input) => {
+      if (input === 'true' && process.env.NODE_ENV !== 'development') {
+        throw new Error('If you are trying to bypass CSP requirement, NODE_ENV must also be set to development.');
+      }
+      if (input === 'true' && process.env.NODE_ENV === 'development') {
+        console.warn('ONE_DANGEROUSLY_DISABLE_CSP is true and NODE_ENV is set to development. Content-Security-Policy header will not be set.');
+      }
+    },
+    valid: ['true', 'false'],
+    defaultValue: 'false',
+  },
   // IPv4 port to bind on
   {
     name: 'HTTP_PORT',
@@ -195,7 +209,6 @@ const runTime = [
     defaultValue: () => false,
   },
 ];
-
 runTime.forEach(preprocessEnvVar);
 export { ip };
 export default runTime;

@@ -64,6 +64,12 @@ function validateConfig(configValidators, config) {
 
 export const CONFIGURATION_KEY = 'appConfig';
 
+export function validateCspIsPresent(csp) {
+  if (!csp && process.env.ONE_DANGEROUSLY_DISABLE_CSP !== 'true') {
+    throw new Error('Root module must provide a valid content security policy.');
+  }
+}
+
 export default function onModuleLoad({
   module,
   moduleName,
@@ -108,9 +114,7 @@ export default function onModuleLoad({
   }
 
   if (moduleName === serverStateConfig.rootModuleName) {
-    if (!csp) {
-      throw new Error('Root module must provide a valid content security policy');
-    }
+    validateCspIsPresent(csp);
     clearModulesUsingExternals();
     if (provideStateConfig) {
       setStateConfig(provideStateConfig);
