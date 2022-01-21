@@ -28,6 +28,9 @@ jest.mock('@americanexpress/one-app-ducks/lib/errorReporting', () => ({
   })),
 }));
 
+let mockHasChildRoutesValue;
+jest.mock('../../src/universal/utils/hasChildRoutes', () => () => mockHasChildRoutesValue);
+
 describe('routes', () => {
   const store = {
     getState: () => fromJS({
@@ -44,16 +47,36 @@ describe('routes', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('should set up the root module route first', () => {
-    const RootRoute = createRoutes(store)[0];
-    expect(ReactTestUtils.isElement(RootRoute)).toBe(true);
-    expect(RootRoute.props).toEqual({ moduleName: 'fakeRootModule', store });
+  describe('RootModule without childroutes', () => {
+    it('should add a path on the root route', () => {
+      mockHasChildRoutesValue = false;
+      const RootRoute = createRoutes(store)[0];
+      expect(RootRoute.props.path).toBe('/');
+    });
+
+    it('should return RootRoute props with path', () => {
+      mockHasChildRoutesValue = false;
+      const RootRoute = createRoutes(store)[0];
+      expect(ReactTestUtils.isElement(RootRoute)).toBe(true);
+      expect(RootRoute.props).toEqual({ moduleName: 'fakeRootModule', path: '/', store });
+    });
   });
 
-  it('should not define a path on the root module', () => {
-    const RootRoute = createRoutes(store)[0];
-    expect(RootRoute.props.path).toBe(undefined);
+  describe('RootModule with childroutes', () => {
+    it('path should be undefined', () => {
+      mockHasChildRoutesValue = true;
+      const RootRoute = createRoutes(store)[0];
+      expect(RootRoute.props.path).toBe(undefined);
+    });
+
+    it('should return RootRoute props without path', () => {
+      mockHasChildRoutesValue = true;
+      const RootRoute = createRoutes(store)[0];
+      expect(ReactTestUtils.isElement(RootRoute)).toBe(true);
+      expect(RootRoute.props).toEqual({ moduleName: 'fakeRootModule', store });
+    });
   });
+
 
   it('should set up a default 404', () => {
     const NotFoundRoute = createRoutes(store)[1];
