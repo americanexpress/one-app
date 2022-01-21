@@ -47,36 +47,25 @@ describe('routes', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  describe('RootModule without childroutes', () => {
-    it('should add a path on the root route', () => {
-      mockHasChildRoutesValue = false;
-      const RootRoute = createRoutes(store)[0];
-      expect(RootRoute.props.path).toBe('/');
-    });
-
-    it('should return RootRoute props with path', () => {
-      mockHasChildRoutesValue = false;
-      const RootRoute = createRoutes(store)[0];
-      expect(ReactTestUtils.isElement(RootRoute)).toBe(true);
-      expect(RootRoute.props).toEqual({ moduleName: 'fakeRootModule', path: '/', store });
-    });
+  it('createRoutes should return array of length 2', () => {
+    mockHasChildRoutesValue = true;
+    const RootRoute = createRoutes(store);
+    expect(RootRoute.length).toBe(2);
   });
 
-  describe('RootModule with childroutes', () => {
-    it('path should be undefined', () => {
-      mockHasChildRoutesValue = true;
-      const RootRoute = createRoutes(store)[0];
-      expect(RootRoute.props.path).toBe(undefined);
-    });
-
-    it('should return RootRoute props without path', () => {
-      mockHasChildRoutesValue = true;
-      const RootRoute = createRoutes(store)[0];
-      expect(ReactTestUtils.isElement(RootRoute)).toBe(true);
-      expect(RootRoute.props).toEqual({ moduleName: 'fakeRootModule', store });
-    });
+  it('RootModule without childroutes should return RootRoute props with path', () => {
+    mockHasChildRoutesValue = false;
+    const RootRoute = createRoutes(store)[0];
+    expect(ReactTestUtils.isElement(RootRoute)).toBe(true);
+    expect(RootRoute.props).toEqual({ moduleName: 'fakeRootModule', path: '/', store });
   });
 
+  it('RootModule with childroutes should return RootRoute props without path', () => {
+    mockHasChildRoutesValue = true;
+    const RootRoute = createRoutes(store)[0];
+    expect(ReactTestUtils.isElement(RootRoute)).toBe(true);
+    expect(RootRoute.props).toEqual({ moduleName: 'fakeRootModule', store });
+  });
 
   it('should set up a default 404', () => {
     const NotFoundRoute = createRoutes(store)[1];

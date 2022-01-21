@@ -27,12 +27,10 @@ import hasChildRoutes from './utils/hasChildRoutes';
 
 const createRoutes = (store) => {
   const rootModuleName = store.getState().getIn(['config', 'rootModuleName']);
-  const RootModule = getModule(rootModuleName);
-  const rootHasChildRoutes = hasChildRoutes(RootModule);
+  const rootHasChildRoutes = hasChildRoutes(getModule(rootModuleName));
 
   return [
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <ModuleRoute moduleName={rootModuleName} store={store} {...(!rootHasChildRoutes && { path: '/' })} />,
+    <ModuleRoute moduleName={rootModuleName} store={store} path={rootHasChildRoutes ? undefined : '/'} />,
     <Route
       path="*"
       component={() => 'Not found'}
