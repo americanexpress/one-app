@@ -46,19 +46,19 @@ describe('routes', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('createRoutes should return array of length 2', () => {
+  it('should return array of length 2', () => {
     const RootRoute = createRoutes(store);
     expect(RootRoute.length).toBe(2);
   });
 
-  it('RootModule without childroutes should return RootRoute props with path', () => {
+  it('should return RootRoute props with path if RootModule has no childroutes', () => {
     hasChildRoutes.mockReturnValueOnce(false);
     const RootRoute = createRoutes(store)[0];
     expect(ReactTestUtils.isElement(RootRoute)).toBe(true);
     expect(RootRoute.props).toEqual({ moduleName: 'fakeRootModule', path: '/', store });
   });
 
-  it('RootModule with childroutes should return RootRoute props without path', () => {
+  it('should return RootRoute props without path if RootModule has childroutes', () => {
     hasChildRoutes.mockReturnValueOnce(true);
     const RootRoute = createRoutes(store)[0];
     expect(ReactTestUtils.isElement(RootRoute)).toBe(true);
