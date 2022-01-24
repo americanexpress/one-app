@@ -39,7 +39,7 @@ Enables components and modules to define their own child routes. `childRoutes` c
 route, array of routes or a function which accepts the Redux store as the sole argument and returns
 a single route or array of routes.
 
-`childRoutes` is optional for Root Module. `childRoutes` can be either `<Route>` or `<ModuleRoute>` with a `path`. If `childRoutes` is not defined, default path `/` is added to RootRoute prop in one app.
+`childRoutes` is optional for Root Module. `childRoutes` can be either `<Route>` or `<ModuleRoute>` with a `path`. If `childRoutes` is not defined, the default path `/` is added to the root route.
 
 ```js
 const MyModule = () => { /* jsx */ };
