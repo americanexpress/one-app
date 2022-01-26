@@ -14,6 +14,6 @@
  * permissions and limitations under the License.
  */
 
-const hasChildRoutes = (module) => module !== null && typeof module === 'object' && !!module.childRoutes;
+const hasChildRoutes = (module) => module && !!module.childRoutes;
 
 export default hasChildRoutes;
