@@ -22,11 +22,15 @@ import React from 'react';
 import ModuleRoute from 'holocron-module-route';
 import { Route } from '@americanexpress/one-app-router';
 import { applicationError, clearError } from '@americanexpress/one-app-ducks';
+import { getModule } from 'holocron';
+import hasChildRoutes from './utils/hasChildRoutes';
 
 const createRoutes = (store) => {
   const rootModuleName = store.getState().getIn(['config', 'rootModuleName']);
+  const rootHasChildRoutes = hasChildRoutes(getModule(rootModuleName));
+
   return [
-    <ModuleRoute moduleName={rootModuleName} store={store} />,
+    <ModuleRoute moduleName={rootModuleName} store={store} path={rootHasChildRoutes ? undefined : '/'} />,
     <Route
       path="*"
       component={() => 'Not found'}
