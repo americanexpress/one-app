@@ -34,6 +34,7 @@ describe('runTime', () => {
   const origEnvVarVals = {};
   [
     'NODE_ENV',
+    'ONE_DANGEROUSLY_DISABLE_CSP',
     'HTTP_PORT',
     'HTTP_METRICS_PORT',
     'HOLOCRON_MODULE_MAP_URL',
@@ -67,6 +68,7 @@ describe('runTime', () => {
     console.info = jest.fn();
     console.warn = jest.fn();
     resetEnvVar('NODE_ENV');
+    resetEnvVar('ONE_DANGEROUSLY_DISABLE_CSP', 'false');
     resetEnvVar('HTTP_ONE_APP_DEV_CDN_PORT');
     jest.resetModules();
     jest.resetAllMocks();
@@ -122,6 +124,32 @@ describe('runTime', () => {
 
     it('only allows for values to be set to either development or production', () => {
       expect(nodeEnv.valid).toMatchSnapshot();
+    });
+  });
+
+  describe('ONE_DANGEROUSLY_DISABLE_CSP', () => {
+    const disableCspEnv = getEnvVarConfig('ONE_DANGEROUSLY_DISABLE_CSP');
+
+    it('throws error if ONE_DANGEROUSLY_DISABLE_CSP is set to true and NODE_ENV is not development', () => {
+      expect(() => disableCspEnv.validate('true')).toThrowError('If you are trying to bypass CSP requirement, NODE_ENV must also be set to development.');
+    });
+
+    it('warns console if both ONE_DANGEROUSLY_DISABLE_CSP and NODE_ENV are set properly', () => {
+      process.env.NODE_ENV = 'development';
+      disableCspEnv.validate('true');
+      expect(console.warn).toHaveBeenCalledWith('ONE_DANGEROUSLY_DISABLE_CSP is true and NODE_ENV is set to development. Content-Security-Policy header will not be set.');
+    });
+
+    it('does not warn or throw if ONE_DANGEROUSLY_DISABLE_CSP is set to false', () => {
+      expect(() => disableCspEnv.validate('false')).not.toThrow();
+    });
+
+    it('parses input and returns it in lowercase', () => {
+      expect(disableCspEnv.normalize('TRUE')).toBe('true');
+    });
+
+    it('has a default value', () => {
+      expect(disableCspEnv.defaultValue).toBe('false');
     });
   });
 
