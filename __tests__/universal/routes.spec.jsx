@@ -18,6 +18,7 @@ import ReactTestUtils from 'react-dom/test-utils';
 import { fromJS } from 'immutable';
 
 import createRoutes from '../../src/universal/routes';
+import hasChildRoutes from '../../src/universal/utils/hasChildRoutes';
 
 jest.mock('holocron-module-route', () => () => null);
 jest.mock('@americanexpress/one-app-ducks/lib/errorReporting', () => ({
@@ -27,6 +28,7 @@ jest.mock('@americanexpress/one-app-ducks/lib/errorReporting', () => ({
     meta,
   })),
 }));
+jest.mock('../../src/universal/utils/hasChildRoutes');
 
 describe('routes', () => {
   const store = {
@@ -44,15 +46,23 @@ describe('routes', () => {
 
   beforeEach(() => jest.clearAllMocks());
 
-  it('should set up the root module route first', () => {
+  it('should return array of length 2', () => {
+    const RootRoute = createRoutes(store);
+    expect(RootRoute.length).toBe(2);
+  });
+
+  it('should return RootRoute props with path if RootModule has no childroutes', () => {
+    hasChildRoutes.mockReturnValueOnce(false);
+    const RootRoute = createRoutes(store)[0];
+    expect(ReactTestUtils.isElement(RootRoute)).toBe(true);
+    expect(RootRoute.props).toEqual({ moduleName: 'fakeRootModule', path: '/', store });
+  });
+
+  it('should return RootRoute props without path if RootModule has childroutes', () => {
+    hasChildRoutes.mockReturnValueOnce(true);
     const RootRoute = createRoutes(store)[0];
     expect(ReactTestUtils.isElement(RootRoute)).toBe(true);
     expect(RootRoute.props).toEqual({ moduleName: 'fakeRootModule', store });
-  });
-
-  it('should not define a path on the root module', () => {
-    const RootRoute = createRoutes(store)[0];
-    expect(RootRoute.props.path).toBe(undefined);
   });
 
   it('should set up a default 404', () => {
