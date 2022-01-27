@@ -118,6 +118,7 @@ describe('Tests that require Docker setup', () => {
 
     beforeAll(async () => {
       removeModuleFromModuleMap('late-frank');
+      removeModuleFromModuleMap('unhealthy-frank');
       originalModuleMap = readModuleMap();
       ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse }));
     });
