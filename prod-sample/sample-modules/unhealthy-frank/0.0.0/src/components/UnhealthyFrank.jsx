@@ -15,11 +15,12 @@
  */
 
 import React from 'react';
+import semver from 'semver';
 
-export default function HealthyFrank() {
+export default function UnhealthyFrank() {
   return (
     <div>
-      <h1 className="helloFrank">Im Frank, and unhealthy</h1>
+      <h1 className="helloFrank">Im Frank, and unhealthy. is 1.2.3 valid semver? {semver.valid('1.2.3')}</h1>
     </div>
   );
 }
