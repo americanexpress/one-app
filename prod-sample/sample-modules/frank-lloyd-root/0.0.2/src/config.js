@@ -24,7 +24,7 @@ export default {
       'macadamia',
     ],
   },
-  configureRequestLog: ({ req, log = {} }) => {
+  configureRequestLog: ({ req, log = { request: { metaData: {} } } }) => {
     const clonedLog = JSON.parse(JSON.stringify(log));
     const { cookies } = req;
 
