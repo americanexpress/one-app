@@ -35,6 +35,8 @@ import {
   writeModuleMap,
   readModuleMap,
   retrieveModuleIntegrityDigests,
+  retrieveGitSha,
+  testCdnUrl,
 } from './helpers/moduleMap';
 import {
   searchForNextLogMatch,
@@ -55,6 +57,51 @@ yargs.array('scanEnvironment');
 jest.setTimeout(95000);
 
 describe('Tests that require Docker setup', () => {
+  describe('one-app startup with bad module module', () => {
+    let originalModuleMap;
+    const oneAppLocalPortToUse = getRandomPortNumber();
+    const oneAppMetricsLocalPortToUse = getRandomPortNumber();
+    let browser;
+    const moduleName = 'unhealthy-frank';
+    const version = '0.0.0';
+    beforeAll(async () => {
+      originalModuleMap = readModuleMap();
+
+      await addModuleToModuleMap({
+        moduleName,
+        version,
+      });
+      ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse }));
+    });
+
+    afterAll(async () => {
+      await tearDownTestRunner({ browser });
+      writeModuleMap(originalModuleMap);
+    });
+    test('one-app starts up successfully with a bad module', async () => {
+      const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Ignoring (?<workingModule>.*) until .*/;
+      const requiredExternalsError = searchForNextLogMatch(revertErrorMatch);
+      const loggedError = await requiredExternalsError;
+      const [,
+        problemModule,
+        problemModuleUrl,
+        workingUrl,
+      ] = revertErrorMatch.exec(loggedError);
+      const gitSha = await retrieveGitSha();
+      await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
+      expect(problemModule).toBe(moduleName);
+      expect(problemModuleUrl).toBe(`${testCdnUrl}/${gitSha}/${moduleName}/${version}/${moduleName}.node.js`);
+      // eslint-disable-next-line no-useless-escape
+      expect(workingUrl).toBe(moduleName);
+    });
+    test('one-app remains healthy with a bad module at start', async () => {
+      await browser.url('https://one-app:8443/success');
+      const header = await browser.$('.helloMessage');
+      const headerText = await header.getText();
+      expect(headerText).toBe('Hello! One App is successfully rendering its Modules!');
+    });
+  });
+
   describe('one-app successfully started', () => {
     const defaultFetchOptions = createFetchOptions();
     let originalModuleMap;
@@ -71,6 +118,7 @@ describe('Tests that require Docker setup', () => {
 
     beforeAll(async () => {
       removeModuleFromModuleMap('late-frank');
+      removeModuleFromModuleMap('unhealthy-frank');
       originalModuleMap = readModuleMap();
       ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse }));
     });
@@ -700,30 +748,71 @@ describe('Tests that require Docker setup', () => {
         });
 
         describe('child module `requiredExternals` invalid usage', () => {
-          const requiredExternalsErrorMatch = /Failed to get external react-intl from root module/;
-
           const moduleName = 'cultured-frankie';
           const version = '0.0.1';
 
-          let requiredExternalsError;
+          afterEach(() => {
+            writeModuleMap(originalModuleMap);
+          });
 
-          beforeAll(async () => {
-            requiredExternalsError = searchForNextLogMatch(requiredExternalsErrorMatch);
+          test('fails to get external `react-intl` for child module as an unsupplied `requiredExternal` - logs failure', async () => {
+            const requiredExternalsErrorMatch = /Failed to get external react-intl from root module/;
+
+            const requiredExternalsError = searchForNextLogMatch(requiredExternalsErrorMatch);
             await addModuleToModuleMap({
               moduleName,
               version,
             });
             // not ideal but need to wait for app to poll;
-
             await waitFor(5000);
-          });
 
-          afterAll(() => {
-            writeModuleMap(originalModuleMap);
-          });
-
-          test('fails to get external `react-intl` for child module as an unsupplied `requiredExternal`', async () => {
             await expect(requiredExternalsError).resolves.toMatch(requiredExternalsErrorMatch);
+          });
+
+          test('fails to get external `react-intl` for child module as an unsupplied `requiredExternal` - Logs reverting message', async () => {
+            const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Reverting back to (?<workingModule>.*)/;
+            const requiredExternalsError = searchForNextLogMatch(revertErrorMatch);
+            await addModuleToModuleMap({
+              moduleName,
+              version,
+            });
+            // not ideal but need to wait for app to poll;
+            await waitFor(5000);
+            const loggedError = await requiredExternalsError;
+            const [,
+              problemModule,
+              problemModuleUrl,
+              workingUrl,
+            ] = revertErrorMatch.exec(loggedError);
+            const gitSha = await retrieveGitSha();
+            await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
+            expect(problemModule).toBe('cultured-frankie');
+            expect(problemModuleUrl).toBe(`${testCdnUrl}/${gitSha}/${moduleName}/${version}/${moduleName}.node.js`);
+            // eslint-disable-next-line no-useless-escape
+            expect(workingUrl).toBe(`${testCdnUrl}/${gitSha}/${moduleName}/0.0.0/${moduleName}.node.js\"}`);
+          });
+          test('fails to get external `semver` for child module as an unsupplied `requiredExternal` for new module in mooduleMap', async () => {
+            const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Ignoring (?<ignoredModule>.*) until .*/;
+            const requiredExternalsError = searchForNextLogMatch(revertErrorMatch);
+            const modName = 'unhealthy-frank';
+            const modVersion = '0.0.0';
+            await addModuleToModuleMap({
+              moduleName: modName,
+              version: modVersion,
+            });
+            // not ideal but need to wait for app to poll;
+            await waitFor(5000);
+            const loggedError = await requiredExternalsError;
+            const [,
+              problemModule,
+              problemModuleUrl,
+              ignoredModule,
+            ] = revertErrorMatch.exec(loggedError);
+            const gitSha = await retrieveGitSha();
+            await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
+            expect(problemModule).toBe(modName);
+            expect(problemModuleUrl).toBe(`${testCdnUrl}/${gitSha}/${modName}/${modVersion}/${modName}.node.js`);
+            expect(ignoredModule).toBe(modName);
           });
 
           test('does not modify the original version "0.0.0" of the failing module', async () => {

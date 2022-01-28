@@ -1,0 +1,32 @@
+{
+  "name": "unhealthy-frank",
+  "version": "0.0.0",
+  "description": "A module that works, nothing more, nothing less.",
+  "scripts": {
+    "prebuild": "npm run clean",
+    "build": "bundle-module",
+    "clean": "rimraf build",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@americanexpress/one-app-router": "^1.1.0",
+    "holocron": "^1.1.4",
+    "holocron-module-route": "^1.1.4",
+    "prop-types": "^15.5.9",
+    "react": "^16.14.0",
+    "react-redux": "^7.2.4",
+    "semver": "7.3.5"
+  },
+  "devDependencies": {
+    "@americanexpress/one-app-bundler": "^6.14.1",
+    "babel-preset-amex": "^3.5.0",
+    "rimraf": "^2.5.2"
+  },
+  "one-amex": {
+    "bundler": {
+      "requiredExternals": [
+        "semver"
+      ]
+    }
+  }
+}
