@@ -129,6 +129,22 @@ describe('csp', () => {
       expect(headers).toHaveProperty('content-security-policy');
       expect(headers['content-security-policy'].search(scriptNonce)).not.toEqual(-1);
     });
+
+    it('does not set the script nonce if this has been disabled in development', () => {
+      process.env.NODE_ENV = 'development';
+      process.env.ONE_CSP_ALLOW_INLINE_SCRIPTS = 'true';
+
+      const requiredCsp = requireCSP();
+      const cspMiddleware = requiredCsp.default;
+      const { updateCSP } = requiredCsp;
+      updateCSP("default-src 'none'; script-src 'self';");
+      cspMiddleware()(req, res, next);
+      // eslint-disable-next-line no-underscore-dangle
+      const headers = res._getHeaders();
+      const { scriptNonce } = res;
+      expect(headers).toHaveProperty('content-security-policy');
+      expect(headers['content-security-policy'].search(scriptNonce)).toEqual(-1);
+    });
   });
 
   describe('policy', () => {

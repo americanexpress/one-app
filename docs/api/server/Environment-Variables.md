@@ -34,6 +34,7 @@ One App can be configured via Environment Variables:
   * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
   * [`ONE_CONFIG_ENV`](#one_config_env) ⚠️
   * [`ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS`](#ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS)
+  * [`ONE_CSP_ALLOW_INLINE_SCRIPTS`](#ONE_CSP_ALLOW_INLINE_SCRIPTS)
   * [`ONE_DANGEROUSLY_DISABLE_CSP`](#ONE_DANGEROUSLY_DISABLE_CSP)
 * Server Settings
   * [`HOLOCRON_SERVER_MAX_MODULES_RETRY`](#holocron_server_max_modules_retry)
@@ -536,6 +537,28 @@ ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=true
 ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS=undefined
 ```
 
+## `ONE_CSP_ALLOW_INLINE_SCRIPTS`
+
+**Runs In**
+* 🚫 Production
+* ✅ Development
+
+If set to `true`, one-app will not prepend a script nonce to the `script-src` CSP. This will allow inline scripts to be executed in development - for example, to allow browser devtools to inject content scripts in some browsers that otherwise restrict this.
+
+**Shape**
+```bash
+ONE_CSP_ALLOW_INLINE_SCRIPTS=true
+```
+
+**Example**
+```bash
+ONE_CSP_ALLOW_INLINE_SCRIPTS=true
+```
+
+**Default Value**
+```bash
+ONE_CSP_ALLOW_INLINE_SCRIPTS=undefined
+```
 
 ## `ONE_DANGEROUSLY_DISABLE_CSP`
 
@@ -559,7 +582,6 @@ ONE_DANGEROUSLY_DISABLE_CSP=true
 ```bash
 ONE_DANGEROUSLY_DISABLE_CSP=false
 ```
-
 
 ## `ONE_ENABLE_POST_TO_MODULE_ROUTES`
 
