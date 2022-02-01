@@ -62,7 +62,7 @@ about your new module before it is generated.
 - Select "yes" for `internationalization`
 
 > Read more about [`parrot-middleware`](parrot-middleware)
-> and [`internationalization`](../guides/internationalizing-your-module.md)
+> and [`internationalization`](../guides/Internationalizing-Your-Module.md)
 
 Once the root module is generated we will be able to start developing with One App.
 As we continue, we will eventually create a child Holocron module for us to use -
@@ -147,15 +147,15 @@ multiple local modules when it's configured to accept them.
 >
 > **Development**
 >
-> [Run One App Locally](../guides/running-one-app-locally.md)
+> [Run One App Locally](../guides/Running-One-App-Locally.md)
 >
-> [Mocking API Calls](../guides/mocking-api-calls.md)
+> [Mocking API Calls](../guides/Mocking-Api-Calls.md)
 >
 > **Production**
 >
-> [Running In Production](../guides/running-in-production.md)
+> [Running In Production](../guides/Running-In-Production.md)
 >
-> [Publishing Modules](../guides/publishing-modules.md)
+> [Publishing Modules](../guides/Publishing-Modules.md)
 >
 > ##### Packages
 >
@@ -207,7 +207,7 @@ export default function MyModule() {
 >
 > **Guides**
 >
-> [Adding Styles Recipe](../guides/adding-styles)
+> [Adding Styles Recipe](../guides/Adding-Styles.md)
 
 ### Creating Routes
 
@@ -254,15 +254,15 @@ if that is all that's needed.
 >
 > **API**
 >
-> [Routing](../api/modules/routing.md)
+> [Routing](../api/modules/Routing.md)
 >
-> [Loading Modules](../api/modules/loading-modules.md)
+> [Loading Modules](../api/modules/Loading-Modules.md)
 >
 > **Guides**
 >
-> [Module Composition](../guides/module-composition.md)
+> [Module Composition](../guides/Module-Composition.md)
 >
-> [Code Splitting Using Holocron](../guides/code-splitting-using-holocron.md)
+> [Code Splitting Using Holocron](../guides/Code-Splitting-Using-Holocron.md)
 >
 > ##### Packages
 >
@@ -324,17 +324,17 @@ learn about in the next section.
 >
 > **API**
 >
-> [Loading Data](../api/modules/loading-data.md)
+> [Loading Data](../api/modules/Loading-Data.md)
 >
-> [State Management](../api/modules/state-management.md)
+> [State Management](../api/modules/State-Management.md)
 >
 > **Guides**
 >
-> [Making An API Call](../guides/making-an-api-call.md)
+> [Making An API Call](../guides/Making-An-Api-Call.md)
 >
-> [Enabling Server Side Render](../guides/enabling-serverside-rendering.md)
+> [Enabling Server Side Render](../guides/Enabling-Serverside-Rendering.md)
 >
-> [Internationalization](../guides/internationalizing-your-module.md)
+> [Internationalization](../guides/Internationalizing-Your-Module.md)
 >
 > ##### Packages
 >
@@ -350,7 +350,7 @@ ___
 
 **Up Next**
 
-Check out the [Configuration guide](./configuration.md) to grasp
+Check out the [Configuration guide](./Configuration.md) to grasp
 how we can use environment variables and Holocron module app
 configuration to cater to our needs as well as utilize features
 in One App.
