@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.13.0](https://github.com/americanexpress/one-app/compare/v5.12.0...v5.13.0) (2022-02-02)
+
+
+### Bug Fixes
+
+* **deps:** bump normalize-url from 4.5.0 to 4.5.1 ([#649](https://github.com/americanexpress/one-app/issues/649)) ([ad05552](https://github.com/americanexpress/one-app/commit/ad05552e2c7fea704683da49a23f560d256ffbd1))
+* **holocron:** bad modules could cause crashes and prevent restart ([#631](https://github.com/americanexpress/one-app/issues/631)) ([3e53147](https://github.com/americanexpress/one-app/commit/3e5314715f07ecf9c217364971b9253fd581a64c))
+* **prodsample:** configureRequestLog had faulty example code ([#647](https://github.com/americanexpress/one-app/issues/647)) ([9d62c6d](https://github.com/americanexpress/one-app/commit/9d62c6d5fdcbe30e19d282ffa32f1a0772254abc))
+
+
+### Features
+
+* **csp:** add env var to disable csp requirement in dev  ([#640](https://github.com/americanexpress/one-app/issues/640)) ([7fc5e19](https://github.com/americanexpress/one-app/commit/7fc5e1982b12c3fbb981840def2fd02ec96392f1))
+* **csp:** allow nonce to be disabled in development ([#636](https://github.com/americanexpress/one-app/issues/636)) ([0916756](https://github.com/americanexpress/one-app/commit/0916756c8ffff0de5ca5f0ce25b02f9784378e35))
+* **routes:** childRoutes are not required for root module ([#657](https://github.com/americanexpress/one-app/issues/657)) ([0926fb2](https://github.com/americanexpress/one-app/commit/0926fb2ec05723f99279130c41e03414800dcd9f))
+* **runtime:** support node 16 ([#624](https://github.com/americanexpress/one-app/issues/624)) ([f8752d6](https://github.com/americanexpress/one-app/commit/f8752d6252475d987eeb120061008e52e37b27a3))
+
+
 # [5.12.0](https://github.com/americanexpress/one-app/compare/v5.11.7...v5.12.0) (2021-10-27)
 
 
