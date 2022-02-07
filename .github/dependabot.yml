@@ -12,7 +12,7 @@ updates:
       - "one app"
     allow:
       - dependency-type: "direct"
-    target-branch: "dependabot-changes"
+    target-branch: "main"
   # Enable version updates for Docker
   - package-ecosystem: "docker"
     directory: "/"
@@ -21,7 +21,7 @@ updates:
     labels:
       - "docker"
       - "dependabot"
-    target-branch: "dependabot-changes"
+    target-branch: "main"
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/.github/workflows"
@@ -30,4 +30,4 @@ updates:
     labels:
       - "github-actions"
       - "dependabot"
-    target-branch: "dependabot-changes"
+    target-branch: "main"
