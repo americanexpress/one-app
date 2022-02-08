@@ -80,7 +80,7 @@
     "@americanexpress/env-config-utils": "^2.0.2",
     "@americanexpress/fetch-enhancers": "^1.1.1",
     "@americanexpress/lumberjack": "^1.1.4",
-    "@americanexpress/one-app-bundler": "^6.14.1",
+    "@americanexpress/one-app-bundler": "^6.14.2",
     "@americanexpress/one-app-ducks": "^4.3.3",
     "@americanexpress/one-app-router": "^1.1.0",
     "@americanexpress/vitruvius": "^2.0.2",
