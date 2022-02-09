@@ -9,10 +9,9 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "holocron": "^1.1.4",
+    "holocron": "^1.2.0",
     "prop-types": "^15.5.9",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0"
+    "react": "^17.0.2"
   },
   "devDependencies": {
     "@americanexpress/one-app-bundler": "^6.14.1",

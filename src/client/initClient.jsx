@@ -60,6 +60,7 @@ export default async function initClient() {
     });
 
     /* eslint-disable react/jsx-props-no-spreading */
+    /* istanbul ignore next */
     const App = () => (
       <Provider store={store}>
         <Router {...renderProps} />

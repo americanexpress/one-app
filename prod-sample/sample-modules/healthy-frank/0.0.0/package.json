@@ -9,12 +9,11 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@americanexpress/one-app-router": "^1.1.0",
-    "holocron": "^1.1.4",
+    "@americanexpress/one-app-router": "^1.2.0",
+    "holocron": "^1.2.0",
     "holocron-module-route": "^1.1.4",
     "prop-types": "^15.5.9",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
+    "react": "^17.0.2",
     "react-redux": "^7.2.4"
   },
   "devDependencies": {

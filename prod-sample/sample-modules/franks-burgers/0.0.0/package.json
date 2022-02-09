@@ -9,8 +9,7 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0"
+    "react": "^17.0.2"
   },
   "devDependencies": {
     "@americanexpress/one-app-bundler": "^6.14.1",
