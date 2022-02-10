@@ -21,7 +21,7 @@ import { browserHistory, Router, matchPromise } from '@americanexpress/one-app-r
 import { setModuleMap } from 'holocron';
 
 import {
-  initializeClientStore, loadPrerenderScripts, moveHelmetScripts, loadServiceWorker,
+  initializeClientStore, loadPrerenderScripts, moveHelmetScripts, loadServiceWorker, loadPXSensor,
 } from './prerender';
 import createRoutes from '../universal/routes';
 
@@ -29,6 +29,7 @@ export default async function initClient() {
   try {
     // eslint-disable-next-line no-underscore-dangle
     setModuleMap(global.__CLIENT_HOLOCRON_MODULE_MAP__);
+    loadPXSensor();
     moveHelmetScripts();
 
     const store = initializeClientStore();

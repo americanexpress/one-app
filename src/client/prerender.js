@@ -44,6 +44,13 @@ export function loadPrerenderScripts(initialState) {
   return locale ? getLocalePack(locale) : Promise.resolve();
 }
 
+export function loadPXSensor() {
+  window._pxAppId = 'PX37LNtmtr';
+  const s = document.createElement('script');
+  s.src = '/px/init.js';
+  document.head.insertBefore(s, document.head.firstChild);
+}
+
 export function moveHelmetScripts() {
   document.addEventListener('DOMContentLoaded', () => {
     const headHelmetScripts = [...document.head.querySelectorAll('script[data-react-helmet]')];
