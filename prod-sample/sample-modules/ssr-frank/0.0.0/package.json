@@ -12,7 +12,6 @@
     "immutable": "^3.8.2",
     "prop-types": "^15.5.9",
     "react": "^16.14.0",
-    "react-dom": "^16.14.0",
     "react-helmet": "^5.2.1"
   },
   "devDependencies": {
