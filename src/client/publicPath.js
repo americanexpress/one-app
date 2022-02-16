@@ -21,6 +21,6 @@ if (global.__webpack_public_path__) {
   // webpack ignores the global variable
 
   // this var is defined by webpack
-  // eslint-disable-next-line no-undef, camelcase, prefer-destructuring, no-underscore-dangle
+  // eslint-disable-next-line no-undef, camelcase, no-underscore-dangle
   __webpack_public_path__ = global.__webpack_public_path__;
 }

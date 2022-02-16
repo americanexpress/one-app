@@ -19,7 +19,6 @@ import Joi from 'joi';
 import { urlSchema } from './shared';
 import { webManifestExtension } from './extensions';
 
-// eslint-disable-next-line import/prefer-default-export
 export const pwaSchema = Joi.object().keys({
   serviceWorker: Joi.boolean(),
   recoveryMode: Joi.boolean(),

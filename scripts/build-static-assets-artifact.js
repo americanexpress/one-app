@@ -34,13 +34,15 @@ if (!DOCKER_IMAGE_LABEL) {
 }
 
 function removeDir(dirPath) {
-  return new Promise((res, rej) => rimraf(dirPath, { disableGlob: true }, (err) => {
-    if (err) {
-      rej(err);
-    } else {
-      res();
-    }
-  }));
+  return new Promise((res, rej) => {
+    rimraf(dirPath, { disableGlob: true }, (err) => {
+      if (err) {
+        rej(err);
+      } else {
+        res();
+      }
+    });
+  });
 }
 
 function promisifySpawn(...args) {
@@ -96,9 +98,9 @@ async function extractStaticAssets(imageLabel, targetPath) {
 
 function createTarArchive(copiedStaticPath) {
   const copiedStaticAppPath = path.join(copiedStaticPath, 'app');
-  return new Promise((res, rej) => fs.readdir(
-    copiedStaticAppPath, (err, data) => (err ? rej(err) : res(data))
-  ))
+  return new Promise((res, rej) => {
+    fs.readdir(copiedStaticAppPath, (err, data) => (err ? rej(err) : res(data)));
+  })
     .then((childPaths) => {
       if (childPaths.length !== 1) {
         throw new Error(`expected 1 child path, had ${childPaths.length} (${childPaths})`);

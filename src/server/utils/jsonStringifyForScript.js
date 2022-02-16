@@ -26,7 +26,7 @@ function escaper(match) {
   return ESCAPES[match];
 }
 
-const ESCAPE_REGEX = /[&><\u2028\u2029]/g;
+const ESCAPE_REGEX = /[&<>\u2028\u2029]/g;
 
 export default function jsonStringifyForScript(data) {
   return JSON.stringify(data, (key, val) => val).replace(ESCAPE_REGEX, escaper);

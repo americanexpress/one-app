@@ -31,7 +31,6 @@ export default function createEnhancer(extraMiddleware = []) {
 
   let storeEnhancers;
   if (process.env.NODE_ENV === 'development' && global.BROWSER) {
-    // eslint-disable-next-line no-underscore-dangle
     const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
     storeEnhancers = composeEnhancers(applyMiddleware(...middleware));
   } else {

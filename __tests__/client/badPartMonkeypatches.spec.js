@@ -26,7 +26,6 @@ jest.spyOn(global, 'setTimeout');
 jest.spyOn(global, 'setInterval');
 
 describe('badPartMonkeypatches', () => {
-  // eslint-disable-next-line no-console
   global.execScript = (s) => console.info('execScript?', s);
   const originals = {};
   [
@@ -112,7 +111,6 @@ describe('badPartMonkeypatches', () => {
 
   describe('implicit eval', () => {
     beforeEach(() => {
-      // eslint-disable-next-line no-console
       console.warn = jest.fn(console.warn);
       applyMonkeypatches();
     });
@@ -124,7 +122,6 @@ describe('badPartMonkeypatches', () => {
 
       it('should execute normally on non-string first argument', () => {
         setTimeout(
-          // eslint-disable-next-line no-console
           (a, b, c) => console.log(a, b, c),
           1e3,
           'A',
@@ -146,7 +143,6 @@ describe('badPartMonkeypatches', () => {
 
       it('should execute normally on non-string first argument', () => {
         setInterval(
-          // eslint-disable-next-line no-console
           (a, b, c) => console.log(a, b, c),
           1e3,
           'A',

@@ -15,21 +15,18 @@
  */
 
 // the cleanest way to express the logic w/o loading development formatters, alternatives welcome
-/* eslint-disable no-nested-ternary */
 
 import { argv } from 'yargs';
 import Lumberjack from '@americanexpress/lumberjack';
 
 import productionFormatter from './production-formatter';
 
-const nodeEnvIsDevelopment = process.env.NODE_ENV === 'development';
+const nodeEnvIsProduction = process.env.NODE_ENV !== 'development';
 const productionConfig = { formatter: productionFormatter };
 
-const logger = new Lumberjack(
-  argv.logFormat === 'machine' ? productionConfig
-  // development-formatters should not be loaded in production
-  : nodeEnvIsDevelopment ? require('./development-formatters') // eslint-disable-line global-require, indent
-  : productionConfig // eslint-disable-line indent
-);
+// development-formatters should not be loaded in production
+const config = argv.logFormat === 'machine' || nodeEnvIsProduction ? productionConfig : require('./development-formatters');
+
+const logger = new Lumberjack(config);
 
 export default logger;

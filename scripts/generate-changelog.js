@@ -34,7 +34,7 @@ function runSpawn(...args) {
   if (status === 0) {
     console.log('Output:', stdout.toString());
   } else {
-    console.error(`Error when running spawn with args ${args}: `, error || stderr.toString());
+    console.error(`Error when running spawn with args ${args}:`, error || stderr.toString());
   }
 }
 

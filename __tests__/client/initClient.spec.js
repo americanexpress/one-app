@@ -21,7 +21,6 @@ import { fromJS } from 'immutable';
 jest.mock('react', () => {
   const StrictMode = ({ children }) => children;
   const react = jest.requireActual('react');
-  expect(react.StrictMode).toBeDefined();
   return { ...react, StrictMode };
 });
 
@@ -91,7 +90,9 @@ describe('initClient', () => {
 
     try {
       await initClient();
-    } catch (error) {
+    } catch {
+      // ignore error
+    } finally {
       expect(consoleErrorSpy).toHaveBeenCalledWith(mockError);
     }
   });
@@ -139,7 +140,9 @@ describe('initClient', () => {
 
     try {
       await initClient();
-    } catch (error) {
+    } catch {
+      // ignore error
+    } finally {
       expect(promiseRejectionSpy).toHaveBeenCalled();
     }
   });

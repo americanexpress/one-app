@@ -18,7 +18,7 @@ import csp from './csp';
 import createFrankLikeFetch from './createFrankLikeFetch';
 
 export default {
-  eventLoopDelayThreshold: Infinity,
+  eventLoopDelayThreshold: Number.POSITIVE_INFINITY,
   csp,
   corsOrigins: [/\.example.com$/],
   configureRequestLog: ({ req, log = { request: { metaData: {} } } }) => {

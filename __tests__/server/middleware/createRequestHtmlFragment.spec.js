@@ -187,11 +187,9 @@ describe('createRequestHtmlFragment', () => {
     }));
 
     const middleware = createRequestHtmlFragment({ createRoutes });
-    // eslint-disable-next-line no-console
     console.error = jest.fn();
     return middleware(req, res, next)
       .then(() => {
-        // eslint-disable-next-line no-console
         expect(console.error).toHaveBeenCalled();
         expect(next).toHaveBeenCalled();
         expect(res.sendStatus).toHaveBeenCalledWith(404);

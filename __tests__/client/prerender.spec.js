@@ -60,7 +60,6 @@ describe('initializeClientStore', () => {
     global.fetch = undefined;
   });
 
-
   afterEach(() => {
     // eslint-disable-next-line no-underscore-dangle
     global.__INITIAL_STATE__ = undefined;

@@ -60,7 +60,7 @@ export default function createRequestStore(
 
       // TODO: namespace?
       // use the store as a global for the request
-      req.store = store; // eslint-disable-line no-param-reassign
+      req.store = store;
       req.clientModuleMapCache = getClientModuleMapCache();
       return next();
     } catch (err) {

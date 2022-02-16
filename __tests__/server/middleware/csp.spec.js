@@ -18,8 +18,8 @@ import httpMocks from 'node-mocks-http';
 
 const sanitizeCspString = (cspString) => cspString
 // replaces dynamic ip and nonce to prevent snapshot failures
-  .replace(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g, '0.0.0.0')
-  .replace(/nonce-[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}/, 'nonce-00000000-0000-0000-0000-000000000000');
+  .replace(/(?:\d{1,3}\.){3}\d{1,3}/g, '0.0.0.0')
+  .replace(/nonce-[\dA-Za-z]{8}(?:-[\dA-Za-z]{4}){3}-[\dA-Za-z]{12}/, 'nonce-00000000-0000-0000-0000-000000000000');
 
 describe('csp', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -111,7 +111,7 @@ describe('csp', () => {
       const headers = res._getHeaders();
       expect(headers).toHaveProperty('content-security-policy');
       const cspString = headers['content-security-policy'];
-      const ipFound = cspString.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
+      const ipFound = cspString.match(/(?:\d{1,3}\.){3}\d{1,3}/);
       expect(ipFound).toBeNull();
       const localhostFound = cspString.match(/localhost/);
       expect(localhostFound).toBeNull();

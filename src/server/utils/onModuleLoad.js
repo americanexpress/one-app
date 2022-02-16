@@ -160,7 +160,7 @@ export default function onModuleLoad({
       }
     });
 
-    if (messages.length !== 0) {
+    if (messages.length > 0) {
       throw new Error(messages.join('\n'));
     }
 

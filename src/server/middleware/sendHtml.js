@@ -15,7 +15,6 @@
  */
 
 // This rule is only needed for a couple functions below
-/* eslint-disable es/no-arrow-functions */
 import { Set as iSet, Map as iMap } from 'immutable';
 import { createTimeoutFetch } from '@americanexpress/fetch-enhancers';
 

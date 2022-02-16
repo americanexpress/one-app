@@ -61,7 +61,7 @@ const runTime = [
   {
     name: 'HTTP_PORT',
     normalize: (input) => {
-      const parsed = parseInt(input, 10);
+      const parsed = Number.parseInt(input, 10);
       // make sure the parsed value is the same value as input
       // input may be a string or a number, we don't want === in this case, just ==
       if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
@@ -79,7 +79,7 @@ const runTime = [
   {
     name: 'HTTP_METRICS_PORT',
     normalize: (input) => {
-      const parsed = parseInt(input, 10);
+      const parsed = Number.parseInt(input, 10);
       // make sure the parsed value is the same value as input
       // input may be a string or a number, we don't want === in this case, just ==
       if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
@@ -94,7 +94,7 @@ const runTime = [
     name: 'HTTP_ONE_APP_DEV_CDN_PORT',
     normalize: (input) => {
       if (input) {
-        const parsed = parseInt(input, 10);
+        const parsed = Number.parseInt(input, 10);
         // make sure the parsed value is the same value as input
         // input may be a string or a number, we don't want === in this case, just ==
         if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
@@ -113,7 +113,7 @@ const runTime = [
     name: 'HTTP_ONE_APP_DEV_PROXY_SERVER_PORT',
     normalize: (input) => {
       if (input) {
-        const parsed = parseInt(input, 10);
+        const parsed = Number.parseInt(input, 10);
         // make sure the parsed value is the same value as input
         // input may be a string or a number, we don't want === in this case, just ==
         if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq

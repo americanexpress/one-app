@@ -40,7 +40,7 @@ function getI18nFileFromState(clientInitialState) {
   // use the language without further refinement (ex: 'en' for 'en-SA')
   const localeArray = activeLocale.split('-');
   // adapted from one-app-ducks src/intl/index.js getLocalePack()
-  while (localeArray.length) {
+  while (localeArray.length > 0) {
     if (i18nFiles.has(localeArray.join('-'))) {
       return i18nFiles.get(localeArray.join('-'));
     }

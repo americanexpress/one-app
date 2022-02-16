@@ -29,6 +29,7 @@ createGauge({
 
 // keep the parsing in a local variable to avoid keeping it in memory forever
 function parseVersionAndSetGaugue() {
+  // eslint-disable-next-line unicorn/no-unsafe-regex -- do not want to touch
   const parts = /(\d+)\.(\d+)\.(\d+)(?:-(.+))?-(.+)/.exec(version);
 
   setGauge(versionNamespace.getMetricNames().info, {

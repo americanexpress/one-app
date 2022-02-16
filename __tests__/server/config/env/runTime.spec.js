@@ -28,7 +28,6 @@ jest.mock('@americanexpress/env-config-utils', () => {
 });
 
 describe('runTime', () => {
-  // eslint-disable-next-line no-console
   const origConsoleInfo = console.info;
   const origConsoleWarn = console.warn;
   const origEnvVarVals = {};
@@ -64,7 +63,6 @@ describe('runTime', () => {
   }
 
   beforeEach(() => {
-    // eslint-disable-next-line no-console
     console.info = jest.fn();
     console.warn = jest.fn();
     resetEnvVar('NODE_ENV');
@@ -75,7 +73,6 @@ describe('runTime', () => {
   });
 
   afterAll(() => {
-    // eslint-disable-next-line no-console
     console.info = origConsoleInfo;
     console.warn = origConsoleWarn;
     Object

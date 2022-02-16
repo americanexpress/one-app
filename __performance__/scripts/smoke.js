@@ -14,7 +14,6 @@
  * permissions and limitations under the License.
  */
 
-/* eslint-disable import/no-anonymous-default-export */
 /* eslint-disable import/no-unresolved */
 import http from 'k6/http';
 import { check, sleep } from 'k6';

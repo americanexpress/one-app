@@ -25,7 +25,6 @@ const noop = () => 0;
 const noopBreaker = new CircuitBreaker(noop);
 const metrics = new PrometheusMetrics({ circuits: [noopBreaker], registry: register });
 
-/* eslint-disable-next-line import/prefer-default-export */
 export const registerCircuitBreaker = (breaker) => {
   metrics.add([breaker]);
 };

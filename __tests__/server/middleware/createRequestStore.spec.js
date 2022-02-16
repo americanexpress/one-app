@@ -119,7 +119,6 @@ describe('createRequestStore', () => {
   it('should send the static error page when there is an error', () => {
     const middleware = createRequestStore({ reducers: null });
     middleware(req, res, next);
-    // eslint-disable-next-line no-console
     expect(console.error).toHaveBeenCalled();
     expect(renderStaticErrorPage).toHaveBeenCalledWith(res);
   });

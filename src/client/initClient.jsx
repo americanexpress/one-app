@@ -71,16 +71,15 @@ export default async function initClient() {
 
     render(
       <App />,
-      document.getElementById('root')
+      document.querySelector('#root')
     );
-    [...document.getElementsByClassName('ssr-css')]
+    [...document.querySelectorAll('.ssr-css')]
       .forEach((style) => style.remove());
 
     // eslint-disable-next-line no-underscore-dangle
     delete global.__INITIAL_STATE__;
-    document.getElementById('initial-state').remove();
+    document.querySelector('#initial-state').remove();
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error(error);
     // TODO add renderError
   }

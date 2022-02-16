@@ -40,7 +40,7 @@ export default transit.withExtraHandlers([
     tag: 'error',
     class: Error,
     write: writeError,
-    read: (value) => Object.assign(new Error(), { stack: undefined }, value),
+    read: (value) => Object.assign(new Error('Transit error'), { stack: undefined }, value),
   },
   {
     tag: 'promise',

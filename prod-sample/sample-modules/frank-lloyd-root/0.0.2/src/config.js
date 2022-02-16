@@ -17,7 +17,7 @@
 import csp from './csp';
 
 export default {
-  eventLoopDelayThreshold: Infinity,
+  eventLoopDelayThreshold: Number.POSITIVE_INFINITY,
   csp,
   extendSafeRequestRestrictedAttributes: {
     cookies: [

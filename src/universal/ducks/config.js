@@ -27,6 +27,7 @@ export const SET_CONFIG = 'global/config/SET_CONFIG';
 
 const initialState = fromJS({});
 
+// eslint-disable-next-line default-param-last
 export default function reducer(state = initialState, action) {
   if (action.type === SET_CONFIG) {
     return fromJS(action.config);

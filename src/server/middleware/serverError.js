@@ -41,4 +41,4 @@ const serverError = (err, req, res, next) => {
   return renderStaticErrorPage(res);
 };
 
-module.exports = serverError;
+export default serverError;

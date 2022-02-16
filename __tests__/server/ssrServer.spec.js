@@ -204,7 +204,7 @@ describe('ssrServer', () => {
           expect(addSecurityHeaders).toBeCalled();
           expect(createRequestHtmlFragment).toHaveBeenCalledTimes(1);
           expect(sendHtml).toHaveBeenCalledTimes(1);
-          expect(text.trim().substr(0, 15).toLowerCase()).toEqual('<!doctype html>');
+          expect(text.trim().slice(0, 15).toLowerCase()).toEqual('<!doctype html>');
           expect(type).toEqual('text/html');
           done();
         });
@@ -217,7 +217,7 @@ describe('ssrServer', () => {
           expect(addSecurityHeaders).toBeCalled();
           expect(createRequestHtmlFragment).toHaveBeenCalledTimes(1);
           expect(sendHtml).toBeCalled();
-          expect(res.text.trim().substr(0, 15).toLowerCase()).toEqual('<!doctype html>');
+          expect(res.text.trim().slice(0, 15).toLowerCase()).toEqual('<!doctype html>');
           expect(res.type).toEqual('text/html');
           done();
         });

@@ -76,7 +76,6 @@ function afterWrite() {
 
 function startupMatchers(level, ...args) {
   // the first argument may not be a string
-  // eslint-disable-next-line unicorn/prefer-starts-ends-with
   if (/^env var /.test(args[0])) {
     // skip in non-verbose mode
     return null;
@@ -87,7 +86,7 @@ function startupMatchers(level, ...args) {
     return null;
   }
 
-  if (/WARNING: ONE_CLIENT_[A-Z_]+ unspecified, using ONE_[A-Z+]/.test(args[0])) {
+  if (/WARNING: ONE_CLIENT_[A-Z_]+ unspecified, using ONE_[+A-Z]/.test(args[0])) {
     // skip in non-verbose mode
     return null;
   }
@@ -127,7 +126,6 @@ function startupMatchers(level, ...args) {
     appServerSpinner.isEnabled
     && (
       // the first argument may not be a string
-      // eslint-disable-next-line unicorn/prefer-starts-ends-with
       /^Failed to load Holocron module/.test(args[0])
       || /unable to find root module/.test(args[0])
     )
@@ -156,7 +154,6 @@ function moduleMapPollingMatchers(level, ...args) {
     return null;
   }
   // the first argument may not be a string
-  // eslint-disable-next-line unicorn/prefer-starts-ends-with
   if (/^pollModuleMap: no updates, looking again in /.test(args[0])) {
     setImmediate(() => {
       moduleMapSpinner.succeed(`Polled Holocron Module map: no updates (polling again in ${/looking again in (\d+)/.exec(args[0])[1]}s)`);

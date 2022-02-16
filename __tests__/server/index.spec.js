@@ -165,8 +165,7 @@ describe('server index', () => {
           devProxyPath: 'test',
           destination: 'https://example.com',
         },
-      }),
-      { virtual: true }
+      }), { virtual: true }
       );
       await load();
       fs.existsSync = origFsExistsSync;
@@ -184,8 +183,7 @@ describe('server index', () => {
           devProxyPath: 'test',
           destination: 'https://example.com',
         },
-      }),
-      { virtual: true }
+      }), { virtual: true }
       );
       await load();
       fs.existsSync = origFsExistsSync;

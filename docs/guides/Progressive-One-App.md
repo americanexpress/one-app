@@ -338,7 +338,6 @@ export function useInstallPrompt() {
       });
     };
 
-
     // we listen and wait for the event to happen
     window.addEventListener('beforeinstallprompt', beforeInstallPrompt);
     return () => {

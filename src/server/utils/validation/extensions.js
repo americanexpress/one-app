@@ -18,7 +18,6 @@ import Joi from 'joi';
 
 import { webManifestSchema } from './webManifest';
 
-// eslint-disable-next-line import/prefer-default-export
 export const webManifestExtension = Joi.extend({
   type: 'manifest',
   base: webManifestSchema,

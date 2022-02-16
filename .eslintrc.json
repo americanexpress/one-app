@@ -18,7 +18,9 @@
         // a lot of tests require changing the environment the file is started in
         "global-require": 0,
         // this is a server, a lot of console spys are added
-        "no-console": 0
+        "no-console": 0,
+        "eslint-comments/require-description": "off",
+        "eslint-comments/disable-enable-pair": "off"
       }
     },
     {
@@ -27,8 +29,14 @@
       ],
       "rules": {
         // console methods are how we log events
-        "no-console": 0
+        "no-console": 0,
+        "eslint-comments/require-description": "off",
+        "eslint-comments/disable-enable-pair": "off"
       }
     }
-  ]
+  ],
+  "rules": {
+    "eslint-comments/require-description": "off",
+    "eslint-comments/disable-enable-pair": "off"
+  }
 }

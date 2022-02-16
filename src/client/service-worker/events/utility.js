@@ -20,7 +20,8 @@ import {
 
 // language
 const appLocaleRegExp = /i18n\/([^/]*)\.js$/;
-const moduleLocaleRegExp = /([a-z]{2,3}(-[a-zA-Z]{1,})?)\/[^/]*\.json$/;
+// eslint-disable-next-line unicorn/no-unsafe-regex -- safer to keep
+const moduleLocaleRegExp = /([a-z]{2,3}(-[A-Za-z]+)?)\/[^/]*\.json$/;
 // url:
 // matches the full url path in the first capture group and
 // the search params in the second capture group

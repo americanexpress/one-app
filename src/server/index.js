@@ -74,7 +74,7 @@ if (process.env.NODE_ENV === 'development') {
   const getRemotesFromDevEndpointsFile = () => {
     const moduleRemotes = {};
     if (fs.existsSync(pathToDevEndpoints)) {
-      // eslint-disable-next-line global-require,import/no-dynamic-require
+      // eslint-disable-next-line import/no-dynamic-require
       Object.values(require(pathToDevEndpoints)()).forEach(({ destination, devProxyPath }) => {
         moduleRemotes[devProxyPath] = destination;
       });
@@ -96,30 +96,34 @@ if (process.env.NODE_ENV === 'development') {
   const oneAppDevProxyPort = process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT;
 
   serverChain = Promise.resolve()
-    .then(() => new Promise((res, rej) => addServer(
-      devHolocronCDN.listen(oneAppDevCdnPort, (err) => {
-        if (err) {
-          rej(err);
-        } else {
-          console.log(`👕 one-app-dev-cdn server listening on port ${oneAppDevCdnPort}`);
-          res();
-        }
-      })
-    )))
-    .then(() => new Promise((res, rej) => addServer(
-      oneAppDevProxy({
-        useMiddleware: argv.m,
-        pathToMiddleware: path.join(__dirname, '../../.dev/middleware'),
-        remotes: getRemotesFromDevEndpointsFile(),
-      }).listen(oneAppDevProxyPort, (err) => {
-        if (err) {
-          rej(err);
-        } else {
-          console.log(`👖 one-app-dev-proxy server listening on port ${oneAppDevProxyPort}`);
-          res();
-        }
-      })
-    )))
+    .then(() => new Promise((res, rej) => {
+      addServer(
+        devHolocronCDN.listen(oneAppDevCdnPort, (err) => {
+          if (err) {
+            rej(err);
+          } else {
+            console.log(`👕 one-app-dev-cdn server listening on port ${oneAppDevCdnPort}`);
+            res();
+          }
+        })
+      );
+    }))
+    .then(() => new Promise((res, rej) => {
+      addServer(
+        oneAppDevProxy({
+          useMiddleware: argv.m,
+          pathToMiddleware: path.join(__dirname, '../../.dev/middleware'),
+          remotes: getRemotesFromDevEndpointsFile(),
+        }).listen(oneAppDevProxyPort, (err) => {
+          if (err) {
+            rej(err);
+          } else {
+            console.log(`👖 one-app-dev-proxy server listening on port ${oneAppDevProxyPort}`);
+            res();
+          }
+        })
+      );
+    }))
     .then(appServersStart)
     .then(watchLocalModules);
 } else {

@@ -18,7 +18,6 @@ import Joi from 'joi';
 
 import { urlSchema, colorSchema } from './shared';
 
-// eslint-disable-next-line import/prefer-default-export
 export const webManifestSchema = Joi.object().keys({
   name: Joi.string().required(),
   short_name: Joi.string(),

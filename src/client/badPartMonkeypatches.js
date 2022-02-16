@@ -48,7 +48,7 @@ if (typeof document !== 'undefined') {
     if (typeof cb === 'string') {
       throw new TypeError(`eval form of ${name} used, this is disabled`);
     }
-    return orig.apply(this, [cb, ...args]);
+    return Reflect.apply(orig, this, [cb, ...args]);
   };
 });
 

@@ -16,7 +16,6 @@
 
 // We need to conditionally require in this fault based on whether we are in a
 // development or production environment
-/* eslint-disable global-require */
 
 import path from 'path';
 
