@@ -118,7 +118,7 @@
     "regenerator-runtime": "^0.13.7",
     "reselect": "^4.0.0",
     "semver": "^7.3.5",
-    "serialize-error": "^8.1.0",
+    "serialize-error": "^9.1.0",
     "striptags": "^3.2.0",
     "transit-immutable-js": "^0.8.0",
     "transit-js": "^0.8.874",
