@@ -66,14 +66,14 @@ const csp = () => (req, res, next) => {
     if (process.env.ONE_CSP_ALLOW_INLINE_SCRIPTS === 'true') {
       updatedScriptSrc = insertSource(policy, 'script-src', developmentAdditions);
     } else {
+      res.scriptNonce = scriptNonce;
       updatedScriptSrc = insertSource(policy, 'script-src', `'nonce-${scriptNonce}' ${developmentAdditions}`);
     }
     updatedPolicy = insertSource(updatedScriptSrc, 'connect-src', developmentAdditions);
   } else {
+    res.scriptNonce = scriptNonce;
     updatedPolicy = insertSource(policy, 'script-src', `'nonce-${scriptNonce}'`);
   }
-
-  res.scriptNonce = scriptNonce;
 
   if (process.env.ONE_DANGEROUSLY_DISABLE_CSP !== 'true') {
     res.setHeader('Content-Security-Policy', updatedPolicy);
