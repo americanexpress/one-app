@@ -127,7 +127,7 @@ describe('csp', () => {
       const headers = res._getHeaders();
       const { scriptNonce } = res;
       expect(headers).toHaveProperty('content-security-policy');
-      expect(headers['content-security-policy'].search(scriptNonce)).not.toEqual(-1);
+      expect(headers['content-security-policy'].includes(scriptNonce)).toBe(true);
     });
 
     it('does not set the script nonce if this has been disabled in development', () => {
@@ -139,11 +139,7 @@ describe('csp', () => {
       const { updateCSP } = requiredCsp;
       updateCSP("default-src 'none'; script-src 'self';");
       cspMiddleware()(req, res, next);
-      // eslint-disable-next-line no-underscore-dangle
-      const headers = res._getHeaders();
-      const { scriptNonce } = res;
-      expect(headers).toHaveProperty('content-security-policy');
-      expect(headers['content-security-policy'].search(scriptNonce)).toEqual(-1);
+      expect(res.scriptNonce).toBeUndefined();
     });
   });
 
