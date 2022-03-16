@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.13.1](https://github.com/americanexpress/one-app/compare/v5.13.0...v5.13.1) (2022-03-16)
+
+
+### Bug Fixes
+
+* **csp:** remove script nonce if inline scripts are disabled ([#700](https://github.com/americanexpress/one-app/issues/700)) ([d90954e](https://github.com/americanexpress/one-app/commit/d90954ef3b6a07b3a0b01f8909f133c0ef504ef1))
+
+
 # [5.13.0](https://github.com/americanexpress/one-app/compare/v5.12.0...v5.13.0) (2022-02-16)
 
 
