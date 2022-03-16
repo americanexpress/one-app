@@ -1,4 +1,4 @@
-name: Docker Tag Version Check
+name: '[Release step 3 | automatic] Prepare docker tags'
 on:
   workflow_dispatch:
    inputs:
@@ -9,9 +9,9 @@ on:
     tags:
       - '*'
   repository_dispatch:
-    types: [one-app-docker-tag-check]
+    types: [release-step-3_automatic_prepare-docker-tags]
 jobs:
-  one-app-docker-tag-check:
+  release-step-3_automatic_prepare-docker-tags:
     name: Docker Tag Version Check
     runs-on: ubuntu-latest
     steps:
@@ -44,12 +44,12 @@ jobs:
           echo ::set-output name=dockertag::$(sed 's/^v*//' <<< "$tagversion")
       - name: Trigger Production Image Publishing
         uses: octokit/request-action@v2.x
-        id: dispatch_one-app-docker-prod-build
+        id: dispatch_release-step-4_automatic_docker-prod-build-and-publish
         with:
           route: POST /repos/:repository/dispatches
           repository: ${{ github.repository }}
           mediaType: '{"previews": ["everest"]}'
-          event_type: "one-app-docker-prod-build"
+          event_type: "release-step-4_automatic_docker-prod-build-and-publish"
           client_payload: '{"docker_tag_version": "${{ steps.set_docker_tag_version.outputs.dockertag }}"}'
         env:
           GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}

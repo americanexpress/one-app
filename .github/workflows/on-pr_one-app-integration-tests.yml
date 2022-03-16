@@ -1,4 +1,4 @@
-name: One App Integration Tests - PR
+name: "[on PR] One App Integration Tests"
 on: pull_request
 jobs:
   one-app-integration-pr:
