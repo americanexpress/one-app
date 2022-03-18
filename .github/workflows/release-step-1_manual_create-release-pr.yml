@@ -6,6 +6,14 @@ on:
     types: [prepare-release-command]
   workflow_dispatch:
 jobs:
+  validate-branch:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/5.x.x'
+    steps:
+      - name: Echo Valid Branches
+        run: |
+          echo "::error title=Invalid Target Branch::This action can only be triggered for branches 'main' or '5.x.x'"
+          exit 1
   release-step-1_manual_create-release-pr:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/5.x.x'
@@ -40,11 +48,3 @@ jobs:
           body: 'This is an auto-generated pull request for One App release changes. Please review this PR and merge it for a release to be initiated. Please close this PR to stop a release from being initiated.'
           labels: release,automated pr,skip-release-drafter
           branch: ${{ format('prepare-release-for-{0}', github.ref_name)}}
-  validate-branch:
-    runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/5.x.x'
-    steps:
-      - name: Echo Valid Branches
-        run: |
-          echo "::error title=Invalid Target Branch::This action can only be triggered for branches 'main' or '5.x.x'"
-          exit 1
