@@ -21,8 +21,8 @@ export default function addFrameOptionsHeader(req, res, next) {
   const referer = req.get('Referer');
 
   const frameAncestorDomains = getCSP()['frame-ancestors'];
-
-  const matchedDomain = frameAncestorDomains && frameAncestorDomains.find((domain) => matcher.isMatch(referer, `${domain}/*`)
+  const trimmedReferrer = referer && referer.replace('https://', '');
+  const matchedDomain = frameAncestorDomains && frameAncestorDomains.find((domain) => matcher.isMatch(trimmedReferrer, `${domain}/*`)
   );
 
   if (matchedDomain) {

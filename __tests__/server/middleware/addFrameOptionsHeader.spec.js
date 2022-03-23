@@ -18,7 +18,7 @@ import addFrameOptionsHeader from '../../../src/server/middleware/addFrameOption
 
 jest.mock('../../../src/server/middleware/csp', () => ({
   getCSP: () => ({
-    'frame-ancestors': ['*.example.com'],
+    'frame-ancestors': ['valid.example.com'],
   }),
 }));
 
@@ -36,14 +36,14 @@ describe('addFrameOptionsHeader', () => {
 
   it('should add X-Frame-Options ALLOW-FROM header on approved ancestor', () => {
     req = {
-      get: jest.fn(() => 'https://external.example.com/embedded'),
+      get: jest.fn(() => 'https://valid.example.com/embedded'),
     };
     addFrameOptionsHeader(req, res, next);
 
     expect(req.get).toHaveBeenCalledWith('Referer');
     expect(res.set).toBeCalledWith(
       'X-Frame-Options',
-      'ALLOW-FROM https://external.example.com/embedded'
+      'ALLOW-FROM https://valid.example.com/embedded'
     );
     expect(next).toBeCalled();
   });
