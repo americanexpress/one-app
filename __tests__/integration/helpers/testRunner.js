@@ -36,7 +36,7 @@ const setUpTestRunner = async ({
   const pathToBaseDockerComposeFile = path.resolve(prodSampleDir, 'docker-compose.yml');
   const seleniumServerPort = getRandomPortNumber();
   // create docker compose file from base with changes needed for tests
-  const baseDockerComposeFileContents = yaml.safeLoad(fs.readFileSync(pathToBaseDockerComposeFile, 'utf8'));
+  const baseDockerComposeFileContents = yaml.load(fs.readFileSync(pathToBaseDockerComposeFile, 'utf8'));
   const testDockerComposeFileContents = deepMergeObjects(
     baseDockerComposeFileContents,
     {
@@ -63,7 +63,7 @@ const setUpTestRunner = async ({
     delete testDockerComposeFileContents.services['selenium-chrome'].entrypoint;
   }
 
-  fs.writeFileSync(pathToDockerComposeTestFile, yaml.safeDump(testDockerComposeFileContents));
+  fs.writeFileSync(pathToDockerComposeTestFile, yaml.dump(testDockerComposeFileContents));
 
   const dockerComposeUpCommand = `docker-compose -f ${pathToDockerComposeTestFile} up --abort-on-container-exit --force-recreate`;
   const dockerComposeUpProcess = childProcess.spawn(`${dockerComposeUpCommand}`, { shell: true });
