@@ -170,7 +170,7 @@
     "nodemon": "^2.0.15",
     "ora": "^5.4.0",
     "parse-prometheus-text-format": "^1.1.1",
-    "prettier": "^2.2.1",
+    "prettier": "^2.6.1",
     "react-test-renderer": "^16.14.0",
     "rimraf": "^3.0.2",
     "rollup": "^2.50.5",
