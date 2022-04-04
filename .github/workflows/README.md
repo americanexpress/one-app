@@ -6,7 +6,7 @@ Current prefixes include
 * `[on <Targets>]`
   * runs when the branch targeted changes. Targets are a branch name or `PR`, `Prepare` ,or `Trunk`
     * `PR` will run against branches that are part of a PR whenever that brach changes. PR's will be un-mergable untill these workflows pass
-    * `Prepare` will run against our `prepare-release-for-<trunk_branch_name` branches. These branches are created automatically by `Release Step 1` and are the first stage in releasing
+    * `Prepare` will run against our `prepare-release-for-<trunk_branch_name>` branches. These branches are created automatically by `Release Step 1` and are the first stage in releasing
     * `Trunk` will run against our trunk branches; `main` and `5.x.x` at time of writing.
 * `[Release <step> | <type>]`
   * run as part of the release process, where step is an integer implying the sequence, and type is one of `manual` or `automatic`
