@@ -35,7 +35,7 @@ Runs dangerJS against the PR code
 Runs OneApp's integration tests, without a remote host
 
 ### [PR, Issue] Mark stale issues and pull requests
-Marks pr's as stale after 30 days
+Marks PRs as stale after 30 days
 
 ## On Trunk
 These workflows run whenever a trunk branch (`main` or `5.x.x` at time of writing) are changed.
