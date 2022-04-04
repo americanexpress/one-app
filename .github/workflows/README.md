@@ -24,7 +24,7 @@ These workflows check PR code to ensure they are the quality we expect
 Runs CodeQL against the PR code
 
 ### [on PR, Trunk] One App Unit and Lint Tests
-Runs OneApp's unit tests and linting tests against the PR code
+Runs One App's unit tests and linting tests against the PR code
 
 This workflow creates two checks, one for node 14 and one for node 16.
 
@@ -32,7 +32,7 @@ This workflow creates two checks, one for node 14 and one for node 16.
 Runs dangerJS against the PR code
 
 ### [on PR] One App Integration Tests
-Runs OneApp's integration tests, without a remote host
+Runs One App's integration tests, without a remote host
 
 ### [PR, Issue] Mark stale issues and pull requests
 Marks PRs as stale after 30 days
@@ -44,16 +44,16 @@ These workflows run whenever a trunk branch (`main` or `5.x.x` at time of writin
 Runs CodeQL against the trunk branch
 
 ### [on PR, Trunk] One App Unit and Lint Tests
-Runs OneApp's unit tests and linting tests against the trunk branch
+Runs One App's unit tests and linting tests against the trunk branch
 
 ### [on Trunk, Prepare] One App Integration Tests
-Runs OneApp's integration tests, using Surge as a CDN and Heroku as a server.
+Runs One App's integration tests, using Surge as a CDN and Heroku as a server.
 
 ## On Prepare
 These workflows run against our Prepare branches as part of the release process. This is the last chance to catch issues before they are released.
 
 ### [on Trunk, Prepare] One App Integration Tests
-Runs OneApp's integration tests, using Surge as a CDN and Heroku as a server.
+Runs One App's integration tests, using Surge as a CDN and Heroku as a server.
 
 ## Release
 These workflows are part of the Release process.
