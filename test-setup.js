@@ -15,6 +15,7 @@
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-require('@babel/polyfill');
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 
 process.env.ONE_CONFIG_ENV = 'test';

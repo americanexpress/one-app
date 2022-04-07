@@ -34,13 +34,13 @@ export const getModuleMapHealth = () => moduleMapHealthy;
 
 export const MIN_POLL_TIME = Math.max(
   process.env.ONE_MAP_POLLING_MIN
-    ? parseInt(process.env.ONE_MAP_POLLING_MIN, 10) * 1e3
+    ? Number.parseInt(process.env.ONE_MAP_POLLING_MIN, 10) * 1e3
     : 0,
   1e3 * 5 // 5s
 );
 
 export const MAX_POLL_TIME = process.env.ONE_MAP_POLLING_MAX
-  ? parseInt(process.env.ONE_MAP_POLLING_MAX, 10) * 1e3
+  ? Number.parseInt(process.env.ONE_MAP_POLLING_MAX, 10) * 1e3
   : 1e3 * 60 * 5; // 5min
 
 if (Number.isNaN(MIN_POLL_TIME) || Number.isNaN(MAX_POLL_TIME)) {

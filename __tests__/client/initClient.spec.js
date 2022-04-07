@@ -21,6 +21,7 @@ import { fromJS } from 'immutable';
 jest.mock('react', () => {
   const StrictMode = ({ children }) => children;
   const react = jest.requireActual('react');
+  // eslint-disable-next-line jest/no-standalone-expect
   expect(react.StrictMode).toBeDefined();
   return { ...react, StrictMode };
 });
@@ -81,7 +82,7 @@ describe('initClient', () => {
   });
 
   it('should log error to console if any errors are caught', async () => {
-    expect.assertions(1);
+    expect.assertions(2);
     const { loadPrerenderScripts } = require('../../src/client/prerender');
     const mockError = new Error('This is a test error!!!');
     loadPrerenderScripts.mockReturnValue(Promise.reject(mockError));
@@ -91,9 +92,10 @@ describe('initClient', () => {
 
     try {
       await initClient();
-    } catch (error) {
-      expect(consoleErrorSpy).toHaveBeenCalledWith(mockError);
+    } catch (_error) {
+      // do nothing
     }
+    expect(consoleErrorSpy).toHaveBeenCalledWith(mockError);
   });
 
   it('should redirect if there is a redirectLocation', async () => {
@@ -139,7 +141,8 @@ describe('initClient', () => {
 
     try {
       await initClient();
-    } catch (error) {
+    } catch {
+      // eslint-disable-next-line jest/no-try-expect, jest/no-conditional-expect
       expect(promiseRejectionSpy).toHaveBeenCalled();
     }
   });
@@ -247,7 +250,7 @@ describe('initClient', () => {
       style.remove = remove;
       return style;
     };
-    [...new Array(5)].forEach(() => document.body.appendChild(createStyle()));
+    [...new Array(5)].forEach(() => document.body.append(createStyle()));
 
     const { matchPromise } = require('@americanexpress/one-app-router');
     matchPromise.mockImplementationOnce(() => Promise.resolve({

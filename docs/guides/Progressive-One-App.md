@@ -71,7 +71,7 @@ export default function RootModule({ children }) {
 }
 
 RootModule.childRoutes = () => [
-  <Route path="/" />,
+  <Route key="/" path="/" />,
 ];
 
 RootModule.holocron = {
@@ -337,7 +337,6 @@ export function useInstallPrompt() {
         });
       });
     };
-
 
     // we listen and wait for the event to happen
     window.addEventListener('beforeinstallprompt', beforeInstallPrompt);

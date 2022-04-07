@@ -19,6 +19,7 @@ import ModuleRoute from 'holocron-module-route';
 
 ParentModule.childRoutes = () => [
   <ModuleRoute
+    key="child"
     path="childModule"
     moduleName="child-module"
     greeting="hello"

@@ -113,24 +113,22 @@ describe('server listen', () => {
       expect(cb).toHaveBeenCalledWith(null, { port: '8998' });
     });
 
-    it('passes the error to the callback', (done) => {
+    it('passes the error to the callback', async () => {
       process.env.HTTP_PORT = 8998;
       const listenError = new Error('port taken or such');
       http.mock.listenError = listenError;
-      listenHttp(app, (err, serverInfo) => {
+      await listenHttp(app, (err, serverInfo) => {
         expect(err).toEqual(listenError);
         expect(serverInfo.port).toEqual('8998');
-        done();
       });
     });
 
-    it('passes the server information to the callback', (done) => {
+    it('passes the server information to the callback', async () => {
       process.env.HTTP_PORT = 8998;
       http.mock.listenError = null;
-      listenHttp(app, (err, serverInfo) => {
+      await listenHttp(app, (err, serverInfo) => {
         expect(err).toEqual(null);
         expect(serverInfo.port).toEqual('8998');
-        done();
       });
     });
   });

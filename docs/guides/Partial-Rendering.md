@@ -103,6 +103,7 @@ function PartialGreetingModuleComponent(props) {
 
 RootModule.childRoutes = (store) => [
   <ModuleRoute
+    key="partials"
     path="partials/greet"
     component={PartialGreetingModuleComponent}
     onEnter={(routerProps, replace, cb) => {

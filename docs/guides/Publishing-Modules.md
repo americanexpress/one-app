@@ -13,13 +13,13 @@
 
 ## Overview
 
-Publishing Holocron modules consists on two steps: 
+Publishing Holocron modules consists on two steps:
 
 1. Upload the contents of the `build` folder to your CDN of choice. This publishes your module's static assets similar to when you release an npm dependency.
 2. Update the [module map](../api/server/Module-Map-Schema.md) to point to the newly published static assets. This will tell One App to consume that published/released module version.
 
 In the following example, we will use Vercel to publish a holocron module and a manual script to deploy the module map.
- 
+
 ### Creating a Module Map
 
 If you don't have an existing module map, you can create a `module-map.json` file locally that looks something like this:
@@ -42,7 +42,7 @@ You can place this script wherever you would like. However, the following step e
 
 > Note: The manual script presented below is just an example on how to update the module map by downloading your current module map, updating it to include the new deployed assets and re-uploading it, however, this approach doesn't handle concurrency.
 There could be a case where two deployments running on different pipelines try to update the module map at the same time and a race condition might occur where the last deployment will override the contents of the first. If you want to avoid concurrency issues, we recommend to adopt
-a "locking" mechanism as part of your CI to prevent the module map from being updated while another deployment is already in progress.  
+a "locking" mechanism as part of your CI to prevent the module map from being updated while another deployment is already in progress.
 
 ```javascript
 const fs = require('fs-extra');
@@ -85,7 +85,8 @@ const updateModuleMap = async () => {
       './module_map/module-map.json', JSON.stringify(moduleMapContent, null, 2)
     );
   } catch (error) {
-    console.log(error);
+    // eslint-disable-next-line no-console
+    console.error(error);
   }
 };
 
@@ -94,8 +95,8 @@ updateModuleMap().catch((err) => {
   console.log(err);
 });
 ```
->Note: Vercel only allows you to upload a single folder per project, this means that every holocron module will have its own URL and project name. Other CDNs like Cloudfront / Amazon S3 allow you to upload multiple folders. 
->In that case, you can adjust the script above to include module name as the folder that contains the static assets for each holocron module. 
+>Note: Vercel only allows you to upload a single folder per project, this means that every holocron module will have its own URL and project name. Other CDNs like Cloudfront / Amazon S3 allow you to upload multiple folders.
+>In that case, you can adjust the script above to include module name as the folder that contains the static assets for each holocron module.
 
 ## Deploying to Vercel with GitHub Actions
 
@@ -152,7 +153,7 @@ jobs:
       env:
         VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 ```
-> Note: It is very important to set your `NODE_ENV=production` before running the `npm run build` command so the code is bundled and minified for production. 
+> Note: It is very important to set your `NODE_ENV=production` before running the `npm run build` command so the code is bundled and minified for production.
 
 The `deploy` stage on this action will publish the contents of the `build` folder to Vercel. The `Update Module Map` stage will run the script we created in `./scripts/updateModuleMap.js` and upload the updated module map placed in the temporary `module_map` folder to Vercel.
 
@@ -178,7 +179,7 @@ The running One App instance that points to your updated module map will automat
 
 One App enforces the [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) by default. You must add to the CSP the URL where your module's statics are loaded from, otherwise you will get a CSP violation and your modules will fail to load in Production.
 
-For example, to add Vercel to the Content Security Policy, add the `*.vercel.app` domain to the `connectSrc` and `scriptSrc` directives in your Root Module's `appConfig.js` file under the csp section: 
+For example, to add Vercel to the Content Security Policy, add the `*.vercel.app` domain to the `connectSrc` and `scriptSrc` directives in your Root Module's `appConfig.js` file under the csp section:
 ```javascript
 export default contentSecurityPolicyBuilder({
   directives: {
@@ -203,5 +204,5 @@ export default contentSecurityPolicyBuilder({
     ],
   },
 });
-``` 
+```
 For more information on how to configure One App and the CSP please refer to this section: [App Configuration](../api/modules/App-Configuration.md#csp)
