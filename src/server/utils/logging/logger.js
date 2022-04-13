@@ -28,8 +28,9 @@ const productionConfig = { formatter: productionFormatter };
 const logger = new Lumberjack(
   argv.logFormat === 'machine' ? productionConfig
   // development-formatters should not be loaded in production
-  : nodeEnvIsDevelopment ? require('./development-formatters') // eslint-disable-line global-require, indent
-  : productionConfig // eslint-disable-line indent
+  // eslint-disable-next-line no-extra-parens -- conflicting lint rule
+  : (nodeEnvIsDevelopment ? require('./development-formatters') // eslint-disable-line global-require, indent
+  : productionConfig) // eslint-disable-line indent
 );
 
 export default logger;

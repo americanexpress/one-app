@@ -99,7 +99,6 @@ import React, { Fragment } from 'react';
 import { Provider } from 'reakit';
 import * as system from 'reakit-system-bootstrap';
 
-
 const MyRootModule = ({ children }) => (
   <Fragment>
     <Provider unstable_system={system}>
@@ -125,7 +124,6 @@ in your child modules.
 ```jsx
 import React, { Fragment } from 'react';
 import { Button } from 'reakit';
-
 
 const MyModule = ({ children }) => (
   <Button>Button</Button>

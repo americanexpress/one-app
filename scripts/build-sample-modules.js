@@ -40,7 +40,6 @@ const bundleStaticsOrigin = argv.bundleStaticsOrigin || 'https://sample-cdn.fran
 
 const sanitizedEnvVars = sanitizeEnvVars();
 
-
 async function updateModuleVersion(directory, moduleVersion) {
   const packageJsonPath = path.resolve(directory, 'package.json');
   // eslint-disable-next-line global-require, import/no-dynamic-require
@@ -159,7 +158,6 @@ const doWork = async () => {
       fs.move(nginxOriginStaticsModulesDir, path.join(pathToBundles, 'modules')),
       fs.move(pathToNginxOriginModuleMap, path.join(pathToBundles, 'module-map.json')),
     ]);
-
 
     console.log(`✅ Bundled One App Sample Modules and Module Map created at ${pathToBundles}`);
   }

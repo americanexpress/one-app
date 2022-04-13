@@ -70,7 +70,7 @@ describe('getI18nFileFromState', () => {
         const clientInitialState = fromJS({
           intl: { activeLocale: locale },
         });
-        expect(getI18nFileFromState(clientInitialState)).toMatch(/^i18n\/[a-z\d-]+\.js$/i);
+        expect(getI18nFileFromState(clientInitialState)).toMatch(/^i18n\/[\da-z-]+\.js$/i);
       });
 
       it(`${locale} has the right file`, () => {

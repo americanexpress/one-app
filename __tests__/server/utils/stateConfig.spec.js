@@ -184,7 +184,7 @@ describe('stateConfig methods', () => {
       });
       it('should show dev endpoint supplied config', () => {
         process.env.NODE_ENV = 'development';
-        // eslint-disable-next-line unicorn/import-index, import/no-unresolved
+        // eslint-disable-next-line unicorn/import-index, import/no-unresolved, import/extensions
         require('fake/path/.dev/endpoints/index.js').mockImplementation(() => ({
           someOtherApiUrl: {
             devProxyPath: 'some-other-api',
@@ -202,7 +202,7 @@ describe('stateConfig methods', () => {
       it('dev endpoints should use ip instead of localhost when useHost is passed as arg', () => {
         process.env.NODE_ENV = 'development';
         yargs.argv = { useHost: true };
-        // eslint-disable-next-line unicorn/import-index, import/no-unresolved
+        // eslint-disable-next-line unicorn/import-index, import/no-unresolved, import/extensions
         require('fake/path/.dev/endpoints/index.js').mockImplementation(() => ({
           someOtherApiUrl: {
             devProxyPath: 'some-other-api',
@@ -219,7 +219,7 @@ describe('stateConfig methods', () => {
       });
       it('dev endpoint should not have doubled slash in path', () => {
         process.env.NODE_ENV = 'development';
-        // eslint-disable-next-line unicorn/import-index, import/no-unresolved
+        // eslint-disable-next-line unicorn/import-index, import/no-unresolved, import/extensions
         require('fake/path/.dev/endpoints/index.js').mockImplementation(() => ({
           leadingSlashApiUrl: {
             devProxyPath: '/leading-slash-api',
@@ -318,7 +318,7 @@ describe('stateConfig methods', () => {
     describe('with priorities of', () => {
       it('should prioritize dev endpoint over env', () => {
         fs.existsSync.mockImplementation(() => true);
-        // eslint-disable-next-line unicorn/import-index, import/no-unresolved
+        // eslint-disable-next-line unicorn/import-index, import/no-unresolved, import/extensions
         require('fake/path/.dev/endpoints/index.js').mockImplementation(() => ({
           someOtherApiUrl: {
             devProxyPath: 'some-other-api',

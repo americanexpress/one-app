@@ -315,7 +315,6 @@ describe('createFetchMiddleware', () => {
     describe('invalidation', () => {
       beforeEach(() => {
         // clear all internal caches already used
-        // https://github.com/zackargyle/service-workers/blob/master/packages/service-worker-mock/models/CacheStorage.js#L6
         caches.caches = {};
       });
 
@@ -361,14 +360,9 @@ describe('createFetchMiddleware', () => {
         events.forEach((event, index) => {
           expect(event.respondWith).toHaveBeenCalledTimes(1);
           expect(event.respondWith).toHaveBeenCalledWith(Promise.resolve(event.response));
-          if (index === 2) {
-            // on the third and final call, we expect to waitUntil the original
-            // cache item was removed as an additional step when invalidating
-            expect(event.waitUntil).toHaveBeenCalledTimes(4);
-          } else {
-            // otherwise the previous two calls should
-            expect(event.waitUntil).toHaveBeenCalledTimes(3);
-          }
+          // on the third and final call, we expect to waitUntil the original
+          // cache item was removed as an additional step when invalidating
+          expect(event.waitUntil).toHaveBeenCalledTimes(index === 2 ? 4 : 3);
         });
         await expect(match(new Request('https://example.com/cdn/modules/test-root/2.2.2/locale/en-US/test-root.json'))).resolves.toBe(null);
         await expect(match(new Request('https://example.com/cdn/modules/test-root/2.2.2/locale/en-CA/test-root.json'))).resolves.toBeInstanceOf(Response);

@@ -212,7 +212,7 @@ MyHolocronModule.holocron = {
       const imported = await import(/* webpackChunkName: '<chunkName>' */ './Chunk');
       Chunk = imported.default || imported;
     } catch (error) {
-      Chunk = () => <p>{error.message}</p>;
+      Chunk = function ChunkError() { return <p>{error.message}</p>; };
     }
   },
   // we can wait for our holocron module to load the chunk during server-side rendering

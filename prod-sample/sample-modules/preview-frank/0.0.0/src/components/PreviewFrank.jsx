@@ -22,9 +22,9 @@ import { loadModuleData } from '../duck';
 import getDemoProps from '../utils/getDemoProps';
 
 const PreviewFrank = (props) => {
-  const { params, moduleToBeDemoedExists } = props;
+  const { params, hasModuleToBeDemoed } = props;
 
-  if (moduleToBeDemoedExists) {
+  if (hasModuleToBeDemoed) {
     return (
       <RenderModule
         moduleName={params.moduleName}
@@ -54,7 +54,7 @@ PreviewFrank.propTypes = {
       locale: PropTypes.string,
     }).isRequired,
   }).isRequired,
-  moduleToBeDemoedExists: PropTypes.bool.isRequired,
+  hasModuleToBeDemoed: PropTypes.bool.isRequired,
 };
 
 PreviewFrank.holocron = {
@@ -64,7 +64,7 @@ PreviewFrank.holocron = {
 };
 
 export const mapStateToProps = (state, ownProps) => ({
-  moduleToBeDemoedExists: state.hasIn(['holocron', 'loaded', ownProps.params.moduleName]),
+  hasModuleToBeDemoed: state.hasIn(['holocron', 'loaded', ownProps.params.moduleName]),
 });
 
 export default connect(mapStateToProps)(PreviewFrank);

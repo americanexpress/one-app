@@ -120,13 +120,13 @@ MyModule.holocron = {
   name: 'my-module',
 };
 
-MyModule.childRoutes = () => [
+MyModule.childRoutes = () => (
   <ModuleRoute moduleName="my-module">
     <ModuleRoute moduleName="my-layout-module">
       <ModuleRoute moduleName="landing-page-module" path="/" />
     </ModuleRoute>
-  </ModuleRoute>,
-];
+  </ModuleRoute>
+);
 ```
 
 #### **Data Loading**

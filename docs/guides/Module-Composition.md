@@ -17,13 +17,13 @@ as a child route. This can be done on any module as routing is not limited to th
 // Other imports
 import ModuleRoute from 'holocron-module-route';
 
-ParentModule.childRoutes = () => [
+ParentModule.childRoutes = () => (
   <ModuleRoute
     path="childModule"
     moduleName="child-module"
     greeting="hello"
-  />,
-];
+  />
+);
 ```
 
 When using ModuleRoute, additional props are passed through to the module via the `route` prop:

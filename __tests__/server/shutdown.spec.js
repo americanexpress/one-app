@@ -53,7 +53,7 @@ describe('shutdown', () => {
   });
 
   signalNames.forEach((signalName) => {
-    describe(signalName, () => {
+    describe(`${signalName}`, () => {
       it('calls shutdown', async () => {
         const close = jest.fn();
         const { addServer } = load();

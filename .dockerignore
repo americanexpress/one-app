@@ -27,6 +27,7 @@ dangerfile.js
 CODEOWNERS
 docs
 *.png
+.clinic
 
 # test
 test-results
