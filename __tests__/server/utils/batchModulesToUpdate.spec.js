@@ -37,9 +37,15 @@ describe('batchModulesToUpdate', () => {
     const result = batchModulesToUpdate(modules);
     expect(result.length).toBe(8);
     result.forEach((arr, i) => {
-      if (i === 0) expect(arr.length).toBe(1);
-      else if (i < 7) expect(arr.length).toBe(10);
-      else if (i === 7) expect(arr.length).toBe(5);
+      let expectedLength;
+      if (i === 0) {
+        expectedLength = 1;
+      } else if (i < 7) {
+        expectedLength = 10;
+      } else if (i === 7) {
+        expectedLength = 5;
+      }
+      expect(arr.length).toBe(expectedLength);
     });
     expect(JSON.stringify(result)).toMatchSnapshot();
   });
@@ -54,8 +60,7 @@ describe('batchModulesToUpdate', () => {
     const result = batchModulesToUpdate(modulesWithoutRoot);
     expect(result.length).toBe(7);
     result.forEach((arr, i) => {
-      if (i < 6) expect(arr.length).toBe(10);
-      else if (i === 6) expect(arr.length).toBe(5);
+      expect(arr.length).toBe(i < 6 ? 10 : 5);
     });
     expect(JSON.stringify(result)).toMatchSnapshot();
   });

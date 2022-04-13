@@ -16,7 +16,7 @@
 
 import { validatePWAConfig } from '../../../../src/server/utils/validation';
 
-describe(validatePWAConfig.name, () => {
+describe(`${validatePWAConfig.name}`, () => {
   test('valid pwa config using a function', () => {
     const clientUrl = 'https://example.com/api';
     expect(

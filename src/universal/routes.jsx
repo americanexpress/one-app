@@ -30,8 +30,9 @@ const createRoutes = (store) => {
   const rootHasChildRoutes = hasChildRoutes(getModule(rootModuleName));
 
   return [
-    <ModuleRoute moduleName={rootModuleName} store={store} path={rootHasChildRoutes ? undefined : '/'} />,
+    <ModuleRoute key="rootModule" moduleName={rootModuleName} store={store} path={rootHasChildRoutes ? undefined : '/'} />,
     <Route
+      key="404"
       path="*"
       component={() => 'Not found'}
       onEnter={({ location }) => {

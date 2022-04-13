@@ -87,7 +87,7 @@ function startupMatchers(level, ...args) {
     return null;
   }
 
-  if (/WARNING: ONE_CLIENT_[A-Z_]+ unspecified, using ONE_[A-Z+]/.test(args[0])) {
+  if (/WARNING: ONE_CLIENT_[A-Z_]+ unspecified, using ONE_[+A-Z]/.test(args[0])) {
     // skip in non-verbose mode
     return null;
   }
