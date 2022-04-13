@@ -40,8 +40,8 @@ const runBatchedModuleCommand = async (command) => {
   const moduleVersionPaths = await getModuleVersionPaths();
   const batches = basicBatch(moduleVersionPaths);
 
-  for (let batchNumber = 0; batchNumber < batches.length; batchNumber += 1) {
-    const currentBatch = batches[batchNumber];
+  // eslint-disable-next-line no-restricted-syntax -- dev tooling
+  for (const currentBatch of batches) {
     // eslint-disable-next-line no-await-in-loop
     await Promise.all(currentBatch.map((modulePath) => {
       const { moduleName, moduleVersion, directory } = getModuleDetailsFromPath(modulePath);
@@ -54,7 +54,6 @@ const runBatchedModuleCommand = async (command) => {
     }));
   }
 };
-
 
 runBatchedModuleCommand('npm audit fix').catch((e) => {
   console.error(e);

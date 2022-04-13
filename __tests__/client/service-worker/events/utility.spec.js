@@ -26,7 +26,6 @@ import {
   fetchCacheResource,
 } from '../../../../src/client/service-worker/events/utility';
 
-
 jest.mock('@americanexpress/one-service-worker', () => ({
   put: jest.fn(() => Promise.resolve()),
   match: jest.fn(() => Promise.resolve()),
@@ -45,7 +44,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe(markResourceForRemoval.name, () => {
+describe(`${markResourceForRemoval.name}`, () => {
   test('invalidates each matrix of validation', () => {
     const existingMetaData = {
       revision: '101010',
@@ -74,7 +73,7 @@ describe(markResourceForRemoval.name, () => {
   });
 });
 
-describe(createResourceMetaData.name, () => {
+describe(`${createResourceMetaData.name}`, () => {
   test.each([
     // app
     [
@@ -148,7 +147,7 @@ describe(createResourceMetaData.name, () => {
   });
 });
 
-describe(invalidateCacheResource.name, () => {
+describe(`${invalidateCacheResource.name}`, () => {
   const existingMetaData = {
     cacheName: '__sw/modules',
     name: 'my-module',
@@ -207,7 +206,7 @@ describe(invalidateCacheResource.name, () => {
   });
 });
 
-describe(setCacheResource.name, () => {
+describe(`${setCacheResource.name}`, () => {
   const mockMetaData = {
     path: 'my-module.browser.js',
     url: 'https://example.com/cdn/modules/my-module/1.0.0/my-module.browser.js',
@@ -232,7 +231,7 @@ describe(setCacheResource.name, () => {
   });
 });
 
-describe(fetchCacheResource.name, () => {
+describe(`${fetchCacheResource.name}`, () => {
   const mockMetaData = {
     path: 'my-module.browser.js',
     url: 'https://example.com/cdn/modules/my-module/1.0.0/my-module.browser.js',

@@ -79,7 +79,6 @@ const collectOneAppStaticFiles = async () => {
   console.log('✅ One App Statics successfully pulled from Docker image and moved to Nginx origin dir! \n');
 };
 
-
 const doWork = async () => {
   const oneAppImageAlreadyBuilt = execSync('docker images one-app:at-test', { encoding: 'utf8' }).includes('at-test');
   const skipOneAppImageBuild = userIntendsToSkipOneAppImageBuild && oneAppImageAlreadyBuilt;

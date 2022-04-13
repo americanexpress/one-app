@@ -49,12 +49,11 @@ export function moveHelmetScripts() {
     const headHelmetScripts = [...document.head.querySelectorAll('script[data-react-helmet]')];
     const bodyHelmetScripts = [...document.body.querySelectorAll('script[data-react-helmet]')];
 
-    bodyHelmetScripts.forEach((script) => document.body.removeChild(script));
-
+    bodyHelmetScripts.forEach((script) => script.remove());
     // If the helmet scripts exist in the head then we can assume that the body
     // scripts were already added by react-helmet
     if (headHelmetScripts.length === 0) {
-      bodyHelmetScripts.forEach((script) => document.head.appendChild(script));
+      bodyHelmetScripts.forEach((script) => document.head.append(script));
     }
   });
 }

@@ -384,7 +384,6 @@ describe('sendHtml', () => {
       );
     });
 
-
     it('sends the static error page when the store malfunctions', () => {
       req.store = {
         getState: jest.fn(() => { throw new Error('cannot get state'); }),
@@ -426,7 +425,6 @@ describe('sendHtml', () => {
       expect(res.send).toHaveBeenCalledTimes(1);
       expect(/<script.*nonce="54321"/.test(res.send.mock.calls[0][0])).toBe(true);
     });
-
 
     describe('render modes', () => {
       test('render mode is "hydrate" by default', () => {

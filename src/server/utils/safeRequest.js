@@ -82,7 +82,7 @@ const validateRequiredRestrictedPresent = (restrictedAttributeAdditions) => {
     }
   });
 
-  if (requiredRestrictedAttributesRemoved.length !== 0) {
+  if (requiredRestrictedAttributesRemoved.length > 0) {
     throw new Error(requiredRestrictedAttributesRemoved.join('\n'));
   }
 };
@@ -114,7 +114,7 @@ export const validateSafeRequestRestrictedAttributes = (requiredAttributes, modu
         );
       }
     });
-  if (missingRequestItemsMessages.length !== 0) {
+  if (missingRequestItemsMessages.length > 0) {
     throw new Error(missingRequestItemsMessages.join('\n'));
   }
 
