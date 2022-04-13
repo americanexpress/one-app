@@ -870,7 +870,7 @@ describe('Tests that require Docker setup', () => {
     });
 
     describe('module requires SafeRequest Restricted Attributes not provided by the root module', () => {
-      const requestRestrictedAttributesRegex = /Error: Root module must extendSafeRequestRestrictedAttributes with cookies: \[macadamia,homebaked\]/;
+      const requestRestrictedAttributesRegex = /Error: Root module must extendSafeRequestRestrictedAttributes with cookies: \[macadamia,homebaked]/;
       let requestRestrictedAttributesLogSearch;
 
       beforeAll(async () => {
@@ -1034,7 +1034,7 @@ describe('Tests that require Docker setup', () => {
         // we load in the pwa enabled frank-lloyd-root
         beforeAll(loadPWARoot);
 
-        test('loads PWA resources from server ', async () => {
+        test('loads PWA resources from server', async () => {
           expect.assertions(9);
 
           const serviceWorkerResponse = await fetchServiceWorker();
@@ -1332,7 +1332,6 @@ describe('Tests that can run against either local Docker setup or remote One App
           pageHtml.includes('Hello! One App is successfully rendering its Modules!')
         ).toBe(true);
       });
-
 
       test('app passes vitruvius data to modules', async () => {
         await browser.addCookie({

@@ -23,7 +23,6 @@ import healthCheck, {
 } from '../../../src/server/middleware/healthCheck';
 import { getModuleMapHealth } from '../../../src/server/utils/pollModuleMap';
 
-
 jest.mock('holocron', () => ({
   getModule: jest.fn(),
 }));

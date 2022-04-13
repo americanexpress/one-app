@@ -60,7 +60,6 @@ describe('initializeClientStore', () => {
     global.fetch = undefined;
   });
 
-
   afterEach(() => {
     // eslint-disable-next-line no-underscore-dangle
     global.__INITIAL_STATE__ = undefined;
@@ -134,7 +133,7 @@ describe('loadPrerenderScripts', () => {
 describe('moveHelmetScripts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    [...document.querySelectorAll('script')].forEach((scriptTag) => { scriptTag.parentElement.removeChild(scriptTag); });
+    [...document.querySelectorAll('script')].forEach((scriptTag) => { scriptTag.remove(); });
 
     jest.spyOn(document, 'addEventListener').mockImplementation(() => { /* noop */ });
   });
@@ -142,7 +141,7 @@ describe('moveHelmetScripts', () => {
   const createScript = ({ src, helmet }) => {
     const script = document.createElement('script');
     script.src = src;
-    if (helmet) script.setAttribute('data-react-helmet', true);
+    if (helmet) script.dataset.reactHelmet = true;
     return script;
   };
 
@@ -161,7 +160,7 @@ describe('moveHelmetScripts', () => {
       { src: 'baz.js', helmet: true },
     ]
       .map(createScript)
-      .forEach((script) => document.body.appendChild(script));
+      .forEach((script) => document.body.append(script));
 
     moveHelmetScripts();
     document.addEventListener.mock.calls[0][1]();
@@ -173,8 +172,8 @@ describe('moveHelmetScripts', () => {
     const scriptForBody = createScript({ src: 'hello.js', helmet: true });
     const scriptForHead = createScript({ src: 'hello.js', helmet: true });
 
-    document.body.appendChild(scriptForBody);
-    document.head.appendChild(scriptForHead);
+    document.body.append(scriptForBody);
+    document.head.append(scriptForHead);
 
     moveHelmetScripts();
     document.addEventListener.mock.calls[0][1]();
@@ -190,7 +189,7 @@ describe('moveHelmetScripts', () => {
       { src: 'world.js', helmet: true },
     ]
       .map(createScript)
-      .forEach((script) => document.body.appendChild(script));
+      .forEach((script) => document.body.append(script));
 
     moveHelmetScripts();
     jest.spyOn(NodeList.prototype, 'forEach');

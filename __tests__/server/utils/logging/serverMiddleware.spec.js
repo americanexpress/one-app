@@ -314,7 +314,6 @@ describe('serverMiddleware', () => {
       customConfigureRequestLog.mockClear();
     });
 
-
     it('updates configureRequestLog function', () => {
       setConfigureRequestLog(customConfigureRequestLog);
       const { req, res, next } = createReqResNext();

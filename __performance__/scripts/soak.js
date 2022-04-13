@@ -32,7 +32,6 @@ export const options = {
 // eslint-disable-next-line no-undef
 const { TARGET_URL } = __ENV;
 
-
 export default function virtualUser() {
   const response = http.get(TARGET_URL);
   check(response, { 'status is 200': (resp) => resp.status === 200 });

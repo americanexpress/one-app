@@ -14,7 +14,6 @@
  * permissions and limitations under the License.
  */
 
-
 let safeRequest;
 let extendRestrictedAttributesAllowList;
 let validateSafeRequestRestrictedAttributes;
@@ -132,7 +131,7 @@ describe('safeRequest', () => {
       expect(extendedCleanedRequest.notvalid).toBeUndefined();
     });
 
-    it('resets to default restricted attributes ', () => {
+    it('resets to default restricted attributes', () => {
       extendRestrictedAttributesAllowList({
         cookies: ['applocale'],
       });
