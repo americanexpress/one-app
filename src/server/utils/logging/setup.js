@@ -75,7 +75,7 @@ function outgoingRequestEndSpy(externalRequest, parsedUrl) {
 // https://github.com/nodejs/node/blob/v6.x/lib/https.js#L206
 // https://github.com/nodejs/node/blob/v8.x/lib/https.js#L239
 // https://github.com/nodejs/node/blob/v10.x/lib/https.js#L271
-if (parseInt(/^v(\d+)/.exec(process.version)[1], 10) > 8) {
+if (Number.parseInt(/^v(\d+)/.exec(process.version)[1], 10) > 8) {
   monkeypatches.attachHttpsRequestSpy(outgoingRequestSpy, outgoingRequestEndSpy);
 }
 monkeypatches.attachHttpRequestSpy(outgoingRequestSpy, outgoingRequestEndSpy);

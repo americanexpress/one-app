@@ -42,7 +42,7 @@ const stateConfigFromEnvVars = Object
   .keys(process.env)
   .filter((k) => envVarAllowList.includes(k))
   .reduce((acc, envVarName) => {
-    const regexExec = /^ONE_(CLIENT_)?([A-Z0-9_]+)$/.exec(envVarName);
+    const regexExec = /^ONE_(CLIENT_)?([\dA-Z_]+)$/.exec(envVarName);
 
     if (!regexExec) return acc;
 
@@ -154,12 +154,12 @@ export const setStateConfig = (providedStateConfig) => {
   const missingClientConfig = serverStateConfigKeys
     .filter((v) => !clientStateConfigKeys.includes(v));
 
-  if (missingClientConfig.length !== 0) {
+  if (missingClientConfig.length > 0) {
     throw new Error(`Root module attempted to set the following non-overrideable options for the server but not the client:
   ${missingClientConfig.join(',\n  ')}`);
   }
 
-  if (missingServerConfig.length !== 0) {
+  if (missingServerConfig.length > 0) {
     throw new Error(`Root module attempted to set the following non-overrideable options for the client but not the server:
   ${missingServerConfig.join(',\n  ')}`);
   }
@@ -168,7 +168,7 @@ export const setStateConfig = (providedStateConfig) => {
   const configKeysSetByModuleAndEnvVar = allModuleConfigKeys
     .filter((v) => allEnvVarConfigKeys.includes(v));
 
-  if (configKeysSetByModuleAndEnvVar.length !== 0) {
+  if (configKeysSetByModuleAndEnvVar.length > 0) {
     throw new Error(`Root module attempted to set the following non-overrideable options that have been set by env var:
   ${configKeysSetByModuleAndEnvVar.join(',\n  ')}`);
   }

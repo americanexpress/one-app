@@ -16,3 +16,4 @@ prod-sample/**/build
 prod-sample/**/node_modules
 # test
 test-results
+.clinic

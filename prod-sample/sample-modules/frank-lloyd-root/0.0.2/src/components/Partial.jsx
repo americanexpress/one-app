@@ -53,7 +53,7 @@ Partial.propTypes = {
     moduleName: PropTypes.string.isRequired,
   }).isRequired,
   location: PropTypes.shape({
-    query: PropTypes.object.isRequired,
+    query: PropTypes.shape({}).isRequired,
   }).isRequired,
   // Props for rendered module are indeterminate
   // eslint-disable-next-line react/forbid-prop-types

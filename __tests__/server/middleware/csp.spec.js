@@ -1,25 +1,30 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- * or implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
+* Copyright 2019 American Express Travel Related Services Company, Inc.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+* or implied. See the License for the specific language governing
+* permissions and limitations under the License.
+*/
+/* eslint-disable global-require */
 
 import httpMocks from 'node-mocks-http';
 
 const sanitizeCspString = (cspString) => cspString
 // replaces dynamic ip and nonce to prevent snapshot failures
+  // eslint-disable-next-line unicorn/better-regex -- conflicts with unsafe-regex
   .replace(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g, '0.0.0.0')
-  .replace(/nonce-[a-zA-Z0-9]{8}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{4}-[a-zA-Z0-9]{12}/, 'nonce-00000000-0000-0000-0000-000000000000');
+  .replace(
+    // eslint-disable-next-line unicorn/better-regex -- conflicts with unsafe-regex
+    /nonce-[\dA-Za-z]{8}-[\dA-Za-z]{4}-[\dA-Za-z]{4}-[\dA-Za-z]{4}-[\dA-Za-z]{12}/, 'nonce-00000000-0000-0000-0000-000000000000'
+  );
 
 describe('csp', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -111,6 +116,7 @@ describe('csp', () => {
       const headers = res._getHeaders();
       expect(headers).toHaveProperty('content-security-policy');
       const cspString = headers['content-security-policy'];
+      // eslint-disable-next-line unicorn/better-regex
       const ipFound = cspString.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
       expect(ipFound).toBeNull();
       const localhostFound = cspString.match(/localhost/);

@@ -35,7 +35,6 @@ export const options = {
   },
 };
 
-
 // eslint-disable-next-line no-undef
 const { TARGET_BASE_URL } = __ENV;
 
