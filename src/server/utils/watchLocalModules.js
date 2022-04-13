@@ -42,7 +42,7 @@ export default function watchLocalModules() {
     try {
       if (!changedPath.endsWith('.node.js')) return;
 
-      const match = changedPath.substring(moduleDirectory.length).match(/\/([^/]+)\/([^/]+)/);
+      const match = changedPath.slice(moduleDirectory.length).match(/\/([^/]+)\/([^/]+)/);
       if (!match) return;
       const [, moduleNameChangeDetectedIn] = match;
 

@@ -37,7 +37,7 @@ export function FrankLloydRoot({ children, config }) {
 }
 
 FrankLloydRoot.childRoutes = () => [
-  <ModuleRoute path="success" component={HelloWorldComponent} />,
+  <ModuleRoute key="success" path="success" component={HelloWorldComponent} />,
 ];
 
 FrankLloydRoot.propTypes = {
