@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 /*
  * Copyright 2019 American Express Travel Related Services Company, Inc.
  *
@@ -17,12 +18,9 @@
 import { shallow } from 'enzyme';
 import { fromJS } from 'immutable';
 
-// the extra assertion counts in the specifications are due to the `expect` found here
 jest.mock('react', () => {
   const StrictMode = ({ children }) => children;
   const react = jest.requireActual('react');
-  // eslint-disable-next-line jest/no-standalone-expect
-  expect(react.StrictMode).toBeDefined();
   return { ...react, StrictMode };
 });
 
@@ -82,7 +80,7 @@ describe('initClient', () => {
   });
 
   it('should log error to console if any errors are caught', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
     const { loadPrerenderScripts } = require('../../src/client/prerender');
     const mockError = new Error('This is a test error!!!');
     loadPrerenderScripts.mockReturnValue(Promise.reject(mockError));
@@ -99,7 +97,7 @@ describe('initClient', () => {
   });
 
   it('should redirect if there is a redirectLocation', async () => {
-    expect.assertions(3);
+    expect.assertions(2);
     const promiseResolveSpy = jest.spyOn(Promise, 'resolve');
 
     const { matchPromise } = require('@americanexpress/one-app-router');
@@ -121,17 +119,15 @@ describe('initClient', () => {
     expect(promiseResolveSpy).toHaveBeenCalled();
   });
 
-  it('should return rejected promise if there is an error', async () => {
-    expect.assertions(1);
+  it('handles rejected promises', async () => {
+    expect.assertions(2);
     const promiseRejectionSpy = jest.spyOn(Promise, 'reject');
+    const consoleErrorSpy = jest.spyOn(console, 'error');
+    const testError = new Error('something went wrong');
 
     const { matchPromise } = require('@americanexpress/one-app-router');
     matchPromise.mockImplementationOnce(
-      (config, cb) => cb('error', { pathname: 'path/to/redirected/location' }, { testProp: 'test' })
-    );
-
-    matchPromise.mockImplementationOnce(
-      () => Promise.reject(new Error('error'))
+      () => Promise.reject(testError)
     );
 
     const { loadPrerenderScripts } = require('../../src/client/prerender');
@@ -139,16 +135,13 @@ describe('initClient', () => {
 
     const initClient = require('../../src/client/initClient').default;
 
-    try {
-      await initClient();
-    } catch {
-      // eslint-disable-next-line jest/no-try-expect, jest/no-conditional-expect
-      expect(promiseRejectionSpy).toHaveBeenCalled();
-    }
+    await initClient();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(testError);
+    expect(promiseRejectionSpy).toHaveBeenCalled();
   });
 
   it('should set up the global redux store and kick off rendering', async () => {
-    expect.assertions(3);
+    expect.assertions(2);
     const promiseResolveSpy = jest.spyOn(Promise, 'resolve');
     const { hydrate } = require('react-dom');
 
@@ -170,7 +163,7 @@ describe('initClient', () => {
   });
 
   it('should use strict mode', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
     const promiseResolveSpy = jest.spyOn(Promise, 'resolve');
     const { hydrate } = require('react-dom');
 
@@ -195,7 +188,7 @@ describe('initClient', () => {
   });
 
   it('should use ReactDOM.render if renderMode is "render"', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
     const promiseResolveSpy = jest.spyOn(Promise, 'resolve');
     const { render } = require('react-dom');
 
@@ -223,7 +216,7 @@ describe('initClient', () => {
   });
 
   it('should load pwa script', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
     document.getElementById = jest.fn(() => ({ remove: jest.fn() }));
 
     const { matchPromise } = require('@americanexpress/one-app-router');
@@ -242,7 +235,7 @@ describe('initClient', () => {
   });
 
   it('should remove the server rendered stylesheets', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
     const remove = jest.fn();
     const createStyle = () => {
       const style = document.createElement('style');
@@ -268,7 +261,7 @@ describe('initClient', () => {
   });
 
   it('should move the scripts loaded by react-helmet', async () => {
-    expect.assertions(2);
+    expect.assertions(1);
     const { moveHelmetScripts } = require('../../src/client/prerender');
     const initClient = require('../../src/client/initClient').default;
     await initClient();
@@ -277,7 +270,7 @@ describe('initClient', () => {
   });
 
   it('should set the holocron module map with the value sent from the server', async () => {
-    expect.assertions(3);
+    expect.assertions(2);
     const initClient = require('../../src/client/initClient').default;
     await initClient();
     const { getModuleMap } = require('holocron');

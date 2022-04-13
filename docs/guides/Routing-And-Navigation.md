@@ -15,9 +15,7 @@ import { Route } from '@americanexpress/one-app-router';
 export function RootModule({ children, config }) {
   return <h1>Hello World!</h1>;
 }
-RootModule.childRoutes = [
-  <Route key="/" path="/" />,
-];
+RootModule.childRoutes = <Route path="/" />;
 ```
 
 As your application grows, you can also take advantage of Holocron's [`ModuleRoute`](./docs/api/modules/loading-modules.md#moduleroute)

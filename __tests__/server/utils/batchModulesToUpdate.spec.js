@@ -60,8 +60,6 @@ describe('batchModulesToUpdate', () => {
     const result = batchModulesToUpdate(modulesWithoutRoot);
     expect(result.length).toBe(7);
     result.forEach((arr, i) => {
-      // if (i < 6) expect(arr.length).toBe(10);
-      // else if (i === 6) expect(arr.length).toBe(5);
       expect(arr.length).toBe(i < 6 ? 10 : 5);
     });
     expect(JSON.stringify(result)).toMatchSnapshot();

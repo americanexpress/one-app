@@ -101,9 +101,8 @@ function PartialGreetingModuleComponent(props) {
   );
 }
 
-RootModule.childRoutes = (store) => [
+RootModule.childRoutes = (store) => (
   <ModuleRoute
-    key="partials"
     path="partials/greet"
     component={PartialGreetingModuleComponent}
     onEnter={(routerProps, replace, cb) => {
@@ -120,8 +119,8 @@ RootModule.childRoutes = (store) => [
         props: getPartialRenderProps(store),
       }])).then(() => cb());
     }}
-  />,
-];
+  />
+);
 ```
 
 **Sample Child Module**

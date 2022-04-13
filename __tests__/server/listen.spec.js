@@ -114,6 +114,7 @@ describe('server listen', () => {
     });
 
     it('passes the error to the callback', async () => {
+      expect.assertions(2);
       process.env.HTTP_PORT = 8998;
       const listenError = new Error('port taken or such');
       http.mock.listenError = listenError;
@@ -124,6 +125,7 @@ describe('server listen', () => {
     });
 
     it('passes the server information to the callback', async () => {
+      expect.assertions(2);
       process.env.HTTP_PORT = 8998;
       http.mock.listenError = null;
       await listenHttp(app, (err, serverInfo) => {

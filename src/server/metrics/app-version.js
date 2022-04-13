@@ -14,6 +14,7 @@
  * permissions and limitations under the License.
  */
 
+import semverParse from 'semver/functions/parse';
 import { createGauge, setGauge } from './gauges';
 import createMetricNamespace from './create-metric-namespace';
 import readJsonFile from '../utils/readJsonFile';
@@ -29,16 +30,21 @@ createGauge({
 
 // keep the parsing in a local variable to avoid keeping it in memory forever
 function parseVersionAndSetGaugue() {
-  // eslint-disable-next-line unicorn/no-unsafe-regex
-  const parts = /(\d+)\.(\d+)\.(\d+)(?:-(.+))?-(.+)/.exec(version);
+  // semver expects build to be qualified with '+'
+  // current version of one app bundler appends build with '-'
+  const parts = version.split('-');
+  const build = parts.pop();
+  const {
+    major, minor, patch, prerelease,
+  } = semverParse(parts.join('-'));
 
   setGauge(versionNamespace.getMetricNames().info, {
     version,
-    major: Number(parts[1]),
-    minor: Number(parts[2]),
-    patch: Number(parts[3]),
-    prerelease: parts[4] || null,
-    build: parts[5],
+    major,
+    minor,
+    patch,
+    prerelease: prerelease.join('.') || null,
+    build,
   }, 1);
 }
 parseVersionAndSetGaugue();

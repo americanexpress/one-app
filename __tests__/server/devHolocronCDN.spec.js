@@ -66,6 +66,7 @@ describe('devHolocronCDN', () => {
     });
 
     it('should give @americanexpress/one-app-dev-cdn the path to the static directory', () => {
+      expect.assertions(1);
       const moduleMapUrl = 'https://example.com/module-map.json';
       process.argv = [
         '',
@@ -86,6 +87,7 @@ describe('devHolocronCDN', () => {
     });
 
     it('does not require useLocalModules when no static module-map', () => {
+      expect.assertions(1);
       fs.existsSync.mockImplementationOnce(() => false);
       const moduleMapUrl = 'https://example.com/module-map.json';
       process.argv = [
@@ -124,6 +126,7 @@ describe('devHolocronCDN', () => {
     });
 
     it('should hit the cors middleware first', async () => {
+      expect.assertions(3);
       corsMiddleware.mockImplementationOnce((req, res) => res.sendStatus(204));
       const resp = await request(devHolocronCDN)
         .get('/static/anything.json');
@@ -133,6 +136,7 @@ describe('devHolocronCDN', () => {
     });
 
     it('should hit the one-app-dev-cdn middleware after cors', async () => {
+      expect.assertions(2);
       await request(devHolocronCDN)
         .get('/static/anything.json');
       expect(corsMiddleware).toHaveBeenCalledTimes(1);
@@ -140,6 +144,7 @@ describe('devHolocronCDN', () => {
     });
 
     it('should miss the one-app-dev-cdn middleware if not a static route', async () => {
+      expect.assertions(2);
       await request(devHolocronCDN)
         .get('/not-static.json');
       expect(corsMiddleware).toHaveBeenCalledTimes(1);
