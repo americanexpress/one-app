@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.13.2](https://github.com/americanexpress/one-app/compare/v5.13.1...v5.13.2) (2022-04-13)
+
+
+### Bug Fixes
+
+* **addFrameOptions:** strict csp domain now matches ([#704](https://github.com/americanexpress/one-app/issues/704)) ([ee252db](https://github.com/americanexpress/one-app/commit/ee252dbc9c7e83e7fa5125f59c077a7e4669fd7b))
+
+
 ## [5.13.1](https://github.com/americanexpress/one-app/compare/v5.13.0...v5.13.1) (2022-03-16)
 
 
