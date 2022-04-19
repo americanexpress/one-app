@@ -1,9 +1,12 @@
-name: One App Integration Tests
+name: "[on Trunk, Prepare] One App Integration Tests"
 on:
  push:
    branches:
     - main
-    - prepare-release
+    - 5.x.x
+    - prepare-release-for-main
+    - prepare-release-for-5.x.x
+concurrency: "one-app-integration-tests"
 jobs:
   one-app-integration:
     name:  One App Integration Tests

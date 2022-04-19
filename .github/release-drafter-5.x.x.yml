@@ -1,0 +1,31 @@
+categories:
+  - title: '🚀 Features'
+    labels:
+      - 'feature'
+      - 'enhancement'
+  - title: '🐛 Bug Fixes'
+    labels:
+      - 'fix'
+      - 'bugfix'
+      - 'bug'
+  - title: '🧰 Maintenance'
+    label:
+      - 'chore'
+      - 'dependencies'
+  - title: '📖 Documentation'
+    label:
+      - 'documentation'
+
+exclude-labels:
+  - 'skip-release-drafter'
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+name-template: 'Play $NEXT_PATCH_VERSION'
+tag-template: '$NEXT_PATCH_VERSION'
+filter-by-commitish: true
+commitish: 5.x.x
+template: |
+  ## Changes
+
+  $CHANGES
+
+

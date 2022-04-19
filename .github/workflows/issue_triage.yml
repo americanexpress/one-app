@@ -1,4 +1,4 @@
-name: Issue Triage
+name: "[Issue] Triage"
 
 on:
   issues:
