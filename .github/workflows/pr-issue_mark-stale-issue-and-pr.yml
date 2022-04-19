@@ -1,4 +1,4 @@
-name: Mark stale issues and pull requests
+name: "[PR, Issue] Mark stale issues and pull requests"
 
 on:
   schedule:

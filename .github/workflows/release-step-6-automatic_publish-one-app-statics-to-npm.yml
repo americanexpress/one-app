@@ -1,4 +1,4 @@
-name: One App Statics Publish to NPM
+name: '[Release step 6 | automatic] Publish One App Statics to NPM'
 on:
   workflow_dispatch:
    inputs:
@@ -6,9 +6,9 @@ on:
      description: 'Semantic Version'
      required: true
   repository_dispatch:
-    types: [publish-statics-npm]
+    types: [release-step-6-automatic_publish-one-app-statics-to-npm]
 jobs:
-  publish-statics-npm:
+  release-step-6-automatic_publish-one-app-statics-to-npm:
     name: One App Statics Publish to NPM
     runs-on: ubuntu-latest
     steps:
