@@ -1,4 +1,4 @@
-name: DangerJS
+name: "[on PR] DangerJS"
 on: pull_request
 jobs:
   dangerJS:

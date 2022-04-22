@@ -1,21 +1,31 @@
-name: One App Release Pull Request
+name: '[Release step 1 | manual] Create Release PR'
 on:
   schedule:
-  - cron: "0 16 * * 3"
+    - cron: "0 16 * * 3"
   repository_dispatch:
     types: [prepare-release-command]
+  workflow_dispatch:
 jobs:
-  one-app-release-pull-request:
+  validate-branch:
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/5.x.x'
+    steps:
+      - name: Echo Valid Branches
+        run: |
+          echo "::error title=Invalid Target Branch::This action can only be triggered for branches 'main' or '5.x.x'"
+          exit 1
+  release-step-1_manual_create-release-pr:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/5.x.x'
     steps:
       - uses: actions/checkout@v2
       - run: git fetch --prune --unshallow
       - uses: actions/cache@v2
         with:
-         path: ~/.npm
-         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-         restore-keys: |
-          ${{ runner.os }}-node-
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - uses: actions/setup-node@v1
         with:
           node-version: 16.x
@@ -34,8 +44,7 @@ jobs:
           token: ${{ secrets.PA_TOKEN }}
           commit-message: One App Prepare Release
           author: 'OneAmexBot <one.amex@aexp.com>'
-          title: 'One App Prepare Release'
+          title: 'One App Prepare Release (${{ github.ref_name }})'
           body: 'This is an auto-generated pull request for One App release changes. Please review this PR and merge it for a release to be initiated. Please close this PR to stop a release from being initiated.'
           labels: release,automated pr,skip-release-drafter
-          branch: prepare-release
-          base: main
+          branch: ${{ format('prepare-release-for-{0}', github.ref_name)}}
