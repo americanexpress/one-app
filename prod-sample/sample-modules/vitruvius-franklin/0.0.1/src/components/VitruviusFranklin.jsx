@@ -40,7 +40,7 @@ if (!global.BROWSER) {
 
 VitruviusFranklin.propTypes = {
   moduleState: PropTypes.shape({
-    req: PropTypes.object,
+    req: PropTypes.shape({}),
   }).isRequired,
 };
 

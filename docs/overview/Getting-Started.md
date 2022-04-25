@@ -232,8 +232,9 @@ export default function MyModule({ children }) {
 }
 
 MyModule.childRoutes = () => [
-  <ModuleRoute path="home" moduleName="home-module" />,
+  <ModuleRoute key="home" path="home" moduleName="home-module" />,
   <Route
+    key="about"
     path="about"
     component={() => (
       <p>
