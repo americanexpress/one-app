@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.12.1](https://github.com/americanexpress/one-app/compare/v5.12.0...v5.12.1) (2022-04-28)
+
+
+### Bug Fixes
+
+* **one-app-ducks:** delete langpack error on retry ([8d4fbbc](https://github.com/americanexpress/one-app/commit/8d4fbbcf1079c0db8e6e97e5a006d1a94c12cbe7))
+
+
 # [5.12.0](https://github.com/americanexpress/one-app/compare/v5.11.7...v5.12.0) (2021-10-27)
 
 
