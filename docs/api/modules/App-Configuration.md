@@ -20,6 +20,7 @@ if (!global.BROWSER) {
     createSsrFetch,
     eventLoopDelayThreshold,
     errorPageUrl,
+    dnsCache,
     /* Child Module Specific */
     validateStateConfig,
     requiredSafeRequestRestrictedAttributes,
@@ -67,6 +68,7 @@ export default MyModule;
   - [`createSsrFetch`](#createssrfetch)
   - [`eventLoopDelayThreshold`](#eventloopdelaythreshold)
   - [`errorPageUrl`](#errorpageurl)
+  - [`dnsCache`](#dnsCache)
   - [`validateStateConfig`](#validatestateconfig)
   - [`requiredSafeRequestRestrictedAttributes`](#requiredsaferequestrestrictedattributes)
 
@@ -477,7 +479,30 @@ if (!global.BROWSER) {
 
 The `errorPageUrl` directive is useful for supplying a URL to a custom error page. This URL should return a `Content-Type` of `text/html` and a `Content-Length` of less than `244000`. The URL will get called when your root module is loaded and is rendered if and when an error occurs. It is recommended that you keep the custom error page as small as possible.
 
+## `dnsCache`
+
+**Module Type**
+
+- ✅ Root Module
+- 🚫 Child Module
+
+**Shape**
+
+```js
+if (!global.BROWSER) {
+  Module.appConfig = {
+    dnsCache: {
+      enabled: Boolean,
+      maxTtl: Number,
+    },
+  };
+}
+```
+
+The `dnsCache` option allows for enabling applcation-level DNS caching. It is disabled by default. When enabled, the dedault max TTL is `Infinity`.
+
 ## `validateStateConfig`
+
 **Module Type**
 * 🚫 Root Module
 * ✅ Child Module
