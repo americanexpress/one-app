@@ -499,7 +499,7 @@ if (!global.BROWSER) {
 }
 ```
 
-The `dnsCache` option allows for enabling applcation-level DNS caching. It is disabled by default. When enabled, the dedault max TTL is `Infinity`.
+The `dnsCache` option allows for enabling applcation-level DNS caching. It is disabled by default. When enabled, the default max TTL is `Infinity`.
 
 ## `validateStateConfig`
 
