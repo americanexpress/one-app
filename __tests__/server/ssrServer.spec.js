@@ -65,6 +65,7 @@ describe('ssrServer', () => {
     jest.clearAllMocks();
     process.env.NODE_ENV = 'development';
     delete process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES;
+    delete process.env.ONE_MAX_POST_REQUEST_PAYLOAD;
   });
 
   describe('middleware order', () => {
@@ -288,7 +289,7 @@ describe('ssrServer', () => {
 
     describe('enablePostToModuleRoutes', () => {
       beforeEach(() => {
-        process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES = 'yes';
+        process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES = 'true';
       });
 
       it('should check the state for a status code for all post calls', async () => {
@@ -331,10 +332,11 @@ describe('ssrServer', () => {
       });
 
       it('should configure json parsing with a maximum limit for render post calls', async () => {
+        process.env.ONE_MAX_POST_REQUEST_PAYLOAD = '100kb';
         await request(loadServer())
           .post('/route');
         expect(json).toBeCalled();
-        expect(json.mock.calls[2][0]).toHaveProperty('limit', '15kb');
+        expect(json.mock.calls[2][0]).toHaveProperty('limit', '100kb');
       });
       it('should configure urlencoded parsing with a maximum limit for render post pre-flight options calls', async () => {
         await request(loadServer())
@@ -344,10 +346,11 @@ describe('ssrServer', () => {
       });
 
       it('should configure json urlencoded with a maximum limit for render post calls', async () => {
+        process.env.ONE_MAX_POST_REQUEST_PAYLOAD = '25kb';
         await request(loadServer())
           .post('/route');
         expect(urlencoded).toBeCalled();
-        expect(json.mock.calls[2][0]).toHaveProperty('limit', '15kb');
+        expect(json.mock.calls[2][0]).toHaveProperty('limit', '25kb');
       });
 
       describe('cors for render post calls', () => {
