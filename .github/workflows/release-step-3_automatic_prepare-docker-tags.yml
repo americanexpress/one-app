@@ -15,7 +15,6 @@ jobs:
     name: Docker Tag Version Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
       - name: Set env
         id: set_tag_version
         run: |
@@ -37,6 +36,9 @@ jobs:
           echo "::error::Incorrect tag provided, please provide a tag with the correct format and try again"
           exit 1
           fi
+      - uses: actions/checkout@v2
+        with:
+          ref: "${{ steps.set_tag_version.outputs.tagversion}}"
       - name: Docker tag version
         id: set_docker_tag_version
         run: |
