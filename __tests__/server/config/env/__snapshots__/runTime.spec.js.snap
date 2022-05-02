@@ -1,14 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`runTime HTTP_ONE_APP_DEV_CDN_PORT normalizes numeric input 1`] = `"env var HTTP_ONE_APP_DEV_CDN_PORT needs to be a valid integer, given \\"0002345a\\""`;
-
-exports[`runTime HTTP_ONE_APP_DEV_PROXY_SERVER_PORT normalizes numeric input: env var HTTP_ONE_APP_DEV_PROXY_SERVER_PORT needs to be a valid integer, given "r00t" 1`] = `"env var HTTP_ONE_APP_DEV_PROXY_SERVER_PORT needs to be a valid integer, given \\"r00t\\""`;
-
 exports[`runTime NODE_ENV only allows for values to be set to either development or production 1`] = `
 Array [
   "development",
   "production",
 ]
 `;
-
-exports[`runTime ONE_CLIENT_ROOT_MODULE_NAME validates that environment value is defined 1`] = `"The \`ONE_CLIENT_ROOT_MODULE_NAME\` environment variable must be defined."`;
