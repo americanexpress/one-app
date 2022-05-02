@@ -23,7 +23,7 @@ jobs:
           fi
       - uses: actions/checkout@v2
         with:
-          ref: "${{ steps.set_tag_version.outputs.tagversion}}"
+          ref: "v${{ steps.set_tag_version.outputs.tagversion}}"
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v1
         with:
