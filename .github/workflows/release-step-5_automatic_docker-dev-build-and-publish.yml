@@ -30,10 +30,10 @@ jobs:
           fi
       - name: Print docker version
         run:  |
-          echo "tag: ${{ github.event.inputs.docker_tag_version }}"
+          echo "tag: ${{ steps.set_docker_version.outputs.docker_version }}"
       - uses: actions/checkout@v2
         with:
-          ref: "v${{ github.event.inputs.docker_tag_version }}"
+          ref: "v${{ steps.set_docker_version.outputs.docker_version }}"
       - name: Docker login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Build development docker image
