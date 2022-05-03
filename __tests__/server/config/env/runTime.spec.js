@@ -47,8 +47,11 @@ describe('runTime', () => {
     'ONE_CLIENT_CDN_URL',
     'ONE_CLIENT_LOCALE_FILENAME',
     'ONE_CLIENT_ROOT_MODULE_NAME',
-  ]
-    .forEach((name) => { origEnvVarVals[name] = process.env[name]; });
+    'ONE_ENABLE_POST_TO_MODULE_ROUTES',
+    'ONE_MAX_POST_REQUEST_PAYLOAD',
+  ].forEach((name) => {
+    origEnvVarVals[name] = process.env[name];
+  });
 
   function getEnvVarConfig(envVarName) {
     const runTime = require('../../../../src/server/config/env/runTime').default;
@@ -70,6 +73,7 @@ describe('runTime', () => {
     resetEnvVar('NODE_ENV');
     resetEnvVar('ONE_DANGEROUSLY_DISABLE_CSP', 'false');
     resetEnvVar('HTTP_ONE_APP_DEV_CDN_PORT');
+    resetEnvVar('ONE_ENABLE_POST_TO_MODULE_ROUTES');
     jest.resetModules();
     jest.resetAllMocks();
   });
@@ -78,9 +82,7 @@ describe('runTime', () => {
     // eslint-disable-next-line no-console
     console.info = origConsoleInfo;
     console.warn = origConsoleWarn;
-    Object
-      .keys(origEnvVarVals)
-      .forEach((name) => resetEnvVar(name, origEnvVarVals[name]));
+    Object.keys(origEnvVarVals).forEach((name) => resetEnvVar(name, origEnvVarVals[name]));
     jest.resetAllMocks();
   });
 
@@ -131,13 +133,17 @@ describe('runTime', () => {
     const disableCspEnv = getEnvVarConfig('ONE_DANGEROUSLY_DISABLE_CSP');
 
     it('throws error if ONE_DANGEROUSLY_DISABLE_CSP is set to true and NODE_ENV is not development', () => {
-      expect(() => disableCspEnv.validate('true')).toThrowError('If you are trying to bypass CSP requirement, NODE_ENV must also be set to development.');
+      expect(() => disableCspEnv.validate('true')).toThrowError(
+        'If you are trying to bypass CSP requirement, NODE_ENV must also be set to development.'
+      );
     });
 
     it('warns console if both ONE_DANGEROUSLY_DISABLE_CSP and NODE_ENV are set properly', () => {
       process.env.NODE_ENV = 'development';
       disableCspEnv.validate('true');
-      expect(console.warn).toHaveBeenCalledWith('ONE_DANGEROUSLY_DISABLE_CSP is true and NODE_ENV is set to development. Content-Security-Policy header will not be set.');
+      expect(console.warn).toHaveBeenCalledWith(
+        'ONE_DANGEROUSLY_DISABLE_CSP is true and NODE_ENV is set to development. Content-Security-Policy header will not be set.'
+      );
     });
 
     it('does not warn or throw if ONE_DANGEROUSLY_DISABLE_CSP is set to false', () => {
@@ -190,7 +196,9 @@ describe('runTime', () => {
         'env var HTTP_ONE_APP_DEV_CDN_PORT needs to be a valid integer, given "r00t"'
       );
       expect(devCdnPort.normalize('0002345')).toEqual(2345);
-      expect(() => devCdnPort.normalize('0002345a')).toThrowErrorMatchingSnapshot();
+      expect(() => devCdnPort.normalize('0002345a')).toThrowErrorMatchingInlineSnapshot(
+        '"env var HTTP_ONE_APP_DEV_CDN_PORT needs to be a valid integer, given \\"0002345a\\""'
+      );
     });
 
     it('does not normalize if no value is given', () => {
@@ -215,8 +223,8 @@ describe('runTime', () => {
 
     it('normalizes numeric input', () => {
       expect(devProxyPort.normalize('1337')).toEqual(1337);
-      expect(() => devProxyPort.normalize('r00t')).toThrowErrorMatchingSnapshot(
-        'env var HTTP_ONE_APP_DEV_PROXY_SERVER_PORT needs to be a valid integer, given "r00t"'
+      expect(() => devProxyPort.normalize('r00t')).toThrowErrorMatchingInlineSnapshot(
+        '"env var HTTP_ONE_APP_DEV_PROXY_SERVER_PORT needs to be a valid integer, given \\"r00t\\""'
       );
       expect(devProxyPort.normalize('0002345')).toEqual(2345);
       expect(() => devProxyPort.normalize('0002345a')).toThrow();
@@ -263,7 +271,9 @@ describe('runTime', () => {
       process.env.NODE_ENV = 'development';
       process.env.HTTP_ONE_APP_DEV_CDN_PORT = 3001;
       expect(holocronModuleMapPath.defaultValue()).toBeDefined();
-      expect(holocronModuleMapPath.defaultValue()).toBe('http://localhost:3001/static/module-map.json');
+      expect(holocronModuleMapPath.defaultValue()).toBe(
+        'http://localhost:3001/static/module-map.json'
+      );
     });
 
     it('has no default value for production', () => {
@@ -293,13 +303,18 @@ describe('runTime', () => {
   });
 
   describe('HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH', () => {
-    const holocronServerMaxSimModulesFetch = getEnvVarConfig('HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH');
+    const holocronServerMaxSimModulesFetch = getEnvVarConfig(
+      'HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH'
+    );
 
     it('does not have a default value', () => {
       expect(holocronServerMaxSimModulesFetch.defaultValue).toBe(undefined);
     });
 
-    it('validates the value as a positive integer', positiveInteger(holocronServerMaxSimModulesFetch));
+    it(
+      'validates the value as a positive integer',
+      positiveInteger(holocronServerMaxSimModulesFetch)
+    );
   });
 
   describe('ONE_CLIENT_REPORTING_URL', () => {
@@ -390,7 +405,9 @@ describe('runTime', () => {
     const clientRootModuleName = getEnvVarConfig('ONE_CLIENT_ROOT_MODULE_NAME');
 
     it('validates that environment value is defined', () => {
-      expect(() => clientRootModuleName.validate()).toThrowErrorMatchingSnapshot();
+      expect(() => clientRootModuleName.validate()).toThrowErrorMatchingInlineSnapshot(
+        '"The `ONE_CLIENT_ROOT_MODULE_NAME` environment variable must be defined."'
+      );
       expect(() => clientRootModuleName.validate('frank-lloyd-root')).not.toThrow();
     });
 
@@ -430,6 +447,57 @@ describe('runTime', () => {
       expect(oneServiceWorkerFeatureFlag.normalize('false')).toEqual(false);
       expect(oneServiceWorkerFeatureFlag.normalize('truth')).toEqual(false);
       expect(oneServiceWorkerFeatureFlag.normalize('true')).toEqual(true);
+    });
+  });
+
+  describe('ONE_ENABLE_POST_TO_MODULE_ROUTES', () => {
+    const enablePostToModuleRoutes = getEnvVarConfig('ONE_ENABLE_POST_TO_MODULE_ROUTES');
+
+    it('should have a default value of "false"', () => {
+      expect(enablePostToModuleRoutes.defaultValue).toBe('false');
+    });
+
+    it('should normalize the value to lower case', () => {
+      expect(enablePostToModuleRoutes.normalize('Value')).toBe('value');
+      expect(enablePostToModuleRoutes.normalize('VALUE')).toBe('value');
+    });
+
+    it('should pass validation when value is "true" or "false"', () => {
+      expect(() => enablePostToModuleRoutes.validate('true')).not.toThrow();
+      expect(() => enablePostToModuleRoutes.validate('false')).not.toThrow();
+    });
+
+    it('should fail validation when value is not "true" or "false"', () => {
+      expect(() => enablePostToModuleRoutes.validate('bad value')
+      ).toThrowErrorMatchingInlineSnapshot(
+        '"Expected \\"bad value\\" to be \\"true\\" or \\"false\\""'
+      );
+    });
+  });
+
+  describe('ONE_MAX_POST_REQUEST_PAYLOAD', () => {
+    const postRequestMaxPayload = getEnvVarConfig('ONE_MAX_POST_REQUEST_PAYLOAD');
+
+    it('should have a default value of "15kb"', () => {
+      expect(postRequestMaxPayload.defaultValue).toBe('15kb');
+    });
+
+    it('should fail validation when input is not parseable by bytes util', () => {
+      process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES = true;
+      expect(() => postRequestMaxPayload.validate('bad value')).toThrowErrorMatchingInlineSnapshot(
+        '"Expected \\"bad value\\" to be parseable by bytes utility https://www.npmjs.com/package/bytes"'
+      );
+    });
+
+    it('should pass validation when input is parseable by bytes util', () => {
+      process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES = true;
+      expect(() => postRequestMaxPayload.validate('20kb')).not.toThrow();
+    });
+
+    it('should fail validation when POSTing is not enabled', () => {
+      expect(() => postRequestMaxPayload.validate('20kb')).toThrowErrorMatchingInlineSnapshot(
+        '"ONE_ENABLE_POST_TO_MODULE_ROUTES must be \\"true\\" to configure max POST payload."'
+      );
     });
   });
 });

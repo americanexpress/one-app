@@ -12,7 +12,6 @@ jobs:
     name: One App Development Image Build and Push
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
       - name: Docker Image Versions
         id: set_docker_version
         run: |
@@ -32,6 +31,9 @@ jobs:
       - name: Print docker version
         run:  |
           echo "tag: ${{ github.event.inputs.docker_tag_version }}"
+      - uses: actions/checkout@v2
+        with:
+          ref: "v${{ github.event.inputs.docker_tag_version }}"
       - name: Docker login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Build development docker image
