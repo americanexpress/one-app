@@ -57,7 +57,7 @@
   "contributors": [
     "Andres Escobar <Andres.Escobar@aexp.com> (https://github.com/anescobar1991)",
     "James Singleton <James.Singleton1@aexp.com> (https://github.com/JamesSingleton)",
-    "Jimmy King  <Jimmy.King@aexp.com> (https://github.com/10xLaCroixDrinker)",
+    "Jamie King  <Jamie.King@aexp.com> (https://github.com/10xLaCroixDrinker)",
     "Jonathan Adshead <Jonathan.Adshead@aexp.com> (https://github.com/JAdshead)",
     "Michael Tobia <Michael.M.Tobia@aexp.com> (https://github.com/Francois-Esquire)",
     "Michael Tomcal <Michael.A.Tomcal@aexp.com> (https://github.com/mtomcal)",
@@ -87,6 +87,7 @@
     "@americanexpress/vitruvius": "^2.0.2",
     "abort-controller": "^3.0.0",
     "body-parser": "^1.19.0",
+    "bytes": "^3.1.2",
     "cacheable-lookup": "^6.0.4",
     "chalk": "^4.1.2",
     "compression": "^1.7.4",
