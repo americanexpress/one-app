@@ -103,8 +103,8 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
     app.post(
       '*',
       addSecurityHeaders,
-      json({ limit: '15kb' }),
-      urlencoded({ limit: '15kb' }),
+      json({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
+      urlencoded({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
       addFrameOptionsHeader,
       createRequestStore(oneApp, { useBodyForBuildingTheInitialState: true }),
       createRequestHtmlFragment(oneApp),
@@ -123,5 +123,5 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
 }
 
 export default createApp({
-  enablePostToModuleRoutes: !!process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES,
+  enablePostToModuleRoutes: process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true',
 });
