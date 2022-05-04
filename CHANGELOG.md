@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.14.0](https://github.com/americanexpress/one-app/compare/v5.13.3...v5.14.0) (2022-05-04)
+
+
+### Features
+
+* **ssrServer:** make max POST request payload size configurable ([#721](https://github.com/americanexpress/one-app/issues/721)) ([a1abb49](https://github.com/americanexpress/one-app/commit/a1abb4986b922162935847fb0e042576f1c72b53))
+
+
 ## [5.13.3](https://github.com/americanexpress/one-app/compare/v5.13.2...v5.13.3) (2022-04-28)
 
 
