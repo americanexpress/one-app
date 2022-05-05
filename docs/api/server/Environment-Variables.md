@@ -614,7 +614,7 @@ ONE_ENABLE_POST_TO_MODULE_ROUTES=false
 * ✅ Production
 * ✅ Development
 
-Maximum payload allowed in POST requests. `ONE_ENABLE_POST_TO_MODULE_ROUTES` must be true to configure this.
+Maximum payload allowed in POST requests. Has no effect unless `ONE_ENABLE_POST_TO_MODULE_ROUTES` is set to true.
 
 **Shape**
 ```bash

@@ -457,9 +457,11 @@ describe('runTime', () => {
       expect(enablePostToModuleRoutes.defaultValue).toBe('false');
     });
 
-    it('should normalize the value to lower case', () => {
-      expect(enablePostToModuleRoutes.normalize('Value')).toBe('value');
-      expect(enablePostToModuleRoutes.normalize('VALUE')).toBe('value');
+    it('should normalize the value to be either true or false', () => {
+      expect(enablePostToModuleRoutes.normalize('Value')).toBe('true');
+      expect(enablePostToModuleRoutes.normalize('VALUE')).toBe('true');
+      expect(enablePostToModuleRoutes.normalize('true')).toBe('true');
+      expect(enablePostToModuleRoutes.normalize('FALSE')).toBe('false');
     });
 
     it('should pass validation when value is "true" or "false"', () => {
@@ -492,12 +494,6 @@ describe('runTime', () => {
     it('should pass validation when input is parseable by bytes util', () => {
       process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES = true;
       expect(() => postRequestMaxPayload.validate('20kb')).not.toThrow();
-    });
-
-    it('should fail validation when POSTing is not enabled', () => {
-      expect(() => postRequestMaxPayload.validate('20kb')).toThrowErrorMatchingInlineSnapshot(
-        '"ONE_ENABLE_POST_TO_MODULE_ROUTES must be \\"true\\" to configure max POST payload."'
-      );
     });
   });
 });
