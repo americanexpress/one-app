@@ -213,7 +213,12 @@ const runTime = [
   {
     name: 'ONE_ENABLE_POST_TO_MODULE_ROUTES',
     defaultValue: 'false',
-    normalize: (input) => input.toLowerCase(),
+    normalize: (input) => {
+      if (input.toLowerCase() === 'false') {
+        return 'false';
+      }
+      return `${!!input}`;
+    },
     validate: (input) => {
       if (input !== 'true' && input !== 'false') {
         throw new Error(`Expected "${input}" to be "true" or "false"`);
@@ -225,10 +230,6 @@ const runTime = [
     name: 'ONE_MAX_POST_REQUEST_PAYLOAD',
     defaultValue: '15kb',
     validate: (input) => {
-      if (process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES !== 'true') {
-        throw new Error('ONE_ENABLE_POST_TO_MODULE_ROUTES must be "true" to configure max POST payload.');
-      }
-
       const parsed = bytes.parse(input);
 
       if (parsed === null) {
