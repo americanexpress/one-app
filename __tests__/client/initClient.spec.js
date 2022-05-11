@@ -131,7 +131,7 @@ describe('initClient', () => {
   });
 
   it('should use ReactDOM.render if renderMode is "render"', async () => {
-    expect.assertions(1);
+    expect.assertions(2);
     const promiseResolveSpy = jest.spyOn(Promise, 'resolve');
     const { render, hydrate } = require('react-dom');
 
