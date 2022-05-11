@@ -13,6 +13,7 @@
     "lodash.get": "^4.4.2",
     "prop-types": "^15.5.9",
     "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-redux": "^7.2.4",
     "redux": "^4.1.1"
   },
