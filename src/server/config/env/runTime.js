@@ -19,6 +19,7 @@ const { preprocessEnvVar } = require('@americanexpress/env-config-utils');
 const isFetchableUrlInNode = require('@americanexpress/env-config-utils/isFetchableUrlInNode');
 const isFetchableUrlInBrowser = require('@americanexpress/env-config-utils/isFetchableUrlInBrowser');
 const { argv } = require('yargs');
+const bytes = require('bytes');
 
 const isPositiveIntegerIfDefined = (input) => {
   if (input === undefined) {
@@ -197,7 +198,7 @@ const runTime = [
       ];
 
       if (!approvedPolicies.includes(value)) {
-        throw new Error(`${value} in not an approved policy. Please use: ${approvedPolicies.join(',')}.`);
+        throw new Error(`"${value}" is not an approved policy. Please use: ${approvedPolicies.join(',')}.`);
       }
     },
   },
@@ -207,6 +208,34 @@ const runTime = [
     name: 'ONE_SERVICE_WORKER',
     normalize: (value) => value === 'true',
     defaultValue: () => false,
+  },
+  // Enable POSTing to module routes
+  {
+    name: 'ONE_ENABLE_POST_TO_MODULE_ROUTES',
+    defaultValue: 'false',
+    normalize: (input) => {
+      if (input.toLowerCase() === 'false') {
+        return 'false';
+      }
+      return `${!!input}`;
+    },
+    validate: (input) => {
+      if (input !== 'true' && input !== 'false') {
+        throw new Error(`Expected "${input}" to be "true" or "false"`);
+      }
+    },
+  },
+  // Customize max payload for POST requests
+  {
+    name: 'ONE_MAX_POST_REQUEST_PAYLOAD',
+    defaultValue: '15kb',
+    validate: (input) => {
+      const parsed = bytes.parse(input);
+
+      if (parsed === null) {
+        throw new Error(`Expected "${input}" to be parseable by bytes utility https://www.npmjs.com/package/bytes`);
+      }
+    },
   },
 ];
 runTime.forEach(preprocessEnvVar);

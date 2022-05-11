@@ -1,4 +1,4 @@
-name: Docker Tag Version Check
+name: '[Release step 3 | automatic] Prepare docker tags'
 on:
   workflow_dispatch:
    inputs:
@@ -9,20 +9,19 @@ on:
     tags:
       - '*'
   repository_dispatch:
-    types: [one-app-docker-tag-check]
+    types: [release-step-3_automatic_prepare-docker-tags]
 jobs:
-  one-app-docker-tag-check:
+  release-step-3_automatic_prepare-docker-tags:
     name: Docker Tag Version Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
       - name: Set env
         id: set_tag_version
         run: |
           #Checks for when a valid tag is manually pushed
           if [[ $GITHUB_REF != "" && "${{ github.event.client_payload.tagversion }}" == "" ]];
           then
-          echo ::set-output name=tagversion::$(egrep -o '(v[0-9]+\.[0-9]+\.[0-9]+)(-\S*)?' <<< $GITHUB_REF)
+          echo ::set-output name=tagversion::$(egrep -o '^v([0-9]+\.[0-9]+\.[0-9]+)(-\S*)?' <<< $GITHUB_REF)
           else
           echo ::set-output name=tagversion::${{ github.event.client_payload.tagversion }}
           fi
@@ -40,16 +39,21 @@ jobs:
       - name: Docker tag version
         id: set_docker_tag_version
         run: |
-          tagversion=${{ steps.set_tag_version.outputs.tagversion}}
+          # trimmed off 'v' from tagversion
+          tagversion=${{ steps.set_tag_version.outputs.tagversion }}
           echo ::set-output name=dockertag::$(sed 's/^v*//' <<< "$tagversion")
+      # ensure tag is available
+      - uses: actions/checkout@v2
+        with:
+          ref: "v${{ steps.set_docker_tag_version.outputs.dockertag }}"
       - name: Trigger Production Image Publishing
         uses: octokit/request-action@v2.x
-        id: dispatch_one-app-docker-prod-build
+        id: dispatch_release-step-4_automatic_docker-prod-build-and-publish
         with:
           route: POST /repos/:repository/dispatches
           repository: ${{ github.repository }}
           mediaType: '{"previews": ["everest"]}'
-          event_type: "one-app-docker-prod-build"
+          event_type: "release-step-4_automatic_docker-prod-build-and-publish"
           client_payload: '{"docker_tag_version": "${{ steps.set_docker_tag_version.outputs.dockertag }}"}'
         env:
           GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}

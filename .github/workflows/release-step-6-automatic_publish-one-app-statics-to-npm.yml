@@ -1,4 +1,4 @@
-name: One App Statics Publish to NPM
+name: '[Release step 6 | automatic] Publish One App Statics to NPM'
 on:
   workflow_dispatch:
    inputs:
@@ -6,20 +6,12 @@ on:
      description: 'Semantic Version'
      required: true
   repository_dispatch:
-    types: [publish-statics-npm]
+    types: [release-step-6-automatic_publish-one-app-statics-to-npm]
 jobs:
-  publish-statics-npm:
+  release-step-6-automatic_publish-one-app-statics-to-npm:
     name: One App Statics Publish to NPM
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      # Setup .npmrc file to publish to npm
-      - uses: actions/setup-node@v1
-        with:
-          node-version: '16.x'
-          registry-url: 'https://registry.npmjs.org'
-      - name: Docker login
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Tag Version
         id: set_tag_version
         run: |
@@ -29,6 +21,16 @@ jobs:
           else
           echo ::set-output name=tagversion::${{ github.event.inputs.tag_version }}
           fi
+      - uses: actions/checkout@v2
+        with:
+          ref: "v${{ steps.set_tag_version.outputs.tagversion}}"
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '16.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Docker login
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Extract and zip production statics
         run: |
           docker create --name prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_tag_version.outputs.tagversion}}

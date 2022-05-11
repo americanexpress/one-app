@@ -31,6 +31,7 @@ import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttri
 import { setConfigureRequestLog } from '../../../src/server/utils/logging/serverMiddleware';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
 import { getEventLoopDelayThreshold } from '../../../src/server/utils/createCircuitBreaker';
+import setupDnsCache from '../../../src/server/utils/setupDnsCache';
 import { configurePWA } from '../../../src/server/middleware/pwa';
 import { setErrorPage } from '../../../src/server/middleware/sendHtml';
 
@@ -46,6 +47,7 @@ jest.mock('../../../src/server/middleware/conditionallyAllowCors', () => ({
 }));
 jest.mock('../../../src/server/utils/logging/serverMiddleware');
 jest.mock('../../../src/server/utils/createSsrFetch');
+jest.mock('../../../src/server/utils/setupDnsCache');
 
 jest.mock('../../../src/server/utils/safeRequest', () => ({
   extendRestrictedAttributesAllowList: jest.fn(),
@@ -345,6 +347,16 @@ describe('onModuleLoad', () => {
     });
     expect(configurePWA).toHaveBeenCalledTimes(1);
     expect(configurePWA).toHaveBeenCalledWith(pwa);
+  });
+
+  it('calls setupDnsCache with DNS cache config', () => {
+    const dnsCache = { enabled: true, maxTtl: 300 };
+    onModuleLoad({
+      module: { [CONFIGURATION_KEY]: { csp, dnsCache }, [META_DATA_KEY]: { version: '1.0.16' } },
+      moduleName: 'some-root',
+    });
+    expect(setupDnsCache).toHaveBeenCalledTimes(1);
+    expect(setupDnsCache).toHaveBeenCalledWith(dnsCache);
   });
 
   it('calls setErrorPage with error page URL', () => {

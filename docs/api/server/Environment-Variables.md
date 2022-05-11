@@ -40,6 +40,7 @@ One App can be configured via Environment Variables:
   * [`HOLOCRON_SERVER_MAX_MODULES_RETRY`](#holocron_server_max_modules_retry)
   * [`HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`](#holocron_server_max_sim_modules_fetch)
   * [`ONE_ENABLE_POST_TO_MODULE_ROUTES`](#one_enable_post_to_module_routes)
+  * [`ONE_MAX_POST_REQUEST_PAYLOAD`](#one_max_post_request_payload)
   * [`ONE_MAP_POLLING_MAX`](#one_map_polling_max)
   * [`ONE_MAP_POLLING_MIN`](#one_map_polling_min)
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
@@ -71,6 +72,7 @@ One App can be configured via Environment Variables:
   * [`ONE_ENABLE_POST_TO_MODULE_ROUTES`](#one_enable_post_to_module_routes)
   * [`ONE_MAP_POLLING_MAX`](#one_map_polling_max)
   * [`ONE_MAP_POLLING_MIN`](#one_map_polling_min)
+  * [`ONE_MAX_POST_REQUEST_PAYLOAD`](#one_max_post_request_payload)
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
   * [`ONE_SERVICE_WORKER`](#one_service_worker)
 </details>
@@ -589,16 +591,44 @@ ONE_DANGEROUSLY_DISABLE_CSP=false
 * ✅ Production
 * ✅ Development
 
-Set if One App should respond to POST requests.
+Set to true if One App should respond to POST requests.
 
 **Shape**
 ```bash
 ONE_ENABLE_POST_TO_MODULE_ROUTES=Boolean
 ```
 
+**Example**
+```bash
+ONE_ENABLE_POST_TO_MODULE_ROUTES=true
+```
+
 **Default Value**
 ```bash
 ONE_ENABLE_POST_TO_MODULE_ROUTES=false
+```
+
+## `ONE_MAX_POST_REQUEST_PAYLOAD`
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+Maximum payload allowed in POST requests. Has no effect unless `ONE_ENABLE_POST_TO_MODULE_ROUTES` is set to true.
+
+**Shape**
+```bash
+ONE_MAX_POST_REQUEST_PAYLOAD=String
+```
+
+**Example**
+```bash
+ONE_MAX_POST_REQUEST_PAYLOAD=100kb
+```
+
+**Default Value**
+```bash
+ONE_MAX_POST_REQUEST_PAYLOAD=15kb
 ```
 
 ## `ONE_MAP_POLLING_MAX`
@@ -683,6 +713,7 @@ ONE_SERVICE_WORKER=true
 ```bash
 ONE_SERVICE_WORKER=false
 ```
+
 
 **📘 More Information**
 * Useful NodeJS Env Variables: [Node CLI Docs](https://nodejs.org/api/cli.html#cli_node_extra_ca_certs_file)

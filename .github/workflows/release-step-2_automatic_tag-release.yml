@@ -1,15 +1,16 @@
-name: Tagging release
+name: '[Release step 2 | automatic] Tag Release'
 on:
   pull_request:
     types:
       - closed
     branches:
       - main
+      - 5.x.x
 jobs:
-  tagging-release:
+  release-step-2_automatic_tag-release:
     name: Tagging release
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged && github.head_ref == 'prepare-release' && github.base_ref == 'main'
+    if: github.event.pull_request.merged && ( github.head_ref == 'prepare-release-for-main' || github.head_ref == 'prepare-release-for-5.x.x'  ) && (github.base_ref == 'main' || github.base_ref == '5.x.x')
     steps:
       - uses: actions/checkout@v2
       - name: get commit message
@@ -35,12 +36,12 @@ jobs:
           echo ::set-output name=action_tag::v${{ steps.get-tag-version.outputs.tagversion }}
       - name: Trigger Image Publishing
         uses: octokit/request-action@v2.x
-        id: dispatch_one-app-docker-tag-check
+        id: dispatch_release-step-3_automatic_prepare-docker-tags
         with:
           route: POST /repos/:repository/dispatches
           repository: ${{ github.repository }}
           mediaType: '{"previews": ["everest"]}'
-          event_type: "one-app-docker-tag-check"
+          event_type: "release-step-3_automatic_prepare-docker-tags"
           client_payload: '{"tagversion": "${{ steps.set-tag-version.outputs.action_tag }}"}'
         env:
           GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}
