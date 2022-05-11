@@ -5,6 +5,14 @@ on:
     tag_version:
      description: 'Semantic Version'
      required: true
+    docker_meta_tag:
+     type: choice
+     options:
+      - do_not_tag
+      - latest
+      - next
+     description: When manually triggering a deployment, specify which meta tag such as `latest` should be used. `do_not_tag` will result in no meta tag being applied.
+     required: true
   push:
     tags:
       - '*'
@@ -30,6 +38,24 @@ jobs:
           echo ::set-output name=tagversion::${{ github.event.inputs.tag_version }}
           fi
           echo $tagversion
+      - name: Normalize meta tag
+        id: set_docker_meta_tag
+        run: |
+          # if a meta tag was specified this was a menual build
+          if [[ "${{ github.event.inputs.docker_meta_tag }}" != "" ]]
+          then
+          echo ::set-output name=metatag::${{ github.event.inputs.docker_meta_tag }}
+          echo From manual run: ${{ github.event.inputs.docker_meta_tag }}
+          # if we are on the main branch, default to `latest`
+          elif [[ "$GITHUB_REF" == "refs/heads/main" ]]
+          then
+          echo ::set-output name=metatag::latest
+          echo For main branch: latest
+          # if we are not on the main branch, default to `do_not_tag`
+          else
+          echo ::set-output name=metatag::do_not_tag
+          echo For other branch: do_not_tag
+          fi
       - name: Check Tag Version
         run: |
           if [[ "${{ steps.set_tag_version.outputs.tagversion }}" == ""  ]]; then
@@ -54,6 +80,6 @@ jobs:
           repository: ${{ github.repository }}
           mediaType: '{"previews": ["everest"]}'
           event_type: "release-step-4_automatic_docker-prod-build-and-publish"
-          client_payload: '{"docker_tag_version": "${{ steps.set_docker_tag_version.outputs.dockertag }}"}'
+          client_payload: '{"docker_tag_version": "${{ steps.set_docker_tag_version.outputs.dockertag }}", "docker_meta_tag": "${{ steps.set_docker_meta_tag.outputs.metatag }}"}'
         env:
           GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}
