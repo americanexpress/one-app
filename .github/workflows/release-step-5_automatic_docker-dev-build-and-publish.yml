@@ -44,7 +44,7 @@ jobs:
           then
           echo ::set-output name=metatag::${{ github.event.client_payload.docker_meta_tag }}
           echo From previous step: ${{ github.event.client_payload.docker_meta_tag }}
-          # if a meta tag was specified this was a menual build
+          # if a meta tag was specified this was a manual build
           elif [[ "${{ github.event.inputs.docker_meta_tag }}" != "" ]]
           then
           echo ::set-output name=metatag::${{ github.event.inputs.docker_meta_tag }}

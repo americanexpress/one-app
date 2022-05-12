@@ -41,7 +41,7 @@ jobs:
       - name: Normalize meta tag
         id: set_docker_meta_tag
         run: |
-          # if a meta tag was specified this was a menual build
+          # if a meta tag was specified this was a manual build
           if [[ "${{ github.event.inputs.docker_meta_tag }}" != "" ]]
           then
           echo ::set-output name=metatag::${{ github.event.inputs.docker_meta_tag }}
