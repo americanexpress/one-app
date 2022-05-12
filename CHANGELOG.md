@@ -36,7 +36,14 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
-* **update:** updated node and npm versions on docker file ([7449e71](https://github.com/americanexpress/one-app/commit/7449e716c91320421702ccec6d2c028359a61be7))
+* **deps:** upgrade to react 17 ([9ba5c39](https://github.com/americanexpress/one-app/commit/9ba5c3926f603a8bf3e8a4ed32930766568621eb))
+* **server:** drop node 12 support ([5154d65](https://github.com/americanexpress/one-app/commit/5154d65924dec28f63ad5fdf9192c4ecb972d440))
+
+
+### BREAKING CHANGES
+
+* **server:** minimum supported node version is 16
+* **deps:** Upgrade from React 16 to 17
 
 
 ## [5.14.1](https://github.com/americanexpress/one-app/compare/v5.14.0...v5.14.1) (2022-05-05)
