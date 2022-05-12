@@ -24,6 +24,7 @@ import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttri
 import { setConfigureRequestLog } from './logging/serverMiddleware';
 import { setCreateSsrFetch } from './createSsrFetch';
 import { setEventLoopDelayThreshold } from './createCircuitBreaker';
+import setupDnsCache from './setupDnsCache';
 import { configurePWA } from '../middleware/pwa';
 import { validatePWAConfig } from './validation';
 import { setErrorPage } from '../middleware/sendHtml';
@@ -87,6 +88,7 @@ export default function onModuleLoad({
       eventLoopDelayThreshold,
       pwa,
       errorPageUrl,
+      dnsCache,
       // Child Module Specific
       requiredExternals,
       validateStateConfig,
@@ -130,6 +132,7 @@ export default function onModuleLoad({
     configurePWA(validatePWAConfig(pwa, {
       clientStateConfig: getClientStateConfig(),
     }));
+    setupDnsCache(dnsCache);
 
     logModuleLoad(moduleName, metaData.version);
     return;
