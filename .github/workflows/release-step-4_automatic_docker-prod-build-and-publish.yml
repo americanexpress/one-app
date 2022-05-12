@@ -5,6 +5,14 @@ on:
     docker_tag_version:
      description: 'Semantic Version'
      required: true
+    docker_meta_tag:
+      type: choice
+      options:
+        - do_not_tag
+        - latest
+        - next
+      description: When manually triggering a deployment, specify which meta tag such as `latest` should be used. `do_not_tag` will result in no meta tag being applied.
+      required: true
   repository_dispatch:
     types: [release-step-4_automatic_docker-prod-build-and-publish]
 jobs:
@@ -36,6 +44,29 @@ jobs:
           echo ::set-output name=major_version::${MAJOR}
           echo ::set-output name=minor_version::${MINOR}
           fi
+      - name: Normalize meta tag
+        id: set_docker_meta_tag
+        run: |
+          # Always use the value from the last step if it is present
+          if [[ "${{ github.event.client_payload.docker_meta_tag }}" != "" ]]
+          then
+          echo ::set-output name=metatag::${{ github.event.client_payload.docker_meta_tag }}
+          echo From previous step: ${{ github.event.client_payload.docker_meta_tag }}
+          # if a meta tag was specified this was a manual build
+          elif [[ "${{ github.event.inputs.docker_meta_tag }}" != "" ]]
+          then
+          echo ::set-output name=metatag::${{ github.event.inputs.docker_meta_tag }}
+          echo From manual run: ${{ github.event.inputs.docker_meta_tag }}
+          # if we are on the main branch, default to `latest`
+          elif [[ "$GITHUB_REF" == "refs/heads/main" ]]
+          then
+          echo ::set-output name=metatag::latest
+          echo For main branch: latest
+          # if we are not on the main branch, default to `do_not_tag`
+          else
+          echo ::set-output name=metatag::do_not_tag
+          echo For other branch: do_not_tag
+          fi
       - uses: actions/checkout@v2
         with:
           ref: "v${{ steps.set_docker_version.outputs.docker_version }}"
@@ -45,16 +76,24 @@ jobs:
         run: docker build -t prod .
       - name: Tag Docker Images
         run: |
-          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}
           docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}.${{steps.set_docker_version.outputs.minor_version}}
           docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.docker_version}}
-          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:latest
+          if [[ "${{ steps.set_docker_meta_tag.outputs.metatag }}" != "do_not_tag" ]]
+          then
+           # if we are not tagging `latest` or `next`, dont tag with the major either
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}
+          docker tag prod ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_meta_tag.outputs.metatag }}
+          fi
       - name: Push Docker Images
         run: |
           docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}
           docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}.${{ steps.set_docker_version.outputs.minor_version}}
           docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.docker_version}}
-          docker push ${{ secrets.DOCKER_USER }}/one-app:latest
+          if [[ "${{ steps.set_docker_meta_tag.outputs.metatag }}" != "do_not_tag" ]]
+          then
+          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_version.outputs.major_version}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app:${{ steps.set_docker_meta_tag.outputs.metatag }}
+          fi
       - name: Trigger Development Image Publishing
         uses: octokit/request-action@v2.x
         id: dispatch_one_app_docker_dev_build
@@ -63,6 +102,6 @@ jobs:
           repository: ${{ github.repository }}
           mediaType: '{"previews": ["everest"]}'
           event_type: "release-step-5_automatic_docker-dev-build-and-publish"
-          client_payload: '{"docker_tag_version": "${{ steps.set_docker_version.outputs.docker_version }}","major_version":"${{ steps.set_docker_version.outputs.major_version}}","minor_version":"${{ steps.set_docker_version.outputs.minor_version}}"}'
+          client_payload: '{"docker_tag_version": "${{ steps.set_docker_version.outputs.docker_version }}","major_version":"${{ steps.set_docker_version.outputs.major_version}}","minor_version":"${{ steps.set_docker_version.outputs.minor_version}}"}, "docker_meta_tag": "${{ steps.set_docker_meta_tag.outputs.metatag }}"}'
         env:
           GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}
