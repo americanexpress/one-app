@@ -102,6 +102,6 @@ jobs:
           repository: ${{ github.repository }}
           mediaType: '{"previews": ["everest"]}'
           event_type: "release-step-5_automatic_docker-dev-build-and-publish"
-          client_payload: '{"docker_tag_version": "${{ steps.set_docker_version.outputs.docker_version }}","major_version":"${{ steps.set_docker_version.outputs.major_version}}","minor_version":"${{ steps.set_docker_version.outputs.minor_version}}"}, "docker_meta_tag": "${{ steps.set_docker_meta_tag.outputs.metatag }}"}'
+          client_payload: '{"docker_tag_version": "${{ steps.set_docker_version.outputs.docker_version }}","major_version":"${{ steps.set_docker_version.outputs.major_version}}","minor_version":"${{ steps.set_docker_version.outputs.minor_version}}","docker_meta_tag": "${{ steps.set_docker_meta_tag.outputs.metatag }}"}'
         env:
           GITHUB_TOKEN: ${{ secrets.PA_TOKEN }}
