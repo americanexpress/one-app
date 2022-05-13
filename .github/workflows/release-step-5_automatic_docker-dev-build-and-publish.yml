@@ -71,21 +71,33 @@ jobs:
         run: docker build -t dev . --target=development
       - name: Tag Docker Images
         run: |
-          docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.major_version}}.${{ steps.set_docker_version.outputs.minor_version }}
+          # Always tag the exact version
           docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.docker_version }}
+
+          # Only tag with `<major>` and `<major>.<minor>` if we are tagging `latest`
+          if [[ "${{ steps.set_docker_meta_tag.outputs.metatag }}" == "latest" ]]
+          then
+          docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.major_version }}
+          docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.major_version}}.${{ steps.set_docker_version.outputs.minor_version }}
+          fi
+
+          # Finally tag with the requested meta tag
           if [[ "${{ steps.set_docker_meta_tag.outputs.metatag }}" != "do_not_tag" ]]
           then
-           # if we are not tagging `latest` or `next`, dont tag with the major either
-          docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.major_version }}
           docker tag dev ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_meta_tag.outputs.metatag }}
           fi
       - name: Push Docker Images
         run: |
-          docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.major_version}}.${{ steps.set_docker_version.outputs.minor_version }}
           docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.docker_version}}
-          if [[ "${{ steps.set_docker_meta_tag.outputs.metatag }}" != "do_not_tag" ]]
+
+          if [[ "${{ steps.set_docker_meta_tag.outputs.metatag }}" == "latest" ]]
           then
           docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.major_version}}
+          docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_version.outputs.major_version}}.${{ steps.set_docker_version.outputs.minor_version }}
+          fi
+
+          if [[ "${{ steps.set_docker_meta_tag.outputs.metatag }}" != "do_not_tag" ]]
+          then
           docker push ${{ secrets.DOCKER_USER }}/one-app-dev:${{ steps.set_docker_meta_tag.outputs.metatag }}
           fi
       - name: Publish One App Statics
