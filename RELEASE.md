@@ -53,7 +53,9 @@ This process can be used to make ad hoc releases outside of wednesday release cy
 
 This should only be used as a last resort. Ensure that the tag being used references a valid release commit.
 
- 1. Manually run the [[Release step 3 | automatic] Prepare docker tags](https://github.com/americanexpress/one-app/actions/workflows/release-step-3_automatic_prepare-docker-tags.yml) workflow and provide a valid semantic release version of an existing tag which has not been released.
+1. Manually run the [[Release step 3 | automatic] Prepare docker tags](https://github.com/americanexpress/one-app/actions/workflows/release-step-3_automatic_prepare-docker-tags.yml) workflow:
+   1. Provide a valid semantic release version of an existing tag which has not been released.
+   2. Specify if this release should be tagged as `latest`, `next` or use `do_not_tag`(default) to add no meta tag
 
 ## FAQs
 
