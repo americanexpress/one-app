@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.15.0](https://github.com/americanexpress/one-app/compare/v5.14.1...v5.15.0) (2022-05-25)
+
+
+### Features
+
+* **update:** updated node and npm versions on docker file ([7449e71](https://github.com/americanexpress/one-app/commit/7449e716c91320421702ccec6d2c028359a61be7))
+
+
 ## [5.14.1](https://github.com/americanexpress/one-app/compare/v5.14.0...v5.14.1) (2022-05-05)
 
 
