@@ -15,7 +15,5 @@
  */
 
 import checkPackageFiles from './scripts/dangers/keep-package-and-lock-in-sync';
-import reportBundleSizes from './scripts/dangers/bundle-sizes';
 
 checkPackageFiles();
-reportBundleSizes();

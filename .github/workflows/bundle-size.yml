@@ -1,0 +1,16 @@
+name: Build Size - gzipped
+
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: preactjs/compressed-size-action@v2
+        env:
+          NODE_ENV: development
+        with:
+          build-script: "build:bundle"
+          pattern: "./build/**/*.js"
+          exclude: "{./build/**/i18n/*.js,./build/**/legacy/**,./build/**/tmp/**,**/*.map,**/node_modules/**}"
