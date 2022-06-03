@@ -1,4 +1,4 @@
-name: Build Size
+name: Build Size - gzipped
 
 on: [pull_request]
 
@@ -13,4 +13,4 @@ jobs:
         with:
           build-script: "build:bundle"
           pattern: "./build/**/*.js"
-          exclude: "{**/i18n/*.js , **/legacy/*.js, **/*.map,**/node_modules/**}"
+          exclude: "{./build/**/i18n/*.js,./build/**/legacy/**,./build/**/tmp/**,**/*.map,**/node_modules/**}"
