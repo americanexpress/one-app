@@ -511,6 +511,23 @@ describe('sendHtml', () => {
         expect(res.send.mock.calls[0][0]).toBe(`<!doctype html><html><head><title>Some Title</title><style class="ssr-css">.class { background: red; }</style></head>${appHtml}</html>`);
         expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
       });
+
+      it('sends an incomplete HTML document without styles', () => {
+        req.appHtml = `<dangerously-return-only-doctype><!doctype html><html><head><title>Some Title</title></head>${appHtml}</html></dangerously-return-only-doctype>`;
+        req.store.getState.mockImplementationOnce(() => fromJS({
+          holocron: fromJS({
+            loaded: ['a'],
+          }),
+          intl: fromJS({ activeLocale: 'en-US' }),
+          rendering: fromJS({
+            renderPartialOnly: true,
+            disableStyles: true,
+          }),
+        }));
+        sendHtml(req, res);
+        expect(res.send).toHaveBeenCalledTimes(1);
+        expect(res.send.mock.calls[0][0]).toBe(`<!doctype html><html><head><title>Some Title</title></head>${appHtml}</html>`);
+      });
     });
 
     describe('renderTextOnly', () => {
