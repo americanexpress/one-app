@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.15.0](https://github.com/americanexpress/one-app/compare/v5.14.1...v5.15.0) (2022-06-01)
+
+
+### Bug Fixes
+
+* **fetch-enhancers:** use treeshakable es build ([#748](https://github.com/americanexpress/one-app/issues/748)) ([26b26ab](https://github.com/americanexpress/one-app/commit/26b26abaac1a9e3b5b693f1abd4403eb28f92e5d))
+
+
+### Features
+
+* **update:** updated node and npm versions on docker file ([7449e71](https://github.com/americanexpress/one-app/commit/7449e716c91320421702ccec6d2c028359a61be7))
+
+
 ## [5.14.1](https://github.com/americanexpress/one-app/compare/v5.14.0...v5.14.1) (2022-05-05)
 
 

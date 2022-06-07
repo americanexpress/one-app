@@ -287,6 +287,7 @@ export function getBody({
 export function renderPartial({
   html: initialHtml,
   store,
+  disableStyles,
 }) {
   let html = initialHtml;
   // The partial route is commonly used for HTML partials, however email rendering requires
@@ -301,14 +302,16 @@ export function renderPartial({
       .replace(/^<dangerously-return-only-doctype>/, '')
       .replace(/<\/dangerously-return-only-doctype>$/, '');
   }
+  if (!disableStyles) {
+    const styles = renderModuleStyles(store);
 
-  const styles = renderModuleStyles(store);
-
-  if (html.startsWith('<!doctype html>')) {
-    return html.replace('</head>', `${styles}</head>`);
+    if (html.startsWith('<!doctype html>')) {
+      html = html.replace('</head>', `${styles}</head>`);
+    } else {
+      html = styles + html;
+    }
   }
-
-  return styles + html;
+  return html;
 }
 
 // TODO add additional client side scripts
@@ -342,7 +345,7 @@ export default function sendHtml(req, res) {
     const allowedHtmlTags = clientInitialState.getIn(['rendering', 'renderTextOnlyOptions', 'allowedHtmlTags']);
 
     if (renderPartialOnly) {
-      return safeSend(res, renderPartial({ html: req.appHtml, store }));
+      return safeSend(res, renderPartial({ html: req.appHtml, store, disableStyles }));
     }
 
     if (renderTextOnly) {
