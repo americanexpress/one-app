@@ -46,11 +46,6 @@ describe('metricsServer', () => {
       load();
       expect(client.collectDefaultMetrics).toHaveBeenCalledTimes(1);
     });
-
-    it('registers intl cache collector', () => {
-      load();
-      expect(client.register.registerCollector).toHaveBeenCalledWith('cacheSizeCollector');
-    });
   });
 
   describe('unknown routes', () => {
