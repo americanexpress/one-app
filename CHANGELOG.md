@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.15.1](https://github.com/americanexpress/one-app/compare/v5.15.0...v5.15.1) (2022-06-08)
+
+
+### Bug Fixes
+
+* **renderPartial:** respect disabledStyles for partial render ([#755](https://github.com/americanexpress/one-app/issues/755)) ([8209bbe](https://github.com/americanexpress/one-app/commit/8209bbe713d88971a9557ab9f681e23ea6baac4a))
+
+
 # [5.15.0](https://github.com/americanexpress/one-app/compare/v5.14.1...v5.15.0) (2022-06-01)
 
 
