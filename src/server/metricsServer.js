@@ -20,10 +20,8 @@ import { register as metricsRegister, collectDefaultMetrics } from 'prom-client'
 
 import logging from './utils/logging/serverMiddleware';
 import healthCheck from './middleware/healthCheck';
-import { cacheSizeCollector } from './metrics/intl-cache';
 
 collectDefaultMetrics();
-metricsRegister.registerCollector(cacheSizeCollector);
 
 export function createMetricsServer() {
   const app = express();
@@ -36,9 +34,9 @@ export function createMetricsServer() {
 
   app.get('/im-up', healthCheck);
 
-  app.get('/metrics', (req, res) => {
+  app.get('/metrics', async (req, res) => {
     res.set('Content-Type', metricsRegister.contentType);
-    res.end(metricsRegister.metrics());
+    res.end(await metricsRegister.metrics());
   });
 
   app.use('/', (req, res) => res.status(404).set('Content-Type', 'text/plain').send(''));

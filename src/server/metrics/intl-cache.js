@@ -15,7 +15,7 @@
  */
 
 import { getEstimatedSize } from '@americanexpress/one-app-ducks/lib/intl/server-cache';
-import { createGauge, setGauge } from './gauges';
+import { createGauge } from './gauges';
 import createMetricNamespace from './create-metric-namespace';
 
 const intlServerCacheNamespace = createMetricNamespace('intl');
@@ -23,12 +23,12 @@ const intlServerCacheNamespace = createMetricNamespace('intl');
 createGauge({
   name: intlServerCacheNamespace('cache_size', 'total'),
   help: 'estimated intl server cache size',
+  collect() {
+    const size = getEstimatedSize();
+    this.set(size);
+  },
 });
 
 const metricNames = intlServerCacheNamespace.getMetricNames();
-
-export const cacheSizeCollector = () => {
-  setGauge(metricNames.cacheSize, getEstimatedSize());
-};
 
 export default metricNames;
