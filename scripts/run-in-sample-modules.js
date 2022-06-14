@@ -55,7 +55,10 @@ const runBatchedModuleCommand = async (command) => {
   }
 };
 
-runBatchedModuleCommand('npm audit fix').catch((e) => {
+// to run `npm update` in all sample modules
+// node scripts/run-in-sample-modules npm update
+const runCommand = process.argv.slice(2);
+runBatchedModuleCommand(runCommand.join(' ')).catch((e) => {
   console.error(e);
   process.exit(1);
 });
