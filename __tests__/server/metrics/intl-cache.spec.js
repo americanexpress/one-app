@@ -15,12 +15,11 @@
  */
 
 jest.mock('@americanexpress/one-app-ducks/lib/intl/server-cache', () => ({
-  getEstimatedSize: jest.fn(() => 'mocked'),
+  getEstimatedSize: jest.fn(() => 'mocked size'),
 }));
 
 describe('intl-cache', () => {
   let createGauge;
-  let setGauge;
 
   function load() {
     jest.resetModules();
@@ -29,7 +28,7 @@ describe('intl-cache', () => {
     jest.mock('../../../src/server/metrics/counters');
 
     jest.mock('../../../src/server/metrics/gauges');
-    ({ createGauge, setGauge } = require('../../../src/server/metrics/gauges'));
+    ({ createGauge } = require('../../../src/server/metrics/gauges'));
 
     return require('../../../src/server/metrics/intl-cache');
   }
@@ -42,15 +41,15 @@ describe('intl-cache', () => {
     expect(createGauge.mock.calls[0]).toMatchSnapshot();
   });
 
-  it('exports the metric names', () => {
-    expect(load()).toMatchSnapshot();
+  it('collects from intl server cache', () => {
+    load();
+    const set = jest.fn();
+    const fauxPromRegistry = { set };
+    createGauge.mock.calls[0][0].collect.call(fauxPromRegistry);
+    expect(set).toHaveBeenCalledWith('mocked size');
   });
 
-  describe('cacheSizeCollector', () => {
-    it('updates gauge to include estimated size', () => {
-      const { cacheSizeCollector } = load();
-      cacheSizeCollector();
-      expect(setGauge).toHaveBeenCalledWith('oneapp_intl_cache_size_total', 'mocked');
-    });
+  it('exports the metric names', () => {
+    expect(load()).toMatchSnapshot();
   });
 });
