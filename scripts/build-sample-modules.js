@@ -29,6 +29,7 @@ const {
   npmProductionBuild,
   getGitSha,
   getModuleVersionPaths,
+  basicBatchedTask,
 } = require('./utils');
 
 const nginxOriginStaticsModulesDir = path.resolve(nginxOriginStaticsRootDir, 'modules');
@@ -84,7 +85,10 @@ const buildModule = async (pathToModule) => {
 
 const buildAllSampleModules = async () => {
   const moduleVersionPaths = await getModuleVersionPaths();
-  return Promise.all(moduleVersionPaths.map((modulePath) => buildModule(modulePath)));
+  return basicBatchedTask(
+    moduleVersionPaths,
+    (currentBatch) => Promise.all(currentBatch.map((modulePath) => buildModule(modulePath)))
+  );
 };
 
 const doWork = async () => {

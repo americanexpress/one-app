@@ -152,6 +152,24 @@ const getModuleDetailsFromPath = (pathToModule) => {
   return { moduleName, moduleVersion, directory };
 };
 
+const basicBatchedTask = async (list, task, batchSize = 5) => {
+  const totalBatches = Math.max(Math.round(list.length / batchSize), 1);
+  const batches = [];
+  list.forEach((item, index) => {
+    const batchNumber = index % totalBatches;
+    batches[batchNumber] = [item, ...batches[batchNumber] ? batches[batchNumber] : []];
+    return batches;
+  }, []);
+  let results = [];
+  // eslint-disable-next-line no-restricted-syntax -- this is not for production
+  for (const currentBatch of batches) {
+    // eslint-disable-next-line no-await-in-loop -- this is not for production
+    const result = await task(currentBatch);
+    results = results.concat(result);
+  }
+  return results;
+};
+
 module.exports = {
   sampleProdDir,
   sampleModulesDir,
@@ -165,4 +183,5 @@ module.exports = {
   getModuleVersionPaths,
   getModuleDetailsFromPath,
   runCommandInModule,
+  basicBatchedTask,
 };
