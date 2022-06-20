@@ -21,29 +21,16 @@ const {
   getModuleDetailsFromPath,
   sanitizeEnvVars,
   runCommandInModule,
+  basicBatchedTask,
 } = require('./utils');
 
 const sanitizedEnvVars = sanitizeEnvVars();
 
-const basicBatch = (list, batchSize = 5) => {
-  const totalBatches = Math.max(Math.round(list.length / batchSize), 1);
-  const batches = [];
-  list.forEach((item, index) => {
-    const batchNumber = index % totalBatches;
-    batches[batchNumber] = [item, ...batches[batchNumber] ? batches[batchNumber] : []];
-    return batches;
-  }, []);
-  return batches;
-};
-
 const runBatchedModuleCommand = async (command) => {
   const moduleVersionPaths = await getModuleVersionPaths();
-  const batches = basicBatch(moduleVersionPaths);
-
-  // eslint-disable-next-line no-restricted-syntax -- dev tooling
-  for (const currentBatch of batches) {
-    // eslint-disable-next-line no-await-in-loop
-    await Promise.all(currentBatch.map((modulePath) => {
+  basicBatchedTask(
+    moduleVersionPaths,
+    (currentBatch) => Promise.all(currentBatch.map((modulePath) => {
       const { moduleName, moduleVersion, directory } = getModuleDetailsFromPath(modulePath);
       return runCommandInModule({
         moduleName,
@@ -51,8 +38,8 @@ const runBatchedModuleCommand = async (command) => {
         directory,
         envVars: sanitizedEnvVars,
       }, command);
-    }));
-  }
+    }))
+  );
 };
 
 // to run `npm update` in all sample modules
