@@ -61,7 +61,7 @@ const csp = () => (req, res, next) => {
   const scriptNonce = uuidV4();
   let updatedPolicy;
   if (process.env.NODE_ENV === 'development') {
-    const developmentAdditions = `${ip.address()}:* localhost:*`;
+    const developmentAdditions = `${ip.address()}:* localhost:* ws://localhost:*`;
     let updatedScriptSrc;
     if (process.env.ONE_CSP_ALLOW_INLINE_SCRIPTS === 'true') {
       updatedScriptSrc = insertSource(policy, 'script-src', developmentAdditions);
