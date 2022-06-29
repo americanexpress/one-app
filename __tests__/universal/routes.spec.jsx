@@ -20,6 +20,7 @@ import { fromJS } from 'immutable';
 import createRoutes from '../../src/universal/routes';
 import hasChildRoutes from '../../src/universal/utils/hasChildRoutes';
 
+// eslint-disable-next-line react/display-name -- mock component
 jest.mock('holocron-module-route', () => () => null);
 jest.mock('@americanexpress/one-app-ducks/lib/errorReporting', () => ({
   addErrorToReport: jest.fn((error, meta) => ({
