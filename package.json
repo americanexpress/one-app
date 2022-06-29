@@ -92,7 +92,7 @@
     "chalk": "^5.0.1",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.5",
-    "core-js": "^3.23.1",
+    "core-js": "^3.23.3",
     "cors": "^2.8.5",
     "create-shared-react-context": "^1.0.4",
     "cross-fetch": "^3.0.6",
