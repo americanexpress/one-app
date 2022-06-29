@@ -44,7 +44,8 @@
     "postinstall": "npm run build",
     "release:standard-version": "standard-version",
     "release:changelog": "echo \"$(head -3 CHANGELOG.md)\n\n$(node_modules/.bin/conventional-changelog -p angular)\n\n$(tail -n +4 CHANGELOG.md)\" > CHANGELOG.md",
-    "release": "npm run release:standard-version && npm run release:changelog"
+    "release": "npm run release:standard-version && npm run release:changelog",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -160,7 +161,7 @@
     "fs-extra": "^9.1.0",
     "glob": "^7.2.3",
     "https-proxy-agent": "^5.0.1",
-    "husky": "^4.3.8",
+    "husky": "^8.0.1",
     "jest": "^27.5.1",
     "jest-circus": "^27.5.1",
     "js-yaml": "^4.1.0",
@@ -183,12 +184,6 @@
     "supertest": "^4.0.2",
     "tar": "^6.1.11",
     "webdriverio": "^6.12.1"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run test:lint && npm run test:unit && npm run test:lockfile",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
   },
   "standard-version": {
     "bumpFiles": [
