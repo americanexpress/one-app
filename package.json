@@ -164,7 +164,7 @@
     "jest": "^27.5.1",
     "jest-circus": "^27.5.1",
     "js-yaml": "^4.1.0",
-    "lockfile-lint": "^4.7.5",
+    "lockfile-lint": "^4.7.6",
     "lodash.set": "^4.3.2",
     "markdown-table": "^3.0.2",
     "mkdirp": "^1.0.4",
@@ -180,7 +180,7 @@
     "rollup-plugin-terser": "^7.0.2",
     "service-worker-mock": "^2.0.5",
     "standard-version": "^9.5.0",
-    "supertest": "^6.2.3",
+    "supertest": "^6.2.4",
     "tar": "^6.1.11",
     "webdriverio": "^7.20.5"
   },
