@@ -13,5 +13,5 @@ jobs:
         with:
           build-script: "build:bundle"
           pattern: "./build/**/*.js"
-          strip-hash: \d+\.\d+\.\d+-\w+\/
+          strip-hash: \d+\.\d+\.\d+[-\S+]*\/
           exclude: "{./build/**/i18n/*.js,./build/**/legacy/**,./build/**/tmp/**,**/*.map,**/node_modules/**}"
