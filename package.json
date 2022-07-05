@@ -127,7 +127,7 @@
     "transit-js": "^0.8.874",
     "url-polyfill": "^1.1.12",
     "uuid": "^8.3.2",
-    "yargs": "^17.4.1"
+    "yargs": "^17.5.1"
   },
   "devDependencies": {
     "@americanexpress/one-app-dev-cdn": "^3.3.1",
