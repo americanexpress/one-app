@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "5.15.1",
+  "version": "5.15.3",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
@@ -109,7 +109,7 @@
     "matcher": "^3.0.0",
     "opossum": "^6.2.1",
     "opossum-prometheus": "^0.3.0",
-    "pidusage": "^2.0.21",
+    "pidusage": "^3.0.0",
     "prom-client": "^14.0.1",
     "prop-types": "^15.7.2",
     "react": "^16.14.0",
@@ -120,7 +120,7 @@
     "redux-lifesaver": "^2.1.0",
     "regenerator-runtime": "^0.13.9",
     "reselect": "^4.0.0",
-    "semver": "^7.3.5",
+    "semver": "^7.3.7",
     "serialize-error": "^8.1.0",
     "striptags": "^3.2.0",
     "transit-immutable-js": "^0.8.0",
