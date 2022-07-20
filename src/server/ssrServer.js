@@ -69,7 +69,12 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
 
   app.disable('x-powered-by');
   app.disable('e-tag');
-  app.use(helmet());
+  app.use(helmet({
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
+    crossOriginResourcePolicy: false,
+    originAgentCluster: false,
+  }));
   app.use(csp());
   app.use(cookieParser());
   app.use(json({

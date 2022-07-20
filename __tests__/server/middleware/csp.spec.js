@@ -18,13 +18,9 @@
 import httpMocks from 'node-mocks-http';
 
 const sanitizeCspString = (cspString) => cspString
-// replaces dynamic ip and nonce to prevent snapshot failures
+// replaces dynamic ip to prevent snapshot failures
   // eslint-disable-next-line unicorn/better-regex -- conflicts with unsafe-regex
-  .replace(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g, '0.0.0.0')
-  .replace(
-    // eslint-disable-next-line unicorn/better-regex -- conflicts with unsafe-regex
-    /nonce-[\dA-Za-z]{8}-[\dA-Za-z]{4}-[\dA-Za-z]{4}-[\dA-Za-z]{4}-[\dA-Za-z]{12}/, 'nonce-00000000-0000-0000-0000-000000000000'
-  );
+  .replace(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g, '0.0.0.0');
 
 describe('csp', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});

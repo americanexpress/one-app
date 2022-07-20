@@ -15,7 +15,11 @@
  */
 
 module.exports = {
-  preset: 'amex-jest-preset-react',
+  preset: 'amex-jest-preset',
+  testEnvironment: 'jsdom',
+  collectCoverageFrom: [
+    'src/**/*.{js,jsx}',
+  ],
   coveragePathIgnorePatterns: [
     'src/client/polyfill',
     'src/server/polyfill',

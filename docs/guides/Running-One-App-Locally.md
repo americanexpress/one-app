@@ -4,7 +4,7 @@
 
 # Running One App Locally
 
-To run One App locally, you need to make sure that you are on Node 12 or greater. After that, go ahead and clone One App:
+To run One App locally, you need to make sure that you are on Node 16 or greater. After that, go ahead and clone One App:
 
 ```bash
 git clone https://github.com/americanexpress/one-app.git
