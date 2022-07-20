@@ -16,6 +16,8 @@
 
 import express from 'express';
 import helmet from 'helmet';
+import Fastify from 'fastify';
+import fastifyExpress from '@fastify/express';
 import { register as metricsRegister, collectDefaultMetrics } from 'prom-client';
 
 import logging from './utils/logging/serverMiddleware';
@@ -23,25 +25,35 @@ import healthCheck from './middleware/healthCheck';
 
 collectDefaultMetrics();
 
-export function createMetricsServer() {
-  const app = express();
+const makeExpressRouter = () => {
+  const router = express.Router();
 
-  app.disable('x-powered-by');
-  app.disable('e-tag');
+  router.use(helmet());
+  router.use(logging);
 
-  app.use(helmet());
-  app.use(logging);
+  router.get('/im-up', healthCheck);
 
-  app.get('/im-up', healthCheck);
-
-  app.get('/metrics', async (req, res) => {
+  router.get('/metrics', async (_req, res) => {
     res.set('Content-Type', metricsRegister.contentType);
     res.end(await metricsRegister.metrics());
   });
 
-  app.use('/', (req, res) => res.status(404).set('Content-Type', 'text/plain').send(''));
+  router.use('/', (_req, res) => res.status(404).set('Content-Type', 'text/plain').send(''));
 
-  return app;
+  return router;
+};
+
+export async function createMetricsServer() {
+  const fastify = Fastify();
+
+  await fastify.register(fastifyExpress);
+
+  fastify.express.disable('x-powered-by');
+  fastify.express.disable('e-tag');
+
+  fastify.use(makeExpressRouter());
+
+  return fastify;
 }
 
-export default createMetricsServer();
+export default createMetricsServer;

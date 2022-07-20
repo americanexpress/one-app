@@ -327,6 +327,7 @@ export default function sendHtml(req, res) {
 
     console.info(`sendHtml, have store? ${!!store}, have appHtml? ${!!appHtml}`);
     if (appHtml && typeof appHtml !== 'string') {
+      console.log('--test 1', 'before throw');
       throw new Error(`appHtml was not a string, was ${typeof appHtml}`, appHtml);
     }
     // replace server specific config with client specific config (api urls and such)
@@ -345,10 +346,12 @@ export default function sendHtml(req, res) {
     const allowedHtmlTags = clientInitialState.getIn(['rendering', 'renderTextOnlyOptions', 'allowedHtmlTags']);
 
     if (renderPartialOnly) {
+      console.log('--test 2', 'renderPartialOnly');
       return safeSend(res, renderPartial({ html: req.appHtml, store, disableStyles }));
     }
 
     if (renderTextOnly) {
+      console.log('--test 3', 'renderTextOnly');
       res.setHeader('content-type', 'text/plain');
       return safeSend(res, striptags(req.appHtml, allowedHtmlTags, htmlTagReplacement));
     }
@@ -390,9 +393,11 @@ export default function sendHtml(req, res) {
       </html>
     `;
   } catch (err) {
+    console.log('--test 4', 'ERROR');
     console.error('sendHtml had an error, sending static error page', err);
     return renderStaticErrorPage(res);
   }
 
+  console.log('--test 5', 'safeSend');
   return safeSend(res, body);
 }

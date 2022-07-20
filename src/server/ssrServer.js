@@ -26,6 +26,8 @@ import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'body-parser';
 import helmet from 'helmet';
 import cors from 'cors';
+import Fastify from 'fastify';
+import fastifyExpress from '@fastify/express';
 
 import conditionallyAllowCors from './middleware/conditionallyAllowCors';
 import ensureCorrelationId from './middleware/ensureCorrelationId';
@@ -51,41 +53,41 @@ import {
   offlineMiddleware,
 } from './middleware/pwa';
 
-export function createApp({ enablePostToModuleRoutes = false } = {}) {
-  const app = express();
+export const makeExpressRouter = () => {
+  const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
 
-  app.use(ensureCorrelationId);
-  app.use(logging);
-  app.use(compression());
-  app.get('*', addSecurityHeaders);
-  app.use(setAppVersionHeader);
-  app.use(forwardedHeaderParser);
+  const router = express.Router();
 
-  app.use('/_/static', express.static(path.join(__dirname, '../../build'), { maxage: '182d' }));
-  app.get('/_/status', (req, res) => res.sendStatus(200));
-  app.get('/_/pwa/service-worker.js', serviceWorkerMiddleware());
-  app.get('*', addCacheHeaders);
-  app.get('/_/pwa/manifest.webmanifest', webManifestMiddleware());
+  router.use(ensureCorrelationId);
+  router.use(logging);
+  router.use(compression());
+  router.get('*', addSecurityHeaders);
+  router.use(setAppVersionHeader);
+  router.use(forwardedHeaderParser);
 
-  app.disable('x-powered-by');
-  app.disable('e-tag');
-  app.use(helmet({
+  router.use('/_/static', express.static(path.join(__dirname, '../../build'), { maxage: '182d' }));
+  router.get('/_/status', (req, res) => res.sendStatus(200));
+  router.get('/_/pwa/service-worker.js', serviceWorkerMiddleware());
+  router.get('*', addCacheHeaders);
+  router.get('/_/pwa/manifest.webmanifest', webManifestMiddleware());
+
+  router.use(helmet({
     crossOriginEmbedderPolicy: false,
     crossOriginOpenerPolicy: false,
     crossOriginResourcePolicy: false,
     originAgentCluster: false,
   }));
-  app.use(csp());
-  app.use(cookieParser());
-  app.use(json({
+  router.use(csp());
+  router.use(cookieParser());
+  router.use(json({
     type: ['json', 'application/csp-report'],
   }));
-  app.post('/_/report/security/csp-violation', cspViolation);
-  app.post('/_/report/errors', clientErrorLogger);
-  app.get('**/*.(json|js|css|map)', (req, res) => res.sendStatus(404));
+  router.post('/_/report/security/csp-violation', cspViolation);
+  router.post('/_/report/errors', clientErrorLogger);
+  router.get('**/*.(json|js|css|map)', (req, res) => res.sendStatus(404));
 
-  app.get('/_/pwa/shell', offlineMiddleware(oneApp));
-  app.get(
+  router.get('/_/pwa/shell', offlineMiddleware(oneApp));
+  router.get(
     '*',
     addFrameOptionsHeader,
     createRequestStore(oneApp),
@@ -97,7 +99,7 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
   );
 
   if (enablePostToModuleRoutes) {
-    app.options(
+    router.options(
       '*',
       addSecurityHeaders,
       json({ limit: '0kb' }), // there should be no body
@@ -105,7 +107,7 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
       cors({ origin: false }) // disable CORS
     );
 
-    app.post(
+    router.post(
       '*',
       addSecurityHeaders,
       json({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
@@ -121,12 +123,25 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
   }
 
   // https://expressjs.com/en/guide/error-handling.html
+  router.use(serverError); // Note: should be quickly moved to Fastify
 
-  app.use(serverError);
+  return router;
+};
 
-  return app;
+export async function createApp(opts = {}) {
+  const fastify = Fastify(opts);
+
+  await fastify.register(fastifyExpress);
+
+  fastify.express.disable('x-powered-by');
+  fastify.express.disable('e-tag');
+
+  fastify.use(makeExpressRouter());
+
+  // TODO: Needs refactoring (priority)
+  fastify.setNotFoundHandler(sendHtml);
+
+  return fastify;
 }
 
-export default createApp({
-  enablePostToModuleRoutes: process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true',
-});
+export default createApp;

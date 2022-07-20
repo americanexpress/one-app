@@ -75,7 +75,7 @@ const setUpTestRunner = async ({
   dockerComposeUpProcess.stderr.pipe(logWatcherDuplex);
 
   // uncomment this line in order to view full logs for debugging
-  // logWatcherDuplex.pipe(process.stdout);
+  logWatcherDuplex.pipe(process.stdout);
 
   try {
     await Promise.all([
@@ -85,6 +85,7 @@ const setUpTestRunner = async ({
   } catch (err) {
     // logWatcherDuplex will buffer the logs until piped out.
     logWatcherDuplex.pipe(process.stdout);
+    console.error('--> CONNECTION ERROR <--', err);
     throw new Error(
       '🚨 Either of the One App, Selenium, or Nginx servers failed to be pulled, built, and started '
       + `within ${serverStartupTimeout}ms. See logs for details.`

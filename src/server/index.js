@@ -23,41 +23,64 @@ import './init';
 // Allow env config to run before importing holocron. (x2)
 import ssrServer from './ssrServer';
 import metricsServer from './metricsServer';
-import listen from './listen';
 import { addServer, shutdown } from './shutdown';
 import pollModuleMap from './utils/pollModuleMap';
 import loadModules from './utils/loadModules';
+import getHttpsConfig from './utils/getHttpsConfig';
 
-function ssrServerStart() {
+const listen = async ({
+  context,
+  instance,
+  port,
+  host,
+} = { context: 'Server' }) => {
+  try {
+    await instance.listen({
+      host: host || '0.0.0.0',
+      port,
+    });
+
+    console.log(`${context} listening on port ${port}`);
+
+    addServer(instance);
+
+    return instance;
+  } catch (error) {
+    console.error(`Error encountered starting ${context}`, error);
+    throw error;
+  }
+};
+
+async function ssrServerStart() {
   // need to load _some_ locale so that react-intl does not prevent modules from loading
   // eslint-disable-next-line no-underscore-dangle
   Intl.__addLocaleData(enData);
-  return loadModules()
-    .then(() => new Promise((res, rej) => {
-      addServer(listen(ssrServer, (err, { port }) => {
-        if (err) {
-          rej(err);
-        } else {
-          console.log(`🌎 One App server listening on port ${port}`);
-          res();
-        }
-      }));
-    }))
-    .then(pollModuleMap);
+
+  await loadModules();
+
+  const isHttps = !!process.env.HTTPS_PORT;
+  const port = isHttps ? process.env.HTTPS_PORT : process.env.HTTP_PORT;
+
+  await listen({
+    context: '🌎 One App server',
+    instance: await ssrServer({
+      https: isHttps ? getHttpsConfig() : null,
+    }),
+    host: process.env.IP_ADDRESS,
+    port,
+  });
+
+  await pollModuleMap();
 }
 
-function metricsServerStart() {
-  return new Promise((res, rej) => {
-    const port = process.env.HTTP_METRICS_PORT;
-    addServer(metricsServer.listen(port, (err) => (err ? rej(err) : res(port))));
-  })
-    .then(
-      (port) => console.log(`📊 Metrics server listening on port ${port}`),
-      (err) => {
-        console.error('error encountered starting the metrics server', err);
-        throw err;
-      }
-    );
+async function metricsServerStart() {
+  const port = process.env.HTTP_METRICS_PORT;
+
+  await listen({
+    context: '📊 Metrics server',
+    instance: await metricsServer(),
+    port,
+  });
 }
 
 function appServersStart() {
@@ -96,30 +119,26 @@ if (process.env.NODE_ENV === 'development') {
   const oneAppDevProxyPort = process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT;
 
   serverChain = Promise.resolve()
-    .then(() => new Promise((res, rej) => addServer(
-      devHolocronCDN.listen(oneAppDevCdnPort, (err) => {
-        if (err) {
-          rej(err);
-        } else {
-          console.log(`👕 one-app-dev-cdn server listening on port ${oneAppDevCdnPort}`);
-          res();
-        }
-      })
-    )))
-    .then(() => new Promise((res, rej) => addServer(
-      oneAppDevProxy({
-        useMiddleware: argv.m,
-        pathToMiddleware: path.join(__dirname, '../../.dev/middleware'),
-        remotes: getRemotesFromDevEndpointsFile(),
-      }).listen(oneAppDevProxyPort, (err) => {
-        if (err) {
-          rej(err);
-        } else {
-          console.log(`👖 one-app-dev-proxy server listening on port ${oneAppDevProxyPort}`);
-          res();
-        }
-      })
-    )))
+    .then(async () => {
+      await listen({
+        context: '👕 one-app-dev-cdn server',
+        instance: await devHolocronCDN(),
+        port: oneAppDevCdnPort,
+      });
+    })
+    .then(() => new Promise((res, rej) => oneAppDevProxy({
+      useMiddleware: argv.m,
+      pathToMiddleware: path.join(__dirname, '../../.dev/middleware'),
+      remotes: getRemotesFromDevEndpointsFile(),
+    }).listen(oneAppDevProxyPort, (err) => {
+      if (err) {
+        rej(err);
+      } else {
+        console.log(`👖 one-app-dev-proxy server listening on port ${oneAppDevProxyPort}`);
+        res();
+      }
+    })
+    ))
     .then(appServersStart)
     .then(watchLocalModules);
 } else {
