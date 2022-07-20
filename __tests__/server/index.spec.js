@@ -23,14 +23,15 @@ import { Map as ImmutableMap } from 'immutable';
 jest.unmock('yargs');
 
 describe('server index', () => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => { });
+  jest.spyOn(console, 'error').mockImplementation(() => { });
   const origFsExistsSync = fs.existsSync;
 
   let addServer;
   let shutdown;
+  let devHolocronCDNlisten;
 
-  function load({
+  async function load({
     ssrServerError,
     metricsServerError,
     getModuleImplementation = (/* name */) => (/* props */) => 'a react component',
@@ -72,7 +73,7 @@ describe('server index', () => {
     });
     //
     jest.doMock('../../src/server/polyfill/intl');
-    jest.doMock('../../src/server/utils/logging/setup', () => {});
+    jest.doMock('../../src/server/utils/logging/setup', () => { });
 
     // ms timeouts are to ensure order
     jest.doMock('../../src/server/ssrServer', () => ({
@@ -82,7 +83,7 @@ describe('server index', () => {
       }),
     }));
     jest.doMock('../../src/server/metricsServer', () => ({
-      listen: jest.fn((port, cb) => {
+      listen: jest.fn((_port, cb) => {
         setTimeout(() => (metricsServerError ? cb(new Error('test error')) : cb(null)), 10);
         return { close: 'metricsServer' };
       }),
@@ -94,16 +95,22 @@ describe('server index', () => {
 
     jest.doMock('../../src/server/utils/pollModuleMap', () => jest.fn());
     jest.doMock('../../src/server/config/env/runTime', () => jest.fn());
-    jest.doMock('../../src/server/utils/heapdump', () => {});
+    jest.doMock('../../src/server/utils/heapdump', () => { });
     jest.doMock('../../src/server/utils/watchLocalModules', () => ({ default: jest.fn() }));
 
+    devHolocronCDNlisten = jest.fn(async (opts = {}) => {
+      if (devHolocronCdnError) {
+        throw new Error('test error')
+      }
+
+      return {
+        close: 'devHolocronCdn'
+      }
+    })
     jest.doMock('../../src/server/devHolocronCDN', () => ({
-      default: {
-        listen: jest.fn((port, cb) => {
-          setTimeout(() => (devHolocronCdnError ? cb(new Error('test error')) : cb(null, { port })));
-          return { close: 'devHolocronCdn' };
-        }),
-      },
+      default: () => ({
+        listen: devHolocronCDNlisten,
+      }),
     }));
     jest.doMock('lean-intl', () => ({
       // eslint-disable-next-line no-underscore-dangle
@@ -134,11 +141,10 @@ describe('server index', () => {
       expect(yargs.getOptions().string).toMatchSnapshot();
     });
 
-    it.skip('starts devHolocronCDN on port 4011', async () => {
+    it('starts devHolocronCDN on port 4011', async () => {
       process.env.HTTP_ONE_APP_DEV_CDN_PORT = 4011;
       await load();
-      const devHolocronCDNListen = require('../../src/server/devHolocronCDN').default.listen;
-      expect(devHolocronCDNListen.mock.calls[0][0]).toBe('4011');
+      expect(devHolocronCDNlisten).toHaveBeenCalledWith({ "host": "0.0.0.0", "port": "4011" });
     });
 
     it.skip('starts one-app-dev-proxy with config derived from what is passed in CLI args', async () => {
@@ -163,7 +169,7 @@ describe('server index', () => {
           destination: 'https://example.com',
         },
       }),
-      { virtual: true }
+        { virtual: true }
       );
       await load();
       fs.existsSync = origFsExistsSync;
@@ -182,7 +188,7 @@ describe('server index', () => {
           destination: 'https://example.com',
         },
       }),
-      { virtual: true }
+        { virtual: true }
       );
       await load();
       fs.existsSync = origFsExistsSync;

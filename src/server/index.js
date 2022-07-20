@@ -28,7 +28,7 @@ import pollModuleMap from './utils/pollModuleMap';
 import loadModules from './utils/loadModules';
 import getHttpsConfig from './utils/getHttpsConfig';
 
-const listen = async ({
+export const listen = async ({
   context,
   instance,
   port,
