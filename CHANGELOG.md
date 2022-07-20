@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.15.3](https://github.com/americanexpress/one-app/compare/v5.15.2...v5.15.3) (2022-07-13)
+
+
+### Bug Fixes
+
+* **node:** bump node to 16.16.0 for security patch ([#782](https://github.com/americanexpress/one-app/issues/782)) ([3782116](https://github.com/americanexpress/one-app/commit/3782116f1e196780a547388e0a257f6717f98b02))
+
+
+## [5.15.2](https://github.com/americanexpress/one-app/compare/v5.15.1...v5.15.2) (2022-07-06)
+
+
+### Bug Fixes
+
+* **deps:** bump core-js from 3.21.1 to 3.23.1 ([#764](https://github.com/americanexpress/one-app/issues/764)) ([53917e0](https://github.com/americanexpress/one-app/commit/53917e0266f9ceb05a3041802a9b2b11520b3512))
+
+
 ## [5.15.1](https://github.com/americanexpress/one-app/compare/v5.15.0...v5.15.1) (2022-06-08)
 
 
@@ -28,7 +44,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 * **server:** minimum supported node version is 16
 * **deps:** Upgrade from React 16 to 17
-
 
 ## [5.14.1](https://github.com/americanexpress/one-app/compare/v5.14.0...v5.14.1) (2022-05-05)
 
