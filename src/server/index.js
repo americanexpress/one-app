@@ -59,7 +59,7 @@ async function ssrServerStart() {
   await loadModules();
 
   const isHttps = !!process.env.HTTPS_PORT;
-  const port = isHttps ? process.env.HTTPS_PORT : process.env.HTTP_PORT;
+  const port = isHttps ? process.env.HTTPS_PORT : (process.env.HTTP_PORT || 3000);
 
   await listen({
     context: '🌎 One App server',
@@ -126,19 +126,20 @@ if (process.env.NODE_ENV === 'development') {
         port: oneAppDevCdnPort,
       });
     })
-    .then(() => new Promise((res, rej) => oneAppDevProxy({
-      useMiddleware: argv.m,
-      pathToMiddleware: path.join(__dirname, '../../.dev/middleware'),
-      remotes: getRemotesFromDevEndpointsFile(),
-    }).listen(oneAppDevProxyPort, (err) => {
-      if (err) {
-        rej(err);
-      } else {
-        console.log(`👖 one-app-dev-proxy server listening on port ${oneAppDevProxyPort}`);
-        res();
-      }
-    })
-    ))
+    .then(() => new Promise((res, rej) => addServer(
+      oneAppDevProxy({
+        useMiddleware: argv.m,
+        pathToMiddleware: path.join(__dirname, '../../.dev/middleware'),
+        remotes: getRemotesFromDevEndpointsFile(),
+      }).listen(oneAppDevProxyPort, (err) => {
+        if (err) {
+          rej(err);
+        } else {
+          console.log(`👖 one-app-dev-proxy server listening on port ${oneAppDevProxyPort}`);
+          res();
+        }
+      })
+    )))
     .then(appServersStart)
     .then(watchLocalModules);
 } else {

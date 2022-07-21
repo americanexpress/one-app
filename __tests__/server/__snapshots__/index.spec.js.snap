@@ -25,6 +25,6 @@ Object {
 }
 `;
 
-exports[`server index ssrServerStart logs errors when listening on the metrics server fails 1`] = `"error encountered starting the metrics server"`;
+exports[`server index ssrServerStart logs errors when listening on the metrics server fails 1`] = `"Error encountered starting 📊 Metrics server"`;
 
-exports[`server index ssrServerStart logs errors when listening on the server fails 1`] = `[Error: test error]`;
+exports[`server index ssrServerStart logs errors when listening on the server fails 1`] = `"Error encountered starting 🌎 One App server"`;
