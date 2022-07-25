@@ -18,6 +18,7 @@
 import request from 'supertest';
 
 jest.mock('express');
+jest.mock('fastify');
 jest.mock('body-parser', () => ({
   json: jest.fn(() => (_request, _res, next) => next()),
   urlencoded: jest.fn(() => (_request, _res, next) => next()),
@@ -56,7 +57,7 @@ jest.mock('../../mocks/scenarios', () => ({
 }), { virtual: true });
 
 describe('ssrServer', () => {
-  jest.spyOn(console, 'info').mockImplementation(() => {});
+  // jest.spyOn(console, 'info').mockImplementation(() => {});
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -174,20 +175,15 @@ describe('ssrServer', () => {
       return server;
     }
 
-    // TODO: Add test cases
-    // const loadFastify = async () => {
-    //   const fastify = await loadServer().createApp();
-
-    //   return fastify;
-    // };
-
     const loadExpress = () => {
       const app = require('express')();
 
       app.disable('x-powered-by');
       app.disable('e-tag');
 
-      app.use(loadServer().makeExpressRouter());
+      const router = loadServer().makeExpressRouter();
+
+      app.use(router);
 
       return app;
     };
@@ -492,28 +488,6 @@ describe('ssrServer', () => {
       expect(addFrameOptionsHeader).toBeCalled();
     });
 
-    it.skip('should return the static error page when an error was encountered', async () => {
-      const middlewareError = new Error('test error after body sent');
-
-      const express = require('express');
-      const buggyApp = express()
-        .use((_request, _res, next) => {
-          next(middlewareError);
-        });
-      express.mockReturnValueOnce(buggyApp);
-
-      const response = await request(loadExpress())
-        .get('/anything');
-
-      expect(response.status).toEqual(500);
-      expect(console.error).toHaveBeenCalledTimes(1);
-      // expect(console.error).toHaveBeenCalledWith(middlewareError);
-      expect(response.type).toEqual('text/html');
-      expect(response.text).toMatch('<h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>');
-      expect(response.text).toMatch('Sorry, we are unable to load this page at this time.');
-      expect(response.text).toMatch('Please try again later.');
-    });
-
     it('should return the static error page when the URL is malformed', async () => {
       const res = await request(loadExpress())
         .get('/%c0%2e%c0%2e/%c0%2e%c0%2e/%c0%2e%c0%2e/%c0%2e%c0%2e/rockpj/rock.exe');
@@ -524,30 +498,45 @@ describe('ssrServer', () => {
       expect(res.text).toMatch('Sorry, we are unable to load this page at this time.');
       expect(res.text).not.toMatch('Please try again later.');
     });
+  });
 
-    it.skip('should not alter the response in flight when an error was encountered', async () => {
-      const middlewareError = new Error('test error after body sent');
+  describe('start app with Fastify', () => {
+    it('starts the app through fastify', async () => {
+      const fastify = require('fastify').default;
+      const fastifyExpress = require('@fastify/express').default;
+      const sendHtml = require('../../src/server/middleware/sendHtml').default;
 
-      const express = require('express');
-      const buggyApp = express()
-        .use((request_, res, next) => {
-          res.status(201).send('hello');
-          next(middlewareError);
-        });
-      express.mockReturnValueOnce(buggyApp);
-      let res;
-      try {
-        res = await request(loadExpress())
-          .get('/anything');
-      } catch (_error) {
-        // do nothing
-      }
+      const registerMock = jest.fn();
+      const expressDisableMock = jest.fn();
+      const useMock = jest.fn();
+      const notFoundMock = jest.fn();
 
-      expect(res.status).toEqual(201);
-      // Called twice because express also calls console.error in test
-      expect(console.error).toHaveBeenCalledTimes(2);
-      expect(console.error).toHaveBeenCalledWith(middlewareError, 'express application error: method GET, url "/anything", correlationId "undefined", headersSent: true');
-      expect(res.text).toMatch('hello');
+      fastify.mockImplementation(() => ({
+        register: registerMock,
+        express: {
+          disable: expressDisableMock,
+        },
+        use: useMock,
+        setNotFoundHandler: notFoundMock,
+      }));
+
+      const { createApp } = require('../../src/server/ssrServer');
+
+      await createApp();
+
+      expect(fastify).toHaveBeenCalledWith({});
+
+      expect(registerMock).toHaveBeenCalledTimes(1);
+      expect(registerMock).toHaveBeenCalledWith(fastifyExpress);
+
+      expect(expressDisableMock).toHaveBeenCalledTimes(2);
+      expect(expressDisableMock).toHaveBeenCalledWith('x-powered-by');
+      expect(expressDisableMock).toHaveBeenCalledWith('e-tag');
+
+      expect(useMock).toHaveBeenCalledTimes(1);
+
+      expect(notFoundMock).toHaveBeenCalledTimes(1);
+      expect(notFoundMock).toHaveBeenCalledWith(sendHtml);
     });
   });
 });

@@ -33,7 +33,7 @@ export const listen = async ({
   instance,
   port,
   host,
-} = { context: 'Server' }) => {
+}) => {
   try {
     await instance.listen({
       host: host || '0.0.0.0',
@@ -59,7 +59,7 @@ async function ssrServerStart() {
   await loadModules();
 
   const isHttps = !!process.env.HTTPS_PORT;
-  const port = isHttps ? process.env.HTTPS_PORT : (process.env.HTTP_PORT || 3000);
+  const port = isHttps ? process.env.HTTPS_PORT : process.env.HTTP_PORT || 3000;
 
   await listen({
     context: '🌎 One App server',

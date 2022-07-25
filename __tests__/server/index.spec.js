@@ -29,6 +29,7 @@ describe('server index', () => {
 
   let addServer;
   let shutdown;
+  let ssrServer;
   let ssrServerListen;
   let devHolocronCDNListen;
   let metricsServerListen;
@@ -79,19 +80,20 @@ describe('server index', () => {
 
     ssrServerListen = jest.fn(async () => {
       if (ssrServerError) {
-        throw new Error('test error')
+        throw new Error('test error');
       }
-    })
-    jest.doMock('../../src/server/ssrServer', () => () => ({
+    });
+    ssrServer = jest.fn(() => ({
       listen: ssrServerListen,
       close: async () => 'ssrServer',
     }));
+    jest.doMock('../../src/server/ssrServer', () => ssrServer);
 
     metricsServerListen = jest.fn(async () => {
       if (metricsServerError) {
-        throw new Error('test error')
+        throw new Error('test error');
       }
-    })
+    });
     jest.doMock('../../src/server/metricsServer', () => () => ({
       listen: metricsServerListen,
       close: async () => 'metricsServer',
@@ -99,9 +101,9 @@ describe('server index', () => {
 
     devHolocronCDNListen = jest.fn(async () => {
       if (devHolocronCdnError) {
-        throw new Error('test error')
+        throw new Error('test error');
       }
-    })
+    });
     jest.doMock('../../src/server/devHolocronCDN', () => ({
       default: () => ({
         listen: devHolocronCDNListen,
@@ -116,6 +118,7 @@ describe('server index', () => {
     jest.doMock('../../src/server/config/env/runTime', () => jest.fn());
     jest.doMock('../../src/server/utils/heapdump', () => { });
     jest.doMock('../../src/server/utils/watchLocalModules', () => ({ default: jest.fn() }));
+    jest.doMock('../../src/server/utils/getHttpsConfig', () => () => 'https-config-mock');
 
     jest.doMock('lean-intl', () => ({
       // eslint-disable-next-line no-underscore-dangle
@@ -149,7 +152,7 @@ describe('server index', () => {
     it('starts devHolocronCDN on port 4011', async () => {
       process.env.HTTP_ONE_APP_DEV_CDN_PORT = 4011;
       await load();
-      expect(devHolocronCDNListen).toHaveBeenCalledWith({ "host": "0.0.0.0", "port": "4011" });
+      expect(devHolocronCDNListen).toHaveBeenCalledWith({ host: '0.0.0.0', port: '4011' });
     });
 
     it('starts one-app-dev-proxy with config derived from what is passed in CLI args', async () => {
@@ -174,7 +177,7 @@ describe('server index', () => {
           destination: 'https://example.com',
         },
       }),
-        { virtual: true }
+      { virtual: true }
       );
       await load();
       fs.existsSync = origFsExistsSync;
@@ -193,7 +196,7 @@ describe('server index', () => {
           destination: 'https://example.com',
         },
       }),
-        { virtual: true }
+      { virtual: true }
       );
       await load();
       fs.existsSync = origFsExistsSync;
@@ -205,7 +208,7 @@ describe('server index', () => {
     it('starts ssrServer', async () => {
       process.env.HTTP_PORT = 3000;
       await load();
-      expect(ssrServerListen).toHaveBeenCalledWith({ "host": "0.0.0.0", "port": "3000" });
+      expect(ssrServerListen).toHaveBeenCalledWith({ host: '0.0.0.0', port: '3000' });
     });
 
     it('watches local modules for changes', async () => {
@@ -323,6 +326,7 @@ describe('server index', () => {
     beforeEach(() => {
       process.env.NODE_ENV = 'production';
       delete process.env.ONE_CLIENT_ROOT_MODULE_NAME;
+      delete process.env.HTTPS_PORT;
     });
 
     it('initializes holocron', async () => {
@@ -333,10 +337,21 @@ describe('server index', () => {
 
     it('starts server using a default http port if no env var for HTTP_PORT is given', async () => {
       delete process.env.HTTP_PORT;
-      
+
       await load();
 
-      expect(ssrServerListen.mock.calls[0][0]).toEqual({"host": "0.0.0.0", "port": 3000});
+      expect(ssrServerListen.mock.calls[0][0]).toEqual({ host: '0.0.0.0', port: 3000 });
+    });
+
+    it('starts https server when HTTPS_PORT is present', async () => {
+      process.env.HTTPS_PORT = 5555;
+
+      await load();
+
+      expect(ssrServerListen).toHaveBeenCalledWith(
+        { host: '0.0.0.0', port: '5555' }
+      );
+      expect(ssrServer).toHaveBeenCalledWith({ https: 'https-config-mock' });
     });
 
     it('logs errors when listening on the server fails', async () => {
@@ -398,7 +413,7 @@ describe('server index', () => {
       process.env.NODE_ENV = 'development';
       await load();
       expect(addServer).toHaveBeenCalledTimes(4);
-      expect(await addServer.mock.calls[0][0].close()).toBe('devHolocronCdn')
+      expect(await addServer.mock.calls[0][0].close()).toBe('devHolocronCdn');
     });
 
     it('adds the one-app-dev-proxy to the shutdown list in development', async () => {
@@ -412,14 +427,14 @@ describe('server index', () => {
       process.env.NODE_ENV = 'development';
       await load();
       expect(addServer).toHaveBeenCalledTimes(4);
-      expect(await addServer.mock.calls[2][0].close()).toBe('metricsServer')
+      expect(await addServer.mock.calls[2][0].close()).toBe('metricsServer');
     });
 
     it('adds the ssrServer to the shutdown list in development', async () => {
       process.env.NODE_ENV = 'development';
       await load();
       expect(addServer).toHaveBeenCalledTimes(4);
-      expect(await addServer.mock.calls[3][0].close()).toBe('ssrServer')
+      expect(await addServer.mock.calls[3][0].close()).toBe('ssrServer');
     });
 
     it('does not add the one-app-dev-cdn to the shutdown list in production', async () => {
