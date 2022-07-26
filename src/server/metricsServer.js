@@ -18,6 +18,7 @@ import express from 'express';
 import helmet from 'helmet';
 import Fastify from 'fastify';
 import fastifyExpress from '@fastify/express';
+import rateLimit from 'express-rate-limit';
 import { register as metricsRegister, collectDefaultMetrics } from 'prom-client';
 
 import logging from './utils/logging/serverMiddleware';
@@ -30,6 +31,10 @@ const makeExpressRouter = () => {
 
   router.use(helmet());
   router.use(logging);
+  router.use(rateLimit({
+    windowMs: 1000,
+    max: 10,
+  }));
 
   router.get('/im-up', healthCheck);
 
