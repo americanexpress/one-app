@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 /*
  * Copyright 2019 American Express Travel Related Services Company, Inc.
  *
@@ -28,6 +29,22 @@ import pollModuleMap from './utils/pollModuleMap';
 import loadModules from './utils/loadModules';
 import getHttpsConfig from './utils/getHttpsConfig';
 
+/*    🛠️ UTILITIES 🛠️    */
+
+const getRemotesFromDevEndpointsFile = () => {
+  const pathToDevEndpoints = path.join(process.cwd(), '.dev', 'endpoints', 'index.js');
+
+  return fs.existsSync(pathToDevEndpoints)
+    // eslint-disable-next-line global-require,import/no-dynamic-require
+    ? Object.values(require(pathToDevEndpoints)()).reduce(
+      (moduleRemotes, { destination, devProxyPath }) => ({
+        ...moduleRemotes,
+        [devProxyPath]: destination,
+      }),
+      {})
+    : {};
+};
+
 export const listen = async ({
   context,
   instance,
@@ -50,6 +67,8 @@ export const listen = async ({
     throw error;
   }
 };
+
+/*    🚀 STARTERS 🚀    */
 
 async function ssrServerStart() {
   // need to load _some_ locale so that react-intl does not prevent modules from loading
@@ -83,68 +102,55 @@ async function metricsServerStart() {
   });
 }
 
-function appServersStart() {
-  return Promise.all([
-    ssrServerStart(),
-    metricsServerStart(),
-  ]);
-}
-
-let serverChain;
-if (process.env.NODE_ENV === 'development') {
-  const pathToDevEndpoints = path.join(process.cwd(), '.dev', 'endpoints', 'index.js');
-
-  const getRemotesFromDevEndpointsFile = () => {
-    const moduleRemotes = {};
-    if (fs.existsSync(pathToDevEndpoints)) {
-      // eslint-disable-next-line global-require,import/no-dynamic-require
-      Object.values(require(pathToDevEndpoints)()).forEach(({ destination, devProxyPath }) => {
-        moduleRemotes[devProxyPath] = destination;
-      });
-      return moduleRemotes;
-    }
-    return {};
-  };
-
-  /* eslint
-    global-require: 0,
-    import/no-extraneous-dependencies: ["error", {"devDependencies": true }]
-  */
-  const { argv } = require('yargs');
-
-  const watchLocalModules = require('./utils/watchLocalModules').default;
+async function devHolocronCDNStart() {
   const devHolocronCDN = require('./devHolocronCDN').default;
-  const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy');
   const oneAppDevCdnPort = process.env.HTTP_ONE_APP_DEV_CDN_PORT;
-  const oneAppDevProxyPort = process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT;
 
-  serverChain = Promise.resolve()
-    .then(async () => {
-      await listen({
-        context: '👕 one-app-dev-cdn server',
-        instance: await devHolocronCDN(),
-        port: oneAppDevCdnPort,
-      });
-    })
-    .then(() => new Promise((res, rej) => addServer(
-      oneAppDevProxy({
-        useMiddleware: argv.m,
-        pathToMiddleware: path.join(__dirname, '../../.dev/middleware'),
-        remotes: getRemotesFromDevEndpointsFile(),
-      }).listen(oneAppDevProxyPort, (err) => {
-        if (err) {
-          rej(err);
-        } else {
-          console.log(`👖 one-app-dev-proxy server listening on port ${oneAppDevProxyPort}`);
-          res();
-        }
-      })
-    )))
-    .then(appServersStart)
-    .then(watchLocalModules);
-} else {
-  serverChain = appServersStart();
+  await listen({
+    context: '👕 one-app-dev-cdn server',
+    instance: await devHolocronCDN(),
+    port: oneAppDevCdnPort,
+  });
 }
+
+async function oneAppDevProxyStart() {
+  const { argv } = require('yargs');
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy');
+  const oneAppDevProxyPort = process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT;
+  const instance = oneAppDevProxy({
+    useMiddleware: argv.m,
+    pathToMiddleware: path.join(__dirname, '../../.dev/middleware'),
+    remotes: getRemotesFromDevEndpointsFile(),
+  });
+
+  // Note: this will be moved to Fastify once @americanexpress/one-app-dev-proxy is moved to Fastify
+  await new Promise((res, rej) => {
+    addServer(instance.listen(oneAppDevProxyPort, (err) => {
+      if (err) {
+        rej(err);
+      } else {
+        console.log(`👖 one-app-dev-proxy server listening on port ${oneAppDevProxyPort}`);
+        res();
+      }
+    }));
+  });
+}
+
+async function appServersStart() {
+  await metricsServerStart();
+  await ssrServerStart();
+}
+
+// INIT
+
+const serverChain = process.env.NODE_ENV === 'development'
+  ? Promise.resolve()
+    .then(devHolocronCDNStart)
+    .then(oneAppDevProxyStart)
+    .then(appServersStart)
+    .then(require('./utils/watchLocalModules').default)
+  : appServersStart();
 
 export default serverChain.catch((err) => {
   console.error(err);
