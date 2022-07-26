@@ -138,9 +138,9 @@ describe('pollModuleMap', () => {
     return loadModulesPromise;
   });
 
-  it('schedules a new polling', () => {
+  it('schedules a new polling', async () => {
     const { default: pollModuleMap } = load();
-    pollModuleMap();
+    await pollModuleMap();
     expect(loadModules).toHaveBeenCalledTimes(1);
     return loadModulesPromise
       .then(() => {
@@ -283,11 +283,11 @@ describe('pollModuleMap', () => {
     expect(setTimeout.mock.calls[2][1]).toBe(MIN_POLL_TIME);
   });
 
-  it('schedules a new polling that does not prevent the event loop from exiting', () => {
+  it('schedules a new polling that does not prevent the event loop from exiting', async () => {
     const { default: pollModuleMap } = load();
     const mockUnref = jest.fn();
     setTimeout.mockImplementationOnce(() => ({ unref: mockUnref }));
-    pollModuleMap();
+    await pollModuleMap();
     expect(loadModules).toHaveBeenCalledTimes(1);
 
     return loadModulesPromise
@@ -297,11 +297,11 @@ describe('pollModuleMap', () => {
       });
   });
 
-  it('resets the time to the next polling to the minimum if there were updates', () => {
+  it('resets the time to the next polling to the minimum if there were updates', async () => {
     const { default: pollModuleMap } = load();
     const moduleMapUpdates = { 'module-name': '1.2.3' };
     loadModulesPromise = Promise.resolve(moduleMapUpdates);
-    pollModuleMap();
+    await pollModuleMap();
     expect(loadModules).toHaveBeenCalledTimes(1);
 
     return loadModulesPromise
@@ -320,9 +320,9 @@ describe('pollModuleMap', () => {
       });
   });
 
-  it('increases the time to the next polling if there were no updates', () => {
+  it('increases the time to the next polling if there were no updates', async () => {
     const { default: pollModuleMap } = load();
-    pollModuleMap();
+    await pollModuleMap();
     expect(loadModules).toHaveBeenCalledTimes(1);
 
     return loadModulesPromise
@@ -344,11 +344,11 @@ describe('pollModuleMap', () => {
       });
   });
 
-  it('resets the time to the next polling to the minimum if there were errors', () => {
+  it('resets the time to the next polling to the minimum if there were errors', async () => {
     const { default: pollModuleMap } = load();
     const error = { message: 'sample test error' };
     loadModulesPromise = Promise.reject(error);
-    pollModuleMap();
+    await pollModuleMap();
     expect(loadModules).toHaveBeenCalledTimes(1);
 
     return loadModulesPromise
@@ -421,10 +421,10 @@ describe('pollModuleMap', () => {
     expect(setTimeout.mock.calls[2][0]).toBe(pollModuleMap);
   });
 
-  it('marks the module map as healthy if there were no errors', () => {
+  it('marks the module map as healthy if there were no errors', async () => {
     expect.assertions(2);
     const { default: pollModuleMap, getModuleMapHealth } = load();
-    pollModuleMap();
+    await pollModuleMap();
     expect(loadModules).toHaveBeenCalledTimes(1);
 
     return loadModulesPromise
@@ -433,18 +433,18 @@ describe('pollModuleMap', () => {
       });
   });
 
-  it('marks the module map as unhealthy if there is an error', () => {
+  it('marks the module map as unhealthy if there is an error', async () => {
     expect.assertions(2);
     const { default: pollModuleMap, getModuleMapHealth } = load();
     const error = { message: 'sample test error' };
     loadModulesPromise = Promise.reject(error);
-    pollModuleMap();
+    await pollModuleMap();
     expect(loadModules).toHaveBeenCalledTimes(1);
     return loadModulesPromise
       // catch and then so as to run after pollModuleMap's error handling
       .catch((err) => err)
       .then(() => {
-        expect(getModuleMapHealth()).toBe(null);
+        expect(getModuleMapHealth()).toBe(false);
       });
   });
 
