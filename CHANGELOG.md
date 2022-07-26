@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.0.0](https://github.com/americanexpress/one-app/compare/v5.15.3...v6.0.0) (2022-07-20)
+
+
+### Bug Fixes
+
+* **helmet:** disable breaking headers ([#780](https://github.com/americanexpress/one-app/issues/780)) ([df21a1d](https://github.com/americanexpress/one-app/commit/df21a1dd38b7ff5f893fe45961001a9ce010affb))
+
+
+### Features
+
+* **deps:** upgrade to react 17 ([d927a7f](https://github.com/americanexpress/one-app/commit/d927a7f370d88d216e1df7c6c026081ed7c5f9ea))
+* **server:** drop node 12 support ([a755bef](https://github.com/americanexpress/one-app/commit/a755beffb9edce5f261bf02dca8c3cfd420f7c96))
+
+
+### BREAKING CHANGES
+
+* **server:** minimum supported node version is 16
+* **deps:** Upgrade from React 16 to 17
+
+
 ## [5.15.3](https://github.com/americanexpress/one-app/compare/v5.15.2...v5.15.3) (2022-07-13)
 
 
@@ -38,12 +58,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 * **deps:** upgrade to react 17 ([9ba5c39](https://github.com/americanexpress/one-app/commit/9ba5c3926f603a8bf3e8a4ed32930766568621eb))
 * **server:** drop node 12 support ([5154d65](https://github.com/americanexpress/one-app/commit/5154d65924dec28f63ad5fdf9192c4ecb972d440))
-
-
-### BREAKING CHANGES
-
-* **server:** minimum supported node version is 16
-* **deps:** Upgrade from React 16 to 17
 
 ## [5.14.1](https://github.com/americanexpress/one-app/compare/v5.14.0...v5.14.1) (2022-05-05)
 
