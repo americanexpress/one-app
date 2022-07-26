@@ -444,7 +444,7 @@ describe('pollModuleMap', () => {
       // catch and then so as to run after pollModuleMap's error handling
       .catch((err) => err)
       .then(() => {
-        expect(getModuleMapHealth()).toBe(false);
+        expect(getModuleMapHealth()).toBe(null);
       });
   });
 
