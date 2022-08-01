@@ -135,7 +135,7 @@
     "@americanexpress/one-service-worker": "^1.0.4",
     "@babel/cli": "^7.18.6",
     "@babel/core": "^7.18.6",
-    "@babel/node": "^7.18.6",
+    "@babel/node": "^7.18.10",
     "@babel/register": "^7.18.6",
     "@commitlint/cli": "^17.0.3",
     "@commitlint/config-conventional": "^17.0.3",
