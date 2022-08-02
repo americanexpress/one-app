@@ -1668,3 +1668,213 @@ describe('heapdump', () => {
     expect(size).toBeLessThanOrEqual(100 * oneMegabyte);
   });
 });
+
+describe('Routes sanity checks', () => {
+  const defaultFetchOptions = createFetchOptions();
+  let originalModuleMap;
+  const oneAppLocalPortToUse = getRandomPortNumber();
+  const oneAppMetricsLocalPortToUse = getRandomPortNumber();
+  const fetchUrl = `https://localhost:${oneAppLocalPortToUse}`;
+
+  let browser;
+
+  beforeAll(async () => {
+    originalModuleMap = readModuleMap();
+    ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse }));
+  });
+
+  afterAll(async () => {
+    await tearDownTestRunner({ browser });
+    writeModuleMap(originalModuleMap);
+  });
+
+  test('Request: /_/status', async () => {
+    const response = await fetch(
+      `${fetchUrl}/_/status`,
+      {
+        ...defaultFetchOptions,
+        method: 'GET',
+        headers: {
+          origin: 'test.example.com',
+        },
+      }
+    );
+    const rawHeaders = response.headers.raw();
+
+    expect(response.status).toBe(200);
+    expect(Object.keys(rawHeaders)).toEqual([
+      'x-frame-options',
+      'x-content-type-options',
+      'strict-transport-security',
+      'x-xss-protection',
+      'referrer-policy',
+      'one-app-version',
+      'content-type',
+      'content-length',
+      'etag',
+      'vary',
+      'date',
+      'connection',
+    ]);
+    expect(rawHeaders.connection).toEqual(['close']);
+    expect(rawHeaders['content-length']).toEqual(['2']);
+    expect(rawHeaders['content-type']).toEqual(['text/plain; charset=utf-8']);
+    expect(rawHeaders['referrer-policy']).toEqual(['same-origin']);
+    expect(rawHeaders['strict-transport-security']).toEqual([
+      'max-age=15552000; includeSubDomains',
+    ]);
+    expect(rawHeaders.vary).toEqual(['Accept-Encoding']);
+    expect(rawHeaders['x-content-type-options']).toEqual(['nosniff']);
+    expect(rawHeaders['x-frame-options']).toEqual(['DENY']);
+    expect(rawHeaders['x-xss-protection']).toEqual(['1; mode=block']);
+  });
+
+  test('Request: /_/report/security/csp-violation', async () => {
+    const response = await fetch(
+      `${fetchUrl}/_/report/security/csp-violation`,
+      {
+        ...defaultFetchOptions,
+        method: 'POST',
+        headers: {
+          origin: 'test.example.com',
+        },
+      }
+    );
+    const rawHeaders = response.headers.raw();
+
+    expect(Object.keys(rawHeaders).sort()).toEqual([
+      'connection',
+      'content-security-policy',
+      'date',
+      'expect-ct',
+      'one-app-version',
+      'referrer-policy',
+      'strict-transport-security',
+      'x-content-type-options',
+      'x-dns-prefetch-control',
+      'x-download-options',
+      'x-frame-options',
+      'x-permitted-cross-domain-policies',
+      'x-xss-protection',
+    ]);
+    expect(rawHeaders.connection).toEqual(['close']);
+    expect(rawHeaders['expect-ct']).toEqual(['max-age=0']);
+    expect(rawHeaders['referrer-policy']).toEqual(['no-referrer']);
+    expect(rawHeaders['strict-transport-security']).toEqual(['max-age=15552000; includeSubDomains']);
+    expect(rawHeaders['x-content-type-options']).toEqual(['nosniff']);
+    expect(rawHeaders['x-dns-prefetch-control']).toEqual(['off']);
+    expect(rawHeaders['x-download-options']).toEqual(['noopen']);
+    expect(rawHeaders['x-frame-options']).toEqual(['SAMEORIGIN']);
+    expect(rawHeaders['x-permitted-cross-domain-policies']).toEqual(['none']);
+    expect(rawHeaders['x-xss-protection']).toEqual(['0']);
+    expect(response.status).toBe(204);
+    expect(response.type).toBe(undefined); // not specified
+    expect(await response.text()).toBe('');
+  });
+
+  test('Request: /_/report/errors responds with status 415', async () => {
+    const response = await fetch(
+      `${fetchUrl}/_/report/errors`,
+      {
+        ...defaultFetchOptions,
+        method: 'POST',
+        headers: {
+          origin: 'test.example.com',
+        },
+      }
+    );
+
+    expect(Object.keys(response.headers.raw()).sort()).toEqual([
+      'connection',
+      'content-length',
+      'content-security-policy',
+      'content-type',
+      'date',
+      'etag',
+      'expect-ct',
+      'one-app-version',
+      'referrer-policy',
+      'strict-transport-security',
+      'vary',
+      'x-content-type-options',
+      'x-dns-prefetch-control',
+      'x-download-options',
+      'x-frame-options',
+      'x-permitted-cross-domain-policies',
+      'x-xss-protection',
+    ]);
+    expect(response.headers.get('connection')).toEqual('close');
+    expect(response.headers.get('content-length')).toEqual('22');
+    expect(response.headers.get('content-type')).toEqual('text/plain; charset=utf-8');
+    expect(response.headers.get('expect-ct')).toEqual('max-age=0');
+    expect(response.headers.get('referrer-policy')).toEqual('no-referrer');
+    expect(response.headers.get('strict-transport-security')).toEqual('max-age=15552000; includeSubDomains');
+    expect(response.headers.get('vary')).toEqual('Accept-Encoding');
+    expect(response.headers.get('x-content-type-options')).toEqual('nosniff');
+    expect(response.headers.get('x-dns-prefetch-control')).toEqual('off');
+    expect(response.headers.get('x-download-options')).toEqual('noopen');
+    expect(response.headers.get('x-frame-options')).toEqual('SAMEORIGIN');
+    expect(response.headers.get('x-permitted-cross-domain-policies')).toEqual('none');
+    expect(response.headers.get('x-xss-protection')).toEqual('0');
+    expect(response.status).toBe(415);
+    expect(await response.text()).toBe('Unsupported Media Type');
+  });
+
+  test('Request: /_/report/errors responds with status 204', async () => {
+    const response = await fetch(
+      `${fetchUrl}/_/report/errors`,
+      {
+        ...defaultFetchOptions,
+        method: 'POST',
+        headers: {
+          origin: 'test.example.com',
+          'content-type': 'application/json',
+        },
+      }
+    );
+
+    expect(Object.keys(response.headers.raw()).sort()).toEqual([
+      'connection',
+      'content-security-policy',
+      'date',
+      'etag',
+      'expect-ct',
+      'one-app-version',
+      'referrer-policy',
+      'strict-transport-security',
+      'x-content-type-options',
+      'x-dns-prefetch-control',
+      'x-download-options',
+      'x-frame-options',
+      'x-permitted-cross-domain-policies',
+      'x-xss-protection',
+    ]);
+    expect(response.headers.get('connection')).toEqual('close');
+    expect(response.headers.get('expect-ct')).toEqual('max-age=0');
+    expect(response.headers.get('referrer-policy')).toEqual('no-referrer');
+    expect(response.headers.get('strict-transport-security')).toEqual('max-age=15552000; includeSubDomains');
+    expect(response.headers.get('x-content-type-options')).toEqual('nosniff');
+    expect(response.headers.get('x-dns-prefetch-control')).toEqual('off');
+    expect(response.headers.get('x-download-options')).toEqual('noopen');
+    expect(response.headers.get('x-frame-options')).toEqual('SAMEORIGIN');
+    expect(response.headers.get('x-permitted-cross-domain-policies')).toEqual('none');
+    expect(response.headers.get('x-xss-protection')).toEqual('0');
+    expect(response.status).toBe(204);
+    expect(await response.text()).toBe('');
+  });
+
+  test('Request: /foo/invalid.json', async () => {
+    const response = await fetch(
+      `${fetchUrl}/foo/invalid.json`,
+      {
+        ...defaultFetchOptions,
+        method: 'GET',
+        headers: {
+          origin: 'test.example.com',
+        },
+      }
+    );
+
+    expect(response.status).toBe(404);
+  });
+});
