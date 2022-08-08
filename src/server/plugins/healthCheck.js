@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2022 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,37 +37,41 @@ export const verifyThresholds = ({
   && tickDelay[0] < 1
   && rootModuleExists;
 
-export default async function healthCheck(_req, res) {
-  try {
-    const [processStats, tickDelay] = await Promise.all([
-      getProcessStats(process.pid),
-      getTickDelay(),
-    ]);
-    const holocron = {
-      rootModuleExists: checkForRootModule(),
-      moduleMapHealthy: getModuleMapHealth(),
-    };
-    const stats = {
-      process: {
-        ...processStats,
-        tickDelay,
-      },
-      holocron,
-    };
-    const withinThresholds = verifyThresholds(stats);
-
-    if (!holocron.moduleMapHealthy) {
-      stats.process.status = 200;
-      stats.holocron.status = 500;
-      res.status(207);
-    } else if (withinThresholds) {
-      res.status(200);
-    } else {
-      res.status(503);
+export default async function healthCheck(fastify, _opts, done) {
+  fastify.get('/im-up', (_request, reply) => {
+    try {
+      const [processStats, tickDelay] = await Promise.all([
+        getProcessStats(process.pid),
+        getTickDelay(),
+      ]);
+      const holocron = {
+        rootModuleExists: checkForRootModule(),
+        moduleMapHealthy: getModuleMapHealth(),
+      };
+      const stats = {
+        process: {
+          ...processStats,
+          tickDelay,
+        },
+        holocron,
+      };
+      const withinThresholds = verifyThresholds(stats);
+  
+      if (!holocron.moduleMapHealthy) {
+        stats.process.status = 200;
+        stats.holocron.status = 500;
+        reply.code(207);
+      } else if (withinThresholds) {
+        reply.code(200);
+      } else {
+        reply.code(503);
+      }
+  
+      reply.send(stats);
+    } catch (err) {
+      res.code(500).send('');
     }
+  })
 
-    res.json(stats);
-  } catch (err) {
-    res.sendStatus(500);
-  }
+  done();
 }

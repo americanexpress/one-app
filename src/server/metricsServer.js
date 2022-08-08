@@ -17,33 +17,33 @@
 import express from 'express';
 import helmet from 'helmet';
 import Fastify from 'fastify';
-import fastifyExpress from '@fastify/express';
-import rateLimit from 'express-rate-limit';
+// import fastifyExpress from '@fastify/express';
+// import rateLimit from 'express-rate-limit';
 import { register as metricsRegister, collectDefaultMetrics } from 'prom-client';
 
 import logging from './utils/logging/serverMiddleware';
-import healthCheck from './middleware/healthCheck';
+import healthCheck from './plugins/healthCheck';
 
 collectDefaultMetrics();
 
 const makeExpressRouter = () => {
   const router = express.Router();
 
-  router.use(helmet());
+  // router.use(helmet());
   router.use(logging);
-  router.use(rateLimit({
-    windowMs: 1000,
-    max: 10,
-  }));
+  // router.use(rateLimit({
+  //   windowMs: 1000,
+  //   max: 10,
+  // }));
 
-  router.get('/im-up', healthCheck);
+  // router.get('/im-up', healthCheck);
 
-  router.get('/metrics', async (_req, res) => {
-    res.set('Content-Type', metricsRegister.contentType);
-    res.end(await metricsRegister.metrics());
-  });
+  // router.get('/metrics', async (_req, res) => {
+  //   res.set('Content-Type', metricsRegister.contentType);
+  //   res.end(await metricsRegister.metrics());
+  // });
 
-  router.use('/', (_req, res) => res.status(404).set('Content-Type', 'text/plain').send(''));
+  // router.use('/', (_req, res) => res.status(404).set('Content-Type', 'text/plain').send(''));
 
   return router;
 };
@@ -51,12 +51,18 @@ const makeExpressRouter = () => {
 export async function createMetricsServer() {
   const fastify = Fastify();
 
-  await fastify.register(fastifyExpress);
+  await fastify.register(helmet);
+  await fastify.register(healthCheck);
 
-  fastify.express.disable('x-powered-by');
-  fastify.express.disable('e-tag');
+  fastify.get('/metrics', async (_request, reply) => {
+    reply
+      .header('Content-Type', metricsRegister.contentType)
+      .send(await metricsRegister.metrics());
+  });
 
-  fastify.use(makeExpressRouter());
+  fastify.get('/', (_request, reply) => {
+    reply.code(404).send('')
+  });
 
   return fastify;
 }
