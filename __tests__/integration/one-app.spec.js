@@ -25,10 +25,7 @@ import parsePrometheusTextFormat from 'parse-prometheus-text-format';
 
 import { setUpTestRunner, tearDownTestRunner, sendSignal } from './helpers/testRunner';
 import { waitFor } from './helpers/wait';
-import {
-  deployBrokenModule,
-  dropModuleVersion,
-} from './helpers/moduleDeployments';
+import { deployBrokenModule, dropModuleVersion } from './helpers/moduleDeployments';
 import {
   removeModuleFromModuleMap,
   addModuleToModuleMap,
@@ -38,9 +35,7 @@ import {
   retrieveGitSha,
   testCdnUrl,
 } from './helpers/moduleMap';
-import {
-  searchForNextLogMatch,
-} from './helpers/logging';
+import { searchForNextLogMatch } from './helpers/logging';
 import createFetchOptions from './helpers/fetchOptions';
 import getRandomPortNumber from './helpers/getRandomPortNumber';
 import {
@@ -82,15 +77,13 @@ describe('Tests that require Docker setup', () => {
       const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Ignoring (?<workingModule>.*) until .*/;
       const requiredExternalsError = searchForNextLogMatch(revertErrorMatch);
       const loggedError = await requiredExternalsError;
-      const [,
-        problemModule,
-        problemModuleUrl,
-        workingUrl,
-      ] = revertErrorMatch.exec(loggedError);
+      const [, problemModule, problemModuleUrl, workingUrl] = revertErrorMatch.exec(loggedError);
       const gitSha = await retrieveGitSha();
       await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
       expect(problemModule).toBe(moduleName);
-      expect(problemModuleUrl).toBe(`${testCdnUrl}/${gitSha}/${moduleName}/${version}/${moduleName}.node.js`);
+      expect(problemModuleUrl).toBe(
+        `${testCdnUrl}/${gitSha}/${moduleName}/${version}/${moduleName}.node.js`
+      );
       // eslint-disable-next-line no-useless-escape
       expect(workingUrl).toBe(moduleName);
     });
@@ -129,16 +122,13 @@ describe('Tests that require Docker setup', () => {
     });
 
     test('app rejects CORS POST requests', async () => {
-      const response = await fetch(
-        `${appAtTestUrls.fetchUrl}/success`,
-        {
-          ...defaultFetchOptions,
-          method: 'POST',
-          headers: {
-            origin: 'test.example.com',
-          },
-        }
-      );
+      const response = await fetch(`${appAtTestUrls.fetchUrl}/success`, {
+        ...defaultFetchOptions,
+        method: 'POST',
+        headers: {
+          origin: 'test.example.com',
+        },
+      });
       const rawHeaders = response.headers.raw();
       expect(response.status).toBe(200);
       expect(rawHeaders).not.toHaveProperty('access-control-allow-origin');
@@ -164,8 +154,7 @@ describe('Tests that require Docker setup', () => {
         expect.assertions(1);
         const response = await fetch(appAtTestUrls.fetchMetricsUrl);
         const parsedMetrics = parsePrometheusTextFormat(await response.text());
-        const allMetricNames = parsedMetrics
-          .map((metric) => metric.name);
+        const allMetricNames = parsedMetrics.map((metric) => metric.name);
 
         const metricsNamesWithHelpInfo = parsedMetrics
           .filter((metric) => metric.help && metric.help.length > 0)
@@ -176,15 +165,13 @@ describe('Tests that require Docker setup', () => {
     });
 
     test('app rejects CORS OPTIONS pre-flight requests for POST', async () => {
-      const response = await fetch(
-        `${appAtTestUrls.fetchUrl}/success`,
-        {
-          ...defaultFetchOptions,
-          method: 'OPTIONS',
-          headers: {
-            origin: 'test.example.com',
-          },
-        });
+      const response = await fetch(`${appAtTestUrls.fetchUrl}/success`, {
+        ...defaultFetchOptions,
+        method: 'OPTIONS',
+        headers: {
+          origin: 'test.example.com',
+        },
+      });
 
       expect(response.status).toBe(200);
       // preflight-only headers
@@ -203,7 +190,10 @@ describe('Tests that require Docker setup', () => {
         await addModuleToModuleMap({
           moduleName: 'frank-lloyd-root',
           version: '0.0.2',
-          integrityDigests: retrieveModuleIntegrityDigests({ moduleName: 'frank-lloyd-root', version: '0.0.2' }),
+          integrityDigests: retrieveModuleIntegrityDigests({
+            moduleName: 'frank-lloyd-root',
+            version: '0.0.2',
+          }),
         });
         // wait for change to be picked up
         await waitFor(5000);
@@ -250,17 +240,14 @@ describe('Tests that require Docker setup', () => {
         });
 
         test('logs errors when reported to /_/report/errors', async () => {
-          const resp = await fetch(
-            `${appAtTestUrls.fetchUrl}/_/report/errors`,
-            {
-              ...defaultFetchOptions,
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify([{ msg: errorMessage }]),
-            }
-          );
+          const resp = await fetch(`${appAtTestUrls.fetchUrl}/_/report/errors`, {
+            ...defaultFetchOptions,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify([{ msg: errorMessage }]),
+          });
 
           expect(resp.status).toEqual(204);
 
@@ -278,21 +265,18 @@ describe('Tests that require Docker setup', () => {
         });
 
         test('logs violations reported to /_/report/errors', async () => {
-          const resp = await fetch(
-            `${appAtTestUrls.fetchUrl}/_/report/security/csp-violation`,
-            {
-              ...defaultFetchOptions,
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
+          const resp = await fetch(`${appAtTestUrls.fetchUrl}/_/report/security/csp-violation`, {
+            ...defaultFetchOptions,
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              'csp-report': {
+                'document-uri': 'bad.example.com',
               },
-              body: JSON.stringify({
-                'csp-report': {
-                  'document-uri': 'bad.example.com',
-                },
-              }),
-            }
-          );
+            }),
+          });
 
           expect(resp.status).toEqual(204);
           await expect(reportedCspViolationSearch).resolves.toMatchSnapshot();
@@ -316,7 +300,10 @@ describe('Tests that require Docker setup', () => {
 
       describe('module removed from module map', () => {
         afterAll(() => {
-          const integrityDigests = retrieveModuleIntegrityDigests({ moduleName: 'healthy-frank', version: sampleModuleVersion });
+          const integrityDigests = retrieveModuleIntegrityDigests({
+            moduleName: 'healthy-frank',
+            version: sampleModuleVersion,
+          });
           addModuleToModuleMap({
             moduleName: 'healthy-frank',
             version: sampleModuleVersion,
@@ -336,7 +323,9 @@ describe('Tests that require Docker setup', () => {
 
           await browser.url(`${appAtTestUrls.browserUrl}/demo/healthy-frank`);
           const missingModuleMessageElement = await browser.$('.missingModuleMessage');
-          const missingModuleNameElement = await missingModuleMessageElement.$('.missingModuleName');
+          const missingModuleNameElement = await missingModuleMessageElement.$(
+            '.missingModuleName'
+          );
           const missingModuleName = await missingModuleNameElement.getText();
           expect(missingModuleName.includes('healthy-frank')).toBe(true);
         });
@@ -348,14 +337,19 @@ describe('Tests that require Docker setup', () => {
         test('loads new module when module map updated', async () => {
           await browser.url(`${appAtTestUrls.browserUrl}/demo/late-frank`);
           const missingModuleMessageElement = await browser.$('.missingModuleMessage');
-          const missingModuleNameElement = await missingModuleMessageElement.$('.missingModuleName');
+          const missingModuleNameElement = await missingModuleMessageElement.$(
+            '.missingModuleName'
+          );
           const missingModuleName = await missingModuleNameElement.getText();
           expect(missingModuleName.includes('late-frank')).toBe(true);
 
           await addModuleToModuleMap({
             moduleName: 'late-frank',
             version: sampleModuleVersion,
-            integrityDigests: retrieveModuleIntegrityDigests({ moduleName: 'late-frank', version: sampleModuleVersion }),
+            integrityDigests: retrieveModuleIntegrityDigests({
+              moduleName: 'late-frank',
+              version: sampleModuleVersion,
+            }),
           });
           // not ideal but need to wait for app to poll;
           await waitFor(5000);
@@ -385,7 +379,10 @@ describe('Tests that require Docker setup', () => {
             await addModuleToModuleMap({
               moduleName: 'frank-lloyd-root',
               version: nextVersion,
-              integrityDigests: retrieveModuleIntegrityDigests({ moduleName: 'frank-lloyd-root', version: nextVersion }),
+              integrityDigests: retrieveModuleIntegrityDigests({
+                moduleName: 'frank-lloyd-root',
+                version: nextVersion,
+              }),
             });
             await waitFor(5000);
           });
@@ -425,7 +422,10 @@ describe('Tests that require Docker setup', () => {
             await addModuleToModuleMap({
               moduleName: 'picky-frank',
               version: nextVersion,
-              integrityDigests: retrieveModuleIntegrityDigests({ moduleName: 'picky-frank', version: nextVersion }),
+              integrityDigests: retrieveModuleIntegrityDigests({
+                moduleName: 'picky-frank',
+                version: nextVersion,
+              }),
             });
             await waitFor(5000);
           });
@@ -457,9 +457,11 @@ describe('Tests that require Docker setup', () => {
             moduleName: 'bad-frank',
             version: sampleModuleVersion,
             integrityDigests: {
-              browser: 'sha256-4XVXHQGFftIRsBvUKIobtVQjouQBaq11PwPHDMzQ2Hk= sha384-FX5cUzgC22jk+RGJ47h07QVt4q/cvv+Ck57CY0A8bwEQDn+w48zYlwMDlh9OxRzq',
+              browser:
+                'sha256-4XVXHQGFftIRsBvUKIobtVQjouQBaq11PwPHDMzQ2Hk= sha384-FX5cUzgC22jk+RGJ47h07QVt4q/cvv+Ck57CY0A8bwEQDn+w48zYlwMDlh9OxRzq',
               node: 'sha256-4XVXHQGFftIRsBvUKIobtVQjouQBaq11PwPHDMzQ2Hk= sha384-FX5cUzgC22jk+RGJ47h07QVt4q/cvv+Ck57CY0A8bwEQDn+w48zYlwMDlh9OxRzq',
-              legacyBrowser: 'sha256-4XVXHQGFftIRsBvUKIobtVQjouQBaq11PwPHDMzQ2Hk= sha384-FX5cUzgC22jk+RGJ47h07QVt4q/cvv+Ck57CY0A8bwEQDn+w48zYlwMDlh9OxRzq',
+              legacyBrowser:
+                'sha256-4XVXHQGFftIRsBvUKIobtVQjouQBaq11PwPHDMzQ2Hk= sha384-FX5cUzgC22jk+RGJ47h07QVt4q/cvv+Ck57CY0A8bwEQDn+w48zYlwMDlh9OxRzq',
             },
           };
           blocklistingOfModuleLogSearch = searchForNextLogMatch(blocklistRegex);
@@ -481,7 +483,9 @@ describe('Tests that require Docker setup', () => {
         test('does not load broken module', async () => {
           await browser.url(`${appAtTestUrls.browserUrl}/demo/bad-frank`);
           const missingModuleMessageElement = await browser.$('.missingModuleMessage');
-          const missingModuleNameElement = await missingModuleMessageElement.$('.missingModuleName');
+          const missingModuleNameElement = await missingModuleMessageElement.$(
+            '.missingModuleName'
+          );
           const missingModuleName = await missingModuleNameElement.getText();
           expect(missingModuleName.includes('bad-frank')).toBe(true);
         });
@@ -504,8 +508,10 @@ describe('Tests that require Docker setup', () => {
             moduleName: 'sneaky-frank',
             version,
             integrityDigests: {
-              browser: 'sha256-GmvP4f2Fg21H5bLWdUNqFFuLeGnLbXD7FDrb0CJL6CA= sha384-sewv7JNAfdDA+jcS+nn4auGm5Sad4GaMSxvT3IIlAdsLhUnxCjqWrWHbt4PWBJoo',
-              legacyBrowser: 'sha256-GmvP4f2Fg21H5bLWdUNqFFuLeGnLbXD7FDrb0CJL6CA= sha384-sewv7JNAfdDA+jcS+nn4auGm5Sad4GaMSxvT3IIlAdsLhUnxCjqWrWHbt4PWBJoo',
+              browser:
+                'sha256-GmvP4f2Fg21H5bLWdUNqFFuLeGnLbXD7FDrb0CJL6CA= sha384-sewv7JNAfdDA+jcS+nn4auGm5Sad4GaMSxvT3IIlAdsLhUnxCjqWrWHbt4PWBJoo',
+              legacyBrowser:
+                'sha256-GmvP4f2Fg21H5bLWdUNqFFuLeGnLbXD7FDrb0CJL6CA= sha384-sewv7JNAfdDA+jcS+nn4auGm5Sad4GaMSxvT3IIlAdsLhUnxCjqWrWHbt4PWBJoo',
               node: 'invalid-digest',
             },
           };
@@ -534,7 +540,9 @@ describe('Tests that require Docker setup', () => {
         test('does not load broken module', async () => {
           await browser.url(`${appAtTestUrls.browserUrl}/demo/sneaky-frank`);
           const missingModuleMessageElement = await browser.$('.missingModuleMessage');
-          const missingModuleNameElement = await missingModuleMessageElement.$('.missingModuleName');
+          const missingModuleNameElement = await missingModuleMessageElement.$(
+            '.missingModuleName'
+          );
           const missingModuleName = await missingModuleNameElement.getText();
           expect(missingModuleName.includes('sneaky-frank')).toBe(true);
         });
@@ -576,12 +584,16 @@ describe('Tests that require Docker setup', () => {
           const consoleLogs = await browser.getLogs('browser');
 
           expect(consoleLogs).toEqual(
-            expect.arrayContaining([{
-              level: 'SEVERE',
-              message: expect.stringMatching(/https:\/\/one-app:8443\/demo\/healthy-frank - Failed to find a valid digest in the 'integrity' attribute for resource 'https:\/\/sample-cdn\.frank\/modules\/.+\/healthy-frank\/0\.0\.0\/healthy-frank.browser.js' with computed SHA-256 integrity '.+'\. The resource has been blocked\./),
-              source: 'security',
-              timestamp: expect.any(Number),
-            }])
+            expect.arrayContaining([
+              {
+                level: 'SEVERE',
+                message: expect.stringMatching(
+                  /https:\/\/one-app:8443\/demo\/healthy-frank - Failed to find a valid digest in the 'integrity' attribute for resource 'https:\/\/sample-cdn\.frank\/modules\/.+\/healthy-frank\/0\.0\.0\/healthy-frank.browser.js' with computed SHA-256 integrity '.+'\. The resource has been blocked\./
+                ),
+                source: 'security',
+                timestamp: expect.any(Number),
+              },
+            ])
           );
         });
       });
@@ -593,7 +605,10 @@ describe('Tests that require Docker setup', () => {
         describe('with iguazu', () => {
           describe('with ssr enabled', () => {
             beforeAll(async () => {
-              const integrityDigests = retrieveModuleIntegrityDigests({ moduleName: 'needy-frank', version: '0.0.0' });
+              const integrityDigests = retrieveModuleIntegrityDigests({
+                moduleName: 'needy-frank',
+                version: '0.0.0',
+              });
               await addModuleToModuleMap({
                 moduleName: 'needy-frank',
                 version: '0.0.0',
@@ -602,7 +617,9 @@ describe('Tests that require Docker setup', () => {
               await waitFor(5000);
             });
             test('should have SSR preload module state with readPosts', async () => {
-              await browser.url(`${appAtTestUrls.browserUrl}/demo/needy-frank?api=https://fast.api.frank/posts`);
+              await browser.url(
+                `${appAtTestUrls.browserUrl}/demo/needy-frank?api=https://fast.api.frank/posts`
+              );
               const needyFrankModuleStateTag = await browser.$('.needy-frank-loaded-data');
               const needyFrankModuleState = await needyFrankModuleStateTag.getText();
               expect(JSON.parse(needyFrankModuleState)).toMatchSnapshot();
@@ -610,7 +627,9 @@ describe('Tests that require Docker setup', () => {
 
             describe('uses root module provided fetch', () => {
               test('should timeout on server if request exceeds one second', async () => {
-                await browser.url(`${appAtTestUrls.browserUrl}/demo/needy-frank?api=https://slow.api.frank/posts`);
+                await browser.url(
+                  `${appAtTestUrls.browserUrl}/demo/needy-frank?api=https://slow.api.frank/posts`
+                );
                 const needyFrankModuleStateTag = await browser.$('.needy-frank-loaded-data');
                 const needyFrankModuleState = await needyFrankModuleStateTag.getText();
                 expect(JSON.parse(needyFrankModuleState)).toEqual({
@@ -634,7 +653,10 @@ describe('Tests that require Docker setup', () => {
           });
           describe('with ssr disabled', () => {
             beforeAll(async () => {
-              const integrityDigests = retrieveModuleIntegrityDigests({ moduleName: 'needy-frank', version: '0.0.1' });
+              const integrityDigests = retrieveModuleIntegrityDigests({
+                moduleName: 'needy-frank',
+                version: '0.0.1',
+              });
               await addModuleToModuleMap({
                 moduleName: 'needy-frank',
                 version: '0.0.1',
@@ -643,7 +665,9 @@ describe('Tests that require Docker setup', () => {
               await waitFor(5000);
             });
             test('should timeout on client if request exceeds six seconds', async () => {
-              await browser.url(`${appAtTestUrls.browserUrl}/demo/needy-frank?api=https://extra-slow.api.frank/posts`);
+              await browser.url(
+                `${appAtTestUrls.browserUrl}/demo/needy-frank?api=https://extra-slow.api.frank/posts`
+              );
               await waitFor(7000);
               const needyFrankModuleStateTag = await browser.$('.needy-frank-loaded-data');
               const needyFrankModuleState = await needyFrankModuleStateTag.getText();
@@ -652,7 +676,9 @@ describe('Tests that require Docker setup', () => {
                   procedureCaches: {
                     readPosts: {
                       de48373b416b8d2af053d04402c35d194568ffdd: {
-                        stack: expect.stringContaining('Error: https://extra-slow.api.frank/posts after 6000ms'),
+                        stack: expect.stringContaining(
+                          'Error: https://extra-slow.api.frank/posts after 6000ms'
+                        ),
                       },
                     },
                   },
@@ -692,19 +718,22 @@ describe('Tests that require Docker setup', () => {
 
           test('no warnings written to log if a root module is configured with `providedExternals`', async () => {
             await expect(providedExternalsWarning).rejects.toEqual(
-              new Error('Failed to match: /Module frank-lloyd-root attempted to provide externals/ in logs')
+              new Error(
+                'Failed to match: /Module frank-lloyd-root attempted to provide externals/ in logs'
+              )
             );
           });
 
-          test('loads root module correctly with styles from @emotion/core when the root module `providesExternals`',
-            async () => {
-              await browser.url(`${appAtTestUrls.browserUrl}/success`);
-              const headerBody = await browser.$('.helloMessage');
-              const headerText = await headerBody.getText();
-              const headerColor = await headerBody.getCSSProperty('background-color');
-              expect(headerText.includes('Hello! One App is successfully rendering its Modules!')).toBe(true);
-              expect(headerColor.value).toEqual('rgba(0,0,255,1)'); // color: blue;
-            });
+          test('loads root module correctly with styles from @emotion/core when the root module `providesExternals`', async () => {
+            await browser.url(`${appAtTestUrls.browserUrl}/success`);
+            const headerBody = await browser.$('.helloMessage');
+            const headerText = await headerBody.getText();
+            const headerColor = await headerBody.getCSSProperty('background-color');
+            expect(
+              headerText.includes('Hello! One App is successfully rendering its Modules!')
+            ).toBe(true);
+            expect(headerColor.value).toEqual('rgba(0,0,255,1)'); // color: blue;
+          });
         });
 
         describe('child module `providedExternals` invalid usage', () => {
@@ -729,22 +758,20 @@ describe('Tests that require Docker setup', () => {
             writeModuleMap(originalModuleMap);
           });
 
-          test(
-            'writes a warning to log if a child module is configured with `providedExternals`',
-            async () => {
-              await expect(providedExternalsWarning).resolves
-                .toMatch(providedExternalsModuleValidation);
-            });
+          test('writes a warning to log if a child module is configured with `providedExternals`', async () => {
+            await expect(providedExternalsWarning).resolves.toMatch(
+              providedExternalsModuleValidation
+            );
+          });
 
-          test('loads child module correctly with styles from @emotion/core regardless of mis-configuration',
-            async () => {
-              await browser.url(`${appAtTestUrls.browserUrl}/demo/late-frank`);
-              const headerBody = await browser.$('.lateFrank');
-              const headerText = await headerBody.getText();
-              const headerColor = await headerBody.getCSSProperty('color');
-              expect(headerText.includes('Sorry Im late!')).toBe(true);
-              expect(headerColor.value).toEqual('rgba(255,192,203,1)'); // color: pink;
-            });
+          test('loads child module correctly with styles from @emotion/core regardless of mis-configuration', async () => {
+            await browser.url(`${appAtTestUrls.browserUrl}/demo/late-frank`);
+            const headerBody = await browser.$('.lateFrank');
+            const headerText = await headerBody.getText();
+            const headerColor = await headerBody.getCSSProperty('color');
+            expect(headerText.includes('Sorry Im late!')).toBe(true);
+            expect(headerColor.value).toEqual('rgba(255,192,203,1)'); // color: pink;
+          });
         });
 
         describe('child module `requiredExternals` invalid usage', () => {
@@ -779,17 +806,18 @@ describe('Tests that require Docker setup', () => {
             // not ideal but need to wait for app to poll;
             await waitFor(5000);
             const loggedError = await requiredExternalsError;
-            const [,
-              problemModule,
-              problemModuleUrl,
-              workingUrl,
-            ] = revertErrorMatch.exec(loggedError);
+            const [, problemModule, problemModuleUrl, workingUrl] = revertErrorMatch
+              .exec(loggedError);
             const gitSha = await retrieveGitSha();
             await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
             expect(problemModule).toBe('cultured-frankie');
-            expect(problemModuleUrl).toBe(`${testCdnUrl}/${gitSha}/${moduleName}/${version}/${moduleName}.node.js`);
+            expect(problemModuleUrl).toBe(
+              `${testCdnUrl}/${gitSha}/${moduleName}/${version}/${moduleName}.node.js`
+            );
             // eslint-disable-next-line no-useless-escape
-            expect(workingUrl).toBe(`${testCdnUrl}/${gitSha}/${moduleName}/0.0.0/${moduleName}.node.js\"}`);
+            expect(workingUrl).toBe(
+              `${testCdnUrl}/${gitSha}/${moduleName}/0.0.0/${moduleName}.node.js"}`
+            );
           });
           test('fails to get external `semver` for child module as an unsupplied `requiredExternal` for new module in mooduleMap', async () => {
             const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Ignoring (?<ignoredModule>.*) until .*/;
@@ -803,15 +831,14 @@ describe('Tests that require Docker setup', () => {
             // not ideal but need to wait for app to poll;
             await waitFor(5000);
             const loggedError = await requiredExternalsError;
-            const [,
-              problemModule,
-              problemModuleUrl,
-              ignoredModule,
-            ] = revertErrorMatch.exec(loggedError);
+            const [, problemModule, problemModuleUrl, ignoredModule] = revertErrorMatch
+              .exec(loggedError);
             const gitSha = await retrieveGitSha();
             await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
             expect(problemModule).toBe(modName);
-            expect(problemModuleUrl).toBe(`${testCdnUrl}/${gitSha}/${modName}/${modVersion}/${modName}.node.js`);
+            expect(problemModuleUrl).toBe(
+              `${testCdnUrl}/${gitSha}/${modName}/${modVersion}/${modName}.node.js`
+            );
             expect(ignoredModule).toBe(modName);
           });
 
@@ -880,7 +907,10 @@ describe('Tests that require Docker setup', () => {
         await addModuleToModuleMap({
           moduleName: 'vitruvius-franklin',
           version: '0.0.1',
-          integrityDigests: retrieveModuleIntegrityDigests({ moduleName: 'vitruvius-franklin', version: '0.0.1' }),
+          integrityDigests: retrieveModuleIntegrityDigests({
+            moduleName: 'vitruvius-franklin',
+            version: '0.0.1',
+          }),
         });
         // not ideal but need to wait for app to poll;
         await waitFor(5000);
@@ -898,9 +928,9 @@ describe('Tests that require Docker setup', () => {
       });
 
       it('does not load module', async () => {
-        await expect(requestRestrictedAttributesLogSearch)
-          .resolves
-          .toMatch(requestRestrictedAttributesRegex);
+        await expect(requestRestrictedAttributesLogSearch).resolves.toMatch(
+          requestRestrictedAttributesRegex
+        );
       });
     });
 
@@ -909,7 +939,9 @@ describe('Tests that require Docker setup', () => {
         ...defaultFetchOptions,
       });
       const htmlData = await response.text();
-      const scriptContents = htmlData.match(/<script id="initial-state" nonce=\S+>([^<]+)<\/script>/)[1];
+      const scriptContents = htmlData.match(
+        /<script id="initial-state" nonce=\S+>([^<]+)<\/script>/
+      )[1];
       const initialState = scriptContents.match(/window\.__INITIAL_STATE__ = "([^<]+)";/)[1];
       const state = transit.fromJSON(initialState.replace(/\\/g, ''));
       expect(state.getIn(['modules', 'ssr-frank', 'data'])).toEqual({
@@ -941,7 +973,10 @@ describe('Tests that require Docker setup', () => {
         await addModuleToModuleMap({
           moduleName: 'frank-lloyd-root',
           version: '0.0.2',
-          integrityDigests: retrieveModuleIntegrityDigests({ moduleName: 'frank-lloyd-root', version: '0.0.2' }),
+          integrityDigests: retrieveModuleIntegrityDigests({
+            moduleName: 'frank-lloyd-root',
+            version: '0.0.2',
+          }),
         });
         const waiting = waitFor(5000);
 
@@ -1047,7 +1082,9 @@ describe('Tests that require Docker setup', () => {
 
           expect(webManifestResponse.status).toBe(200);
           expect(webManifestResponse.headers.get('cache-control')).toBeDefined();
-          expect(webManifestResponse.headers.get('content-type')).toEqual('application/manifest+json');
+          expect(webManifestResponse.headers.get('content-type')).toEqual(
+            'application/manifest+json'
+          );
 
           const offlineResponse = await fetchOfflineShell();
 
@@ -1095,10 +1132,7 @@ describe('Tests that require Docker setup', () => {
 
               await expect(browser.executeAsync(getCacheMatch, shell)).resolves.toBeDefined();
               await expect(browser.executeAsync(getCacheMatch, manifest)).resolves.toBeDefined();
-              expect(cacheMap.get('__sw/offline').sort()).toEqual([
-                manifest,
-                shell,
-              ].sort());
+              expect(cacheMap.get('__sw/offline').sort()).toEqual([manifest, shell].sort());
             });
 
             test('caches the app assets and entry root module', async () => {
@@ -1111,28 +1145,25 @@ describe('Tests that require Docker setup', () => {
               const holocronModuleMap = readModuleMap();
               const cacheKeys = await browser.executeAsync(getCacheKeys);
               const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
-              const oneAppCacheURLs = cacheMap.get('__sw/one-app').map((url) => url.replace(
-                url.match(oneAppVersionRegExp)[1],
-                '[one-app-version]'
-              ));
+              const oneAppCacheURLs = cacheMap
+                .get('__sw/one-app')
+                .map((url) => url.replace(url.match(oneAppVersionRegExp)[1], '[one-app-version]'));
 
               expect(cacheMap.get('__sw/lang-packs')).toBeUndefined();
               expect(cacheMap.get('__sw/modules')).toEqual([
                 holocronModuleMap.modules['frank-lloyd-root'].browser.url,
               ]);
               expect(oneAppCacheURLs).toEqual(
-                expect.arrayContaining(
-                  [
-                    // the build output directory uses the git sha which
-                    // changes from any modification
-                    `${appAtTestUrls.cdnUrl}/app/[one-app-version]/app~vendors.js`,
-                    `${appAtTestUrls.cdnUrl}/app/[one-app-version]/runtime.js`,
-                    `${appAtTestUrls.cdnUrl}/app/[one-app-version]/vendors.js`,
-                    `${appAtTestUrls.cdnUrl}/app/[one-app-version]/i18n/en-US.js`,
-                    `${appAtTestUrls.cdnUrl}/app/[one-app-version]/app.js`,
-                    `${appAtTestUrls.cdnUrl}/app/[one-app-version]/service-worker-client.js`,
-                  ]
-                )
+                expect.arrayContaining([
+                  // the build output directory uses the git sha which
+                  // changes from any modification
+                  `${appAtTestUrls.cdnUrl}/app/[one-app-version]/app~vendors.js`,
+                  `${appAtTestUrls.cdnUrl}/app/[one-app-version]/runtime.js`,
+                  `${appAtTestUrls.cdnUrl}/app/[one-app-version]/vendors.js`,
+                  `${appAtTestUrls.cdnUrl}/app/[one-app-version]/i18n/en-US.js`,
+                  `${appAtTestUrls.cdnUrl}/app/[one-app-version]/app.js`,
+                  `${appAtTestUrls.cdnUrl}/app/[one-app-version]/service-worker-client.js`,
+                ])
               );
             });
 
@@ -1150,10 +1181,9 @@ describe('Tests that require Docker setup', () => {
               const holocronModuleMap = readModuleMap();
               const cacheKeys = await browser.executeAsync(getCacheKeys);
               const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
-              const burgerChunkURL = holocronModuleMap.modules['franks-burgers'].browser.url.replace(
-                'franks-burgers.browser.js',
-                'Burger.chunk.browser.js'
-              );
+              const burgerChunkURL = holocronModuleMap.modules[
+                'franks-burgers'
+              ].browser.url.replace('franks-burgers.browser.js', 'Burger.chunk.browser.js');
 
               expect(cacheMap.get('__sw/modules')).toHaveLength(4);
               expect(cacheMap.get('__sw/modules')).toEqual(
@@ -1213,10 +1243,9 @@ describe('Tests that require Docker setup', () => {
 
                 const cacheKeys = await browser.executeAsync(getCacheKeys);
                 const cacheMap = new Map(await browser.executeAsync(getCacheEntries, cacheKeys));
-                const culturedFrankieUrl = holocronModuleMap.modules['cultured-frankie'].browser.url.replace(
-                  'cultured-frankie.browser.js',
-                  'es-mx/cultured-frankie.json'
-                );
+                const culturedFrankieUrl = holocronModuleMap.modules[
+                  'cultured-frankie'
+                ].browser.url.replace('cultured-frankie.browser.js', 'es-mx/cultured-frankie.json');
                 // we should not expect an additional lang pack to be added,
                 // rather it replaces the other one used by any given module
                 expect(cacheMap.get('__sw/lang-packs')).toHaveLength(1);
@@ -1274,8 +1303,16 @@ describe('Tests that can run against either local Docker setup or remote One App
   const appAtTestInstances = remoteOneAppEnvironment
     // conflicting eslint rules make it so that on running `lint --fix` this rule always fails
     // eslint-disable-next-line max-len
-    ? remoteOneAppEnvironment.map((environmentUrl) => ({ fetchUrl: environmentUrl, browserUrl: environmentUrl }))
-    : [{ fetchUrl: `https://localhost:${oneAppLocalPortToUse}`, browserUrl: 'https://one-app:8443' }];
+    ? remoteOneAppEnvironment.map((environmentUrl) => ({
+      fetchUrl: environmentUrl,
+      browserUrl: environmentUrl,
+    }))
+    : [
+      {
+        fetchUrl: `https://localhost:${oneAppLocalPortToUse}`,
+        browserUrl: 'https://one-app:8443',
+      },
+    ];
 
   let browser;
 
@@ -1321,16 +1358,14 @@ describe('Tests that can run against either local Docker setup or remote One App
       });
 
       test('app renders frank-lloyd-root on a POST', async () => {
-        const response = await fetch(
-          `${appInstanceUrls.fetchUrl}/success`,
-          {
-            ...defaultFetchOpts,
-            method: 'POST',
-          });
+        const response = await fetch(`${appInstanceUrls.fetchUrl}/success`, {
+          ...defaultFetchOpts,
+          method: 'POST',
+        });
         const pageHtml = await response.text();
-        expect(
-          pageHtml.includes('Hello! One App is successfully rendering its Modules!')
-        ).toBe(true);
+        expect(pageHtml.includes('Hello! One App is successfully rendering its Modules!')).toBe(
+          true
+        );
       });
 
       test('app passes vitruvius data to modules', async () => {
@@ -1353,7 +1388,8 @@ describe('Tests that can run against either local Docker setup or remote One App
             headers: {
               'accept-language': 'en-US,en;q=0.9',
               host: expect.any(String),
-              'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.75 Safari/537.36',
+              'user-agent':
+                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.75 Safari/537.36',
             },
             method: 'GET',
             originalUrl: '/vitruvius',
@@ -1368,20 +1404,17 @@ describe('Tests that can run against either local Docker setup or remote One App
       });
 
       test('app passes JSON POST data to modules via vitruvius', async () => {
-        const response = await fetch(
-          `${appInstanceUrls.fetchUrl}/vitruvius`,
-          {
-            ...defaultFetchOpts,
-            method: 'POST',
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-              legacy: 'application',
-              sendingData: 'in POSTs',
-            }),
-          }
-        );
+        const response = await fetch(`${appInstanceUrls.fetchUrl}/vitruvius`, {
+          ...defaultFetchOpts,
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            legacy: 'application',
+            sendingData: 'in POSTs',
+          }),
+        });
 
         const pageHtml = await response.text();
         const data = JSON.parse(pageHtml.match(/<pre>([^<]+)<\/pre>/)[1].replace(/&quot;/g, '"'));
@@ -1392,17 +1425,14 @@ describe('Tests that can run against either local Docker setup or remote One App
         });
       });
       test('app passes urlencoded POST data to modules via vitruvius', async () => {
-        const response = await fetch(
-          `${appInstanceUrls.fetchUrl}/vitruvius`,
-          {
-            ...defaultFetchOpts,
-            method: 'POST',
-            headers: {
-              'content-type': 'application/x-www-form-urlencoded',
-            },
-            body: 'legacy=application&sendingData=in POSTs',
-          }
-        );
+        const response = await fetch(`${appInstanceUrls.fetchUrl}/vitruvius`, {
+          ...defaultFetchOpts,
+          method: 'POST',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+          },
+          body: 'legacy=application&sendingData=in POSTs',
+        });
 
         const pageHtml = await response.text();
         const data = JSON.parse(pageHtml.match(/<pre>([^<]+)<\/pre>/)[1].replace(/&quot;/g, '"'));
@@ -1467,7 +1497,10 @@ describe('Tests that can run against either local Docker setup or remote One App
         });
 
         test('not found requests are caught', async () => {
-          const response = await fetch(`${appInstanceUrls.fetchUrl}/this-route-does-not-exist`, defaultFetchOpts);
+          const response = await fetch(
+            `${appInstanceUrls.fetchUrl}/this-route-does-not-exist`,
+            defaultFetchOpts
+          );
           const body = await response.text();
           expect(response.status).toBe(404);
           expect(body).toContain('<div id="root">Not found</div>');
@@ -1503,36 +1536,37 @@ describe('Tests that can run against either local Docker setup or remote One App
       });
 
       describe('code-splitting', () => {
-        test(
-          'successfully loads a code-split module chunk with a language pack and then lazy loads `franks-burger` chunk',
-          async () => {
-            await browser.url(`${appInstanceUrls.browserUrl}/demo/franks-burgers`);
+        test('successfully loads a code-split module chunk with a language pack and then lazy loads `franks-burger` chunk', async () => {
+          await browser.url(`${appInstanceUrls.browserUrl}/demo/franks-burgers`);
 
-            const openerMessage = await browser.$('#franks-opening-line');
-            await openerMessage.waitForExist({ timeout: 50000 });
-            expect(await openerMessage.getText()).toBe(
-              'Welcome to Franks Burgers! The best burgers in town.'
-            );
+          const openerMessage = await browser.$('#franks-opening-line');
+          await openerMessage.waitForExist({ timeout: 50000 });
+          expect(await openerMessage.getText()).toBe(
+            'Welcome to Franks Burgers! The best burgers in town.'
+          );
 
-            // before clicking to lazy load our chunk, ensure `franks-burger` does not exist
-            const missingFranksBurger = await browser.$('#franks-burger');
-            const exists = await missingFranksBurger.isExisting();
-            expect(exists).toBeFalsy();
+          // before clicking to lazy load our chunk, ensure `franks-burger` does not exist
+          const missingFranksBurger = await browser.$('#franks-burger');
+          const exists = await missingFranksBurger.isExisting();
+          expect(exists).toBeFalsy();
 
-            // once confirmed chunk does not exist, click to load it
-            const btn = await browser.$('#order-burger-btn');
-            await btn.click();
-            // grab the chunk and wait for it to load
-            const franksBurger = await browser.$('#franks-burger');
-            await franksBurger.waitForExist({ timeout: 50000 });
-            await expect(franksBurger.getText()).resolves.toEqual('Burger');
-          });
+          // once confirmed chunk does not exist, click to load it
+          const btn = await browser.$('#order-burger-btn');
+          await btn.click();
+          // grab the chunk and wait for it to load
+          const franksBurger = await browser.$('#franks-burger');
+          await franksBurger.waitForExist({ timeout: 50000 });
+          await expect(franksBurger.getText()).resolves.toEqual('Burger');
+        });
       });
 
       describe('HTML rendering', () => {
         describe('partial only', () => {
           test('responds with an incomplete HTML document', async () => {
-            const response = await fetch(`${appInstanceUrls.fetchUrl}/html-partial/en-US/frank-the-parrot?message=Hello!`, defaultFetchOpts);
+            const response = await fetch(
+              `${appInstanceUrls.fetchUrl}/html-partial/en-US/frank-the-parrot?message=Hello!`,
+              defaultFetchOpts
+            );
             const body = await response.text();
             expect(body).toBe(
               '<style class="ssr-css">.frank-lloyd-root__styles__stylish___2aiGw{color:orchid}</style><pre class="value-provided-from-config">https://intranet-origin-dev.example.com/some-api/v1</pre><span class="message">Hello!</span>'
@@ -1541,12 +1575,13 @@ describe('Tests that can run against either local Docker setup or remote One App
         });
         describe('render text only', () => {
           test('responds with text only without HTML', async () => {
-            const response = await fetch(`${appInstanceUrls.fetchUrl}/text-only/en-US/frank-the-parrot?message=Hello!`, defaultFetchOpts);
+            const response = await fetch(
+              `${appInstanceUrls.fetchUrl}/text-only/en-US/frank-the-parrot?message=Hello!`,
+              defaultFetchOpts
+            );
             const body = await response.text();
             expect(response.headers.get('content-type')).toEqual('text/plain; charset=utf-8');
-            expect(body).toBe(
-              ' https://intranet-origin-dev.example.com/some-api/v1  Hello! '
-            );
+            expect(body).toBe(' https://intranet-origin-dev.example.com/some-api/v1  Hello! ');
           });
         });
       });
@@ -1560,7 +1595,11 @@ describe('Tests that can run against either local Docker setup or remote One App
           expect(body).toMatch(new RegExp('<!DOCTYPE html>'));
           expect(body).toMatch(new RegExp('<title>One App</title>'));
           expect(body).toMatch(new RegExp('<meta name="application-name" content="one-app">'));
-          expect(body).toMatch(new RegExp('<h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>'));
+          expect(body).toMatch(
+            new RegExp(
+              '<h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>'
+            )
+          );
         });
       });
     });
@@ -1650,9 +1689,7 @@ describe('heapdump', () => {
       .replace(/^about to write a heapdump to /, '')
       .replace(/".+$/, '');
 
-    const didWriteFilePath = didWriteRaw
-      .replace(/^wrote heapdump out to /, '')
-      .replace(/".+$/, '');
+    const didWriteFilePath = didWriteRaw.replace(/^wrote heapdump out to /, '').replace(/".+$/, '');
 
     expect(aboutToWriteFilePath).toEqual(didWriteFilePath);
     expect(path.dirname(didWriteFilePath)).toBe('/tmp');
@@ -1689,192 +1726,302 @@ describe('Routes sanity checks', () => {
   });
 
   test('Request: /_/status', async () => {
-    const response = await fetch(
-      `${fetchUrl}/_/status`,
-      {
-        ...defaultFetchOptions,
-        method: 'GET',
-        headers: {
-          origin: 'test.example.com',
-        },
-      }
-    );
-    const rawHeaders = response.headers.raw();
+    const response = await fetch(`${fetchUrl}/_/status`, {
+      ...defaultFetchOptions,
+      method: 'GET',
+      headers: {
+        origin: 'test.example.com',
+      },
+    });
 
     expect(response.status).toBe(200);
-    expect(Object.keys(rawHeaders)).toEqual([
-      'x-frame-options',
-      'x-content-type-options',
-      'strict-transport-security',
-      'x-xss-protection',
-      'referrer-policy',
-      'one-app-version',
-      'content-type',
-      'content-length',
-      'etag',
-      'vary',
-      'date',
-      'connection',
-    ]);
-    expect(rawHeaders.connection).toEqual(['close']);
-    expect(rawHeaders['content-length']).toEqual(['2']);
-    expect(rawHeaders['content-type']).toEqual(['text/plain; charset=utf-8']);
-    expect(rawHeaders['referrer-policy']).toEqual(['same-origin']);
-    expect(rawHeaders['strict-transport-security']).toEqual([
-      'max-age=15552000; includeSubDomains',
-    ]);
-    expect(rawHeaders.vary).toEqual(['Accept-Encoding']);
-    expect(rawHeaders['x-content-type-options']).toEqual(['nosniff']);
-    expect(rawHeaders['x-frame-options']).toEqual(['DENY']);
-    expect(rawHeaders['x-xss-protection']).toEqual(['1; mode=block']);
+    expect(response.headers.raw()).toEqual({
+      connection: [
+        'close',
+      ],
+      'content-length': [
+        '2',
+      ],
+      'content-type': [
+        'text/plain; charset=utf-8',
+      ],
+      date: [
+        expect.any(String),
+      ],
+      etag: [
+        expect.any(String),
+      ],
+      'one-app-version': [
+        expect.any(String),
+      ],
+      'referrer-policy': [
+        'same-origin',
+      ],
+      'strict-transport-security': [
+        'max-age=15552000; includeSubDomains',
+      ],
+      vary: [
+        'Accept-Encoding',
+      ],
+      'x-content-type-options': [
+        'nosniff',
+      ],
+      'x-frame-options': [
+        'DENY',
+      ],
+      'x-xss-protection': [
+        '1; mode=block',
+      ],
+    });
   });
 
   test('Request: /_/report/security/csp-violation', async () => {
-    const response = await fetch(
-      `${fetchUrl}/_/report/security/csp-violation`,
-      {
-        ...defaultFetchOptions,
-        method: 'POST',
-        headers: {
-          origin: 'test.example.com',
-        },
-      }
-    );
-    const rawHeaders = response.headers.raw();
+    const response = await fetch(`${fetchUrl}/_/report/security/csp-violation`, {
+      ...defaultFetchOptions,
+      method: 'POST',
+      headers: {
+        origin: 'test.example.com',
+      },
+    });
 
-    expect(Object.keys(rawHeaders).sort()).toEqual([
-      'connection',
-      'content-security-policy',
-      'date',
-      'expect-ct',
-      'one-app-version',
-      'referrer-policy',
-      'strict-transport-security',
-      'x-content-type-options',
-      'x-dns-prefetch-control',
-      'x-download-options',
-      'x-frame-options',
-      'x-permitted-cross-domain-policies',
-      'x-xss-protection',
-    ]);
-    expect(rawHeaders.connection).toEqual(['close']);
-    expect(rawHeaders['expect-ct']).toEqual(['max-age=0']);
-    expect(rawHeaders['referrer-policy']).toEqual(['no-referrer']);
-    expect(rawHeaders['strict-transport-security']).toEqual(['max-age=15552000; includeSubDomains']);
-    expect(rawHeaders['x-content-type-options']).toEqual(['nosniff']);
-    expect(rawHeaders['x-dns-prefetch-control']).toEqual(['off']);
-    expect(rawHeaders['x-download-options']).toEqual(['noopen']);
-    expect(rawHeaders['x-frame-options']).toEqual(['SAMEORIGIN']);
-    expect(rawHeaders['x-permitted-cross-domain-policies']).toEqual(['none']);
-    expect(rawHeaders['x-xss-protection']).toEqual(['0']);
+    expect(response.headers.raw()).toEqual({
+      connection: [
+        'close',
+      ],
+      'content-security-policy': [
+        expect.any(String),
+      ],
+      date: [
+        expect.any(String),
+      ],
+      'expect-ct': [
+        'max-age=0',
+      ],
+      'one-app-version': [
+        expect.any(String),
+      ],
+      'referrer-policy': [
+        'no-referrer',
+      ],
+      'strict-transport-security': [
+        'max-age=15552000; includeSubDomains',
+      ],
+      'x-content-type-options': [
+        'nosniff',
+      ],
+      'x-dns-prefetch-control': [
+        'off',
+      ],
+      'x-download-options': [
+        'noopen',
+      ],
+      'x-frame-options': [
+        'SAMEORIGIN',
+      ],
+      'x-permitted-cross-domain-policies': [
+        'none',
+      ],
+      'x-xss-protection': [
+        '0',
+      ],
+    });
     expect(response.status).toBe(204);
     expect(response.type).toBe(undefined); // not specified
     expect(await response.text()).toBe('');
   });
 
   test('Request: /_/report/errors responds with status 415', async () => {
-    const response = await fetch(
-      `${fetchUrl}/_/report/errors`,
-      {
-        ...defaultFetchOptions,
-        method: 'POST',
-        headers: {
-          origin: 'test.example.com',
-        },
-      }
-    );
+    const response = await fetch(`${fetchUrl}/_/report/errors`, {
+      ...defaultFetchOptions,
+      method: 'POST',
+      headers: {
+        origin: 'test.example.com',
+      },
+    });
 
-    expect(Object.keys(response.headers.raw()).sort()).toEqual([
-      'connection',
-      'content-length',
-      'content-security-policy',
-      'content-type',
-      'date',
-      'etag',
-      'expect-ct',
-      'one-app-version',
-      'referrer-policy',
-      'strict-transport-security',
-      'vary',
-      'x-content-type-options',
-      'x-dns-prefetch-control',
-      'x-download-options',
-      'x-frame-options',
-      'x-permitted-cross-domain-policies',
-      'x-xss-protection',
-    ]);
-    expect(response.headers.get('connection')).toEqual('close');
-    expect(response.headers.get('content-length')).toEqual('22');
-    expect(response.headers.get('content-type')).toEqual('text/plain; charset=utf-8');
-    expect(response.headers.get('expect-ct')).toEqual('max-age=0');
-    expect(response.headers.get('referrer-policy')).toEqual('no-referrer');
-    expect(response.headers.get('strict-transport-security')).toEqual('max-age=15552000; includeSubDomains');
-    expect(response.headers.get('vary')).toEqual('Accept-Encoding');
-    expect(response.headers.get('x-content-type-options')).toEqual('nosniff');
-    expect(response.headers.get('x-dns-prefetch-control')).toEqual('off');
-    expect(response.headers.get('x-download-options')).toEqual('noopen');
-    expect(response.headers.get('x-frame-options')).toEqual('SAMEORIGIN');
-    expect(response.headers.get('x-permitted-cross-domain-policies')).toEqual('none');
-    expect(response.headers.get('x-xss-protection')).toEqual('0');
+    expect(response.headers.raw()).toEqual({
+      connection: [
+        'close',
+      ],
+      'content-length': [
+        '22',
+      ],
+      'content-security-policy': [
+        expect.any(String),
+      ],
+      'content-type': [
+        'text/plain; charset=utf-8',
+      ],
+      date: [
+        expect.any(String),
+      ],
+      etag: [
+        expect.any(String),
+      ],
+      'expect-ct': [
+        'max-age=0',
+      ],
+      'one-app-version': [
+        '6.0.0-0520af2e',
+      ],
+      'referrer-policy': [
+        'no-referrer',
+      ],
+      'strict-transport-security': [
+        'max-age=15552000; includeSubDomains',
+      ],
+      vary: [
+        'Accept-Encoding',
+      ],
+      'x-content-type-options': [
+        'nosniff',
+      ],
+      'x-dns-prefetch-control': [
+        'off',
+      ],
+      'x-download-options': [
+        'noopen',
+      ],
+      'x-frame-options': [
+        'SAMEORIGIN',
+      ],
+      'x-permitted-cross-domain-policies': [
+        'none',
+      ],
+      'x-xss-protection': [
+        '0',
+      ],
+    });
     expect(response.status).toBe(415);
     expect(await response.text()).toBe('Unsupported Media Type');
   });
 
   test('Request: /_/report/errors responds with status 204', async () => {
-    const response = await fetch(
-      `${fetchUrl}/_/report/errors`,
-      {
-        ...defaultFetchOptions,
-        method: 'POST',
-        headers: {
-          origin: 'test.example.com',
-          'content-type': 'application/json',
-        },
-      }
-    );
+    const response = await fetch(`${fetchUrl}/_/report/errors`, {
+      ...defaultFetchOptions,
+      method: 'POST',
+      headers: {
+        origin: 'test.example.com',
+        'content-type': 'application/json',
+      },
+    });
 
-    expect(Object.keys(response.headers.raw()).sort()).toEqual([
-      'connection',
-      'content-security-policy',
-      'date',
-      'etag',
-      'expect-ct',
-      'one-app-version',
-      'referrer-policy',
-      'strict-transport-security',
-      'x-content-type-options',
-      'x-dns-prefetch-control',
-      'x-download-options',
-      'x-frame-options',
-      'x-permitted-cross-domain-policies',
-      'x-xss-protection',
-    ]);
-    expect(response.headers.get('connection')).toEqual('close');
-    expect(response.headers.get('expect-ct')).toEqual('max-age=0');
-    expect(response.headers.get('referrer-policy')).toEqual('no-referrer');
-    expect(response.headers.get('strict-transport-security')).toEqual('max-age=15552000; includeSubDomains');
-    expect(response.headers.get('x-content-type-options')).toEqual('nosniff');
-    expect(response.headers.get('x-dns-prefetch-control')).toEqual('off');
-    expect(response.headers.get('x-download-options')).toEqual('noopen');
-    expect(response.headers.get('x-frame-options')).toEqual('SAMEORIGIN');
-    expect(response.headers.get('x-permitted-cross-domain-policies')).toEqual('none');
-    expect(response.headers.get('x-xss-protection')).toEqual('0');
+    expect(response.headers.raw()).toEqual({
+      connection: [
+        'close',
+      ],
+      'content-security-policy': [
+        expect.any(String),
+      ],
+      date: [
+        expect.any(String),
+      ],
+      etag: [
+        expect.any(String),
+      ],
+      'expect-ct': [
+        'max-age=0',
+      ],
+      'one-app-version': [
+        expect.any(String),
+      ],
+      'referrer-policy': [
+        'no-referrer',
+      ],
+      'strict-transport-security': [
+        'max-age=15552000; includeSubDomains',
+      ],
+      'x-content-type-options': [
+        'nosniff',
+      ],
+      'x-dns-prefetch-control': [
+        'off',
+      ],
+      'x-download-options': [
+        'noopen',
+      ],
+      'x-frame-options': [
+        'SAMEORIGIN',
+      ],
+      'x-permitted-cross-domain-policies': [
+        'none',
+      ],
+      'x-xss-protection': [
+        '0',
+      ],
+    });
     expect(response.status).toBe(204);
     expect(await response.text()).toBe('');
   });
 
   test('Request: /foo/invalid.json', async () => {
-    const response = await fetch(
-      `${fetchUrl}/foo/invalid.json`,
-      {
-        ...defaultFetchOptions,
-        method: 'GET',
-        headers: {
-          origin: 'test.example.com',
-        },
-      }
-    );
+    const response = await fetch(`${fetchUrl}/foo/invalid.json`, {
+      ...defaultFetchOptions,
+      method: 'GET',
+      headers: {
+        origin: 'test.example.com',
+      },
+    });
 
     expect(response.status).toBe(404);
+    expect(response.headers.raw()).toEqual({
+      'cache-control': [
+        'no-store',
+      ],
+      connection: [
+        'close',
+      ],
+      'content-length': [
+        '9',
+      ],
+      'content-security-policy': [
+        expect.any(String),
+      ],
+      'content-type': [
+        'text/plain; charset=utf-8',
+      ],
+      date: [
+        expect.any(String),
+      ],
+      etag: [
+        expect.any(String),
+      ],
+      'expect-ct': [
+        'max-age=0',
+      ],
+      'one-app-version': [
+        expect.any(String),
+      ],
+      pragma: [
+        'no-cache',
+      ],
+      'referrer-policy': [
+        'no-referrer',
+      ],
+      'strict-transport-security': [
+        'max-age=15552000; includeSubDomains',
+      ],
+      vary: [
+        'Accept-Encoding',
+      ],
+      'x-content-type-options': [
+        'nosniff',
+      ],
+      'x-dns-prefetch-control': [
+        'off',
+      ],
+      'x-download-options': [
+        'noopen',
+      ],
+      'x-frame-options': [
+        'SAMEORIGIN',
+      ],
+      'x-permitted-cross-domain-policies': [
+        'none',
+      ],
+      'x-xss-protection': [
+        '0',
+      ],
+    });
   });
 });
