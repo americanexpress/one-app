@@ -18,7 +18,6 @@
 import path from 'path';
 import fs from 'fs';
 import findUp from 'find-up';
-import request from 'supertest';
 import '../../src/server/devHolocronCDN';
 
 jest.mock('cors', () => jest.fn(() => (req, res, next) => next()));
@@ -44,28 +43,28 @@ describe('devHolocronCDN', () => {
       jest.resetModules();
     });
 
-    function load() {
+    async function load() {
       cors = require('cors');
       oneAppDevCdn = require('@americanexpress/one-app-dev-cdn');
-      return require('../../src/server/devHolocronCDN').default;
+
+      const devHolocronCDN = require('../../src/server/devHolocronCDN').default;
+
+      const fastify = await devHolocronCDN();
+
+      return fastify;
     }
 
-    it('should export usable middleware', () => {
-      const devHolocronCDN = load();
-      expect(devHolocronCDN).toBeInstanceOf(Function);
-    });
-
-    it('should add cors to the app', () => {
-      load();
+    it('should add cors to the app', async () => {
+      await load();
       expect(cors).toHaveBeenCalled();
     });
 
-    it('should add @americanexpress/one-app-dev-cdn to the static route', () => {
-      load();
+    it('should add @americanexpress/one-app-dev-cdn to the static route', async () => {
+      await load();
       expect(oneAppDevCdn).toHaveBeenCalled();
     });
 
-    it('should give @americanexpress/one-app-dev-cdn the path to the static directory', () => {
+    it('should give @americanexpress/one-app-dev-cdn the path to the static directory', async () => {
       expect.assertions(1);
       const moduleMapUrl = 'https://example.com/module-map.json';
       process.argv = [
@@ -75,7 +74,8 @@ describe('devHolocronCDN', () => {
         moduleMapUrl,
       ];
 
-      load();
+      await load();
+
       return findUp('package.json')
         .then((filepath) => {
           expect(oneAppDevCdn).toHaveBeenCalledWith({
@@ -86,7 +86,7 @@ describe('devHolocronCDN', () => {
         });
     });
 
-    it('does not require useLocalModules when no static module-map', () => {
+    it('does not require useLocalModules when no static module-map', async () => {
       expect.assertions(1);
       fs.existsSync.mockImplementationOnce(() => false);
       const moduleMapUrl = 'https://example.com/module-map.json';
@@ -97,7 +97,8 @@ describe('devHolocronCDN', () => {
         moduleMapUrl,
       ];
 
-      load();
+      await load();
+
       return findUp('package.json')
         .then((filepath) => {
           expect(oneAppDevCdn).toHaveBeenCalledWith({
@@ -113,40 +114,65 @@ describe('devHolocronCDN', () => {
     let corsMiddleware;
     let oneAppDevCdnMiddleware;
     let devHolocronCDN;
+    let cors;
+    let oneAppDevCdn;
 
     beforeEach(() => {
       jest.resetModules();
-      const cors = require('cors');
-      const oneAppDevCdn = require('@americanexpress/one-app-dev-cdn');
+    });
+
+    async function load() {
+      cors = require('cors');
+      oneAppDevCdn = require('@americanexpress/one-app-dev-cdn');
       corsMiddleware = jest.fn((req, res, next) => next());
       cors.mockReturnValue(corsMiddleware);
       oneAppDevCdnMiddleware = jest.fn((req, res, next) => next());
       oneAppDevCdn.mockReturnValue(oneAppDevCdnMiddleware);
       devHolocronCDN = require('../../src/server/devHolocronCDN').default;
-    });
+
+      return devHolocronCDN();
+    }
 
     it('should hit the cors middleware first', async () => {
       expect.assertions(3);
+      const instance = await load();
+
       corsMiddleware.mockImplementationOnce((req, res) => res.sendStatus(204));
-      const resp = await request(devHolocronCDN)
-        .get('/static/anything.json');
+
+      const response = await instance.inject({
+        method: 'GET',
+        url: '/static/anything.json',
+      });
+
       expect(corsMiddleware).toHaveBeenCalledTimes(1);
       expect(oneAppDevCdnMiddleware).not.toHaveBeenCalled();
-      expect(resp.status).toBe(204);
+      expect(response.statusCode).toBe(204);
     });
 
     it('should hit the one-app-dev-cdn middleware after cors', async () => {
       expect.assertions(2);
-      await request(devHolocronCDN)
-        .get('/static/anything.json');
+
+      const instance = await load();
+
+      await instance.inject({
+        method: 'GET',
+        url: '/static/anything.json',
+      });
+
       expect(corsMiddleware).toHaveBeenCalledTimes(1);
       expect(oneAppDevCdnMiddleware).toHaveBeenCalledTimes(1);
     });
 
     it('should miss the one-app-dev-cdn middleware if not a static route', async () => {
       expect.assertions(2);
-      await request(devHolocronCDN)
-        .get('/not-static.json');
+
+      const instance = await load();
+
+      await instance.inject({
+        method: 'GET',
+        url: '/not-static.json',
+      });
+
       expect(corsMiddleware).toHaveBeenCalledTimes(1);
       expect(oneAppDevCdnMiddleware).not.toHaveBeenCalled();
     });

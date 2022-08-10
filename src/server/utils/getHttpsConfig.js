@@ -14,25 +14,9 @@
  * permissions and limitations under the License.
  */
 
-/**
- * listen(app, cb) for https or http
- */
-
 import fs from 'fs';
-import http from 'http';
-import https from 'https';
 
-function listenHttp(app, cb) {
-  const port = process.env.HTTP_PORT;
-  return http
-    .createServer(app)
-    .listen(port, (err) => cb(err, { port }));
-}
-
-function listenHttps(app, cb) {
-  const port = process.env.HTTPS_PORT;
-  const ipAddress = process.env.IP_ADDRESS || '0.0.0.0';
-
+const getHttpsConfig = () => {
   if (!(process.env.HTTPS_PRIVATE_KEY_PATH && process.env.HTTPS_PUBLIC_CERT_CHAIN_PATH)) {
     throw new Error(
       'HTTPS_PORT requires HTTPS_PRIVATE_KEY_PATH and HTTPS_PUBLIC_CERT_CHAIN_PATH to be set'
@@ -58,20 +42,7 @@ function listenHttps(app, cb) {
     });
   }
 
-  return https
-    .createServer(serverOptions, app)
-    .listen(port, ipAddress, (err) => cb(err, { port }));
-}
-
-export default function listen(app, cb) {
-  if (process.env.HTTPS_PORT) {
-    return listenHttps(app, cb);
-  }
-
-  return listenHttp(app, cb);
-}
-
-export {
-  listenHttp,
-  listenHttps,
+  return serverOptions;
 };
+
+export default getHttpsConfig;
