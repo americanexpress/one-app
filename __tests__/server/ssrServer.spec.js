@@ -56,7 +56,7 @@ jest.mock('../../mocks/scenarios', () => ({
 }), { virtual: true });
 
 describe('ssrServer', () => {
-  // jest.spyOn(console, 'info').mockImplementation(() => {});
+  jest.spyOn(console, 'info').mockImplementation(() => {});
   jest.spyOn(console, 'log').mockImplementation(() => { });
   jest.spyOn(console, 'warn').mockImplementation(() => { });
   jest.spyOn(console, 'error').mockImplementation(() => { });
