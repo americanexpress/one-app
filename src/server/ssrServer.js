@@ -53,10 +53,8 @@ import {
   offlineMiddleware,
 } from './middleware/pwa';
 
-export const makeExpressRouter = () => {
+export const makeExpressRouter = (router = express.Router()) => {
   const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
-
-  const router = express.Router();
 
   router.use(ensureCorrelationId);
   router.use(logging);
