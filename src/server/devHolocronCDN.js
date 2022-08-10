@@ -21,19 +21,35 @@ import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
 import { argv } from 'yargs';
+import Fastify from 'fastify';
+import fastifyExpress from '@fastify/express';
 import oneAppDevCdn from '@americanexpress/one-app-dev-cdn';
 
 const hasLocalModuleMap = () => fs.existsSync(path.join(process.cwd(), 'static', 'module-map.json'));
 
-const app = express();
+const makeExpressRouter = () => {
+  const router = express.Router();
 
-app.use(cors());
-app.use('/static', oneAppDevCdn({
-  localDevPublicPath: path.join(__dirname, '../../static'),
-  remoteModuleMapUrl: argv.moduleMapUrl,
-  useLocalModules: hasLocalModuleMap(),
-  appPort: process.env.HTTP_PORT,
-  useHost: argv.useHost,
-}));
+  router.use(cors());
+  router.use('/static', oneAppDevCdn({
+    localDevPublicPath: path.join(__dirname, '../../static'),
+    remoteModuleMapUrl: argv.moduleMapUrl,
+    useLocalModules: hasLocalModuleMap(),
+    appPort: process.env.HTTP_PORT,
+    useHost: argv.useHost,
+  }));
 
-export default app;
+  return router;
+};
+
+const devHolocronCDN = async () => {
+  const fastify = Fastify();
+
+  await fastify.register(fastifyExpress);
+
+  fastify.use(makeExpressRouter());
+
+  return fastify;
+};
+
+export default devHolocronCDN;

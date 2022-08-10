@@ -85,6 +85,7 @@ const setUpTestRunner = async ({
   } catch (err) {
     // logWatcherDuplex will buffer the logs until piped out.
     logWatcherDuplex.pipe(process.stdout);
+    console.error('--> CONNECTION ERROR <--', err);
     throw new Error(
       '🚨 Either of the One App, Selenium, or Nginx servers failed to be pulled, built, and started '
       + `within ${serverStartupTimeout}ms. See logs for details.`
