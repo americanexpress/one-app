@@ -14,8 +14,6 @@
  * permissions and limitations under the License.
  */
 
-import request from 'supertest';
-
 describe('metricsServer', () => {
   jest.mock('../../src/server/metrics/intl-cache', () => ({
     cacheSizeCollector: 'cacheSizeCollector',
@@ -27,7 +25,7 @@ describe('metricsServer', () => {
   let healthCheck;
   let logging;
 
-  function load() {
+  async function load() {
     jest.resetModules();
 
     jest.mock('prom-client');
@@ -38,75 +36,109 @@ describe('metricsServer', () => {
     logging = require('../../src/server/utils/logging/serverMiddleware');
     healthCheck = require('../../src/server/middleware/healthCheck').default;
 
-    return require('../../src/server/metricsServer').default;
+    const fastify = await require('../../src/server/metricsServer').default();
+
+    return fastify;
   }
 
   describe('metrics setup', () => {
-    it('collects default metrics', () => {
-      load();
+    it('collects default metrics', async () => {
+      await load();
       expect(client.collectDefaultMetrics).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('unknown routes', () => {
     it('should return a 404 status', async () => {
-      const res = await request(load())
-        .get('/doesnt-exist');
-      expect(res.status).toEqual(404);
+      const instance = await load();
+      const response = await instance.inject({
+        method: 'GET',
+        url: '/doesnt-exist',
+      });
+
+      expect(response.statusCode).toEqual(404);
     });
 
     it('should return a blank page', async () => {
-      const res = await request(load())
-        .get('/doesnt-exist');
-      expect(res.text).toEqual('');
-      expect(res.type).toEqual('text/plain');
+      const instance = await load();
+      const response = await instance.inject({
+        method: 'GET',
+        url: '/doesnt-exist',
+      });
+
+      expect(response.body).toEqual('');
+      expect(response.headers['content-type']).toEqual('text/plain; charset=utf-8');
     });
 
     it('should log the request', async () => {
       logging.mockClear();
       process.env.NODE_ENV = 'production';
 
-      const metricsServer = load();
+      const metricsServer = await load();
       expect(logging).not.toHaveBeenCalled();
 
-      await request(metricsServer)
-        .get('/doesnt-exist');
+      await metricsServer.inject({
+        method: 'GET',
+        url: '/doesnt-exist',
+      });
       expect(logging).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('/im-up', () => {
     it('should run health checks', async () => {
-      await request(load())
-        .get('/im-up');
+      const instance = await load();
+      await instance.inject({
+        method: 'GET',
+        url: '/im-up',
+      });
+
       expect(healthCheck).toBeCalled();
     });
 
     it('should log the request', async () => {
       logging.mockClear();
-      await request(load())
-        .get('/im-up');
+
+      const instance = await load();
+      await instance.inject({
+        method: 'GET',
+        url: '/im-up',
+      });
+
       expect(logging).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('/metrics', () => {
     it('should respond with metrics', async () => {
-      await request(load())
-        .get('/metrics');
+      const instance = await load();
+      await instance.inject({
+        method: 'GET',
+        url: '/metrics',
+      });
+
       expect(client.register.metrics).toBeCalled();
     });
 
     it('should be Content-Type of metrics', async () => {
-      const res = await request(load())
-        .get('/metrics');
-      expect(res.type).toBe(`${client.register.contentType}`);
+      const instance = await load();
+      const response = await instance.inject({
+        method: 'GET',
+        url: '/metrics',
+      });
+
+      expect(response.headers['content-type']).toBe(`${client.register.contentType}`);
     });
 
     it('should log the request', async () => {
       logging.mockClear();
-      await request(load())
-        .get('/im-up');
+
+      const instance = await load();
+      await instance.inject({
+        method: 'GET',
+        url: '/im-up',
+      });
+
       expect(logging).toHaveBeenCalledTimes(1);
     });
   });
