@@ -29,12 +29,12 @@ describe('metricsServer', () => {
     jest.resetModules();
 
     jest.mock('prom-client');
-    jest.mock('../../src/server/utils/logging/serverMiddleware', () => jest.fn((req, res, next) => next()));
-    jest.mock('../../src/server/middleware/healthCheck');
+    jest.mock('../../src/server/utils/logging/fastifyPlugin', () => jest.fn((_request, _reply, done) => done()));
+    jest.mock('../../src/server/plugins/healthCheck', () => jest.fn((_request, _reply, done) => done()));
 
     client = require('prom-client');
-    logging = require('../../src/server/utils/logging/serverMiddleware');
-    healthCheck = require('../../src/server/middleware/healthCheck').default;
+    logging = require('../../src/server/utils/logging/fastifyPlugin');
+    healthCheck = require('../../src/server/plugins/healthCheck').default;
 
     const fastify = await require('../../src/server/metricsServer').default();
 

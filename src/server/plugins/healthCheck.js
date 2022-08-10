@@ -38,7 +38,7 @@ export const verifyThresholds = ({
   && rootModuleExists;
 
 export default async function healthCheck(fastify, _opts, done) {
-  fastify.get('/im-up', (_request, reply) => {
+  fastify.get('/im-up', async (_request, reply) => {
     try {
       const [processStats, tickDelay] = await Promise.all([
         getProcessStats(process.pid),
