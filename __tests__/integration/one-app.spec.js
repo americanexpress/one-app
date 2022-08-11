@@ -1292,6 +1292,326 @@ describe('Tests that require Docker setup', () => {
       });
     });
   });
+
+  describe('Routes confidence checks', () => {
+    const defaultFetchOptions = createFetchOptions();
+    let originalModuleMap;
+    const oneAppLocalPortToUse = getRandomPortNumber();
+    const oneAppMetricsLocalPortToUse = getRandomPortNumber();
+    const fetchUrl = `https://localhost:${oneAppLocalPortToUse}`;
+
+    let browser;
+
+    beforeAll(async () => {
+      originalModuleMap = readModuleMap();
+      ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse }));
+    });
+
+    afterAll(async () => {
+      await tearDownTestRunner({ browser });
+      writeModuleMap(originalModuleMap);
+    });
+
+    test('Request: /_/status', async () => {
+      const response = await fetch(`${fetchUrl}/_/status`, {
+        ...defaultFetchOptions,
+        method: 'GET',
+        headers: {
+          origin: 'test.example.com',
+        },
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.headers.raw()).toEqual({
+        connection: [
+          'close',
+        ],
+        'content-length': [
+          '2',
+        ],
+        'content-type': [
+          'text/plain; charset=utf-8',
+        ],
+        date: [
+          expect.any(String),
+        ],
+        etag: [
+          expect.any(String),
+        ],
+        'one-app-version': [
+          expect.any(String),
+        ],
+        'referrer-policy': [
+          'same-origin',
+        ],
+        'strict-transport-security': [
+          'max-age=15552000; includeSubDomains',
+        ],
+        vary: [
+          'Accept-Encoding',
+        ],
+        'x-content-type-options': [
+          'nosniff',
+        ],
+        'x-frame-options': [
+          'DENY',
+        ],
+        'x-xss-protection': [
+          '1; mode=block',
+        ],
+      });
+    });
+
+    test('Request: /_/report/security/csp-violation', async () => {
+      const response = await fetch(`${fetchUrl}/_/report/security/csp-violation`, {
+        ...defaultFetchOptions,
+        method: 'POST',
+        headers: {
+          origin: 'test.example.com',
+        },
+      });
+
+      expect(response.headers.raw()).toEqual({
+        connection: [
+          'close',
+        ],
+        'content-security-policy': [
+          expect.any(String),
+        ],
+        date: [
+          expect.any(String),
+        ],
+        'expect-ct': [
+          'max-age=0',
+        ],
+        'one-app-version': [
+          expect.any(String),
+        ],
+        'referrer-policy': [
+          'no-referrer',
+        ],
+        'strict-transport-security': [
+          'max-age=15552000; includeSubDomains',
+        ],
+        'x-content-type-options': [
+          'nosniff',
+        ],
+        'x-dns-prefetch-control': [
+          'off',
+        ],
+        'x-download-options': [
+          'noopen',
+        ],
+        'x-frame-options': [
+          'SAMEORIGIN',
+        ],
+        'x-permitted-cross-domain-policies': [
+          'none',
+        ],
+        'x-xss-protection': [
+          '0',
+        ],
+      });
+      expect(response.status).toBe(204);
+      expect(response.type).toBe(undefined); // not specified
+      expect(await response.text()).toBe('');
+    });
+
+    test('Request: /_/report/errors responds with status 415', async () => {
+      const response = await fetch(`${fetchUrl}/_/report/errors`, {
+        ...defaultFetchOptions,
+        method: 'POST',
+        headers: {
+          origin: 'test.example.com',
+        },
+      });
+
+      expect(response.headers.raw()).toEqual({
+        connection: [
+          'close',
+        ],
+        'content-length': [
+          '22',
+        ],
+        'content-security-policy': [
+          expect.any(String),
+        ],
+        'content-type': [
+          'text/plain; charset=utf-8',
+        ],
+        date: [
+          expect.any(String),
+        ],
+        etag: [
+          expect.any(String),
+        ],
+        'expect-ct': [
+          'max-age=0',
+        ],
+        'one-app-version': [
+          expect.any(String),
+        ],
+        'referrer-policy': [
+          'no-referrer',
+        ],
+        'strict-transport-security': [
+          'max-age=15552000; includeSubDomains',
+        ],
+        vary: [
+          'Accept-Encoding',
+        ],
+        'x-content-type-options': [
+          'nosniff',
+        ],
+        'x-dns-prefetch-control': [
+          'off',
+        ],
+        'x-download-options': [
+          'noopen',
+        ],
+        'x-frame-options': [
+          'SAMEORIGIN',
+        ],
+        'x-permitted-cross-domain-policies': [
+          'none',
+        ],
+        'x-xss-protection': [
+          '0',
+        ],
+      });
+      expect(response.status).toBe(415);
+      expect(await response.text()).toBe('Unsupported Media Type');
+    });
+
+    test('Request: /_/report/errors responds with status 204', async () => {
+      const response = await fetch(`${fetchUrl}/_/report/errors`, {
+        ...defaultFetchOptions,
+        method: 'POST',
+        headers: {
+          origin: 'test.example.com',
+          'content-type': 'application/json',
+        },
+      });
+
+      expect(response.headers.raw()).toEqual({
+        connection: [
+          'close',
+        ],
+        'content-security-policy': [
+          expect.any(String),
+        ],
+        date: [
+          expect.any(String),
+        ],
+        etag: [
+          expect.any(String),
+        ],
+        'expect-ct': [
+          'max-age=0',
+        ],
+        'one-app-version': [
+          expect.any(String),
+        ],
+        'referrer-policy': [
+          'no-referrer',
+        ],
+        'strict-transport-security': [
+          'max-age=15552000; includeSubDomains',
+        ],
+        'x-content-type-options': [
+          'nosniff',
+        ],
+        'x-dns-prefetch-control': [
+          'off',
+        ],
+        'x-download-options': [
+          'noopen',
+        ],
+        'x-frame-options': [
+          'SAMEORIGIN',
+        ],
+        'x-permitted-cross-domain-policies': [
+          'none',
+        ],
+        'x-xss-protection': [
+          '0',
+        ],
+      });
+      expect(response.status).toBe(204);
+      expect(await response.text()).toBe('');
+    });
+
+    test('Request: /foo/invalid.json', async () => {
+      const response = await fetch(`${fetchUrl}/foo/invalid.json`, {
+        ...defaultFetchOptions,
+        method: 'GET',
+        headers: {
+          origin: 'test.example.com',
+        },
+      });
+
+      expect(response.status).toBe(404);
+      expect(response.headers.raw()).toEqual({
+        'cache-control': [
+          'no-store',
+        ],
+        connection: [
+          'close',
+        ],
+        'content-length': [
+          '9',
+        ],
+        'content-security-policy': [
+          expect.any(String),
+        ],
+        'content-type': [
+          'text/plain; charset=utf-8',
+        ],
+        date: [
+          expect.any(String),
+        ],
+        etag: [
+          expect.any(String),
+        ],
+        'expect-ct': [
+          'max-age=0',
+        ],
+        'one-app-version': [
+          expect.any(String),
+        ],
+        pragma: [
+          'no-cache',
+        ],
+        'referrer-policy': [
+          'no-referrer',
+        ],
+        'strict-transport-security': [
+          'max-age=15552000; includeSubDomains',
+        ],
+        vary: [
+          'Accept-Encoding',
+        ],
+        'x-content-type-options': [
+          'nosniff',
+        ],
+        'x-dns-prefetch-control': [
+          'off',
+        ],
+        'x-download-options': [
+          'noopen',
+        ],
+        'x-frame-options': [
+          'SAMEORIGIN',
+        ],
+        'x-permitted-cross-domain-policies': [
+          'none',
+        ],
+        'x-xss-protection': [
+          '0',
+        ],
+      });
+    });
+  });
 });
 
 describe('Tests that can run against either local Docker setup or remote One App environments', () => {
@@ -1703,325 +2023,5 @@ describe('heapdump', () => {
     // is affected by my test development
     expect(size).toBeGreaterThanOrEqual(10 * oneMegabyte);
     expect(size).toBeLessThanOrEqual(100 * oneMegabyte);
-  });
-});
-
-describe('Routes confidence checks', () => {
-  const defaultFetchOptions = createFetchOptions();
-  let originalModuleMap;
-  const oneAppLocalPortToUse = getRandomPortNumber();
-  const oneAppMetricsLocalPortToUse = getRandomPortNumber();
-  const fetchUrl = `https://localhost:${oneAppLocalPortToUse}`;
-
-  let browser;
-
-  beforeAll(async () => {
-    originalModuleMap = readModuleMap();
-    ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse }));
-  });
-
-  afterAll(async () => {
-    await tearDownTestRunner({ browser });
-    writeModuleMap(originalModuleMap);
-  });
-
-  test('Request: /_/status', async () => {
-    const response = await fetch(`${fetchUrl}/_/status`, {
-      ...defaultFetchOptions,
-      method: 'GET',
-      headers: {
-        origin: 'test.example.com',
-      },
-    });
-
-    expect(response.status).toBe(200);
-    expect(response.headers.raw()).toEqual({
-      connection: [
-        'close',
-      ],
-      'content-length': [
-        '2',
-      ],
-      'content-type': [
-        'text/plain; charset=utf-8',
-      ],
-      date: [
-        expect.any(String),
-      ],
-      etag: [
-        expect.any(String),
-      ],
-      'one-app-version': [
-        expect.any(String),
-      ],
-      'referrer-policy': [
-        'same-origin',
-      ],
-      'strict-transport-security': [
-        'max-age=15552000; includeSubDomains',
-      ],
-      vary: [
-        'Accept-Encoding',
-      ],
-      'x-content-type-options': [
-        'nosniff',
-      ],
-      'x-frame-options': [
-        'DENY',
-      ],
-      'x-xss-protection': [
-        '1; mode=block',
-      ],
-    });
-  });
-
-  test('Request: /_/report/security/csp-violation', async () => {
-    const response = await fetch(`${fetchUrl}/_/report/security/csp-violation`, {
-      ...defaultFetchOptions,
-      method: 'POST',
-      headers: {
-        origin: 'test.example.com',
-      },
-    });
-
-    expect(response.headers.raw()).toEqual({
-      connection: [
-        'close',
-      ],
-      'content-security-policy': [
-        expect.any(String),
-      ],
-      date: [
-        expect.any(String),
-      ],
-      'expect-ct': [
-        'max-age=0',
-      ],
-      'one-app-version': [
-        expect.any(String),
-      ],
-      'referrer-policy': [
-        'no-referrer',
-      ],
-      'strict-transport-security': [
-        'max-age=15552000; includeSubDomains',
-      ],
-      'x-content-type-options': [
-        'nosniff',
-      ],
-      'x-dns-prefetch-control': [
-        'off',
-      ],
-      'x-download-options': [
-        'noopen',
-      ],
-      'x-frame-options': [
-        'SAMEORIGIN',
-      ],
-      'x-permitted-cross-domain-policies': [
-        'none',
-      ],
-      'x-xss-protection': [
-        '0',
-      ],
-    });
-    expect(response.status).toBe(204);
-    expect(response.type).toBe(undefined); // not specified
-    expect(await response.text()).toBe('');
-  });
-
-  test('Request: /_/report/errors responds with status 415', async () => {
-    const response = await fetch(`${fetchUrl}/_/report/errors`, {
-      ...defaultFetchOptions,
-      method: 'POST',
-      headers: {
-        origin: 'test.example.com',
-      },
-    });
-
-    expect(response.headers.raw()).toEqual({
-      connection: [
-        'close',
-      ],
-      'content-length': [
-        '22',
-      ],
-      'content-security-policy': [
-        expect.any(String),
-      ],
-      'content-type': [
-        'text/plain; charset=utf-8',
-      ],
-      date: [
-        expect.any(String),
-      ],
-      etag: [
-        expect.any(String),
-      ],
-      'expect-ct': [
-        'max-age=0',
-      ],
-      'one-app-version': [
-        expect.any(String),
-      ],
-      'referrer-policy': [
-        'no-referrer',
-      ],
-      'strict-transport-security': [
-        'max-age=15552000; includeSubDomains',
-      ],
-      vary: [
-        'Accept-Encoding',
-      ],
-      'x-content-type-options': [
-        'nosniff',
-      ],
-      'x-dns-prefetch-control': [
-        'off',
-      ],
-      'x-download-options': [
-        'noopen',
-      ],
-      'x-frame-options': [
-        'SAMEORIGIN',
-      ],
-      'x-permitted-cross-domain-policies': [
-        'none',
-      ],
-      'x-xss-protection': [
-        '0',
-      ],
-    });
-    expect(response.status).toBe(415);
-    expect(await response.text()).toBe('Unsupported Media Type');
-  });
-
-  test('Request: /_/report/errors responds with status 204', async () => {
-    const response = await fetch(`${fetchUrl}/_/report/errors`, {
-      ...defaultFetchOptions,
-      method: 'POST',
-      headers: {
-        origin: 'test.example.com',
-        'content-type': 'application/json',
-      },
-    });
-
-    expect(response.headers.raw()).toEqual({
-      connection: [
-        'close',
-      ],
-      'content-security-policy': [
-        expect.any(String),
-      ],
-      date: [
-        expect.any(String),
-      ],
-      etag: [
-        expect.any(String),
-      ],
-      'expect-ct': [
-        'max-age=0',
-      ],
-      'one-app-version': [
-        expect.any(String),
-      ],
-      'referrer-policy': [
-        'no-referrer',
-      ],
-      'strict-transport-security': [
-        'max-age=15552000; includeSubDomains',
-      ],
-      'x-content-type-options': [
-        'nosniff',
-      ],
-      'x-dns-prefetch-control': [
-        'off',
-      ],
-      'x-download-options': [
-        'noopen',
-      ],
-      'x-frame-options': [
-        'SAMEORIGIN',
-      ],
-      'x-permitted-cross-domain-policies': [
-        'none',
-      ],
-      'x-xss-protection': [
-        '0',
-      ],
-    });
-    expect(response.status).toBe(204);
-    expect(await response.text()).toBe('');
-  });
-
-  test('Request: /foo/invalid.json', async () => {
-    const response = await fetch(`${fetchUrl}/foo/invalid.json`, {
-      ...defaultFetchOptions,
-      method: 'GET',
-      headers: {
-        origin: 'test.example.com',
-      },
-    });
-
-    expect(response.status).toBe(404);
-    expect(response.headers.raw()).toEqual({
-      'cache-control': [
-        'no-store',
-      ],
-      connection: [
-        'close',
-      ],
-      'content-length': [
-        '9',
-      ],
-      'content-security-policy': [
-        expect.any(String),
-      ],
-      'content-type': [
-        'text/plain; charset=utf-8',
-      ],
-      date: [
-        expect.any(String),
-      ],
-      etag: [
-        expect.any(String),
-      ],
-      'expect-ct': [
-        'max-age=0',
-      ],
-      'one-app-version': [
-        expect.any(String),
-      ],
-      pragma: [
-        'no-cache',
-      ],
-      'referrer-policy': [
-        'no-referrer',
-      ],
-      'strict-transport-security': [
-        'max-age=15552000; includeSubDomains',
-      ],
-      vary: [
-        'Accept-Encoding',
-      ],
-      'x-content-type-options': [
-        'nosniff',
-      ],
-      'x-dns-prefetch-control': [
-        'off',
-      ],
-      'x-download-options': [
-        'noopen',
-      ],
-      'x-frame-options': [
-        'SAMEORIGIN',
-      ],
-      'x-permitted-cross-domain-policies': [
-        'none',
-      ],
-      'x-xss-protection': [
-        '0',
-      ],
-    });
   });
 });
