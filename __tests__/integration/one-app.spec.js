@@ -1706,7 +1706,7 @@ describe('heapdump', () => {
   });
 });
 
-describe('Routes sanity checks', () => {
+describe('Routes confidence checks', () => {
   const defaultFetchOptions = createFetchOptions();
   let originalModuleMap;
   const oneAppLocalPortToUse = getRandomPortNumber();
