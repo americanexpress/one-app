@@ -1862,7 +1862,7 @@ describe('Routes confidence checks', () => {
         'max-age=0',
       ],
       'one-app-version': [
-        '6.0.0-0520af2e',
+        expect.any(String),
       ],
       'referrer-policy': [
         'no-referrer',
