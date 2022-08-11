@@ -32,7 +32,7 @@ function getLocale(req) {
   return undefined;
 }
 
-const hrtimeToMs = (value) => (value[0] * 1e3) + (value[1] * 1e-6)
+const hrtimeToMs = (value) => (value[0] * 1e3) + (value[1] * 1e-6);
 
 /*
 TIMERS
@@ -42,31 +42,30 @@ TIMERS
 `$ResponseBuilder` measures how long it took for fastify to build the response after the payload/output from route handled was provided
 */
 
-const $Empty = Symbol('$Empty')
-const $RequestFullDuration = Symbol('$RequestFullDuration')
-const $RequestOverhead = Symbol('$RequestOverhead')
-const $RouteHandler = Symbol('$RouteHandler')
-const $ResponseBuilder = Symbol('$ResponseBuilder')
+const $Empty = Symbol('$Empty');
+const $RequestFullDuration = Symbol('$RequestFullDuration');
+const $RequestOverhead = Symbol('$RequestOverhead');
+const $RouteHandler = Symbol('$RouteHandler');
+const $ResponseBuilder = Symbol('$ResponseBuilder');
 
 const TIMERS = {};
 
 const startTimer = (obj, symbol) => {
   obj[symbol] = process.hrtime();
   TIMERS[symbol] = $Empty;
-}
+};
 
 const endTimer = (obj, symbol) => {
-  const result = process.hrtime(obj[symbol])
-  const ms = hrtimeToMs(result)
+  const result = process.hrtime(obj[symbol]);
+  const ms = hrtimeToMs(result);
 
   obj[symbol] = ms;
   TIMERS[symbol] = ms;
 
   return ms;
-}
+};
 
-const getTimer = (symbol) => TIMERS[symbol]
-
+const getTimer = (symbol) => TIMERS[symbol];
 
 function buildMetaData(request, reply) {
   const { headers } = request;
@@ -127,13 +126,11 @@ function logClientRequest(request, reply) {
     },
   };
 
-  console.log(log.request.timings)
-
   // TODO: 'req' is different from 'request', requires analysis
   const configuredLog = tenantUtils.configureRequestLog({
     req: request,
     res: reply,
-    log
+    log,
   });
   logger.info(configuredLog);
 }
@@ -144,33 +141,33 @@ export const setConfigureRequestLog = (newConfigureRequestLog = passThrough) => 
 
 export default function fastifyPlugin(fastify, _opts, done) {
   fastify.addHook('onRequest', async (request) => {
-    startTimer(request, $RequestOverhead)
-    startTimer(request, $RequestFullDuration)
+    startTimer(request, $RequestOverhead);
+    startTimer(request, $RequestFullDuration);
   });
 
   fastify.addHook('preHandler', async (request) => {
-    endTimer(request, $RequestOverhead)
-    startTimer(request, $RouteHandler)
+    endTimer(request, $RequestOverhead);
+    startTimer(request, $RouteHandler);
   });
 
   fastify.addHook('onSend', async (request, _reply, payload) => {
-    endTimer(request, $RouteHandler)
-    startTimer(request, $ResponseBuilder)
+    endTimer(request, $RouteHandler);
+    startTimer(request, $ResponseBuilder);
 
     // Note: `onSend` is meant to be used to modify the payload for the response.
     //        we use it to calculate TTFB (time to first byte) since it's called
     //        by fastify right before `writeHead` is called.
     return payload;
-  })
+  });
 
   fastify.addHook('onResponse', async (request, reply) => {
-    endTimer(request, $ResponseBuilder)
+    endTimer(request, $ResponseBuilder);
     // same as 'reply.getResponseTime()' but our approach
     // helps us to make the code cleaner
-    endTimer(request, $RequestFullDuration)
+    endTimer(request, $RequestFullDuration);
 
     logClientRequest(request, reply);
-  })
+  });
 
   done();
 }

@@ -1,6 +1,6 @@
 /* eslint-disable jest/no-disabled-tests */
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2022 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,10 +57,10 @@ jest.mock('../../mocks/scenarios', () => ({
 }), { virtual: true });
 
 describe('ssrServer', () => {
-  // jest.spyOn(console, 'info').mockImplementation(() => {});
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'info').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(() => { });
+  jest.spyOn(console, 'warn').mockImplementation(() => { });
+  jest.spyOn(console, 'error').mockImplementation(() => { });
 
   beforeEach(() => {
     jest.resetModules();
@@ -175,13 +175,13 @@ describe('ssrServer', () => {
       return server;
     }
 
-    const loadExpress = () => {
+    const loadExpress = (customRouter) => {
       const app = require('express')();
 
       app.disable('x-powered-by');
       app.disable('e-tag');
 
-      const router = loadServer().makeExpressRouter();
+      const router = loadServer().makeExpressRouter(customRouter);
 
       app.use(router);
 
@@ -413,6 +413,7 @@ describe('ssrServer', () => {
           expect(response.headers).not.toHaveProperty('access-control-expose-headers');
           expect(response.headers).not.toHaveProperty('access-control-allow-credentials');
         });
+
         it('POST should conditionally include CORS headers', async () => {
           expect.assertions(1);
           await request(loadExpress())
@@ -486,6 +487,28 @@ describe('ssrServer', () => {
       await request(loadExpress())
         .get('/route');
       expect(addFrameOptionsHeader).toBeCalled();
+    });
+
+    it('should return the static error page when an error was encountered', async () => {
+      const middlewareError = new Error('test error after body sent');
+      const express = require('express');
+      const response = await request(
+        loadExpress(
+          express
+            .Router()
+            .use((_request, _res, next) => {
+              next(middlewareError);
+            })
+        )
+      ).get('/anything');
+
+      expect(response.status).toEqual(500);
+      expect(console.error).toHaveBeenCalledTimes(1);
+      expect(console.error).toHaveBeenCalledWith(middlewareError, 'express application error: method GET, url "/anything", correlationId "undefined", headersSent: false');
+      expect(response.type).toEqual('text/html');
+      expect(response.text).toMatch('<h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>');
+      expect(response.text).toMatch('Sorry, we are unable to load this page at this time.');
+      expect(response.text).toMatch('Please try again later.');
     });
 
     it('should return the static error page when the URL is malformed', async () => {

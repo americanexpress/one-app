@@ -56,7 +56,7 @@ export default async function healthCheck(fastify, _opts, done) {
         holocron,
       };
       const withinThresholds = verifyThresholds(stats);
-  
+
       if (!holocron.moduleMapHealthy) {
         stats.process.status = 200;
         stats.holocron.status = 500;
@@ -66,12 +66,12 @@ export default async function healthCheck(fastify, _opts, done) {
       } else {
         reply.code(503);
       }
-  
+
       reply.send(stats);
     } catch (err) {
       res.code(500).send('');
     }
-  })
+  });
 
   done();
 }

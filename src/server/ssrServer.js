@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2022 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,8 @@ import {
   offlineMiddleware,
 } from './middleware/pwa';
 
-export const makeExpressRouter = () => {
+export const makeExpressRouter = (router = express.Router()) => {
   const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
-
-  const router = express.Router();
 
   router.use(ensureCorrelationId);
   router.use(logging);

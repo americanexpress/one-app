@@ -94,8 +94,6 @@ export async function renderStaticErrorPage(res) {
   if (!res.statusCode) {
     res.status(500);
   }
-  console.info(`renderStaticErrorPage status ${res.statusCode}`);
-
   if (errorPage) {
     safeSend(res, errorPage);
   } else {
