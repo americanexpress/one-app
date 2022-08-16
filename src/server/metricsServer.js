@@ -17,6 +17,7 @@
 import Fastify from 'fastify';
 import fp from 'fastify-plugin';
 import helmet from '@fastify/helmet';
+import rateLimit from '@fastify/rate-limit';
 import { register as metricsRegister, collectDefaultMetrics } from 'prom-client';
 
 import logging from './utils/logging/fastifyPlugin';
@@ -27,6 +28,10 @@ collectDefaultMetrics();
 export async function createMetricsServer() {
   const fastify = Fastify();
 
+  await fastify.register(rateLimit, {
+    max: 120,
+    timeWindow: '1 minute',
+  });
   await fastify.register(fp(logging));
   await fastify.register(helmet);
   await fastify.register(healthCheck);
