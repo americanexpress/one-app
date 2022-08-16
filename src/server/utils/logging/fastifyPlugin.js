@@ -18,47 +18,53 @@ import url from 'url';
 
 import logger from './logger';
 
-const passThrough = ({ log }) => log;
-const tenantUtils = {
-  configureRequestLog: passThrough,
+/*
+TIMERS
+`$RequestFullDuration` measures how long it took the whole request to be resolved
+`$RequestOverhead` measures how long it took from when the request was made
+                   until the route handler was called
+`$RouteHandler` measures how long the route handler took to provide an output
+`$ResponseBuilder` measures how long it took for fastify to build the response
+                   after the payload/output from route handled was provided
+
+Why symbols?
+It prevents conflicts with existing keys, native or from other plugins
+*/
+export const $RequestFullDuration = Symbol('$RequestFullDuration');
+export const $RequestOverhead = Symbol('$RequestOverhead');
+export const $RouteHandler = Symbol('$RouteHandler');
+export const $ResponseBuilder = Symbol('$ResponseBuilder');
+
+const TIMERS = {};
+const TENANT_UTILS = {
+  configureRequestLog: ({ log }) => log,
 };
 
-function getLocale(req) {
+const getLocale = (req) => {
   // TODO: Verify if `store` is available
   if (req.store) {
     const state = req.store.getState();
     return state.getIn(['intl', 'activeLocale']);
   }
+
   return undefined;
-}
+};
 
 const hrtimeToMs = (value) => (value[0] * 1e3) + (value[1] * 1e-6);
 
-/*
-TIMERS
-`$RequestFullDuration` measures how long it took the whole request to be resolved
-`$RequestOverhead` measures how long it took from when the request was made until the route handler was called
-`$RouteHandler` measures how long the route handler took to provide an output
-`$ResponseBuilder` measures how long it took for fastify to build the response after the payload/output from route handled was provided
-*/
-
-const $Empty = Symbol('$Empty');
-const $RequestFullDuration = Symbol('$RequestFullDuration');
-const $RequestOverhead = Symbol('$RequestOverhead');
-const $RouteHandler = Symbol('$RouteHandler');
-const $ResponseBuilder = Symbol('$ResponseBuilder');
-
-const TIMERS = {};
-
 const startTimer = (obj, symbol) => {
-  obj[symbol] = process.hrtime();
-  TIMERS[symbol] = $Empty;
+  const time = process.hrtime();
+
+  // eslint-disable-next-line no-param-reassign
+  obj[symbol] = time;
+  TIMERS[symbol] = time;
 };
 
 const endTimer = (obj, symbol) => {
   const result = process.hrtime(obj[symbol]);
   const ms = hrtimeToMs(result);
 
+  // eslint-disable-next-line no-param-reassign
   obj[symbol] = ms;
   TIMERS[symbol] = ms;
 
@@ -67,7 +73,7 @@ const endTimer = (obj, symbol) => {
 
 const getTimer = (symbol) => TIMERS[symbol];
 
-function buildMetaData(request, reply) {
+const buildMetaData = (request, reply) => {
   const { headers } = request;
 
   return {
@@ -82,9 +88,9 @@ function buildMetaData(request, reply) {
     forwardedFor: headers['x-forwarded-for'] || null,
     locale: getLocale(request),
   };
-}
+};
 
-function logClientRequest(request, reply) {
+const logClientRequest = (request, reply) => {
   const ttfb = getTimer($RequestFullDuration) - getTimer($ResponseBuilder);
   const log = {
     type: 'request',
@@ -127,16 +133,16 @@ function logClientRequest(request, reply) {
   };
 
   // TODO: 'req' is different from 'request', requires analysis
-  const configuredLog = tenantUtils.configureRequestLog({
+  const configuredLog = TENANT_UTILS.configureRequestLog({
     req: request,
     res: reply,
     log,
   });
   logger.info(configuredLog);
-}
+};
 
-export const setConfigureRequestLog = (newConfigureRequestLog = passThrough) => {
-  tenantUtils.configureRequestLog = newConfigureRequestLog;
+export const setConfigureRequestLog = (newConfigureRequestLog) => {
+  TENANT_UTILS.configureRequestLog = newConfigureRequestLog;
 };
 
 export default function fastifyPlugin(fastify, _opts, done) {

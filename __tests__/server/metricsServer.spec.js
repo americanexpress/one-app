@@ -87,4 +87,38 @@ describe('metricsServer', () => {
       expect(response.headers['content-type']).toEqual('text/plain; charset=utf-8');
     });
   });
+
+  describe('/metrics', () => {
+    it('should respond with metrics', async () => {
+      const instance = await load();
+      await instance.inject({
+        method: 'GET',
+        url: '/metrics',
+      });
+
+      expect(client.register.metrics).toBeCalled();
+    });
+
+    it('should be Content-Type of metrics', async () => {
+      const instance = await load();
+      const response = await instance.inject({
+        method: 'GET',
+        url: '/metrics',
+      });
+
+      expect(response.headers['content-type']).toBe(`${client.register.contentType}`);
+    });
+
+    it('should log the request', async () => {
+      logging.mockClear();
+
+      const instance = await load();
+      await instance.inject({
+        method: 'GET',
+        url: '/im-up',
+      });
+
+      expect(logging).toHaveBeenCalledTimes(1);
+    });
+  });
 });

@@ -14,6 +14,14 @@
  * permissions and limitations under the License.
  */
 
+/*
+NOTE:
+Most of this code is a clone from src/server/middleware/healthCheck.js
+This is because the middleware is still used in the ssrServer.js file
+via ExpressJS, which will be removed soon once the ssrServer.js is
+migrated to Fastify
+*/
+
 import pidusage from 'pidusage';
 import { promisify } from 'util';
 import { getModule } from 'holocron';
@@ -69,7 +77,7 @@ export default async function healthCheck(fastify, _opts, done) {
 
       reply.send(stats);
     } catch (err) {
-      res.code(500).send('');
+      reply.code(500).send('');
     }
   });
 
