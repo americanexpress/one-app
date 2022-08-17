@@ -22,6 +22,7 @@ via ExpressJS, which will be removed soon once the ssrServer.js is
 migrated to Fastify
 */
 
+import fp from 'fastify-plugin';
 import pidusage from 'pidusage';
 import { promisify } from 'util';
 import { getModule } from 'holocron';
@@ -45,8 +46,10 @@ export const verifyThresholds = ({
   && tickDelay[0] < 1
   && rootModuleExists;
 
-export default async function healthCheck(fastify, _opts, done) {
-  fastify.get('/im-up', async (_request, reply) => {
+const healthCheck = (fastify, _opts, done) => {
+  fastify.decorateReply('healthReport', async function () {
+    const reply = this;
+
     try {
       const [processStats, tickDelay] = await Promise.all([
         getProcessStats(process.pid),
@@ -82,4 +85,6 @@ export default async function healthCheck(fastify, _opts, done) {
   });
 
   done();
-}
+};
+
+export default fp(healthCheck);

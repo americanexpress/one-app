@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 American Express Travel Related Services Company, Inc.
+ * Copyright 2019 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 
 import Fastify from 'fastify';
-import fp from 'fastify-plugin';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { register as metricsRegister, collectDefaultMetrics } from 'prom-client';
@@ -32,7 +31,7 @@ export async function createMetricsServer() {
     max: 120,
     timeWindow: '1 minute',
   });
-  await fastify.register(fp(logging));
+  await fastify.register(logging);
   await fastify.register(helmet);
   await fastify.register(healthCheck);
 
@@ -40,6 +39,10 @@ export async function createMetricsServer() {
     reply
       .header('Content-Type', metricsRegister.contentType)
       .send(await metricsRegister.metrics());
+  });
+
+  fastify.get('/im-up', async (_request, reply) => {
+    await reply.healthReport();
   });
 
   fastify.setNotFoundHandler((_request, reply) => {

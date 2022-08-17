@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2022 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 import url from 'url';
+import fp from 'fastify-plugin';
 
 import logger from './logger';
 
@@ -35,7 +36,6 @@ export const $RequestOverhead = Symbol('$RequestOverhead');
 export const $RouteHandler = Symbol('$RouteHandler');
 export const $ResponseBuilder = Symbol('$ResponseBuilder');
 
-const TIMERS = {};
 const TENANT_UTILS = {
   configureRequestLog: ({ log }) => log,
 };
@@ -57,7 +57,6 @@ const startTimer = (obj, symbol) => {
 
   // eslint-disable-next-line no-param-reassign
   obj[symbol] = time;
-  TIMERS[symbol] = time;
 };
 
 const endTimer = (obj, symbol) => {
@@ -66,12 +65,9 @@ const endTimer = (obj, symbol) => {
 
   // eslint-disable-next-line no-param-reassign
   obj[symbol] = ms;
-  TIMERS[symbol] = ms;
 
   return ms;
 };
-
-const getTimer = (symbol) => TIMERS[symbol];
 
 const buildMetaData = (request, reply) => {
   const { headers } = request;
@@ -91,6 +87,7 @@ const buildMetaData = (request, reply) => {
 };
 
 const logClientRequest = (request, reply) => {
+  const getTimer = (symbol) => request[symbol];
   const ttfb = getTimer($RequestFullDuration) - getTimer($ResponseBuilder);
   const log = {
     type: 'request',
@@ -145,7 +142,14 @@ export const setConfigureRequestLog = (newConfigureRequestLog) => {
   TENANT_UTILS.configureRequestLog = newConfigureRequestLog;
 };
 
-export default function fastifyPlugin(fastify, _opts, done) {
+const fastifyPlugin = (fastify, _opts, done) => {
+  // decorators should be initialized per Fastify documentation
+  // see https://www.fastify.io/docs/latest/Reference/Decorators/#decoratereplyname-value-dependencies
+  fastify.decorateRequest($RequestOverhead, null);
+  fastify.decorateRequest($RequestFullDuration, null);
+  fastify.decorateRequest($RouteHandler, null);
+  fastify.decorateRequest($ResponseBuilder, null);
+
   fastify.addHook('onRequest', async (request) => {
     startTimer(request, $RequestOverhead);
     startTimer(request, $RequestFullDuration);
@@ -176,4 +180,6 @@ export default function fastifyPlugin(fastify, _opts, done) {
   });
 
   done();
-}
+};
+
+export default fp(fastifyPlugin);

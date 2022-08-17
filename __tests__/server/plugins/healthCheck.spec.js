@@ -145,6 +145,11 @@ describe('healthCheck', () => {
       const fastify = Fastify();
 
       await fastify.register(healthCheck);
+
+      fastify.get('/im-up', async (_request, reply) => {
+        await reply.healthReport();
+      });
+
       await fastify.ready();
 
       const response = await fastify.inject({

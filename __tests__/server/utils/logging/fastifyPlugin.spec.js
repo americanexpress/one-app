@@ -26,16 +26,6 @@ import logger from '../../../../src/server/utils/logging/logger';
 jest.mock('../../../../src/server/utils/logging/logger');
 
 describe('fastifyPlugin', () => {
-  // function createRequestReplyDone() {
-  //   const request = {
-  //   };
-  //   const reply = {
-  //   };
-  //   const done = jest.fn();
-
-  //   return { request, reply, done };
-  // }
-
   const { hrtime } = process;
 
   beforeEach(() => {
@@ -49,6 +39,9 @@ describe('fastifyPlugin', () => {
 
   it('adds the expected hooks and calls the done fn', () => {
     const fastify = {
+      decorateRequest: jest.fn((name, fn) => {
+        fastify[name] = fn;
+      }),
       addHook: jest.fn(),
     };
     const done = jest.fn();
@@ -65,6 +58,9 @@ describe('fastifyPlugin', () => {
   describe('onRequest', () => {
     it('starts Request Overhead and Request Full Duration timers', async () => {
       const fastify = {
+        decorateRequest: jest.fn((name, fn) => {
+          fastify[name] = fn;
+        }),
         addHook: jest.fn((name, fn) => {
           fastify[name] = fn;
         }),
@@ -89,6 +85,9 @@ describe('fastifyPlugin', () => {
   describe('preHandler', () => {
     it('ends Request Overhead timer and starts Route Handler timer', async () => {
       const fastify = {
+        decorateRequest: jest.fn((name, fn) => {
+          fastify[name] = fn;
+        }),
         addHook: jest.fn((name, fn) => {
           fastify[name] = fn;
         }),
@@ -113,6 +112,9 @@ describe('fastifyPlugin', () => {
   describe('onSend', () => {
     it('ends Route Handler timer and starts Response Builder timer with unmodified payload', async () => {
       const fastify = {
+        decorateRequest: jest.fn((name, fn) => {
+          fastify[name] = fn;
+        }),
         addHook: jest.fn((name, fn) => {
           fastify[name] = fn;
         }),
@@ -137,6 +139,9 @@ describe('fastifyPlugin', () => {
   describe('onResponse', () => {
     it('ends Response Builder timer and starts Request Full Duration timer', async () => {
       const fastify = {
+        decorateRequest: jest.fn((name, fn) => {
+          fastify[name] = fn;
+        }),
         addHook: jest.fn((name, fn) => {
           fastify[name] = fn;
         }),
@@ -171,6 +176,9 @@ describe('fastifyPlugin', () => {
 
       it('no headers only fallbacks', async () => {
         const fastify = {
+          decorateRequest: jest.fn((name, fn) => {
+            fastify[name] = fn;
+          }),
           addHook: jest.fn((name, fn) => {
             fastify[name] = fn;
           }),
@@ -189,6 +197,9 @@ describe('fastifyPlugin', () => {
           raw: {},
         };
 
+        await fastify.onRequest(request, reply);
+        await fastify.preHandler(request, reply);
+        await fastify.onSend(request, reply);
         await fastify.onResponse(request, reply);
 
         expect(logger.info).toHaveBeenCalledTimes(1);
@@ -226,6 +237,9 @@ describe('fastifyPlugin', () => {
 
       it('all headers and request keys present', async () => {
         const fastify = {
+          decorateRequest: jest.fn((name, fn) => {
+            fastify[name] = fn;
+          }),
           addHook: jest.fn((name, fn) => {
             fastify[name] = fn;
           }),
@@ -267,6 +281,9 @@ describe('fastifyPlugin', () => {
           statusCode: 500,
         };
 
+        await fastify.onRequest(request, reply);
+        await fastify.preHandler(request, reply);
+        await fastify.onSend(request, reply);
         await fastify.onResponse(request, reply);
 
         expect(logger.info).toHaveBeenCalledTimes(1);
@@ -304,6 +321,9 @@ describe('fastifyPlugin', () => {
 
       it('activeLocale in intl from store', async () => {
         const fastify = {
+          decorateRequest: jest.fn((name, fn) => {
+            fastify[name] = fn;
+          }),
           addHook: jest.fn((name, fn) => {
             fastify[name] = fn;
           }),
@@ -327,6 +347,9 @@ describe('fastifyPlugin', () => {
           raw: {},
         };
 
+        await fastify.onRequest(request, reply);
+        await fastify.preHandler(request, reply);
+        await fastify.onSend(request, reply);
         await fastify.onResponse(request, reply);
 
         expect(logger.info).toHaveBeenCalledTimes(1);
@@ -364,6 +387,9 @@ describe('fastifyPlugin', () => {
 
       it('custom configureRequestLog', async () => {
         const fastify = {
+          decorateRequest: jest.fn((name, fn) => {
+            fastify[name] = fn;
+          }),
           addHook: jest.fn((name, fn) => {
             fastify[name] = fn;
           }),
@@ -384,6 +410,9 @@ describe('fastifyPlugin', () => {
           raw: {},
         };
 
+        await fastify.onRequest(request, reply);
+        await fastify.preHandler(request, reply);
+        await fastify.onSend(request, reply);
         await fastify.onResponse(request, reply);
 
         expect(mutateLog).toHaveBeenCalledWith({
@@ -426,6 +455,9 @@ describe('fastifyPlugin', () => {
 
       it('negative ttfb', async () => {
         const fastify = {
+          decorateRequest: jest.fn((name, fn) => {
+            fastify[name] = fn;
+          }),
           addHook: jest.fn((name, fn) => {
             fastify[name] = fn;
           }),
@@ -470,9 +502,9 @@ describe('fastifyPlugin', () => {
             statusText: undefined,
             timings: {
               duration: 0,
-              requestOverhead: 0,
+              requestOverhead: Number.NaN,
               responseBuilder: 0,
-              routeHandler: 0,
+              routeHandler: Number.NaN,
               ttfb: null,
             },
           },
