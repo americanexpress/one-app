@@ -30,11 +30,11 @@ import Fastify from 'fastify';
 import fastifyExpress from '@fastify/express';
 
 import conditionallyAllowCors from './middleware/conditionallyAllowCors';
-import ensureCorrelationId from './middleware/ensureCorrelationId';
-import setAppVersionHeader from './middleware/setAppVersionHeader';
+import ensureCorrelationId from './plugins/ensureCorrelationId';
+import setAppVersionHeader from './plugins/setAppVersionHeader';
 import clientErrorLogger from './middleware/clientErrorLogger';
 import oneApp from '../universal';
-import addSecurityHeaders from './middleware/addSecurityHeaders';
+import addSecurityHeaders from './plugins/addSecurityHeaders';
 import addCacheHeaders from './middleware/addCacheHeaders';
 import csp from './middleware/csp';
 import cspViolation from './middleware/cspViolation';
@@ -46,7 +46,7 @@ import checkStateForStatusCode from './middleware/checkStateForStatusCode';
 import sendHtml from './middleware/sendHtml';
 import serverError from './middleware/serverError';
 import logging from './utils/logging/serverMiddleware';
-import forwardedHeaderParser from './middleware/forwardedHeaderParser';
+import forwardedHeaderParser from './plugins/forwardedHeaderParser';
 import {
   serviceWorkerMiddleware,
   webManifestMiddleware,
@@ -56,15 +56,20 @@ import {
 export const makeExpressRouter = (router = express.Router()) => {
   const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
 
-  router.use(ensureCorrelationId);
+  router.use((req, res, next) => {
+    console.log('--express router', req.headers)
+
+    next()
+  })
+
   router.use(logging);
-  router.use(compression());
-  router.get('*', addSecurityHeaders);
-  router.use(setAppVersionHeader);
-  router.use(forwardedHeaderParser);
+  router.use(compression()); // TODO: Find Fastify equivalent
+  // router.get('*', addSecurityHeaders);
+  // router.use(setAppVersionHeader);
+  // router.use(forwardedHeaderParser);
 
   router.use('/_/static', express.static(path.join(__dirname, '../../build'), { maxage: '182d' }));
-  router.get('/_/status', (req, res) => res.sendStatus(200));
+  router.get('/_/status', (_req, res) => res.sendStatus(200));
   router.get('/_/pwa/service-worker.js', serviceWorkerMiddleware());
   router.get('*', addCacheHeaders);
   router.get('/_/pwa/manifest.webmanifest', webManifestMiddleware());
@@ -85,21 +90,21 @@ export const makeExpressRouter = (router = express.Router()) => {
   router.get('**/*.(json|js|css|map)', (req, res) => res.sendStatus(404));
 
   router.get('/_/pwa/shell', offlineMiddleware(oneApp));
-  router.get(
-    '*',
-    addFrameOptionsHeader,
-    createRequestStore(oneApp),
-    createRequestHtmlFragment(oneApp),
-    conditionallyAllowCors,
-    checkStateForRedirect,
-    checkStateForStatusCode,
-    sendHtml
-  );
+  // router.get(
+  //   '*',
+  //   addFrameOptionsHeader,
+  //   createRequestStore(oneApp),
+  //   createRequestHtmlFragment(oneApp),
+  //   conditionallyAllowCors,
+  //   checkStateForRedirect,
+  //   checkStateForStatusCode,
+  //   sendHtml
+  // );
 
   if (enablePostToModuleRoutes) {
     router.options(
       '*',
-      addSecurityHeaders,
+      // addSecurityHeaders,
       json({ limit: '0kb' }), // there should be no body
       urlencoded({ limit: '0kb' }), // there should be no body
       cors({ origin: false }) // disable CORS
@@ -107,7 +112,7 @@ export const makeExpressRouter = (router = express.Router()) => {
 
     router.post(
       '*',
-      addSecurityHeaders,
+      // addSecurityHeaders,
       json({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
       urlencoded({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
       addFrameOptionsHeader,
@@ -121,7 +126,7 @@ export const makeExpressRouter = (router = express.Router()) => {
   }
 
   // https://expressjs.com/en/guide/error-handling.html
-  router.use(serverError); // Note: should be quickly moved to Fastify
+  // router.use(serverError); // Note: should be quickly moved to Fastify
 
   return router;
 };
@@ -129,12 +134,20 @@ export const makeExpressRouter = (router = express.Router()) => {
 export async function createApp(opts = {}) {
   const fastify = Fastify(opts);
 
+  await fastify.register(ensureCorrelationId);
+  // await fastify.register(logging); // TODO: Fastify Plugin is in https://github.com/americanexpress/one-app/pull/803
+  await fastify.register(addSecurityHeaders);
+  await fastify.register(setAppVersionHeader);
+  await fastify.register(forwardedHeaderParser);
+
   await fastify.register(fastifyExpress);
 
   fastify.express.disable('x-powered-by');
   fastify.express.disable('e-tag');
 
   fastify.use(makeExpressRouter());
+
+  fastify.get('/*', () => 'asd')
 
   // TODO: Needs refactoring (priority)
   fastify.setNotFoundHandler(sendHtml);
