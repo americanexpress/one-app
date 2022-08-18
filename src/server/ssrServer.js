@@ -21,7 +21,7 @@
 import path from 'path';
 
 import express from 'express';
-import compression from 'compression';
+import compress from '@fastify/compress';
 import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'body-parser';
 import helmet from 'helmet';
@@ -52,18 +52,13 @@ import {
   webManifestMiddleware,
   offlineMiddleware,
 } from './middleware/pwa';
+import reactHtml from './plugins/reactHtml'
 
 export const makeExpressRouter = (router = express.Router()) => {
   const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
 
-  router.use((req, res, next) => {
-    console.log('--express router', req.headers)
-
-    next()
-  })
-
   router.use(logging);
-  router.use(compression()); // TODO: Find Fastify equivalent
+  // router.use(compression());
   // router.get('*', addSecurityHeaders);
   // router.use(setAppVersionHeader);
   // router.use(forwardedHeaderParser);
@@ -136,10 +131,15 @@ export async function createApp(opts = {}) {
 
   await fastify.register(ensureCorrelationId);
   // await fastify.register(logging); // TODO: Fastify Plugin is in https://github.com/americanexpress/one-app/pull/803
+  // await fastify.register(compress); // TODO: requires analysis, it adds 300ms on html body response
   await fastify.register(addSecurityHeaders);
   await fastify.register(setAppVersionHeader);
   await fastify.register(forwardedHeaderParser);
 
+  // Note: Express runs on `onRequest` hook by default.
+  //       When a route is match then all other Fastify
+  //       hooks are ignored since the `done` fn from fastify
+  //       moves to Express as the `next` fn.
   await fastify.register(fastifyExpress);
 
   fastify.express.disable('x-powered-by');
@@ -147,10 +147,18 @@ export async function createApp(opts = {}) {
 
   fastify.use(makeExpressRouter());
 
-  fastify.get('/*', () => 'asd')
+  // Note: the following only gets executed if the request
+  //       does not match any Express route
+
+  // await fastify.register(addFrameOptionsHeader)
+  await fastify.register(reactHtml)
+
+  fastify.get('/*', (_request, reply) => reply.sendHtml())
 
   // TODO: Needs refactoring (priority)
-  fastify.setNotFoundHandler(sendHtml);
+  // fastify.setNotFoundHandler(sendHtml);
+
+  await fastify.ready();
 
   return fastify;
 }
