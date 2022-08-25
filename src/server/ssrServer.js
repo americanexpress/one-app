@@ -153,7 +153,12 @@ export async function createApp(opts = {}) {
   // await fastify.register(addFrameOptionsHeader)
   await fastify.register(reactHtml)
 
-  fastify.get('/*', (_request, reply) => reply.sendHtml())
+  fastify.get('/*', {
+    errorHandler: (error, _request, reply) => {
+      reply.raw.statusMessage = error.message;
+      reply.code(error.statusCode || 500).send(error.message)
+    }
+  }, (_request, reply) => reply.sendHtml())
 
   // TODO: Needs refactoring (priority)
   // fastify.setNotFoundHandler(sendHtml);

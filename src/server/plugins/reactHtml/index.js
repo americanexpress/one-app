@@ -376,7 +376,7 @@ const reactHtml = (fastify, _opts, done) => {
       }
 
       if (renderTextOnly) {
-        reply.header('content-type', 'text/plain');
+        reply.header('content-type', 'text/plain; charset=utf-8');
         return reply.send(striptags(appHtml, allowedHtmlTags, htmlTagReplacement));
       }
 

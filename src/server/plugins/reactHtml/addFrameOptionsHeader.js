@@ -21,7 +21,7 @@ import { getCSP } from '../../middleware/csp'; // TODO: Convert into Fastify plu
 const addFrameOptionsHeader = (fastify) => {
   fastify.addHook('onRequest', async (request, reply) => {
     const referer = request.headers.Referer || request.headers.Referrer || '';
-    const frameAncestorDomains = getCSP()['frame-ancestors'] || '';
+    const frameAncestorDomains = getCSP()['frame-ancestors'] || [];
     const trimmedReferrer = referer.replace('https://', '');
     const matchedDomain = frameAncestorDomains.find((domain) => matcher.isMatch(trimmedReferrer, `${domain}/*`)
     );
