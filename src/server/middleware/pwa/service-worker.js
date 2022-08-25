@@ -24,7 +24,7 @@ function processServiceWorkerScript(script) {
 }
 
 export default function serviceWorkerMiddleware() {
-  return function serviceWorkerMiddlewareHandler(req, res, next) {
+  return function serviceWorkerMiddlewareHandler(_req, res, next) {
     const { serviceWorker, serviceWorkerScope, serviceWorkerScript } = getServerPWAConfig();
     if (serviceWorker === false) return next();
     return res
