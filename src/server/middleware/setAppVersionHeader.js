@@ -18,7 +18,7 @@ import readJsonFile from '../utils/readJsonFile';
 
 const { buildVersion: appVersion } = readJsonFile('../../../.build-meta.json');
 
-export default function setAppVersionHeader(req, res, next) {
+export default function setAppVersionHeader(_req, res, next) {
   res.set('One-App-Version', appVersion);
   next();
 }
