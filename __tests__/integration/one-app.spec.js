@@ -1013,7 +1013,7 @@ describe('Tests that require Docker setup', () => {
         beforeAll(loadCustomErrorPageRoot);
         test('responds with a custom error page', async () => {
           const response = await fetch(
-            `${appAtTestUrls.fetchUrl}/%c0.%c0./%c0.%c0./%c0.%c0./%c0.%c0./winnt/win.ini`,
+            `${appAtTestUrls.fetchUrl}/winnt/win.ini`,
             defaultFetchOptions
           );
           const body = await response.text();
@@ -1908,7 +1908,7 @@ describe('Tests that can run against either local Docker setup or remote One App
       describe('static error page', () => {
         test('responds with default error page on rendering error', async () => {
           const response = await fetch(
-            `${appInstanceUrls.fetchUrl}/%c0.%c0./%c0.%c0./%c0.%c0./%c0.%c0./winnt/win.ini`,
+            `${appInstanceUrls.fetchUrl}/winnt/win.ini`,
             defaultFetchOpts
           );
           const body = await response.text();

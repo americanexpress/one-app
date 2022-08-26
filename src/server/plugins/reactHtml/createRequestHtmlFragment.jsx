@@ -37,7 +37,7 @@ const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 
 const createRequestHtmlFragment = (fastify, { createRoutes }) => {
   fastify.decorateRequest('appHtml', null);
-  fastify.decorateRequest('helmetInfo', null);
+  fastify.decorateRequest('helmetInfo', undefined);
 
   fastify.addHook('onRequest', async (request, reply) => {
     try {

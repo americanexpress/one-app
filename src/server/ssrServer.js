@@ -131,7 +131,11 @@ export async function createApp(opts = {}) {
 
   await fastify.register(ensureCorrelationId);
   // await fastify.register(logging); // TODO: Fastify Plugin is in https://github.com/americanexpress/one-app/pull/803
-  // await fastify.register(compress); // TODO: requires analysis, it adds 300ms on html body response
+  await fastify.register(compress, {
+    zlibOptions:{
+      level: 1,
+    },
+  });
   await fastify.register(addSecurityHeaders);
   await fastify.register(setAppVersionHeader);
   await fastify.register(forwardedHeaderParser);

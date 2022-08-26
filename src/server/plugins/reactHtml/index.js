@@ -346,7 +346,7 @@ const reactHtml = (fastify, _opts, done) => {
       const {
         appHtml, clientModuleMapCache, store, headers, helmetInfo = {}, renderMode = 'hydrate',
       } = request;
-      const { scriptNonce } = reply; // TODO: Check values
+      const { scriptNonce } = reply.raw; // TODO: Check values (this is currently set by csp express middleware)
       const userAgent = headers['user-agent'];
       const isLegacy = legacyUserAgent(userAgent);
 
