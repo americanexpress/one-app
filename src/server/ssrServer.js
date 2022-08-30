@@ -24,8 +24,7 @@ import express from 'express';
 import compress from '@fastify/compress';
 import compression from 'compression'
 import cookieParser from 'cookie-parser';
-import cors from 'cors';
-import { json, urlencoded } from 'body-parser';
+import { json } from 'body-parser';
 import helmet from 'helmet';
 import Fastify from 'fastify';
 import fastifyExpress from '@fastify/express';
@@ -35,7 +34,6 @@ import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
 import clientErrorLogger from './middleware/clientErrorLogger';
 import oneApp from '../universal';
-import addSecurityHeaders from './middleware/addSecurityHeaders';
 import addSecurityHeadersPlugin from './plugins/addSecurityHeaders';
 import addCacheHeaders from './middleware/addCacheHeaders';
 import csp from './middleware/csp';
@@ -48,22 +46,10 @@ import {
   offlineMiddleware,
 } from './middleware/pwa';
 import reactHtml, { renderStaticErrorPage } from './plugins/reactHtml'
-import addFrameOptionsHeader from './middleware/addFrameOptionsHeader'
-import createRequestStore from './middleware/createRequestStore'
-import createRequestHtmlFragment from './middleware/createRequestHtmlFragment';
-import conditionallyAllowCors from './middleware/conditionallyAllowCors';
-import checkStateForRedirect from './middleware/checkStateForRedirect';
-import checkStateForStatusCode from './middleware/checkStateForStatusCode';
-import sendHtml from './middleware/sendHtml';
 
 export const makeExpressRouter = (router = express.Router()) => {
-  const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
-
   router.use(logging);
   router.use(compression());
-  // router.get('*', addSecurityHeaders);
-  // router.use(setAppVersionHeader);
-  // router.use(forwardedHeaderParser);
 
   router.use('/_/static', express.static(path.join(__dirname, '../../build'), { maxage: '182d' }));
   router.get('/_/status', (_req, res) => res.sendStatus(200));
@@ -87,45 +73,12 @@ export const makeExpressRouter = (router = express.Router()) => {
   router.get('**/*.(json|js|css|map)', (req, res) => res.sendStatus(404));
 
   router.get('/_/pwa/shell', offlineMiddleware(oneApp));
-  // router.get(
-  //   '*',
-  //   addFrameOptionsHeader,
-  //   createRequestStore(oneApp),
-  //   createRequestHtmlFragment(oneApp),
-  //   conditionallyAllowCors,
-  //   checkStateForRedirect,
-  //   checkStateForStatusCode,
-  //   sendHtml
-  // );
-
-  if (enablePostToModuleRoutes) {
-    router.options(
-      '*',
-      addSecurityHeaders,
-      json({ limit: '0kb' }), // there should be no body
-      urlencoded({ limit: '0kb' }), // there should be no body
-      cors({ origin: false }) // disable CORS
-    );
-
-    router.post(
-      '*',
-      addSecurityHeaders,
-      json({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
-      urlencoded({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
-      addFrameOptionsHeader,
-      createRequestStore(oneApp, { useBodyForBuildingTheInitialState: true }),
-      createRequestHtmlFragment(oneApp),
-      conditionallyAllowCors,
-      checkStateForRedirect,
-      checkStateForStatusCode,
-      sendHtml
-    );
-  }
 
   return router;
 };
 
 export async function createApp(opts = {}) {
+  const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
   const fastify = Fastify({
     frameworkErrors: function (error, request, reply) {
       const { method, url } = request;
@@ -167,6 +120,35 @@ export async function createApp(opts = {}) {
   await fastify.register(reactHtml)
 
   fastify.get('/*', (_request, reply) => reply.sendHtml())
+
+  if (enablePostToModuleRoutes) {
+    // fastify.options(
+    //   '*',
+    //   addSecurityHeaders,
+    //   json({ limit: '0kb' }), // there should be no body
+    //   urlencoded({ limit: '0kb' }), // there should be no body
+    //   cors({ origin: false }) // disable CORS
+    // );
+
+    // fastify.post(
+    //   '*',
+    //   addSecurityHeaders,
+    //   json({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
+    //   urlencoded({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
+    //   addFrameOptionsHeader,
+    //   createRequestStore(oneApp, { useBodyForBuildingTheInitialState: true }),
+    //   createRequestHtmlFragment(oneApp),
+    //   conditionallyAllowCors,
+    //   checkStateForRedirect,
+    //   checkStateForStatusCode,
+    //   sendHtml
+    // );
+
+    // TODO: Support for "options" with restrictions
+
+    // TODO: Support for "json limit" and "urlencoded limit"
+    fastify.post('/*', (_request, reply) => reply.sendHtml())
+  }
 
   fastify.setNotFoundHandler(async (_request, reply) => {
     reply.send('Not found')
