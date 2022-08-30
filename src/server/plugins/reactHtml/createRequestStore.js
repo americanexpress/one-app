@@ -51,7 +51,7 @@ const createRequestStore = (
       const enhancer = createEnhancer();
       const localsForBuildInitialState = {
         // TODO: migrate req
-        req: safeRequest(request.raw, { useBodyForBuildingTheInitialState }),
+        req: safeRequest(request, { useBodyForBuildingTheInitialState }),
         config: clientConfig,
       };
       const store = createHolocronStore({

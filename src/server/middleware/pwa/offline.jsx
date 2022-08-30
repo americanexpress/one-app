@@ -21,8 +21,8 @@ import { Provider } from 'react-redux';
 import { renderForStaticMarkup } from '../../utils/reactRendering';
 
 import addFrameOptionsHeader from '../addFrameOptionsHeader';
-import createRequestStore from '../createRequestStore';
-import sendHtml from '../sendHtml';
+import createRequestStore from '../../plugins/reactHtml/createRequestStore';
+import sendHtml from '../../plugins/reactHtml';
 
 import { getServerPWAConfig } from './config';
 
@@ -49,7 +49,10 @@ async function appShellMiddleware(req, res, next) {
 export default function createOfflineMiddleware(oneApp) {
   const middlewareStack = [
     addFrameOptionsHeader,
-    createRequestStore(oneApp),
+    createRequestStore({
+      decorateRequest: () => {},
+      addHook: () => {},
+    }, oneApp),
     appShellMiddleware,
     sendHtml,
   ];

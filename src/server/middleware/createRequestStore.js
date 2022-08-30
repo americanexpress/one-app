@@ -17,7 +17,7 @@
 import { createHolocronStore } from 'holocron';
 import { fromJS, Set as iSet } from 'immutable';
 
-import { renderStaticErrorPage } from './sendHtml';
+import { renderStaticErrorPage } from '../plugins/reactHtml';
 import createEnhancer from '../../universal/enhancers';
 import safeRequest from '../utils/safeRequest';
 import { getServerStateConfig, getClientStateConfig } from '../utils/stateConfig';

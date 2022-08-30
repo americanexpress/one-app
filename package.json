@@ -87,6 +87,7 @@
     "@americanexpress/one-app-router": "^1.2.1",
     "@americanexpress/vitruvius": "^2.0.2",
     "@fastify/compress": "^6.1.0",
+    "@fastify/cookie": "^8.1.0",
     "@fastify/express": "^2.0.1",
     "abort-controller": "^3.0.0",
     "body-parser": "^1.20.0",

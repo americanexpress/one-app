@@ -93,6 +93,8 @@ export async function renderStaticErrorPage(reply) {
     reply.code(500);
   }
 
+  console.log('--errorPage', errorPage)
+
   if (errorPage) {
     reply.send(errorPage);
   } else {

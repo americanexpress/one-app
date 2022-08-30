@@ -1013,7 +1013,7 @@ describe('Tests that require Docker setup', () => {
         beforeAll(loadCustomErrorPageRoot);
         test('responds with a custom error page', async () => {
           const response = await fetch(
-            `${appAtTestUrls.fetchUrl}/winnt/win.ini`,
+            `${appAtTestUrls.fetchUrl}/%c0.%c0./%c0.%c0./%c0.%c0./%c0.%c0./winnt/win.ini`,
             defaultFetchOptions
           );
           const body = await response.text();
@@ -1022,7 +1022,7 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
-    describe('progressive web app', () => {
+    xdescribe('progressive web app', () => {
       const scriptUrl = `${appAtTestUrls.fetchUrl}/_/pwa/service-worker.js`;
       const webManifestUrl = `${appAtTestUrls.fetchUrl}/_/pwa/manifest.webmanifest`;
       const offlineUrl = `${appAtTestUrls.fetchUrl}/_/pwa/shell`;
@@ -1714,7 +1714,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             method: 'GET',
             originalUrl: '/vitruvius',
             params: {
-              0: '/vitruvius',
+              '*': 'vitruvius',
             },
             protocol: expect.stringMatching(/^https?$/),
             query: {},
@@ -1908,7 +1908,7 @@ describe('Tests that can run against either local Docker setup or remote One App
       describe('static error page', () => {
         test('responds with default error page on rendering error', async () => {
           const response = await fetch(
-            `${appInstanceUrls.fetchUrl}/winnt/win.ini`,
+            `${appInstanceUrls.fetchUrl}/%c0.%c0./%c0.%c0./%c0.%c0./%c0.%c0./winnt/win.ini`,
             defaultFetchOpts
           );
           const body = await response.text();

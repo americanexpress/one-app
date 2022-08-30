@@ -22,29 +22,24 @@ import path from 'path';
 
 import express from 'express';
 import compress from '@fastify/compress';
+import compression from 'compression'
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import { json, urlencoded } from 'body-parser';
 import helmet from 'helmet';
-import cors from 'cors';
 import Fastify from 'fastify';
 import fastifyExpress from '@fastify/express';
+import fastifyCookie from '@fastify/cookie';
 
-import conditionallyAllowCors from './middleware/conditionallyAllowCors';
 import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
 import clientErrorLogger from './middleware/clientErrorLogger';
 import oneApp from '../universal';
-import addSecurityHeaders from './plugins/addSecurityHeaders';
+import addSecurityHeaders from './middleware/addSecurityHeaders';
+import addSecurityHeadersPlugin from './plugins/addSecurityHeaders';
 import addCacheHeaders from './middleware/addCacheHeaders';
 import csp from './middleware/csp';
 import cspViolation from './middleware/cspViolation';
-import addFrameOptionsHeader from './middleware/addFrameOptionsHeader';
-import createRequestStore from './middleware/createRequestStore';
-import createRequestHtmlFragment from './middleware/createRequestHtmlFragment';
-import checkStateForRedirect from './middleware/checkStateForRedirect';
-import checkStateForStatusCode from './middleware/checkStateForStatusCode';
-import sendHtml from './middleware/sendHtml';
-import serverError from './middleware/serverError';
 import logging from './utils/logging/serverMiddleware';
 import forwardedHeaderParser from './plugins/forwardedHeaderParser';
 import {
@@ -52,13 +47,20 @@ import {
   webManifestMiddleware,
   offlineMiddleware,
 } from './middleware/pwa';
-import reactHtml from './plugins/reactHtml'
+import reactHtml, { renderStaticErrorPage } from './plugins/reactHtml'
+import addFrameOptionsHeader from './middleware/addFrameOptionsHeader'
+import createRequestStore from './middleware/createRequestStore'
+import createRequestHtmlFragment from './middleware/createRequestHtmlFragment';
+import conditionallyAllowCors from './middleware/conditionallyAllowCors';
+import checkStateForRedirect from './middleware/checkStateForRedirect';
+import checkStateForStatusCode from './middleware/checkStateForStatusCode';
+import sendHtml from './middleware/sendHtml';
 
 export const makeExpressRouter = (router = express.Router()) => {
   const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
 
   router.use(logging);
-  // router.use(compression());
+  router.use(compression());
   // router.get('*', addSecurityHeaders);
   // router.use(setAppVersionHeader);
   // router.use(forwardedHeaderParser);
@@ -99,7 +101,7 @@ export const makeExpressRouter = (router = express.Router()) => {
   if (enablePostToModuleRoutes) {
     router.options(
       '*',
-      // addSecurityHeaders,
+      addSecurityHeaders,
       json({ limit: '0kb' }), // there should be no body
       urlencoded({ limit: '0kb' }), // there should be no body
       cors({ origin: false }) // disable CORS
@@ -107,7 +109,7 @@ export const makeExpressRouter = (router = express.Router()) => {
 
     router.post(
       '*',
-      // addSecurityHeaders,
+      addSecurityHeaders,
       json({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
       urlencoded({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
       addFrameOptionsHeader,
@@ -120,14 +122,21 @@ export const makeExpressRouter = (router = express.Router()) => {
     );
   }
 
-  // https://expressjs.com/en/guide/error-handling.html
-  // router.use(serverError); // Note: should be quickly moved to Fastify
-
   return router;
 };
 
 export async function createApp(opts = {}) {
-  const fastify = Fastify(opts);
+  const fastify = Fastify({
+    frameworkErrors: function (error, request, reply) {
+      const { method, url } = request;
+      const correlationId = request.headers && request.headers['correlation-id'];
+      
+      console.error(`Fastify internal error: method ${method}, url "${url}", correlationId "${correlationId}"`, error);
+      
+      return renderStaticErrorPage(reply);
+    },
+    ...opts
+  });
 
   await fastify.register(ensureCorrelationId);
   // await fastify.register(logging); // TODO: Fastify Plugin is in https://github.com/americanexpress/one-app/pull/803
@@ -136,7 +145,7 @@ export async function createApp(opts = {}) {
       level: 1,
     },
   });
-  await fastify.register(addSecurityHeaders);
+  await fastify.register(addSecurityHeadersPlugin);
   await fastify.register(setAppVersionHeader);
   await fastify.register(forwardedHeaderParser);
 
@@ -154,18 +163,24 @@ export async function createApp(opts = {}) {
   // Note: the following only gets executed if the request
   //       does not match any Express route
 
-  // await fastify.register(addFrameOptionsHeader)
+  await fastify.register(fastifyCookie);
   await fastify.register(reactHtml)
 
-  fastify.get('/*', {
-    errorHandler: (error, _request, reply) => {
-      reply.raw.statusMessage = error.message;
-      reply.code(error.statusCode || 500).send(error.message)
-    }
-  }, (_request, reply) => reply.sendHtml())
+  fastify.get('/*', (_request, reply) => reply.sendHtml())
 
-  // TODO: Needs refactoring (priority)
-  // fastify.setNotFoundHandler(sendHtml);
+  fastify.setNotFoundHandler(async (_request, reply) => {
+    reply.send('Not found')
+  });
+
+  fastify.setErrorHandler(async (error, request, reply) => {
+    const { method, url } = request;
+    const correlationId = request.headers && request.headers['correlation-id'];
+    const headersSent = !!reply.raw.headersSent;
+
+    console.error(`Fastify application error: method ${method}, url "${url}", correlationId "${correlationId}", headersSent: ${headersSent}`, error);
+
+    return renderStaticErrorPage(res);
+  })
 
   await fastify.ready();
 

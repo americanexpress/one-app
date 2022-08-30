@@ -27,7 +27,7 @@ import { setEventLoopDelayThreshold } from './createCircuitBreaker';
 import setupDnsCache from './setupDnsCache';
 import { configurePWA } from '../middleware/pwa';
 import { validatePWAConfig } from './validation';
-import { setErrorPage } from '../middleware/sendHtml';
+import { setErrorPage } from '../plugins/reactHtml';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
@@ -121,6 +121,7 @@ export default function onModuleLoad({
     if (provideStateConfig) {
       setStateConfig(provideStateConfig);
     }
+    console.log('--module errorPageUrl', errorPageUrl)
     if (errorPageUrl) {
       setErrorPage(errorPageUrl);
     }
