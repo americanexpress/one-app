@@ -404,10 +404,11 @@ describe('fastifyPlugin', () => {
         const request = {
           headers: {
           },
+          raw: 'raw-request',
         };
         const reply = {
           getHeader: jest.fn(),
-          raw: {},
+          raw: 'raw-response',
         };
 
         await fastify.onRequest(request, reply);
@@ -416,8 +417,8 @@ describe('fastifyPlugin', () => {
         await fastify.onResponse(request, reply);
 
         expect(mutateLog).toHaveBeenCalledWith({
-          req: request,
-          res: reply,
+          req: 'raw-request',
+          res: 'raw-response',
           log: {
             request: {
               address: {

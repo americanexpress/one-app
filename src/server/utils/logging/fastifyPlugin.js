@@ -36,7 +36,7 @@ export const $RequestOverhead = Symbol('$RequestOverhead');
 export const $RouteHandler = Symbol('$RouteHandler');
 export const $ResponseBuilder = Symbol('$ResponseBuilder');
 
-const TENANT_UTILS = {
+const UTILS = {
   configureRequestLog: ({ log }) => log,
 };
 
@@ -129,17 +129,20 @@ const logClientRequest = (request, reply) => {
     },
   };
 
-  // TODO: 'req' is different from 'request', requires analysis
-  const configuredLog = TENANT_UTILS.configureRequestLog({
-    req: request,
-    res: reply,
+  // TODO: 'req' (from ExpressJS) is almost identical to 'request.raw' from Fastify
+  //       both are a native node http request, the only difference is that Express
+  //       extends it and adds some extra functions such as 'acceptsLanguages' fn.
+  //       We need to investigate if this impacts modules
+  const configuredLog = UTILS.configureRequestLog({
+    req: request.raw,
+    res: reply.raw,
     log,
   });
   logger.info(configuredLog);
 };
 
 export const setConfigureRequestLog = (newConfigureRequestLog) => {
-  TENANT_UTILS.configureRequestLog = newConfigureRequestLog;
+  UTILS.configureRequestLog = newConfigureRequestLog;
 };
 
 const fastifyPlugin = (fastify, _opts, done) => {
