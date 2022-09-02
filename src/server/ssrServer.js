@@ -19,7 +19,7 @@
 /* eslint-disable global-require */
 
 import path from 'path';
-
+import ms from 'ms'
 import express from 'express';
 import compress from '@fastify/compress';
 import compression from 'compression'
@@ -43,7 +43,7 @@ import forwardedHeaderParser from './plugins/forwardedHeaderParser';
 import {
   serviceWorkerMiddleware,
   webManifestMiddleware,
-  offlineMiddleware,
+  // offlineMiddleware,
 } from './middleware/pwa';
 import reactHtml, { renderStaticErrorPage } from './plugins/reactHtml'
 
@@ -70,17 +70,32 @@ export const makeExpressRouter = (router = express.Router()) => {
   }));
   router.post('/_/report/security/csp-violation', cspViolation);
   router.post('/_/report/errors', clientErrorLogger);
-  router.get('**/*.(json|js|css|map)', (req, res) => res.sendStatus(404));
+  router.get('**/*.(json|js|css|map)', (_req, res) => res.sendStatus(404));
 
-  router.get('/_/pwa/shell', offlineMiddleware(oneApp));
+  // router.get('/_/pwa/shell', offlineMiddleware(oneApp));
 
   return router;
 };
+
+const getBodyLimit = () => {
+  const customLimit = process.env.ONE_MAX_POST_REQUEST_PAYLOAD
+
+  if (customLimit) {
+    if (typeof customLimit === 'string') {
+      return ms(customLimit)
+    } else {
+      return customLimit
+    }
+  }
+
+  return ms('1mb')
+}
 
 export async function createApp(opts = {}) {
   const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
   const fastify = Fastify({
     frameworkErrors: function (error, request, reply) {
+      console.log('--frameworkErrors')
       const { method, url } = request;
       const correlationId = request.headers && request.headers['correlation-id'];
       
@@ -88,6 +103,7 @@ export async function createApp(opts = {}) {
       
       return renderStaticErrorPage(reply);
     },
+    bodyLimit: getBodyLimit(), // Note: this applies to all routes
     ...opts
   });
 
@@ -122,39 +138,21 @@ export async function createApp(opts = {}) {
   fastify.get('/*', (_request, reply) => reply.sendHtml())
 
   if (enablePostToModuleRoutes) {
-    // fastify.options(
-    //   '*',
-    //   addSecurityHeaders,
-    //   json({ limit: '0kb' }), // there should be no body
-    //   urlencoded({ limit: '0kb' }), // there should be no body
-    //   cors({ origin: false }) // disable CORS
-    // );
-
-    // fastify.post(
-    //   '*',
-    //   addSecurityHeaders,
-    //   json({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
-    //   urlencoded({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
-    //   addFrameOptionsHeader,
-    //   createRequestStore(oneApp, { useBodyForBuildingTheInitialState: true }),
-    //   createRequestHtmlFragment(oneApp),
-    //   conditionallyAllowCors,
-    //   checkStateForRedirect,
-    //   checkStateForStatusCode,
-    //   sendHtml
-    // );
+    console.log('--ONE_ENABLE_POST_TO_MODULE_ROUTES ENABLED')
 
     // TODO: Support for "options" with restrictions
 
-    // TODO: Support for "json limit" and "urlencoded limit"
     fastify.post('/*', (_request, reply) => reply.sendHtml())
+    // fastify.post('/*', (_request, reply) => reply.send('Hi'))
   }
 
   fastify.setNotFoundHandler(async (_request, reply) => {
+    console.log('--setNotFoundHandler')
     reply.send('Not found')
   });
 
   fastify.setErrorHandler(async (error, request, reply) => {
+    console.log('--setErrorHandler')
     const { method, url } = request;
     const correlationId = request.headers && request.headers['correlation-id'];
     const headersSent = !!reply.raw.headersSent;

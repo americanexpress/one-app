@@ -22,6 +22,7 @@ import { createTimeoutFetch } from '@americanexpress/fetch-enhancers';
 import addFrameOptionsHeaderHook from './addFrameOptionsHeader'
 import createRequestStoreHook from './createRequestStore'
 import createRequestHtmlFragmentHook from './createRequestHtmlFragment'
+import conditionallyAllowCors from '../conditionallyAllowCors'
 import oneApp from '../../../universal';
 import transit from '../../../universal/utils/transit';
 import { setConfig } from '../../../universal/ducks/config';
@@ -92,8 +93,6 @@ export async function renderStaticErrorPage(reply) {
   if (!reply.statusCode) {
     reply.code(500);
   }
-
-  console.log('--errorPage', errorPage)
 
   if (errorPage) {
     reply.send(errorPage);
@@ -318,7 +317,7 @@ const reactHtml = (fastify, _opts, done) => {
   addFrameOptionsHeaderHook(fastify);
   createRequestStoreHook(fastify, oneApp);
   createRequestHtmlFragmentHook(fastify, oneApp);
-  // TODO: add conditionallyAllowCors hook
+  conditionallyAllowCors(fastify);
 
   // checkStateForRedirect & checkStateForStatusCode
   fastify.addHook('onRequest', async (request, reply) => {

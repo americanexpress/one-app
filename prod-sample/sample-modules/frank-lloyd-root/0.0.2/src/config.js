@@ -21,7 +21,7 @@ export default {
   csp,
   extendSafeRequestRestrictedAttributes: {
     cookies: [
-      'macadamia',
+      'macadamia'
     ],
   },
   configureRequestLog: ({ req, log = { request: { metaData: {} } } }) => {

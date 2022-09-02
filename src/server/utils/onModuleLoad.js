@@ -18,7 +18,7 @@ import semver from 'semver';
 import { Set as ImmutableSet } from 'immutable';
 import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from './stateConfig';
-import { setCorsOrigins } from '../middleware/conditionallyAllowCors';
+import { setCorsOrigins } from '../plugins/conditionallyAllowCors';
 import readJsonFile from './readJsonFile';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from './safeRequest';
 import { setConfigureRequestLog } from './logging/serverMiddleware';
@@ -121,7 +121,6 @@ export default function onModuleLoad({
     if (provideStateConfig) {
       setStateConfig(provideStateConfig);
     }
-    console.log('--module errorPageUrl', errorPageUrl)
     if (errorPageUrl) {
       setErrorPage(errorPageUrl);
     }
