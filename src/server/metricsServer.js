@@ -14,49 +14,40 @@
  * permissions and limitations under the License.
  */
 
-import express from 'express';
-import helmet from 'helmet';
 import Fastify from 'fastify';
-import fastifyExpress from '@fastify/express';
-import rateLimit from 'express-rate-limit';
+import helmet from '@fastify/helmet';
+import rateLimit from '@fastify/rate-limit';
 import { register as metricsRegister, collectDefaultMetrics } from 'prom-client';
 
-import logging from './utils/logging/serverMiddleware';
-import healthCheck from './middleware/healthCheck';
+import logging from './utils/logging/fastifyPlugin';
+import healthCheck from './plugins/healthCheck';
 
 collectDefaultMetrics();
-
-const makeExpressRouter = () => {
-  const router = express.Router();
-
-  router.use(helmet());
-  router.use(logging);
-  router.use(rateLimit({
-    windowMs: 1000,
-    max: 10,
-  }));
-
-  router.get('/im-up', healthCheck);
-
-  router.get('/metrics', async (_req, res) => {
-    res.set('Content-Type', metricsRegister.contentType);
-    res.end(await metricsRegister.metrics());
-  });
-
-  router.use('/', (_req, res) => res.status(404).set('Content-Type', 'text/plain').send(''));
-
-  return router;
-};
 
 export async function createMetricsServer() {
   const fastify = Fastify();
 
-  await fastify.register(fastifyExpress);
+  await fastify.register(rateLimit, {
+    max: 120,
+    timeWindow: '1 minute',
+  });
+  await fastify.register(logging);
+  await fastify.register(helmet);
+  await fastify.register(healthCheck);
 
-  fastify.express.disable('x-powered-by');
-  fastify.express.disable('e-tag');
+  fastify.get('/metrics', async (_request, reply) => {
+    reply
+      .header('Content-Type', metricsRegister.contentType)
+      .send(await metricsRegister.metrics());
+  });
 
-  fastify.use(makeExpressRouter());
+  fastify.get('/im-up', async (_request, reply) => {
+    await reply.healthReport();
+  });
+
+  fastify.setNotFoundHandler((_request, reply) => {
+    reply.code(404).send('');
+  });
 
   return fastify;
 }
