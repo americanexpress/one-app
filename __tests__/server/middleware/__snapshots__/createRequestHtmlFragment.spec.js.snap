@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`createRequestHtmlFragment should preload data for matched route components 1`] = `
-Array [
-  Object {
+[
+  {
     "name": "root",
-    "props": Object {
+    "props": {
       "location": Url {
         "auth": null,
         "hash": null,
@@ -19,14 +19,14 @@ Array [
         "search": null,
         "slashes": true,
       },
-      "params": Object {
+      "params": {
         "hi": "there?",
       },
-      "route": Object {
+      "route": {
         "moduleName": "root",
         "path": "/",
       },
-      "router": Object {
+      "router": {
         "createHref": [Function],
         "createKey": [Function],
         "createLocation": [Function],
@@ -41,8 +41,8 @@ Array [
         "replace": [Function],
         "transitionTo": [Function],
       },
-      "routes": Array [
-        Object {
+      "routes": [
+        {
           "moduleName": "root",
           "path": "/",
         },

@@ -8,8 +8,8 @@ Immutable.Map {
 `;
 
 exports[`config duck setConfig action creator returns action with passed in config 1`] = `
-Object {
-  "config": Object {
+{
+  "config": {
     "configUrl": "https://example.com/something",
     "isTestConfig": true,
   },

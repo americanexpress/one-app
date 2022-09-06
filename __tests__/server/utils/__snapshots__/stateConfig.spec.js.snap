@@ -1,151 +1,151 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`stateConfig methods stateConfig with dev endpoint config dev endpoints should use ip instead of localhost when useHost is passed as arg 1`] = `
-Object {
+{
   "someOtherApiUrl": "http://127.0.0.1:3002/some-other-api",
 }
 `;
 
 exports[`stateConfig methods stateConfig with dev endpoint config dev endpoints should use ip instead of localhost when useHost is passed as arg 2`] = `
-Object {
+{
   "someOtherApiUrl": "http://127.0.0.1:3002/some-other-api",
 }
 `;
 
 exports[`stateConfig methods stateConfig with dev endpoint config should show dev endpoint supplied config 1`] = `
-Object {
+{
   "someOtherApiUrl": "http://localhost:3002/some-other-api",
 }
 `;
 
 exports[`stateConfig methods stateConfig with dev endpoint config should show dev endpoint supplied config 2`] = `
-Object {
+{
   "someOtherApiUrl": "http://localhost:3002/some-other-api",
 }
 `;
 
-exports[`stateConfig methods stateConfig with env vars should ignore env vars not prefixed with ONE 1`] = `Object {}`;
+exports[`stateConfig methods stateConfig with env vars should ignore env vars not prefixed with ONE 1`] = `{}`;
 
-exports[`stateConfig methods stateConfig with env vars should ignore env vars not prefixed with ONE 2`] = `Object {}`;
+exports[`stateConfig methods stateConfig with env vars should ignore env vars not prefixed with ONE 2`] = `{}`;
 
 exports[`stateConfig methods stateConfig with env vars should parse string undefined as js undefined 1`] = `
-Object {
+{
   "fakeSetting": undefined,
 }
 `;
 
 exports[`stateConfig methods stateConfig with env vars should parse string undefined as js undefined 2`] = `
-Object {
+{
   "fakeSetting": undefined,
 }
 `;
 
 exports[`stateConfig methods stateConfig with env vars should set client and server config from env var and merge with other variables 1`] = `
-Object {
+{
   "anotherSetting": "another-fake-setting",
   "fakeSetting": "client-fake-setting",
 }
 `;
 
 exports[`stateConfig methods stateConfig with env vars should set client and server config from env var and merge with other variables 2`] = `
-Object {
+{
   "anotherSetting": "another-fake-setting",
   "fakeSetting": "server-fake-setting",
 }
 `;
 
 exports[`stateConfig methods stateConfig with env vars should set client env var to client config but not override server config if var already exists 1`] = `
-Object {
+{
   "fakeSetting": "client-fake-setting",
 }
 `;
 
 exports[`stateConfig methods stateConfig with env vars should set client env var to client config but not override server config if var already exists 2`] = `
-Object {
+{
   "fakeSetting": "server-fake-setting",
 }
 `;
 
 exports[`stateConfig methods stateConfig with env vars should set client env var to server and client config 1`] = `
-Object {
+{
   "fakeSetting": "client-fake-setting",
 }
 `;
 
 exports[`stateConfig methods stateConfig with env vars should set client env var to server and client config 2`] = `
-Object {
+{
   "fakeSetting": "client-fake-setting",
 }
 `;
 
-exports[`stateConfig methods stateConfig with env vars should set server env var to just server config not client config 1`] = `Object {}`;
+exports[`stateConfig methods stateConfig with env vars should set server env var to just server config not client config 1`] = `{}`;
 
 exports[`stateConfig methods stateConfig with env vars should set server env var to just server config not client config 2`] = `
-Object {
+{
   "fakeSetting": "server-fake-setting",
 }
 `;
 
 exports[`stateConfig methods stateConfig with module config should backup and restore process module config 1`] = `
-Object {
+{
   "someApiUrl": "https://internet-origin-qa.example.com/some-api/v1",
 }
 `;
 
 exports[`stateConfig methods stateConfig with module config should backup and restore process module config 2`] = `
-Object {
+{
   "someApiUrl": "https://intranet-origin-qa.example.com/some-api/v1",
 }
 `;
 
-exports[`stateConfig methods stateConfig with module config should not set config if provided not a string or object 1`] = `Object {}`;
+exports[`stateConfig methods stateConfig with module config should not set config if provided not a string or object 1`] = `{}`;
 
-exports[`stateConfig methods stateConfig with module config should not set config if provided not a string or object 2`] = `Object {}`;
+exports[`stateConfig methods stateConfig with module config should not set config if provided not a string or object 2`] = `{}`;
 
 exports[`stateConfig methods stateConfig with module config should set config if provided a boolean 1`] = `
-Object {
+{
   "enableTest": true,
 }
 `;
 
 exports[`stateConfig methods stateConfig with module config should set config if provided a boolean 2`] = `
-Object {
+{
   "enableTest": true,
 }
 `;
 
 exports[`stateConfig methods stateConfig with module config should set config if provided a number 1`] = `
-Object {
+{
   "timeout": 600000,
 }
 `;
 
 exports[`stateConfig methods stateConfig with module config should set config if provided a number 2`] = `
-Object {
+{
   "timeout": 600000,
 }
 `;
 
 exports[`stateConfig methods stateConfig with module config should set config if provided a string 1`] = `
-Object {
+{
   "someApiUrl": "https://internet-origin-string.example.com/some-api/v1",
 }
 `;
 
 exports[`stateConfig methods stateConfig with module config should set config if provided a string 2`] = `
-Object {
+{
   "someApiUrl": "https://internet-origin-string.example.com/some-api/v1",
 }
 `;
 
 exports[`stateConfig methods stateConfig with module config should set config with matching client server variables 1`] = `
-Object {
+{
   "someApiUrl": "https://internet-origin-qa.example.com/some-api/v1",
 }
 `;
 
 exports[`stateConfig methods stateConfig with module config should set config with matching client server variables 2`] = `
-Object {
+{
   "someApiUrl": "https://intranet-origin-qa.example.com/some-api/v1",
 }
 `;
@@ -165,7 +165,7 @@ exports[`stateConfig methods stateConfig with module config should throw if serv
 `;
 
 exports[`stateConfig methods stateConfig with priorities of should prioritize dev endpoint over env 1`] = `
-Object {
+{
   "anotherSetting": "another-fake-setting",
   "fakeSetting": "client-fake-setting",
   "someOtherApiUrl": "http://localhost:3002/some-other-api",
@@ -173,7 +173,7 @@ Object {
 `;
 
 exports[`stateConfig methods stateConfig with priorities of should prioritize dev endpoint over env 2`] = `
-Object {
+{
   "anotherSetting": "another-fake-setting",
   "fakeSetting": "server-fake-setting",
   "someOtherApiUrl": "http://localhost:3002/some-other-api",
