@@ -114,7 +114,7 @@
     "ip": "^1.1.8",
     "joi": "^17.6.0",
     "lean-intl": "^4.2.2",
-    "matcher": "^4.0.0",
+    "matcher": "^5.0.0",
     "opossum": "^6.4.0",
     "opossum-prometheus": "^0.3.0",
     "pidusage": "^3.0.0",
