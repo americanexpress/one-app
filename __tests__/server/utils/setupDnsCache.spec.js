@@ -14,7 +14,7 @@ cacheableInstance.install(fakeAgent);
 const cacheableLookupSymbols = Object.getOwnPropertySymbols(fakeAgent);
 // eslint-disable-next-line jest/no-standalone-expect -- validate we have the right symbols
 expect(cacheableLookupSymbols).toMatchInlineSnapshot(`
-  Array [
+  [
     Symbol(cacheableLookupCreateConnection),
     Symbol(cacheableLookupInstance),
   ]
@@ -31,11 +31,7 @@ expect.extend({
     );
   },
   toHaveMaxTtl(input, expected) {
-    return matchers.toBe.call(
-      this,
-      getCacheableInstance(input).maxTtl,
-      expected
-    );
+    return matchers.toBe.call(this, getCacheableInstance(input).maxTtl, expected);
   },
 });
 

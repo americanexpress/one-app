@@ -197,7 +197,7 @@ describe('runTime', () => {
       );
       expect(devCdnPort.normalize('0002345')).toEqual(2345);
       expect(() => devCdnPort.normalize('0002345a')).toThrowErrorMatchingInlineSnapshot(
-        '"env var HTTP_ONE_APP_DEV_CDN_PORT needs to be a valid integer, given \\"0002345a\\""'
+        '"env var HTTP_ONE_APP_DEV_CDN_PORT needs to be a valid integer, given "0002345a""'
       );
     });
 
@@ -224,7 +224,7 @@ describe('runTime', () => {
     it('normalizes numeric input', () => {
       expect(devProxyPort.normalize('1337')).toEqual(1337);
       expect(() => devProxyPort.normalize('r00t')).toThrowErrorMatchingInlineSnapshot(
-        '"env var HTTP_ONE_APP_DEV_PROXY_SERVER_PORT needs to be a valid integer, given \\"r00t\\""'
+        '"env var HTTP_ONE_APP_DEV_PROXY_SERVER_PORT needs to be a valid integer, given "r00t""'
       );
       expect(devProxyPort.normalize('0002345')).toEqual(2345);
       expect(() => devProxyPort.normalize('0002345a')).toThrow();
@@ -471,9 +471,7 @@ describe('runTime', () => {
 
     it('should fail validation when value is not "true" or "false"', () => {
       expect(() => enablePostToModuleRoutes.validate('bad value')
-      ).toThrowErrorMatchingInlineSnapshot(
-        '"Expected \\"bad value\\" to be \\"true\\" or \\"false\\""'
-      );
+      ).toThrowErrorMatchingInlineSnapshot('"Expected "bad value" to be "true" or "false""');
     });
   });
 
@@ -487,7 +485,7 @@ describe('runTime', () => {
     it('should fail validation when input is not parseable by bytes util', () => {
       process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES = true;
       expect(() => postRequestMaxPayload.validate('bad value')).toThrowErrorMatchingInlineSnapshot(
-        '"Expected \\"bad value\\" to be parseable by bytes utility https://www.npmjs.com/package/bytes"'
+        '"Expected "bad value" to be parseable by bytes utility https://www.npmjs.com/package/bytes"'
       );
     });
 

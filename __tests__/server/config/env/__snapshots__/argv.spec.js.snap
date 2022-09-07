@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`argv config has development options and defaults 1`] = `
-Array [
+[
   "m",
-  Object {
+  {
     "alias": "use-middleware",
     "describe": "Apply a custom middleware configuration for one-app-dev-proxy",
     "type": "boolean",
@@ -12,9 +12,9 @@ Array [
 `;
 
 exports[`argv config has development options and defaults 2`] = `
-Array [
+[
   "root-module-name",
-  Object {
+  {
     "describe": "Name of the module that serves as the entry point to your application.",
     "type": "string",
   },
@@ -22,9 +22,9 @@ Array [
 `;
 
 exports[`argv config has development options and defaults 3`] = `
-Array [
+[
   "module-map-url",
-  Object {
+  {
     "describe": "Remote module map URL for one-app-dev-cdn to proxy",
     "type": "string",
   },
@@ -32,9 +32,9 @@ Array [
 `;
 
 exports[`argv config has development options and defaults 4`] = `
-Array [
+[
   "use-host",
-  Object {
+  {
     "default": false,
     "describe": "use req.headers.host instead of localhost for one-app-dev-cdn",
     "type": "boolean",
@@ -43,10 +43,10 @@ Array [
 `;
 
 exports[`argv config has development options and defaults 5`] = `
-Array [
+[
   "log-format",
-  Object {
-    "choices": Array [
+  {
+    "choices": [
       "friendly",
       "verbose",
       "machine",
@@ -59,10 +59,10 @@ Array [
 `;
 
 exports[`argv config has development options and defaults 6`] = `
-Array [
+[
   "log-level",
-  Object {
-    "choices": Array [
+  {
+    "choices": [
       "error",
       "warn",
       "log",
@@ -76,9 +76,9 @@ Array [
 `;
 
 exports[`argv config has development options and defaults 7`] = `
-Array [
-  Array [
-    Array [
+[
+  [
+    [
       "root-module-name",
     ],
     "\`root-module-name\` is a required arg.",
@@ -87,10 +87,10 @@ Array [
 `;
 
 exports[`argv config has production options and defaults 1`] = `
-Array [
+[
   "log-format",
-  Object {
-    "choices": Array [
+  {
+    "choices": [
       "friendly",
       "verbose",
       "machine",
@@ -103,10 +103,10 @@ Array [
 `;
 
 exports[`argv config has production options and defaults 2`] = `
-Array [
+[
   "log-level",
-  Object {
-    "choices": Array [
+  {
+    "choices": [
       "error",
       "warn",
       "log",
@@ -120,9 +120,9 @@ Array [
 `;
 
 exports[`argv config requires the \`module-map-url\` and \`root-module-name\` options if there is a local module map that is empty and the root module name env var is not set 1`] = `
-Array [
-  Array [
-    Array [
+[
+  [
+    [
       "module-map-url",
       "root-module-name",
     ],
@@ -132,9 +132,9 @@ Array [
 `;
 
 exports[`argv config requires the \`module-map-url\` but not the \`root-module-name\` option if there is a local module map that is empty and the root module name env var is set 1`] = `
-Array [
-  Array [
-    Array [
+[
+  [
+    [
       "module-map-url",
     ],
     "\`module-map-url\` is required if there are no locally served modules.",
@@ -143,9 +143,9 @@ Array [
 `;
 
 exports[`argv config requires the \`module-map-url\` option if there are no locally served modules 1`] = `
-Array [
-  Array [
-    Array [
+[
+  [
+    [
       "module-map-url",
       "root-module-name",
     ],
@@ -155,9 +155,9 @@ Array [
 `;
 
 exports[`argv config requires the \`module-map-url\` option if there is a local module map that is empty 1`] = `
-Array [
-  Array [
-    Array [
+[
+  [
+    [
       "module-map-url",
       "root-module-name",
     ],

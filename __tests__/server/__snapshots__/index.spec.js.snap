@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`server index development sets up CLI for proxying and mocking of data 1`] = `
-Array [
+[
   "help",
   "version",
   "m",
@@ -11,7 +11,7 @@ Array [
 `;
 
 exports[`server index development sets up CLI for proxying and mocking of data 2`] = `
-Array [
+[
   "root-module-name",
   "module-map-url",
   "log-format",
@@ -20,7 +20,7 @@ Array [
 `;
 
 exports[`server index development starts one-app-dev-proxy with remotes derived from provided module endpoints file 1`] = `
-Object {
+{
   "test": "https://example.com",
 }
 `;

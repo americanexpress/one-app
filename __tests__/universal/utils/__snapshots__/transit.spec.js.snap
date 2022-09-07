@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`transit writeError should remove internal URLs and stacks from errors 1`] = `
-Object {
+{
   "message": "Internal Server Error (http://***/an/example/endpoint)",
   "name": "Error",
-  "response": Object {
+  "response": {
     "status": 500,
     "url": "http://***/an/example/endpoint",
   },

@@ -171,15 +171,15 @@ describe('healthCheck', () => {
       const response = await buildFastifyAndMakeRequest();
       expect(response.statusCode).toBe(200);
       expect(await response.json()).toMatchInlineSnapshot(`
-        Object {
-          "holocron": Object {
+        {
+          "holocron": {
             "moduleMapHealthy": true,
             "rootModuleExists": true,
           },
-          "process": Object {
+          "process": {
             "cpu": 80,
             "memory": 1400000000,
-            "tickDelay": Array [
+            "tickDelay": [
               0,
               100,
             ],
@@ -199,17 +199,17 @@ describe('healthCheck', () => {
       const response = await buildFastifyAndMakeRequest();
       expect(response.statusCode).toBe(207);
       expect(await response.json()).toMatchInlineSnapshot(`
-        Object {
-          "holocron": Object {
+        {
+          "holocron": {
             "moduleMapHealthy": false,
             "rootModuleExists": true,
             "status": 500,
           },
-          "process": Object {
+          "process": {
             "cpu": 80,
             "memory": 1400000000,
             "status": 200,
-            "tickDelay": Array [
+            "tickDelay": [
               0,
               100,
             ],
@@ -229,15 +229,15 @@ describe('healthCheck', () => {
       const response = await buildFastifyAndMakeRequest();
       expect(response.statusCode).toBe(503);
       expect(await response.json()).toMatchInlineSnapshot(`
-        Object {
-          "holocron": Object {
+        {
+          "holocron": {
             "moduleMapHealthy": true,
             "rootModuleExists": true,
           },
-          "process": Object {
+          "process": {
             "cpu": 80.1,
             "memory": 1400000000,
-            "tickDelay": Array [
+            "tickDelay": [
               0,
               100,
             ],
