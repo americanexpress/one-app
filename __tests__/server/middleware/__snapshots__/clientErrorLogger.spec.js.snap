@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`clientErrorLogger production should log a warning when given an array of not objects 1`] = `
-Array [
+[
   "dropping an error report, wrong interface (string)",
 ]
 `;
 
 exports[`clientErrorLogger production should log a warning when not given an array 1`] = `
-Array [
+[
   "dropping an error report group, wrong interface (string)",
 ]
 `;

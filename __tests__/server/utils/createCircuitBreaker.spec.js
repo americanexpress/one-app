@@ -109,8 +109,8 @@ describe('Circuit breaker', () => {
     jest.advanceTimersByTime(5e3 + 10);
     await mockCircuitBreaker.fire('hola, mundo');
     expect(consoleErrorSpy.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
+      [
+        [
           [Error: Opening circuit, event loop delay (0ms) is > eventLoopDelayThreshold (-1ms)],
         ],
       ]
@@ -120,8 +120,8 @@ describe('Circuit breaker', () => {
   it('should log when the circuit opens', () => {
     mockCircuitBreaker.open();
     expect(consoleLogSpy.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
+      [
+        [
           "Circuit breaker [mockConstructor] opened",
         ],
       ]
@@ -133,8 +133,8 @@ describe('Circuit breaker', () => {
     jest.clearAllMocks();
     mockCircuitBreaker.close();
     expect(consoleLogSpy.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
+      [
+        [
           "Circuit breaker [mockConstructor] closed",
         ],
       ]

@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`production-formatter encodes as parseable JSON 1`] = `
-Object {
-  "application": Object {
+{
+  "application": {
     "name": "One App",
     "version": "1.2.3-abc123",
   },
-  "device": Object {
+  "device": {
     "agent": "Darwin x64",
     "id": "host-123:1234",
   },
@@ -18,15 +18,15 @@ Object {
 `;
 
 exports[`production-formatter errors encodes ClientReportedError Error as parseable JSON 1`] = `
-Object {
-  "application": Object {
+{
+  "application": {
     "name": "One App",
     "version": "1.2.3-abc123",
   },
-  "device": Object {
+  "device": {
     "agent": "Browser/5.0 (compatible; WXYZ 100.0; Doors LQ 81.4; Boat/1.0)",
   },
-  "error": Object {
+  "error": {
     "message": "something broke",
     "name": "ClientReportedError",
     "stacktrace": "Error: something broke
@@ -35,11 +35,11 @@ Object {
 ",
   },
   "level": "error",
-  "request": Object {
-    "address": Object {
+  "request": {
+    "address": {
       "uri": "https://example.com/page-the/error/occurred-on",
     },
-    "metaData": Object {
+    "metaData": {
       "code": "500",
       "collectionMethod": "applicationError",
       "correlationId": "123abc",
@@ -52,16 +52,16 @@ Object {
 `;
 
 exports[`production-formatter errors encodes Server Reported Error as parseable JSON with nested metadata objects 1`] = `
-Object {
-  "application": Object {
+{
+  "application": {
     "name": "One App",
     "version": "1.2.3-abc123",
   },
-  "device": Object {
+  "device": {
     "agent": "Darwin x64",
     "id": "host-123:1234",
   },
-  "error": Object {
+  "error": {
     "message": "something broke",
     "name": "Error",
     "stacktrace": "Error: something broke
@@ -70,12 +70,12 @@ Object {
 ",
   },
   "level": "error",
-  "metaData": Object {
+  "metaData": {
     "moduleID": "healthy-frank",
-    "nestedObject": Object {
-      "level1": Object {
-        "level2": Object {
-          "level3": Object {
+    "nestedObject": {
+      "level1": {
+        "level2": {
+          "level3": {
             "level4": "logs nested objects correctly",
           },
         },
@@ -88,16 +88,16 @@ Object {
 `;
 
 exports[`production-formatter errors encodes as parseable JSON 1`] = `
-Object {
-  "application": Object {
+{
+  "application": {
     "name": "One App",
     "version": "1.2.3-abc123",
   },
-  "device": Object {
+  "device": {
     "agent": "Darwin x64",
     "id": "host-123:1234",
   },
-  "error": Object {
+  "error": {
     "message": "test error",
     "name": "Error",
     "stacktrace": "Error: test error
@@ -118,7 +118,7 @@ Object {
 `;
 
 exports[`production-formatter errors puts a lone error in the error field 1`] = `
-Object {
+{
   "message": "test error",
   "name": "Error",
   "stacktrace": "Error: test error
@@ -134,7 +134,7 @@ Object {
 `;
 
 exports[`production-formatter errors puts an error paired with a message in the error field 1`] = `
-Object {
+{
   "message": "test error",
   "name": "Error",
   "stacktrace": "Error: test error
@@ -150,7 +150,7 @@ Object {
 `;
 
 exports[`production-formatter errors puts an error with other arguments in the error field and uses only the other args for the message 1`] = `
-Object {
+{
   "message": "test error",
   "name": "Error",
   "stacktrace": "Error: test error
@@ -166,7 +166,7 @@ Object {
 `;
 
 exports[`production-formatter errors uses the error in the message when the error is paired with a message and other arguments 1`] = `
-Object {
+{
   "message": "test error",
   "name": "Error",
   "stacktrace": "Error: test error
@@ -194,22 +194,22 @@ exports[`production-formatter errors uses the error in the message when the erro
 `;
 
 exports[`production-formatter types encodes request as parseable JSON 1`] = `
-Object {
-  "application": Object {
+{
+  "application": {
     "name": "One App",
     "version": "1.2.3-abc123",
   },
-  "device": Object {
+  "device": {
     "agent": "Darwin x64",
     "id": "host-123:1234",
   },
   "level": "error",
-  "request": Object {
-    "address": Object {
+  "request": {
+    "address": {
       "url": "https://example.org/server",
     },
     "direction": "in",
-    "metaData": Object {
+    "metaData": {
       "correlationId": "123",
       "host": "example.org",
       "method": "GET",
@@ -219,7 +219,7 @@ Object {
     "protocol": "https",
     "statusCode": 200,
     "statusText": "OK",
-    "timings": Object {
+    "timings": {
       "duration": 10,
       "ttfb": 20,
     },
@@ -230,12 +230,12 @@ Object {
 `;
 
 exports[`production-formatter types uses the default util.format when given an unknown type 1`] = `
-Object {
-  "application": Object {
+{
+  "application": {
     "name": "One App",
     "version": "1.2.3-abc123",
   },
-  "device": Object {
+  "device": {
     "agent": "Darwin x64",
     "id": "host-123:1234",
   },

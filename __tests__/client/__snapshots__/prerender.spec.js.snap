@@ -12,7 +12,7 @@ NodeList [
 `;
 
 exports[`moveHelmetScripts should remove helmet scripts from the body and only append helmet scripts to the head if react-helmet has not already injected them: head helmet scripts 1`] = `
-Array [
+[
   <script
     data-react-helmet="true"
     src="hello.js"

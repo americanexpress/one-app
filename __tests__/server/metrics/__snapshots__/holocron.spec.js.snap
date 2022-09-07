@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`holocron creates a counter named module_map_poll 1`] = `
-Array [
-  Object {
+[
+  {
     "help": "total times the module map has been polled",
     "name": "oneapp_holocron_module_map_poll_total",
   },
@@ -10,8 +10,8 @@ Array [
 `;
 
 exports[`holocron creates a gauge named module_map_poll_consecutive_errors 1`] = `
-Array [
-  Object {
+[
+  {
     "help": "how many times has the server encountered errors polling the module map",
     "name": "oneapp_holocron_module_map_poll_consecutive_errors_total",
   },
@@ -19,8 +19,8 @@ Array [
 `;
 
 exports[`holocron creates a gauge named module_map_poll_wait 1`] = `
-Array [
-  Object {
+[
+  {
     "help": "delay until the next poll of the module map",
     "name": "oneapp_holocron_module_map_poll_wait_seconds",
   },
@@ -28,8 +28,8 @@ Array [
 `;
 
 exports[`holocron exports the metric names 1`] = `
-Object {
-  "default": Object {
+{
+  "default": {
     "moduleMapPoll": "oneapp_holocron_module_map_poll_total",
     "moduleMapPollConsecutiveErrors": "oneapp_holocron_module_map_poll_consecutive_errors_total",
     "moduleMapPollRestarted": "oneapp_holocron_module_map_poll_restarted_total",
