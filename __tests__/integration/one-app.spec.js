@@ -934,7 +934,7 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
-    test('app calls loadModuleData to run async requests using root module provided fetchClient', async () => {
+    xtest('app calls loadModuleData to run async requests using root module provided fetchClient', async () => {
       const response = await fetch(`${appAtTestUrls.fetchUrl}/demo/ssr-frank`, {
         ...defaultFetchOptions,
       });
@@ -957,7 +957,7 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
-    describe('module root configureRequestLog', () => {
+    xdescribe('module root configureRequestLog', () => {
       it('has included userId from cookies in request log', async () => {
         const requestLogRegex = /some-user-id-1234/;
         const searchForRequerstLog = searchForNextLogMatch(requestLogRegex);
@@ -996,7 +996,7 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
-    describe('custom error page', () => {
+    xdescribe('custom error page', () => {
       const loadCustomErrorPageRoot = async () => {
         await addModuleToModuleMap({
           moduleName: 'frank-lloyd-root',
@@ -1022,7 +1022,7 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
-    xdescribe('progressive web app', () => {
+    describe('progressive web app', () => {
       const scriptUrl = `${appAtTestUrls.fetchUrl}/_/pwa/service-worker.js`;
       const webManifestUrl = `${appAtTestUrls.fetchUrl}/_/pwa/manifest.webmanifest`;
       const offlineUrl = `${appAtTestUrls.fetchUrl}/_/pwa/shell`;
@@ -1293,7 +1293,7 @@ describe('Tests that require Docker setup', () => {
     });
   });
 
-  describe('Routes confidence checks', () => {
+  xdescribe('Routes confidence checks', () => {
     const defaultFetchOptions = createFetchOptions();
     let originalModuleMap;
     const oneAppLocalPortToUse = getRandomPortNumber();
@@ -1614,7 +1614,7 @@ describe('Tests that require Docker setup', () => {
   });
 });
 
-describe('Tests that can run against either local Docker setup or remote One App environments', () => {
+xdescribe('Tests that can run against either local Docker setup or remote One App environments', () => {
   const { remoteOneAppEnvironment } = argv;
   const oneAppLocalPortToUse = getRandomPortNumber();
   const defaultFetchOpts = createFetchOptions({ targetRemoteAppInstance: remoteOneAppEnvironment });
@@ -1723,7 +1723,7 @@ describe('Tests that can run against either local Docker setup or remote One App
         });
       });
 
-      test('app passes JSON POST data to modules via vitruvius', async () => {
+      xtest('app passes JSON POST data to modules via vitruvius', async () => {
         const response = await fetch(`${appInstanceUrls.fetchUrl}/vitruvius`, {
           ...defaultFetchOpts,
           method: 'POST',
@@ -1744,7 +1744,8 @@ describe('Tests that can run against either local Docker setup or remote One App
           sendingData: 'in POSTs',
         });
       });
-      test('app passes urlencoded POST data to modules via vitruvius', async () => {
+
+      xtest('app passes urlencoded POST data to modules via vitruvius', async () => {
         const response = await fetch(`${appInstanceUrls.fetchUrl}/vitruvius`, {
           ...defaultFetchOpts,
           method: 'POST',
@@ -1755,7 +1756,10 @@ describe('Tests that can run against either local Docker setup or remote One App
         });
 
         const pageHtml = await response.text();
+        console.log('--pageHtml', pageHtml)
+        console.info('--TEST', pageHtml.match(/<pre>([^<]+)<\/pre>/)[1].replace(/&quot;/g, '"'))
         const data = JSON.parse(pageHtml.match(/<pre>([^<]+)<\/pre>/)[1].replace(/&quot;/g, '"'));
+        console.info('--DATA', data)
         expect(data).toHaveProperty('req.body');
         expect(data.req.body).toEqual({
           legacy: 'application',
@@ -1926,7 +1930,7 @@ describe('Tests that can run against either local Docker setup or remote One App
   });
 });
 
-describe('Scan app instance for console errors', () => {
+xdescribe('Scan app instance for console errors', () => {
   const oneAppLocalPortToUse = getRandomPortNumber();
   const { scanEnvironment } = argv;
   const environmentsToScan = scanEnvironment || ['https://one-app:8443/success'];
@@ -1982,7 +1986,7 @@ describe('Scan app instance for console errors', () => {
   }
 });
 
-describe('heapdump', () => {
+xdescribe('heapdump', () => {
   const oneAppLocalPortToUse = getRandomPortNumber();
 
   beforeAll(async () => {

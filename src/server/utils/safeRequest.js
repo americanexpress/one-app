@@ -150,5 +150,7 @@ export default function safeRequest(request, { useBodyForBuildingTheInitialState
   // Not available in Fastify
   filteredRequest.baseUrl = "";
 
+  console.info('--filteredRequest', filteredRequest);
+
   return filteredRequest;
 }

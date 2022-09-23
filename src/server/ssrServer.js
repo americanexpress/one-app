@@ -29,6 +29,7 @@ import helmet from 'helmet';
 import Fastify from 'fastify';
 import fastifyExpress from '@fastify/express';
 import fastifyCookie from '@fastify/cookie';
+import fastifyFormbody from '@fastify/formbody';
 
 import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
@@ -78,39 +79,38 @@ export const makeExpressRouter = (router = express.Router()) => {
 };
 
 const getBodyLimit = () => {
-  const customLimit = process.env.ONE_MAX_POST_REQUEST_PAYLOAD
+  const customLimit = process.env.ONE_MAX_POST_REQUEST_PAYLOAD;
 
   if (customLimit) {
     if (typeof customLimit === 'string') {
-      return ms(customLimit)
-    } else {
-      return customLimit
+      return ms(customLimit);
     }
+
+    return customLimit;
   }
 
-  return ms('1mb')
-}
+  return ms('1mb');
+};
 
 export async function createApp(opts = {}) {
   const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
   const fastify = Fastify({
-    frameworkErrors: function (error, request, reply) {
-      console.log('--frameworkErrors')
+    frameworkErrors: function frameworkErrors(error, request, reply) {
       const { method, url } = request;
       const correlationId = request.headers && request.headers['correlation-id'];
-      
+
       console.error(`Fastify internal error: method ${method}, url "${url}", correlationId "${correlationId}"`, error);
-      
+
       return renderStaticErrorPage(reply);
     },
     bodyLimit: getBodyLimit(), // Note: this applies to all routes
-    ...opts
+    ...opts,
   });
 
   await fastify.register(ensureCorrelationId);
   // await fastify.register(logging); // TODO: Fastify Plugin is in https://github.com/americanexpress/one-app/pull/803
   await fastify.register(compress, {
-    zlibOptions:{
+    zlibOptions: {
       level: 1,
     },
   });
@@ -132,35 +132,38 @@ export async function createApp(opts = {}) {
   // Note: the following only gets executed if the request
   //       does not match any Express route
 
+  await fastify.register(fastifyFormbody);
   await fastify.register(fastifyCookie);
-  await fastify.register(reactHtml)
+  await fastify.register(reactHtml);
 
-  fastify.get('/*', (_request, reply) => reply.sendHtml())
+  fastify.get('/*', (_request, reply) => reply.sendHtml());
 
   if (enablePostToModuleRoutes) {
-    console.log('--ONE_ENABLE_POST_TO_MODULE_ROUTES ENABLED')
+    console.log('--ONE_ENABLE_POST_TO_MODULE_ROUTES ENABLED');
 
     // TODO: Support for "options" with restrictions
 
-    fastify.post('/*', (_request, reply) => reply.sendHtml())
+    fastify.post('/*', (_request, reply) => reply.sendHtml());
     // fastify.post('/*', (_request, reply) => reply.send('Hi'))
+    // fastify.post('/*', (request, reply) => {
+    //   console.log('--request.body from route', request.body)
+    //   reply.send(request.body)
+    // })
   }
 
   fastify.setNotFoundHandler(async (_request, reply) => {
-    console.log('--setNotFoundHandler')
-    reply.send('Not found')
+    reply.send('Not found');
   });
 
   fastify.setErrorHandler(async (error, request, reply) => {
-    console.log('--setErrorHandler')
     const { method, url } = request;
     const correlationId = request.headers && request.headers['correlation-id'];
     const headersSent = !!reply.raw.headersSent;
 
     console.error(`Fastify application error: method ${method}, url "${url}", correlationId "${correlationId}", headersSent: ${headersSent}`, error);
 
-    return renderStaticErrorPage(res);
-  })
+    return renderStaticErrorPage(reply);
+  });
 
   await fastify.ready();
 

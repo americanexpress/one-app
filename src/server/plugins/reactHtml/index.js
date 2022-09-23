@@ -328,15 +328,15 @@ const reactHtml = (fastify, _opts, done) => {
     }
 
     const error = request.store.getState().get('error');
-    
+
     if (error) {
       const code = error.get('code');
-      
+
       if (code) {
         reply.code(code);
       }
     }
-  })
+  });
 
   fastify.decorateReply('sendHtml', function() {
     const reply = this;

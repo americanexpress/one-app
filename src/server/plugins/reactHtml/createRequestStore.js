@@ -26,12 +26,11 @@ import { getClientModuleMapCache } from '../../utils/clientModuleMapCache';
 
 const createRequestStore = (
   fastify,
-  { reducers },
-  { useBodyForBuildingTheInitialState = false } = {}
+  { reducers }
 ) => {
-  fastify.decorateRequest('store', null)
-  fastify.decorateRequest('clientModuleMapCache', null)
-  
+  fastify.decorateRequest('store', null);
+  fastify.decorateRequest('clientModuleMapCache', null);
+
   fastify.addHook('onRequest', (request, reply, done) => {
     try {
       const serverConfig = getServerStateConfig();
@@ -50,10 +49,14 @@ const createRequestStore = (
 
       const enhancer = createEnhancer();
       const localsForBuildInitialState = {
-        // TODO: migrate req
-        req: safeRequest(request, { useBodyForBuildingTheInitialState }),
+        req: safeRequest(request, { useBodyForBuildingTheInitialState: request.method.toLowerCase() === 'post' }),
         config: clientConfig,
       };
+
+      console.log('--request.method', request.method);
+      console.log('--request.body', request.body);
+      console.log('--request.raw.body', request.raw.body);
+
       const store = createHolocronStore({
         reducer: reducers,
         initialState: initialServerState.merge(
