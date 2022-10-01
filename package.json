@@ -123,7 +123,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
-    "react-redux": "^7.2.8",
+    "react-redux": "^8.0.4",
     "redux": "^4.2.0",
     "redux-lifesaver": "^2.1.0",
     "regenerator-runtime": "^0.13.9",
