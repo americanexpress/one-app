@@ -957,7 +957,7 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
-    xdescribe('module root configureRequestLog', () => {
+    describe('module root configureRequestLog', () => {
       it('has included userId from cookies in request log', async () => {
         const requestLogRegex = /some-user-id-1234/;
         const searchForRequerstLog = searchForNextLogMatch(requestLogRegex);
@@ -996,7 +996,7 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
-    xdescribe('custom error page', () => {
+    describe('custom error page', () => {
       const loadCustomErrorPageRoot = async () => {
         await addModuleToModuleMap({
           moduleName: 'frank-lloyd-root',
@@ -1293,7 +1293,7 @@ describe('Tests that require Docker setup', () => {
     });
   });
 
-  xdescribe('Routes confidence checks', () => {
+  describe('Routes confidence checks', () => {
     const defaultFetchOptions = createFetchOptions();
     let originalModuleMap;
     const oneAppLocalPortToUse = getRandomPortNumber();
@@ -1614,7 +1614,7 @@ describe('Tests that require Docker setup', () => {
   });
 });
 
-xdescribe('Tests that can run against either local Docker setup or remote One App environments', () => {
+describe('Tests that can run against either local Docker setup or remote One App environments', () => {
   const { remoteOneAppEnvironment } = argv;
   const oneAppLocalPortToUse = getRandomPortNumber();
   const defaultFetchOpts = createFetchOptions({ targetRemoteAppInstance: remoteOneAppEnvironment });
@@ -1658,7 +1658,7 @@ xdescribe('Tests that can run against either local Docker setup or remote One Ap
         expect(consoleLogs).toEqual([]);
       });
 
-      test('app allows CORS POST requests for partials', async () => {
+      xtest('app allows CORS POST requests for partials', async () => {
         const response = await fetch(
           `${appInstanceUrls.fetchUrl}/html-partial/en-US/frank-the-parrot`,
           {
@@ -1930,7 +1930,7 @@ xdescribe('Tests that can run against either local Docker setup or remote One Ap
   });
 });
 
-xdescribe('Scan app instance for console errors', () => {
+describe('Scan app instance for console errors', () => {
   const oneAppLocalPortToUse = getRandomPortNumber();
   const { scanEnvironment } = argv;
   const environmentsToScan = scanEnvironment || ['https://one-app:8443/success'];
@@ -1986,7 +1986,7 @@ xdescribe('Scan app instance for console errors', () => {
   }
 });
 
-xdescribe('heapdump', () => {
+describe('heapdump', () => {
   const oneAppLocalPortToUse = getRandomPortNumber();
 
   beforeAll(async () => {

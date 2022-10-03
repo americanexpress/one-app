@@ -30,5 +30,5 @@ const addSecurityHeaders = (fastify, _opts, done) => {
 
 export default fp(addSecurityHeaders, {
   fastify: '4.x',
-  name: 'addSecurityHeaders'
-})
+  name: 'addSecurityHeaders',
+});

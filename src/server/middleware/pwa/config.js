@@ -64,8 +64,6 @@ function createServiceWorkerConfig(config) {
     script = fs.readFileSync(path.join(__dirname, 'scripts/sw.noop.js'));
   }
 
-  console.log('--type', type);
-
   if (type) {
     // with a valid type, we can be sure that the service worker will be
     // ready to enable and assign a scope

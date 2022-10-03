@@ -27,7 +27,7 @@ import { setEventLoopDelayThreshold } from './createCircuitBreaker';
 import setupDnsCache from './setupDnsCache';
 import { configurePWA } from '../middleware/pwa';
 import { validatePWAConfig } from './validation';
-import { setErrorPage } from '../plugins/reactHtml';
+import { setErrorPage } from '../plugins/reactHtml/staticErrorPage';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');

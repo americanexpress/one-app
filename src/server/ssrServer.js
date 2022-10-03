@@ -19,10 +19,10 @@
 /* eslint-disable global-require */
 
 import path from 'path';
-import ms from 'ms'
+import ms from 'ms';
 import express from 'express';
 import compress from '@fastify/compress';
-import compression from 'compression'
+import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import { json } from 'body-parser';
 import helmet from 'helmet';
@@ -34,7 +34,6 @@ import fastifyFormbody from '@fastify/formbody';
 import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
 import clientErrorLogger from './middleware/clientErrorLogger';
-import oneApp from '../universal';
 import addSecurityHeadersPlugin from './plugins/addSecurityHeaders';
 import addCacheHeaders from './middleware/addCacheHeaders';
 import csp from './middleware/csp';
@@ -44,9 +43,11 @@ import forwardedHeaderParser from './plugins/forwardedHeaderParser';
 import {
   serviceWorkerMiddleware,
   webManifestMiddleware,
-  // offlineMiddleware,
 } from './middleware/pwa';
-import reactHtml, { renderStaticErrorPage } from './plugins/reactHtml'
+import renderHtml from './plugins/reactHtml';
+import renderStaticErrorPage from './plugins/reactHtml/staticErrorPage';
+import addFrameOptionsHeaderHook from './plugins/addFrameOptionsHeader';
+import { getServerPWAConfig } from './middleware/pwa/config';
 
 export const makeExpressRouter = (router = express.Router()) => {
   router.use(logging);
@@ -73,8 +74,6 @@ export const makeExpressRouter = (router = express.Router()) => {
   router.post('/_/report/errors', clientErrorLogger);
   router.get('**/*.(json|js|css|map)', (_req, res) => res.sendStatus(404));
 
-  // router.get('/_/pwa/shell', offlineMiddleware(oneApp));
-
   return router;
 };
 
@@ -89,7 +88,7 @@ const getBodyLimit = () => {
     return customLimit;
   }
 
-  return ms('1mb');
+  return ms('10mb');
 };
 
 export async function createApp(opts = {}) {
@@ -134,21 +133,26 @@ export async function createApp(opts = {}) {
 
   await fastify.register(fastifyFormbody);
   await fastify.register(fastifyCookie);
-  await fastify.register(reactHtml);
+  await fastify.register(addFrameOptionsHeaderHook);
+  await fastify.register(renderHtml);
 
-  fastify.get('/*', (_request, reply) => reply.sendHtml());
+  if (getServerPWAConfig().serviceWorker) {
+    fastify.get('/_/pwa/shell', (_request, reply) => {
+      reply.sendHtml();
+    });
+  }
+
+  fastify.get('/*', (_request, reply) => {
+    reply.sendHtml();
+  });
 
   if (enablePostToModuleRoutes) {
     console.log('--ONE_ENABLE_POST_TO_MODULE_ROUTES ENABLED');
 
     // TODO: Support for "options" with restrictions
-
-    fastify.post('/*', (_request, reply) => reply.sendHtml());
-    // fastify.post('/*', (_request, reply) => reply.send('Hi'))
-    // fastify.post('/*', (request, reply) => {
-    //   console.log('--request.body from route', request.body)
-    //   reply.send(request.body)
-    // })
+    fastify.post('/*', (_request, reply) => {
+      reply.sendHtml();
+    });
   }
 
   fastify.setNotFoundHandler(async (_request, reply) => {

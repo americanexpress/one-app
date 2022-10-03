@@ -17,7 +17,7 @@
 import { createHolocronStore } from 'holocron';
 import { fromJS, Set as iSet } from 'immutable';
 
-// import { renderStaticErrorPage } from './sendHtml';
+import renderStaticErrorPage from './staticErrorPage';
 import createEnhancer from '../../../universal/enhancers';
 import safeRequest from '../../utils/safeRequest';
 import { getServerStateConfig, getClientStateConfig } from '../../utils/stateConfig';
@@ -25,60 +25,57 @@ import createSsrFetch from '../../utils/createSsrFetch';
 import { getClientModuleMapCache } from '../../utils/clientModuleMapCache';
 
 const createRequestStore = (
-  fastify,
+  request, reply,
   { reducers }
 ) => {
-  fastify.decorateRequest('store', null);
-  fastify.decorateRequest('clientModuleMapCache', null);
+  // fastify.decorateRequest('store', null);
+  // fastify.decorateRequest('clientModuleMapCache', null);
 
-  fastify.addHook('onRequest', (request, reply, done) => {
-    try {
-      const serverConfig = getServerStateConfig();
-      const clientConfig = getClientStateConfig();
+  console.log('--createRequestStore');
 
-      const initialServerState = fromJS({
-        holocron: { loaded: iSet() },
-        config: serverConfig,
-      });
+  try {
+    const serverConfig = getServerStateConfig();
+    const clientConfig = getClientStateConfig();
 
-      // TODO: migrate req and res
-      const fetchClient = createSsrFetch({
-        req: request.raw,
-        res: reply.raw,
-      })(fetch);
+    const initialServerState = fromJS({
+      holocron: { loaded: iSet() },
+      config: serverConfig,
+    });
 
-      const enhancer = createEnhancer();
-      const localsForBuildInitialState = {
-        req: safeRequest(request, { useBodyForBuildingTheInitialState: request.method.toLowerCase() === 'post' }),
-        config: clientConfig,
-      };
+    const fetchClient = createSsrFetch({
+      req: request.raw,
+      res: reply.raw,
+    })(fetch);
 
-      console.log('--request.method', request.method);
-      console.log('--request.body', request.body);
-      console.log('--request.raw.body', request.raw.body);
+    console.log('--request.method', request.method);
+    console.log('--request.body', request.body);
+    console.log('--request.raw.body', request.raw.body);
 
-      const store = createHolocronStore({
-        reducer: reducers,
-        initialState: initialServerState.merge(
-          fromJS(reducers.buildInitialState(localsForBuildInitialState))
-        ),
-        enhancer,
-        localsForBuildInitialState,
-        extraThunkArguments: { fetchClient },
-      });
+    const enhancer = createEnhancer();
+    const localsForBuildInitialState = {
+      req: safeRequest(request, { useBodyForBuildingTheInitialState: request.method.toLowerCase() === 'post' }),
+      config: clientConfig,
+    };
 
-      // TODO: namespace?
-      // use the store as a global for the request
-      request.store = store; // eslint-disable-line no-param-reassign
-      request.clientModuleMapCache = getClientModuleMapCache();
-      return done();
-    } catch (err) {
-      console.error('error creating store for request', err);
-      // TODO: migrate `renderStaticErrorPage`
-      reply.code(500).send('Something happened (TODO: renderStaticErrorPage)');
-      // return renderStaticErrorPage(res);
-    }
-  });
-}
+    const store = createHolocronStore({
+      reducer: reducers,
+      initialState: initialServerState.merge(
+        fromJS(reducers.buildInitialState(localsForBuildInitialState))
+      ),
+      enhancer,
+      localsForBuildInitialState,
+      extraThunkArguments: { fetchClient },
+    });
+
+    // TODO: namespace?
+    // use the store as a global for the request
+    request.store = store; // eslint-disable-line no-param-reassign
+    request.clientModuleMapCache = getClientModuleMapCache();
+  } catch (err) {
+    console.error('error creating store for request', err);
+    // TODO: migrate `renderStaticErrorPage`
+    return renderStaticErrorPage(reply);
+  }
+};
 
 export default createRequestStore;

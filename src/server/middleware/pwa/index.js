@@ -18,3 +18,4 @@ export { configurePWA, getClientPWAConfig, getServerPWAConfig } from './config';
 export { default as serviceWorkerMiddleware } from './service-worker';
 export { default as webManifestMiddleware } from './webManifest';
 export { default as offlineMiddleware } from './offline';
+export { default as offlineHandler } from './offline';

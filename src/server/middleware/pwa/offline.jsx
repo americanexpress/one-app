@@ -20,10 +20,6 @@ import { Provider } from 'react-redux';
 
 import { renderForStaticMarkup } from '../../utils/reactRendering';
 
-import addFrameOptionsHeader from '../addFrameOptionsHeader';
-import createRequestStore from '../../plugins/reactHtml/createRequestStore';
-import sendHtml from '../../plugins/reactHtml';
-
 import { getServerPWAConfig } from './config';
 
 async function appShellMiddleware(req, res, next) {
@@ -46,25 +42,30 @@ async function appShellMiddleware(req, res, next) {
   next();
 }
 
-export default function createOfflineMiddleware(oneApp) {
+export function createOfflineMiddleware(oneApp) {
   const middlewareStack = [
-    addFrameOptionsHeader,
-    createRequestStore({
-      decorateRequest: () => {},
-      addHook: () => {},
-    }, oneApp),
+    // addFrameOptionsHeader,
+    // createRequestStore({
+    //   decorateRequest: () => {},
+    //   addHook: () => {},
+    // }, oneApp),
     appShellMiddleware,
-    sendHtml,
+    // sendHtml,
   ];
 
   return async function offlineMiddleware(req, res, next) {
     const { serviceWorker } = getServerPWAConfig();
     if (serviceWorker === false) next();
     else {
+      console.log('--middlewareStack', middlewareStack)
       await (async function stackIterator(stack) {
         const middleware = stack.shift();
+        console.log(middleware);
         await middleware(req, res, stack.length === 0 ? next : stackIterator.bind(null, stack));
       }([...middlewareStack]));
     }
   };
+}
+
+export default function offlineHandler() {
 }

@@ -14,11 +14,12 @@
  * permissions and limitations under the License.
  */
 
+import fp from 'fastify-plugin';
 import matcher from 'matcher';
 
-import { getCSP } from '../../middleware/csp'; // TODO: Convert into Fastify plugin
+import { getCSP } from '../middleware/csp'; // TODO: Convert into Fastify plugin
 
-const addFrameOptionsHeader = (fastify) => {
+const addFrameOptionsHeader = (fastify, _opts, done) => {
   fastify.addHook('onRequest', async (request, reply) => {
     const referer = request.headers.Referer || request.headers.Referrer || '';
     const frameAncestorDomains = getCSP()['frame-ancestors'] || [];
@@ -30,6 +31,11 @@ const addFrameOptionsHeader = (fastify) => {
       reply.header('X-Frame-Options', `ALLOW-FROM ${referer}`);
     }
   })
+
+  done();
 }
 
-export default addFrameOptionsHeader;
+export default fp(addFrameOptionsHeader, {
+  fastify: '4.x',
+  name: 'addFrameOptionsHeader',
+});
