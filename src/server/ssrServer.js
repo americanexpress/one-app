@@ -22,56 +22,46 @@ import path from 'path';
 import ms from 'ms';
 import express from 'express';
 import compress from '@fastify/compress';
-import compression from 'compression';
-import cookieParser from 'cookie-parser';
 import { json } from 'body-parser';
-import helmet from 'helmet';
 import Fastify from 'fastify';
-import fastifyExpress from '@fastify/express';
 import fastifyCookie from '@fastify/cookie';
 import fastifyFormbody from '@fastify/formbody';
+import fastifyStatic from '@fastify/static';
+import fastifyHelmet from '@fastify/helmet';
 
 import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
-import clientErrorLogger from './middleware/clientErrorLogger';
 import addSecurityHeadersPlugin from './plugins/addSecurityHeaders';
-import addCacheHeaders from './middleware/addCacheHeaders';
-import csp from './middleware/csp';
-import cspViolation from './middleware/cspViolation';
-import logging from './utils/logging/serverMiddleware';
+import csp from './plugins/csp';
+import logging from './utils/logging/fastifyPlugin';
 import forwardedHeaderParser from './plugins/forwardedHeaderParser';
-import {
-  serviceWorkerMiddleware,
-  webManifestMiddleware,
-} from './middleware/pwa';
 import renderHtml from './plugins/reactHtml';
 import renderStaticErrorPage from './plugins/reactHtml/staticErrorPage';
-import addFrameOptionsHeaderHook from './plugins/addFrameOptionsHeader';
-import { getServerPWAConfig } from './middleware/pwa/config';
+import addFrameOptionsHeader from './plugins/addFrameOptionsHeader';
+import addCacheHeaders from './plugins/addCacheHeaders';
+import { getServerPWAConfig, serviceWorkerHandler, webManifestMiddleware } from './pwa';
+
+const nodeEnvIsDevelopment = process.env.NODE_ENV === 'development';
 
 export const makeExpressRouter = (router = express.Router()) => {
-  router.use(logging);
-  router.use(compression());
+  // router.use('/_/static', express.static(path.join(__dirname, '../../build'), { maxage: '182d' }));
+  // router.get('/_/status', (_req, res) => res.sendStatus(200));
+  // router.get('/_/pwa/service-worker.js', serviceWorkerMiddleware());
+  // router.get('*', addCacheHeaders);
+  // router.get('/_/pwa/manifest.webmanifest', webManifestMiddleware());
 
-  router.use('/_/static', express.static(path.join(__dirname, '../../build'), { maxage: '182d' }));
-  router.get('/_/status', (_req, res) => res.sendStatus(200));
-  router.get('/_/pwa/service-worker.js', serviceWorkerMiddleware());
-  router.get('*', addCacheHeaders);
-  router.get('/_/pwa/manifest.webmanifest', webManifestMiddleware());
-
-  router.use(helmet({
-    crossOriginEmbedderPolicy: false,
-    crossOriginOpenerPolicy: false,
-    crossOriginResourcePolicy: false,
-    originAgentCluster: false,
-  }));
-  router.use(csp());
-  router.use(cookieParser());
+  // router.use(helmet({
+  //   crossOriginEmbedderPolicy: false,
+  //   crossOriginOpenerPolicy: false,
+  //   crossOriginResourcePolicy: false,
+  //   originAgentCluster: false,
+  // }));
+  // router.use(csp());
   router.use(json({
     type: ['json', 'application/csp-report'],
   }));
-  router.post('/_/report/security/csp-violation', cspViolation);
-  router.post('/_/report/errors', clientErrorLogger);
+  // router.post('/_/report/security/csp-violation', cspViolation);
+  // router.post('/_/report/errors', clientErrorLogger);
   router.get('**/*.(json|js|css|map)', (_req, res) => res.sendStatus(404));
 
   return router;
@@ -106,54 +96,144 @@ export async function createApp(opts = {}) {
     ...opts,
   });
 
-  await fastify.register(ensureCorrelationId);
-  // await fastify.register(logging); // TODO: Fastify Plugin is in https://github.com/americanexpress/one-app/pull/803
-  await fastify.register(compress, {
+  fastify.register(ensureCorrelationId);
+  fastify.register(logging);
+  fastify.register(compress, {
     zlibOptions: {
       level: 1,
     },
   });
-  await fastify.register(addSecurityHeadersPlugin);
-  await fastify.register(setAppVersionHeader);
-  await fastify.register(forwardedHeaderParser);
+  fastify.register(fastifyFormbody);
+  fastify.register(fastifyCookie);
+  fastify.register(addSecurityHeadersPlugin);
+  fastify.register(setAppVersionHeader);
+  fastify.register(forwardedHeaderParser);
+  fastify.register(addFrameOptionsHeader);
+  fastify.register(addCacheHeaders);
+  fastify.register(fastifyStatic, {
+    root: path.join(__dirname, '../../build'),
+    prefix: '/_/static',
+    maxAge: '182d',
+  });
+  fastify.register(csp);
 
-  // Note: Express runs on `onRequest` hook by default.
-  //       When a route is match then all other Fastify
-  //       hooks are ignored since the `done` fn from fastify
-  //       moves to Express as the `next` fn.
-  await fastify.register(fastifyExpress);
+  fastify.register((instance, _opts, done) => {
+    instance.get('/_/status', (_request, reply) => reply.status(200).send('OK'));
+    instance.get('/_/pwa/service-worker.js', serviceWorkerHandler);
+    instance.get('/_/pwa/manifest.webmanifest', webManifestMiddleware);
 
-  fastify.express.disable('x-powered-by');
-  fastify.express.disable('e-tag');
+    if (nodeEnvIsDevelopment) {
+      instance.post('/_/report/security/csp-violation', (request, reply) => {
+        const violation = request.body && request.body['csp-report'];
+        if (!violation) {
+          console.warn('CSP Violation reported, but no data received');
+        } else {
+          const {
+            'document-uri': documentUri,
+            'violated-directive': violatedDirective,
+            'blocked-uri': blockedUri,
+            'line-number': lineNumber,
+            'column-number': columnNumber,
+            'source-file': sourceFile,
+          } = violation;
+          console.warn(`CSP Violation: ${sourceFile}:${lineNumber}:${columnNumber} on page ${documentUri} violated the ${violatedDirective} policy via ${blockedUri}`);
+        }
 
-  fastify.use(makeExpressRouter());
+        reply.status(204).send();
+      });
+    } else {
+      instance.post('/_/report/security/csp-violation', (request, reply) => {
+        const violation = request.body ? JSON.stringify(request.body, null, 2) : 'No data received!';
+        console.warn(`CSP Violation: ${violation}`);
+        reply.status(204).send();
+      });
+    }
 
-  // Note: the following only gets executed if the request
-  //       does not match any Express route
-
-  await fastify.register(fastifyFormbody);
-  await fastify.register(fastifyCookie);
-  await fastify.register(addFrameOptionsHeaderHook);
-  await fastify.register(renderHtml);
-
-  if (getServerPWAConfig().serviceWorker) {
-    fastify.get('/_/pwa/shell', (_request, reply) => {
-      reply.sendHtml();
+    instance.post('/_/report/errors', (request, reply) => {
+      if (!nodeEnvIsDevelopment) {
+        const contentType = request.headers['content-type']
+        
+        if (!/^application\/json/i.test(contentType)) {
+          return reply.status(415).send();
+        }
+    
+        const {
+          body: errorsReported,
+          headers: {
+            'correlation-id': correlationId,
+            'user-agent': userAgent,
+          },
+        } = request;
+    
+        if (Array.isArray(errorsReported)) {
+          errorsReported.forEach((raw) => {
+            if (!raw || typeof raw !== 'object') {
+              // drop on the floor, this is the wrong interface
+              console.warn(`dropping an error report, wrong interface (${typeof raw})`);
+              return;
+            }
+            const {
+              msg, stack, href, otherData,
+            } = raw;
+            const err = new Error(msg);
+            Object.assign(err, {
+              name: 'ClientReportedError',
+              stack,
+              userAgent,
+              uri: href,
+              metaData: {
+                ...otherData,
+                correlationId,
+              },
+            });
+            console.error(err);
+          });
+        } else {
+          // drop on the floor, this is the wrong interface
+          console.warn(`dropping an error report group, wrong interface (${typeof errorsReported})`);
+        }
+      }
+    
+      return res.status(204).send();
     });
-  }
 
-  fastify.get('/*', (_request, reply) => {
-    reply.sendHtml();
+    done();
   });
 
-  if (enablePostToModuleRoutes) {
-    console.log('--ONE_ENABLE_POST_TO_MODULE_ROUTES ENABLED');
+  fastify.register((instance, _opts, done) => {
+    instance.register(
+      fastifyHelmet,
+      {
+        crossOriginEmbedderPolicy: false,
+        crossOriginOpenerPolicy: false,
+        crossOriginResourcePolicy: false,
+        originAgentCluster: false,
+      }
+    );
 
-    // TODO: Support for "options" with restrictions
-    fastify.post('/*', (_request, reply) => {
+    instance.register(renderHtml);
+
+    instance.get('/_/pwa/shell', (_request, reply) => {
+      if (getServerPWAConfig().serviceWorker) {
+        reply.sendHtml();
+      } else {
+        reply.callNotFound();
+      }
+    });
+
+    instance.get('/*', (_request, reply) => {
       reply.sendHtml();
     });
-  }
+
+    if (enablePostToModuleRoutes) {
+      // TODO: Support for "options" with restrictions
+      instance.post('/*', (_request, reply) => {
+        reply.sendHtml();
+      });
+    }
+
+    done();
+  });
 
   fastify.setNotFoundHandler(async (_request, reply) => {
     reply.send('Not found');

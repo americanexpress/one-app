@@ -33,10 +33,10 @@ const conditionallyAllowCors = (fastify) => {
   fastify.register(fastifyCors, () => (req, callback) => {
     const renderPartialOnly = req.store.getState().getIn(['rendering', 'renderPartialOnly']);
     // The HTML partials will have CORS enabled so they can be loaded client-side
-    const opts = renderPartialOnly ? corsOptions : { origin: false }
+    const opts = renderPartialOnly ? corsOptions : { origin: false };
 
-    callback(null, opts)
-  })
-}
+    callback(null, opts);
+  });
+};
 
 export default conditionallyAllowCors;

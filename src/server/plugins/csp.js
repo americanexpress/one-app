@@ -14,6 +14,7 @@
  * permissions and limitations under the License.
  */
 
+import fp from 'fastify-plugin';
 import { v4 as uuidV4 } from 'uuid';
 import ip from 'ip';
 
@@ -56,29 +57,43 @@ export function getCSP() {
   return parsePolicy(cspCache.policy);
 }
 
-const csp = () => (req, res, next) => {
-  const { policy } = cspCache;
-  const scriptNonce = uuidV4();
-  let updatedPolicy;
-  if (process.env.NODE_ENV === 'development') {
-    const developmentAdditions = `${ip.address()}:* localhost:* ws://localhost:*`;
-    let updatedScriptSrc;
-    if (process.env.ONE_CSP_ALLOW_INLINE_SCRIPTS === 'true') {
-      updatedScriptSrc = insertSource(policy, 'script-src', developmentAdditions);
-    } else {
-      res.scriptNonce = scriptNonce;
-      updatedScriptSrc = insertSource(policy, 'script-src', `'nonce-${scriptNonce}' ${developmentAdditions}`);
-    }
-    updatedPolicy = insertSource(updatedScriptSrc, 'connect-src', developmentAdditions);
-  } else {
-    res.scriptNonce = scriptNonce;
-    updatedPolicy = insertSource(policy, 'script-src', `'nonce-${scriptNonce}'`);
-  }
+/**
+ * CSP Fastify Plugin
+ * @param {import('fastify').FastifyInstance} fastify Fastify instance
+ * @param {import('fastify').FastifyPluginOptions} _opts plugin options
+ * @param {import('fastify').FastifyPluginCallback} done plugin callback
+ */
+const csp = (fastify, _opts, done) => {
+  fastify.decorateRequest('scriptNonce', null);
 
-  if (process.env.ONE_DANGEROUSLY_DISABLE_CSP !== 'true') {
-    res.setHeader('Content-Security-Policy', updatedPolicy);
-  }
-  next();
+  fastify.addHook('onRequest', async (request, reply) => {
+    const { policy } = cspCache;
+    const scriptNonce = uuidV4();
+    let updatedPolicy;
+    if (process.env.NODE_ENV === 'development') {
+      const developmentAdditions = `${ip.address()}:* localhost:* ws://localhost:*`;
+      let updatedScriptSrc;
+      if (process.env.ONE_CSP_ALLOW_INLINE_SCRIPTS === 'true') {
+        updatedScriptSrc = insertSource(policy, 'script-src', developmentAdditions);
+      } else {
+        request.scriptNonce = scriptNonce;
+        updatedScriptSrc = insertSource(policy, 'script-src', `'nonce-${scriptNonce}' ${developmentAdditions}`);
+      }
+      updatedPolicy = insertSource(updatedScriptSrc, 'connect-src', developmentAdditions);
+    } else {
+      request.scriptNonce = scriptNonce;
+      updatedPolicy = insertSource(policy, 'script-src', `'nonce-${scriptNonce}'`);
+    }
+
+    if (process.env.ONE_DANGEROUSLY_DISABLE_CSP !== 'true') {
+      reply.header('Content-Security-Policy', updatedPolicy);
+    }
+  });
+
+  done();
 };
 
-export default csp;
+export default fp(csp, {
+  fastify: '4.x',
+  name: 'csp',
+});

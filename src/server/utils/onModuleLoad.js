@@ -25,7 +25,7 @@ import { setConfigureRequestLog } from './logging/serverMiddleware';
 import { setCreateSsrFetch } from './createSsrFetch';
 import { setEventLoopDelayThreshold } from './createCircuitBreaker';
 import setupDnsCache from './setupDnsCache';
-import { configurePWA } from '../middleware/pwa';
+import { configurePWA } from '../pwa';
 import { validatePWAConfig } from './validation';
 import { setErrorPage } from '../plugins/reactHtml/staticErrorPage';
 

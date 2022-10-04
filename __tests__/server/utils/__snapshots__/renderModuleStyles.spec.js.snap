@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renderModuleStyles should handle a mix of modules with and without SSR styles 1`] = `"<style class=\\"ssr-css\\">.test-module-b_class { color: red; }</style><style class=\\"ssr-css\\">.test-module-d_class { color: red; }</style>"`;
+exports[`renderModuleStyles should handle a mix of modules with and without SSR styles 1`] = `"<style class="ssr-css">.test-module-b_class { color: red; }</style><style class="ssr-css">.test-module-d_class { color: red; }</style>"`;
 
-exports[`renderModuleStyles should handle modules with SSR styles 1`] = `"<style class=\\"ssr-css\\">.test-module_class { color: red; }</style>"`;
+exports[`renderModuleStyles should handle modules with SSR styles 1`] = `"<style class="ssr-css">.test-module_class { color: red; }</style>"`;
 
-exports[`renderModuleStyles should not send empty styles 1`] = `"<style class=\\"ssr-css\\">.test-module-b_class { color: red; }</style>"`;
+exports[`renderModuleStyles should not send empty styles 1`] = `"<style class="ssr-css">.test-module-b_class { color: red; }</style>"`;

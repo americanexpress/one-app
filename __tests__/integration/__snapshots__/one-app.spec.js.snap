@@ -1,14 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Tests that require Docker setup one-app successfully started holocron needy frank can make universal requests to an api with iguazu with ssr disabled should timeout on client if request exceeds six seconds 1`] = `
-Object {
-  "procedures": Object {
-    "pendingCalls": Object {
-      "readPosts": Object {},
+{
+  "procedures": {
+    "pendingCalls": {
+      "readPosts": {},
     },
-    "procedureCaches": Object {
-      "readPosts": Object {
-        "de48373b416b8d2af053d04402c35d194568ffdd": Object {
+    "procedureCaches": {
+      "readPosts": {
+        "de48373b416b8d2af053d04402c35d194568ffdd": {
           "message": "https://extra-slow.api.frank/posts after 6000ms",
           "name": "TimeoutError",
           "stack": StringContaining "Error: https://extra-slow.api.frank/posts after 6000ms",
@@ -16,20 +16,20 @@ Object {
       },
     },
   },
-  "resources": Object {},
+  "resources": {},
 }
 `;
 
 exports[`Tests that require Docker setup one-app successfully started holocron needy frank can make universal requests to an api with iguazu with ssr enabled should have SSR preload module state with readPosts 1`] = `
-Object {
-  "procedures": Object {
-    "pendingCalls": Object {
-      "readPosts": Object {},
+{
+  "procedures": {
+    "pendingCalls": {
+      "readPosts": {},
     },
-    "procedureCaches": Object {
-      "readPosts": Object {
-        "1f6e715c92acdef7d4af0940981c09e450a52324": Array [
-          Object {
+    "procedureCaches": {
+      "readPosts": {
+        "1f6e715c92acdef7d4af0940981c09e450a52324": [
+          {
             "author": "typicode",
             "id": 1,
             "title": "json-server",
@@ -38,12 +38,12 @@ Object {
       },
     },
   },
-  "resources": Object {},
+  "resources": {},
 }
 `;
 
 exports[`Tests that require Docker setup one-app successfully started metrics has all metrics 1`] = `
-Array [
+[
   "circuit",
   "circuit_perf",
   "nodejs_active_handles",
@@ -87,4 +87,4 @@ Array [
 
 exports[`Tests that require Docker setup one-app successfully started one-app server provides reporting routes client reported errors logs errors when reported to /_/report/errors 1`] = `"reported client error"`;
 
-exports[`Tests that require Docker setup one-app successfully started one-app server provides reporting routes csp-violations reported to server logs violations reported to /_/report/errors 1`] = `"CSP Violation: {\\\\n  \\\\\\"csp-report\\\\\\": {\\\\n    \\\\\\"document-uri\\\\\\": \\\\\\"bad.example.com"`;
+exports[`Tests that require Docker setup one-app successfully started one-app server provides reporting routes csp-violations reported to server logs violations reported to /_/report/errors 1`] = `"CSP Violation: {\\n  \\"csp-report\\": {\\n    \\"document-uri\\": \\"bad.example.com"`;

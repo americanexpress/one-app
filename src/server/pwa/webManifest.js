@@ -14,8 +14,23 @@
  * permissions and limitations under the License.
  */
 
-export { configurePWA, getClientPWAConfig, getServerPWAConfig } from './config';
-export { default as serviceWorkerMiddleware } from './service-worker';
-export { default as webManifestMiddleware } from './webManifest';
-export { default as offlineMiddleware } from './offline';
-export { default as offlineHandler } from './offline';
+import { getWebAppManifestConfig } from './config';
+
+/**
+ * Web Manifest handler for Fastify Route
+ * @param {import('fastify').FastifyRequest} _request Fastify Request object
+ * @param {import('fastify').FastifyReply} reply Fastify Reply object
+ */
+const webManifestHandler = (_request, reply) => {
+  const { webManifestEnabled, webManifest } = getWebAppManifestConfig();
+
+  if (webManifestEnabled) {
+    reply
+      .type('application/manifest+json')
+      .send(webManifest);
+  } else {
+    reply.callNotFound();
+  }
+};
+
+export default webManifestHandler;

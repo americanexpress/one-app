@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2022 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,12 @@
 
 import pidusage from 'pidusage';
 import { getModule } from 'holocron';
+import Fastify from 'fastify';
 import healthCheck, {
   getTickDelay,
   checkForRootModule,
   verifyThresholds,
-} from '../../../src/server/middleware/healthCheck';
+} from '../../../src/server/plugins/healthCheck';
 import { getModuleMapHealth } from '../../../src/server/utils/pollModuleMap';
 
 jest.mock('holocron', () => ({
@@ -41,12 +42,6 @@ jest.mock('../../../src/server/utils/pollModuleMap', () => ({
 
 describe('healthCheck', () => {
   const { hrtime } = process;
-  const req = {};
-  const res = {
-    status: jest.fn(),
-    json: jest.fn(),
-    sendStatus: jest.fn(),
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -145,61 +140,119 @@ describe('healthCheck', () => {
     });
   });
 
-  describe('middleware', () => {
+  describe('plugin', () => {
+    const buildFastifyAndMakeRequest = async () => {
+      const fastify = Fastify();
+
+      await fastify.register(healthCheck);
+
+      fastify.get('/im-up', async (_request, reply) => {
+        await reply.healthReport();
+      });
+
+      await fastify.ready();
+
+      const response = await fastify.inject({
+        method: 'GET',
+        url: '/im-up',
+      });
+
+      return response;
+    };
+
     it('should return a 200 when all is good', async () => {
       pidusage.mockImplementationOnce((pid, cb) => cb(undefined, {
         cpu: 80,
         memory: 1.4e9,
-      }));
+      })
+      );
       getModule.mockReturnValueOnce(() => 0);
       getModuleMapHealth.mockReturnValueOnce(true);
-      await healthCheck(req, res);
-      expect(res.sendStatus).not.toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledTimes(1);
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledTimes(1);
-      expect(res.json.mock.calls[0][0]).toMatchSnapshot();
+      const response = await buildFastifyAndMakeRequest();
+      expect(response.statusCode).toBe(200);
+      expect(await response.json()).toMatchInlineSnapshot(`
+        {
+          "holocron": {
+            "moduleMapHealthy": true,
+            "rootModuleExists": true,
+          },
+          "process": {
+            "cpu": 80,
+            "memory": 1400000000,
+            "tickDelay": [
+              0,
+              100,
+            ],
+          },
+        }
+      `);
     });
 
     it('should return a 207 when the module map is not healthy', async () => {
       pidusage.mockImplementationOnce((pid, cb) => cb(undefined, {
         cpu: 80,
         memory: 1.4e9,
-      }));
+      })
+      );
       getModule.mockReturnValueOnce(() => 0);
       getModuleMapHealth.mockReturnValueOnce(false);
-      await healthCheck(req, res);
-      expect(res.sendStatus).not.toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledTimes(1);
-      expect(res.status).toHaveBeenCalledWith(207);
-      expect(res.json).toHaveBeenCalledTimes(1);
-      expect(res.json.mock.calls[0][0]).toMatchSnapshot();
+      const response = await buildFastifyAndMakeRequest();
+      expect(response.statusCode).toBe(207);
+      expect(await response.json()).toMatchInlineSnapshot(`
+        {
+          "holocron": {
+            "moduleMapHealthy": false,
+            "rootModuleExists": true,
+            "status": 500,
+          },
+          "process": {
+            "cpu": 80,
+            "memory": 1400000000,
+            "status": 200,
+            "tickDelay": [
+              0,
+              100,
+            ],
+          },
+        }
+      `);
     });
 
     it('should return a 503 when any threshold has been passed', async () => {
       pidusage.mockImplementationOnce((pid, cb) => cb(undefined, {
         cpu: 80.1,
         memory: 1.4e9,
-      }));
+      })
+      );
       getModule.mockReturnValueOnce(() => 0);
       getModuleMapHealth.mockReturnValueOnce(true);
-      await healthCheck(req, res);
-      expect(res.sendStatus).not.toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledTimes(1);
-      expect(res.status).toHaveBeenCalledWith(503);
-      expect(res.json).toHaveBeenCalledTimes(1);
-      expect(res.json.mock.calls[0][0]).toMatchSnapshot();
+      const response = await buildFastifyAndMakeRequest();
+      expect(response.statusCode).toBe(503);
+      expect(await response.json()).toMatchInlineSnapshot(`
+        {
+          "holocron": {
+            "moduleMapHealthy": true,
+            "rootModuleExists": true,
+          },
+          "process": {
+            "cpu": 80.1,
+            "memory": 1400000000,
+            "tickDelay": [
+              0,
+              100,
+            ],
+          },
+        }
+      `);
     });
 
-    it('should return a 500 if it can\'t get the stats', async () => {
+    it("should return a 500 if it can't get the stats", async () => {
       pidusage.mockImplementationOnce((pid, cb) => cb(new Error('no stats')));
       getModule.mockReturnValueOnce(() => 0);
       getModuleMapHealth.mockReturnValueOnce(true);
-      await healthCheck(req, res);
-      expect(res.status).not.toHaveBeenCalled();
-      expect(res.json).not.toHaveBeenCalled();
-      expect(res.sendStatus).toHaveBeenCalledTimes(1);
-      expect(res.sendStatus).toHaveBeenCalledWith(500);
+      const response = await buildFastifyAndMakeRequest();
+      expect(response.statusCode).toBe(500);
+      expect(response.body).toMatchInlineSnapshot('""');
     });
   });
 });

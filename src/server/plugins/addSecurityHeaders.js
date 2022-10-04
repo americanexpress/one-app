@@ -16,6 +16,12 @@
 
 import fp from 'fastify-plugin';
 
+/**
+ * Fastify Plugin that adds security into headers
+ * @param {import('fastify').FastifyInstance} fastify Fastify instance
+ * @param {import('fastify').FastifyPluginOptions} _opts plugin options
+ * @param {import('fastify').FastifyPluginCallback} done plugin callback
+ */
 const addSecurityHeaders = (fastify, _opts, done) => {
   fastify.addHook('onRequest', async (_request, reply) => {
     reply.header('X-Frame-Options', 'DENY');
@@ -23,10 +29,10 @@ const addSecurityHeaders = (fastify, _opts, done) => {
     reply.header('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
     reply.header('X-XSS-Protection', '1; mode=block');
     reply.header('Referrer-Policy', process.env.ONE_REFERRER_POLICY_OVERRIDE || 'same-origin');
-  })
+  });
 
   done();
-}
+};
 
 export default fp(addSecurityHeaders, {
   fastify: '4.x',

@@ -15,33 +15,23 @@
  */
 
 import fp from 'fastify-plugin';
-import matcher from 'matcher';
-
-import { getCSP } from './csp';
 
 /**
- * Fastify Plugin that adds frame options into the header
+ * Fastify Plugin that adds header cache configuration
  * @param {import('fastify').FastifyInstance} fastify Fastify instance
  * @param {import('fastify').FastifyPluginOptions} _opts plugin options
  * @param {import('fastify').FastifyPluginCallback} done plugin callback
  */
-const addFrameOptionsHeader = (fastify, _opts, done) => {
-  fastify.addHook('onRequest', async (request, reply) => {
-    const referer = request.headers.Referer || request.headers.Referrer || '';
-    const frameAncestorDomains = getCSP()['frame-ancestors'] || [];
-    const trimmedReferrer = referer.replace('https://', '');
-    const matchedDomain = frameAncestorDomains.find((domain) => matcher.isMatch(trimmedReferrer, `${domain}/*`)
-    );
-
-    if (matchedDomain) {
-      reply.header('X-Frame-Options', `ALLOW-FROM ${referer}`);
-    }
+const addCacheHeaders = (fastify, _opts, done) => {
+  fastify.addHook('onRequest', async (_request, reply) => {
+    reply.header('Cache-Control', 'no-store');
+    reply.header('Pragma', 'no-cache');
   });
 
   done();
 };
 
-export default fp(addFrameOptionsHeader, {
+export default fp(addCacheHeaders, {
   fastify: '4.x',
-  name: 'addFrameOptionsHeader',
+  name: 'addCacheHeaders',
 });

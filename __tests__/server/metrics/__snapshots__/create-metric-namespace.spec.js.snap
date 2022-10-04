@@ -2,12 +2,12 @@
 
 exports[`createMetricNamespace namespace throws if given an unknown unit 1`] = `"units needs to be one of seconds, bytes, total"`;
 
-exports[`createMetricNamespace namespace throws if given more than one unit and one is not "total" 1`] = `"if combining two units the last should be \\"total\\" (given \\"seconds\\")"`;
+exports[`createMetricNamespace namespace throws if given more than one unit and one is not "total" 1`] = `"if combining two units the last should be "total" (given "seconds")"`;
 
-exports[`createMetricNamespace namespace throws if given more than two units 1`] = `"should use only one type of units unless also using \\"total\\" (given \\"bytes_seconds_total\\")"`;
+exports[`createMetricNamespace namespace throws if given more than two units 1`] = `"should use only one type of units unless also using "total" (given "bytes_seconds_total")"`;
 
-exports[`createMetricNamespace namespace throws if given two units and the first one is "total" 1`] = `"should use \\"total\\" only once (given \\"total_total\\")"`;
+exports[`createMetricNamespace namespace throws if given two units and the first one is "total" 1`] = `"should use "total" only once (given "total_total")"`;
 
-exports[`createMetricNamespace namespace throws if given two units and the last one is not "total" 1`] = `"if combining two units the last should be \\"total\\" (given \\"seconds\\")"`;
+exports[`createMetricNamespace namespace throws if given two units and the last one is not "total" 1`] = `"if combining two units the last should be "total" (given "seconds")"`;
 
 exports[`createMetricNamespace throws if the namespace is multiple words 1`] = `"metric namespace/application should be a single word"`;

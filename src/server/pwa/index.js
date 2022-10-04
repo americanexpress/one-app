@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2020 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,6 @@
  * permissions and limitations under the License.
  */
 
-export default function addCacheHeaders(req, res, next) {
-  res.set('Cache-Control', 'no-store');
-  res.set('Pragma', 'no-cache');
-
-  next();
-}
+export { configurePWA, getClientPWAConfig, getServerPWAConfig } from './config';
+export { default as serviceWorkerHandler } from './serviceWorkerHandler';
+export { default as webManifestMiddleware } from './webManifest';

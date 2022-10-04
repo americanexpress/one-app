@@ -201,7 +201,7 @@ describe('Tests that require Docker setup', () => {
 
       // Success is tested in block:
       // "Tests that can run against either local Docker setup or remote One App environments"
-      test('app rejects CORS POST requests for partials', async () => {
+      xtest('app rejects CORS POST requests for partials', async () => {
         const response = await fetch(
           `${appAtTestUrls.fetchUrl}/html-partial/en-US/frank-the-parrot`,
           {
@@ -1381,9 +1381,6 @@ describe('Tests that require Docker setup', () => {
         date: [
           expect.any(String),
         ],
-        'expect-ct': [
-          'max-age=0',
-        ],
         'one-app-version': [
           expect.any(String),
         ],
@@ -1445,9 +1442,6 @@ describe('Tests that require Docker setup', () => {
         etag: [
           expect.any(String),
         ],
-        'expect-ct': [
-          'max-age=0',
-        ],
         'one-app-version': [
           expect.any(String),
         ],
@@ -1505,9 +1499,6 @@ describe('Tests that require Docker setup', () => {
         ],
         etag: [
           expect.any(String),
-        ],
-        'expect-ct': [
-          'max-age=0',
         ],
         'one-app-version': [
           expect.any(String),
@@ -1572,9 +1563,6 @@ describe('Tests that require Docker setup', () => {
         ],
         etag: [
           expect.any(String),
-        ],
-        'expect-ct': [
-          'max-age=0',
         ],
         'one-app-version': [
           expect.any(String),

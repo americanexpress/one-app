@@ -1,18 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`routes should clear the 404 status when leaving the unmatched route 1`] = `
-Object {
+{
   "type": "@americanexpress/one-app-ducks/error/CLEAR_APPLICATION_ERROR",
 }
 `;
 
 exports[`routes should set the status to 404 1`] = `
-Object {
+{
   "error": Any<Error>,
-  "meta": Object {
+  "meta": {
     "code": 404,
     "collectionMethod": "applicationError",
-    "location": Object {
+    "location": {
       "pathname": "missing",
     },
   },
@@ -21,7 +21,7 @@ Object {
 `;
 
 exports[`routes should set the status to 404 2`] = `
-Object {
+{
   "code": 404,
   "type": "@americanexpress/one-app-ducks/error/APPLICATION_ERROR",
 }

@@ -23,12 +23,12 @@ const { buildVersion: appVersion } = readJsonFile('../../../.build-meta.json');
 const setAppVersionHeader = (fastify, _opts, done) => {
   fastify.addHook('onRequest', async (_request, reply) => {
     reply.header('One-App-Version', appVersion);
-  })
+  });
 
   done();
-}
+};
 
 export default fp(setAppVersionHeader, {
   fastify: '4.x',
-  name: 'setAppVersionHeader'
-})
+  name: 'setAppVersionHeader',
+});

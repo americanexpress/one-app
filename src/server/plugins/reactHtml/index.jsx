@@ -32,7 +32,7 @@ import { getClientStateConfig } from '../../utils/stateConfig';
 import getI18nFileFromState from '../../utils/getI18nFileFromState';
 import renderModuleStyles from '../../utils/renderModuleStyles';
 import readJsonFile from '../../utils/readJsonFile';
-import { getClientPWAConfig, getServerPWAConfig } from '../../middleware/pwa/config';
+import { getClientPWAConfig, getServerPWAConfig } from '../../pwa';
 import { renderForStaticMarkup } from '../../utils/reactRendering';
 import renderStaticErrorPage from './staticErrorPage';
 
@@ -269,10 +269,14 @@ const sendHtml = (request, reply) => {
   try {
     // TODO: Check values
     const {
-      appHtml, clientModuleMapCache, store, headers, helmetInfo = {}, renderMode = 'hydrate',
+      appHtml,
+      clientModuleMapCache,
+      store,
+      headers,
+      helmetInfo = {},
+      renderMode = 'hydrate',
+      scriptNonce,
     } = request;
-    // TODO: Check values (this is currently set by csp express middleware)
-    const { scriptNonce } = reply.raw;
     const userAgent = headers['user-agent'];
     const isLegacy = legacyUserAgent(userAgent);
 
@@ -385,8 +389,20 @@ export const offlineHtml = async (request, reply) => {
   sendHtml(request, reply);
 };
 
+/**
+ * Fastify Plugin to render HTML
+ * @param {import('fastify').FastifyInstance} fastify Fastify instance
+ * @param {import('fastify').FastifyPluginOptions} _opts plugin options
+ * @param {import('fastify').FastifyPluginCallback} done plugin callback
+ */
 const renderHtml = (fastify, _opts, done) => {
   fastify.addHook('onRequest', async (request, reply) => {
+    if (['json', 'js', 'css', 'map'].some((ext) => request.url.endsWith(ext))) {
+      reply.callNotFound();
+    }
+  });
+
+  fastify.addHook('preHandler', async (request, reply) => {
     createRequestStoreHook(request, reply, oneApp);
 
     if (getServerPWAConfig().serviceWorker && request.url === '/_/pwa/shell') {

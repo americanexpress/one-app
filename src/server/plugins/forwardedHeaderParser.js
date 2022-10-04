@@ -16,25 +16,31 @@
 
 import fp from 'fastify-plugin';
 
-const parse = forwarded => forwarded
+const parse = (forwarded) => forwarded
   .split(';')
-  .map(directive => directive.split('='))
+  .map((directive) => directive.split('='))
   .reduce((parsed, [key, value]) => ({
     ...parsed,
-    [key]: value
-  }), {})
+    [key]: value,
+  }), {});
 
+/**
+ * Fastify Plugin that injects 'forwarded' into the request object
+ * @param {import('fastify').FastifyInstance} fastify Fastify instance
+ * @param {import('fastify').FastifyPluginOptions} _opts plugin options
+ * @param {import('fastify').FastifyPluginCallback} done plugin callback
+ */
 const forwardedHeaderParser = (fastify, _opts, done) => {
   fastify.addHook('onRequest', async (request) => {
     if (request.headers.forwarded) {
       request.forwarded = parse(request.headers.forwarded);
     }
-  })
+  });
 
   done();
 }
 
 export default fp(forwardedHeaderParser, {
   fastify: '4.x',
-  name: 'forwardedHeaderParser'
-})
+  name: 'forwardedHeaderParser',
+});

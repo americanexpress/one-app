@@ -31,8 +31,6 @@ const createRequestStore = (
   // fastify.decorateRequest('store', null);
   // fastify.decorateRequest('clientModuleMapCache', null);
 
-  console.log('--createRequestStore');
-
   try {
     const serverConfig = getServerStateConfig();
     const clientConfig = getClientStateConfig();

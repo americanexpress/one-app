@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2022 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,24 +22,41 @@ describe('metricsServer', () => {
   jest.spyOn(console, 'warn').mockImplementation(() => {});
 
   let client;
+  let helmet;
   let healthCheck;
   let logging;
 
   async function load() {
     jest.resetModules();
 
-    jest.mock('prom-client');
-    jest.mock('../../src/server/utils/logging/serverMiddleware', () => jest.fn((req, res, next) => next()));
-    jest.mock('../../src/server/middleware/healthCheck');
+    jest.mock('prom-client', () => ({
+      collectDefaultMetrics: jest.fn(),
+      register: {
+        metrics: jest.fn(async () => 'unit testing'),
+        contentType: 'unit/testing',
+      },
+    }));
+    jest.mock('@fastify/helmet', () => jest.fn((_fastify, _opts, done) => done()));
+    jest.mock('../../src/server/utils/logging/fastifyPlugin', () => jest.fn((_fastify, _opts, done) => done()));
+    jest.mock('../../src/server/plugins/healthCheck', () => jest.fn((_fastify, _opts, done) => done()));
 
     client = require('prom-client');
-    logging = require('../../src/server/utils/logging/serverMiddleware');
-    healthCheck = require('../../src/server/middleware/healthCheck').default;
+    helmet = require('@fastify/helmet');
+    logging = require('../../src/server/utils/logging/fastifyPlugin');
+    healthCheck = require('../../src/server/plugins/healthCheck');
 
     const fastify = await require('../../src/server/metricsServer').default();
 
     return fastify;
   }
+
+  it('registers the required plugins', async () => {
+    await load();
+
+    expect(logging).toHaveBeenCalledTimes(1);
+    expect(healthCheck).toHaveBeenCalledTimes(1);
+    expect(helmet).toHaveBeenCalledTimes(1);
+  });
 
   describe('metrics setup', () => {
     it('collects default metrics', async () => {
@@ -68,44 +85,6 @@ describe('metricsServer', () => {
 
       expect(response.body).toEqual('');
       expect(response.headers['content-type']).toEqual('text/plain; charset=utf-8');
-    });
-
-    it('should log the request', async () => {
-      logging.mockClear();
-      process.env.NODE_ENV = 'production';
-
-      const metricsServer = await load();
-      expect(logging).not.toHaveBeenCalled();
-
-      await metricsServer.inject({
-        method: 'GET',
-        url: '/doesnt-exist',
-      });
-      expect(logging).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('/im-up', () => {
-    it('should run health checks', async () => {
-      const instance = await load();
-      await instance.inject({
-        method: 'GET',
-        url: '/im-up',
-      });
-
-      expect(healthCheck).toBeCalled();
-    });
-
-    it('should log the request', async () => {
-      logging.mockClear();
-
-      const instance = await load();
-      await instance.inject({
-        method: 'GET',
-        url: '/im-up',
-      });
-
-      expect(logging).toHaveBeenCalledTimes(1);
     });
   });
 
