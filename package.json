@@ -85,7 +85,7 @@
     "@americanexpress/fetch-enhancers": "^1.1.2",
     "@americanexpress/lumberjack": "^1.1.4",
     "@americanexpress/one-app-bundler": "^6.15.0",
-    "@americanexpress/one-app-ducks": "^4.3.4",
+    "@americanexpress/one-app-ducks": "^4.4.1",
     "@americanexpress/one-app-router": "^1.2.1",
     "@americanexpress/vitruvius": "^2.0.2",
     "@fastify/express": "^2.0.1",
