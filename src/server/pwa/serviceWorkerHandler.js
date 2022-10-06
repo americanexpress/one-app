@@ -37,7 +37,7 @@ const serviceWorkerHandler = (_request, reply) => {
       .header('Cache-Control', 'no-store, no-cache')
       .send(processServiceWorkerScript(serviceWorkerScript));
   } else {
-    reply.callNotFound();
+    reply.status(404).send('Not found');
   }
 };
 

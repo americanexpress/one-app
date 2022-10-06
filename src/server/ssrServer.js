@@ -104,22 +104,33 @@ export async function createApp(opts = {}) {
     },
   });
   fastify.register(fastifyFormbody);
-  fastify.register(fastifyCookie);
-  fastify.register(addSecurityHeadersPlugin);
+
+  fastify.register(addSecurityHeadersPlugin, {
+    ignoreRoutes: [
+      '/_/report/security/csp-violation',
+      '/_/report/errors',
+    ],
+  });
   fastify.register(setAppVersionHeader);
   fastify.register(forwardedHeaderParser);
-  fastify.register(addFrameOptionsHeader);
-  fastify.register(addCacheHeaders);
-  fastify.register(fastifyStatic, {
-    root: path.join(__dirname, '../../build'),
-    prefix: '/_/static',
-    maxAge: '182d',
-  });
-  fastify.register(csp);
 
   fastify.register((instance, _opts, done) => {
+    fastify.register(fastifyStatic, {
+      root: path.join(__dirname, '../../build'),
+      prefix: '/_/static',
+      maxAge: '182d',
+    });
     instance.get('/_/status', (_request, reply) => reply.status(200).send('OK'));
     instance.get('/_/pwa/service-worker.js', serviceWorkerHandler);
+
+    done();
+  });
+
+  fastify.register((instance, _opts, done) => {
+    fastify.register(fastifyCookie);
+    fastify.register(addCacheHeaders);
+    fastify.register(csp);
+
     instance.get('/_/pwa/manifest.webmanifest', webManifestMiddleware);
 
     if (nodeEnvIsDevelopment) {
@@ -152,11 +163,11 @@ export async function createApp(opts = {}) {
     instance.post('/_/report/errors', (request, reply) => {
       if (!nodeEnvIsDevelopment) {
         const contentType = request.headers['content-type']
-        
+
         if (!/^application\/json/i.test(contentType)) {
           return reply.status(415).send();
         }
-    
+
         const {
           body: errorsReported,
           headers: {
@@ -164,7 +175,7 @@ export async function createApp(opts = {}) {
             'user-agent': userAgent,
           },
         } = request;
-    
+
         if (Array.isArray(errorsReported)) {
           errorsReported.forEach((raw) => {
             if (!raw || typeof raw !== 'object') {
@@ -193,14 +204,37 @@ export async function createApp(opts = {}) {
           console.warn(`dropping an error report group, wrong interface (${typeof errorsReported})`);
         }
       }
-    
-      return res.status(204).send();
+
+      return reply.status(204).send();
     });
 
     done();
   });
 
   fastify.register((instance, _opts, done) => {
+    if (enablePostToModuleRoutes) {
+      // TODO: Replicate the following
+      // router.options(
+      //   '*',
+      //   addSecurityHeaders,
+      //   json({ limit: '0kb' }), // there should be no body
+      //   urlencoded({ limit: '0kb' }), // there should be no body
+      //   cors({ origin: false }) // disable CORS
+      // );
+      instance.options('/*', (_request, reply) => {
+        // reply.sendHtml();
+        reply.send();
+      });
+    }
+
+    done();
+  });
+
+  fastify.register((instance, _opts, done) => {
+    fastify.register(fastifyCookie);
+    fastify.register(addCacheHeaders);
+    fastify.register(csp);
+
     instance.register(
       fastifyHelmet,
       {
@@ -210,14 +244,14 @@ export async function createApp(opts = {}) {
         originAgentCluster: false,
       }
     );
-
+    instance.register(addFrameOptionsHeader);
     instance.register(renderHtml);
 
     instance.get('/_/pwa/shell', (_request, reply) => {
       if (getServerPWAConfig().serviceWorker) {
         reply.sendHtml();
       } else {
-        reply.callNotFound();
+        reply.status(404).send('Not found');
       }
     });
 
@@ -226,7 +260,6 @@ export async function createApp(opts = {}) {
     });
 
     if (enablePostToModuleRoutes) {
-      // TODO: Support for "options" with restrictions
       instance.post('/*', (_request, reply) => {
         reply.sendHtml();
       });
@@ -236,7 +269,7 @@ export async function createApp(opts = {}) {
   });
 
   fastify.setNotFoundHandler(async (_request, reply) => {
-    reply.send('Not found');
+    reply.status(404).send('Not found');
   });
 
   fastify.setErrorHandler(async (error, request, reply) => {

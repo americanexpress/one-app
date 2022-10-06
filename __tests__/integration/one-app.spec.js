@@ -1335,9 +1335,6 @@ describe('Tests that require Docker setup', () => {
         date: [
           expect.any(String),
         ],
-        etag: [
-          expect.any(String),
-        ],
         'one-app-version': [
           expect.any(String),
         ],
@@ -1348,7 +1345,7 @@ describe('Tests that require Docker setup', () => {
           'max-age=15552000; includeSubDomains',
         ],
         vary: [
-          'Accept-Encoding',
+          'accept-encoding',
         ],
         'x-content-type-options': [
           'nosniff',
@@ -1542,6 +1539,7 @@ describe('Tests that require Docker setup', () => {
       });
 
       expect(response.status).toBe(404);
+      expect(response.body).toBe('testing');
       expect(response.headers.raw()).toEqual({
         'cache-control': [
           'no-store',

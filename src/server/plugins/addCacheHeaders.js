@@ -23,9 +23,11 @@ import fp from 'fastify-plugin';
  * @param {import('fastify').FastifyPluginCallback} done plugin callback
  */
 const addCacheHeaders = (fastify, _opts, done) => {
-  fastify.addHook('onRequest', async (_request, reply) => {
-    reply.header('Cache-Control', 'no-store');
-    reply.header('Pragma', 'no-cache');
+  fastify.addHook('onRequest', async (request, reply) => {
+    if (request.method.toLowerCase() === 'get') {
+      reply.header('Cache-Control', 'no-store');
+      reply.header('Pragma', 'no-cache');
+    }
   });
 
   done();

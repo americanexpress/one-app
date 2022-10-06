@@ -398,7 +398,7 @@ export const offlineHtml = async (request, reply) => {
 const renderHtml = (fastify, _opts, done) => {
   fastify.addHook('onRequest', async (request, reply) => {
     if (['json', 'js', 'css', 'map'].some((ext) => request.url.endsWith(ext))) {
-      reply.callNotFound();
+      reply.status(404).type('text/plain; charset=utf-8').send('Not found');
     }
   });
 

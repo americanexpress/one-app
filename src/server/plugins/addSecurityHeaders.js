@@ -22,13 +22,17 @@ import fp from 'fastify-plugin';
  * @param {import('fastify').FastifyPluginOptions} _opts plugin options
  * @param {import('fastify').FastifyPluginCallback} done plugin callback
  */
-const addSecurityHeaders = (fastify, _opts, done) => {
-  fastify.addHook('onRequest', async (_request, reply) => {
-    reply.header('X-Frame-Options', 'DENY');
-    reply.header('X-Content-Type-Options', 'nosniff');
-    reply.header('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
-    reply.header('X-XSS-Protection', '1; mode=block');
-    reply.header('Referrer-Policy', process.env.ONE_REFERRER_POLICY_OVERRIDE || 'same-origin');
+const addSecurityHeaders = (fastify, opts = {}, done) => {
+  const ignoreRoutes = opts.ignoreRoutes || [];
+
+  fastify.addHook('onRequest', async (request, reply) => {
+    if (ignoreRoutes.some((ignoreRoute) => ignoreRoute === request.url)) {
+      reply.header('X-Frame-Options', 'DENY');
+      reply.header('X-Content-Type-Options', 'nosniff');
+      reply.header('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+      reply.header('X-XSS-Protection', '1; mode=block');
+      reply.header('Referrer-Policy', process.env.ONE_REFERRER_POLICY_OVERRIDE || 'same-origin');
+    }
   });
 
   done();

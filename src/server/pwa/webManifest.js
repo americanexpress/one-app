@@ -29,7 +29,7 @@ const webManifestHandler = (_request, reply) => {
       .type('application/manifest+json')
       .send(webManifest);
   } else {
-    reply.callNotFound();
+    reply.status(404).send('Not found');
   }
 };
 
