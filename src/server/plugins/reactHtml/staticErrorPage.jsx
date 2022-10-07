@@ -31,13 +31,17 @@ export async function setErrorPage(fallbackUrl) {
   return errorPage;
 }
 
-export default async function staticErrorPage(reply) {
-  if (!reply.statusCode) {
-    reply.code(500);
-  }
+/**
+ * 
+ * @param {import('fastify').FastifyRequest} request Fastify Request object
+ * @param {import('fastify').FastifyReply} reply Fastify Reply object
+ */
+export default async function staticErrorPage(request, reply) {
+  const contentType = request.headers['content-type'];
+  const statusCode = reply.statusCode || 500;
 
   if (errorPage) {
-    reply.send(errorPage);
+    reply.code(statusCode).send(errorPage);
   } else {
     let message = 'Sorry, we are unable to load this page at this time. Please try again later.';
     if (reply.statusCode >= 400 && reply.statusCode < 500 && reply.statusCode !== 404) {
@@ -45,27 +49,33 @@ export default async function staticErrorPage(reply) {
       message = 'Sorry, we are unable to load this page at this time.';
     }
 
-    reply.type('text/html').send(`<!DOCTYPE html>
-    <html>
-      <head>
-        <title>One App</title>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="application-name" content="one-app">
-      </head>
-      <body style="background-color: #F0F0F0">
-        <div id="root">
-          <div>
-            <div style="width: 70%; background-color: white; margin: 4% auto;">
-              <h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>
-              <p style="display: flex; justify-content: center; padding: 10px 15px 40px;">
-                ${message}
-              </p>
+    if (contentType && contentType.includes('application/json')) {
+      reply.type(contentType).code(statusCode).send({
+        message,
+      });
+    } else {
+      reply.type('text/html').code(statusCode).send(`<!DOCTYPE html>
+      <html>
+        <head>
+          <title>One App</title>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <meta name="application-name" content="one-app">
+        </head>
+        <body style="background-color: #F0F0F0">
+          <div id="root">
+            <div>
+              <div style="width: 70%; background-color: white; margin: 4% auto;">
+                <h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>
+                <p style="display: flex; justify-content: center; padding: 10px 15px 40px;">
+                  ${message}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </body>
-    </html>`);
+        </body>
+      </html>`);
+    }
   }
 }

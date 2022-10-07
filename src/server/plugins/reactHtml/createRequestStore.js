@@ -72,7 +72,7 @@ const createRequestStore = (
   } catch (err) {
     console.error('error creating store for request', err);
     // TODO: migrate `renderStaticErrorPage`
-    return renderStaticErrorPage(reply);
+    return renderStaticErrorPage(request, reply);
   }
 };
 

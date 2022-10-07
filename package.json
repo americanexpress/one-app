@@ -95,6 +95,7 @@
     "@fastify/formbody": "^7.3.0",
     "@fastify/helmet": "^9.1.0",
     "@fastify/rate-limit": "^7.3.0",
+    "@fastify/sensible": "^5.1.1",
     "@fastify/static": "^6.5.0",
     "abort-controller": "^3.0.0",
     "body-parser": "^1.20.0",

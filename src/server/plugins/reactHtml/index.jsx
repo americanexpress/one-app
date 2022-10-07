@@ -351,7 +351,7 @@ const sendHtml = (request, reply) => {
   } catch (err) {
     console.log('error :(');
     console.error('sendHtml had an error, sending static error page', err);
-    return renderStaticErrorPage(reply);
+    return renderStaticErrorPage(request, reply);
   }
 };
 
@@ -396,9 +396,9 @@ export const offlineHtml = async (request, reply) => {
  * @param {import('fastify').FastifyPluginCallback} done plugin callback
  */
 const renderHtml = (fastify, _opts, done) => {
-  fastify.addHook('onRequest', async (request, reply) => {
+  fastify.addHook('preHandler', async (request, reply) => {
     if (['json', 'js', 'css', 'map'].some((ext) => request.url.endsWith(ext))) {
-      reply.status(404).type('text/plain; charset=utf-8').send('Not found');
+      reply.code(404).type('text/plain; charset=utf-8').send('Not found');
     }
   });
 

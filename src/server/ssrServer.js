@@ -28,6 +28,7 @@ import fastifyCookie from '@fastify/cookie';
 import fastifyFormbody from '@fastify/formbody';
 import fastifyStatic from '@fastify/static';
 import fastifyHelmet from '@fastify/helmet';
+import fastifySensible from '@fastify/sensible';
 
 import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
@@ -90,12 +91,13 @@ export async function createApp(opts = {}) {
 
       console.error(`Fastify internal error: method ${method}, url "${url}", correlationId "${correlationId}"`, error);
 
-      return renderStaticErrorPage(reply);
+      return renderStaticErrorPage(request, reply);
     },
     bodyLimit: getBodyLimit(), // Note: this applies to all routes
     ...opts,
   });
 
+  fastify.register(fastifySensible);
   fastify.register(ensureCorrelationId);
   fastify.register(logging);
   fastify.register(compress, {
@@ -162,10 +164,10 @@ export async function createApp(opts = {}) {
 
     instance.post('/_/report/errors', (request, reply) => {
       if (!nodeEnvIsDevelopment) {
-        const contentType = request.headers['content-type']
+        const contentType = request.headers['content-type'];
 
         if (!/^application\/json/i.test(contentType)) {
-          return reply.status(415).send();
+          return reply.status(415).send('Unsupported Media Type');
         }
 
         const {
@@ -269,7 +271,7 @@ export async function createApp(opts = {}) {
   });
 
   fastify.setNotFoundHandler(async (_request, reply) => {
-    reply.status(404).send('Not found');
+    reply.code(404).send('Not found');
   });
 
   fastify.setErrorHandler(async (error, request, reply) => {
@@ -279,7 +281,7 @@ export async function createApp(opts = {}) {
 
     console.error(`Fastify application error: method ${method}, url "${url}", correlationId "${correlationId}", headersSent: ${headersSent}`, error);
 
-    return renderStaticErrorPage(reply);
+    return renderStaticErrorPage(request, reply);
   });
 
   await fastify.ready();

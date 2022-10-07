@@ -33,7 +33,7 @@ export function VitruviusFranklin({ moduleState }) {
 if (!global.BROWSER) {
   VitruviusFranklin.appConfig = {
     requiredSafeRequestRestrictedAttributes: {
-      cookies: ['macadamia'],
+      cookies: ['macadamia', 'homebaked'],
     },
   };
 }
