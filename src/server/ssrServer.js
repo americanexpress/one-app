@@ -99,6 +99,7 @@ export async function createApp(opts = {}) {
 
   fastify.register(fastifySensible);
   fastify.register(ensureCorrelationId);
+  fastify.register(fastifyCookie);
   fastify.register(logging);
   fastify.register(compress, {
     zlibOptions: {
@@ -129,7 +130,7 @@ export async function createApp(opts = {}) {
   });
 
   fastify.register((instance, _opts, done) => {
-    fastify.register(fastifyCookie);
+    // fastify.register(fastifyCookie);
     fastify.register(addCacheHeaders);
     fastify.register(csp);
 
@@ -213,27 +214,27 @@ export async function createApp(opts = {}) {
     done();
   });
 
-  fastify.register((instance, _opts, done) => {
-    if (enablePostToModuleRoutes) {
-      // TODO: Replicate the following
-      // router.options(
-      //   '*',
-      //   addSecurityHeaders,
-      //   json({ limit: '0kb' }), // there should be no body
-      //   urlencoded({ limit: '0kb' }), // there should be no body
-      //   cors({ origin: false }) // disable CORS
-      // );
-      instance.options('/*', (_request, reply) => {
-        // reply.sendHtml();
-        reply.send();
-      });
-    }
+  // fastify.register((instance, _opts, done) => {
+  //   if (enablePostToModuleRoutes) {
+  //     // TODO: Replicate the following
+  //     // router.options(
+  //     //   '*',
+  //     //   addSecurityHeaders,
+  //     //   json({ limit: '0kb' }), // there should be no body
+  //     //   urlencoded({ limit: '0kb' }), // there should be no body
+  //     //   cors({ origin: false }) // disable CORS
+  //     // );
+  //     instance.options('/*', (_request, reply) => {
+  //       // reply.sendHtml();
+  //       reply.send();
+  //     });
+  //   }
 
-    done();
-  });
+  //   done();
+  // });
 
   fastify.register((instance, _opts, done) => {
-    fastify.register(fastifyCookie);
+    // fastify.register(fastifyCookie);
     fastify.register(addCacheHeaders);
     fastify.register(csp);
 

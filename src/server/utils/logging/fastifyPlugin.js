@@ -42,6 +42,7 @@ const UTILS = {
 
 const getLocale = (req) => {
   // TODO: Verify if `store` is available
+  console.log('--req.store', req.store)
   if (req.store) {
     const state = req.store.getState();
     return state.getIn(['intl', 'activeLocale']);
@@ -129,15 +130,14 @@ const logClientRequest = (request, reply) => {
     },
   };
 
-  // TODO: 'req' (from ExpressJS) is almost identical to 'request.raw' from Fastify
-  //       both are a native node http request, the only difference is that Express
-  //       extends it and adds some extra functions such as 'acceptsLanguages' fn.
-  //       We need to investigate if this impacts modules
+  console.log('--logging cookies', request.cookies, request.raw.cookies)
+
   const configuredLog = UTILS.configureRequestLog({
     req: request.raw,
     res: reply.raw,
     log,
   });
+
   logger.info(configuredLog);
 };
 
@@ -152,6 +152,38 @@ const fastifyPlugin = (fastify, _opts, done) => {
   fastify.decorateRequest($RequestFullDuration, null);
   fastify.decorateRequest($RouteHandler, null);
   fastify.decorateRequest($ResponseBuilder, null);
+
+  // NOTE: this is needed for backward compatibility since
+  //       we were exposing the 'req' and 'res' from ExpressJS
+  //       to the App Config.
+  fastify.addHook('onRequest', async (request, reply) => {
+    request.raw.originalUrl = request.raw.url;
+    request.raw.id = request.id;
+    request.raw.hostname = request.hostname;
+    request.raw.ip = request.ip;
+    request.raw.ips = request.ips;
+    request.raw.log = request.log;
+    // eslint-disable-next-line no-param-reassign
+    reply.raw.log = request.log;
+
+    // backward compatibility for body-parser
+    if (request.body) {
+      request.raw.body = request.body;
+    }
+    // backward compatibility for cookie-parser
+    if (request.cookies) {
+      request.raw.cookies = request.cookies;
+    }
+
+    console.log('--modified request.raw')
+
+    // Make it lazy as it does a bit of work
+    Object.defineProperty(request.raw, 'protocol', {
+      get() {
+        return request.protocol;
+      },
+    });
+  });
 
   fastify.addHook('onRequest', async (request) => {
     startTimer(request, $RequestOverhead);

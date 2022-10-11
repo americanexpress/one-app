@@ -36,7 +36,6 @@ const getModuleData = async ({ dispatch, modules }) => {
 const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 
 const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
-  console.log('--createRequestHtmlFragment');
   try {
     const { store } = request;
     const { dispatch } = store;
@@ -65,7 +64,7 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
     }
 
     const { httpStatus } = renderProps.routes.slice(-1)[0];
-    
+
     if (httpStatus) {
       reply.code(httpStatus);
     }
@@ -120,6 +119,6 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
   } catch (err) {
     console.error(util.format('error creating request HTML fragment for %s', request.url), err);
   }
-}
+};
 
 export default createRequestHtmlFragment;

@@ -23,7 +23,7 @@ import { Provider } from 'react-redux';
 
 import createRequestStoreHook from './createRequestStore';
 import createRequestHtmlFragmentHook from './createRequestHtmlFragment';
-// import conditionallyAllowCors from '../conditionallyAllowCors'
+import conditionallyAllowCors from '../conditionallyAllowCors';
 import oneApp from '../../../universal';
 import transit from '../../../universal/utils/transit';
 import { setConfig } from '../../../universal/ducks/config';
@@ -403,16 +403,20 @@ const renderHtml = (fastify, _opts, done) => {
   });
 
   fastify.addHook('preHandler', async (request, reply) => {
+    console.log('--mine preHandler')
     createRequestStoreHook(request, reply, oneApp);
 
     if (getServerPWAConfig().serviceWorker && request.url === '/_/pwa/shell') {
       await appShell(request);
     } else {
       await createRequestHtmlFragmentHook(request, reply, oneApp);
-      // conditionallyAllowCors(fastify);
       checkStateForRedirectAndStatusCode(request, reply);
     }
   });
+
+  console.log('--before conditionallyAllowCors')
+  conditionallyAllowCors(fastify);
+  console.log('--after conditionallyAllowCors')
 
   fastify.decorateReply('sendHtml', function sendHtmlDecorator() {
     const reply = this;
