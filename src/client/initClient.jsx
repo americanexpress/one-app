@@ -37,7 +37,8 @@ export default async function initClient() {
 
     await loadPrerenderScripts(store.getState());
 
-    const { redirectLocation, renderProps } = await matchPromise({ history, routes });
+    const asd = await matchPromise({ history, routes });
+    const { redirectLocation, renderProps } = asd;
 
     if (redirectLocation) {
       // FIXME: redirectLocation has pathname, query object, etc; need to format the URL better

@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`cspViolation development should log the request body 1`] = `
-[
-  "CSP Violation: http://analytics.example.com:5:54 on page http://localhost:3000/start violated the script-src policy via eval",
-]
-`;

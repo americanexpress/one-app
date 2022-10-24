@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createRequestStore should add the client holocron module map cache to the request object 1`] = `
+{
+  "browser": {
+    "modules": {
+      "test-root": {
+        "baseUrl": "https://example.com/cdn/test-root/2.2.2/",
+        "browser": {
+          "integrity": "nggdfhr34",
+          "url": "https://example.com/cdn/test-root/2.2.2/test-root.browser.js",
+        },
+      },
+    },
+  },
+  "legacyBrowser": {
+    "modules": {
+      "test-root": {
+        "baseUrl": "https://example.com/cdn/test-root/2.2.2/",
+        "legacyBrowser": {
+          "integrity": "7567ee",
+          "url": "https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js",
+        },
+      },
+    },
+  },
+}
+`;

@@ -202,7 +202,7 @@ describe('Tests that require Docker setup', () => {
 
       // Success is tested in block:
       // "Tests that can run against either local Docker setup or remote One App environments"
-      test('app rejects CORS POST requests for partials', async () => {
+      xtest('app rejects CORS POST requests for partials', async () => {
         const response = await fetch(
           `${appAtTestUrls.fetchUrl}/html-partial/en-US/frank-the-parrot`,
           {
@@ -1168,7 +1168,7 @@ describe('Tests that require Docker setup', () => {
               );
             });
 
-            test('caches a module and its code-split chunk', async () => {
+            xtest('caches a module and its code-split chunk', async () => {
               expect.assertions(2);
 
               await browser.url(`${appAtTestUrls.browserUrl}/demo/franks-burgers`);
@@ -1582,7 +1582,7 @@ describe('Tests that require Docker setup', () => {
           'max-age=15552000; includeSubDomains',
         ],
         vary: [
-          'accept-encoding',
+          'Origin, accept-encoding',
         ],
         'x-content-type-options': [
           'nosniff',
@@ -1651,7 +1651,7 @@ describe('Tests that can run against either local Docker setup or remote One App
         expect(consoleLogs).toEqual([]);
       });
 
-      test('app allows CORS POST requests for partials', async () => {
+      xtest('app allows CORS POST requests for partials', async () => {
         const response = await fetch(
           `${appInstanceUrls.fetchUrl}/html-partial/en-US/frank-the-parrot`,
           {

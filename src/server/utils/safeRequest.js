@@ -14,6 +14,8 @@
  * permissions and limitations under the License.
  */
 
+import accepts from 'accepts';
+
 function pick(request, safeKeys) {
   return safeKeys.reduce((obj, safeKey) => {
     if (request && request[safeKey] !== undefined) {
@@ -25,10 +27,7 @@ function pick(request, safeKeys) {
 }
 
 const requestAllowList = [
-  // 'acceptsLanguages', // not in use (?) need to find a fastify equivalent
-  // 'baseUrl', // not in use (?) need to find a fastify equivalent
   // 'forwarded', // not in use (?) need to find a fastify equivalent
-  // 'originalUrl', // not in use (?) need to find a fastify equivalent
   'method',
   'params',
   'protocol',
@@ -140,17 +139,13 @@ export default function safeRequest(request, { useBodyForBuildingTheInitialState
   /* Backwards Compatibility */
 
   // 'acceptsLanguages' is only available in ExpressJS
-  filteredRequest.acceptsLanguages = (value) => (request.headers['Accept-Language'] || '')
-    .split(',')
-    .includes(value)
+  filteredRequest.acceptsLanguages = () => accepts(request).languages();
 
   // Fastify does not mutate url
   filteredRequest.originalUrl = request.raw.url;
 
   // Not available in Fastify
-  filteredRequest.baseUrl = "";
-
-  console.info('--filteredRequest', filteredRequest);
+  filteredRequest.baseUrl = '';
 
   return filteredRequest;
 }

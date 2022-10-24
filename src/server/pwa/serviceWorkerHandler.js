@@ -23,9 +23,9 @@ function processServiceWorkerScript(script) {
 }
 
 /**
- * 
- * @param {import("fastify").FastifyReply} request 
- * @param {import("fastify").FastifyReply} reply 
+ * Route Service Worker handler to be used in a custom route
+ * @param {import("fastify").FastifyReply} request Fastify Request object
+ * @param {import("fastify").FastifyReply} reply Fastify Reply object
  */
 const serviceWorkerHandler = (_request, reply) => {
   const { serviceWorker, serviceWorkerScope, serviceWorkerScript } = getServerPWAConfig();

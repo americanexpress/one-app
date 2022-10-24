@@ -14,4 +14,27 @@
  * permissions and limitations under the License.
  */
 
-export default jest.fn(jest.requireActual('../forwardedHeaderParser').default);
+import Fastify from 'fastify';
+import setAppVersionHeader from '../../../src/server/plugins/setAppVersionHeader';
+
+jest.mock('../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: 'x.0' }));
+
+const buildApp = () => {
+  const app = Fastify();
+
+  app.register(setAppVersionHeader);
+
+  app.get('/any-path', () => '');
+
+  return app;
+}
+
+describe('setAppVersionHeader', () => {
+  it('should set the app version header', () => {
+    const response = buildApp().inject({
+      method: 'GET',
+      url: '/any-path',
+    });
+    expect(response.headers).toMatchSnapshot();
+  });
+});

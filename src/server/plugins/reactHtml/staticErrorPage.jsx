@@ -2,6 +2,11 @@ import { createTimeoutFetch } from '@americanexpress/fetch-enhancers';
 
 let errorPage;
 
+/**
+ * Sets the global error page
+ * @param {string} fallbackUrl error page url
+ * @returns error page
+ */
 export async function setErrorPage(fallbackUrl) {
   try {
     const timeoutFetch = createTimeoutFetch(6e3)(fetch);
@@ -28,11 +33,12 @@ export async function setErrorPage(fallbackUrl) {
     // Warn if the URL cannot be fetched
     console.warn('Could not fetch the URL', e);
   }
+
   return errorPage;
 }
 
 /**
- * 
+ * Static Error Page handler
  * @param {import('fastify').FastifyRequest} request Fastify Request object
  * @param {import('fastify').FastifyReply} reply Fastify Reply object
  */
@@ -44,6 +50,7 @@ export default async function staticErrorPage(request, reply) {
     reply.code(statusCode).send(errorPage);
   } else {
     let message = 'Sorry, we are unable to load this page at this time. Please try again later.';
+
     if (reply.statusCode >= 400 && reply.statusCode < 500 && reply.statusCode !== 404) {
       // issue is with the request, retrying won't change the server response
       message = 'Sorry, we are unable to load this page at this time.';

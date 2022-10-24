@@ -42,7 +42,6 @@ const UTILS = {
 
 const getLocale = (req) => {
   // TODO: Verify if `store` is available
-  console.log('--req.store', req.store)
   if (req.store) {
     const state = req.store.getState();
     return state.getIn(['intl', 'activeLocale']);
@@ -130,8 +129,6 @@ const logClientRequest = (request, reply) => {
     },
   };
 
-  console.log('--logging cookies', request.cookies, request.raw.cookies)
-
   const configuredLog = UTILS.configureRequestLog({
     req: request.raw,
     res: reply.raw,
@@ -175,8 +172,6 @@ const fastifyPlugin = (fastify, _opts, done) => {
       request.raw.cookies = request.cookies;
     }
 
-    console.log('--modified request.raw')
-
     // Make it lazy as it does a bit of work
     Object.defineProperty(request.raw, 'protocol', {
       get() {
@@ -217,4 +212,7 @@ const fastifyPlugin = (fastify, _opts, done) => {
   done();
 };
 
-export default fp(fastifyPlugin);
+export default fp(fastifyPlugin, {
+  fastify: '4.x',
+  name: 'logging',
+});

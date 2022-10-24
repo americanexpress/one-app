@@ -19,10 +19,8 @@
 /* eslint-disable global-require */
 
 import path from 'path';
-import ms from 'ms';
-import express from 'express';
+import bytes from 'bytes';
 import compress from '@fastify/compress';
-import { json } from 'body-parser';
 import Fastify from 'fastify';
 import fastifyCookie from '@fastify/cookie';
 import fastifyFormbody from '@fastify/formbody';
@@ -44,44 +42,11 @@ import { getServerPWAConfig, serviceWorkerHandler, webManifestMiddleware } from 
 
 const nodeEnvIsDevelopment = process.env.NODE_ENV === 'development';
 
-export const makeExpressRouter = (router = express.Router()) => {
-  // router.use('/_/static', express.static(path.join(__dirname, '../../build'), { maxage: '182d' }));
-  // router.get('/_/status', (_req, res) => res.sendStatus(200));
-  // router.get('/_/pwa/service-worker.js', serviceWorkerMiddleware());
-  // router.get('*', addCacheHeaders);
-  // router.get('/_/pwa/manifest.webmanifest', webManifestMiddleware());
-
-  // router.use(helmet({
-  //   crossOriginEmbedderPolicy: false,
-  //   crossOriginOpenerPolicy: false,
-  //   crossOriginResourcePolicy: false,
-  //   originAgentCluster: false,
-  // }));
-  // router.use(csp());
-  router.use(json({
-    type: ['json', 'application/csp-report'],
-  }));
-  // router.post('/_/report/security/csp-violation', cspViolation);
-  // router.post('/_/report/errors', clientErrorLogger);
-  router.get('**/*.(json|js|css|map)', (_req, res) => res.sendStatus(404));
-
-  return router;
-};
-
-const getBodyLimit = () => {
-  const customLimit = process.env.ONE_MAX_POST_REQUEST_PAYLOAD;
-
-  if (customLimit) {
-    if (typeof customLimit === 'string') {
-      return ms(customLimit);
-    }
-
-    return customLimit;
-  }
-
-  return ms('10mb');
-};
-
+/**
+ * Creates a Fastify app with built-in routes and configuration
+ * @param {import('fastify').FastifyHttp2Options} opts Fastify app options
+ * @returns {import('fastify').FastifyInstance}
+ */
 export async function createApp(opts = {}) {
   const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
   const fastify = Fastify({
@@ -93,7 +58,7 @@ export async function createApp(opts = {}) {
 
       return renderStaticErrorPage(request, reply);
     },
-    bodyLimit: getBodyLimit(), // Note: this applies to all routes
+    bodyLimit: bytes(process.env.ONE_MAX_POST_REQUEST_PAYLOAD || '10mb'), // Note: this applies to all routes
     ...opts,
   });
 
@@ -117,8 +82,9 @@ export async function createApp(opts = {}) {
   fastify.register(setAppVersionHeader);
   fastify.register(forwardedHeaderParser);
 
+  // Static routes
   fastify.register((instance, _opts, done) => {
-    fastify.register(fastifyStatic, {
+    instance.register(fastifyStatic, {
       root: path.join(__dirname, '../../build'),
       prefix: '/_/static',
       maxAge: '182d',
@@ -129,10 +95,10 @@ export async function createApp(opts = {}) {
     done();
   });
 
+  // PWA
   fastify.register((instance, _opts, done) => {
-    // fastify.register(fastifyCookie);
-    fastify.register(addCacheHeaders);
-    fastify.register(csp);
+    instance.register(addCacheHeaders);
+    instance.register(csp);
 
     instance.get('/_/pwa/manifest.webmanifest', webManifestMiddleware);
 
@@ -214,30 +180,10 @@ export async function createApp(opts = {}) {
     done();
   });
 
-  // fastify.register((instance, _opts, done) => {
-  //   if (enablePostToModuleRoutes) {
-  //     // TODO: Replicate the following
-  //     // router.options(
-  //     //   '*',
-  //     //   addSecurityHeaders,
-  //     //   json({ limit: '0kb' }), // there should be no body
-  //     //   urlencoded({ limit: '0kb' }), // there should be no body
-  //     //   cors({ origin: false }) // disable CORS
-  //     // );
-  //     instance.options('/*', (_request, reply) => {
-  //       // reply.sendHtml();
-  //       reply.send();
-  //     });
-  //   }
-
-  //   done();
-  // });
-
+  // Render
   fastify.register((instance, _opts, done) => {
-    // fastify.register(fastifyCookie);
-    fastify.register(addCacheHeaders);
-    fastify.register(csp);
-
+    instance.register(addCacheHeaders);
+    instance.register(csp);
     instance.register(
       fastifyHelmet,
       {

@@ -246,26 +246,25 @@ export function renderPartial({
   return html;
 }
 
-const checkStateForRedirectAndStatusCode = (request, reply) => {
-  console.log('--checkStateForRedirectAndStatusCode');
+export const checkStateForRedirectAndStatusCode = (request, reply) => {
   const destination = request.store.getState().getIn(['redirection', 'destination']);
 
   if (destination) {
-    return reply.redirect(302, destination);
-  }
+    reply.redirect(302, destination);
+  } else {
+    const error = request.store.getState().get('error');
 
-  const error = request.store.getState().get('error');
+    if (error) {
+      const code = error.get('code');
 
-  if (error) {
-    const code = error.get('code');
-
-    if (code) {
-      reply.code(code);
+      if (code) {
+        reply.code(code);
+      }
     }
   }
 };
 
-const sendHtml = (request, reply) => {
+export const sendHtml = (request, reply) => {
   try {
     // TODO: Check values
     const {
@@ -349,23 +348,12 @@ const sendHtml = (request, reply) => {
 
     return reply.header('content-type', 'text/html; charset=utf-8').send(html);
   } catch (err) {
-    console.log('error :(');
     console.error('sendHtml had an error, sending static error page', err);
     return renderStaticErrorPage(request, reply);
   }
 };
 
-export const reactHtml = async (request, reply) => {
-  createRequestStoreHook(request, reply, oneApp);
-  await createRequestHtmlFragmentHook(request, reply, oneApp);
-  // conditionallyAllowCors(fastify);
-  checkStateForRedirectAndStatusCode(request, reply);
-
-  sendHtml(request, reply);
-};
-
 const appShell = async (request) => {
-  console.log('--appShell');
   const { store: { getState, dispatch } } = request;
   const initialState = getState();
   const rootModuleName = initialState.getIn(['config', 'rootModuleName']);
@@ -383,42 +371,34 @@ const appShell = async (request) => {
   request.renderMode = 'render';
 };
 
-export const offlineHtml = async (request, reply) => {
-  createRequestStoreHook(request, reply, oneApp);
-  await appShell(request);
-  sendHtml(request, reply);
-};
-
 /**
  * Fastify Plugin to render HTML
  * @param {import('fastify').FastifyInstance} fastify Fastify instance
  * @param {import('fastify').FastifyPluginOptions} _opts plugin options
  * @param {import('fastify').FastifyPluginCallback} done plugin callback
  */
-const renderHtml = (fastify, _opts, done) => {
+const reactHtml = (fastify, _opts, done) => {
   fastify.addHook('preHandler', async (request, reply) => {
     if (['json', 'js', 'css', 'map'].some((ext) => request.url.endsWith(ext))) {
       reply.code(404).type('text/plain; charset=utf-8').send('Not found');
-    }
-  });
-
-  fastify.addHook('preHandler', async (request, reply) => {
-    console.log('--mine preHandler')
-    createRequestStoreHook(request, reply, oneApp);
-
-    if (getServerPWAConfig().serviceWorker && request.url === '/_/pwa/shell') {
-      await appShell(request);
     } else {
-      await createRequestHtmlFragmentHook(request, reply, oneApp);
-      checkStateForRedirectAndStatusCode(request, reply);
+      createRequestStoreHook(request, reply, oneApp);
+
+      console.info('--testing', getServerPWAConfig().serviceWorker);
+
+      if (getServerPWAConfig().serviceWorker && request.url === '/_/pwa/shell') {
+        await appShell(request);
+      } else {
+        await createRequestHtmlFragmentHook(request, reply, oneApp);
+        checkStateForRedirectAndStatusCode(request, reply);
+      }
     }
   });
 
-  console.log('--before conditionallyAllowCors')
   conditionallyAllowCors(fastify);
-  console.log('--after conditionallyAllowCors')
 
   fastify.decorateReply('sendHtml', function sendHtmlDecorator() {
+    console.info('--testing', getServerPWAConfig().serviceWorker);
     const reply = this;
     const { request } = reply;
 
@@ -428,7 +408,7 @@ const renderHtml = (fastify, _opts, done) => {
   done();
 };
 
-export default fp(renderHtml, {
+export default fp(reactHtml, {
   fastify: '4.x',
-  name: 'renderHtml',
+  name: 'reactHtml',
 });

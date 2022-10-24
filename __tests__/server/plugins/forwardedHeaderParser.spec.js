@@ -14,32 +14,37 @@
  * permissions and limitations under the License.
  */
 
-import forwardedHeaderParser from '../../../src/server/middleware/forwardedHeaderParser';
+import forwardedHeaderParser from '../../../src/server/plugins/forwardedHeaderParser';
 
 describe('forwardedHeaderParser', () => {
   function generateSamples() {
-    const req = {
+    const request = {
       headers: {},
     };
-    const res = null;
-    const next = jest.fn();
-    return { req, res, next };
+
+    const fastify = {
+      addHook: jest.fn((_hookName, cb) => {
+        cb(request);
+      }),
+    };
+
+    return { fastify, request };
   }
 
-  it('no req.forwarded when no forwarded header is present', () => {
-    const { req, res, next } = generateSamples();
-    delete req.headers.forwarded;
-    forwardedHeaderParser(req, res, next);
-    expect(req.forwarded).not.toBeDefined();
+  it('no request.forwarded when no forwarded header is present', () => {
+    const { fastify, request } = generateSamples();
+    delete request.headers.forwarded;
+    forwardedHeaderParser(fastify, null, jest.fn());
+    expect(request.forwarded).not.toBeDefined();
   });
 
   it('forwarded header string is converted into an object - forwarded.host does not exist', () => {
-    const { req, res, next } = generateSamples();
-    delete req.headers.forwarded;
-    req.headers.forwarded = 'by=testby;for=testfor;proto=testproto';
-    forwardedHeaderParser(req, res, next);
-    expect(req.forwarded).toBeDefined();
-    expect(req.forwarded).toEqual({
+    const { fastify, request } = generateSamples();
+    delete request.headers.forwarded;
+    request.headers.forwarded = 'by=testby;for=testfor;proto=testproto';
+    forwardedHeaderParser(fastify, null, jest.fn());
+    expect(request.forwarded).toBeDefined();
+    expect(request.forwarded).toEqual({
       by: 'testby',
       for: 'testfor',
       proto: 'testproto',
@@ -47,12 +52,12 @@ describe('forwardedHeaderParser', () => {
   });
 
   it('forwarded header string is converted into an object - forwarded.host exists', () => {
-    const { req, res, next } = generateSamples();
-    delete req.headers.forwarded;
-    req.headers.forwarded = 'by=testby;for=testfor;host=testhost;proto=testproto';
-    forwardedHeaderParser(req, res, next);
-    expect(req.forwarded).toBeDefined();
-    expect(req.forwarded).toEqual({
+    const { fastify, request } = generateSamples();
+    delete request.headers.forwarded;
+    request.headers.forwarded = 'by=testby;for=testfor;host=testhost;proto=testproto';
+    forwardedHeaderParser(fastify, null, jest.fn());
+    expect(request.forwarded).toBeDefined();
+    expect(request.forwarded).toEqual({
       by: 'testby',
       for: 'testfor',
       host: 'testhost',

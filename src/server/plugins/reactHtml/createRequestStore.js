@@ -24,12 +24,18 @@ import { getServerStateConfig, getClientStateConfig } from '../../utils/stateCon
 import createSsrFetch from '../../utils/createSsrFetch';
 import { getClientModuleMapCache } from '../../utils/clientModuleMapCache';
 
+/**
+ * Creates a Redux Store and injects it into the request object
+ * @param {import('fastify').FastifyRequest} request Fastify request obj
+ * @param {import('fastify').FastifyReply} reply Fastify reply object
+ * @param {*} options Store options
+ */
 const createRequestStore = (
   request, reply,
   { reducers }
 ) => {
-  // fastify.decorateRequest('store', null);
-  // fastify.decorateRequest('clientModuleMapCache', null);
+  // request.decorateRequest('store', null);
+  // request.decorateRequest('clientModuleMapCache', null);
 
   try {
     const serverConfig = getServerStateConfig();
@@ -44,10 +50,6 @@ const createRequestStore = (
       req: request.raw,
       res: reply.raw,
     })(fetch);
-
-    console.log('--request.method', request.method);
-    console.log('--request.body', request.body);
-    console.log('--request.raw.body', request.raw.body);
 
     const enhancer = createEnhancer();
     const localsForBuildInitialState = {
@@ -72,7 +74,7 @@ const createRequestStore = (
   } catch (err) {
     console.error('error creating store for request', err);
     // TODO: migrate `renderStaticErrorPage`
-    return renderStaticErrorPage(request, reply);
+    renderStaticErrorPage(request, reply);
   }
 };
 

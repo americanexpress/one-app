@@ -18,7 +18,7 @@ import { getModule } from 'holocron';
 import { updateModuleRegistry } from 'holocron/server';
 import { CONFIGURATION_KEY } from '../../../src/server/utils/onModuleLoad';
 import loadModules from '../../../src/server/utils/loadModules';
-import { updateCSP } from '../../../src/server/middleware/csp';
+import { updateCSP } from '../../../src/server/plugins/csp';
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
 import addBaseUrlToModuleMap from '../../../src/server/utils/addBaseUrlToModuleMap';
 
@@ -38,7 +38,7 @@ jest.mock('../../../src/server/utils/stateConfig', () => ({
   })),
 }));
 
-jest.mock('../../../src/server/middleware/csp', () => ({
+jest.mock('../../../src/server/plugins/csp', () => ({
   updateCSP: jest.fn(),
 }));
 
