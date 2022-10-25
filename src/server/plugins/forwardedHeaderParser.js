@@ -38,7 +38,7 @@ const forwardedHeaderParser = (fastify, _opts, done) => {
   });
 
   done();
-}
+};
 
 export default fp(forwardedHeaderParser, {
   fastify: '4.x',

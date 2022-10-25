@@ -384,8 +384,6 @@ const reactHtml = (fastify, _opts, done) => {
     } else {
       createRequestStoreHook(request, reply, oneApp);
 
-      console.info('--testing', getServerPWAConfig().serviceWorker);
-
       if (getServerPWAConfig().serviceWorker && request.url === '/_/pwa/shell') {
         await appShell(request);
       } else {
@@ -398,7 +396,6 @@ const reactHtml = (fastify, _opts, done) => {
   conditionallyAllowCors(fastify);
 
   fastify.decorateReply('sendHtml', function sendHtmlDecorator() {
-    console.info('--testing', getServerPWAConfig().serviceWorker);
     const reply = this;
     const { request } = reply;
 

@@ -70,7 +70,7 @@ describe('staticErrorPage', () => {
 
     expect(console.error).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
-    expect(await response.json()).toEqual({"message": "Sorry, we are unable to load this page at this time. Please try again later."});
+    expect(await response.json()).toEqual({ message: 'Sorry, we are unable to load this page at this time. Please try again later.' });
   });
 
   it('does not change the status code if already set', async () => {

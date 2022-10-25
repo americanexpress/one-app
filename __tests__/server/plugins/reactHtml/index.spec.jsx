@@ -16,7 +16,7 @@
 
 import Fastify from 'fastify';
 import { fromJS } from 'immutable';
-import renderHtml, {
+import reactHtml, {
   sendHtml,
   renderModuleScripts,
   checkStateForRedirectAndStatusCode,
@@ -28,17 +28,26 @@ import { getClientStateConfig } from '../../../../src/server/utils/stateConfig';
 // eslint-disable-next-line import/named
 import transit from '../../../../src/universal/utils/transit';
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../../src/server/utils/clientModuleMapCache';
-import { getClientPWAConfig } from '../../../../src/server/pwa/config';
+import { getClientPWAConfig, getServerPWAConfig } from '../../../../src/server/pwa/config';
+import createRequestStoreHook from '../../../../src/server/plugins/reactHtml/createRequestStore';
+import createRequestHtmlFragmentHook from '../../../../src/server/plugins/reactHtml/createRequestHtmlFragment';
+import conditionallyAllowCors from '../../../../src/server/plugins/conditionallyAllowCors';
 
 jest.mock('react-helmet');
-jest.mock('holocron', () => ({
-  getModule: () => {
-    const module = () => 0;
-    module.ssrStyles = {};
-    module.ssrStyles.getFullSheet = () => '.class { background: red; }';
-    return module;
-  },
-}));
+jest.mock('holocron', () => {
+  const actualHolocron = jest.requireActual('holocron');
+
+  return {
+    ...actualHolocron,
+    getModule: () => {
+      const module = () => 0;
+      module.ssrStyles = {};
+      module.ssrStyles.getFullSheet = () => '.class { background: red; }';
+      return module;
+    },
+  };
+});
+
 jest.mock('@americanexpress/fetch-enhancers', () => ({
   createTimeoutFetch: jest.fn(
     (timeout) => (next) => (url) => next(url)
@@ -101,6 +110,9 @@ jest.mock('../../../../src/server/pwa/config', () => ({
     webManifestUrl: false,
     offlineUrl: false,
   })),
+  getServerPWAConfig: jest.fn(() => ({
+    serviceWorker: false,
+  })),
 }));
 jest.mock('../../../../src/universal/ducks/config');
 jest.mock('../../../../src/universal/utils/transit', () => ({
@@ -119,14 +131,16 @@ jest.mock('../../../../src/server/utils/createCircuitBreaker', () => {
   return mockCreateCircuitBreaker;
 });
 
-// jest.mock('../../../../src/server/plugins/reactHtml/createRequestStore');
-// jest.mock('../../../../src/server/plugins/reactHtml/createRequestHtmlFragment');
-// jest.mock('../../../../src/server/plugins/conditionallyAllowCors');
+jest.mock('../../../../src/server/plugins/reactHtml/createRequestStore');
+jest.mock('../../../../src/server/plugins/reactHtml/createRequestHtmlFragment');
+jest.mock('../../../../src/server/plugins/conditionallyAllowCors');
 
-// jest.spyOn(console, 'info').mockImplementation(() => { });
+jest.spyOn(console, 'info').mockImplementation(() => { });
 jest.spyOn(console, 'log').mockImplementation(() => { });
 jest.spyOn(console, 'error').mockImplementation(() => { });
 jest.spyOn(console, 'warn').mockImplementationOnce(() => { });
+
+global.fetch = () => Promise.resolve({ data: 'data' });
 
 describe('reactHtml', () => {
   const appHtml = '<p>Why, hello!</p>';
@@ -242,11 +256,13 @@ describe('reactHtml', () => {
 
     reply = jest.fn();
     reply.status = jest.fn(() => reply);
+    reply.code = jest.fn(() => reply);
     reply.send = jest.fn(() => reply);
     reply.redirect = jest.fn(() => reply);
     reply.type = jest.fn(() => reply);
     reply.code = jest.fn(() => reply);
     reply.header = jest.fn(() => reply);
+    reply.request = request;
 
     getClientStateConfig.mockImplementation(() => ({
       cdnUrl: '/cdnUrl/',
@@ -870,7 +886,7 @@ describe('reactHtml', () => {
     const destination = 'http://example.com/';
     let state = fromJS({ redirection: { destination: null } });
     const req = { store: { getState: () => state } };
-    const res = { redirect: jest.fn() };
+    const res = { redirect: jest.fn(), code: jest.fn() };
 
     beforeEach(() => jest.clearAllMocks());
 
@@ -885,13 +901,27 @@ describe('reactHtml', () => {
       checkStateForRedirectAndStatusCode(req, res);
       expect(res.redirect).not.toHaveBeenCalled();
     });
+
+    it('sets the status code', () => {
+      state = fromJS({ redirection: { destination: null }, error: { code: 500 } });
+      checkStateForRedirectAndStatusCode(req, res);
+      expect(res.redirect).not.toHaveBeenCalled();
+      expect(res.code).toHaveBeenCalledWith(500);
+    });
+
+    it('does nothing', () => {
+      state = fromJS({ redirection: { destination: null }, error: {} });
+      checkStateForRedirectAndStatusCode(req, res);
+      expect(res.redirect).not.toHaveBeenCalled();
+      expect(res.code).not.toHaveBeenCalled();
+    });
   });
 
-  describe('plugin (renderHtml)', () => {
+  describe('plugin', () => {
     describe('unwanted extension', () => {
       const app = Fastify();
 
-      app.register(renderHtml);
+      app.register(reactHtml);
 
       // eslint-disable-next-line no-shadow
       app.get('/*', (_request, reply) => {
@@ -939,50 +969,67 @@ describe('reactHtml', () => {
       });
     });
 
-    it('responds with html', async () => {
-      const app = Fastify();
-
-      app.register(renderHtml);
-
-      // eslint-disable-next-line no-shadow
-      app.get('/*', (_request, reply) => {
-        reply.sendHtml();
-      });
-
-      const response = await app.inject({
-        method: 'get',
-        url: '/testing',
-      });
-
-      expect(response.statusCode).toBe(200);
-      expect(response.body).toContain('<!DOCTYPE html>');
-    });
-
-    xit('responds with pwa shell', async () => {
-      getClientPWAConfig.mockImplementationOnce(() => ({
+    test('calls the expected hooks to render pwa html shell', async () => {
+      getServerPWAConfig.mockImplementationOnce(() => ({
         serviceWorker: true,
-        serviceWorkerScope: '/',
-        serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
-        webManifestUrl: '/_/pwa/manifest.webmanifest',
-        offlineUrl: '/_/pwa/shell',
       }));
 
-      const app = Fastify();
+      request.url = '/_/pwa/shell';
 
-      await app.register(renderHtml);
+      const fastify = {
+        addHook: jest.fn(),
+        decorateReply: jest.fn(),
+      };
+      const done = jest.fn();
 
-      // eslint-disable-next-line no-shadow
-      app.get('/*', (_request, reply) => {
-        reply.sendHtml();
-      });
+      reactHtml(fastify, null, done);
 
-      const response = await app.inject({
-        method: 'get',
-        url: '/_/pwa/shell',
-      });
+      await fastify.addHook.mock.calls[0][1](request, reply);
 
-      expect(response.statusCode).toBe(200);
-      expect(response.body).toContain('window.__pwa_metadata__');
+      expect(fastify.addHook).toHaveBeenCalled();
+      expect(createRequestStoreHook).toHaveBeenCalled();
+      expect(conditionallyAllowCors).toHaveBeenCalled();
+      expect(done).toHaveBeenCalled();
+    });
+
+    test('calls the expected hooks to render html', async () => {
+      getServerPWAConfig.mockImplementationOnce(() => ({
+        serviceWorker: false,
+      }));
+
+      const fastify = {
+        addHook: jest.fn(),
+        decorateReply: jest.fn(),
+      };
+      const done = jest.fn();
+
+      reactHtml(fastify, null, done);
+
+      await fastify.addHook.mock.calls[0][1](request, reply);
+
+      expect(fastify.addHook).toHaveBeenCalled();
+      expect(createRequestStoreHook).toHaveBeenCalled();
+      expect(createRequestHtmlFragmentHook).toHaveBeenCalled();
+      expect(conditionallyAllowCors).toHaveBeenCalled();
+      expect(done).toHaveBeenCalled();
+    });
+
+    test('sendHtml reply decorator renders html', async () => {
+      const fastify = {
+        addHook: jest.fn(),
+        decorateReply: jest.fn(),
+      };
+      const done = jest.fn();
+
+      reactHtml(fastify, null, done);
+
+      await fastify.decorateReply.mock.calls[0][1].bind(reply)(request, reply);
+
+      expect(console.error).not.toHaveBeenCalled();
+
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(reply.send.mock.calls[0][0]).toContain('<title>One App</title>');
     });
   });
 });

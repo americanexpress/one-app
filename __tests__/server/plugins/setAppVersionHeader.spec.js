@@ -27,14 +27,15 @@ const buildApp = () => {
   app.get('/any-path', () => '');
 
   return app;
-}
+};
 
 describe('setAppVersionHeader', () => {
-  it('should set the app version header', () => {
-    const response = buildApp().inject({
+  it('should set the app version header', async () => {
+    const response = await buildApp().inject({
       method: 'GET',
       url: '/any-path',
     });
-    expect(response.headers).toMatchSnapshot();
+
+    expect(response.headers['one-app-version']).toEqual('x.0');
   });
 });

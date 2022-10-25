@@ -52,7 +52,7 @@ export default {
   },
   extendSafeRequestRestrictedAttributes: {
     cookies: [
-      'macadamia'
+      'macadamia',
     ],
   },
   createSsrFetch: createFrankLikeFetch,

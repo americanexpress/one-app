@@ -88,22 +88,22 @@ describe('fastifyPlugin', () => {
       await fastify.onRequest(request, reply);
 
       expect(request).toEqual({
-        "hostname": "unit-testing",
-        "id": 123,
-        "ip": "127.0.0.1",
-        "ips": [],
-        "log": "nothing",
-        "raw": {
-          "hostname": "unit-testing",
-          "id": 123,
-          "ip": "127.0.0.1",
-          "ips": [],
-          "log": "nothing",
-          "originalUrl": "/testing",
-          "url": "/testing",
+        hostname: 'unit-testing',
+        id: 123,
+        ip: '127.0.0.1',
+        ips: [],
+        log: 'nothing',
+        raw: {
+          hostname: 'unit-testing',
+          id: 123,
+          ip: '127.0.0.1',
+          ips: [],
+          log: 'nothing',
+          originalUrl: '/testing',
+          url: '/testing',
         },
       });
-      expect(reply).toEqual({ "raw": { "log": "nothing" } });
+      expect(reply).toEqual({ raw: { log: 'nothing' } });
     });
 
     it('injects the body into raw', async () => {
@@ -131,9 +131,9 @@ describe('fastifyPlugin', () => {
         log: 'nothing',
         body: {
           testing: {
-            something: true
-          }
-        }
+            something: true,
+          },
+        },
       };
       const reply = {
         raw: {},
@@ -142,29 +142,29 @@ describe('fastifyPlugin', () => {
       await fastify.onRequest(request, reply);
 
       expect(request).toEqual({
-        "hostname": "unit-testing",
-        "id": 123,
-        "ip": "127.0.0.1",
-        "ips": [],
-        "log": "nothing",
+        hostname: 'unit-testing',
+        id: 123,
+        ip: '127.0.0.1',
+        ips: [],
+        log: 'nothing',
         body: {
           testing: {
-            something: true
-          }
+            something: true,
+          },
         },
-        "raw": {
-          "hostname": "unit-testing",
-          "id": 123,
-          "ip": "127.0.0.1",
-          "ips": [],
-          "log": "nothing",
-          "originalUrl": "/testing",
-          "url": "/testing",
+        raw: {
+          hostname: 'unit-testing',
+          id: 123,
+          ip: '127.0.0.1',
+          ips: [],
+          log: 'nothing',
+          originalUrl: '/testing',
+          url: '/testing',
           body: {
             testing: {
-              something: true
-            }
-          }
+              something: true,
+            },
+          },
         },
       });
     });
@@ -201,20 +201,20 @@ describe('fastifyPlugin', () => {
       await fastify.onRequest(request, reply);
 
       expect(request).toEqual({
-        "hostname": "unit-testing",
-        "id": 123,
-        "ip": "127.0.0.1",
-        "ips": [],
-        "log": "nothing",
+        hostname: 'unit-testing',
+        id: 123,
+        ip: '127.0.0.1',
+        ips: [],
+        log: 'nothing',
         cookies: 'with milk',
-        "raw": {
-          "hostname": "unit-testing",
-          "id": 123,
-          "ip": "127.0.0.1",
-          "ips": [],
-          "log": "nothing",
-          "originalUrl": "/testing",
-          "url": "/testing",
+        raw: {
+          hostname: 'unit-testing',
+          id: 123,
+          ip: '127.0.0.1',
+          ips: [],
+          log: 'nothing',
+          originalUrl: '/testing',
+          url: '/testing',
           cookies: 'with milk',
         },
       });
@@ -252,20 +252,20 @@ describe('fastifyPlugin', () => {
       await fastify.onRequest(request, reply);
 
       expect(request).toEqual({
-        "hostname": "unit-testing",
-        "id": 123,
-        "ip": "127.0.0.1",
-        "ips": [],
-        "log": "nothing",
+        hostname: 'unit-testing',
+        id: 123,
+        ip: '127.0.0.1',
+        ips: [],
+        log: 'nothing',
         protocol: 'http',
-        "raw": {
-          "hostname": "unit-testing",
-          "id": 123,
-          "ip": "127.0.0.1",
-          "ips": [],
-          "log": "nothing",
-          "originalUrl": "/testing",
-          "url": "/testing",
+        raw: {
+          hostname: 'unit-testing',
+          id: 123,
+          ip: '127.0.0.1',
+          ips: [],
+          log: 'nothing',
+          originalUrl: '/testing',
+          url: '/testing',
         },
       });
       expect(request.raw.protocol).toBeDefined();

@@ -56,7 +56,7 @@ it('allows CORS for HTML partials', async () => {
   expect(fastify.register).toHaveBeenCalledTimes(1);
   expect(fastify.register).toHaveBeenCalledWith(fastifyCors, expect.any(Function));
   expect(callback).toHaveBeenCalledTimes(1);
-  expect(callback).toHaveBeenCalledWith(null, { "origin": [/\.example.com$/] });
+  expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/] });
 });
 
 it('allows CORS for localhost in development', async () => {
@@ -73,7 +73,7 @@ it('allows CORS for localhost in development', async () => {
 
   await conditionallyAllowCors(fastify);
 
-  expect(callback).toHaveBeenCalledWith(null, { "origin": [/\.example.com$/, /localhost:\d{1,5}/] });
+  expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/, /localhost:\d{1,5}/] });
 });
 
 it('does not allow CORS for localhost in production', async () => {
@@ -89,7 +89,7 @@ it('does not allow CORS for localhost in production', async () => {
 
   await conditionallyAllowCors(fastify);
 
-  expect(callback).toHaveBeenCalledWith(null, {"origin": [/\.example.com$/, /localhost:\d{1,5}/]});
+  expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/, /localhost:\d{1,5}/] });
 });
 
 it('does not allow CORS non-partial requests', async () => {
@@ -104,5 +104,5 @@ it('does not allow CORS non-partial requests', async () => {
 
   await conditionallyAllowCors(fastify);
 
-  expect(callback).toHaveBeenCalledWith(null, {"origin": false});
+  expect(callback).toHaveBeenCalledWith(null, { origin: false });
 });

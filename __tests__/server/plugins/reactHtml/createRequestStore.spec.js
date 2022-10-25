@@ -16,7 +16,6 @@
 
 import combineReducers from '@americanexpress/vitruvius/immutable';
 import holocron from 'holocron';
-import httpMocks from 'node-mocks-http';
 import { fromJS } from 'immutable';
 import renderStaticErrorPage from '../../../../src/server/plugins/reactHtml/staticErrorPage';
 import createRequestStore from '../../../../src/server/plugins/reactHtml/createRequestStore';

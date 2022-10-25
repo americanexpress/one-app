@@ -75,7 +75,7 @@ describe('safeRequest', () => {
     });
 
     it('should include all safe request fields', () => {
-      expect(cleanedRequest.acceptsLanguages()).toEqual(["fr-CH", "fr", "en", "de", "*"]);
+      expect(cleanedRequest.acceptsLanguages()).toEqual(['fr-CH', 'fr', 'en', 'de', '*']);
       expect(cleanedRequest.baseUrl).toBe('');
       // expect(cleanedRequest.forwarded.host).toBe('foo');
       expect(cleanedRequest.method).toBe('GET');
@@ -86,7 +86,7 @@ describe('safeRequest', () => {
       expect(cleanedRequest.url).toBe('/bar.html');
     });
     it('should include all safe request headers', () => {
-      expect(cleanedRequest.headers['accept-language']).toBe("fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5");
+      expect(cleanedRequest.headers['accept-language']).toBe('fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5');
       expect(cleanedRequest.headers.host).toBe('bar');
       expect(cleanedRequest.headers['user-agent']).toBe('100.0.0.0:0000');
     });

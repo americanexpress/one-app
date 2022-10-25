@@ -56,7 +56,6 @@ describe('createRequestHtmlFragment', () => {
 
   let req;
   let res;
-  let next;
   let createRoutes;
   const dispatch = jest.fn((x) => x);
   const getState = jest.fn(() => fromJS({
@@ -92,8 +91,6 @@ describe('createRequestHtmlFragment', () => {
     res.code = jest.fn();
     req.url = 'http://example.com/request';
     req.store = { dispatch, getState };
-
-    next = jest.fn();
 
     createRoutes = jest.fn(() => [{ path: '/', moduleName: 'root' }]);
 

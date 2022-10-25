@@ -40,7 +40,7 @@ import addFrameOptionsHeader from './plugins/addFrameOptionsHeader';
 import addCacheHeaders from './plugins/addCacheHeaders';
 import { getServerPWAConfig, serviceWorkerHandler, webManifestMiddleware } from './pwa';
 
-const nodeEnvIsDevelopment = process.env.NODE_ENV === 'development';
+const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
 
 /**
  * Creates a Fastify app with built-in routes and configuration
@@ -51,8 +51,8 @@ export async function createApp(opts = {}) {
   const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
   const fastify = Fastify({
     frameworkErrors: function frameworkErrors(error, request, reply) {
-      const { method, url } = request;
-      const correlationId = request.headers && request.headers['correlation-id'];
+      const { method, url, headers } = request;
+      const correlationId = headers['correlation-id'];
 
       console.error(`Fastify internal error: method ${method}, url "${url}", correlationId "${correlationId}"`, error);
 
@@ -102,7 +102,7 @@ export async function createApp(opts = {}) {
 
     instance.get('/_/pwa/manifest.webmanifest', webManifestMiddleware);
 
-    if (nodeEnvIsDevelopment) {
+    if (nodeEnvIsDevelopment()) {
       instance.post('/_/report/security/csp-violation', (request, reply) => {
         const violation = request.body && request.body['csp-report'];
         if (!violation) {
@@ -130,7 +130,7 @@ export async function createApp(opts = {}) {
     }
 
     instance.post('/_/report/errors', (request, reply) => {
-      if (!nodeEnvIsDevelopment) {
+      if (!nodeEnvIsDevelopment()) {
         const contentType = request.headers['content-type'];
 
         if (!/^application\/json/i.test(contentType)) {
@@ -223,7 +223,7 @@ export async function createApp(opts = {}) {
 
   fastify.setErrorHandler(async (error, request, reply) => {
     const { method, url } = request;
-    const correlationId = request.headers && request.headers['correlation-id'];
+    const correlationId = request.headers['correlation-id'];
     const headersSent = !!reply.raw.headersSent;
 
     console.error(`Fastify application error: method ${method}, url "${url}", correlationId "${correlationId}", headersSent: ${headersSent}`, error);
