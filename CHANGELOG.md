@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.1.0](https://github.com/americanexpress/one-app/compare/v6.0.0...v6.1.0) (2022-10-17)
+
+
+### Code Refactoring
+
+* migrating metrics server to Fastify ([#803](https://github.com/americanexpress/one-app/issues/803)) ([a0fc9ed](https://github.com/americanexpress/one-app/commit/a0fc9ed928b90c56c179080067c9b4908fbe4a9e)), closes [#780](https://github.com/americanexpress/one-app/issues/780) [#780](https://github.com/americanexpress/one-app/issues/780)
+
+
+### Features
+
+* **intl:** allow custom URLs for language packs ([#833](https://github.com/americanexpress/one-app/issues/833)) ([b67e826](https://github.com/americanexpress/one-app/commit/b67e8268f6578cf5b149db2a871dd0f2ecde8543))
+* routes confidence checks ([2a3d996](https://github.com/americanexpress/one-app/commit/2a3d99692d2d52bab618d65f97ca73abe84d55f4))
+* **server:** running app through fastify ([#785](https://github.com/americanexpress/one-app/issues/785)) ([e3da397](https://github.com/americanexpress/one-app/commit/e3da397a8664e11bfec58e85e2650d8a2cc16ff2))
+
+
 # [6.0.0](https://github.com/americanexpress/one-app/compare/v5.15.3...v6.0.0) (2022-07-20)
 
 

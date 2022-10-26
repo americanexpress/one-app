@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "6.0.0",
+  "version": "6.1.0",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
@@ -85,7 +85,7 @@
     "@americanexpress/fetch-enhancers": "^1.1.2",
     "@americanexpress/lumberjack": "^1.1.4",
     "@americanexpress/one-app-bundler": "^6.15.0",
-    "@americanexpress/one-app-ducks": "^4.3.4",
+    "@americanexpress/one-app-ducks": "^4.4.1",
     "@americanexpress/one-app-router": "^1.2.1",
     "@americanexpress/vitruvius": "^2.0.2",
     "@fastify/compress": "^6.1.0",
