@@ -378,6 +378,9 @@ const appShell = async (request) => {
  * @param {import('fastify').FastifyPluginCallback} done plugin callback
  */
 const reactHtml = (fastify, _opts, done) => {
+  fastify.decorateRequest('store', null);
+  fastify.decorateRequest('clientModuleMapCache', null);
+
   fastify.addHook('preHandler', async (request, reply) => {
     if (['json', 'js', 'css', 'map'].some((ext) => request.url.endsWith(ext))) {
       reply.code(404).type('text/plain; charset=utf-8').send('Not found');

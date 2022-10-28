@@ -74,8 +74,9 @@ const setUpTestRunner = async ({
   dockerComposeUpProcess.stdout.pipe(logWatcherDuplex);
   dockerComposeUpProcess.stderr.pipe(logWatcherDuplex);
 
-  // uncomment this line in order to view full logs for debugging
-  logWatcherDuplex.pipe(process.stdout);
+  if (process.env.DEBUG) {
+    logWatcherDuplex.pipe(process.stdout);
+  }
 
   try {
     await Promise.all([

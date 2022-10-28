@@ -35,9 +35,6 @@ const createRequestStore = (
   { reducers }
 ) => {
   try {
-    request.decorateRequest('store', null);
-    request.decorateRequest('clientModuleMapCache', null);
-
     const serverConfig = getServerStateConfig();
     const clientConfig = getClientStateConfig();
 
