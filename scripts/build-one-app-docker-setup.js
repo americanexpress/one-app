@@ -37,10 +37,16 @@ const sanitizedEnvVars = sanitizeEnvVars();
 const buildDockerImages = async (skipOneAppImageBuild) => {
   console.time('Docker Images Build');
   console.log(`🛠  Building ${skipOneAppImageBuild ? ' ' : 'one-app, '}fast-api, slow-api, and extra-slow-api Docker images`);
+  const dockerCmd = `docker-compose build --no-cache --parallel ${skipOneAppImageBuild ? '' : 'one-app'} fast-api slow-api extra-slow-api`
   try {
-    await promisifySpawn(`docker-compose build --no-cache --parallel ${skipOneAppImageBuild ? '' : 'one-app'} fast-api slow-api extra-slow-api`, { shell: true, cwd: sampleProdDir, env: { ...sanitizedEnvVars } });
+    await promisifySpawn(dockerCmd, {
+      shell: true,
+      cwd: sampleProdDir,
+      env: { ...sanitizedEnvVars },
+    });
   } catch (error) {
     console.log('🚨 Docker images could not be built!\n');
+    console.log(`Cmd: "${dockerCmd}"`);
     throw error;
   }
   console.log('✅ Docker images built \n');

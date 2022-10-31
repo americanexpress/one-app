@@ -35,6 +35,13 @@ const getModuleData = async ({ dispatch, modules }) => {
 
 const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 
+/**
+ * Creates html fragment and stores it in the request object.
+ * It redirects if something is not right.
+ * @param {import('fastify').FastifyRequest} request fastify request object
+ * @param {import('fastify').FastifyReply} reply fastify reply object
+ * @param {*} opts options
+ */
 const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
   try {
     const { store } = request;

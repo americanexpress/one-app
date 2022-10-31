@@ -28,9 +28,6 @@ export default {
     const clonedLog = JSON.parse(JSON.stringify(log));
     const { cookies } = req;
 
-    console.log('--req', req);
-    console.log('--cookies', cookies);
-
     clonedLog.request.metaData = {
       guuid: cookies ? cookies.guuid || null : undefined,
       ...clonedLog.request.metaData,

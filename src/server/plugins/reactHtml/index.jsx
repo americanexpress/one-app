@@ -264,9 +264,13 @@ export const checkStateForRedirectAndStatusCode = (request, reply) => {
   }
 };
 
+/**
+ * Sends/Responds with HTML
+ * @param {import('fastify').FastifyRequest} request fastify request object
+ * @param {import('fastify').FastifyReply} reply fastify reply object
+ */
 export const sendHtml = (request, reply) => {
   try {
-    // TODO: Check values
     const {
       appHtml,
       clientModuleMapCache,
@@ -353,6 +357,10 @@ export const sendHtml = (request, reply) => {
   }
 };
 
+/**
+ * Creates an app shell and stores it into the request object
+ * @param {import('fastify').FastifyRequest} request fastify request object
+ */
 const appShell = async (request) => {
   const { store: { getState, dispatch } } = request;
   const initialState = getState();

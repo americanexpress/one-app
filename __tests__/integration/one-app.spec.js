@@ -1750,10 +1750,7 @@ describe('Tests that can run against either local Docker setup or remote One App
         });
 
         const pageHtml = await response.text();
-        console.log('--pageHtml', pageHtml);
-        console.info('--TEST', pageHtml.match(/<pre>([^<]+)<\/pre>/)[1].replace(/&quot;/g, '"'));
         const data = JSON.parse(pageHtml.match(/<pre>([^<]+)<\/pre>/)[1].replace(/&quot;/g, '"'));
-        console.info('--DATA', data);
         expect(data).toHaveProperty('req.body');
         expect(data.req.body).toEqual({
           legacy: 'application',
