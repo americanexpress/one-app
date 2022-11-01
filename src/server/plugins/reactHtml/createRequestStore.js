@@ -54,6 +54,8 @@ const createRequestStore = (
       config: clientConfig,
     };
 
+    console.log('--localsForBuildInitialState', localsForBuildInitialState)
+
     const store = createHolocronStore({
       reducer: reducers,
       initialState: initialServerState.merge(

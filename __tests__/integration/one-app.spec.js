@@ -1677,9 +1677,7 @@ describe('Tests that can run against either local Docker setup or remote One App
           body: {},
         });
         const pageHtml = await response.text();
-        expect(pageHtml.includes('Hello! One App is successfully rendering its Modules!')).toBe(
-          true
-        );
+        expect(pageHtml).toContain('Hello! One App is successfully rendering its Modules!');
       });
 
       test('app passes vitruvius data to modules', async () => {
