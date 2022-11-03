@@ -128,7 +128,7 @@ describe('Tests that require Docker setup', () => {
         headers: {
           origin: 'test.example.com',
         },
-        body: {},
+        body: JSON.stringify({}),
       });
       const rawHeaders = response.headers.raw();
       expect(response.status).toBe(200);
@@ -211,9 +211,9 @@ describe('Tests that require Docker setup', () => {
             headers: {
               origin: 'test.example.com',
             },
-            body: {
+            body: JSON.stringify({
               message: 'Hello!',
-            },
+            }),
           }
         );
         const rawHeaders = response.headers.raw();
@@ -1660,9 +1660,9 @@ describe('Tests that can run against either local Docker setup or remote One App
             headers: {
               origin: 'test.example.com',
             },
-            body: {
+            body: JSON.stringify({
               message: 'Hello!',
-            },
+            }),
           }
         );
         expect(response.status).toBe(200);

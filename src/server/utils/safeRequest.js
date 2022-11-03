@@ -134,6 +134,14 @@ export default function safeRequest(request, { useBodyForBuildingTheInitialState
 
   if (useBodyForBuildingTheInitialState) {
     filteredRequest.body = request.body;
+
+    if (filteredRequest.body && typeof filteredRequest.body === 'string') {
+      try {
+        filteredRequest.body = JSON.parse(filteredRequest.body);
+      } catch (err) {
+        console.error('request body cannot be parsed', filteredRequest.body);
+      }
+    }
   }
 
   /* Backwards Compatibility */

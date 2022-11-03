@@ -37,20 +37,28 @@ export const onPartialRouteEnter = (
   { dispatch, getState },
   partialOnly = false,
   textOnly = false
-) => (nextState, replace, cb) => {
-  const postProps = propSelector(getState());
-  const { locale, moduleName } = nextState.params;
-  dispatch(setRenderPartialOnly(partialOnly));
-  dispatch(setRenderTextOnly(textOnly, { htmlTagReplacement: ' ', allowedHtmlTags: [] }));
-  dispatch(updateLocale(locale))
-    .then(() => dispatch(composeModules([{
+) => async (nextState, _replace, cb) => {
+  try {
+    const postProps = propSelector(getState());
+    const { locale, moduleName } = nextState.params;
+
+    dispatch(setRenderPartialOnly(partialOnly));
+    dispatch(setRenderTextOnly(textOnly, { htmlTagReplacement: ' ', allowedHtmlTags: [] }));
+
+    await dispatch(updateLocale(locale));
+
+    await dispatch(composeModules([{
       name: moduleName,
       props: {
         ...postProps,
         ...nextState.location.query,
       },
-    }])))
-    .then(() => cb());
+    }]));
+
+    cb();
+  } catch (error) {
+    console.error('--ERROR', error);
+  }
 };
 
 Partial.propTypes = {
