@@ -19,6 +19,8 @@ let extendRestrictedAttributesAllowList;
 let validateSafeRequestRestrictedAttributes;
 let getRequiredRestrictedAttributes;
 
+jest.spyOn(console, 'error').mockImplementation(() => { });
+
 describe('safeRequest', () => {
   const dirtyRequest = {
     // makes sure defined falsy values get added too
@@ -257,6 +259,31 @@ describe('safeRequest', () => {
       );
       expect(cleanedBodyRequest).toHaveProperty('body');
       expect(cleanedBodyRequest.body).toEqual({ head: 'top', toes: 'bottom' });
+    });
+
+    it('parses stringified body', () => {
+      const cleanedBodyRequest = safeRequest(
+        {
+          ...dirtyRequest,
+          body: JSON.stringify({ message: 'Testing' }),
+        }, { useBodyForBuildingTheInitialState: true }
+      );
+
+      expect(cleanedBodyRequest).toHaveProperty('body');
+      expect(cleanedBodyRequest.body).toEqual({ message: 'Testing' });
+    });
+
+    it('tries to parse body and silently fails', () => {
+      const cleanedBodyRequest = safeRequest(
+        {
+          ...dirtyRequest,
+          body: '{ invalid }',
+        }, { useBodyForBuildingTheInitialState: true }
+      );
+
+      expect(cleanedBodyRequest).toHaveProperty('body');
+      expect(cleanedBodyRequest.body).toEqual('{ invalid }');
+      expect(console.error).toHaveBeenCalledWith('request body cannot be parsed', '{ invalid }');
     });
   });
 });

@@ -132,7 +132,6 @@ describe('Tests that require Docker setup', () => {
       });
       const rawHeaders = response.headers.raw();
       expect(response.status).toBe(200);
-      expect(rawHeaders).not.toHaveProperty('access-control-allow-origin');
       expect(rawHeaders).not.toHaveProperty('access-control-expose-headers');
       expect(rawHeaders).not.toHaveProperty('access-control-allow-credentials');
     });
@@ -1582,7 +1581,7 @@ describe('Tests that require Docker setup', () => {
           'max-age=15552000; includeSubDomains',
         ],
         vary: [
-          'Origin, accept-encoding',
+          'accept-encoding',
         ],
         'x-content-type-options': [
           'nosniff',

@@ -27,7 +27,6 @@ import fastifyFormbody from '@fastify/formbody';
 import fastifyStatic from '@fastify/static';
 import fastifyHelmet from '@fastify/helmet';
 import fastifySensible from '@fastify/sensible';
-import fetch from 'cross-fetch';
 
 import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
@@ -240,31 +239,3 @@ export async function createApp(opts = {}) {
 }
 
 export default createApp;
-
-// const test = async () => {
-//   try {
-//     const defaultFetchOptions = {};
-//     console.log('--will fetch');
-//     const response = await fetch(
-//       `http://localhost:3000/html-partial/en-US/frank-the-parrot`,
-//       {
-//         ...defaultFetchOptions,
-//         method: 'POST',
-//         headers: {
-//           origin: 'test.example.com',
-//         },
-//         body: JSON.stringify({
-//           message: 'Hello!',
-//         }),
-//       }
-//     );
-//     console.log('--response', response);
-//   } catch (error) {
-//     console.error('--error', error);
-//   }
-// };
-
-// setTimeout(() => {
-//   console.log('--test');
-//   test();
-// }, 1000 * 2);

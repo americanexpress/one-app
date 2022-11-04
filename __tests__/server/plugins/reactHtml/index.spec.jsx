@@ -977,6 +977,7 @@ describe('reactHtml', () => {
       request.url = '/_/pwa/shell';
 
       const fastify = {
+        decorateRequest: jest.fn(),
         addHook: jest.fn(),
         decorateReply: jest.fn(),
       };
@@ -998,6 +999,7 @@ describe('reactHtml', () => {
       }));
 
       const fastify = {
+        decorateRequest: jest.fn(),
         addHook: jest.fn(),
         decorateReply: jest.fn(),
       };
@@ -1016,6 +1018,7 @@ describe('reactHtml', () => {
 
     test('sendHtml reply decorator renders html', async () => {
       const fastify = {
+        decorateRequest: jest.fn(),
         addHook: jest.fn(),
         decorateReply: jest.fn(),
       };

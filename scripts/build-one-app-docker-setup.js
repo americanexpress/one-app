@@ -37,7 +37,7 @@ const sanitizedEnvVars = sanitizeEnvVars();
 const buildDockerImages = async (skipOneAppImageBuild) => {
   console.time('Docker Images Build');
   console.log(`🛠  Building ${skipOneAppImageBuild ? ' ' : 'one-app, '}fast-api, slow-api, and extra-slow-api Docker images`);
-  const dockerCmd = `docker-compose build --no-cache --parallel ${skipOneAppImageBuild ? '' : 'one-app'} fast-api slow-api extra-slow-api`
+  const dockerCmd = `docker-compose build --no-cache --parallel ${skipOneAppImageBuild ? '' : 'one-app'} fast-api slow-api extra-slow-api`;
   try {
     await promisifySpawn(dockerCmd, {
       shell: true,
