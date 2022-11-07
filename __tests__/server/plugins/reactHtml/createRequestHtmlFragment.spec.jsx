@@ -161,7 +161,7 @@ describe('createRequestHtmlFragment', () => {
 
     await requireCreateRequestHtmlFragment(req, res, { createRoutes });
 
-    expect(console.error).toHaveBeenCalled();
+    expect(console.error).toHaveBeenCalledWith('error creating request HTML fragment for http://example.com/request', expect.any(Error));
     expect(res.code).toHaveBeenCalledWith(404);
     expect(createRoutes).toHaveBeenCalledWith(req.store);
     expect(req.appHtml).toBe(undefined);

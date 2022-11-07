@@ -30,9 +30,6 @@ const ensureCorrelationId = (fastify, _opts, done) => {
         || request.headers.unique_id
         || uuidV4();
     }
-
-    // TODO: expose the id to the client?
-    // res.header('Correlation-Id', req.headers['correlation-id']);
   });
 
   done();

@@ -64,13 +64,11 @@ const createRequestStore = (
       extraThunkArguments: { fetchClient },
     });
 
-    // TODO: namespace?
     // use the store as a global for the request
     request.store = store; // eslint-disable-line no-param-reassign
     request.clientModuleMapCache = getClientModuleMapCache();
   } catch (err) {
     console.error('error creating store for request', err);
-    // TODO: migrate `renderStaticErrorPage`
     renderStaticErrorPage(request, reply);
   }
 };

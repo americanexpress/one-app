@@ -27,7 +27,7 @@ function pick(request, safeKeys) {
 }
 
 const requestAllowList = [
-  // 'forwarded', // not in use (?) need to find a fastify equivalent
+  'forwarded',
   'method',
   'params',
   'protocol',
