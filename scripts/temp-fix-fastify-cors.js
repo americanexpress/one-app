@@ -1,3 +1,9 @@
+/*
+NOTE: This temporarily fix is needed until
+      this PR is reviewed, merged, and published
+      https://github.com/fastify/fastify-cors/pull/234
+*/
+
 const fs = require('fs');
 const path = require('path');
 
