@@ -17,69 +17,92 @@
 // Dangling underscores are part of the HTTP mocks API
 /* eslint-disable no-underscore-dangle */
 import httpMocks from 'node-mocks-http';
+import fastifyCors from '@fastify/cors';
 import { fromJS } from 'immutable';
+import conditionallyAllowCors, { setCorsOrigins } from '../../../src/server/plugins/conditionallyAllowCors';
 
-describe('conditionallyAllowCors', () => {
-  const { NODE_ENV } = process.env;
-  let conditionallyAllowCors;
-  let setCorsOrigins;
-  let req;
-  let res;
-  const next = jest.fn();
-  let state = fromJS({ rendering: {} });
+const { NODE_ENV } = process.env;
+let state = fromJS({ rendering: {} });
+let request;
 
-  const setup = ({ renderPartialOnly, origin }) => {
-    conditionallyAllowCors = require('../../../src/server/middleware/conditionallyAllowCors').default;
-    setCorsOrigins = require('../../../src/server/middleware/conditionallyAllowCors').setCorsOrigins;
-    state = state.update('rendering', (rendering) => rendering.set('renderPartialOnly', renderPartialOnly));
-    req = httpMocks.createRequest({
-      headers: {
-        Origin: origin,
-      },
-    });
-    req.store = { getState: () => state };
-    res = httpMocks.createResponse({ req });
+const setup = ({ renderPartialOnly, origin }) => {
+  state = state.update('rendering', (rendering) => rendering.set('renderPartialOnly', renderPartialOnly));
+  request = httpMocks.createRequest({
+    headers: {
+      Origin: origin,
+    },
+  });
+  request.store = { getState: () => state };
+};
+
+afterAll(() => {
+  process.env.NODE_ENV = NODE_ENV;
+});
+
+it('allows CORS for HTML partials', async () => {
+  delete process.env.NODE_ENV;
+  setup({ renderPartialOnly: true, origin: 'test.example.com' });
+  setCorsOrigins([/\.example.com$/]);
+
+  const callback = jest.fn();
+  const fastify = {
+    register: jest.fn((_plugin, handler) => {
+      handler()(request, callback);
+    }),
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    jest.resetModules();
-  });
-  afterAll(() => { process.env.NODE_ENV = NODE_ENV; });
+  await conditionallyAllowCors(fastify);
 
-  it('allows CORS for HTML partials', () => {
-    setup({ renderPartialOnly: true, origin: 'test.example.com' });
-    setCorsOrigins([/\.example.com$/]);
-    conditionallyAllowCors(req, res, next);
-    expect(next).toHaveBeenCalled();
-    const headers = res._getHeaders();
-    expect(headers).toHaveProperty('access-control-allow-origin');
-  });
+  expect(fastify.register).toHaveBeenCalledTimes(1);
+  expect(fastify.register).toHaveBeenCalledWith(fastifyCors, expect.any(Function));
+  expect(callback).toHaveBeenCalledTimes(1);
+  expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/] });
+});
 
-  it('allows CORS for localhost in development', () => {
-    process.env.NODE_ENV = 'development';
-    setup({ renderPartialOnly: true, origin: 'localhost:8000' });
-    setCorsOrigins([/\.example.com$/]);
-    conditionallyAllowCors(req, res, next);
-    expect(next).toHaveBeenCalled();
-    const headers = res._getHeaders();
-    expect(headers).toHaveProperty('access-control-allow-origin');
-  });
+it('allows CORS for localhost in development', async () => {
+  process.env.NODE_ENV = 'development';
+  setup({ renderPartialOnly: true, origin: 'localhost:8000' });
+  setCorsOrigins([/\.example.com$/]);
 
-  it('does not allow CORS for localhost in production', () => {
-    process.env.NODE_ENV = 'production';
-    setup({ renderPartialOnly: true, origin: 'localhost:8000' });
-    conditionallyAllowCors(req, res, next);
-    expect(next).toHaveBeenCalled();
-    const headers = res._getHeaders();
-    expect(headers).not.toHaveProperty('access-control-allow-origin');
-  });
+  const callback = jest.fn();
+  const fastify = {
+    register: jest.fn((_plugin, handler) => {
+      handler()(request, callback);
+    }),
+  };
 
-  it('does not allow CORS non-partial requests', () => {
-    setup({ renderPartialOnly: false, origin: 'test.example.com' });
-    conditionallyAllowCors(req, res, next);
-    expect(next).toHaveBeenCalled();
-    const headers = res._getHeaders();
-    expect(headers).not.toHaveProperty('access-control-allow-origin');
-  });
+  await conditionallyAllowCors(fastify);
+
+  expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/, /localhost:\d{1,5}/] });
+});
+
+it('does not allow CORS for localhost in production', async () => {
+  process.env.NODE_ENV = 'production';
+  setup({ renderPartialOnly: true, origin: 'localhost:8000' });
+
+  const callback = jest.fn();
+  const fastify = {
+    register: jest.fn((_plugin, handler) => {
+      handler()(request, callback);
+    }),
+  };
+
+  await conditionallyAllowCors(fastify);
+
+  expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/, /localhost:\d{1,5}/] });
+});
+
+it('does not allow CORS non-partial requests', async () => {
+  setup({ renderPartialOnly: false, origin: 'test.example.com' });
+
+  const callback = jest.fn();
+  const fastify = {
+    register: jest.fn((_plugin, handler) => {
+      handler()(request, callback);
+    }),
+  };
+
+  await conditionallyAllowCors(fastify);
+
+  expect(callback).toHaveBeenCalledWith(null, { origin: false });
 });

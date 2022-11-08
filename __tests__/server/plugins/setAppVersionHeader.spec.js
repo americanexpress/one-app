@@ -14,32 +14,28 @@
  * permissions and limitations under the License.
  */
 
-import httpMocks from 'node-mocks-http';
-import setAppVersionHeader from '../../../src/server/middleware/setAppVersionHeader';
+import Fastify from 'fastify';
+import setAppVersionHeader from '../../../src/server/plugins/setAppVersionHeader';
 
 jest.mock('../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: 'x.0' }));
 
-describe('setAppVersionHeader', () => {
-  it('should set the app version header', () => {
-    const req = httpMocks.createRequest({
-      method: 'GET',
-      url: '/any-path',
-    });
-    const res = httpMocks.createResponse({ req });
-    const next = jest.fn();
-    setAppVersionHeader(req, res, next);
-    // eslint-disable-next-line no-underscore-dangle
-    expect(res._getHeaders()).toMatchSnapshot();
-  });
+const buildApp = () => {
+  const app = Fastify();
 
-  it('should call next', () => {
-    const req = httpMocks.createRequest({
+  app.register(setAppVersionHeader);
+
+  app.get('/any-path', () => '');
+
+  return app;
+};
+
+describe('setAppVersionHeader', () => {
+  it('should set the app version header', async () => {
+    const response = await buildApp().inject({
       method: 'GET',
       url: '/any-path',
     });
-    const res = httpMocks.createResponse({ req });
-    const next = jest.fn();
-    setAppVersionHeader(req, res, next);
-    expect(next).toHaveBeenCalledTimes(1);
+
+    expect(response.headers['one-app-version']).toEqual('x.0');
   });
 });

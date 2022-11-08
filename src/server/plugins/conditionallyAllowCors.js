@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import cors from 'cors';
+import fastifyCors from '@fastify/cors';
 
 const devOrigin = /localhost:\d{1,5}/;
 const corsOptions = {
@@ -29,13 +29,18 @@ export const setCorsOrigins = (newCorsOrigins = []) => {
 
 setCorsOrigins();
 
-export default function conditionallyAllowCors(req, res, next) {
-  const renderPartialOnly = req.store.getState().getIn(['rendering', 'renderPartialOnly']);
+/**
+ * Sets configurable cors when 'renderPatialOnly' is enabled
+ * @param {import('fastify').FastifyInstance} fastify app instance
+ */
+const conditionallyAllowCors = async (fastify) => {
+  await fastify.register(fastifyCors, () => (req, callback) => {
+    const renderPartialOnly = req.store && req.store.getState().getIn(['rendering', 'renderPartialOnly']);
+    // The HTML partials will have CORS enabled so they can be loaded client-side
+    const opts = renderPartialOnly ? corsOptions : { origin: false };
 
-  // The HTML partials will have CORS enabled so they can be loaded client-side
-  if (renderPartialOnly) {
-    return cors(corsOptions)(req, res, next);
-  }
+    callback(null, opts);
+  });
+};
 
-  return cors({ origin: false })(req, res, next);
-}
+export default conditionallyAllowCors;

@@ -14,11 +14,21 @@
  * permissions and limitations under the License.
  */
 
+import fp from 'fastify-plugin';
+
 import readJsonFile from '../utils/readJsonFile';
 
 const { buildVersion: appVersion } = readJsonFile('../../../.build-meta.json');
 
-export default function setAppVersionHeader(_req, res, next) {
-  res.set('One-App-Version', appVersion);
-  next();
-}
+const setAppVersionHeader = (fastify, _opts, done) => {
+  fastify.addHook('onRequest', async (_request, reply) => {
+    reply.header('One-App-Version', appVersion);
+  });
+
+  done();
+};
+
+export default fp(setAppVersionHeader, {
+  fastify: '4.x',
+  name: 'setAppVersionHeader',
+});
