@@ -20,13 +20,13 @@ import url, { Url } from 'url';
 import util from 'util';
 import { RouterContext, matchPromise } from '@americanexpress/one-app-router';
 import { composeModules } from 'holocron';
-import createCircuitBreaker from '../utils/createCircuitBreaker';
+import createCircuitBreaker from '../../utils/createCircuitBreaker';
 
 import {
   getRenderMethodName,
   renderForStaticMarkup,
   renderForString,
-} from '../utils/reactRendering';
+} from '../../utils/reactRendering';
 
 const getModuleData = async ({ dispatch, modules }) => {
   await dispatch(composeModules(modules));
@@ -35,36 +35,42 @@ const getModuleData = async ({ dispatch, modules }) => {
 
 const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 
-export default function createRequestHtmlFragment({ createRoutes }) {
-  return async (req, res, next) => {
-    try {
-      const { store } = req;
-      const { dispatch } = store;
-      const routes = createRoutes(store);
+/**
+ * Creates html fragment and stores it in the request object.
+ * It redirects if something is not right.
+ * @param {import('fastify').FastifyRequest} request fastify request object
+ * @param {import('fastify').FastifyReply} reply fastify reply object
+ * @param {*} opts options
+ */
+const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
+  try {
+    const { store } = request;
+    const { dispatch } = store;
+    const routes = createRoutes(store);
 
-      const { redirectLocation, renderProps } = await matchPromise({
-        routes,
-        location: req.url,
-      });
-      if (redirectLocation) {
-        // support redirecting outside our app (i.e. domain/origin)
-        // store more than pathname and search as a Url object as redirectLocation.state
-        if (redirectLocation.state instanceof Url) {
-          res.redirect(302, url.format(redirectLocation.state));
-        } else {
-          res.redirect(302, redirectLocation.pathname + redirectLocation.search);
-        }
-        return null;
+    const { redirectLocation, renderProps } = await matchPromise({
+      routes,
+      location: request.url,
+    });
+
+    if (redirectLocation) {
+      // support redirecting outside our app (i.e. domain/origin)
+      // store more than pathname and search as a Url object as redirectLocation.state
+      if (redirectLocation.state instanceof Url) {
+        reply.redirect(302, url.format(redirectLocation.state));
+      } else {
+        reply.redirect(302, redirectLocation.pathname + redirectLocation.search);
       }
-
+    } else {
       if (!renderProps) {
-        res.sendStatus(404);
+        reply.code(404);
         throw new Error('unable to match routes');
       }
 
       const { httpStatus } = renderProps.routes.slice(-1)[0];
+
       if (httpStatus) {
-        res.status(httpStatus);
+        reply.code(httpStatus);
       }
 
       const props = {
@@ -95,9 +101,9 @@ export default function createRequestHtmlFragment({ createRoutes }) {
         });
 
         if (fallback) {
-          req.appHtml = '';
-          req.helmetInfo = {};
-          return next();
+          request.appHtml = '';
+          request.helmetInfo = {};
+          return;
         }
       }
 
@@ -112,12 +118,12 @@ export default function createRequestHtmlFragment({ createRoutes }) {
         </Provider>
       );
       /* eslint-ensable react/jsx-props-no-spreading */
-      req.appHtml = renderedString;
-      req.helmetInfo = helmetInfo;
-    } catch (err) {
-      console.error(util.format('error creating request HTML fragment for %s', req.url), err);
+      request.appHtml = renderedString;
+      request.helmetInfo = helmetInfo;
     }
+  } catch (err) {
+    console.error(util.format('error creating request HTML fragment for %s', request.url), err);
+  }
+};
 
-    return next();
-  };
-}
+export default createRequestHtmlFragment;

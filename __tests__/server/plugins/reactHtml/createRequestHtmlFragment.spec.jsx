@@ -20,22 +20,21 @@ import { Map as iMap, fromJS } from 'immutable';
 import { composeModules } from 'holocron';
 // getBreaker is only added in the mock
 /* eslint-disable-next-line import/named */
-import { getBreaker } from '../../../src/server/utils/createCircuitBreaker';
+import { getBreaker } from '../../../../src/server/utils/createCircuitBreaker';
 
-import * as reactRendering from '../../../src/server/utils/reactRendering';
+import * as reactRendering from '../../../../src/server/utils/reactRendering';
 
-jest.mock('@americanexpress/one-app-router', () => {
-  const reactRouter = jest.requireActual('@americanexpress/one-app-router');
-  jest.spyOn(reactRouter, 'matchPromise');
-  return reactRouter;
-});
+jest.mock('@americanexpress/one-app-router', () => ({
+  ...jest.requireActual('@americanexpress/one-app-router'),
+  matchPromise: jest.fn(),
+}));
 
 jest.mock('holocron', () => ({
   composeModules: jest.fn(() => 'composeModules'),
   getModule: () => () => 0,
 }));
 
-jest.mock('../../../src/server/utils/createCircuitBreaker', () => {
+jest.mock('../../../../src/server/utils/createCircuitBreaker', () => {
   const breaker = jest.fn();
   const mockCreateCircuitBreaker = (asyncFunctionThatMightFail) => {
     breaker.fire = jest.fn((...args) => {
@@ -53,10 +52,10 @@ const renderForStaticMarkupSpy = jest.spyOn(reactRendering, 'renderForStaticMark
 
 describe('createRequestHtmlFragment', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
+  console.error = jest.fn();
 
   let req;
   let res;
-  let next;
   let createRoutes;
   const dispatch = jest.fn((x) => x);
   const getState = jest.fn(() => fromJS({
@@ -89,122 +88,87 @@ describe('createRequestHtmlFragment', () => {
     res.sendStatus = jest.fn(() => res);
     res.redirect = jest.fn(() => res);
     res.end = jest.fn(() => res);
+    res.code = jest.fn();
     req.url = 'http://example.com/request';
     req.store = { dispatch, getState };
-
-    next = jest.fn();
 
     createRoutes = jest.fn(() => [{ path: '/', moduleName: 'root' }]);
 
     renderForStringSpy.mockClear();
     renderForStaticMarkupSpy.mockClear();
+    console.error.mockClear();
   });
 
-  it('returns a function', () => {
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
-    const middleware = createRequestHtmlFragment({ createRoutes });
-    expect(middleware).toBeInstanceOf(Function);
-  });
+  const requireCreateRequestHtmlFragment = (...args) => require(
+    '../../../../src/server/plugins/reactHtml/createRequestHtmlFragment'
+  ).default(...args);
 
-  it('should preload data for matched route components', () => {
+  it('should preload data for matched route components', async () => {
     expect.assertions(4);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
-    const middleware = createRequestHtmlFragment({ createRoutes });
-    return middleware(req, res, next)
-      .then(() => {
-        expect(getBreaker().fire).toHaveBeenCalled();
-        expect(composeModules).toHaveBeenCalled();
-        expect(composeModules.mock.calls[0][0]).toMatchSnapshot();
-        expect(dispatch).toHaveBeenCalledWith('composeModules');
-      });
+
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
+    expect(getBreaker().fire).toHaveBeenCalled();
+    expect(composeModules).toHaveBeenCalled();
+    expect(composeModules.mock.calls[0][0]).toMatchSnapshot();
+    expect(dispatch).toHaveBeenCalledWith('composeModules');
   });
 
-  it('should add app HTML to the request object', () => {
-    expect.assertions(5);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
-    const middleware = createRequestHtmlFragment({ createRoutes });
-    return middleware(req, res, next)
-      .then(() => {
-        expect(next).toHaveBeenCalled();
-        expect(createRoutes).toHaveBeenCalledWith(req.store);
-        expect(renderForStringSpy).toHaveBeenCalled();
-        expect(renderForStaticMarkupSpy).not.toHaveBeenCalled();
-        expect(typeof req.appHtml).toBe('string');
-      });
+  it('should add app HTML to the request object', async () => {
+    expect.assertions(4);
+
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
+    expect(createRoutes).toHaveBeenCalledWith(req.store);
+    expect(renderForStringSpy).toHaveBeenCalled();
+    expect(renderForStaticMarkupSpy).not.toHaveBeenCalled();
+    expect(typeof req.appHtml).toBe('string');
   });
 
-  it('should add app HTML as static markup to the request object when scripts are disabled', () => {
-    expect.assertions(5);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
-    const middleware = createRequestHtmlFragment({ createRoutes });
+  it('should add app HTML as static markup to the request object when scripts are disabled', async () => {
+    expect.assertions(4);
+
     getState.mockImplementationOnce(() => fromJS({
       rendering: iMap({ disableScripts: true }),
     }));
-    return middleware(req, res, next)
-      .then(() => {
-        expect(next).toHaveBeenCalled();
-        expect(createRoutes).toHaveBeenCalledWith(req.store);
-        expect(renderForStringSpy).not.toHaveBeenCalled();
-        expect(renderForStaticMarkupSpy).toHaveBeenCalled();
-        expect(typeof req.appHtml).toBe('string');
-      });
+
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
+    expect(createRoutes).toHaveBeenCalledWith(req.store);
+    expect(renderForStringSpy).not.toHaveBeenCalled();
+    expect(renderForStaticMarkupSpy).toHaveBeenCalled();
+    expect(typeof req.appHtml).toBe('string');
   });
 
-  it('should set the custom HTTP status', () => {
-    expect.assertions(4);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
+  it('should set the custom HTTP status', async () => {
+    expect.assertions(3);
 
     createRoutes = jest.fn(() => [{ path: '/', httpStatus: 400 }]);
-    const middleware = createRequestHtmlFragment({ createRoutes });
-    return middleware(req, res, next)
-      .then(() => {
-        expect(next).toHaveBeenCalled();
-        expect(createRoutes).toHaveBeenCalledWith(req.store);
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(typeof req.appHtml).toBe('string');
-      });
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
+    expect(createRoutes).toHaveBeenCalledWith(req.store);
+    expect(res.code).toHaveBeenCalledWith(400);
+    expect(typeof req.appHtml).toBe('string');
   });
 
-  it('does not generate HTML when no route is matched', () => {
-    expect.assertions(5);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
+  it('does not generate HTML when no route is matched', async () => {
+    expect.assertions(4);
 
     matchPromise.mockImplementationOnce(() => ({
       redirectLocation: undefined,
       // omit renderProps
     }));
 
-    const middleware = createRequestHtmlFragment({ createRoutes });
-    // eslint-disable-next-line no-console
-    console.error = jest.fn();
-    return middleware(req, res, next)
-      .then(() => {
-        // eslint-disable-next-line no-console
-        expect(console.error).toHaveBeenCalled();
-        expect(next).toHaveBeenCalled();
-        expect(res.sendStatus).toHaveBeenCalledWith(404);
-        expect(createRoutes).toHaveBeenCalledWith(req.store);
-        expect(req.appHtml).toBe(undefined);
-      });
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
+    expect(console.error).toHaveBeenCalledWith('error creating request HTML fragment for http://example.com/request', expect.any(Error));
+    expect(res.code).toHaveBeenCalledWith(404);
+    expect(createRoutes).toHaveBeenCalledWith(req.store);
+    expect(req.appHtml).toBe(undefined);
   });
 
-  it('redirects when a relative redirect route is matched', () => {
+  it('redirects when a relative redirect route is matched', async () => {
     expect.assertions(3);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
 
     matchPromise.mockImplementationOnce(() => ({
       redirectLocation: {
@@ -213,20 +177,15 @@ describe('createRequestHtmlFragment', () => {
       },
     }));
 
-    const middleware = createRequestHtmlFragment({ createRoutes });
-    return middleware(req, res, next)
-      .then(() => {
-        expect(createRoutes).toHaveBeenCalledWith(req.store);
-        expect(res.redirect).toHaveBeenCalledWith(302, '/redirect');
-        expect(req.appHtml).toBe(undefined);
-      });
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
+    expect(createRoutes).toHaveBeenCalledWith(req.store);
+    expect(res.redirect).toHaveBeenCalledWith(302, '/redirect');
+    expect(req.appHtml).toBe(undefined);
   });
 
-  it('redirects when an absolute redirect route is matched', () => {
+  it('redirects when an absolute redirect route is matched', async () => {
     expect.assertions(3);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
 
     matchPromise.mockImplementationOnce(() => ({
       redirectLocation: {
@@ -234,42 +193,30 @@ describe('createRequestHtmlFragment', () => {
       },
     }));
 
-    const middleware = createRequestHtmlFragment({ createRoutes });
-    return middleware(req, res, next)
-      .then(() => {
-        expect(createRoutes).toHaveBeenCalledWith(req.store);
-        expect(res.redirect).toHaveBeenCalledWith(302, 'https://example.com/redirect');
-        expect(req.appHtml).toBe(undefined);
-      });
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
+    expect(createRoutes).toHaveBeenCalledWith(req.store);
+    expect(res.redirect).toHaveBeenCalledWith(302, 'https://example.com/redirect');
+    expect(req.appHtml).toBe(undefined);
   });
 
-  it('should catch any errors and call the next middleware', () => {
-    expect.assertions(3);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
+  it('should catch any errors and call the next middleware', async () => {
+    expect.assertions(2);
 
     const createRoutesError = new Error('failed to create routes');
     const brokenCreateRoutes = () => { throw createRoutesError; };
 
-    const middleware = createRequestHtmlFragment({ createRoutes: brokenCreateRoutes });
-    /* eslint-disable no-console */
-    console.error = jest.fn();
-    middleware(req, res, next);
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes: brokenCreateRoutes });
+
     expect(console.error).toHaveBeenCalled();
     expect(console.error.mock.calls[0]).toEqual(['error creating request HTML fragment for http://example.com/request', createRoutesError]);
-    expect(next).toHaveBeenCalled();
-    /* eslint-enable no-console */
   });
 
   it('should use a circuit breaker', async () => {
-    expect.assertions(6);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
-    const middleware = createRequestHtmlFragment({ createRoutes });
-    await middleware(req, res, next);
-    expect(next).toHaveBeenCalled();
+    expect.assertions(5);
+
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
     expect(getBreaker().fire).toHaveBeenCalled();
     expect(composeModules).toHaveBeenCalled();
     expect(renderForStringSpy).toHaveBeenCalled();
@@ -278,15 +225,12 @@ describe('createRequestHtmlFragment', () => {
   });
 
   it('should fall back when the circuit opens', async () => {
-    expect.assertions(5);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
+    expect.assertions(4);
     const breaker = getBreaker();
     breaker.fire.mockReturnValueOnce(true);
-    const middleware = createRequestHtmlFragment({ createRoutes });
-    await middleware(req, res, next);
-    expect(next).toHaveBeenCalled();
+
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
     expect(getBreaker().fire).toHaveBeenCalled();
     expect(renderForStringSpy).not.toHaveBeenCalled();
     expect(renderForStaticMarkupSpy).not.toHaveBeenCalled();
@@ -294,18 +238,16 @@ describe('createRequestHtmlFragment', () => {
   });
 
   it('should not use the circuit breaker for partials', async () => {
-    expect.assertions(6);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
-    const middleware = createRequestHtmlFragment({ createRoutes });
+    expect.assertions(5);
+
     getState.mockImplementationOnce(() => fromJS({
       rendering: {
         renderPartialOnly: true,
       },
     }));
-    await middleware(req, res, next);
-    expect(next).toHaveBeenCalled();
+
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
     expect(getBreaker().fire).not.toHaveBeenCalled();
     expect(composeModules).toHaveBeenCalled();
     expect(renderForStringSpy).not.toHaveBeenCalled();
@@ -314,18 +256,16 @@ describe('createRequestHtmlFragment', () => {
   });
 
   it('should not use the circuit breaker when scripts are disabled', async () => {
-    expect.assertions(6);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
-    const middleware = createRequestHtmlFragment({ createRoutes });
+    expect.assertions(5);
+
     getState.mockImplementationOnce(() => fromJS({
       rendering: {
         disableScripts: true,
       },
     }));
-    await middleware(req, res, next);
-    expect(next).toHaveBeenCalled();
+
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
     expect(getBreaker().fire).not.toHaveBeenCalled();
     expect(composeModules).toHaveBeenCalled();
     expect(renderForStringSpy).not.toHaveBeenCalled();
@@ -334,19 +274,17 @@ describe('createRequestHtmlFragment', () => {
   });
 
   it('should not use the circuit breaker when rendering text only', async () => {
-    expect.assertions(6);
-    const createRequestHtmlFragment = require(
-      '../../../src/server/middleware/createRequestHtmlFragment'
-    ).default;
-    const middleware = createRequestHtmlFragment({ createRoutes });
+    expect.assertions(5);
+
     getState.mockImplementationOnce(() => fromJS({
       rendering: {
         renderTextOnly: true,
         renderTextOnlyOptions: { htmlTagReplacement: '', allowedHtmlTags: [] },
       },
     }));
-    await middleware(req, res, next);
-    expect(next).toHaveBeenCalled();
+
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
     expect(getBreaker().fire).not.toHaveBeenCalled();
     expect(composeModules).toHaveBeenCalled();
     expect(renderForStringSpy).not.toHaveBeenCalled();

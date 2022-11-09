@@ -14,42 +14,52 @@
  * permissions and limitations under the License.
  */
 
+import Fastify from 'fastify';
 import { fromJS } from 'immutable';
-import sendHtml, {
-  renderStaticErrorPage,
+import reactHtml, {
+  sendHtml,
   renderModuleScripts,
-  safeSend,
-  setErrorPage,
-} from '../../../src/server/middleware/sendHtml';
+  checkStateForRedirectAndStatusCode,
+} from '../../../../src/server/plugins/reactHtml';
 // _client is a method to control the mock
 // eslint-disable-next-line import/named
-import { getClientStateConfig } from '../../../src/server/utils/stateConfig';
+import { getClientStateConfig } from '../../../../src/server/utils/stateConfig';
 // _setVars is a method to control the mock
 // eslint-disable-next-line import/named
-import transit from '../../../src/universal/utils/transit';
-import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
-import { getClientPWAConfig } from '../../../src/server/middleware/pwa/config';
+import transit from '../../../../src/universal/utils/transit';
+import { setClientModuleMapCache, getClientModuleMapCache } from '../../../../src/server/utils/clientModuleMapCache';
+import { getClientPWAConfig, getServerPWAConfig } from '../../../../src/server/pwa/config';
+import createRequestStoreHook from '../../../../src/server/plugins/reactHtml/createRequestStore';
+import createRequestHtmlFragmentHook from '../../../../src/server/plugins/reactHtml/createRequestHtmlFragment';
+import conditionallyAllowCors from '../../../../src/server/plugins/conditionallyAllowCors';
 
 jest.mock('react-helmet');
-jest.mock('holocron', () => ({
-  getModule: () => {
-    const module = () => 0;
-    module.ssrStyles = {};
-    module.ssrStyles.getFullSheet = () => '.class { background: red; }';
-    return module;
-  },
-}));
+jest.mock('holocron', () => {
+  const actualHolocron = jest.requireActual('holocron');
+
+  return {
+    ...actualHolocron,
+    getModule: () => {
+      const module = () => 0;
+      module.ssrStyles = {};
+      module.ssrStyles.getFullSheet = () => '.class { background: red; }';
+      return module;
+    },
+  };
+});
+
 jest.mock('@americanexpress/fetch-enhancers', () => ({
   createTimeoutFetch: jest.fn(
     (timeout) => (next) => (url) => next(url)
-      .then((res) => {
-        res.timeout = timeout;
-        return res;
+      .then((reply) => {
+        // eslint-disable-next-line no-param-reassign
+        reply.timeout = timeout;
+        return reply;
       })
   ),
 }));
-jest.mock('../../../src/server/utils/stateConfig');
-jest.mock('../../../src/server/utils/readJsonFile', () => (filePath) => {
+jest.mock('../../../../src/server/utils/stateConfig');
+jest.mock('../../../../src/server/utils/readJsonFile', () => (filePath) => {
   switch (filePath) {
     case '../../../.build-meta.json':
       return {
@@ -92,7 +102,7 @@ jest.mock('../../../src/server/utils/readJsonFile', () => (filePath) => {
       throw new Error('Couldn\'t find JSON file to read');
   }
 });
-jest.mock('../../../src/server/middleware/pwa/config', () => ({
+jest.mock('../../../../src/server/pwa/config', () => ({
   getClientPWAConfig: jest.fn(() => ({
     serviceWorker: false,
     serviceWorkerScope: null,
@@ -100,22 +110,43 @@ jest.mock('../../../src/server/middleware/pwa/config', () => ({
     webManifestUrl: false,
     offlineUrl: false,
   })),
+  getServerPWAConfig: jest.fn(() => ({
+    serviceWorker: false,
+  })),
 }));
-jest.mock('../../../src/universal/ducks/config');
-jest.mock('../../../src/universal/utils/transit', () => ({
+jest.mock('../../../../src/universal/ducks/config');
+jest.mock('../../../../src/universal/utils/transit', () => ({
   toJSON: jest.fn(() => 'serialized in a string'),
 }));
+jest.mock('../../../../src/server/utils/createCircuitBreaker', () => {
+  const breaker = jest.fn();
+  const mockCreateCircuitBreaker = (asyncFunctionThatMightFail) => {
+    breaker.fire = jest.fn((...args) => {
+      asyncFunctionThatMightFail(...args);
+      return false;
+    });
+    return breaker;
+  };
+  mockCreateCircuitBreaker.getBreaker = () => breaker;
+  return mockCreateCircuitBreaker;
+});
 
-jest.spyOn(console, 'info').mockImplementation(() => {});
-jest.spyOn(console, 'log').mockImplementation(() => {});
-jest.spyOn(console, 'error').mockImplementation(() => {});
-jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
+jest.mock('../../../../src/server/plugins/reactHtml/createRequestStore');
+jest.mock('../../../../src/server/plugins/reactHtml/createRequestHtmlFragment');
+jest.mock('../../../../src/server/plugins/conditionallyAllowCors');
 
-describe('sendHtml', () => {
+jest.spyOn(console, 'info').mockImplementation(() => { });
+jest.spyOn(console, 'log').mockImplementation(() => { });
+jest.spyOn(console, 'error').mockImplementation(() => { });
+jest.spyOn(console, 'warn').mockImplementationOnce(() => { });
+
+global.fetch = () => Promise.resolve({ data: 'data' });
+
+describe('reactHtml', () => {
   const appHtml = '<p>Why, hello!</p>';
 
-  let req;
-  let res;
+  let request;
+  let reply;
 
   const setFullMap = () => {
     setClientModuleMapCache({
@@ -178,7 +209,7 @@ describe('sendHtml', () => {
         },
       },
     });
-    req.clientModuleMapCache = getClientModuleMapCache();
+    request.clientModuleMapCache = getClientModuleMapCache();
   };
 
   beforeEach(() => {
@@ -203,19 +234,14 @@ describe('sendHtml', () => {
     });
     jest.resetModules();
     jest.clearAllMocks();
-    req = jest.fn();
-    req.headers = {
+
+    request = jest.fn();
+    request.headers = {
       // we need a legitimate user-agent string here to test between modern and legacy browsers
       'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36',
     };
-
-    res = jest.fn();
-    res.status = jest.fn(() => res);
-    res.send = jest.fn(() => res);
-    res.redirect = jest.fn(() => res);
-    res.end = jest.fn(() => res);
-    req.url = 'http://example.com/request';
-    req.store = {
+    request.url = 'http://example.com/request';
+    request.store = {
       dispatch: jest.fn(),
       getState: jest.fn(() => fromJS({
         holocron: fromJS({
@@ -225,8 +251,18 @@ describe('sendHtml', () => {
         rendering: fromJS({}),
       })),
     };
-    req.clientModuleMapCache = getClientModuleMapCache();
-    req.appHtml = appHtml;
+    request.clientModuleMapCache = getClientModuleMapCache();
+    request.appHtml = appHtml;
+
+    reply = jest.fn();
+    reply.status = jest.fn(() => reply);
+    reply.code = jest.fn(() => reply);
+    reply.send = jest.fn(() => reply);
+    reply.redirect = jest.fn(() => reply);
+    reply.type = jest.fn(() => reply);
+    reply.code = jest.fn(() => reply);
+    reply.header = jest.fn(() => reply);
+    reply.request = request;
 
     getClientStateConfig.mockImplementation(() => ({
       cdnUrl: '/cdnUrl/',
@@ -245,59 +281,66 @@ describe('sendHtml', () => {
     );
   }
 
-  describe('middleware', () => {
+  describe('sendHtml', () => {
     it('sends a rendered page', () => {
-      sendHtml(req, res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(res.send.mock.calls[0][0]).toContain('<title>One App</title>');
+      sendHtml(request, reply);
 
-      expect(res.send.mock.calls[0][0]).toContain(appHtml);
-      expect(res.send.mock.calls[0][0]).toContain(
+      expect(console.error).not.toHaveBeenCalled();
+
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(reply.send.mock.calls[0][0]).toContain('<title>One App</title>');
+
+      expect(reply.send.mock.calls[0][0]).toContain(appHtml);
+      expect(reply.send.mock.calls[0][0]).toContain(
         'window.__webpack_public_path__ = "/cdnUrl/app/1.2.3-rc.4-abc123/";'
       );
-      expect(res.send.mock.calls[0][0]).toContain(
+      expect(reply.send.mock.calls[0][0]).toContain(
         'window.__holocron_module_bundle_type__ = \'browser\';'
       );
-      expect(res.send.mock.calls[0][0]).toContain(
+      expect(reply.send.mock.calls[0][0]).toContain(
         'window.__CLIENT_HOLOCRON_MODULE_MAP__ = {"modules":{"test-root":{"baseUrl":"https://example.com/cdn/test-root/2.2.2/","browser":{"url":"https://example.com/cdn/test-root/2.2.2/test-root.browser.js","integrity":"nggdfhr34"}}}};'
       );
-      expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
+      expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
     });
 
     it('sends a rendered page with the __holocron_module_bundle_type__ global set according to the user agent and the client module map that only includes the relevant details', () => {
       // MSIE indicates legacy IE
-      req.headers['user-agent'] = 'Browser/5.0 (compatible; MSIE 100.0; Doors TX 81.4; Layers/1.0)';
-      sendHtml(req, res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(res.send.mock.calls[0][0]).toContain('<title>One App</title>');
+      request.headers['user-agent'] = 'Browser/5.0 (compatible; MSIE 100.0; Doors TX 81.4; Layers/1.0)';
 
-      expect(res.send.mock.calls[0][0]).toContain(appHtml);
-      expect(res.send.mock.calls[0][0]).toContain(
+      sendHtml(request, reply);
+
+      expect(console.error).not.toHaveBeenCalled();
+
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(reply.send.mock.calls[0][0]).toContain('<title>One App</title>');
+
+      expect(reply.send.mock.calls[0][0]).toContain(appHtml);
+      expect(reply.send.mock.calls[0][0]).toContain(
         'window.__holocron_module_bundle_type__ = \'legacyBrowser\';'
       );
-      expect(res.send.mock.calls[0][0]).toContain(
+      expect(reply.send.mock.calls[0][0]).toContain(
         'window.__CLIENT_HOLOCRON_MODULE_MAP__ = {"modules":{"test-root":{"baseUrl":"https://example.com/cdn/test-root/2.2.2/","legacyBrowser":{"url":"https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js","integrity":"7567ee"}}}};'
       );
-      expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
+      expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
     });
 
     it('sends a rendered page with defaults', () => {
       getClientStateConfig.mockImplementation(() => ({}));
-      sendHtml(req, res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(res.send.mock.calls[0][0]).toContain('<title>One App</title>');
-      expect(res.send.mock.calls[0][0]).toContain(appHtml);
-      expect(res.send.mock.calls[0][0]).toContain(
+      sendHtml(request, reply);
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(reply.send.mock.calls[0][0]).toContain('<title>One App</title>');
+      expect(reply.send.mock.calls[0][0]).toContain(appHtml);
+      expect(reply.send.mock.calls[0][0]).toContain(
         'window.__webpack_public_path__ = "/_/static/app/1.2.3-rc.4-abc123/";'
       );
-      expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
+      expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
     });
 
     it('sends a rendered page with helmet info', () => {
-      req.helmetInfo = {
+      request.helmetInfo = {
         htmlAttributes: { toString: jest.fn(() => 'htmlAttributes') },
         bodyAttributes: { toString: jest.fn(() => 'bodyAttributes') },
         title: { toString: jest.fn(() => '<title>title</title>') },
@@ -307,49 +350,49 @@ describe('sendHtml', () => {
         link: { toString: jest.fn(() => '<link rel="stylesheet" />') },
         base: { toString: jest.fn(() => '<base>') },
       };
-      sendHtml(req, res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(res.send.mock.calls[0][0]).toContain('<html htmlAttributes>');
+      sendHtml(request, reply);
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(reply.send.mock.calls[0][0]).toContain('<html htmlAttributes>');
 
-      expect(res.send.mock.calls[0][0]).not.toContain('<title>One App</title>');
-      expect(res.send.mock.calls[0][0]).toContain('<title>title</title>');
+      expect(reply.send.mock.calls[0][0]).not.toContain('<title>One App</title>');
+      expect(reply.send.mock.calls[0][0]).toContain('<title>title</title>');
 
-      expect(res.send.mock.calls[0][0]).toContain('<meta>');
-      expect(res.send.mock.calls[0][0]).toContain('<body bodyAttributes>');
-      expect(res.send.mock.calls[0][0]).toContain('<style>.style</style>');
-      expect(res.send.mock.calls[0][0]).toContain('<script>/*script*/</script>');
-      expect(res.send.mock.calls[0][0]).toContain('<link rel="stylesheet" />');
-      expect(res.send.mock.calls[0][0]).toContain('<base>');
+      expect(reply.send.mock.calls[0][0]).toContain('<meta>');
+      expect(reply.send.mock.calls[0][0]).toContain('<body bodyAttributes>');
+      expect(reply.send.mock.calls[0][0]).toContain('<style>.style</style>');
+      expect(reply.send.mock.calls[0][0]).toContain('<script>/*script*/</script>');
+      expect(reply.send.mock.calls[0][0]).toContain('<link rel="stylesheet" />');
+      expect(reply.send.mock.calls[0][0]).toContain('<base>');
 
-      expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
+      expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
     });
 
     it('sends a rendered page with the one-app script tags', () => {
-      sendHtml(req, res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/bundle~common.js" integrity="1234" crossorigin="anonymous"></script>');
-      expect(res.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/app.js" integrity="098" crossorigin="anonymous"></script>');
+      sendHtml(request, reply);
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/bundle~common.js" integrity="1234" crossorigin="anonymous"></script>');
+      expect(reply.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/app.js" integrity="098" crossorigin="anonymous"></script>');
     });
 
     it('sends a rendered page with the legacy app bundle according to the user agent', () => {
       // rv:11 indicates IE 11  on mobile
-      req.headers['user-agent'] = 'Browser/5.0 (compatible; NUEI 100.0; Doors TX 81.4; rv:11)';
-      sendHtml(req, res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/legacy/bundle~common.js" integrity="abc" crossorigin="anonymous"></script>');
-      expect(res.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/legacy/app.js" integrity="zyx" crossorigin="anonymous"></script>');
+      request.headers['user-agent'] = 'Browser/5.0 (compatible; NUEI 100.0; Doors TX 81.4; rv:11)';
+      sendHtml(request, reply);
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/legacy/bundle~common.js" integrity="abc" crossorigin="anonymous"></script>');
+      expect(reply.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/legacy/app.js" integrity="zyx" crossorigin="anonymous"></script>');
     });
 
     it('sends a rendered page with the locale data script tag', () => {
-      sendHtml(req, res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/i18n/en-US.js"');
+      sendHtml(request, reply);
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/i18n/en-US.js"');
     });
 
     it('sends a rendered page without the locale data script tag when the activeLocale is not known', () => {
       setFullMap();
-      req.store = {
+      request.store = {
         dispatch: jest.fn(),
         getState: jest.fn(() => fromJS({
           holocron: fromJS({
@@ -359,100 +402,100 @@ describe('sendHtml', () => {
           rendering: fromJS({}),
         })),
       };
-      sendHtml(req, res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).not.toContain('src="/cdnUrl/app/1.2.3-rc.4-abc123/i18n/');
+      sendHtml(request, reply);
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).not.toContain('src="/cdnUrl/app/1.2.3-rc.4-abc123/i18n/');
     });
 
     it('sends a rendered page with the module styles and scripts', () => {
-      sendHtml(req, res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain(
+      sendHtml(request, reply);
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain(
         '<style class="ssr-css">.class { background: red; }</style>'
       );
-      expect(res.send.mock.calls[0][0]).toContain(
+      expect(reply.send.mock.calls[0][0]).toContain(
         '<script src="/cdnUrl/app/1.2.3-rc.4-abc123/i18n/en-US.js" crossorigin="anonymous"></script>'
       );
-      expect(res.send.mock.calls[0][0]).toContain(
+      expect(reply.send.mock.calls[0][0]).toContain(
         '<script src="/cdnUrl/app/1.2.3-rc.4-abc123/bundle~common.js" integrity="1234" crossorigin="anonymous"></script>'
       );
-      expect(res.send.mock.calls[0][0]).toContain(
+      expect(reply.send.mock.calls[0][0]).toContain(
         '<script src="/cdnUrl/app/1.2.3-rc.4-abc123/app.js" integrity="098" crossorigin="anonymous"></script>'
       );
-      expect(res.send.mock.calls[0][0]).toContain(
+      expect(reply.send.mock.calls[0][0]).toContain(
         '<script src="https://example.com/cdn/test-root/2.2.2/test-root.browser.js'
       );
     });
 
     it('sends the static error page when the store malfunctions', () => {
-      req.store = {
+      request.store = {
         getState: jest.fn(() => { throw new Error('cannot get state'); }),
       };
       /* eslint-disable no-console */
-      sendHtml(req, res);
+      sendHtml(request, reply);
       expect(console.error).toHaveBeenCalled();
       /* eslint-enable no-console */
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(res.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
-      expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(reply.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
+      expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
     });
 
     it('sends the static error page when appHtml is not a string', () => {
-      req.appHtml = [1, 2, 3];
+      request.appHtml = [1, 2, 3];
       /* eslint-disable no-console */
-      sendHtml(req, res);
+      sendHtml(request, reply);
       expect(console.error).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
+      expect(reply.code).toHaveBeenCalledWith(500);
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
       /* eslint-enable no-console */
     });
 
     it('sends a page with an empty div#root when appHtml is undefined', () => {
-      delete req.appHtml;
-      sendHtml(req, res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(res.send.mock.calls[0][0]).not.toContain(appHtml);
-      expect(res.send.mock.calls[0][0]).toContain('<div id="root"></div>');
+      delete request.appHtml;
+      sendHtml(request, reply);
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(reply.send.mock.calls[0][0]).not.toContain(appHtml);
+      expect(reply.send.mock.calls[0][0]).toContain('<div id="root"></div>');
     });
 
     it('includes scriptNonce when provided', () => {
-      res.scriptNonce = '54321';
-      sendHtml(req, res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(/<script.*nonce="54321"/.test(res.send.mock.calls[0][0])).toBe(true);
+      request.scriptNonce = '54321';
+      sendHtml(request, reply);
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(/<script.*nonce="54321"/.test(reply.send.mock.calls[0][0])).toBe(true);
     });
 
     describe('render modes', () => {
       test('render mode is "hydrate" by default', () => {
-        sendHtml(req, res);
-        expect(res.send).toHaveBeenCalledTimes(1);
-        expect(res.send.mock.calls[0][0]).toContain("window.__render_mode__ = 'hydrate';");
+        sendHtml(request, reply);
+        expect(reply.send).toHaveBeenCalledTimes(1);
+        expect(reply.send.mock.calls[0][0]).toContain("window.__render_mode__ = 'hydrate';");
       });
 
       test('render mode is "render" when set', () => {
-        sendHtml({ ...req, renderMode: 'render' }, res);
-        expect(res.send).toHaveBeenCalledTimes(1);
-        expect(res.send.mock.calls[0][0]).toContain("window.__render_mode__ = 'render';");
+        sendHtml({ ...request, renderMode: 'render' }, reply);
+        expect(reply.send).toHaveBeenCalledTimes(1);
+        expect(reply.send.mock.calls[0][0]).toContain("window.__render_mode__ = 'render';");
       });
     });
 
     describe('dynamic chunks', () => {
       it('does not add service-worker-client.js to the document script tags', () => {
-        sendHtml(req, res);
-        expect(res.send).toHaveBeenCalledTimes(1);
-        expect(res.send.mock.calls[0][0]).not.toContain('service-worker-client.js');
+        sendHtml(request, reply);
+        expect(reply.send).toHaveBeenCalledTimes(1);
+        expect(reply.send.mock.calls[0][0]).not.toContain('service-worker-client.js');
       });
     });
 
     describe('PWA config rendering', () => {
       it('includes __pwa_metadata__ with disabled values', () => {
-        sendHtml(req, res);
-        expect(res.send).toHaveBeenCalledTimes(1);
-        expect(res.send.mock.calls[0][0]).toContain('window.__pwa_metadata__ = {"serviceWorker":false');
+        sendHtml(request, reply);
+        expect(reply.send).toHaveBeenCalledTimes(1);
+        expect(reply.send.mock.calls[0][0]).toContain('window.__pwa_metadata__ = {"serviceWorker":false');
       });
 
       it('includes __pwa_metadata__ with enabled values', () => {
@@ -463,18 +506,18 @@ describe('sendHtml', () => {
           webManifestUrl: '/_/pwa/manifest.webmanifest',
           offlineUrl: '/_/pwa/shell',
         }));
-        sendHtml(req, res);
-        expect(res.send).toHaveBeenCalledTimes(1);
-        expect(res.send.mock.calls[0][0]).toContain(
+        sendHtml(request, reply);
+        expect(reply.send).toHaveBeenCalledTimes(1);
+        expect(reply.send.mock.calls[0][0]).toContain(
           'window.__pwa_metadata__ = {"serviceWorker":true,"serviceWorkerScope":"/","serviceWorkerScriptUrl":"/_/pwa/service-worker.js","webManifestUrl":"/_/pwa/manifest.webmanifest","offlineUrl":"/_/pwa/shell"};'
         );
-        expect(/<link rel="manifest" href="\/_\/pwa\/manifest\.webmanifest">/.test(res.send.mock.calls[0][0])).toBe(true);
+        expect(/<link rel="manifest" href="\/_\/pwa\/manifest\.webmanifest">/.test(reply.send.mock.calls[0][0])).toBe(true);
       });
     });
 
     describe('renderPartialOnly', () => {
       beforeEach(() => {
-        req.store = {
+        request.store = {
           dispatch: jest.fn(),
           getState: jest.fn(() => fromJS({
             holocron: fromJS({
@@ -489,32 +532,32 @@ describe('sendHtml', () => {
         setFullMap();
       });
 
-      afterEach(() => { req.appHtml = appHtml; });
+      afterEach(() => { request.appHtml = appHtml; });
 
       it('sends an incomplete HTML document with styles', () => {
-        sendHtml(req, res);
-        expect(res.send).toHaveBeenCalledTimes(1);
-        expect(res.send.mock.calls[0][0]).not.toContain('<!DOCTYPE html>');
-        expect(res.send.mock.calls[0][0]).not.toContain('<title>One App</title>');
+        sendHtml(request, reply);
+        expect(reply.send).toHaveBeenCalledTimes(1);
+        expect(reply.send.mock.calls[0][0]).not.toContain('<!DOCTYPE html>');
+        expect(reply.send.mock.calls[0][0]).not.toContain('<title>One App</title>');
 
-        expect(res.send.mock.calls[0][0]).toBe(`<style class="ssr-css">.class { background: red; }</style>${appHtml}`);
-        expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
+        expect(reply.send.mock.calls[0][0]).toBe(`<style class="ssr-css">.class { background: red; }</style>${appHtml}`);
+        expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
       });
 
       it('sends an complete HTML document with styles in the head', () => {
-        req.appHtml = `<dangerously-return-only-doctype><!doctype html><html><head><title>Some Title</title></head>${appHtml}</html></dangerously-return-only-doctype>`;
-        sendHtml(req, res);
-        expect(res.send).toHaveBeenCalledTimes(1);
-        expect(res.send.mock.calls[0][0]).not.toContain('<!DOCTYPE html>');
-        expect(res.send.mock.calls[0][0]).not.toContain('<title>One App</title>');
+        request.appHtml = `<dangerously-return-only-doctype><!doctype html><html><head><title>Some Title</title></head>${appHtml}</html></dangerously-return-only-doctype>`;
+        sendHtml(request, reply);
+        expect(reply.send).toHaveBeenCalledTimes(1);
+        expect(reply.send.mock.calls[0][0]).not.toContain('<!DOCTYPE html>');
+        expect(reply.send.mock.calls[0][0]).not.toContain('<title>One App</title>');
 
-        expect(res.send.mock.calls[0][0]).toBe(`<!doctype html><html><head><title>Some Title</title><style class="ssr-css">.class { background: red; }</style></head>${appHtml}</html>`);
-        expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
+        expect(reply.send.mock.calls[0][0]).toBe(`<!doctype html><html><head><title>Some Title</title><style class="ssr-css">.class { background: red; }</style></head>${appHtml}</html>`);
+        expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
       });
 
       it('sends an incomplete HTML document without styles', () => {
-        req.appHtml = `<dangerously-return-only-doctype><!doctype html><html><head><title>Some Title</title></head>${appHtml}</html></dangerously-return-only-doctype>`;
-        req.store.getState.mockImplementationOnce(() => fromJS({
+        request.appHtml = `<dangerously-return-only-doctype><!doctype html><html><head><title>Some Title</title></head>${appHtml}</html></dangerously-return-only-doctype>`;
+        request.store.getState.mockImplementationOnce(() => fromJS({
           holocron: fromJS({
             loaded: ['a'],
           }),
@@ -524,15 +567,15 @@ describe('sendHtml', () => {
             disableStyles: true,
           }),
         }));
-        sendHtml(req, res);
-        expect(res.send).toHaveBeenCalledTimes(1);
-        expect(res.send.mock.calls[0][0]).toBe(`<!doctype html><html><head><title>Some Title</title></head>${appHtml}</html>`);
+        sendHtml(request, reply);
+        expect(reply.send).toHaveBeenCalledTimes(1);
+        expect(reply.send.mock.calls[0][0]).toBe(`<!doctype html><html><head><title>Some Title</title></head>${appHtml}</html>`);
       });
     });
 
     describe('renderTextOnly', () => {
       beforeEach(() => {
-        req.store = {
+        request.store = {
           dispatch: jest.fn(),
           getState: jest.fn(() => fromJS({
             holocron: fromJS({
@@ -548,26 +591,28 @@ describe('sendHtml', () => {
         setFullMap();
       });
 
-      afterEach(() => { req.appHtml = appHtml; });
+      afterEach(() => { request.appHtml = appHtml; });
 
       it('sends a text only response with no HTML present', () => {
-        req.appHtml = 'text only without html';
-        const fakeRes = {
-          send: jest.fn(),
-          setHeader: jest.fn(),
+        request.appHtml = 'text only without html';
+        const fakeReply = {
+          send: jest.fn(() => fakeReply),
+          code: jest.fn(() => fakeReply),
+          header: jest.fn(() => fakeReply),
         };
-        sendHtml(req, fakeRes);
-        expect(fakeRes.send).toHaveBeenCalledTimes(1);
-        expect(fakeRes.setHeader).toHaveBeenCalledWith('content-type', 'text/plain');
-        expect(fakeRes.send.mock.calls[0][0]).not.toContain('<!DOCTYPE html>');
-        expect(fakeRes.send.mock.calls[0][0]).not.toContain('<body');
-        expect(fakeRes.send.mock.calls[0][0]).toBe(req.appHtml);
+        sendHtml(request, fakeReply);
+        expect(console.error).not.toHaveBeenCalled();
+        expect(fakeReply.send).toHaveBeenCalledTimes(1);
+        expect(fakeReply.header).toHaveBeenCalledWith('content-type', 'text/plain; charset=utf-8');
+        expect(fakeReply.send.mock.calls[0][0]).not.toContain('<!DOCTYPE html>');
+        expect(fakeReply.send.mock.calls[0][0]).not.toContain('<body');
+        expect(fakeReply.send.mock.calls[0][0]).toBe(request.appHtml);
       });
     });
 
     describe('disableScripts', () => {
       beforeEach(() => {
-        req.store = {
+        request.store = {
           dispatch: jest.fn(),
           getState: jest.fn(() => fromJS({
             holocron: fromJS({
@@ -583,24 +628,24 @@ describe('sendHtml', () => {
       });
 
       it('sends a rendered page', () => {
-        sendHtml(req, res);
-        expect(res.send).toHaveBeenCalledTimes(1);
-        expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-        expect(res.send.mock.calls[0][0]).toContain('<title>One App</title>');
+        sendHtml(request, reply);
+        expect(reply.send).toHaveBeenCalledTimes(1);
+        expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+        expect(reply.send.mock.calls[0][0]).toContain('<title>One App</title>');
 
-        expect(res.send.mock.calls[0][0]).toContain(appHtml);
-        expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
+        expect(reply.send.mock.calls[0][0]).toContain(appHtml);
+        expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
       });
 
       it('prevents global state from being added to rendered page', () => {
-        sendHtml(req, res);
-        expect(res.send.mock.calls[0][0]).not.toContain('window.__webpack_public_path__');
-        expect(res.send.mock.calls[0][0]).not.toContain('window.__holocron_modules_path__');
-        expect(res.send.mock.calls[0][0]).not.toContain('window.__INITIAL_STATE__');
+        sendHtml(request, reply);
+        expect(reply.send.mock.calls[0][0]).not.toContain('window.__webpack_public_path__');
+        expect(reply.send.mock.calls[0][0]).not.toContain('window.__holocron_modules_path__');
+        expect(reply.send.mock.calls[0][0]).not.toContain('window.__INITIAL_STATE__');
       });
 
       it('prevents all scripts from being added to rendered page', () => {
-        req.helmetInfo = {
+        request.helmetInfo = {
           htmlAttributes: { toString: jest.fn(() => 'htmlAttributes') },
           bodyAttributes: { toString: jest.fn(() => 'bodyAttributes') },
           title: { toString: jest.fn(() => '<title>title</title>') },
@@ -610,14 +655,14 @@ describe('sendHtml', () => {
           link: { toString: jest.fn(() => '<link rel="stylesheet" /><link rel="icon" href="favicon.ico" />') },
           base: { toString: jest.fn(() => '<base>') },
         };
-        sendHtml(req, res);
-        expect(res.send.mock.calls[0][0]).not.toContain('<script');
+        sendHtml(request, reply);
+        expect(reply.send.mock.calls[0][0]).not.toContain('<script');
       });
     });
 
     describe('disableStyles', () => {
       beforeEach(() => {
-        req.store = {
+        request.store = {
           dispatch: jest.fn(),
           getState: jest.fn(() => fromJS({
             holocron: fromJS({
@@ -633,9 +678,9 @@ describe('sendHtml', () => {
       });
 
       it('prevents all stylesheets from being added to the rendered page', () => {
-        req.clientModuleMapCache = getClientModuleMapCache();
+        request.clientModuleMapCache = getClientModuleMapCache();
         process.env.NODE_ENV = 'production';
-        req.helmetInfo = {
+        request.helmetInfo = {
           htmlAttributes: { toString: jest.fn(() => 'htmlAttributes') },
           bodyAttributes: { toString: jest.fn(() => 'bodyAttributes') },
           title: { toString: jest.fn(() => '<title>title</title>') },
@@ -645,14 +690,14 @@ describe('sendHtml', () => {
           link: { toString: jest.fn(() => '<link rel="stylesheet" /><link rel="icon" href="favicon.ico" />') },
           base: { toString: jest.fn(() => '<base>') },
         };
-        sendHtml(req, res);
-        expect(res.send.mock.calls[0][0]).not.toContain('<link rel="stylesheet"');
-        expect(res.send.mock.calls[0][0]).toContain('<link rel="icon" href="favicon.ico" />');
+        sendHtml(request, reply);
+        expect(reply.send.mock.calls[0][0]).not.toContain('<link rel="stylesheet"');
+        expect(reply.send.mock.calls[0][0]).toContain('<link rel="icon" href="favicon.ico" />');
       });
 
       it('prevents all style tags from being added to the rendered page', () => {
         process.env.NODE_ENV = 'production';
-        req.helmetInfo = {
+        request.helmetInfo = {
           htmlAttributes: { toString: jest.fn(() => 'htmlAttributes') },
           bodyAttributes: { toString: jest.fn(() => 'bodyAttributes') },
           title: { toString: jest.fn(() => '<title>title</title>') },
@@ -662,8 +707,8 @@ describe('sendHtml', () => {
           link: { toString: jest.fn(() => '<link rel="stylesheet" /><link rel="icon" href="favicon.ico" />') },
           base: { toString: jest.fn(() => '<base>') },
         };
-        sendHtml(req, res);
-        expect(res.send.mock.calls[0][0]).not.toContain('<style');
+        sendHtml(request, reply);
+        expect(reply.send.mock.calls[0][0]).not.toContain('<style');
       });
     });
   });
@@ -696,7 +741,7 @@ describe('sendHtml', () => {
 
     it('adds cache busting clientCacheRevision from module map to each module script src if NODE_ENV is production', () => {
       expect(renderModuleScripts({
-        clientInitialState: req.store.getState(),
+        clientInitialState: request.store.getState(),
         moduleMap: clientModuleMapCache.browser,
         isDevelopmentEnv: false,
         bundle: 'browser',
@@ -705,7 +750,7 @@ describe('sendHtml', () => {
 
     it('does not add cache busting clientCacheRevision from module map to each module script src if NODE_ENV is development', () => {
       expect(renderModuleScripts({
-        clientInitialState: req.store.getState(),
+        clientInitialState: request.store.getState(),
         moduleMap: clientModuleMapCache.browser,
         isDevelopmentEnv: true,
         bundle: 'browser',
@@ -716,7 +761,7 @@ describe('sendHtml', () => {
       const moduleMap = { ...clientModuleMapCache.browser };
       delete moduleMap.clientCacheRevision;
       expect(renderModuleScripts({
-        clientInitialState: req.store.getState(),
+        clientInitialState: request.store.getState(),
         moduleMap,
         isDevelopmentEnv: false,
         bundle: 'browser',
@@ -725,7 +770,7 @@ describe('sendHtml', () => {
 
     it('sends a rendered page with cross origin scripts', () => {
       expect(renderModuleScripts({
-        clientInitialState: req.store.getState(),
+        clientInitialState: request.store.getState(),
         moduleMap: clientModuleMapCache.browser,
         isDevelopmentEnv: true,
         bundle: 'browser',
@@ -788,24 +833,24 @@ describe('sendHtml', () => {
         .mockImplementationOnce(() => 'this is the cache clean call')
         .mockImplementationOnce(() => 'serialized bare state possible');
 
-      sendHtml(req, res);
+      sendHtml(request, reply);
       /* eslint-disable no-console */
       expect(console.error).toHaveBeenCalledTimes(1);
       expect(console.error).toHaveBeenCalledWith('encountered an error serializing full client initial state', fullStateError);
       /* eslint-enable no-console */
       expect(transit.toJSON).toHaveBeenCalledTimes(3);
 
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
 
-      expect(res.send.mock.calls[0][0]).toContain(appHtml);
-      expect(res.send.mock.calls[0][0]).toContain(
+      expect(reply.send.mock.calls[0][0]).toContain(appHtml);
+      expect(reply.send.mock.calls[0][0]).toContain(
         'window.__webpack_public_path__ = "/cdnUrl/app/1.2.3-rc.4-abc123/";'
       );
-      expect(res.send.mock.calls[0][0]).toContain(
+      expect(reply.send.mock.calls[0][0]).toContain(
         'window.__INITIAL_STATE__ = "serialized bare state possible";'
       );
-      expect(removeInitialState(res.send.mock.calls[0][0])).not.toContain('undefined');
+      expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
     });
 
     it('logs when even the base state possible cannot be serialized', () => {
@@ -818,7 +863,7 @@ describe('sendHtml', () => {
         .mockImplementationOnce(() => { throw minimalStateError; })
         .mockImplementationOnce(() => 'second cache clean call');
 
-      sendHtml(req, res);
+      sendHtml(request, reply);
       /* eslint-disable no-console */
       expect(console.error).toHaveBeenCalledTimes(3);
       expect(console.error).toHaveBeenCalledWith('encountered an error serializing full client initial state', fullStateError);
@@ -826,241 +871,168 @@ describe('sendHtml', () => {
       /* eslint-enable no-console */
       expect(transit.toJSON).toHaveBeenCalledTimes(4);
 
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(res.send.mock.calls[0][0]).toContain('<title>One App</title>');
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(reply.send.mock.calls[0][0]).toContain('<title>One App</title>');
 
-      expect(res.send.mock.calls[0][0]).not.toContain(appHtml);
-      expect(res.send.mock.calls[0][0]).toContain(
+      expect(reply.send.mock.calls[0][0]).not.toContain(appHtml);
+      expect(reply.send.mock.calls[0][0]).toContain(
         'Sorry, we are unable to load this page at this time. Please try again later.'
       );
     });
   });
 
-  describe('renderStaticErrorPage', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-    it('sends default static error page', () => {
-      renderStaticErrorPage(res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(res.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
-    });
+  describe('checkStateForRedirectAndStatusCode', () => {
+    const destination = 'http://example.com/';
+    let state = fromJS({ redirection: { destination: null } });
+    const req = { store: { getState: () => state } };
+    const res = { redirect: jest.fn(), code: jest.fn() };
 
-    it('sets the status code to 500 if not already set', () => {
-      delete res.statusCode;
-      renderStaticErrorPage(res);
-      expect(res.status).toHaveBeenCalledWith(500);
+    beforeEach(() => jest.clearAllMocks());
+
+    it('should redirect if there is a destination', () => {
+      state = fromJS({ redirection: { destination } });
+      checkStateForRedirectAndStatusCode(req, res);
+      expect(res.redirect).toHaveBeenCalledWith(302, destination);
     });
 
-    it('does not change the status code if already set', () => {
-      res.statusCode = 400;
-      renderStaticErrorPage(res);
-      expect(res.status).not.toHaveBeenCalled();
+    it('should got to the next middleware if there is no destination', () => {
+      state = fromJS({ redirection: { destination: null } });
+      checkStateForRedirectAndStatusCode(req, res);
+      expect(res.redirect).not.toHaveBeenCalled();
     });
 
-    it('invites the user to try again if the status code is 5xx level', () => {
-      res.statusCode = 500;
-      renderStaticErrorPage(res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('Sorry, we are unable to load this page at this time. Please try again later.');
+    it('sets the status code', () => {
+      state = fromJS({ redirection: { destination: null }, error: { code: 500 } });
+      checkStateForRedirectAndStatusCode(req, res);
+      expect(res.redirect).not.toHaveBeenCalled();
+      expect(res.code).toHaveBeenCalledWith(500);
     });
 
-    it('invites the user to try again if the status code is 404', () => {
-      res.statusCode = 404;
-      renderStaticErrorPage(res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('Sorry, we are unable to load this page at this time. Please try again later.');
-    });
-
-    it('does not invite the user to try again if the status code is 4xx level and not 404', () => {
-      res.statusCode = 400;
-      renderStaticErrorPage(res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('Sorry, we are unable to load this page at this time.');
-      expect(res.send.mock.calls[0][0]).not.toContain('Please try again later.');
-    });
-
-    it('does not send any serializations of non-strings', () => {
-      renderStaticErrorPage(res);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(res.send.mock.calls[0][0]).not.toMatch('[object ');
-      expect(res.send.mock.calls[0][0]).not.toContain('undefined');
-    });
-    it('returns default error page if fetching custom error page url fails', async () => {
-      const errorPageUrl = 'https://example.com';
-      const fetchError = new Error('getaddrinfo ENOTFOUND');
-      global.fetch = jest.fn(() => Promise.reject(fetchError));
-
-      await setErrorPage(errorPageUrl);
-      renderStaticErrorPage(res);
-
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(res.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
-    });
-    it('uses the default error page if custom error page does not 200', async () => {
-      const errorPageUrl = 'https://example.com';
-      const statusCode = 500;
-
-      global.fetch = jest.fn(() => Promise.resolve({
-        headers: new global.Headers({
-          'Content-Type': 'text/html',
-        }),
-        status: statusCode,
-      }));
-
-      await setErrorPage(errorPageUrl);
-      renderStaticErrorPage(res);
-
-      const data = await global.fetch.mock.results[0].value;
-
-      expect(global.fetch).toHaveBeenCalledTimes(1);
-      expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
-      expect(await data.timeout).toBe(6000);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(console.warn).toHaveBeenCalledWith('Failed to fetch custom error page with status:', statusCode);
-      expect(res.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(res.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
-      expect(res.send.mock.calls[0][0]).toContain('Sorry, we are unable to load this page at this time. Please try again later.');
-    });
-    it('returns a custom error page if provided', async () => {
-      const errorPageUrl = 'https://example.com';
-      const mockResponse = `<!doctype html>
-      <html>
-      <head>
-        <title>Custom Error Page</title>
-        <meta charset="utf-8" />
-        <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </head>
-      <body>
-        <div>
-          <h1>Custom Error Page</h1>
-          <p>This is a custom error page.</p>
-        </div>
-      </body>
-      </html>`;
-
-      global.fetch = jest.fn(() => Promise.resolve({
-        text: () => Promise.resolve(mockResponse),
-        headers: new global.Headers({
-          'Content-Type': 'text/html',
-        }),
-        status: 200,
-      }));
-
-      await setErrorPage(errorPageUrl);
-      renderStaticErrorPage(res);
-
-      const data = await global.fetch.mock.results[0].value;
-
-      expect(global.fetch).toHaveBeenCalledTimes(1);
-      expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
-      expect(await data.text()).toBe(mockResponse);
-      expect(await data.timeout).toBe(6000);
-      expect(res.send).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toContain('<!doctype html>');
-      expect(res.send.mock.calls[0][0]).toContain('<h1>Custom Error Page</h1>');
+    it('does nothing', () => {
+      state = fromJS({ redirection: { destination: null }, error: {} });
+      checkStateForRedirectAndStatusCode(req, res);
+      expect(res.redirect).not.toHaveBeenCalled();
+      expect(res.code).not.toHaveBeenCalled();
     });
   });
 
-  describe('setErrorPage', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
+  describe('plugin', () => {
+    describe('unwanted extension', () => {
+      const app = Fastify();
+
+      app.register(reactHtml);
+
+      // eslint-disable-next-line no-shadow
+      app.get('/*', (_request, reply) => {
+        reply.sendHtml();
+      });
+
+      it('renders not found when url contains json', async () => {
+        const response = await app.inject({
+          method: 'get',
+          url: '/test.json',
+        });
+
+        expect(response.statusCode).toBe(404);
+        expect(response.body).toBe('Not found');
+      });
+
+      it('renders not found when url contains js', async () => {
+        const response = await app.inject({
+          method: 'get',
+          url: '/test.js',
+        });
+
+        expect(response.statusCode).toBe(404);
+        expect(response.body).toBe('Not found');
+      });
+
+      it('renders not found when url contains css', async () => {
+        const response = await app.inject({
+          method: 'get',
+          url: '/test.css',
+        });
+
+        expect(response.statusCode).toBe(404);
+        expect(response.body).toBe('Not found');
+      });
+
+      it('renders not found when url contains map', async () => {
+        const response = await app.inject({
+          method: 'get',
+          url: '/test.map',
+        });
+
+        expect(response.statusCode).toBe(404);
+        expect(response.body).toBe('Not found');
+      });
     });
-    const errorPageUrl = 'https://example.com';
-    const mockResponse = `<!doctype html>
-  <html>
-  <head>
-    <title>Custom Error Page</title>
-    <meta charset="utf-8" />
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-  </head>
-  <body>
-    <div>
-      <h1>Custom Error Page</h1>
-      <p>This is a custom error page.</p>
-    </div>
-  </body>
-  </html>`;
-    it('fetches errorPageUrl', async () => {
-      global.fetch = jest.fn(() => Promise.resolve({
-        text: () => Promise.resolve(mockResponse),
-        headers: new global.Headers({
-          'Content-Type': 'text/html',
-        }),
-        status: 200,
+
+    test('calls the expected hooks to render pwa html shell', async () => {
+      getServerPWAConfig.mockImplementationOnce(() => ({
+        serviceWorker: true,
       }));
 
-      setErrorPage(errorPageUrl);
+      request.url = '/_/pwa/shell';
 
-      const data = await global.fetch.mock.results[0].value;
-
-      expect(global.fetch).toHaveBeenCalledTimes(1);
-      expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
-      expect(await data.text()).toBe(mockResponse);
-      expect(await data.timeout).toBe(6000);
-    });
-
-    it('warns if content-type is not text/html', async () => {
-      global.fetch = jest.fn(() => Promise.resolve({
-        text: () => Promise.resolve(mockResponse),
-        headers: new global.Headers({
-          'Content-Type': 'text/plain',
-        }),
-        status: 200,
-      }));
-
-      await setErrorPage(errorPageUrl);
-      expect(console.warn).toHaveBeenCalledTimes(1);
-      expect(console.warn).toHaveBeenCalledWith('[appConfig/errorPageUrl] Content-Type was not of type text/html and may not render correctly');
-    });
-
-    it('warns if url cannot be fetched', async () => {
-      const fetchError = new Error('getaddrinfo ENOTFOUND');
-      global.fetch = jest.fn(() => Promise.reject(fetchError));
-
-      await setErrorPage(errorPageUrl);
-      expect(console.warn).toHaveBeenCalledTimes(1);
-      expect(console.warn).toHaveBeenCalledWith('Could not fetch the URL', fetchError);
-    });
-
-    it('warns if content-length is greater than 244Kb', async () => {
-      global.fetch = jest.fn(() => Promise.resolve({
-        text: () => Promise.resolve(mockResponse),
-        headers: new global.Headers({
-          'Content-Type': 'text/html',
-          'Content-Length': 750000,
-        }),
-        status: 200,
-      }));
-
-      await setErrorPage(errorPageUrl);
-      expect(console.warn).toHaveBeenCalledTimes(1);
-      expect(console.warn).toHaveBeenCalledWith('[appConfig/errorPageUrl] Content-Length is over 244Kb and may have an impact on performance');
-    });
-  });
-
-  describe('safeSend', () => {
-    it('should res.send if no headers were sent', () => {
-      const fakeRes = {
-        headersSent: false,
-        send: jest.fn(),
+      const fastify = {
+        decorateRequest: jest.fn(),
+        addHook: jest.fn(),
+        decorateReply: jest.fn(),
       };
-      safeSend(fakeRes, 'stuff');
-      expect(fakeRes.send).toHaveBeenCalledWith('stuff');
+      const done = jest.fn();
+
+      reactHtml(fastify, null, done);
+
+      await fastify.addHook.mock.calls[0][1](request, reply);
+
+      expect(fastify.addHook).toHaveBeenCalled();
+      expect(createRequestStoreHook).toHaveBeenCalled();
+      expect(conditionallyAllowCors).toHaveBeenCalled();
+      expect(done).toHaveBeenCalled();
     });
-    it('should do nothing if headers were already sent', () => {
-      const fakeRes = {
-        headersSent: true,
-        send: jest.fn(),
+
+    test('calls the expected hooks to render html', async () => {
+      getServerPWAConfig.mockImplementationOnce(() => ({
+        serviceWorker: false,
+      }));
+
+      const fastify = {
+        decorateRequest: jest.fn(),
+        addHook: jest.fn(),
+        decorateReply: jest.fn(),
       };
-      safeSend(fakeRes, 'stuff');
-      expect(fakeRes.send).not.toHaveBeenCalled();
+      const done = jest.fn();
+
+      reactHtml(fastify, null, done);
+
+      await fastify.addHook.mock.calls[0][1](request, reply);
+
+      expect(fastify.addHook).toHaveBeenCalled();
+      expect(createRequestStoreHook).toHaveBeenCalled();
+      expect(createRequestHtmlFragmentHook).toHaveBeenCalled();
+      expect(conditionallyAllowCors).toHaveBeenCalled();
+      expect(done).toHaveBeenCalled();
+    });
+
+    test('sendHtml reply decorator renders html', async () => {
+      const fastify = {
+        decorateRequest: jest.fn(),
+        addHook: jest.fn(),
+        decorateReply: jest.fn(),
+      };
+      const done = jest.fn();
+
+      reactHtml(fastify, null, done);
+
+      await fastify.decorateReply.mock.calls[0][1].bind(reply)(request, reply);
+
+      expect(console.error).not.toHaveBeenCalled();
+
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
+      expect(reply.send.mock.calls[0][0]).toContain('<title>One App</title>');
     });
   });
 });
