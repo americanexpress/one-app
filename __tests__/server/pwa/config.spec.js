@@ -19,7 +19,7 @@ import {
   getServerPWAConfig,
   getClientPWAConfig,
   configurePWA,
-} from '../../../../src/server/middleware/pwa/config';
+} from '../../../src/server/pwa/config';
 
 jest.mock('fs', () => ({
   existsSync: () => false,

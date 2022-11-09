@@ -16,12 +16,21 @@
 
 import { getWebAppManifestConfig } from './config';
 
-export default function webManifestMiddleware() {
-  return function webManifestMiddlewareHandler(req, res, next) {
-    const { webManifestEnabled, webManifest } = getWebAppManifestConfig();
-    if (!webManifestEnabled) return next();
-    return res
+/**
+ * Web Manifest handler for Fastify Route
+ * @param {import('fastify').FastifyRequest} _request Fastify Request object
+ * @param {import('fastify').FastifyReply} reply Fastify Reply object
+ */
+const webManifestHandler = (_request, reply) => {
+  const { webManifestEnabled, webManifest } = getWebAppManifestConfig();
+
+  if (webManifestEnabled) {
+    reply
       .type('application/manifest+json')
       .send(webManifest);
-  };
-}
+  } else {
+    reply.status(404).send('Not found');
+  }
+};
+
+export default webManifestHandler;
