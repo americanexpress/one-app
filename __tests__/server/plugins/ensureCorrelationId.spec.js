@@ -48,7 +48,7 @@ describe('ensureCorrelationId', () => {
     expect(request.headers).toHaveProperty('correlation-id', 'thunderstorms');
   });
 
-  it('adds a correlation-id header to a request without anything', () => {
+  it('adds a unique correlation-id to the request object', () => {
     const { fastify, request } = generateSamples();
     delete request.headers['correlation-id'];
     ensureCorrelationId(fastify, null, jest.fn());
