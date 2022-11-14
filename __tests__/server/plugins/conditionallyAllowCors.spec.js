@@ -35,74 +35,76 @@ const setup = ({ renderPartialOnly, origin }) => {
   request.store = { getState: () => state };
 };
 
-afterAll(() => {
-  process.env.NODE_ENV = NODE_ENV;
-});
+describe('conditionallyAllowCors', () => {
+  afterAll(() => {
+    process.env.NODE_ENV = NODE_ENV;
+  });
 
-it('allows CORS for HTML partials', async () => {
-  delete process.env.NODE_ENV;
-  setup({ renderPartialOnly: true, origin: 'test.example.com' });
-  setCorsOrigins([/\.example.com$/]);
+  it('allows CORS for HTML partials', async () => {
+    delete process.env.NODE_ENV;
+    setup({ renderPartialOnly: true, origin: 'test.example.com' });
+    setCorsOrigins([/\.example.com$/]);
 
-  const callback = jest.fn();
-  const fastify = {
-    register: jest.fn((_plugin, handler) => {
-      handler()(request, callback);
-    }),
-  };
+    const callback = jest.fn();
+    const fastify = {
+      register: jest.fn((_plugin, handler) => {
+        handler()(request, callback);
+      }),
+    };
 
-  await conditionallyAllowCors(fastify);
+    await conditionallyAllowCors(fastify);
 
-  expect(fastify.register).toHaveBeenCalledTimes(1);
-  expect(fastify.register).toHaveBeenCalledWith(fastifyCors, expect.any(Function));
-  expect(callback).toHaveBeenCalledTimes(1);
-  expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/] });
-});
+    expect(fastify.register).toHaveBeenCalledTimes(1);
+    expect(fastify.register).toHaveBeenCalledWith(fastifyCors, expect.any(Function));
+    expect(callback).toHaveBeenCalledTimes(1);
+    expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/] });
+  });
 
-it('allows CORS for localhost in development', async () => {
-  process.env.NODE_ENV = 'development';
-  setup({ renderPartialOnly: true, origin: 'localhost:8000' });
-  setCorsOrigins([/\.example.com$/]);
+  it('allows CORS for localhost in development', async () => {
+    process.env.NODE_ENV = 'development';
+    setup({ renderPartialOnly: true, origin: 'localhost:8000' });
+    setCorsOrigins([/\.example.com$/]);
 
-  const callback = jest.fn();
-  const fastify = {
-    register: jest.fn((_plugin, handler) => {
-      handler()(request, callback);
-    }),
-  };
+    const callback = jest.fn();
+    const fastify = {
+      register: jest.fn((_plugin, handler) => {
+        handler()(request, callback);
+      }),
+    };
 
-  await conditionallyAllowCors(fastify);
+    await conditionallyAllowCors(fastify);
 
-  expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/, /localhost:\d{1,5}/] });
-});
+    expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/, /localhost:\d{1,5}/] });
+  });
 
-it('does not allow CORS for localhost in production', async () => {
-  process.env.NODE_ENV = 'production';
-  setup({ renderPartialOnly: true, origin: 'localhost:8000' });
+  it('does not allow CORS for localhost in production', async () => {
+    process.env.NODE_ENV = 'production';
+    setup({ renderPartialOnly: true, origin: 'localhost:8000' });
 
-  const callback = jest.fn();
-  const fastify = {
-    register: jest.fn((_plugin, handler) => {
-      handler()(request, callback);
-    }),
-  };
+    const callback = jest.fn();
+    const fastify = {
+      register: jest.fn((_plugin, handler) => {
+        handler()(request, callback);
+      }),
+    };
 
-  await conditionallyAllowCors(fastify);
+    await conditionallyAllowCors(fastify);
 
-  expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/, /localhost:\d{1,5}/] });
-});
+    expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/, /localhost:\d{1,5}/] });
+  });
 
-it('does not allow CORS non-partial requests', async () => {
-  setup({ renderPartialOnly: false, origin: 'test.example.com' });
+  it('does not allow CORS non-partial requests', async () => {
+    setup({ renderPartialOnly: false, origin: 'test.example.com' });
 
-  const callback = jest.fn();
-  const fastify = {
-    register: jest.fn((_plugin, handler) => {
-      handler()(request, callback);
-    }),
-  };
+    const callback = jest.fn();
+    const fastify = {
+      register: jest.fn((_plugin, handler) => {
+        handler()(request, callback);
+      }),
+    };
 
-  await conditionallyAllowCors(fastify);
+    await conditionallyAllowCors(fastify);
 
-  expect(callback).toHaveBeenCalledWith(null, { origin: false });
+    expect(callback).toHaveBeenCalledWith(null, { origin: false });
+  });
 });
