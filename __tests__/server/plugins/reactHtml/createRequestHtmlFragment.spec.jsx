@@ -52,7 +52,6 @@ const renderForStaticMarkupSpy = jest.spyOn(reactRendering, 'renderForStaticMark
 
 describe('createRequestHtmlFragment', () => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
-  console.error = jest.fn();
 
   let req;
   let res;

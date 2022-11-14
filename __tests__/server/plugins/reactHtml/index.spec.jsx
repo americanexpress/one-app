@@ -135,10 +135,10 @@ jest.mock('../../../../src/server/plugins/reactHtml/createRequestStore');
 jest.mock('../../../../src/server/plugins/reactHtml/createRequestHtmlFragment');
 jest.mock('../../../../src/server/plugins/conditionallyAllowCors');
 
-jest.spyOn(console, 'info').mockImplementation(() => { });
-jest.spyOn(console, 'log').mockImplementation(() => { });
-jest.spyOn(console, 'error').mockImplementation(() => { });
-jest.spyOn(console, 'warn').mockImplementationOnce(() => { });
+jest.spyOn(console, 'info').mockImplementation(() => {});
+jest.spyOn(console, 'log').mockImplementation(() => {});
+jest.spyOn(console, 'error').mockImplementation(() => {});
+jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
 
 global.fetch = () => Promise.resolve({ data: 'data' });
 
@@ -470,13 +470,13 @@ describe('reactHtml', () => {
     });
 
     describe('render modes', () => {
-      test('render mode is "hydrate" by default', () => {
+      it('render mode is "hydrate" by default', () => {
         sendHtml(request, reply);
         expect(reply.send).toHaveBeenCalledTimes(1);
         expect(reply.send.mock.calls[0][0]).toContain("window.__render_mode__ = 'hydrate';");
       });
 
-      test('render mode is "render" when set', () => {
+      it('render mode is "render" when set', () => {
         sendHtml({ ...request, renderMode: 'render' }, reply);
         expect(reply.send).toHaveBeenCalledTimes(1);
         expect(reply.send.mock.calls[0][0]).toContain("window.__render_mode__ = 'render';");
@@ -923,7 +923,7 @@ describe('reactHtml', () => {
 
       app.register(reactHtml);
 
-      // eslint-disable-next-line no-shadow
+      // eslint-disable-next-line no-shadow -- following Fastify's naming convention
       app.get('/*', (_request, reply) => {
         reply.sendHtml();
       });
@@ -969,7 +969,7 @@ describe('reactHtml', () => {
       });
     });
 
-    test('calls the expected hooks to render pwa html shell', async () => {
+    it('calls the expected hooks to render pwa html shell', async () => {
       getServerPWAConfig.mockImplementationOnce(() => ({
         serviceWorker: true,
       }));
@@ -993,7 +993,7 @@ describe('reactHtml', () => {
       expect(done).toHaveBeenCalled();
     });
 
-    test('calls the expected hooks to render html', async () => {
+    it('calls the expected hooks to render html', async () => {
       getServerPWAConfig.mockImplementationOnce(() => ({
         serviceWorker: false,
       }));
@@ -1016,7 +1016,7 @@ describe('reactHtml', () => {
       expect(done).toHaveBeenCalled();
     });
 
-    test('sendHtml reply decorator renders html', async () => {
+    it('sendHtml reply decorator renders html', async () => {
       const fastify = {
         decorateRequest: jest.fn(),
         addHook: jest.fn(),
