@@ -16,13 +16,12 @@
 
 import combineReducers from '@americanexpress/vitruvius/immutable';
 import holocron from 'holocron';
-import httpMocks from 'node-mocks-http';
 import { fromJS } from 'immutable';
-import { renderStaticErrorPage } from '../../../src/server/middleware/sendHtml';
-import createRequestStore from '../../../src/server/middleware/createRequestStore';
-import { setClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
+import renderStaticErrorPage from '../../../../src/server/plugins/reactHtml/staticErrorPage';
+import createRequestStore from '../../../../src/server/plugins/reactHtml/createRequestStore';
+import { setClientModuleMapCache } from '../../../../src/server/utils/clientModuleMapCache';
 
-jest.mock('../../../src/server/middleware/sendHtml');
+jest.mock('../../../../src/server/plugins/reactHtml/staticErrorPage');
 jest.mock('holocron', () => {
   const actualHolocron = jest.requireActual('holocron');
   return {
@@ -58,9 +57,8 @@ describe('createRequestStore', () => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
 
-  let req;
-  let res;
-  let next;
+  let request;
+  let reply;
   let reducers;
 
   beforeAll(() => {
@@ -74,19 +72,20 @@ describe('createRequestStore', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    req = httpMocks.createRequest({
+
+    request = {
+      decorateRequest: jest.fn(),
       headers: {
         'correlation-id': 'abc123',
       },
-    });
-    res = httpMocks.createResponse({ req });
+      url: '/',
+      raw: {},
+      method: 'get',
+    };
 
-    res.status = jest.fn(res.status);
-    res.send = jest.fn(res.send);
-    res.end = jest.fn(res.end);
-    res.cookie = jest.fn(res.cookie);
-
-    next = jest.fn();
+    reply = {
+      raw: {},
+    };
 
     reducers = jest.fn(
       (...args) => combineReducers({
@@ -97,68 +96,61 @@ describe('createRequestStore', () => {
     reducers.buildInitialState = jest.fn(() => fromJS({ appReducer: 'fizzy' }));
   });
 
-  it('returns a function', () => {
-    const middleware = createRequestStore({ reducers });
-    expect(middleware).toBeInstanceOf(Function);
-  });
-
   it('should add a store to the request object', () => {
-    const middleware = createRequestStore({ reducers });
-    middleware(req, res, next);
-    expect(req.store).toBeTruthy();
-    expect(next).toHaveBeenCalled();
+    createRequestStore(request, reply, { reducers });
+
+    expect(console.error).not.toHaveBeenCalled();
+    expect(request.store).toBeTruthy();
   });
 
   it('should add the client holocron module map cache to the request object', () => {
-    const middleware = createRequestStore({ reducers });
-    middleware(req, res, next);
-    expect(req.clientModuleMapCache).toMatchSnapshot();
-    expect(next).toHaveBeenCalled();
+    createRequestStore(request, reply, { reducers });
+
+    expect(request.clientModuleMapCache).toMatchSnapshot();
   });
 
   it('should send the static error page when there is an error', () => {
-    const middleware = createRequestStore({ reducers: null });
-    middleware(req, res, next);
-    // eslint-disable-next-line no-console
+    createRequestStore(request, reply, { reducers: null });
+
     expect(console.error).toHaveBeenCalled();
-    expect(renderStaticErrorPage).toHaveBeenCalledWith(res);
+    expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
   });
 
   describe('fetch', () => {
     it('should set the store up with fetchClient', async () => {
-      const middleware = createRequestStore({ reducers });
-      middleware(req, res, next);
+      createRequestStore(request, reply, { reducers });
       const {
         extraThunkArguments: { fetchClient },
       } = holocron.createHolocronStore.mock.calls[0][0];
+
       expect(fetchClient).toBeInstanceOf(Function);
     });
   });
 
   describe('useBodyForBuildingTheInitialState', () => {
     it('uses the request body as the locals for initial state when useBodyForBuildingTheInitialState is true', () => {
-      const middleware = createRequestStore(
-        { reducers },
-        { useBodyForBuildingTheInitialState: true }
-      );
-      req.body = { some: 'form data', that: 'was posted' };
-      middleware(req, res, next);
+      request.method = 'post';
+      request.body = { some: 'form data', that: 'was posted' };
+
+      createRequestStore(request, reply, { reducers });
+
       expect(reducers.buildInitialState).toHaveBeenCalledTimes(1);
       expect(reducers.buildInitialState.mock.calls[0][0]).toHaveProperty('req.body.some', 'form data');
       expect(reducers.buildInitialState.mock.calls[0][0]).toHaveProperty('req.body.that', 'was posted');
     });
 
     it('does not use the request body as the locals for initial state when useBodyForBuildingTheInitialState is not given', () => {
-      const middleware = createRequestStore({ reducers });
-      req.body = { some: 'other form data', that: 'was acquired' };
-      middleware(req, res, next);
+      request.body = { some: 'other form data', that: 'was acquired' };
+      createRequestStore(request, reply, { reducers });
+
       expect(reducers.buildInitialState).toHaveBeenCalledTimes(1);
       expect(reducers.buildInitialState.mock.calls[0][0]).not.toHaveProperty('req.body');
     });
   });
 
   it('should pass enhancedFetch into createHolocronStore', () => {
-    createRequestStore({ reducers })(req, res, next);
+    createRequestStore(request, reply, { reducers });
+
     expect(holocron.createHolocronStore.mock.calls[0][0]).toHaveProperty('extraThunkArguments.fetchClient');
   });
 });

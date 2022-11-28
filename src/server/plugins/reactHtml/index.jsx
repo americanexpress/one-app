@@ -14,20 +14,27 @@
  * permissions and limitations under the License.
  */
 
-// This rule is only needed for a couple functions below
-/* eslint-disable es/no-arrow-functions */
-import { Set as iSet, Map as iMap } from 'immutable';
-import { createTimeoutFetch } from '@americanexpress/fetch-enhancers';
-
+import fp from 'fastify-plugin';
+import React from 'react';
 import striptags from 'striptags';
-import transit from '../../universal/utils/transit';
-import { setConfig } from '../../universal/ducks/config';
-import jsonStringifyForScript from '../utils/jsonStringifyForScript';
-import { getClientStateConfig } from '../utils/stateConfig';
-import getI18nFileFromState from '../utils/getI18nFileFromState';
-import renderModuleStyles from '../utils/renderModuleStyles';
-import readJsonFile from '../utils/readJsonFile';
-import { getClientPWAConfig } from './pwa/config';
+import { Set as iSet, Map as iMap } from 'immutable';
+import { composeModules, RenderModule } from 'holocron';
+import { Provider } from 'react-redux';
+
+import createRequestStoreHook from './createRequestStore';
+import createRequestHtmlFragmentHook from './createRequestHtmlFragment';
+import conditionallyAllowCors from '../conditionallyAllowCors';
+import oneApp from '../../../universal';
+import transit from '../../../universal/utils/transit';
+import { setConfig } from '../../../universal/ducks/config';
+import jsonStringifyForScript from '../../utils/jsonStringifyForScript';
+import { getClientStateConfig } from '../../utils/stateConfig';
+import getI18nFileFromState from '../../utils/getI18nFileFromState';
+import renderModuleStyles from '../../utils/renderModuleStyles';
+import readJsonFile from '../../utils/readJsonFile';
+import { getClientPWAConfig, getServerPWAConfig } from '../../pwa';
+import { renderForStaticMarkup } from '../../utils/reactRendering';
+import renderStaticErrorPage from './staticErrorPage';
 
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
 const integrityManifest = readJsonFile('../../../bundle.integrity.manifest.json');
@@ -41,6 +48,7 @@ const legacyIndicators = [
 
 const legacyUserAgent = (userAgent) => userAgent && legacyIndicators
   .some((legacyIndicator) => userAgent.includes(legacyIndicator));
+
 function getChunkAssets(assetsByChunkName) {
   return Object
     .entries(assetsByChunkName)
@@ -52,80 +60,6 @@ function getChunkAssets(assetsByChunkName) {
 const modernBrowserChunkAssets = getChunkAssets(readJsonFile('../../../.build-meta.json').modernBrowserChunkAssets);
 const legacyBrowserChunkAssets = getChunkAssets(readJsonFile('../../../.build-meta.json').legacyBrowserChunkAssets)
   .map((chunkAsset) => `legacy/${chunkAsset}`);
-
-export function safeSend(res, ...payload) {
-  if (!res.headersSent) {
-    res.send(...payload);
-  }
-}
-
-let errorPage;
-
-export async function setErrorPage(fallbackUrl) {
-  try {
-    const timeoutFetch = createTimeoutFetch(6e3)(fetch);
-    const response = await timeoutFetch(fallbackUrl);
-    const contentType = response.headers.get('content-type');
-    const contentLength = response.headers.get('content-length');
-
-    // Warn if status is not a 200 and return errorPage
-    if (response.status !== 200) {
-      console.warn('Failed to fetch custom error page with status:', response.status);
-      return errorPage;
-    }
-    // Warn if the Content-Type is not text/html
-    if (!contentType.includes('text/html')) {
-      console.warn('[appConfig/errorPageUrl] Content-Type was not of type text/html and may not render correctly');
-    }
-    // Warn if the content length is over 244kb
-    if (contentLength > 250e3) {
-      console.warn('[appConfig/errorPageUrl] Content-Length is over 244Kb and may have an impact on performance');
-    }
-    // Read the response as text.
-    errorPage = await response.text();
-  } catch (e) {
-    // Warn if the URL cannot be fetched
-    console.warn('Could not fetch the URL', e);
-  }
-  return errorPage;
-}
-
-export async function renderStaticErrorPage(res) {
-  if (!res.statusCode) {
-    res.status(500);
-  }
-  if (errorPage) {
-    safeSend(res, errorPage);
-  } else {
-    let message = 'Sorry, we are unable to load this page at this time. Please try again later.';
-    if (res.statusCode >= 400 && res.statusCode < 500 && res.statusCode !== 404) {
-    // issue is with the request, retrying won't change the server response
-      message = 'Sorry, we are unable to load this page at this time.';
-    }
-    safeSend(res, `<!DOCTYPE html>
-    <html>
-      <head>
-        <title>One App</title>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="application-name" content="one-app">
-      </head>
-      <body style="background-color: #F0F0F0">
-        <div id="root">
-          <div>
-            <div style="width: 70%; background-color: white; margin: 4% auto;">
-              <h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>
-              <p style="display: flex; justify-content: center; padding: 10px 15px 40px;">
-                ${message}
-              </p>
-            </div>
-          </div>
-        </div>
-      </body>
-    </html>`);
-  }
-}
 
 function renderI18nScript(clientInitialState, appBundlesURLPrefix) {
   const i18nFile = getI18nFileFromState(clientInitialState);
@@ -312,21 +246,49 @@ export function renderPartial({
   return html;
 }
 
-// TODO add additional client side scripts
-export default function sendHtml(req, res) {
-  let body;
+export const checkStateForRedirectAndStatusCode = (request, reply) => {
+  const destination = request.store.getState().getIn(['redirection', 'destination']);
+
+  if (destination) {
+    reply.redirect(302, destination);
+  } else {
+    const error = request.store.getState().get('error');
+
+    if (error) {
+      const code = error.get('code');
+
+      if (code) {
+        reply.code(code);
+      }
+    }
+  }
+};
+
+/**
+ * Sends/Responds with HTML
+ * @param {import('fastify').FastifyRequest} request fastify request object
+ * @param {import('fastify').FastifyReply} reply fastify reply object
+ */
+export const sendHtml = (request, reply) => {
   try {
     const {
-      appHtml, clientModuleMapCache, store, headers, helmetInfo = {}, renderMode = 'hydrate',
-    } = req;
-    const { scriptNonce } = res;
+      appHtml,
+      clientModuleMapCache,
+      store,
+      headers,
+      helmetInfo = {},
+      renderMode = 'hydrate',
+      scriptNonce,
+    } = request;
     const userAgent = headers['user-agent'];
     const isLegacy = legacyUserAgent(userAgent);
 
     console.info(`sendHtml, have store? ${!!store}, have appHtml? ${!!appHtml}`);
+
     if (appHtml && typeof appHtml !== 'string') {
       throw new Error(`appHtml was not a string, was ${typeof appHtml}`, appHtml);
     }
+
     // replace server specific config with client specific config (api urls and such)
     const clientConfig = getClientStateConfig();
     const pwaMetadata = getClientPWAConfig();
@@ -343,12 +305,12 @@ export default function sendHtml(req, res) {
     const allowedHtmlTags = clientInitialState.getIn(['rendering', 'renderTextOnlyOptions', 'allowedHtmlTags']);
 
     if (renderPartialOnly) {
-      return safeSend(res, renderPartial({ html: req.appHtml, store, disableStyles }));
+      return reply.header('content-type', 'text/html; charset=utf-8').send(renderPartial({ html: appHtml, store, disableStyles }));
     }
 
     if (renderTextOnly) {
-      res.setHeader('content-type', 'text/plain');
-      return safeSend(res, striptags(req.appHtml, allowedHtmlTags, htmlTagReplacement));
+      reply.header('content-type', 'text/plain; charset=utf-8');
+      return reply.send(striptags(appHtml, allowedHtmlTags, htmlTagReplacement));
     }
 
     const chunkAssets = isLegacy ? legacyBrowserChunkAssets : modernBrowserChunkAssets;
@@ -380,17 +342,81 @@ export default function sendHtml(req, res) {
       pwaMetadata,
     };
 
-    body = `
+    const html = `
       <!DOCTYPE html>
       <html${getHtmlAttributesString(helmetInfo)}>
         ${getHead(headSectionArgs)}
         ${getBody(bodySectionArgs)}
       </html>
     `;
+
+    return reply.header('content-type', 'text/html; charset=utf-8').send(html);
   } catch (err) {
     console.error('sendHtml had an error, sending static error page', err);
-    return renderStaticErrorPage(res);
+    return renderStaticErrorPage(request, reply);
   }
+};
 
-  return safeSend(res, body);
-}
+/**
+ * Creates an app shell and stores it into the request object
+ * @param {import('fastify').FastifyRequest} request fastify request object
+ */
+const appShell = async (request) => {
+  const { store: { getState, dispatch } } = request;
+  const initialState = getState();
+  const rootModuleName = initialState.getIn(['config', 'rootModuleName']);
+
+  await dispatch(composeModules([{ name: rootModuleName }]));
+
+  const { renderedString, helmetInfo } = renderForStaticMarkup(
+    <Provider store={request.store}>
+      <RenderModule moduleName={rootModuleName} />
+    </Provider>
+  );
+
+  request.appHtml = renderedString;
+  request.helmetInfo = helmetInfo;
+  request.renderMode = 'render';
+};
+
+/**
+ * Fastify Plugin to render HTML
+ * @param {import('fastify').FastifyInstance} fastify Fastify instance
+ * @param {import('fastify').FastifyPluginOptions} _opts plugin options
+ * @param {import('fastify').FastifyPluginCallback} done plugin callback
+ */
+const reactHtml = (fastify, _opts, done) => {
+  fastify.decorateRequest('store', null);
+  fastify.decorateRequest('clientModuleMapCache', null);
+
+  fastify.addHook('preHandler', async (request, reply) => {
+    if (['json', 'js', 'css', 'map'].some((ext) => request.url.endsWith(ext))) {
+      reply.code(404).type('text/plain; charset=utf-8').send('Not found');
+    } else {
+      createRequestStoreHook(request, reply, oneApp);
+
+      if (getServerPWAConfig().serviceWorker && request.url === '/_/pwa/shell') {
+        await appShell(request);
+      } else {
+        await createRequestHtmlFragmentHook(request, reply, oneApp);
+        checkStateForRedirectAndStatusCode(request, reply);
+      }
+    }
+  });
+
+  conditionallyAllowCors(fastify);
+
+  fastify.decorateReply('sendHtml', function sendHtmlDecorator() {
+    const reply = this;
+    const { request } = reply;
+
+    sendHtml(request, reply);
+  });
+
+  done();
+};
+
+export default fp(reactHtml, {
+  fastify: '4.x',
+  name: 'reactHtml',
+});
