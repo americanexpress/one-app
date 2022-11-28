@@ -14,23 +14,50 @@
  * permissions and limitations under the License.
  */
 
-import addCacheHeaders from '../../../src/server/middleware/addCacheHeaders';
+import addCacheHeaders from '../../../src/server/plugins/addCacheHeaders';
 
 describe('addCacheHeaders', () => {
-  it('should add all expected cache headers', () => {
-    const req = { get: jest.fn(), headers: {} };
-    const res = { set: jest.fn((key, value) => value) };
-    const next = jest.fn();
-    addCacheHeaders(req, res, next);
-
-    const cacheHeaders = {
-      'Cache-Control': 'no-store',
-      Pragma: 'no-cache',
+  it('adds cache headers', () => {
+    const request = {
+      method: 'get',
     };
-    expect(res.set.mock.calls.length).toEqual(Object.keys(cacheHeaders).length);
-    Object.keys(cacheHeaders).forEach(
-      (header) => expect(res.set).toBeCalledWith(header, cacheHeaders[header])
-    );
-    expect(next).toBeCalled();
+    const reply = {
+      header: jest.fn(),
+    };
+    const fastify = {
+      addHook: jest.fn(async (_hook, cb) => {
+        await cb(request, reply);
+      }),
+    };
+    const done = jest.fn();
+
+    addCacheHeaders(fastify, null, done);
+
+    expect(fastify.addHook).toHaveBeenCalled();
+    expect(done).toHaveBeenCalled();
+    expect(reply.header).toHaveBeenCalledTimes(2);
+    expect(reply.header).toHaveBeenCalledWith('Cache-Control', 'no-store');
+    expect(reply.header).toHaveBeenCalledWith('Pragma', 'no-cache');
+  });
+
+  it('does not add cache headers', () => {
+    const request = {
+      method: 'post',
+    };
+    const reply = {
+      header: jest.fn(),
+    };
+    const fastify = {
+      addHook: jest.fn(async (_hook, cb) => {
+        await cb(request, reply);
+      }),
+    };
+    const done = jest.fn();
+
+    addCacheHeaders(fastify, null, done);
+
+    expect(fastify.addHook).toHaveBeenCalled();
+    expect(done).toHaveBeenCalled();
+    expect(reply.header).not.toHaveBeenCalled();
   });
 });

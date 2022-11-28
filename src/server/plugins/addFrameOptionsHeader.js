@@ -14,20 +14,34 @@
  * permissions and limitations under the License.
  */
 
+import fp from 'fastify-plugin';
 import matcher from 'matcher';
+
 import { getCSP } from './csp';
 
-export default function addFrameOptionsHeader(req, res, next) {
-  const referer = req.get('Referer');
+/**
+ * Fastify Plugin that adds frame options into the header
+ * @param {import('fastify').FastifyInstance} fastify Fastify instance
+ * @param {import('fastify').FastifyPluginOptions} _opts plugin options
+ * @param {import('fastify').FastifyPluginCallback} done plugin callback
+ */
+const addFrameOptionsHeader = (fastify, _opts, done) => {
+  fastify.addHook('onRequest', async (request, reply) => {
+    const referer = request.headers.Referer || request.headers.Referrer || '';
+    const frameAncestorDomains = getCSP()['frame-ancestors'] || [];
+    const trimmedReferrer = referer.replace('https://', '');
+    const matchedDomain = frameAncestorDomains.find((domain) => matcher.isMatch(trimmedReferrer, `${domain}/*`)
+    );
 
-  const frameAncestorDomains = getCSP()['frame-ancestors'];
-  const trimmedReferrer = referer && referer.replace('https://', '');
-  const matchedDomain = frameAncestorDomains && frameAncestorDomains.find((domain) => matcher.isMatch(trimmedReferrer, `${domain}/*`)
-  );
+    if (matchedDomain) {
+      reply.header('X-Frame-Options', `ALLOW-FROM ${referer}`);
+    }
+  });
 
-  if (matchedDomain) {
-    res.set('X-Frame-Options', `ALLOW-FROM ${referer}`);
-  }
+  done();
+};
 
-  next();
-}
+export default fp(addFrameOptionsHeader, {
+  fastify: '4.x',
+  name: 'addFrameOptionsHeader',
+});

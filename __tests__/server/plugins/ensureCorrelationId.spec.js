@@ -14,54 +14,52 @@
  * permissions and limitations under the License.
  */
 
-const ensureCorrelationId = require('../../../src/server/middleware/ensureCorrelationId').default;
+import ensureCorrelationId from '../../../src/server/plugins/ensureCorrelationId';
 
 describe('ensureCorrelationId', () => {
   function generateSamples() {
-    const req = {
+    const request = {
       headers: {},
     };
-    const res = null;
-    const next = jest.fn();
-    return { req, res, next };
+
+    const fastify = {
+      addHook: jest.fn((_hookName, cb) => {
+        cb(request);
+      }),
+    };
+
+    return { fastify, request };
   }
 
   it('uses correlation_id for correlation-id on a request without correlation-id', () => {
-    const { req, res, next } = generateSamples();
-    delete req.headers['correlation-id'];
-    req.headers.correlation_id = 'cloudy';
-    ensureCorrelationId(req, res, next);
-    expect(req.headers).toHaveProperty('correlation-id', 'cloudy');
+    const { fastify, request } = generateSamples();
+    delete request.headers['correlation-id'];
+    request.headers.correlation_id = 'cloudy';
+    ensureCorrelationId(fastify, null, jest.fn());
+    expect(request.headers).toHaveProperty('correlation-id', 'cloudy');
   });
 
   it('uses unique_id for correlation-id on a request without correlation-id or correlation_id', () => {
-    const { req, res, next } = generateSamples();
-    delete req.headers['correlation-id'];
-    delete req.headers.correlation_id;
-    req.headers.unique_id = 'thunderstorms';
-    ensureCorrelationId(req, res, next);
-    expect(req.headers).toHaveProperty('correlation-id', 'thunderstorms');
+    const { fastify, request } = generateSamples();
+    delete request.headers['correlation-id'];
+    delete request.headers.correlation_id;
+    request.headers.unique_id = 'thunderstorms';
+    ensureCorrelationId(fastify, null, jest.fn());
+    expect(request.headers).toHaveProperty('correlation-id', 'thunderstorms');
   });
 
-  it('adds a correlation-id header to a request without anything', () => {
-    const { req, res, next } = generateSamples();
-    delete req.headers['correlation-id'];
-    ensureCorrelationId(req, res, next);
-    expect(req.headers).toHaveProperty('correlation-id');
-    expect(typeof req.headers['correlation-id']).toBe('string');
+  it('adds a unique correlation-id to the request object', () => {
+    const { fastify, request } = generateSamples();
+    delete request.headers['correlation-id'];
+    ensureCorrelationId(fastify, null, jest.fn());
+    expect(request.headers).toHaveProperty('correlation-id');
+    expect(typeof request.headers['correlation-id']).toBe('string');
   });
 
   it('does not change an existing correlation-id header on a request', () => {
-    const { req, res, next } = generateSamples();
-    req.headers['correlation-id'] = 'exists';
-    ensureCorrelationId(req, res, next);
-    expect(req.headers).toHaveProperty('correlation-id', 'exists');
-  });
-
-  it('calls the next middleware', () => {
-    const { req, res, next } = generateSamples();
-    expect(next).not.toHaveBeenCalled();
-    ensureCorrelationId(req, res, next);
-    expect(next).toHaveBeenCalledTimes(1);
+    const { fastify, request } = generateSamples();
+    request.headers['correlation-id'] = 'exists';
+    ensureCorrelationId(fastify, null, jest.fn());
+    expect(request.headers).toHaveProperty('correlation-id', 'exists');
   });
 });

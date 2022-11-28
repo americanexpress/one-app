@@ -14,19 +14,33 @@
  * permissions and limitations under the License.
  */
 
-function parse(forwarded) {
-  const parsed = {};
-  const directiveList = forwarded.split(';');
-  directiveList.forEach((directive) => {
-    const [key, value] = directive.split('=');
-    parsed[key] = value;
-  });
-  return parsed;
-}
+import fp from 'fastify-plugin';
 
-export default function forwardedHeaderParser(req, res, next) {
-  if (req.headers.forwarded) {
-    req.forwarded = parse(req.headers.forwarded);
-  }
-  next();
-}
+const parse = (forwarded) => forwarded
+  .split(';')
+  .map((directive) => directive.split('='))
+  .reduce((parsed, [key, value]) => ({
+    ...parsed,
+    [key]: value,
+  }), {});
+
+/**
+ * Fastify Plugin that injects 'forwarded' into the request object
+ * @param {import('fastify').FastifyInstance} fastify Fastify instance
+ * @param {import('fastify').FastifyPluginOptions} _opts plugin options
+ * @param {import('fastify').FastifyPluginCallback} done plugin callback
+ */
+const forwardedHeaderParser = (fastify, _opts, done) => {
+  fastify.addHook('onRequest', async (request) => {
+    if (request.headers.forwarded) {
+      request.forwarded = parse(request.headers.forwarded);
+    }
+  });
+
+  done();
+};
+
+export default fp(forwardedHeaderParser, {
+  fastify: '4.x',
+  name: 'forwardedHeaderParser',
+});

@@ -14,47 +14,81 @@
  * permissions and limitations under the License.
  */
 
-import addFrameOptionsHeader from '../../../src/server/middleware/addFrameOptionsHeader';
+import addFrameOptionsHeader from '../../../src/server/plugins/addFrameOptionsHeader';
+import { updateCSP } from '../../../src/server/plugins/csp';
 
-jest.mock('../../../src/server/middleware/csp', () => ({
-  getCSP: () => ({
-    'frame-ancestors': ['valid.example.com'],
-  }),
-}));
+beforeEach(() => {
+  updateCSP('');
+});
 
-describe('addFrameOptionsHeader', () => {
-  let req;
-
-  const set = jest.fn((key, value) => value);
-  const res = { set };
-  const next = jest.fn();
-
-  beforeEach(() => {
-    set.mockClear();
-    next.mockClear();
-  });
-
-  it('should add X-Frame-Options ALLOW-FROM header on approved ancestor', () => {
-    req = {
-      get: jest.fn(() => 'https://valid.example.com/embedded'),
+describe('empty frame-ancestors', () => {
+  test('does not add frame options header', () => {
+    const request = {
+      headers: {},
     };
-    addFrameOptionsHeader(req, res, next);
-
-    expect(req.get).toHaveBeenCalledWith('Referer');
-    expect(res.set).toBeCalledWith(
-      'X-Frame-Options',
-      'ALLOW-FROM https://valid.example.com/embedded'
-    );
-    expect(next).toBeCalled();
-  });
-
-  it('should not add X-Frame-Options ALLOW-FROM header on unapproved ancestor', () => {
-    req = {
-      get: jest.fn(() => 'https://example.com/embedded'),
+    const reply = {
+      header: jest.fn(),
     };
-    addFrameOptionsHeader(req, res, next);
+    const fastify = {
+      addHook: jest.fn(async (_hook, cb) => {
+        await cb(request, reply);
+      }),
+    };
+    const done = jest.fn();
 
-    expect(res.set).not.toHaveBeenCalled();
-    expect(next).toBeCalled();
+    addFrameOptionsHeader(fastify, null, done);
+
+    expect(fastify.addHook).toHaveBeenCalled();
+    expect(done).toHaveBeenCalled();
+    expect(reply.header).not.toHaveBeenCalled();
   });
+});
+
+describe('no matching domains', () => {
+  test('does not add frame options header', () => {
+    updateCSP('frame-ancestors americanexpress.com;');
+    const request = {
+      headers: {},
+    };
+    const reply = {
+      header: jest.fn(),
+    };
+    const fastify = {
+      addHook: jest.fn(async (_hook, cb) => {
+        await cb(request, reply);
+      }),
+    };
+    const done = jest.fn();
+
+    addFrameOptionsHeader(fastify, null, done);
+
+    expect(fastify.addHook).toHaveBeenCalled();
+    expect(done).toHaveBeenCalled();
+    expect(reply.header).not.toHaveBeenCalled();
+  });
+});
+
+test('adds frame options header', () => {
+  updateCSP('frame-ancestors americanexpress.com;');
+  const request = {
+    headers: {
+      Referer: 'https://americanexpress.com/testing',
+    },
+  };
+  const reply = {
+    header: jest.fn(),
+  };
+  const fastify = {
+    addHook: jest.fn(async (_hook, cb) => {
+      await cb(request, reply);
+    }),
+  };
+  const done = jest.fn();
+
+  addFrameOptionsHeader(fastify, null, done);
+
+  expect(fastify.addHook).toHaveBeenCalled();
+  expect(done).toHaveBeenCalled();
+  expect(reply.header).toHaveBeenCalledTimes(1);
+  expect(reply.header).toHaveBeenCalledWith('X-Frame-Options', 'ALLOW-FROM https://americanexpress.com/testing');
 });

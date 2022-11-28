@@ -14,15 +14,28 @@
  * permissions and limitations under the License.
  */
 
+import fp from 'fastify-plugin';
 import { v4 as uuidV4 } from 'uuid';
 
-export default function ensureCorrelationId(req, res, next) {
-  if (!req.headers['correlation-id']) {
-    req.headers['correlation-id'] = req.headers.correlation_id
-      || req.headers.unique_id
-      || uuidV4();
-  }
-  // TODO: expose the id to the client?
-  // res.header('Correlation-Id', req.headers['correlation-id']);
-  next();
-}
+/**
+ * Fastify Plugin that adds correlation id into headers
+ * @param {import('fastify').FastifyInstance} fastify Fastify instance
+ * @param {import('fastify').FastifyPluginOptions} _opts plugin options
+ * @param {import('fastify').FastifyPluginCallback} done plugin callback
+ */
+const ensureCorrelationId = (fastify, _opts, done) => {
+  fastify.addHook('onRequest', async (request) => {
+    if (!request.headers['correlation-id']) {
+      request.headers['correlation-id'] = request.headers.correlation_id
+        || request.headers.unique_id
+        || uuidV4();
+    }
+  });
+
+  done();
+};
+
+export default fp(ensureCorrelationId, {
+  fastify: '4.x',
+  name: 'ensureCorrelationId',
+});
