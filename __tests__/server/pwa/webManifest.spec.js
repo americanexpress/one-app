@@ -14,39 +14,48 @@
  * permissions and limitations under the License.
  */
 
-import webManifestMiddleware from '../../../../src/server/middleware/pwa/webManifest';
-import { getWebAppManifestConfig } from '../../../../src/server/middleware/pwa/config';
+import webManifestHandler from '../../../src/server/pwa/webManifest';
+import { getWebAppManifestConfig } from '../../../src/server/pwa/config';
 
-jest.mock('../../../../src/server/middleware/pwa/config', () => ({
+jest.mock('../../../src/server/pwa/config', () => ({
   getWebAppManifestConfig: jest.fn(() => ({ webManifestEnabled: false, webAppManifest: null })),
 }));
 
-describe('webmanifest middleware', () => {
-  test('middleware factory returns function', () => {
-    expect.assertions(1);
-    expect(webManifestMiddleware()).toBeInstanceOf(Function);
-  });
+const makeReplyObject = () => {
+  const reply = {};
+  reply.send = jest.fn(() => reply);
+  reply.header = jest.fn(() => reply);
+  reply.type = jest.fn(() => reply);
+  reply.status = jest.fn(() => reply);
 
+  return reply;
+};
+
+describe('webmanifest middleware', () => {
   test('middleware is disabled by default', () => {
     expect.assertions(2);
-    const middleware = webManifestMiddleware();
-    const next = jest.fn();
-    expect(middleware(null, null, next)).toBeUndefined();
-    expect(next).toHaveBeenCalledTimes(1);
+
+    const reply = makeReplyObject();
+
+    webManifestHandler(null, reply);
+
+    expect(reply.status).toHaveBeenCalledWith(404);
+    expect(reply.send).toHaveBeenCalledWith('Not found');
   });
 
   test('middleware responds with manifest', () => {
-    expect.assertions(4);
+    expect.assertions(2);
+
     const webManifest = { name: 'One App Test', short_name: 'one-app-test' };
-    const middleware = webManifestMiddleware();
-    const next = jest.fn();
-    const send = jest.fn();
-    const type = jest.fn(() => ({ send }));
+
     getWebAppManifestConfig
       .mockImplementationOnce(() => ({ webManifestEnabled: true, webManifest }));
-    expect(middleware(null, { type, send }, next)).toBeUndefined();
-    expect(next).not.toHaveBeenCalled();
-    expect(type).toHaveBeenCalledWith('application/manifest+json');
-    expect(send).toHaveBeenCalledWith(webManifest);
+
+    const reply = makeReplyObject();
+
+    webManifestHandler(null, reply);
+
+    expect(reply.type).toHaveBeenCalledWith('application/manifest+json');
+    expect(reply.send).toHaveBeenCalledWith(webManifest);
   });
 });

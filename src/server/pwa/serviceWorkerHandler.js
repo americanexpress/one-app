@@ -14,8 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import { getClientModuleMapCache } from '../../utils/clientModuleMapCache';
-
+import { getClientModuleMapCache } from '../utils/clientModuleMapCache';
 import { getServerPWAConfig } from './config';
 
 function processServiceWorkerScript(script) {
@@ -23,14 +22,23 @@ function processServiceWorkerScript(script) {
   return Buffer.from(script.toString().replace('process.env.HOLOCRON_MODULE_MAP', holocronModuleMap));
 }
 
-export default function serviceWorkerMiddleware() {
-  return function serviceWorkerMiddlewareHandler(_req, res, next) {
-    const { serviceWorker, serviceWorkerScope, serviceWorkerScript } = getServerPWAConfig();
-    if (serviceWorker === false) return next();
-    return res
-      .type('js')
-      .set('Service-Worker-Allowed', serviceWorkerScope)
-      .set('Cache-Control', 'no-store, no-cache')
+/**
+ * Route Service Worker handler to be used in a custom route
+ * @param {import("fastify").FastifyReply} request Fastify Request object
+ * @param {import("fastify").FastifyReply} reply Fastify Reply object
+ */
+const serviceWorkerHandler = (_request, reply) => {
+  const { serviceWorker, serviceWorkerScope, serviceWorkerScript } = getServerPWAConfig();
+
+  if (serviceWorker) {
+    reply
+      .type('application/javascript')
+      .header('Service-Worker-Allowed', serviceWorkerScope)
+      .header('Cache-Control', 'no-store, no-cache')
       .send(processServiceWorkerScript(serviceWorkerScript));
-  };
-}
+  } else {
+    reply.status(404).send('Not found');
+  }
+};
+
+export default serviceWorkerHandler;
