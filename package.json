@@ -174,7 +174,7 @@
     "jest-circus": "^29.2.2",
     "jest-environment-jsdom": "^28.1.2",
     "js-yaml": "^4.1.0",
-    "lockfile-lint": "^4.7.6",
+    "lockfile-lint": "^4.9.6",
     "lodash.set": "^4.3.2",
     "markdown-table": "^3.0.2",
     "mkdirp": "^1.0.4",
