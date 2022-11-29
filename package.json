@@ -158,7 +158,7 @@
     "concurrently": "^7.3.0",
     "conventional-changelog-cli": "^2.2.2",
     "cross-env": "^7.0.3",
-    "danger": "^11.0.7",
+    "danger": "^11.1.4",
     "eslint": "^7.32.0",
     "eslint-config-amex": "^14.2.1",
     "eslint-plugin-es": "^4.1.0",
