@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.1.1](https://github.com/americanexpress/one-app/compare/v6.1.0...v6.1.1) (2022-11-09)
+
+
+### Bug Fixes
+
+* **fetchEnhancers:** take patch to fetch-enhancers ([a5e5d18](https://github.com/americanexpress/one-app/commit/a5e5d180fbc486c8f53c8aef3d088ddeb348f5a1))
+
+
 # [6.1.0](https://github.com/americanexpress/one-app/compare/v6.0.0...v6.1.0) (2022-10-17)
 
 
