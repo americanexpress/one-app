@@ -218,12 +218,10 @@ export async function createApp(opts = {}) {
   });
 
   fastify.setNotFoundHandler(async (_request, reply) => {
-    console.log('--setNotFoundHandler');
     reply.code(404).send('Not found');
   });
 
   fastify.setErrorHandler(async (error, request, reply) => {
-    console.log('--setErrorHandler', error);
     const { method, url } = request;
     const correlationId = request.headers['correlation-id'];
     const headersSent = !!reply.raw.headersSent;
