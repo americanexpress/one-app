@@ -128,10 +128,10 @@ describe('Tests that require Docker setup', () => {
         headers: {
           origin: 'test.example.com',
         },
+        body: JSON.stringify({}),
       });
       const rawHeaders = response.headers.raw();
       expect(response.status).toBe(200);
-      expect(rawHeaders).not.toHaveProperty('access-control-allow-origin');
       expect(rawHeaders).not.toHaveProperty('access-control-expose-headers');
       expect(rawHeaders).not.toHaveProperty('access-control-allow-credentials');
     });
@@ -210,9 +210,9 @@ describe('Tests that require Docker setup', () => {
             headers: {
               origin: 'test.example.com',
             },
-            body: {
+            body: JSON.stringify({
               message: 'Hello!',
-            },
+            }),
           }
         );
         const rawHeaders = response.headers.raw();
@@ -1335,9 +1335,6 @@ describe('Tests that require Docker setup', () => {
         date: [
           expect.any(String),
         ],
-        etag: [
-          expect.any(String),
-        ],
         'one-app-version': [
           expect.any(String),
         ],
@@ -1348,13 +1345,22 @@ describe('Tests that require Docker setup', () => {
           'max-age=15552000; includeSubDomains',
         ],
         vary: [
-          'Accept-Encoding',
+          'accept-encoding',
         ],
         'x-content-type-options': [
           'nosniff',
         ],
+        'x-dns-prefetch-control': [
+          'off',
+        ],
+        'x-download-options': [
+          'noopen',
+        ],
         'x-frame-options': [
           'DENY',
+        ],
+        'x-permitted-cross-domain-policies': [
+          'none',
         ],
         'x-xss-protection': [
           '1; mode=block',
@@ -1369,6 +1375,7 @@ describe('Tests that require Docker setup', () => {
         headers: {
           origin: 'test.example.com',
         },
+        body: {},
       });
 
       expect(response.headers.raw()).toEqual({
@@ -1421,6 +1428,7 @@ describe('Tests that require Docker setup', () => {
         headers: {
           origin: 'test.example.com',
         },
+        body: {},
       });
 
       expect(response.headers.raw()).toEqual({
@@ -1439,9 +1447,6 @@ describe('Tests that require Docker setup', () => {
         date: [
           expect.any(String),
         ],
-        etag: [
-          expect.any(String),
-        ],
         'one-app-version': [
           expect.any(String),
         ],
@@ -1452,7 +1457,7 @@ describe('Tests that require Docker setup', () => {
           'max-age=15552000; includeSubDomains',
         ],
         vary: [
-          'Accept-Encoding',
+          'accept-encoding',
         ],
         'x-content-type-options': [
           'nosniff',
@@ -1485,8 +1490,11 @@ describe('Tests that require Docker setup', () => {
           origin: 'test.example.com',
           'content-type': 'application/json',
         },
+        body: JSON.stringify({}),
       });
 
+      // expect(response.status).toBe(204);
+      expect(await response.text()).toBe('');
       expect(response.headers.raw()).toEqual({
         connection: [
           'close',
@@ -1495,9 +1503,6 @@ describe('Tests that require Docker setup', () => {
           expect.any(String),
         ],
         date: [
-          expect.any(String),
-        ],
-        etag: [
           expect.any(String),
         ],
         'one-app-version': [
@@ -1528,8 +1533,6 @@ describe('Tests that require Docker setup', () => {
           '0',
         ],
       });
-      expect(response.status).toBe(204);
-      expect(await response.text()).toBe('');
     });
 
     test('Request: /foo/invalid.json', async () => {
@@ -1542,6 +1545,7 @@ describe('Tests that require Docker setup', () => {
       });
 
       expect(response.status).toBe(404);
+      expect(await response.text()).toBe('Not found');
       expect(response.headers.raw()).toEqual({
         'cache-control': [
           'no-store',
@@ -1561,8 +1565,8 @@ describe('Tests that require Docker setup', () => {
         date: [
           expect.any(String),
         ],
-        etag: [
-          expect.any(String),
+        'expect-ct': [
+          'max-age=0',
         ],
         'one-app-version': [
           expect.any(String),
@@ -1571,13 +1575,13 @@ describe('Tests that require Docker setup', () => {
           'no-cache',
         ],
         'referrer-policy': [
-          'no-referrer',
+          'same-origin',
         ],
         'strict-transport-security': [
           'max-age=15552000; includeSubDomains',
         ],
         vary: [
-          'Accept-Encoding',
+          'accept-encoding',
         ],
         'x-content-type-options': [
           'nosniff',
@@ -1589,13 +1593,13 @@ describe('Tests that require Docker setup', () => {
           'noopen',
         ],
         'x-frame-options': [
-          'SAMEORIGIN',
+          'DENY',
         ],
         'x-permitted-cross-domain-policies': [
           'none',
         ],
         'x-xss-protection': [
-          '0',
+          '1; mode=block',
         ],
       });
     });
@@ -1655,9 +1659,9 @@ describe('Tests that can run against either local Docker setup or remote One App
             headers: {
               origin: 'test.example.com',
             },
-            body: {
+            body: JSON.stringify({
               message: 'Hello!',
-            },
+            }),
           }
         );
         expect(response.status).toBe(200);
@@ -1669,11 +1673,10 @@ describe('Tests that can run against either local Docker setup or remote One App
         const response = await fetch(`${appInstanceUrls.fetchUrl}/success`, {
           ...defaultFetchOpts,
           method: 'POST',
+          body: {},
         });
         const pageHtml = await response.text();
-        expect(pageHtml.includes('Hello! One App is successfully rendering its Modules!')).toBe(
-          true
-        );
+        expect(pageHtml).toContain('Hello! One App is successfully rendering its Modules!');
       });
 
       test('app passes vitruvius data to modules', async () => {
@@ -1702,7 +1705,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             method: 'GET',
             originalUrl: '/vitruvius',
             params: {
-              0: '/vitruvius',
+              '*': 'vitruvius',
             },
             protocol: expect.stringMatching(/^https?$/),
             query: {},
@@ -1732,6 +1735,7 @@ describe('Tests that can run against either local Docker setup or remote One App
           sendingData: 'in POSTs',
         });
       });
+
       test('app passes urlencoded POST data to modules via vitruvius', async () => {
         const response = await fetch(`${appInstanceUrls.fetchUrl}/vitruvius`, {
           ...defaultFetchOpts,

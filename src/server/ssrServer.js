@@ -223,7 +223,7 @@ export async function createApp(opts = {}) {
   });
 
   fastify.setErrorHandler(async (error, request, reply) => {
-    console.log('--setErrorHandler');
+    console.log('--setErrorHandler', error);
     const { method, url } = request;
     const correlationId = request.headers['correlation-id'];
     const headersSent = !!reply.raw.headersSent;

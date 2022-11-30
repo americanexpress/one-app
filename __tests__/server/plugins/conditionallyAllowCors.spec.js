@@ -47,15 +47,15 @@ describe('conditionallyAllowCors', () => {
 
     const callback = jest.fn();
     const fastify = {
-      register: jest.fn((_plugin, handler) => {
-        handler()(request, callback);
+      register: jest.fn((_plugin, { delegator }) => {
+        delegator(request, callback);
       }),
     };
 
     await conditionallyAllowCors(fastify);
 
     expect(fastify.register).toHaveBeenCalledTimes(1);
-    expect(fastify.register).toHaveBeenCalledWith(fastifyCors, expect.any(Function));
+    expect(fastify.register).toHaveBeenCalledWith(fastifyCors, { hook: 'preHandler', delegator: expect.any(Function) });
     expect(callback).toHaveBeenCalledTimes(1);
     expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/] });
   });
@@ -67,8 +67,8 @@ describe('conditionallyAllowCors', () => {
 
     const callback = jest.fn();
     const fastify = {
-      register: jest.fn((_plugin, handler) => {
-        handler()(request, callback);
+      register: jest.fn((_plugin, { delegator }) => {
+        delegator(request, callback);
       }),
     };
 
@@ -83,8 +83,8 @@ describe('conditionallyAllowCors', () => {
 
     const callback = jest.fn();
     const fastify = {
-      register: jest.fn((_plugin, handler) => {
-        handler()(request, callback);
+      register: jest.fn((_plugin, { delegator }) => {
+        delegator(request, callback);
       }),
     };
 
@@ -98,8 +98,8 @@ describe('conditionallyAllowCors', () => {
 
     const callback = jest.fn();
     const fastify = {
-      register: jest.fn((_plugin, handler) => {
-        handler()(request, callback);
+      register: jest.fn((_plugin, { delegator }) => {
+        delegator(request, callback);
       }),
     };
 

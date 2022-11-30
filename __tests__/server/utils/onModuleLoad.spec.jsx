@@ -26,14 +26,14 @@ import onModuleLoad, {
 // This named export exists only on the mock
 // eslint-disable-next-line import/named
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from '../../../src/server/utils/stateConfig';
-import { setCorsOrigins } from '../../../src/server/middleware/conditionallyAllowCors';
+import { setCorsOrigins } from '../../../src/server/plugins/conditionallyAllowCors';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from '../../../src/server/utils/safeRequest';
-import { setConfigureRequestLog } from '../../../src/server/utils/logging/serverMiddleware';
+import { setConfigureRequestLog } from '../../../src/server/utils/logging/fastifyPlugin';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
 import { getEventLoopDelayThreshold } from '../../../src/server/utils/createCircuitBreaker';
 import setupDnsCache from '../../../src/server/utils/setupDnsCache';
-import { configurePWA } from '../../../src/server/middleware/pwa';
-import { setErrorPage } from '../../../src/server/middleware/sendHtml';
+import { configurePWA } from '../../../src/server/pwa';
+import { setErrorPage } from '../../../src/server/plugins/reactHtml/staticErrorPage';
 
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
@@ -42,10 +42,10 @@ jest.mock('../../../src/server/utils/stateConfig', () => ({
 }));
 jest.mock('@americanexpress/env-config-utils');
 jest.mock('../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: '4.43.0-0-38f0178d' }));
-jest.mock('../../../src/server/middleware/conditionallyAllowCors', () => ({
+jest.mock('../../../src/server/plugins/conditionallyAllowCors', () => ({
   setCorsOrigins: jest.fn(),
 }));
-jest.mock('../../../src/server/utils/logging/serverMiddleware');
+jest.mock('../../../src/server/utils/logging/fastifyPlugin');
 jest.mock('../../../src/server/utils/createSsrFetch');
 jest.mock('../../../src/server/utils/setupDnsCache');
 
@@ -53,10 +53,10 @@ jest.mock('../../../src/server/utils/safeRequest', () => ({
   extendRestrictedAttributesAllowList: jest.fn(),
   validateSafeRequestRestrictedAttributes: jest.fn(),
 }));
-jest.mock('../../../src/server/middleware/pwa', () => ({
+jest.mock('../../../src/server/pwa', () => ({
   configurePWA: jest.fn(),
 }));
-jest.mock('../../../src/server/middleware/sendHtml.js', () => ({
+jest.mock('../../../src/server/plugins/reactHtml/staticErrorPage', () => ({
   setErrorPage: jest.fn(),
 }));
 

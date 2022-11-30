@@ -34,12 +34,15 @@ setCorsOrigins();
  * @param {import('fastify').FastifyInstance} fastify app instance
  */
 const conditionallyAllowCors = async (fastify) => {
-  await fastify.register(fastifyCors, () => (req, callback) => {
-    const renderPartialOnly = req.store && req.store.getState().getIn(['rendering', 'renderPartialOnly']);
-    // The HTML partials will have CORS enabled so they can be loaded client-side
-    const opts = renderPartialOnly ? corsOptions : { origin: false };
+  await fastify.register(fastifyCors, {
+    hook: 'preHandler',
+    delegator: (req, callback) => {
+      const renderPartialOnly = req.store && req.store.getState().getIn(['rendering', 'renderPartialOnly']);
+      // The HTML partials will have CORS enabled so they can be loaded client-side
+      const opts = renderPartialOnly ? corsOptions : { origin: false };
 
-    callback(null, opts);
+      callback(null, opts);
+    },
   });
 };
 

@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`setAppVersionHeader should set the app version header 1`] = `
-{
-  "one-app-version": "x.0",
-}
-`;
