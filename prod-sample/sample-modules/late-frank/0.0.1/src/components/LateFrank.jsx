@@ -26,6 +26,7 @@ const styles = css`
 `;
 
 export function FashionablyLateFrank() {
+  // eslint-disable-next-line react/no-unknown-property
   return <div><h1 className="lateFrank" css={styles}>Sorry Im late!</h1></div>;
 }
 
