@@ -117,7 +117,7 @@
     "matcher": "^4.0.0",
     "opossum": "^6.4.0",
     "opossum-prometheus": "^0.3.0",
-    "pidusage": "^3.0.0",
+    "pidusage": "^3.0.2",
     "prom-client": "^14.0.1",
     "prop-types": "^15.8.1",
     "react": "^17.0.2",
