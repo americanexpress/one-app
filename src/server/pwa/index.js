@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2020 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,6 @@
  * permissions and limitations under the License.
  */
 
-/** @jsx jsx */
-
-import { jsx, css } from '@emotion/core';
-
-const styles = css`
-  background-color: grey;
-  color: pink;
-  font-size: 36px;
-  font-family: system;
-`;
-
-export function FashionablyLateFrank() {
-  // eslint-disable-next-line react/no-unknown-property
-  return <div><h1 className="lateFrank" css={styles}>Sorry Im late!</h1></div>;
-}
-
-export default FashionablyLateFrank;
+export { configurePWA, getClientPWAConfig, getServerPWAConfig } from './config';
+export { default as serviceWorkerHandler } from './serviceWorkerHandler';
+export { default as webManifestMiddleware } from './webManifest';

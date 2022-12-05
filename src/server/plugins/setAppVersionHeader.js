@@ -14,20 +14,21 @@
  * permissions and limitations under the License.
  */
 
-/** @jsx jsx */
+import fp from 'fastify-plugin';
 
-import { jsx, css } from '@emotion/core';
+import readJsonFile from '../utils/readJsonFile';
 
-const styles = css`
-  background-color: grey;
-  color: pink;
-  font-size: 36px;
-  font-family: system;
-`;
+const { buildVersion: appVersion } = readJsonFile('../../../.build-meta.json');
 
-export function FashionablyLateFrank() {
-  // eslint-disable-next-line react/no-unknown-property
-  return <div><h1 className="lateFrank" css={styles}>Sorry Im late!</h1></div>;
-}
+const setAppVersionHeader = (fastify, _opts, done) => {
+  fastify.addHook('onRequest', async (_request, reply) => {
+    reply.header('One-App-Version', appVersion);
+  });
 
-export default FashionablyLateFrank;
+  done();
+};
+
+export default fp(setAppVersionHeader, {
+  fastify: '4.x',
+  name: 'setAppVersionHeader',
+});

@@ -29,7 +29,7 @@ async function buildServiceWorkerScripts({
   minify = true,
 } = {}) {
   const inputDirectory = path.resolve(__dirname, '../src/client/service-worker');
-  const buildFolderDirectory = path.resolve(__dirname, '../lib/server/middleware/pwa', 'scripts');
+  const buildFolderDirectory = path.resolve(__dirname, '../lib/server/pwa', 'scripts');
 
   const plugins = [
     replace({
