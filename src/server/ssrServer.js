@@ -19,125 +19,219 @@
 /* eslint-disable global-require */
 
 import path from 'path';
-
-import express from 'express';
-import compression from 'compression';
-import cookieParser from 'cookie-parser';
-import { json, urlencoded } from 'body-parser';
-import helmet from 'helmet';
-import cors from 'cors';
+import bytes from 'bytes';
+import compress from '@fastify/compress';
 import Fastify from 'fastify';
-import fastifyExpress from '@fastify/express';
+import fastifyCookie from '@fastify/cookie';
+import fastifyFormbody from '@fastify/formbody';
+import fastifyStatic from '@fastify/static';
+import fastifyHelmet from '@fastify/helmet';
+import fastifySensible from '@fastify/sensible';
 
-import conditionallyAllowCors from './middleware/conditionallyAllowCors';
-import ensureCorrelationId from './middleware/ensureCorrelationId';
-import setAppVersionHeader from './middleware/setAppVersionHeader';
-import clientErrorLogger from './middleware/clientErrorLogger';
-import oneApp from '../universal';
-import addSecurityHeaders from './middleware/addSecurityHeaders';
-import addCacheHeaders from './middleware/addCacheHeaders';
-import csp from './middleware/csp';
-import cspViolation from './middleware/cspViolation';
-import addFrameOptionsHeader from './middleware/addFrameOptionsHeader';
-import createRequestStore from './middleware/createRequestStore';
-import createRequestHtmlFragment from './middleware/createRequestHtmlFragment';
-import checkStateForRedirect from './middleware/checkStateForRedirect';
-import checkStateForStatusCode from './middleware/checkStateForStatusCode';
-import sendHtml from './middleware/sendHtml';
-import serverError from './middleware/serverError';
-import logging from './utils/logging/serverMiddleware';
-import forwardedHeaderParser from './middleware/forwardedHeaderParser';
-import {
-  serviceWorkerMiddleware,
-  webManifestMiddleware,
-  offlineMiddleware,
-} from './middleware/pwa';
+import ensureCorrelationId from './plugins/ensureCorrelationId';
+import setAppVersionHeader from './plugins/setAppVersionHeader';
+import addSecurityHeadersPlugin from './plugins/addSecurityHeaders';
+import csp from './plugins/csp';
+import logging from './utils/logging/fastifyPlugin';
+import forwardedHeaderParser from './plugins/forwardedHeaderParser';
+import renderHtml from './plugins/reactHtml';
+import renderStaticErrorPage from './plugins/reactHtml/staticErrorPage';
+import addFrameOptionsHeader from './plugins/addFrameOptionsHeader';
+import addCacheHeaders from './plugins/addCacheHeaders';
+import { getServerPWAConfig, serviceWorkerHandler, webManifestMiddleware } from './pwa';
 
-export const makeExpressRouter = (router = express.Router()) => {
-  const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
+const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
 
-  router.use(ensureCorrelationId);
-  router.use(logging);
-  router.use(compression());
-  router.get('*', addSecurityHeaders);
-  router.use(setAppVersionHeader);
-  router.use(forwardedHeaderParser);
-
-  router.use('/_/static', express.static(path.join(__dirname, '../../build'), { maxage: '182d' }));
-  router.get('/_/status', (req, res) => res.sendStatus(200));
-  router.get('/_/pwa/service-worker.js', serviceWorkerMiddleware());
-  router.get('*', addCacheHeaders);
-  router.get('/_/pwa/manifest.webmanifest', webManifestMiddleware());
-
-  router.use(helmet({
-    crossOriginEmbedderPolicy: false,
-    crossOriginOpenerPolicy: false,
-    crossOriginResourcePolicy: false,
-    originAgentCluster: false,
-  }));
-  router.use(csp());
-  router.use(cookieParser());
-  router.use(json({
-    type: ['json', 'application/csp-report'],
-  }));
-  router.post('/_/report/security/csp-violation', cspViolation);
-  router.post('/_/report/errors', clientErrorLogger);
-  router.get('**/*.(json|js|css|map)', (req, res) => res.sendStatus(404));
-
-  router.get('/_/pwa/shell', offlineMiddleware(oneApp));
-  router.get(
-    '*',
-    addFrameOptionsHeader,
-    createRequestStore(oneApp),
-    createRequestHtmlFragment(oneApp),
-    conditionallyAllowCors,
-    checkStateForRedirect,
-    checkStateForStatusCode,
-    sendHtml
-  );
-
-  if (enablePostToModuleRoutes) {
-    router.options(
-      '*',
-      addSecurityHeaders,
-      json({ limit: '0kb' }), // there should be no body
-      urlencoded({ limit: '0kb' }), // there should be no body
-      cors({ origin: false }) // disable CORS
-    );
-
-    router.post(
-      '*',
-      addSecurityHeaders,
-      json({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
-      urlencoded({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
-      addFrameOptionsHeader,
-      createRequestStore(oneApp, { useBodyForBuildingTheInitialState: true }),
-      createRequestHtmlFragment(oneApp),
-      conditionallyAllowCors,
-      checkStateForRedirect,
-      checkStateForStatusCode,
-      sendHtml
-    );
-  }
-
-  // https://expressjs.com/en/guide/error-handling.html
-  router.use(serverError); // Note: should be quickly moved to Fastify
-
-  return router;
-};
-
+/**
+ * Creates a Fastify app with built-in routes and configuration
+ * @param {import('fastify').FastifyHttp2Options} opts Fastify app options
+ * @returns {import('fastify').FastifyInstance}
+ */
 export async function createApp(opts = {}) {
-  const fastify = Fastify(opts);
+  const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
+  const fastify = Fastify({
+    frameworkErrors: function frameworkErrors(error, request, reply) {
+      const { method, url, headers } = request;
+      const correlationId = headers['correlation-id'];
 
-  await fastify.register(fastifyExpress);
+      console.error(`Fastify internal error: method ${method}, url "${url}", correlationId "${correlationId}"`, error);
 
-  fastify.express.disable('x-powered-by');
-  fastify.express.disable('e-tag');
+      return renderStaticErrorPage(request, reply);
+    },
+    bodyLimit: bytes(process.env.ONE_MAX_POST_REQUEST_PAYLOAD || '10mb'), // Note: this applies to all routes
+    ...opts,
+  });
 
-  fastify.use(makeExpressRouter());
+  fastify.register(fastifySensible);
+  fastify.register(ensureCorrelationId);
+  fastify.register(fastifyCookie);
+  fastify.register(logging);
+  fastify.register(compress, {
+    zlibOptions: {
+      level: 1,
+    },
+  });
+  fastify.register(fastifyFormbody);
 
-  // TODO: Needs refactoring (priority)
-  fastify.setNotFoundHandler(sendHtml);
+  fastify.register(addSecurityHeadersPlugin, {
+    ignoreRoutes: [
+      '/_/report/security/csp-violation',
+      '/_/report/errors',
+    ],
+  });
+  fastify.register(setAppVersionHeader);
+  fastify.register(forwardedHeaderParser);
+
+  // Static routes
+  fastify.register((instance, _opts, done) => {
+    instance.register(fastifyStatic, {
+      root: path.join(__dirname, '../../build'),
+      prefix: '/_/static',
+      maxAge: '182d',
+    });
+    instance.get('/_/status', (_request, reply) => reply.status(200).send('OK'));
+    instance.get('/_/pwa/service-worker.js', serviceWorkerHandler);
+
+    done();
+  });
+
+  // PWA
+  fastify.register((instance, _opts, done) => {
+    instance.register(addCacheHeaders);
+    instance.register(csp);
+
+    instance.get('/_/pwa/manifest.webmanifest', webManifestMiddleware);
+
+    if (nodeEnvIsDevelopment()) {
+      instance.post('/_/report/security/csp-violation', (request, reply) => {
+        const violation = request.body && request.body['csp-report'];
+        if (!violation) {
+          console.warn('CSP Violation reported, but no data received');
+        } else {
+          const {
+            'document-uri': documentUri,
+            'violated-directive': violatedDirective,
+            'blocked-uri': blockedUri,
+            'line-number': lineNumber,
+            'column-number': columnNumber,
+            'source-file': sourceFile,
+          } = violation;
+          console.warn(`CSP Violation: ${sourceFile}:${lineNumber}:${columnNumber} on page ${documentUri} violated the ${violatedDirective} policy via ${blockedUri}`);
+        }
+
+        reply.status(204).send();
+      });
+    } else {
+      instance.post('/_/report/security/csp-violation', (request, reply) => {
+        const violation = request.body ? JSON.stringify(request.body, null, 2) : 'No data received!';
+        console.warn(`CSP Violation: ${violation}`);
+        reply.status(204).send();
+      });
+    }
+
+    instance.post('/_/report/errors', (request, reply) => {
+      if (!nodeEnvIsDevelopment()) {
+        const contentType = request.headers['content-type'];
+
+        if (!/^application\/json/i.test(contentType)) {
+          return reply.status(415).send('Unsupported Media Type');
+        }
+
+        const {
+          body: errorsReported,
+          headers: {
+            'correlation-id': correlationId,
+            'user-agent': userAgent,
+          },
+        } = request;
+
+        if (Array.isArray(errorsReported)) {
+          errorsReported.forEach((raw) => {
+            if (!raw || typeof raw !== 'object') {
+              // drop on the floor, this is the wrong interface
+              console.warn(`dropping an error report, wrong interface (${typeof raw})`);
+              return;
+            }
+            const {
+              msg, stack, href, otherData,
+            } = raw;
+            const err = new Error(msg);
+            Object.assign(err, {
+              name: 'ClientReportedError',
+              stack,
+              userAgent,
+              uri: href,
+              metaData: {
+                ...otherData,
+                correlationId,
+              },
+            });
+            console.error(err);
+          });
+        } else {
+          // drop on the floor, this is the wrong interface
+          console.warn(`dropping an error report group, wrong interface (${typeof errorsReported})`);
+        }
+      }
+
+      return reply.status(204).send();
+    });
+
+    done();
+  });
+
+  // Render
+  fastify.register((instance, _opts, done) => {
+    instance.register(addCacheHeaders);
+    instance.register(csp);
+    instance.register(
+      fastifyHelmet,
+      {
+        crossOriginEmbedderPolicy: false,
+        crossOriginOpenerPolicy: false,
+        crossOriginResourcePolicy: false,
+        originAgentCluster: false,
+      }
+    );
+    instance.register(addFrameOptionsHeader);
+    instance.register(renderHtml);
+
+    instance.get('/_/pwa/shell', (_request, reply) => {
+      if (getServerPWAConfig().serviceWorker) {
+        reply.sendHtml();
+      } else {
+        reply.status(404).send('Not found');
+      }
+    });
+
+    instance.get('/*', (_request, reply) => {
+      reply.sendHtml();
+    });
+
+    if (enablePostToModuleRoutes) {
+      instance.post('/*', (_request, reply) => {
+        reply.sendHtml();
+      });
+    }
+
+    done();
+  });
+
+  fastify.setNotFoundHandler(async (_request, reply) => {
+    reply.code(404).send('Not found');
+  });
+
+  fastify.setErrorHandler(async (error, request, reply) => {
+    const { method, url } = request;
+    const correlationId = request.headers['correlation-id'];
+    const headersSent = !!reply.raw.headersSent;
+
+    console.error(`Fastify application error: method ${method}, url "${url}", correlationId "${correlationId}", headersSent: ${headersSent}`, error);
+
+    return renderStaticErrorPage(request, reply);
+  });
+
+  await fastify.ready();
 
   return fastify;
 }

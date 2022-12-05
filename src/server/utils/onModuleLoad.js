@@ -18,16 +18,16 @@ import semver from 'semver';
 import { Set as ImmutableSet } from 'immutable';
 import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from './stateConfig';
-import { setCorsOrigins } from '../middleware/conditionallyAllowCors';
+import { setCorsOrigins } from '../plugins/conditionallyAllowCors';
 import readJsonFile from './readJsonFile';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from './safeRequest';
-import { setConfigureRequestLog } from './logging/serverMiddleware';
+import { setConfigureRequestLog } from './logging/fastifyPlugin';
 import { setCreateSsrFetch } from './createSsrFetch';
 import { setEventLoopDelayThreshold } from './createCircuitBreaker';
 import setupDnsCache from './setupDnsCache';
-import { configurePWA } from '../middleware/pwa';
+import { configurePWA } from '../pwa';
 import { validatePWAConfig } from './validation';
-import { setErrorPage } from '../middleware/sendHtml';
+import { setErrorPage } from '../plugins/reactHtml/staticErrorPage';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');

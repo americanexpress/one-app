@@ -14,20 +14,28 @@
  * permissions and limitations under the License.
  */
 
-/** @jsx jsx */
+import Fastify from 'fastify';
+import setAppVersionHeader from '../../../src/server/plugins/setAppVersionHeader';
 
-import { jsx, css } from '@emotion/core';
+jest.mock('../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: 'x.0' }));
 
-const styles = css`
-  background-color: grey;
-  color: pink;
-  font-size: 36px;
-  font-family: system;
-`;
+const buildApp = () => {
+  const app = Fastify();
 
-export function FashionablyLateFrank() {
-  // eslint-disable-next-line react/no-unknown-property
-  return <div><h1 className="lateFrank" css={styles}>Sorry Im late!</h1></div>;
-}
+  app.register(setAppVersionHeader);
 
-export default FashionablyLateFrank;
+  app.get('/any-path', () => '');
+
+  return app;
+};
+
+describe('setAppVersionHeader', () => {
+  it('should set the app version header', async () => {
+    const response = await buildApp().inject({
+      method: 'GET',
+      url: '/any-path',
+    });
+
+    expect(response.headers['one-app-version']).toEqual('x.0');
+  });
+});
