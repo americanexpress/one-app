@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2020 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,6 @@
  * permissions and limitations under the License.
  */
 
-/** @jsx jsx */
-import { jsx, css } from '@emotion/core';
-import styles from './styles.scss';
-
-const HelloMessage = () => (
-  // eslint-disable-next-line react/no-unknown-property
-  <h1 className={`helloMessage ${styles.stylish}`} css={css`background-color: blue;`}>
-    Hello! One App is successfully rendering its Modules!
-  </h1>
-);
-
-export default HelloMessage;
+export { configurePWA, getClientPWAConfig, getServerPWAConfig } from './config';
+export { default as serviceWorkerHandler } from './serviceWorkerHandler';
+export { default as webManifestMiddleware } from './webManifest';

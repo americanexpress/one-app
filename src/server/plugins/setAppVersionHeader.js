@@ -14,15 +14,21 @@
  * permissions and limitations under the License.
  */
 
-/** @jsx jsx */
-import { jsx, css } from '@emotion/core';
-import styles from './styles.scss';
+import fp from 'fastify-plugin';
 
-const HelloMessage = () => (
-  // eslint-disable-next-line react/no-unknown-property
-  <h1 className={`helloMessage ${styles.stylish}`} css={css`background-color: blue;`}>
-    Hello! One App is successfully rendering its Modules!
-  </h1>
-);
+import readJsonFile from '../utils/readJsonFile';
 
-export default HelloMessage;
+const { buildVersion: appVersion } = readJsonFile('../../../.build-meta.json');
+
+const setAppVersionHeader = (fastify, _opts, done) => {
+  fastify.addHook('onRequest', async (_request, reply) => {
+    reply.header('One-App-Version', appVersion);
+  });
+
+  done();
+};
+
+export default fp(setAppVersionHeader, {
+  fastify: '4.x',
+  name: 'setAppVersionHeader',
+});

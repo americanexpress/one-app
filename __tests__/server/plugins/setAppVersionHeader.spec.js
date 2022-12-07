@@ -14,15 +14,28 @@
  * permissions and limitations under the License.
  */
 
-/** @jsx jsx */
-import { jsx, css } from '@emotion/core';
-import styles from './styles.scss';
+import Fastify from 'fastify';
+import setAppVersionHeader from '../../../src/server/plugins/setAppVersionHeader';
 
-const HelloMessage = () => (
-  // eslint-disable-next-line react/no-unknown-property
-  <h1 className={`helloMessage ${styles.stylish}`} css={css`background-color: blue;`}>
-    Hello! One App is successfully rendering its Modules!
-  </h1>
-);
+jest.mock('../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: 'x.0' }));
 
-export default HelloMessage;
+const buildApp = () => {
+  const app = Fastify();
+
+  app.register(setAppVersionHeader);
+
+  app.get('/any-path', () => '');
+
+  return app;
+};
+
+describe('setAppVersionHeader', () => {
+  it('should set the app version header', async () => {
+    const response = await buildApp().inject({
+      method: 'GET',
+      url: '/any-path',
+    });
+
+    expect(response.headers['one-app-version']).toEqual('x.0');
+  });
+});
