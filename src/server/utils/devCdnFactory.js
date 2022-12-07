@@ -151,7 +151,7 @@ export const oneAppDevCdnFactory = ({
       .code(200)
       .send(map);
   });
-  //We dont return a value here so disable eslint
+  // We dont return a value here so disable eslint
   // eslint-disable-next-line consistent-return
   oneAppDevCdn.get('*', async (req, reply) => {
     const incomingRequestPath = req.url;
