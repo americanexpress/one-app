@@ -2,6 +2,142 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.2.0-rc](https://github.com/americanexpress/one-app/compare/v5.15.1...v6.2.0-rc) (2022-12-12)
+
+
+### Bug Fixes
+
+* **deps:** bump core-js from 3.21.1 to 3.23.1 ([#764](https://github.com/americanexpress/one-app/issues/764)) ([53917e0](https://github.com/americanexpress/one-app/commit/53917e0266f9ceb05a3041802a9b2b11520b3512))
+* **fetchEnhancers:** take patch to fetch-enhancers ([a5e5d18](https://github.com/americanexpress/one-app/commit/a5e5d180fbc486c8f53c8aef3d088ddeb348f5a1))
+* **helmet:** disable breaking headers ([#780](https://github.com/americanexpress/one-app/issues/780)) ([df21a1d](https://github.com/americanexpress/one-app/commit/df21a1dd38b7ff5f893fe45961001a9ce010affb))
+* **node:** bump node to 16.16.0 for security patch ([#782](https://github.com/americanexpress/one-app/issues/782)) ([3782116](https://github.com/americanexpress/one-app/commit/3782116f1e196780a547388e0a257f6717f98b02))
+
+
+### Code Refactoring
+
+* migrating metrics server to Fastify ([#803](https://github.com/americanexpress/one-app/issues/803)) ([a0fc9ed](https://github.com/americanexpress/one-app/commit/a0fc9ed928b90c56c179080067c9b4908fbe4a9e)), closes [#780](https://github.com/americanexpress/one-app/issues/780) [#780](https://github.com/americanexpress/one-app/issues/780)
+
+
+### Features
+
+* **deps:** upgrade to react 17 ([d927a7f](https://github.com/americanexpress/one-app/commit/d927a7f370d88d216e1df7c6c026081ed7c5f9ea))
+* **intl:** allow custom URLs for language packs ([#833](https://github.com/americanexpress/one-app/issues/833)) ([b67e826](https://github.com/americanexpress/one-app/commit/b67e8268f6578cf5b149db2a871dd0f2ecde8543))
+* migrated express to fastify ([86e2889](https://github.com/americanexpress/one-app/commit/86e2889635100a23152e47da151c0f7c8e802751))
+* routes confidence checks ([2a3d996](https://github.com/americanexpress/one-app/commit/2a3d99692d2d52bab618d65f97ca73abe84d55f4))
+* **server:** drop node 12 support ([a755bef](https://github.com/americanexpress/one-app/commit/a755beffb9edce5f261bf02dca8c3cfd420f7c96))
+* **server:** running app through fastify ([#785](https://github.com/americanexpress/one-app/issues/785)) ([e3da397](https://github.com/americanexpress/one-app/commit/e3da397a8664e11bfec58e85e2650d8a2cc16ff2))
+
+
+### BREAKING CHANGES
+
+* Upgrade from React 16 to 17
+
+* feat(server): drop node 12 support
+* minimum supported node version is 16
+
+* test(modules): fix dep resolution error
+
+* chore(release): 6.0.0-rc.0
+
+* chore(bundle-size-action): wider strip-hash capture
+
+* chore(deps): update packages to latest compatible versions
+
+* chore(babel): update packages
+
+* chore(commitlint): update
+
+* chore(rollup-plugins): update
+
+* chore(acorn): uninstall
+
+* chore(babel-preset-amex): update to 4
+
+* chore(body-parser): update
+
+* chore(dev-deps): update
+
+* chore(holocron): update 1.3.0
+
+* chore(redux): update 4.2.0
+
+* chore(core-js): update 3.23.3
+
+* chore(deps): run npm update
+
+* chore(husky): update to 8.x
+
+* chore(chalk): downgrade to non esm version
+
+* chore(webdriverio): update 7.x
+
+* feat(dockerfile): update node version to 16.15.1
+
+* chore(deps): update supertest
+
+* fix(node): set min version 16.15.1
+
+* chore(deps): dedupe
+
+* test(createRequestHtmlFragment): more reliable error message
+
+* chore(jest): upgrade 28.1.2
+* Upgrade from React 16 to 17
+
+* feat(server): drop node 12 support
+* minimum supported node version is 16
+
+* test(modules): fix dep resolution error
+
+* chore(release): 6.0.0-rc.0
+
+* chore(bundle-size-action): wider strip-hash capture
+
+* chore(deps): update packages to latest compatible versions
+
+* chore(babel): update packages
+
+* chore(commitlint): update
+
+* chore(rollup-plugins): update
+
+* chore(acorn): uninstall
+
+* chore(babel-preset-amex): update to 4
+
+* chore(body-parser): update
+
+* chore(dev-deps): update
+
+* chore(holocron): update 1.3.0
+
+* chore(redux): update 4.2.0
+
+* chore(core-js): update 3.23.3
+
+* chore(deps): run npm update
+
+* chore(husky): update to 8.x
+
+* chore(chalk): downgrade to non esm version
+
+* chore(webdriverio): update 7.x
+
+* feat(dockerfile): update node version to 16.15.1
+
+* chore(deps): update supertest
+
+* fix(node): set min version 16.15.1
+
+* chore(deps): dedupe
+
+* test(createRequestHtmlFragment): more reliable error message
+
+* chore(jest): upgrade 28.1.2
+* **server:** minimum supported node version is 16
+* **deps:** Upgrade from React 16 to 17
+
+
 ## [6.1.1](https://github.com/americanexpress/one-app/compare/v6.1.0...v6.1.1) (2022-11-09)
 
 
