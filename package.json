@@ -180,7 +180,7 @@
     "mkdirp": "^1.0.4",
     "node-mocks-http": "^1.11.0",
     "nodemon": "^2.0.19",
-    "ora": "^5.4.1",
+    "ora": "^6.1.2",
     "parse-prometheus-text-format": "^1.1.1",
     "prettier": "^2.7.1",
     "react-test-renderer": "^17.0.2",
