@@ -5,7 +5,7 @@
   <img src='https://github.com/americanexpress/one-app/raw/main/one-app.png' alt="One App - One Amex" width='50%'/>
 </h1>
 
-![One App Docker Release](https://github.com/americanexpress/one-app/workflows/One%20App%20Docker%20Release/badge.svg)
+![One App Docker Release](https://github.com/americanexpress/one-app/actions/workflows/release-step-4_automatic_docker-prod-build-and-publish.yml/badge.svg)
 ![One App Integration Tests](https://github.com/americanexpress/one-app/workflows/One%20App%20Integration%20Tests/badge.svg)
 ![One App Unit and Lint Tests](https://github.com/americanexpress/one-app/workflows/One%20App%20Unit%20and%20Lint%20Tests/badge.svg)
 
