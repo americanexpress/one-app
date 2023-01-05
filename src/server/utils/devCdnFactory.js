@@ -51,7 +51,6 @@ const consumeRemoteRequest = async (remoteModuleMapUrl, hostAddress, remoteModul
         http: new ProxyAgent(),
       },
     });
-
     // clear out remoteModuleBaseUrls as the new module map now has different urls in it
     // not clearing would result in an ever growing array
     remoteModuleBaseUrls.splice(0, remoteModuleBaseUrls.length);
@@ -151,7 +150,6 @@ export const oneAppDevCdnFactory = ({
       remoteMap = await consumeRemoteRequest(remoteModuleMapUrl, hostAddress, remoteModuleBaseUrls);
     }
     // remoteMap always fulfilled
-
     const map = {
       ...remoteMap,
       key: 'not-used-in-development',
@@ -168,8 +166,7 @@ export const oneAppDevCdnFactory = ({
 
   // eslint-disable-next-line consistent-return
   oneAppDevCdn.get('*', async (req, reply) => {
-    const incomingRequestPath = req.url;
-
+    const incomingRequestPath = req.url.replace('/static', '');
     if (matchPathToKnownRemoteModuleUrl(incomingRequestPath, remoteModuleBaseUrls)) {
       const knownRemoteModuleBaseUrl = matchPathToKnownRemoteModuleUrl(
         incomingRequestPath,
@@ -177,7 +174,7 @@ export const oneAppDevCdnFactory = ({
       );
       const remoteModuleBaseUrlOrigin = new URL(knownRemoteModuleBaseUrl).origin;
       try {
-        const remoteModuleResponse = await got(`${remoteModuleBaseUrlOrigin}/${req.url}`, {
+        const remoteModuleResponse = await got(`${remoteModuleBaseUrlOrigin}/${incomingRequestPath}`, {
 
           headers: { connection: 'keep-alive' },
           agent: {
@@ -198,7 +195,7 @@ export const oneAppDevCdnFactory = ({
     } else {
       reply
         .code(404)
-        .send('Not found');
+        .send('Not Found');
     }
   });
 
