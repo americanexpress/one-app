@@ -14,13 +14,13 @@
 
 import path from 'path';
 import fs from 'fs';
-import got from 'got';
 import cors from '@fastify/cors';
 import compress from '@fastify/compress';
 import fastifyStatic from '@fastify/static';
 import Fastify from 'fastify';
 import ip from 'ip';
 import ProxyAgent from 'proxy-agent';
+import fetch from 'node-fetch';
 
 const getLocalModuleMap = ({ pathToModuleMap, oneAppDevCdnAddress }) => {
   const moduleMap = JSON.parse(fs.readFileSync(pathToModuleMap, 'utf8').toString());
@@ -45,11 +45,8 @@ const matchPathToKnownRemoteModuleUrl = (
 
 const consumeRemoteRequest = async (remoteModuleMapUrl, hostAddress, remoteModuleBaseUrls) => {
   try {
-    const response = await got(remoteModuleMapUrl, {
-      agent: {
-        https: new ProxyAgent(),
-        http: new ProxyAgent(),
-      },
+    const response = await fetch(remoteModuleMapUrl, {
+      agent: new ProxyAgent(),
     });
     // clear out remoteModuleBaseUrls as the new module map now has different urls in it
     // not clearing would result in an ever growing array
@@ -174,13 +171,10 @@ export const oneAppDevCdnFactory = ({
       );
       const remoteModuleBaseUrlOrigin = new URL(knownRemoteModuleBaseUrl).origin;
       try {
-        const remoteModuleResponse = await got(`${remoteModuleBaseUrlOrigin}/${incomingRequestPath}`, {
+        const remoteModuleResponse = await fetch(`${remoteModuleBaseUrlOrigin}/${incomingRequestPath}`, {
 
           headers: { connection: 'keep-alive' },
-          agent: {
-            https: new ProxyAgent(),
-            http: new ProxyAgent(),
-          },
+          agent: new ProxyAgent(),
         });
         reply
           .code(remoteModuleResponse.statusCode)

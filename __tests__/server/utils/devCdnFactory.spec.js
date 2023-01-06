@@ -13,7 +13,7 @@
  */
 
 /* eslint-disable no-console -- console used in tests */
-import got from 'got';
+import fetch from 'node-fetch';
 import fs from 'fs';
 import rimraf from 'rimraf';
 import path from 'path';
@@ -21,10 +21,11 @@ import mkdirp from 'mkdirp';
 import ProxyAgent from 'proxy-agent';
 import oneAppDevCdn from '../../../src/server/utils/devCdnFactory';
 
+jest.mock('node-fetch');
+
 const pathToStubs = path.join(__dirname, 'stubs');
 const pathToCache = path.join(__dirname, '..', '.cache');
 const mockLocalDevPublicPath = path.join(pathToStubs, 'public');
-jest.mock('got');
 
 const origNodeEnv = process.env.NODE_ENV;
 
@@ -137,7 +138,7 @@ describe('one-app-dev-cdn', () => {
       .resetAllMocks()
       .resetModules();
 
-    got.mockImplementation((url) => Promise.reject(new Error(`no mock for ${url} set up`)));
+    fetch.mockImplementation((url) => Promise.reject(new Error(`no mock for ${url} set up`)));
   });
 
   it('add CORS headers based on appPort configuration value', () => {
@@ -254,7 +255,7 @@ describe('one-app-dev-cdn', () => {
         remoteModuleMapUrl: 'https://example.com/cdn/module-map.json',
         appPort: 3000,
       });
-      got.mockReturnJsonOnce(defaultRemoteMap);
+      fetch.mockReturnJsonOnce(defaultRemoteMap);
 
       return fcdn.inject()
         .get('/module-map.json')
@@ -271,7 +272,7 @@ describe('one-app-dev-cdn', () => {
       expect.assertions(4);
       const remoteModuleMapUrl = 'https://my-domain.com/map/module-map.json';
       const fcdn = setupTest({ appPort: 3000, useLocalModules: false, remoteModuleMapUrl });
-      got.mockReturnJsonOnce(defaultRemoteMap);
+      fetch.mockReturnJsonOnce(defaultRemoteMap);
 
       const modifiedRemoteMap = {
         key: 'not-used-in-development',
@@ -298,7 +299,7 @@ describe('one-app-dev-cdn', () => {
           expect(response.statusCode).toBe(200);
           expect(response.headers['content-type']).toMatch(/^application\/json/);
           expect(response.body).toEqual(JSON.stringify(modifiedRemoteMap));
-          expect(got.mock.calls[0]).toContain(remoteModuleMapUrl);
+          expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
         });
     });
 
@@ -308,7 +309,7 @@ describe('one-app-dev-cdn', () => {
       const fcdn = setupTest({
         appPort: 3000, useLocalModules: false, remoteModuleMapUrl, useHost: true,
       });
-      got.mockReturnJsonOnce(defaultRemoteMap);
+      fetch.mockReturnJsonOnce(defaultRemoteMap);
 
       const modifiedRemoteMap = {
         key: 'not-used-in-development',
@@ -338,7 +339,7 @@ describe('one-app-dev-cdn', () => {
           expect(
             sanitizeModuleMapForSnapshot(response.body)
           ).toEqual(JSON.stringify(modifiedRemoteMap));
-          expect(got.mock.calls[0]).toContain(remoteModuleMapUrl);
+          expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
         });
     });
 
@@ -347,7 +348,7 @@ describe('one-app-dev-cdn', () => {
       const remoteModuleMapUrl = 'https://my-domain.com/map/module-map.json';
 
       const fcdn = setupTest({ remoteModuleMapUrl, useLocalModules: true, appPort: 3000 });
-      got.mockReturnJsonOnce(defaultRemoteMap);
+      fetch.mockReturnJsonOnce(defaultRemoteMap);
 
       return fcdn.inject()
         .get('/module-map.json')
@@ -357,7 +358,7 @@ describe('one-app-dev-cdn', () => {
           expect(
             sanitizeModuleMapForSnapshot(response.body)
           ).toMatchSnapshot();
-          expect(got.mock.calls[0]).toContain(remoteModuleMapUrl);
+          expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
         });
     });
     it('extends the remote map with the local map and uses host instead of localhost', () => {
@@ -367,7 +368,7 @@ describe('one-app-dev-cdn', () => {
       const fcdn = setupTest({
         remoteModuleMapUrl, useLocalModules: true, appPort: 3000, useHost: true,
       });
-      got.mockReturnJsonOnce(defaultRemoteMap);
+      fetch.mockReturnJsonOnce(defaultRemoteMap);
 
       return fcdn.inject()
         .get('/module-map.json')
@@ -377,7 +378,7 @@ describe('one-app-dev-cdn', () => {
           expect(
             sanitizeModuleMapForSnapshot(response.body)
           ).toMatchSnapshot();
-          expect(got.mock.calls[0]).toContain(remoteModuleMapUrl);
+          expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
         });
     });
 
@@ -385,7 +386,7 @@ describe('one-app-dev-cdn', () => {
       expect.assertions(4);
       const remoteModuleMapUrl = 'https://my-domain.com/map/module-map.json';
       const fcdn = setupTest({ useLocalModules: false, remoteModuleMapUrl, appPort: 3000 });
-      got.mockReturnJsonOnce(defaultRemoteMap);
+      fetch.mockReturnJsonOnce(defaultRemoteMap);
 
       return fcdn.inject()
         .get('/module-map.json')
@@ -401,7 +402,7 @@ describe('one-app-dev-cdn', () => {
               key: 'not-used-in-development',
             }).replace(/https:\/\/example.com\//g, 'http://localhost:3001/static/')
           );
-          expect(got.mock.calls[0]).toContain(remoteModuleMapUrl);
+          expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
         });
     });
 
@@ -429,7 +430,7 @@ describe('one-app-dev-cdn', () => {
           },
         },
       };
-      got.mockReturnJsonOnce(remoteMap);
+      fetch.mockReturnJsonOnce(remoteMap);
 
       return fcdn.inject()
         .get('/module-map.json')
@@ -437,7 +438,7 @@ describe('one-app-dev-cdn', () => {
           expect(response.statusCode).toBe(200);
           expect(response.headers['content-type']).toMatch(/^application\/json/);
           expect(response.body).toEqual(JSON.stringify(defaultLocalMap));
-          expect(got.mock.calls[0]).toContain(remoteModuleMapUrl);
+          expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
         });
     });
 
@@ -445,7 +446,7 @@ describe('one-app-dev-cdn', () => {
       expect.assertions(6);
       const remoteModuleMapUrl = 'https://my-domain.com/map/module-map.json';
       const fcdn = setupTest({ remoteModuleMapUrl, useLocalModules: true, appPort: 3000 });
-      got.mockReturnJsonOnce(new Error('simulated timeout or some other network error!'));
+      fetch.mockReturnJsonOnce(new Error('simulated timeout or some other network error!'));
 
       return fcdn.inject()
         .get('/module-map.json')
@@ -453,7 +454,7 @@ describe('one-app-dev-cdn', () => {
           expect(response.statusCode).toBe(200);
           expect(response.headers['content-type']).toMatch(/^application\/json/);
           expect(response.body).toEqual(JSON.stringify(defaultLocalMap));
-          expect(got.mock.calls[0]).toContain(remoteModuleMapUrl);
+          expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
           expect(console.warn).toHaveBeenCalledTimes(1);
           expect(console.warn).toHaveBeenCalledWith(
             'one-app-dev-cdn error loading module map from https://my-domain.com/map/module-map.json: Error: simulated timeout or some other network error!'
@@ -466,7 +467,7 @@ describe('one-app-dev-cdn', () => {
       const remoteModuleMapUrl = 'https://my-domain.com/map/module-map.json';
       const fcdn = setupTest({ remoteModuleMapUrl, useLocalModules: true, appPort: 3000 });
       const invalidModuleMap = [];
-      got.mockReturnJsonOnce(invalidModuleMap);
+      fetch.mockReturnJsonOnce(invalidModuleMap);
 
       return fcdn.inject()
         .get('/module-map.json')
@@ -474,7 +475,7 @@ describe('one-app-dev-cdn', () => {
           expect(response.statusCode).toBe(200);
           expect(response.headers['content-type']).toMatch(/^application\/json/);
           expect(response.body).toEqual(JSON.stringify(defaultLocalMap));
-          expect(got.mock.calls[0]).toContain(remoteModuleMapUrl);
+          expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
           expect(console.warn).toHaveBeenCalledTimes(1);
           expect(console.warn).toHaveBeenCalledWith(
             'one-app-dev-cdn error loading module map from https://my-domain.com/map/module-map.json: TypeError: Cannot convert undefined or null to object'
@@ -496,7 +497,7 @@ describe('one-app-dev-cdn', () => {
           expect(response.statusCode).toBe(200);
           expect(response.headers['content-type']).toMatch(/^application\/json/);
           expect(response.body).toEqual(JSON.stringify(defaultLocalMap));
-          expect(got.mock.calls).toEqual([]);
+          expect(fetch.mock.calls).toEqual([]);
         });
     });
   });
@@ -510,8 +511,8 @@ describe('one-app-dev-cdn', () => {
         appPort: 3000,
         remoteModuleMapUrl: 'https://example.com/module-map.json',
       });
-      got.mockReturnJsonOnce(defaultRemoteMap);
-      got.mockReturnFileOnce('console.log("a");');
+      fetch.mockReturnJsonOnce(defaultRemoteMap);
+      fetch.mockReturnFileOnce('console.log("a");');
 
       const moduleMapResponse = await fcdn.inject()
         .get('/module-map.json');
@@ -525,23 +526,17 @@ describe('one-app-dev-cdn', () => {
       const moduleResponse = await fcdn.inject()
         .get('/cdn/module-b/1.0.0/module-b.node.js');
       expect(moduleResponse.body).toBe('console.log("a");');
-      expect(got.mock.calls).toEqual([
+      expect(fetch.mock.calls).toEqual([
         [
           'https://example.com/module-map.json',
           {
-            agent: {
-              http: expect.any(ProxyAgent),
-              https: expect.any(ProxyAgent),
-            },
+            agent: expect.any(ProxyAgent),
           },
         ],
         [
           'https://example.com//cdn/module-b/1.0.0/module-b.node.js',
           {
-            agent: {
-              http: expect.any(ProxyAgent),
-              https: expect.any(ProxyAgent),
-            },
+            agent: expect.any(ProxyAgent),
             headers: {
               connection: 'keep-alive',
             },
@@ -558,7 +553,7 @@ describe('one-app-dev-cdn', () => {
         appPort: 3000,
         remoteModuleMapUrl: 'https://example.com/module-map.json',
       });
-      got.mockReturnJsonOnce(defaultRemoteMap);
+      fetch.mockReturnJsonOnce(defaultRemoteMap);
       await fcdn.ready();
       const moduleMapResponse = await fcdn.inject()
         .get('/module-map.json');
@@ -568,15 +563,12 @@ describe('one-app-dev-cdn', () => {
       expect(
         sanitizeModuleMapForSnapshot(moduleMapResponse.body)
       ).toMatchSnapshot('module map response');
-      expect(got.mock.calls).toEqual(
+      expect(fetch.mock.calls).toEqual(
         [
           [
             'https://example.com/module-map.json',
             {
-              agent: {
-                http: expect.any(ProxyAgent),
-                https: expect.any(ProxyAgent),
-              },
+              agent: expect.any(ProxyAgent),
             },
           ],
         ]
@@ -595,8 +587,8 @@ describe('one-app-dev-cdn', () => {
         appPort: 3000,
         remoteModuleMapUrl: 'https://example.com/module-map.json',
       });
-      got.mockReturnJsonOnce(defaultRemoteMap);
-      got.mockReturnJsonOnce(new Error('Network error!'));
+      fetch.mockReturnJsonOnce(defaultRemoteMap);
+      fetch.mockReturnJsonOnce(new Error('Network error!'));
       const moduleMapResponse = await fcdn.inject()
         .get('/module-map.json');
 
@@ -605,14 +597,11 @@ describe('one-app-dev-cdn', () => {
       expect(
         sanitizeModuleMapForSnapshot(moduleMapResponse.body)
       ).toMatchSnapshot('module map response');
-      expect(got.mock.calls).toEqual([
+      expect(fetch.mock.calls).toEqual([
         [
           'https://example.com/module-map.json',
           {
-            agent: {
-              http: expect.any(ProxyAgent),
-              https: expect.any(ProxyAgent),
-            },
+            agent: expect.any(ProxyAgent),
           },
         ],
       ]);
@@ -631,7 +620,7 @@ describe('one-app-dev-cdn', () => {
         remoteModuleMapUrl: 'https://example.com/module-map.json',
       });
 
-      got.mockReturnJsonOnce(defaultRemoteMap);
+      fetch.mockReturnJsonOnce(defaultRemoteMap);
       const gotError = new Error('Network error!');
       gotError.statusCode = 'ERR_NON_2XX_3XX_RESPONSE';
       gotError.response = { statusCode: 501 };
@@ -639,7 +628,7 @@ describe('one-app-dev-cdn', () => {
       await fcdn.inject()
         .get('/module-map.json');
 
-      got.mockReturnFileOnce(gotError);
+      fetch.mockReturnFileOnce(gotError);
       const moduleResponse = await fcdn.inject()
         .get('/cdn/module-b/1.0.0/some-langpack.json');
       expect(moduleResponse.statusCode).toBe(501);

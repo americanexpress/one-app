@@ -12,21 +12,20 @@
  * under the License.
  */
 
-const got = jest.createMockFromModule('got');
-
-got.mockReturnJsonOnce = (obj) => {
+const fetch = jest.createMockFromModule('node-fetch');
+fetch.mockReturnJsonOnce = (obj) => {
   if (obj instanceof Error) {
-    return got.mockImplementationOnce(() => Promise.reject(obj));
+    return fetch.mockImplementationOnce(() => Promise.reject(obj));
   }
 
-  return got.mockImplementationOnce(() => Promise.resolve({ body: JSON.stringify(obj) }));
+  return fetch.mockImplementationOnce(() => Promise.resolve({ body: JSON.stringify(obj) }));
 };
 
-got.mockReturnFileOnce = (body) => {
+fetch.mockReturnFileOnce = (body) => {
   if (body instanceof Error) {
-    return got.mockImplementationOnce(() => Promise.reject(body));
+    return fetch.mockImplementationOnce(() => Promise.reject(body));
   }
 
-  return got.mockImplementationOnce(() => Promise.resolve({ body, statusCode: 200 }));
+  return fetch.mockImplementationOnce(() => Promise.resolve({ body, statusCode: 200 }));
 };
-module.exports = got;
+module.exports = fetch;
