@@ -105,12 +105,12 @@ export const oneAppDevCdnFactory = ({
     console.log('one-app-dev-cdn only using locally served modules');
   }
 
-  const oneAppDevCdn = Fastify();
-
   if (process.env.NODE_ENV === 'production') {
-    console.warn('do not include one-app-dev-cdn in production');
-    return oneAppDevCdn;
+    console.error('do not include one-app-dev-cdn in production');
+
   }
+
+  const oneAppDevCdn = Fastify();
   oneAppDevCdn.register(compress, {
     global: false,
   });
@@ -141,11 +141,8 @@ export const oneAppDevCdnFactory = ({
       pathToModuleMap: path.join(localDevPublicPath, 'module-map.json'),
       oneAppDevCdnAddress: hostAddress,
     })) : {};
-    let remoteMap = {};
 
-    if (remoteModuleMapUrl !== undefined) {
-      remoteMap = await consumeRemoteRequest(remoteModuleMapUrl, hostAddress, remoteModuleBaseUrls);
-    }
+    const remoteMap = remoteModuleMapUrl != null ? await consumeRemoteRequest(remoteModuleMapUrl, hostAddress, remoteModuleBaseUrls) : {}
     // remoteMap always fulfilled
     const map = {
       ...remoteMap,

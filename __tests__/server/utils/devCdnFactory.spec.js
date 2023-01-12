@@ -32,6 +32,7 @@ const origNodeEnv = process.env.NODE_ENV;
 describe('one-app-dev-cdn', () => {
   jest.spyOn(console, 'warn');
   jest.spyOn(console, 'log');
+  jest.spyOn(console, 'error');
   const defaultLocalMap = {
     key: 'not-used-in-development',
     modules: {
@@ -636,17 +637,17 @@ describe('one-app-dev-cdn', () => {
   });
 
   describe('production', () => {
-    it('warns when used in production', () => {
+    it('throws error when used in production', () => {
       process.env.NODE_ENV = 'production';
-      console.warn.mockClear();
+      console.error.mockClear();
       oneAppDevCdn({
         localDevPublicPath: mockLocalDevPublicPath,
         remoteModuleMapUrl: 'https://my-cdn-domain.com/map/module-map.json',
         appPort: 3000,
       });
 
-      expect(console.warn).toHaveBeenCalledTimes(1);
-      expect(console.warn).toHaveBeenCalledWith('do not include one-app-dev-cdn in production');
+      expect(console.error).toHaveBeenCalledTimes(1);
+      expect(console.error).toHaveBeenCalledWith('do not include one-app-dev-cdn in production');
     });
   });
 
