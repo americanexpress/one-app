@@ -107,7 +107,6 @@ export const oneAppDevCdnFactory = ({
 
   if (process.env.NODE_ENV === 'production') {
     console.error('do not include one-app-dev-cdn in production');
-
   }
 
   const oneAppDevCdn = Fastify();
@@ -142,7 +141,7 @@ export const oneAppDevCdnFactory = ({
       oneAppDevCdnAddress: hostAddress,
     })) : {};
 
-    const remoteMap = remoteModuleMapUrl != null ? await consumeRemoteRequest(remoteModuleMapUrl, hostAddress, remoteModuleBaseUrls) : {}
+    const remoteMap = remoteModuleMapUrl != null ? await consumeRemoteRequest(remoteModuleMapUrl, hostAddress, remoteModuleBaseUrls) : {}; // eslint-disable-line max-len
     // remoteMap always fulfilled
     const map = {
       ...remoteMap,
