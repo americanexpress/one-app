@@ -32,14 +32,14 @@ const addSecurityHeaders = (fastify, opts = {}, done) => {
     reply.header('x-permitted-cross-domain-policies', 'none');
     reply.header('X-Content-Type-Options', 'nosniff');
 
-    if (!ignoreRoutes.includes(request.url)) {
+    if (ignoreRoutes.includes(request.url)) {
+      reply.header('X-Frame-Options', 'SAMEORIGIN');
+      reply.header('X-XSS-Protection', '0');
+      reply.header('Referrer-Policy', 'no-referrer');
+    } else {
       reply.header('X-Frame-Options', 'DENY');
       reply.header('X-XSS-Protection', '1; mode=block');
       reply.header('Referrer-Policy', process.env.ONE_REFERRER_POLICY_OVERRIDE || 'same-origin');
-    } else {
-      reply.header('referrer-policy', 'no-referrer');
-      reply.header('x-frame-options', 'SAMEORIGIN');
-      reply.header('x-xss-protection', '0');
     }
   });
 
