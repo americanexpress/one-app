@@ -24,6 +24,7 @@ describe('addSecurityHeaders', () => {
   it('adds security headers', () => {
     const request = {
       headers: {},
+      method: 'GET',
     };
     const reply = {
       header: jest.fn(),

@@ -70,13 +70,15 @@ export async function createApp(opts = {}) {
     zlibOptions: {
       level: 1,
     },
+    encodings: ['gzip'],
   });
   fastify.register(fastifyFormbody);
 
   fastify.register(addSecurityHeadersPlugin, {
-    ignoreRoutes: [
-      '/_/report/security/csp-violation',
-      '/_/report/errors',
+    matchGetRoutes: [
+      '/_/status',
+      '/_/pwa/service-worker.js',
+      '/_/pwa/manifest.webmanifest',
     ],
   });
   fastify.register(setAppVersionHeader);

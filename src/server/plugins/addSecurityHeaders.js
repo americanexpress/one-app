@@ -23,23 +23,24 @@ import fp from 'fastify-plugin';
  * @param {import('fastify').FastifyPluginCallback} done plugin callback
  */
 const addSecurityHeaders = (fastify, opts = {}, done) => {
-  const ignoreRoutes = opts.ignoreRoutes || [];
+  const matchGetRoutes = opts.matchGetRoutes || [];
 
   fastify.addHook('onRequest', async (request, reply) => {
+    reply.header('vary', 'Accept-Encoding');
     reply.header('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
     reply.header('x-dns-prefetch-control', 'off');
     reply.header('x-download-options', 'noopen');
     reply.header('x-permitted-cross-domain-policies', 'none');
     reply.header('X-Content-Type-Options', 'nosniff');
 
-    if (ignoreRoutes.includes(request.url)) {
-      reply.header('X-Frame-Options', 'SAMEORIGIN');
-      reply.header('X-XSS-Protection', '0');
-      reply.header('Referrer-Policy', 'no-referrer');
-    } else {
+    if (request.method.toLowerCase() !== 'get' || request.method.toLowerCase() === 'get' && matchGetRoutes.includes(request.url)) {
       reply.header('X-Frame-Options', 'DENY');
       reply.header('X-XSS-Protection', '1; mode=block');
       reply.header('Referrer-Policy', process.env.ONE_REFERRER_POLICY_OVERRIDE || 'same-origin');
+    } else {
+      reply.header('X-Frame-Options', 'SAMEORIGIN');
+      reply.header('X-XSS-Protection', '0');
+      reply.header('Referrer-Policy', 'no-referrer');
     }
   });
 
