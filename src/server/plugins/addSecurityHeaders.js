@@ -33,7 +33,10 @@ const addSecurityHeaders = (fastify, opts = {}, done) => {
     reply.header('x-permitted-cross-domain-policies', 'none');
     reply.header('X-Content-Type-Options', 'nosniff');
 
-    if (request.method.toLowerCase() !== 'get' || request.method.toLowerCase() === 'get' && matchGetRoutes.includes(request.url)) {
+    if (
+      request.method.toLowerCase() !== 'get'
+      || (request.method.toLowerCase() === 'get' && matchGetRoutes.includes(request.url))
+    ) {
       reply.header('X-Frame-Options', 'DENY');
       reply.header('X-XSS-Protection', '1; mode=block');
       reply.header('Referrer-Policy', process.env.ONE_REFERRER_POLICY_OVERRIDE || 'same-origin');

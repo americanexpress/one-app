@@ -125,7 +125,7 @@ describe('ssrServer', () => {
         level: 1,
       },
       encodings: [
-        "gzip",
+        'gzip',
       ],
     }]);
     expect(register.mock.calls[5][0]).toEqual(fastifyFormbody);
