@@ -40,7 +40,7 @@ const addSecurityHeaders = (fastify, opts = {}, done) => {
     } else {
       reply.header('X-Frame-Options', 'SAMEORIGIN');
       reply.header('X-XSS-Protection', '0');
-      reply.header('Referrer-Policy', 'no-referrer');
+      reply.header('Referrer-Policy', process.env.ONE_REFERRER_POLICY_OVERRIDE || 'no-referrer');
     }
   });
 
