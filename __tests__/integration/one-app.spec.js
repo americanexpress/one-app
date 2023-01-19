@@ -1345,7 +1345,7 @@ describe('Tests that require Docker setup', () => {
           'max-age=15552000; includeSubDomains',
         ],
         vary: [
-          'accept-encoding',
+          'Accept-Encoding, accept-encoding',
         ],
         'x-content-type-options': [
           'nosniff',
@@ -1379,6 +1379,7 @@ describe('Tests that require Docker setup', () => {
       });
 
       expect(response.headers.raw()).toEqual({
+        vary: ['Accept-Encoding'],
         connection: [
           'close',
         ],
@@ -1392,7 +1393,7 @@ describe('Tests that require Docker setup', () => {
           expect.any(String),
         ],
         'referrer-policy': [
-          'no-referrer',
+          'same-origin',
         ],
         'strict-transport-security': [
           'max-age=15552000; includeSubDomains',
@@ -1407,13 +1408,13 @@ describe('Tests that require Docker setup', () => {
           'noopen',
         ],
         'x-frame-options': [
-          'SAMEORIGIN',
+          'DENY',
         ],
         'x-permitted-cross-domain-policies': [
           'none',
         ],
         'x-xss-protection': [
-          '0',
+          '1; mode=block',
         ],
       });
       expect(response.status).toBe(204);
@@ -1451,13 +1452,13 @@ describe('Tests that require Docker setup', () => {
           expect.any(String),
         ],
         'referrer-policy': [
-          'no-referrer',
+          'same-origin',
         ],
         'strict-transport-security': [
           'max-age=15552000; includeSubDomains',
         ],
         vary: [
-          'accept-encoding',
+          'Accept-Encoding, accept-encoding',
         ],
         'x-content-type-options': [
           'nosniff',
@@ -1469,13 +1470,13 @@ describe('Tests that require Docker setup', () => {
           'noopen',
         ],
         'x-frame-options': [
-          'SAMEORIGIN',
+          'DENY',
         ],
         'x-permitted-cross-domain-policies': [
           'none',
         ],
         'x-xss-protection': [
-          '0',
+          '1; mode=block',
         ],
       });
       expect(response.status).toBe(415);
@@ -1509,11 +1510,12 @@ describe('Tests that require Docker setup', () => {
           expect.any(String),
         ],
         'referrer-policy': [
-          'no-referrer',
+          'same-origin',
         ],
         'strict-transport-security': [
           'max-age=15552000; includeSubDomains',
         ],
+        vary: ['Accept-Encoding'],
         'x-content-type-options': [
           'nosniff',
         ],
@@ -1524,13 +1526,13 @@ describe('Tests that require Docker setup', () => {
           'noopen',
         ],
         'x-frame-options': [
-          'SAMEORIGIN',
+          'DENY',
         ],
         'x-permitted-cross-domain-policies': [
           'none',
         ],
         'x-xss-protection': [
-          '0',
+          '1; mode=block',
         ],
       });
     });
@@ -1581,7 +1583,7 @@ describe('Tests that require Docker setup', () => {
           'max-age=15552000; includeSubDomains',
         ],
         vary: [
-          'accept-encoding',
+          'Accept-Encoding, accept-encoding',
         ],
         'x-content-type-options': [
           'nosniff',
@@ -1593,13 +1595,13 @@ describe('Tests that require Docker setup', () => {
           'noopen',
         ],
         'x-frame-options': [
-          'DENY',
+          'SAMEORIGIN',
         ],
         'x-permitted-cross-domain-policies': [
           'none',
         ],
         'x-xss-protection': [
-          '1; mode=block',
+          '0',
         ],
       });
     });

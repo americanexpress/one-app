@@ -124,12 +124,16 @@ describe('ssrServer', () => {
       zlibOptions: {
         level: 1,
       },
+      encodings: [
+        'gzip',
+      ],
     }]);
     expect(register.mock.calls[5][0]).toEqual(fastifyFormbody);
     expect(register.mock.calls[6]).toEqual([addSecurityHeadersPlugin, {
-      ignoreRoutes: [
-        '/_/report/security/csp-violation',
-        '/_/report/errors',
+      matchGetRoutes: [
+        '/_/status',
+        '/_/pwa/service-worker.js',
+        '/_/pwa/manifest.webmanifest',
       ],
     }]);
     expect(register.mock.calls[7][0]).toEqual(setAppVersionHeader);
