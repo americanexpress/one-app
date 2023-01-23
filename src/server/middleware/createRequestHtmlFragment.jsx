@@ -38,10 +38,15 @@ const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 export default function createRequestHtmlFragment({ createRoutes }) {
   return async (req, res, next) => {
     try {
+      req.tracer.serverStartTimer({ key: 'createRoutes' });
+
       const { store } = req;
       const { dispatch } = store;
       const routes = createRoutes(store);
 
+      req.tracer.serverEndTimer({ key: 'createRoutes' });
+
+      req.tracer.serverStartTimer({ key: 'checkRoutes' });
       const { redirectLocation, renderProps } = await matchPromise({
         routes,
         location: req.url,
@@ -62,6 +67,9 @@ export default function createRequestHtmlFragment({ createRoutes }) {
         throw new Error('unable to match routes');
       }
 
+      req.tracer.serverEndTimer({ key: 'checkRoutes' });
+
+      req.tracer.serverStartTimer({ key: 'buildRenderProps' });
       const { httpStatus } = renderProps.routes.slice(-1)[0];
       if (httpStatus) {
         res.status(httpStatus);
@@ -85,7 +93,9 @@ export default function createRequestHtmlFragment({ createRoutes }) {
         }));
 
       const state = store.getState();
+      req.tracer.serverEndTimer({ key: 'buildRenderProps' });
 
+      req.tracer.serverStartTimer({ key: 'loadModuleData' });
       if (getRenderMethodName(state) === 'renderForStaticMarkup') {
         await dispatch(composeModules(routeModules));
       } else {
@@ -100,7 +110,8 @@ export default function createRequestHtmlFragment({ createRoutes }) {
           return next();
         }
       }
-
+      req.tracer.serverEndTimer({ key: 'loadModuleData', message: 'Load Module Data' });
+      req.tracer.serverStartTimer({ key: 'renderToString' });
       const renderMethod = getRenderMethodName(state) === 'renderForStaticMarkup'
         ? renderForStaticMarkup
         : renderForString;
@@ -111,6 +122,7 @@ export default function createRequestHtmlFragment({ createRoutes }) {
           <RouterContext {...renderProps} />
         </Provider>
       );
+      req.tracer.serverEndTimer({ key: 'renderToString', message: 'Render To String' });
       /* eslint-ensable react/jsx-props-no-spreading */
       req.appHtml = renderedString;
       req.helmetInfo = helmetInfo;
