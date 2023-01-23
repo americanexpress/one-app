@@ -23,6 +23,7 @@ import safeRequest from '../utils/safeRequest';
 import { getServerStateConfig, getClientStateConfig } from '../utils/stateConfig';
 import createSsrFetch from '../utils/createSsrFetch';
 import { getClientModuleMapCache } from '../utils/clientModuleMapCache';
+import { enhanceFetchWithTracer } from './tracer';
 
 export default function createRequestStore(
   { reducers },
@@ -38,10 +39,10 @@ export default function createRequestStore(
         config: serverConfig,
       });
 
-      const fetchClient = createSsrFetch({
+      const fetchClient = enhanceFetchWithTracer(req.tracer, createSsrFetch({
         req,
         res,
-      })(fetch);
+      })(fetch));
 
       const enhancer = createEnhancer();
       const localsForBuildInitialState = {

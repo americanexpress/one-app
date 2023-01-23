@@ -86,6 +86,7 @@ export default function createRequestHtmlFragment({ createRoutes }) {
 
       const state = store.getState();
 
+      req.tracer.serverStartTimer({ key: 'loadModuleData' });
       if (getRenderMethodName(state) === 'renderForStaticMarkup') {
         await dispatch(composeModules(routeModules));
       } else {
@@ -100,7 +101,8 @@ export default function createRequestHtmlFragment({ createRoutes }) {
           return next();
         }
       }
-
+      req.tracer.serverEndTimer({ key: 'loadModuleData', message: 'Load Module Data' });
+      req.tracer.serverStartTimer({ key: 'renderToString' });
       const renderMethod = getRenderMethodName(state) === 'renderForStaticMarkup'
         ? renderForStaticMarkup
         : renderForString;
@@ -111,6 +113,7 @@ export default function createRequestHtmlFragment({ createRoutes }) {
           <RouterContext {...renderProps} />
         </Provider>
       );
+      req.tracer.serverEndTimer({ key: 'renderToString', message: 'Render To String' });
       /* eslint-ensable react/jsx-props-no-spreading */
       req.appHtml = renderedString;
       req.helmetInfo = helmetInfo;

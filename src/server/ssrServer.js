@@ -50,6 +50,7 @@ import {
   webManifestMiddleware,
   offlineMiddleware,
 } from './middleware/pwa';
+import { completeTracer, initializeTracer } from './middleware/tracer';
 
 export function createApp({ enablePostToModuleRoutes = false } = {}) {
   const app = express();
@@ -82,13 +83,15 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
   app.get('/_/pwa/shell', offlineMiddleware(oneApp));
   app.get(
     '*',
+    initializeTracer,
     addFrameOptionsHeader,
     createRequestStore(oneApp),
     createRequestHtmlFragment(oneApp),
     conditionallyAllowCors,
     checkStateForRedirect,
     checkStateForStatusCode,
-    sendHtml
+    sendHtml,
+    completeTracer
   );
 
   if (enablePostToModuleRoutes) {
