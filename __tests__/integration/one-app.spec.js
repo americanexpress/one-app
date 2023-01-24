@@ -1287,7 +1287,7 @@ describe('Tests that require Docker setup', () => {
           // eslint-disable-next-line prefer-arrow-callback
           const cacheKeys = await browser.executeAsync(getCacheKeys);
 
-          expect(cacheKeys).toEqual(['__sw/__meta']);
+          expect(cacheKeys).toEqual([]);
         });
       });
     });
