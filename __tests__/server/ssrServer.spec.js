@@ -713,20 +713,26 @@ describe('ssrServer', () => {
         await ssrServer();
 
         const post = jest.fn();
+        const options = jest.fn();
         register.mock.calls[11][0]({
           register: jest.fn(),
           get: jest.fn(),
+          options,
           post,
         }, null, jest.fn());
 
         const reply = {
           sendHtml: jest.fn(() => reply),
+          send: jest.fn(),
         };
 
         post.mock.calls[0][1](null, reply);
+        options.mock.calls[0][1](null, reply);
 
         expect(post.mock.calls[0][0]).toEqual('/*');
+        expect(options.mock.calls[0][0]).toEqual('/*');
         expect(reply.sendHtml).toHaveBeenCalled();
+        expect(reply.send).toHaveBeenCalled();
       });
     });
 

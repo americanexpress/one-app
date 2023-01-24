@@ -211,6 +211,8 @@ export async function createApp(opts = {}) {
     });
 
     if (enablePostToModuleRoutes) {
+      instance.options('/*', (_request, reply) => reply.send('ok'));
+
       instance.post('/*', (_request, reply) => {
         reply.sendHtml();
       });
