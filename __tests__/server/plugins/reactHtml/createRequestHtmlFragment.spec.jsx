@@ -67,7 +67,6 @@ describe('createRequestHtmlFragment', () => {
       renderProps: {
         routes,
         components: [() => 'hi'],
-        // history: browserHistory,
         location: url.parse(location),
         router: browserHistory,
         params: {

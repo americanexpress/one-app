@@ -1,6 +1,7 @@
 {
   "extends": "amex",
   "rules": {
-    "import/no-unresolved": "warn"
+    "import/no-unresolved": "warn",
+    "react/no-unknown-property": "warn"
   }
 }
