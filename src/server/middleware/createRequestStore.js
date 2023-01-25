@@ -29,7 +29,7 @@ export default function createRequestStore(
   { reducers },
   { useBodyForBuildingTheInitialState = false } = {}
 ) {
-  return (req, res, next) => {
+  const createRequestStoreMiddleware = (req, res, next) => {
     try {
       const serverConfig = getServerStateConfig();
       const clientConfig = getClientStateConfig();
@@ -69,4 +69,5 @@ export default function createRequestStore(
       return renderStaticErrorPage(res);
     }
   };
+  return createRequestStoreMiddleware;
 }

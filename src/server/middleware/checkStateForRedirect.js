@@ -15,11 +15,13 @@
  */
 
 export default function checkStateForRedirect(req, res, next) {
+  req.tracer.serverStartTimer({ key: 'checkStateForRedirect' });
   const destination = req.store.getState().getIn(['redirection', 'destination']);
 
   if (destination) {
     return res.redirect(302, destination);
   }
+  req.tracer.serverEndTimer({ key: 'checkStateForRedirect' });
 
   return next();
 }

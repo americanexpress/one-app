@@ -50,7 +50,7 @@ import {
   webManifestMiddleware,
   offlineMiddleware,
 } from './middleware/pwa';
-import { completeTracer, initializeTracer } from './middleware/tracer';
+import { completeTracer, initializeTracer, traceMiddleware } from './middleware/tracer';
 
 export function createApp({ enablePostToModuleRoutes = false } = {}) {
   const app = express();
@@ -84,13 +84,14 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
   app.get(
     '*',
     initializeTracer,
-    addFrameOptionsHeader,
-    createRequestStore(oneApp),
+    traceMiddleware(addFrameOptionsHeader),
+    traceMiddleware(createRequestStore(oneApp)),
+    // createRequestHtmlFragment traces itself
     createRequestHtmlFragment(oneApp),
-    conditionallyAllowCors,
-    checkStateForRedirect,
-    checkStateForStatusCode,
-    sendHtml,
+    traceMiddleware(conditionallyAllowCors),
+    traceMiddleware(checkStateForRedirect),
+    traceMiddleware(checkStateForStatusCode),
+    traceMiddleware(sendHtml),
     completeTracer
   );
 

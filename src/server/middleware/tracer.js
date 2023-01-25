@@ -1,3 +1,19 @@
+/*
+ * Copyright 2023 American Express Travel Related Services Company, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+
 class Tracer {
   constructor() {
     this.timerRecords = {};
@@ -18,10 +34,9 @@ class Tracer {
   }
 
   // end a timer and create a record out of it
-  serverEndTimer = ({ key, message }) => {
+  serverEndTimer = ({ key }) => {
     const timeNs = process.hrtime.bigint();
     this.timerRecords[key] = {
-      message,
       timerStartNs: this.timers[key],
       timerEndNs: timeNs,
     };
@@ -45,9 +60,9 @@ class Tracer {
   buildSynopsys = (record) => {
     const synopsys = {};
 
-    synopsys.message = record.message;
-    synopsys.timerDurationNs = record.timerEndNs - record.timerStartNs;
-    synopsys.timerDurationMs = synopsys.timerDurationNs / 1000000n;
+    synopsys.timerDurationMs = Number((record.timerEndNs - record.timerStartNs) / 1000000n);
+    synopsys.timerStartMs = Number(record.timerStartNs / 1000000n);
+    synopsys.timerEndMs = Number(record.timerEndNs / 1000000n);
     return synopsys;
   }
 
@@ -63,23 +78,31 @@ class Tracer {
       fetchSynopsys[recordKey] = this.buildSynopsys(this.fetchRecords[recordKey]);
     });
 
-    const totalTimersNs = Object.values(timersSynopsys).reduce(
-      (acc, timerSynopsys) => acc + timerSynopsys.timerDurationNs, 0n
+    const totalTimersMs = Object.values(timersSynopsys).reduce(
+      (acc, timerSynopsys) => acc + timerSynopsys.timerDurationMs, 0
     );
 
-    const totalDurationNs = this.requestEndTimeNs - this.requestStartTimeNs;
-    const totalDurationMs = totalDurationNs / 1000000n;
+    const totalDurationMs = Number((this.requestEndTimeNs - this.requestStartTimeNs) / 1000000n);
 
-    const serverDurationNs = this.requestEndTimeNs - this.requestStartTimeNs - totalTimersNs;
-    const serverDurationMs = serverDurationNs / 1000000n;
+    const serverDurationMs = totalDurationMs - totalTimersMs;
+
+    const sortedFetchSynopsys = {};
+
+    const sortedFetchKeys = Object.keys(fetchSynopsys).sort((aKey, bKey) => (
+      fetchSynopsys[bKey].timerDurationMs - fetchSynopsys[aKey].timerDurationMs
+    ));
+
+    sortedFetchKeys.forEach((key) => {
+      sortedFetchSynopsys[key] = fetchSynopsys[key];
+    });
 
     return {
-      totalDurationNs,
+      // totalDurationNs,
       totalDurationMs,
-      serverDurationNs,
+      // serverDurationNs,
       serverDurationMs,
       timersSynopsys,
-      fetchSynopsys,
+      fetchSynopsys: sortedFetchSynopsys,
     };
   }
 }
@@ -95,7 +118,8 @@ export const initializeTracer = (req, res, next) => {
 export const completeTracer = (req, res, next) => {
   req.tracer.completeTrace();
 
-  console.log('Trace:', req.tracer.formatTrace());
+  console.log('Trace:');
+  console.log(JSON.stringify(req.tracer.formatTrace(), null, 2));
 
   next();
 };
@@ -106,4 +130,13 @@ export const enhanceFetchWithTracer = (tracer, fetch) => async (...params) => {
   const response = await fetch(...params);
   tracer.serverEndFetchTimer({ key: params[0] });
   return response;
+};
+
+// middleware enhancer to trace how long the middleware took
+export const traceMiddleware = (middleware) => async (req, res, next) => {
+  req.tracer.serverStartTimer({ key: middleware.name });
+  return middleware(req, res, () => {
+    req.tracer.serverEndTimer({ key: middleware.name });
+    next();
+  });
 };
