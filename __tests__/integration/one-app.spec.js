@@ -1577,7 +1577,7 @@ describe('Tests that require Docker setup', () => {
           'no-cache',
         ],
         'referrer-policy': [
-          'same-origin',
+          'no-referrer',
         ],
         'strict-transport-security': [
           'max-age=15552000; includeSubDomains',
