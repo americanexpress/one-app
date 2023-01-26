@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 
 describe('empty frame-ancestors', () => {
-  test('does not add frame options header', () => {
+  it('does not add frame options header', () => {
     const request = {
       headers: {},
     };
@@ -45,7 +45,7 @@ describe('empty frame-ancestors', () => {
 });
 
 describe('no matching domains', () => {
-  test('does not add frame options header', () => {
+  it('does not add frame options header', () => {
     updateCSP('frame-ancestors americanexpress.com;');
     const request = {
       headers: {},
@@ -68,7 +68,7 @@ describe('no matching domains', () => {
   });
 });
 
-test('adds frame options header', () => {
+it('adds frame options header', () => {
   updateCSP('frame-ancestors americanexpress.com;');
   const request = {
     headers: {
