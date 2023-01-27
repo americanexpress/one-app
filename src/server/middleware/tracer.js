@@ -50,7 +50,6 @@ class Tracer {
   serverEndFetchTimer = ({ key }) => {
     const timeNs = process.hrtime.bigint();
     this.fetchRecords[key] = {
-      message: key,
       timerStartNs: this.timers[key],
       timerEndNs: timeNs,
     };
@@ -70,12 +69,27 @@ class Tracer {
   formatTrace = () => {
     const timersSynopsys = {};
     const fetchSynopsys = {};
+    const openTimers = {};
 
+    const processedKeys = [];
     Object.keys(this.timerRecords).forEach((recordKey) => {
       timersSynopsys[recordKey] = this.buildSynopsys(this.timerRecords[recordKey]);
+      processedKeys.push(recordKey);
     });
     Object.keys(this.fetchRecords).forEach((recordKey) => {
       fetchSynopsys[recordKey] = this.buildSynopsys(this.fetchRecords[recordKey]);
+      processedKeys.push(recordKey);
+    });
+    Object.keys(this.timers).forEach((timerKey) => {
+      if (!processedKeys.includes(timerKey)) {
+        const synopsys = {};
+
+        // open timers get a fake duration of 10ms
+        synopsys.timerDurationMs = 10;
+        synopsys.timerStartMs = Number(this.timers[timerKey] / 1000000n);
+        synopsys.timerEndMs = synopsys.timerStartMs + 10;
+        openTimers[timerKey] = synopsys;
+      }
     });
 
     const totalTimersMs = Object.values(timersSynopsys).reduce(
@@ -88,9 +102,9 @@ class Tracer {
 
     const sortedFetchSynopsys = {};
 
-    const sortedFetchKeys = Object.keys(fetchSynopsys).sort((aKey, bKey) => (
-      fetchSynopsys[bKey].timerDurationMs - fetchSynopsys[aKey].timerDurationMs
-    ));
+    const sortedFetchKeys = Object.keys(fetchSynopsys).sort(
+      (aKey, bKey) => fetchSynopsys[bKey].timerDurationMs - fetchSynopsys[aKey].timerDurationMs
+    );
 
     sortedFetchKeys.forEach((key) => {
       sortedFetchSynopsys[key] = fetchSynopsys[key];
@@ -103,6 +117,7 @@ class Tracer {
       serverDurationMs,
       timersSynopsys,
       fetchSynopsys: sortedFetchSynopsys,
+      openTimers,
     };
   }
 }
@@ -124,11 +139,16 @@ export const completeTracer = (req, res, next) => {
   next();
 };
 
+// keep track of fetch count so duplicated calls can be traced
+let fetchCount = 0;
+
 // fetch enhancer to add fetch tracing around api calls
 export const enhanceFetchWithTracer = (tracer, fetch) => async (...params) => {
-  tracer.serverStartFetchTimer({ key: params[0] });
+  const localFetchCount = fetchCount;
+  fetchCount += 1;
+  tracer.serverStartFetchTimer({ key: `${localFetchCount} ${params[0]}` });
   const response = await fetch(...params);
-  tracer.serverEndFetchTimer({ key: params[0] });
+  tracer.serverEndFetchTimer({ key: `${localFetchCount} ${params[0]}` });
   return response;
 };
 
