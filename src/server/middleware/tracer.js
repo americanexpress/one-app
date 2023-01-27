@@ -21,6 +21,8 @@ class Tracer {
     this.timers = {};
     this.requestStartTimeNs = process.hrtime.bigint();
     this.requestEndTimeNs = null;
+    // keep track of fetch count so duplicated calls can be traced
+    this.fetchCount = 0;
   }
 
   completeTrace = () => {
@@ -111,9 +113,7 @@ class Tracer {
     });
 
     return {
-      // totalDurationNs,
       totalDurationMs,
-      // serverDurationNs,
       serverDurationMs,
       timersSynopsys,
       fetchSynopsys: sortedFetchSynopsys,
@@ -139,13 +139,10 @@ export const completeTracer = (req, res, next) => {
   next();
 };
 
-// keep track of fetch count so duplicated calls can be traced
-let fetchCount = 0;
-
 // fetch enhancer to add fetch tracing around api calls
 export const enhanceFetchWithTracer = (tracer, fetch) => async (...params) => {
-  const localFetchCount = fetchCount;
-  fetchCount += 1;
+  const localFetchCount = tracer.fetchCount;
+  tracer.fetchCount += 1;
   tracer.serverStartFetchTimer({ key: `${localFetchCount} ${params[0]}` });
   const response = await fetch(...params);
   tracer.serverEndFetchTimer({ key: `${localFetchCount} ${params[0]}` });
