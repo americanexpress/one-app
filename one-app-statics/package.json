@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app-statics",
-  "version": "5.15.4",
+  "version": "5.15.4-experimental-ssr-tracer-003",
   "description": "One App Static Assets",
   "main": "index.js",
   "scripts": {
