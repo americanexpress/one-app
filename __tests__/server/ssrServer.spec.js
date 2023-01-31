@@ -14,551 +14,792 @@
  * permissions and limitations under the License.
  */
 
-import request from 'supertest';
+import path from 'path';
+import compress from '@fastify/compress';
+import Fastify from 'fastify';
+import fastifyCookie from '@fastify/cookie';
+import fastifyFormbody from '@fastify/formbody';
+import fastifyStatic from '@fastify/static';
+import fastifyHelmet from '@fastify/helmet';
+import fastifySensible from '@fastify/sensible';
 
-jest.mock('express');
+import ensureCorrelationId from '../../src/server/plugins/ensureCorrelationId';
+import setAppVersionHeader from '../../src/server/plugins/setAppVersionHeader';
+import addSecurityHeadersPlugin from '../../src/server/plugins/addSecurityHeaders';
+import csp from '../../src/server/plugins/csp';
+import logging from '../../src/server/utils/logging/fastifyPlugin';
+import forwardedHeaderParser from '../../src/server/plugins/forwardedHeaderParser';
+import renderHtml from '../../src/server/plugins/reactHtml';
+import renderStaticErrorPage from '../../src/server/plugins/reactHtml/staticErrorPage';
+import addFrameOptionsHeader from '../../src/server/plugins/addFrameOptionsHeader';
+import addCacheHeaders from '../../src/server/plugins/addCacheHeaders';
+import {
+  // eslint-disable-next-line import/named
+  _setConfig, serviceWorkerHandler, webManifestMiddleware,
+} from '../../src/server/pwa';
+
+import ssrServer from '../../src/server/ssrServer';
+
+const { NODE_ENV } = process.env;
+
+jest.mock('@fastify/compress');
 jest.mock('fastify');
-jest.mock('body-parser', () => ({
-  json: jest.fn(() => (_request, _res, next) => next()),
-  urlencoded: jest.fn(() => (_request, _res, next) => next()),
-}));
-jest.mock('../../src/server/middleware/clientErrorLogger');
-jest.mock('../../src/server/middleware/setAppVersionHeader');
-jest.mock('../../src/server/middleware/addSecurityHeaders');
-jest.mock('../../src/server/middleware/createRequestStore');
-jest.mock('../../src/server/middleware/createRequestHtmlFragment');
-jest.mock('../../src/server/middleware/checkStateForRedirect');
-jest.mock('../../src/server/middleware/checkStateForStatusCode');
-jest.mock('../../src/server/middleware/conditionallyAllowCors');
-jest.mock('../../src/server/middleware/csp');
-jest.mock('../../src/server/middleware/cspViolation');
-jest.mock('../../src/server/middleware/sendHtml');
-jest.mock('../../src/server/middleware/addCacheHeaders');
-jest.mock('../../src/server/middleware/addFrameOptionsHeader');
-jest.mock('../../src/server/middleware/forwardedHeaderParser');
-jest.mock('../../src/server/utils/logging/serverMiddleware', () => (_request, _res, next) => setImmediate(next));
-jest.mock('../../src/universal/index');
-jest.mock('../../src/server/middleware/pwa', () => {
-  const serviceWorker = jest.fn((_request, _res, next) => next());
-  const webManifest = jest.fn((_request, _res, next) => next());
-  const offline = jest.fn((_request, _res, next) => next());
+jest.mock('@fastify/cookie');
+jest.mock('@fastify/formbody');
+jest.mock('@fastify/static');
+jest.mock('@fastify/helmet');
+jest.mock('@fastify/sensible');
+jest.mock('../../src/server/plugins/ensureCorrelationId');
+jest.mock('../../src/server/plugins/setAppVersionHeader');
+jest.mock('../../src/server/plugins/addSecurityHeaders');
+jest.mock('../../src/server/plugins/csp');
+jest.mock('../../src/server/utils/logging/fastifyPlugin');
+jest.mock('../../src/server/plugins/forwardedHeaderParser');
+jest.mock('../../src/server/plugins/reactHtml');
+jest.mock('../../src/server/plugins/reactHtml/staticErrorPage');
+jest.mock('../../src/server/plugins/addFrameOptionsHeader');
+jest.mock('../../src/server/plugins/addCacheHeaders');
+jest.mock('../../src/server/pwa', () => {
+  let config = null;
+
   return {
-    serviceWorker,
-    webManifest,
-    offline,
-    serviceWorkerMiddleware: () => serviceWorker,
-    webManifestMiddleware: () => webManifest,
-    offlineMiddleware: () => offline,
+    _setConfig: (newConfig) => {
+      config = newConfig;
+    },
+    getServerPWAConfig: () => config,
+    serviceWorkerHandler: jest.fn(),
+    webManifestMiddleware: jest.fn(),
   };
 });
-jest.mock('../../mocks/scenarios', () => ({
-  scenarios: true,
-}), { virtual: true });
+
+afterAll(() => {
+  process.env.NODE_ENV = NODE_ENV;
+});
 
 describe('ssrServer', () => {
-  jest.spyOn(console, 'info').mockImplementation(() => {});
+  jest.spyOn(console, 'info').mockImplementation(() => { });
   jest.spyOn(console, 'log').mockImplementation(() => { });
   jest.spyOn(console, 'warn').mockImplementation(() => { });
   jest.spyOn(console, 'error').mockImplementation(() => { });
 
+  let register;
+  let setNotFoundHandler;
+  let setErrorHandler;
+  let ready;
+
   beforeEach(() => {
-    jest.resetModules();
+    // jest.resetModules();
     jest.clearAllMocks();
     process.env.NODE_ENV = 'development';
     delete process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES;
     delete process.env.ONE_MAX_POST_REQUEST_PAYLOAD;
+
+    register = jest.fn();
+    setNotFoundHandler = jest.fn();
+    setErrorHandler = jest.fn();
+    ready = jest.fn();
+
+    Fastify.mockImplementationOnce(() => ({
+      register,
+      setNotFoundHandler,
+      setErrorHandler,
+      ready,
+    }));
   });
 
-  describe('middleware order', () => {
-    it('first ensures the request has a correlation id', async () => {
-      const express = require('express');
-      const ensureCorrelationId = require('../../src/server/middleware/ensureCorrelationId').default;
-      const { makeExpressRouter } = require('../../src/server/ssrServer');
+  test('builds the fastify server and registers plugins in the correct order', async () => {
+    const app = await ssrServer();
 
-      const useMock = jest.fn();
-      express.Router = jest.fn(() => ({
-        use: useMock,
-        get: jest.fn(),
-        post: jest.fn(),
-        options: jest.fn(),
-      }));
-
-      const router = await makeExpressRouter();
-
-      expect(router.use).toHaveBeenCalled();
-      expect(router.use.mock.calls[0][0]).toEqual(ensureCorrelationId);
+    expect(Fastify).toHaveBeenCalledWith({
+      frameworkErrors: expect.any(Function),
+      bodyLimit: 10485760,
     });
 
-    it('ensures the request will be logged', async () => {
-      const express = require('express');
-      const serverLoggingMiddleware = require('../../src/server/utils/logging/serverMiddleware');
-      const { makeExpressRouter } = require('../../src/server/ssrServer');
+    expect(register).toHaveBeenCalledTimes(12);
+    expect(register.mock.calls[0][0]).toEqual(fastifySensible);
+    expect(register.mock.calls[1][0]).toEqual(ensureCorrelationId);
+    expect(register.mock.calls[2][0]).toEqual(fastifyCookie);
+    expect(register.mock.calls[3][0]).toEqual(logging);
+    expect(register.mock.calls[4]).toEqual([compress, {
+      zlibOptions: {
+        level: 1,
+      },
+      encodings: [
+        'gzip',
+      ],
+    }]);
+    expect(register.mock.calls[5][0]).toEqual(fastifyFormbody);
+    expect(register.mock.calls[6]).toEqual([addSecurityHeadersPlugin, {
+      matchGetRoutes: [
+        '/_/status',
+        '/_/pwa/service-worker.js',
+        '/_/pwa/manifest.webmanifest',
+      ],
+    }]);
+    expect(register.mock.calls[7][0]).toEqual(setAppVersionHeader);
+    expect(register.mock.calls[8][0]).toEqual(forwardedHeaderParser);
+    expect(register.mock.calls[9][0]).toEqual(expect.any(Function)); // abstraction
+    expect(register.mock.calls[10][0]).toEqual(expect.any(Function)); // abstraction
+    expect(register.mock.calls[11][0]).toEqual(expect.any(Function)); // abstraction
 
-      const useMock = jest.fn();
-      express.Router = jest.fn(() => ({
-        use: useMock,
-        get: jest.fn(),
-        post: jest.fn(),
-        options: jest.fn(),
-      }));
+    const staticRegister = jest.fn();
+    register.mock.calls[9][0]({
+      register: staticRegister,
+      get: jest.fn(),
+    }, null, jest.fn());
 
-      const router = await makeExpressRouter();
+    expect(staticRegister.mock.calls[0]).toEqual([
+      fastifyStatic,
+      {
+        root: path.join(__dirname, '../../build'),
+        prefix: '/_/static',
+        maxAge: '182d',
+      },
+    ]);
 
-      expect(router.use).toHaveBeenCalled();
-      expect(router.use.mock.calls[1][0]).toEqual(serverLoggingMiddleware);
-    });
+    const pwaRegister = jest.fn();
+    register.mock.calls[10][0]({
+      register: pwaRegister,
+      get: jest.fn(),
+      post: jest.fn(),
+    }, null, jest.fn());
 
-    it('ensures forwarded header in the request is parsed if present', async () => {
-      const express = require('express');
-      const forwardedHeaderParser = require('../../src/server/middleware/forwardedHeaderParser').default;
-      const { makeExpressRouter } = require('../../src/server/ssrServer');
+    expect(pwaRegister.mock.calls[0][0]).toEqual(addCacheHeaders);
+    expect(pwaRegister.mock.calls[1][0]).toEqual(csp);
 
-      const useMock = jest.fn();
-      express.Router = jest.fn(() => ({
-        use: useMock,
-        get: jest.fn(),
-        post: jest.fn(),
-        options: jest.fn(),
-      }));
+    const renderRegister = jest.fn();
+    register.mock.calls[11][0]({
+      register: renderRegister,
+      get: jest.fn(),
+      post: jest.fn(),
+    }, null, jest.fn());
 
-      const router = await makeExpressRouter();
+    expect(renderRegister.mock.calls[0][0]).toEqual(addCacheHeaders);
+    expect(renderRegister.mock.calls[1][0]).toEqual(csp);
+    expect(renderRegister.mock.calls[2]).toEqual([
+      fastifyHelmet,
+      {
+        crossOriginEmbedderPolicy: false,
+        crossOriginOpenerPolicy: false,
+        crossOriginResourcePolicy: false,
+        originAgentCluster: false,
+      },
+    ]);
+    expect(renderRegister.mock.calls[3][0]).toEqual(addFrameOptionsHeader);
+    expect(renderRegister.mock.calls[4][0]).toEqual(renderHtml);
 
-      expect(router.use).toHaveBeenCalled();
-      expect(router.use.mock.calls[4][0]).toEqual(forwardedHeaderParser);
-    });
+    expect(setNotFoundHandler).toHaveBeenCalledTimes(1);
+    expect(setErrorHandler).toHaveBeenCalledTimes(1);
+    expect(ready).toHaveBeenCalledTimes(1);
+
+    expect(app).not.toBe(undefined);
   });
 
-  describe('app server', () => {
-    let clientErrorLogger;
-    let setAppVersionHeader;
-    let addSecurityHeaders;
-    let createRequestStore;
-    let createRequestHtmlFragment;
-    let checkStateForRedirect;
-    let checkStateForStatusCode;
-    let sendHtml;
-    let renderStaticErrorPage;
-    let conditionallyAllowCors;
-    let csp;
-    let cspViolation;
-    let addFrameOptionsHeader;
-    let addCacheHeaders;
-    let json;
-    let urlencoded;
-    let forwardedHeaderParser;
-    let serviceWorker;
-    let webManifest;
-    let offline;
+  test('frameworkErrors reports and renders error', async () => {
+    await ssrServer();
+    const { frameworkErrors } = Fastify.mock.calls[0][0];
 
-    function loadServer() {
-      ({ json, urlencoded } = require('body-parser'));
-      clientErrorLogger = require('../../src/server/middleware/clientErrorLogger').default;
-      setAppVersionHeader = require('../../src/server/middleware/setAppVersionHeader').default;
-      addSecurityHeaders = require('../../src/server/middleware/addSecurityHeaders').default;
-      createRequestStore = require('../../src/server/middleware/createRequestStore').default;
-      createRequestHtmlFragment = require(
-        '../../src/server/middleware/createRequestHtmlFragment'
-      ).default;
-      checkStateForRedirect = require('../../src/server/middleware/checkStateForRedirect').default;
-      checkStateForStatusCode = require('../../src/server/middleware/checkStateForStatusCode').default;
-      conditionallyAllowCors = require('../../src/server/middleware/conditionallyAllowCors').default;
-      csp = require('../../src/server/middleware/csp').default;
-      cspViolation = require('../../src/server/middleware/cspViolation').default;
-      ({ default: sendHtml, renderStaticErrorPage } = require('../../src/server/middleware/sendHtml'));
-      addFrameOptionsHeader = require('../../src/server/middleware/addFrameOptionsHeader').default;
-      addCacheHeaders = require('../../src/server/middleware/addCacheHeaders').default;
-      forwardedHeaderParser = require('../../src/server/middleware/forwardedHeaderParser').default;
-      ({ serviceWorker, webManifest, offline } = require('../../src/server/middleware/pwa'));
-      const server = require('../../src/server/ssrServer');
-
-      return server;
-    }
-
-    const loadExpress = (customRouter) => {
-      const app = require('express')();
-
-      app.disable('x-powered-by');
-      app.disable('e-tag');
-
-      const router = loadServer().makeExpressRouter(customRouter);
-
-      app.use(router);
-
-      return app;
+    const error = new Error('testing');
+    const request = {
+      method: 'get',
+      url: 'example.com',
+      headers: {},
     };
+    const reply = {};
 
-    it('should return an unformatted 404 response for a missing JSON file', async () => {
-      const response = await request(loadExpress())
-        .get('/_/static/locale/xx-XX/error-message.json');
-      expect(response.status).toEqual(404);
-      expect(response.text).toEqual('Not Found');
-      expect(response.type).toEqual('text/plain');
+    frameworkErrors(error, request, reply);
+
+    expect(console.error).toHaveBeenCalledWith(
+      'Fastify internal error: method get, url "example.com", correlationId "undefined"',
+      error
+    );
+    expect(renderStaticErrorPage).toHaveBeenCalled();
+  });
+
+  describe('static routes', () => {
+    test('/_/status responds with 200', async () => {
+      await ssrServer();
+
+      const get = jest.fn();
+
+      register.mock.calls[9][0]({
+        register: jest.fn(),
+        get,
+      }, null, jest.fn());
+
+      const reply = {
+        status: jest.fn(() => reply),
+        send: jest.fn(() => reply),
+      };
+
+      get.mock.calls[0][1](null, reply);
+
+      expect(get.mock.calls[0][0]).toEqual('/_/status');
+      expect(reply.status).toHaveBeenCalledWith(200);
+      expect(reply.send).toHaveBeenCalledWith('OK');
     });
 
-    it('should return an unformatted 404 response for a missing CSS file', async () => {
-      const response = await request(loadExpress())
-        .get('/_/static/404.css');
-      expect(response.status).toEqual(404);
-      expect(response.text).toEqual('Not Found');
-      expect(response.type).toEqual('text/plain');
-    });
+    test('/_/pwa/service-worker.js uses the serviceWorkerHandler handler', async () => {
+      await ssrServer();
 
-    it('should return an unformatted 404 response for a missing JS file', async () => {
-      const response = await request(loadExpress())
-        .get('/bad-url.js');
-      expect(response.text).toEqual('Not Found');
-      expect(response.status).toEqual(404);
-      expect(response.type).toEqual('text/plain');
-    });
+      const get = jest.fn();
 
-    it('should return an unformatted 404 response for a missing sourcemap', async () => {
-      const response = await request(loadExpress())
-        .get('/bad-url.js.map');
+      register.mock.calls[9][0]({
+        register: jest.fn(),
+        get,
+      }, null, jest.fn());
 
-      expect(response.status).toEqual(404);
-      expect(response.text).toEqual('Not Found');
-      expect(response.type).toEqual('text/plain');
-    });
+      const reply = {
+        status: jest.fn(() => reply),
+        send: jest.fn(() => reply),
+      };
 
-    it('should return a 200 response for the readiness check', async () => {
-      const response = await request(loadExpress())
-        .get('/_/status');
-      expect(response.status).toEqual(200);
-      expect(response.text).toEqual('OK');
-      expect(response.type).toEqual('text/plain');
-    });
-
-    it('should use rendering middleware for HTML requests', async () => {
-      const { text, type } = await request(loadExpress())
-        .get('/some.html');
-      expect(addSecurityHeaders).toBeCalled();
-      expect(createRequestHtmlFragment).toHaveBeenCalledTimes(1);
-      expect(sendHtml).toHaveBeenCalledTimes(1);
-      expect(text.trim().slice(0, 15).toLowerCase()).toEqual('<!doctype html>');
-      expect(type).toEqual('text/html');
-    });
-
-    it('should use rendering middleware for requests with no extension', async () => {
-      const response = await request(loadExpress())
-        .get('/404');
-      expect(addSecurityHeaders).toBeCalled();
-      expect(createRequestHtmlFragment).toHaveBeenCalledTimes(1);
-      expect(sendHtml).toBeCalled();
-      expect(response.text.trim().slice(0, 15).toLowerCase()).toEqual('<!doctype html>');
-      expect(response.type).toEqual('text/html');
-    });
-
-    it('should add security headers for assets', async () => {
-      await request(loadExpress())
-        .get('/_/static');
-      expect(addSecurityHeaders).toBeCalled();
-    });
-
-    it('should not add cache headers for assets', async () => {
-      await request(loadExpress())
-        .get('/_/static');
-      expect(addCacheHeaders).not.toBeCalled();
-    });
-
-    it('should add cache headers for all get calls', async () => {
-      await request(loadExpress())
-        .get('/route');
-      expect(addCacheHeaders).toBeCalled();
-    });
-
-    it('should call service worker middleware', async () => {
-      await request(loadExpress())
-        .get('/_/pwa/service-worker.js');
-      expect(serviceWorker).toBeCalled();
-    });
-
-    it('should call web manifest middleware', async () => {
-      await request(loadExpress())
-        .get('/_/pwa/manifest.webmanifest');
-      expect(webManifest).toBeCalled();
-    });
-
-    it('should call offline middleware and other html middleware', async () => {
-      await request(loadExpress())
-        .get('/_/pwa/shell');
-      expect(addFrameOptionsHeader).toBeCalled();
-      expect(createRequestStore).toBeCalled();
-      expect(offline).toBeCalled();
-      expect(sendHtml).toBeCalled();
-    });
-
-    it('should call errors logging', async () => {
-      await request(loadExpress())
-        .post('/_/report/errors');
-      expect(clientErrorLogger).toBeCalled();
-    });
-
-    it('should set the expected app version header', async () => {
-      const response = await request(loadExpress())
-        .get('/any-path');
-      expect(setAppVersionHeader).toHaveBeenCalled();
-      expect(response.headers['one-app-version']).toBe('x.0.0');
-    });
-
-    it('should add security headers for all get calls', async () => {
-      await request(loadExpress())
-        .get('/route');
-      expect(addSecurityHeaders).toBeCalled();
-    });
-
-    it('should add csp headers for all get calls', async () => {
-      await request(loadExpress())
-        .get('/route');
-      expect(csp).toBeCalled();
-    });
-
-    it('should create request store for all get calls', async () => {
-      await request(loadExpress())
-        .get('/route');
-      expect(createRequestStore).toBeCalled();
-    });
-
-    it('should conditionally include CORS headers for all get calls', async () => {
-      expect.assertions(1);
-      await request(loadExpress())
-        .get('/route');
-      expect(conditionallyAllowCors).toBeCalled();
-    });
-
-    it('should parse forwarded header for all get calls', async () => {
-      await request(loadExpress())
-        .get('/route');
-      expect(forwardedHeaderParser).toBeCalled();
-    });
-
-    describe('enablePostToModuleRoutes', () => {
-      beforeEach(() => {
-        process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES = 'true';
-      });
-
-      it('should check the state for a status code for all post calls', async () => {
-        await request(loadExpress())
-          .post('/route');
-        expect(checkStateForStatusCode).toBeCalled();
-      });
-
-      it('should respond with a 404 when not enabled', async () => {
-        delete process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES;
-        const response = await request(loadExpress())
-          .post('/any-path');
-        return expect(response.status).toEqual(404);
-      });
-
-      it('should set the expected app version header for a render post call', async () => {
-        const response = await request(loadExpress())
-          .post('/any-path');
-        expect(setAppVersionHeader).toHaveBeenCalled();
-        expect(response.headers['one-app-version']).toBe('x.0.0');
-      });
-
-      it('should add security headers for render post pre-flight options calls', async () => {
-        await request(loadExpress())
-          .options('/route');
-        expect(addSecurityHeaders).toBeCalled();
-      });
-
-      it('should add security headers for render post calls', async () => {
-        await request(loadExpress())
-          .post('/route');
-        expect(addSecurityHeaders).toBeCalled();
-      });
-
-      it('should configure json parsing with a maximum limit for render post pre-flight options calls', async () => {
-        await request(loadExpress())
-          .options('/route');
-        expect(json).toBeCalled();
-        expect(json.mock.calls[1][0]).toHaveProperty('limit', '0kb');
-      });
-
-      it('should configure json parsing with a maximum limit for render post calls', async () => {
-        process.env.ONE_MAX_POST_REQUEST_PAYLOAD = '100kb';
-        await request(loadExpress())
-          .post('/route');
-        expect(json).toBeCalled();
-        expect(json.mock.calls[2][0]).toHaveProperty('limit', '100kb');
-      });
-      it('should configure urlencoded parsing with a maximum limit for render post pre-flight options calls', async () => {
-        await request(loadExpress())
-          .options('/route');
-        expect(urlencoded).toBeCalled();
-        expect(json.mock.calls[1][0]).toHaveProperty('limit', '0kb');
-      });
-
-      it('should configure json urlencoded with a maximum limit for render post calls', async () => {
-        process.env.ONE_MAX_POST_REQUEST_PAYLOAD = '25kb';
-        await request(loadExpress())
-          .post('/route');
-        expect(urlencoded).toBeCalled();
-        expect(json.mock.calls[2][0]).toHaveProperty('limit', '25kb');
-      });
-
-      describe('cors for render post calls', () => {
-        it('pre-flight OPTIONS should not respond with CORS headers', async () => {
-          const response = await request(loadExpress())
-            .options('/route')
-            .set('Origin', 'test.example.com');
-          expect(response.status).toEqual(200);
-          // preflight-only headers
-          expect(response.headers).not.toHaveProperty('access-control-max-age');
-          expect(response.headers).not.toHaveProperty('access-control-allow-methods');
-          expect(response.headers).not.toHaveProperty('access-control-allow-headers');
-          // any response headers
-          expect(response.headers).not.toHaveProperty('access-control-allow-origin');
-          expect(response.headers).not.toHaveProperty('access-control-expose-headers');
-          expect(response.headers).not.toHaveProperty('access-control-allow-credentials');
-        });
-
-        it('POST should conditionally include CORS headers', async () => {
-          expect.assertions(1);
-          await request(loadExpress())
-            .post('/route')
-            .set('Origin', 'test.example.com');
-          expect(conditionallyAllowCors).toBeCalled();
-        });
-      });
-
-      it('should add csp headers for render post calls', async () => {
-        await request(loadExpress())
-          .post('/route');
-        expect(csp).toBeCalled();
-      });
-
-      it('should create request store using the body for building initial state for render post calls', async () => {
-        await request(loadExpress())
-          .post('/route');
-        expect(createRequestStore).toBeCalled();
-        expect(createRequestStore.mock.calls[1][1]).toEqual(
-          { useBodyForBuildingTheInitialState: true }
-        );
-      });
-
-      it('should parse forwarded header for render post calls', async () => {
-        await request(loadExpress())
-          .post('/route');
-        expect(forwardedHeaderParser).toBeCalled();
-      });
-    });
-
-    it('should log the csp violation request body', async () => {
-      await request(loadExpress())
-        .post('/_/report/security/csp-violation')
-        .send({ body: 'foo', other: 'boo' });
-      expect(cspViolation).toHaveBeenCalled();
-    });
-
-    it('should create send html for all get calls', async () => {
-      await request(loadExpress())
-        .get('/route');
-      expect(sendHtml).toBeCalled();
-    });
-
-    it('should not call route specific middleware to be called on non-matching routes', async () => {
-      await request(loadExpress())
-        .get('/route');
-      expect(cspViolation).not.toHaveBeenCalled();
-      expect(clientErrorLogger).not.toHaveBeenCalled();
-    });
-
-    it('should create request html fragment for all get calls', async () => {
-      await request(loadExpress())
-        .get('/route');
-      expect(createRequestHtmlFragment).toBeCalled();
-    });
-
-    it('should check the state for a redirect for all get calls', async () => {
-      await request(loadExpress())
-        .get('/route');
-      expect(checkStateForRedirect).toBeCalled();
-    });
-
-    it('should check the state for a status code for all get calls', async () => {
-      await request(loadExpress())
-        .get('/route');
-      expect(checkStateForStatusCode).toBeCalled();
-    });
-
-    it('should add frame options header for all get calls', async () => {
-      await request(loadExpress())
-        .get('/route');
-      expect(addFrameOptionsHeader).toBeCalled();
-    });
-
-    it('should return the static error page when an error was encountered', async () => {
-      const middlewareError = new Error('test error after body sent');
-      const express = require('express');
-      const response = await request(
-        loadExpress(
-          express
-            .Router()
-            .use((_request, _res, next) => {
-              next(middlewareError);
-            })
-        )
-      ).get('/anything');
-
-      expect(response.status).toEqual(500);
-      expect(console.error).toHaveBeenCalledTimes(1);
-      expect(console.error).toHaveBeenCalledWith(middlewareError, 'express application error: method GET, url "/anything", correlationId "undefined", headersSent: false');
-      expect(response.type).toEqual('text/html');
-      expect(response.text).toMatch('<h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>');
-      expect(response.text).toMatch('Sorry, we are unable to load this page at this time.');
-      expect(response.text).toMatch('Please try again later.');
-    });
-
-    it('should return the static error page when the URL is malformed', async () => {
-      const res = await request(loadExpress())
-        .get('/%c0%2e%c0%2e/%c0%2e%c0%2e/%c0%2e%c0%2e/%c0%2e%c0%2e/rockpj/rock.exe');
-      expect(renderStaticErrorPage).toHaveBeenCalled();
-      expect(res.status).toEqual(400);
-      expect(res.type).toEqual('text/html');
-      expect(res.text).toMatch('<h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>');
-      expect(res.text).toMatch('Sorry, we are unable to load this page at this time.');
-      expect(res.text).not.toMatch('Please try again later.');
+      expect(get.mock.calls[1][0]).toEqual('/_/pwa/service-worker.js');
+      expect(get.mock.calls[1][1]).toEqual(serviceWorkerHandler);
     });
   });
 
-  describe('start app with Fastify', () => {
-    it('starts the app through fastify', async () => {
-      const fastify = require('fastify').default;
-      const fastifyExpress = require('@fastify/express').default;
-      const sendHtml = require('../../src/server/middleware/sendHtml').default;
+  describe('pwa routes', () => {
+    test('/_/pwa/manifest.webmanifest uses the webManifestMiddleware handler', async () => {
+      await ssrServer();
 
-      const registerMock = jest.fn();
-      const expressDisableMock = jest.fn();
-      const useMock = jest.fn();
-      const notFoundMock = jest.fn();
+      const get = jest.fn();
 
-      fastify.mockImplementation(() => ({
-        register: registerMock,
-        express: {
-          disable: expressDisableMock,
+      register.mock.calls[10][0]({
+        register: jest.fn(),
+        get,
+        post: jest.fn(),
+      }, null, jest.fn());
+
+      const reply = {
+        status: jest.fn(() => reply),
+        send: jest.fn(() => reply),
+      };
+
+      expect(get.mock.calls[0][0]).toEqual('/_/pwa/manifest.webmanifest');
+      expect(get.mock.calls[0][1]).toEqual(webManifestMiddleware);
+    });
+
+    describe('DEVELOPMENT', () => {
+      describe('empty body', () => {
+        test('/_/report/security/csp-violation report with no data', async () => {
+          await ssrServer();
+
+          const post = jest.fn();
+
+          register.mock.calls[10][0]({
+            register: jest.fn(),
+            get: jest.fn(),
+            post,
+          }, null, jest.fn());
+
+          const request = {};
+          const reply = {
+            status: jest.fn(() => reply),
+            send: jest.fn(() => reply),
+          };
+
+          post.mock.calls[0][1](request, reply);
+
+          expect(post.mock.calls[0][0]).toEqual('/_/report/security/csp-violation');
+          expect(console.warn).toHaveBeenCalledWith('CSP Violation reported, but no data received');
+          expect(reply.status).toHaveBeenCalledWith(204);
+          expect(reply.send).toHaveBeenCalled();
+        });
+      });
+
+      describe('missing csp-report', () => {
+        test('/_/report/security/csp-violation report with no data', async () => {
+          await ssrServer();
+
+          const post = jest.fn();
+
+          register.mock.calls[10][0]({
+            register: jest.fn(),
+            get: jest.fn(),
+            post,
+          }, null, jest.fn());
+
+          const request = {
+            body: {},
+          };
+          const reply = {
+            status: jest.fn(() => reply),
+            send: jest.fn(() => reply),
+          };
+
+          post.mock.calls[0][1](request, reply);
+
+          expect(post.mock.calls[0][0]).toEqual('/_/report/security/csp-violation');
+          expect(console.warn).toHaveBeenCalledWith('CSP Violation reported, but no data received');
+          expect(reply.status).toHaveBeenCalledWith(204);
+          expect(reply.send).toHaveBeenCalled();
+        });
+      });
+
+      test('/_/report/security/csp-violation reports data', async () => {
+        await ssrServer();
+
+        const post = jest.fn();
+
+        register.mock.calls[10][0]({
+          register: jest.fn(),
+          get: jest.fn(),
+          post,
+        }, null, jest.fn());
+
+        const request = {
+          body: {
+            'csp-report': {
+              'document-uri': 'document-uri',
+              'violated-directive': 'violated-directive',
+              'blocked-uri': 'blocked-uri',
+              'line-number': 'line-number',
+              'column-number': 'column-number',
+              'source-file': 'source-file',
+            },
+          },
+        };
+        const reply = {
+          status: jest.fn(() => reply),
+          send: jest.fn(() => reply),
+        };
+
+        post.mock.calls[0][1](request, reply);
+
+        expect(post.mock.calls[0][0]).toEqual('/_/report/security/csp-violation');
+        expect(console.warn).toHaveBeenCalledWith('CSP Violation: source-file:line-number:column-number on page document-uri violated the violated-directive policy via blocked-uri');
+        expect(reply.status).toHaveBeenCalledWith(204);
+        expect(reply.send).toHaveBeenCalled();
+      });
+
+      test('/_/report/errors responds with 204', async () => {
+        await ssrServer();
+
+        const post = jest.fn();
+
+        register.mock.calls[10][0]({
+          register: jest.fn(),
+          get: jest.fn(),
+          post,
+        }, null, jest.fn());
+
+        const request = {};
+        const reply = {
+          status: jest.fn(() => reply),
+          send: jest.fn(() => reply),
+        };
+
+        post.mock.calls[1][1](request, reply);
+
+        expect(post.mock.calls[1][0]).toEqual('/_/report/errors');
+        expect(console.warn).not.toHaveBeenCalled();
+        expect(console.error).not.toHaveBeenCalled();
+        expect(reply.status).toHaveBeenCalledWith(204);
+        expect(reply.send).toHaveBeenCalled();
+      });
+    });
+
+    describe('PRODUCTION', () => {
+      describe('empty body', () => {
+        test('/_/report/security/csp-violation report with no data', async () => {
+          process.env.NODE_ENV = 'production';
+          await ssrServer();
+
+          const post = jest.fn();
+
+          register.mock.calls[10][0]({
+            register: jest.fn(),
+            get: jest.fn(),
+            post,
+          }, null, jest.fn());
+
+          const request = {
+            headers: {},
+          };
+          const reply = {
+            status: jest.fn(() => reply),
+            send: jest.fn(() => reply),
+          };
+
+          post.mock.calls[0][1](request, reply);
+
+          expect(post.mock.calls[0][0]).toEqual('/_/report/security/csp-violation');
+          expect(console.warn).toHaveBeenCalledWith('CSP Violation: No data received!');
+          expect(reply.status).toHaveBeenCalledWith(204);
+          expect(reply.send).toHaveBeenCalled();
+        });
+      });
+
+      describe('data in body', () => {
+        test('/_/report/security/csp-violation report with no data', async () => {
+          process.env.NODE_ENV = 'production';
+          await ssrServer();
+
+          const post = jest.fn();
+
+          register.mock.calls[10][0]({
+            register: jest.fn(),
+            get: jest.fn(),
+            post,
+          }, null, jest.fn());
+
+          const request = {
+            headers: {},
+            body: {
+              unit: 'testing',
+            },
+          };
+          const reply = {
+            status: jest.fn(() => reply),
+            send: jest.fn(() => reply),
+          };
+
+          post.mock.calls[0][1](request, reply);
+
+          expect(post.mock.calls[0][0]).toEqual('/_/report/security/csp-violation');
+          expect(console.warn).toHaveBeenCalledWith(`CSP Violation: {
+  "unit": "testing"
+}`);
+          expect(reply.status).toHaveBeenCalledWith(204);
+          expect(reply.send).toHaveBeenCalled();
+        });
+      });
+
+      test('/_/report/errors responds with 415', async () => {
+        process.env.NODE_ENV = 'production';
+
+        await ssrServer();
+
+        const post = jest.fn();
+
+        register.mock.calls[10][0]({
+          register: jest.fn(),
+          get: jest.fn(),
+          post,
+        }, null, jest.fn());
+
+        const request = {
+          headers: {
+            'content-type': 'text/plain',
+          },
+        };
+        const reply = {
+          status: jest.fn(() => reply),
+          send: jest.fn(() => reply),
+        };
+
+        post.mock.calls[1][1](request, reply);
+
+        expect(post.mock.calls[1][0]).toEqual('/_/report/errors');
+        expect(console.warn).not.toHaveBeenCalled();
+        expect(console.error).not.toHaveBeenCalled();
+        expect(reply.status).toHaveBeenCalledWith(415);
+        expect(reply.send).toHaveBeenCalledWith('Unsupported Media Type');
+      });
+
+      test('/_/report/errors invalid body type', async () => {
+        process.env.NODE_ENV = 'production';
+
+        await ssrServer();
+
+        const post = jest.fn();
+
+        register.mock.calls[10][0]({
+          register: jest.fn(),
+          get: jest.fn(),
+          post,
+        }, null, jest.fn());
+
+        const request = {
+          headers: {
+            'content-type': 'application/json',
+            'correlation-id': 'correlationId',
+            'user-agent': 'userAgent',
+          },
+          body: 'invalid',
+        };
+        const reply = {
+          status: jest.fn(() => reply),
+          send: jest.fn(() => reply),
+        };
+
+        post.mock.calls[1][1](request, reply);
+
+        expect(post.mock.calls[1][0]).toEqual('/_/report/errors');
+        expect(console.warn).toHaveBeenCalledWith('dropping an error report group, wrong interface (string)');
+        expect(console.error).not.toHaveBeenCalled();
+        expect(reply.status).toHaveBeenCalledWith(204);
+        expect(reply.send).toHaveBeenCalled();
+      });
+
+      test('/_/report/errors invalid report items are ignored', async () => {
+        process.env.NODE_ENV = 'production';
+
+        await ssrServer();
+
+        const post = jest.fn();
+
+        register.mock.calls[10][0]({
+          register: jest.fn(),
+          get: jest.fn(),
+          post,
+        }, null, jest.fn());
+
+        const request = {
+          headers: {
+            'content-type': 'application/json',
+            'correlation-id': 'correlationId',
+            'user-agent': 'userAgent',
+          },
+          body: [
+            '',
+            false,
+            'not an object',
+          ],
+        };
+        const reply = {
+          status: jest.fn(() => reply),
+          send: jest.fn(() => reply),
+        };
+
+        post.mock.calls[1][1](request, reply);
+
+        expect(post.mock.calls[1][0]).toEqual('/_/report/errors');
+        expect(console.warn).toHaveBeenCalledWith('dropping an error report, wrong interface (string)');
+        expect(console.warn).toHaveBeenCalledWith('dropping an error report, wrong interface (boolean)');
+        expect(console.warn).toHaveBeenCalledWith('dropping an error report, wrong interface (string)');
+        expect(console.error).not.toHaveBeenCalled();
+        expect(reply.status).toHaveBeenCalledWith(204);
+        expect(reply.send).toHaveBeenCalled();
+      });
+
+      test('/_/report/errors reports errors', async () => {
+        process.env.NODE_ENV = 'production';
+
+        await ssrServer();
+
+        const post = jest.fn();
+
+        register.mock.calls[10][0]({
+          register: jest.fn(),
+          get: jest.fn(),
+          post,
+        }, null, jest.fn());
+
+        const request = {
+          headers: {
+            'content-type': 'application/json',
+            'correlation-id': 'correlationId',
+            'user-agent': 'userAgent',
+          },
+          body: [{
+            msg: 'testing',
+            stack: 'stack',
+            href: 'href',
+            otherData: {
+              testing: true,
+            },
+          }],
+        };
+        const reply = {
+          status: jest.fn(() => reply),
+          send: jest.fn(() => reply),
+        };
+
+        post.mock.calls[1][1](request, reply);
+
+        expect(post.mock.calls[1][0]).toEqual('/_/report/errors');
+        expect(console.warn).not.toHaveBeenCalled();
+        expect(console.error.mock.calls.length).toBe(1);
+        expect(console.error.mock.calls[0][0] instanceof Error).toBe(true);
+        expect(console.error.mock.calls[0][0].name).toBe('ClientReportedError');
+        expect(console.error.mock.calls[0][0].stack).toBe('stack');
+        expect(console.error.mock.calls[0][0].userAgent).toBe('userAgent');
+        expect(console.error.mock.calls[0][0].uri).toBe('href');
+        expect(console.error.mock.calls[0][0].metaData).toEqual({
+          correlationId: 'correlationId',
+          testing: true,
+        });
+        expect(reply.status).toHaveBeenCalledWith(204);
+        expect(reply.send).toHaveBeenCalled();
+      });
+    });
+
+    describe('render html', () => {
+      test('/_/pwa/shell responds with html', async () => {
+        _setConfig({
+          serviceWorker: true,
+        });
+
+        await ssrServer();
+
+        const get = jest.fn();
+        register.mock.calls[11][0]({
+          register: jest.fn(),
+          get,
+        }, null, jest.fn());
+
+        const reply = {
+          sendHtml: jest.fn(() => reply),
+        };
+
+        get.mock.calls[0][1](null, reply);
+
+        expect(get.mock.calls[0][0]).toEqual('/_/pwa/shell');
+        expect(reply.sendHtml).toHaveBeenCalled();
+      });
+
+      test('/_/pwa/shell responds with 404', async () => {
+        _setConfig({
+          serviceWorker: false,
+        });
+
+        await ssrServer();
+
+        const get = jest.fn();
+        register.mock.calls[11][0]({
+          register: jest.fn(),
+          get,
+        }, null, jest.fn());
+
+        const reply = {
+          status: jest.fn(() => reply),
+          send: jest.fn(() => reply),
+        };
+
+        get.mock.calls[0][1](null, reply);
+
+        expect(get.mock.calls[0][0]).toEqual('/_/pwa/shell');
+        expect(reply.status).toHaveBeenCalledWith(404);
+        expect(reply.send).toHaveBeenCalledWith('Not found');
+      });
+
+      test('any other GET route renders html', async () => {
+        await ssrServer();
+
+        const get = jest.fn();
+        register.mock.calls[11][0]({
+          register: jest.fn(),
+          get,
+        }, null, jest.fn());
+
+        const reply = {
+          sendHtml: jest.fn(() => reply),
+        };
+
+        get.mock.calls[1][1](null, reply);
+
+        expect(get.mock.calls[1][0]).toEqual('/*');
+        expect(reply.sendHtml).toHaveBeenCalled();
+      });
+
+      test('any other POST route renders html is disabled', async () => {
+        await ssrServer();
+
+        const post = jest.fn();
+        register.mock.calls[11][0]({
+          register: jest.fn(),
+          get: jest.fn(),
+          post,
+        }, null, jest.fn());
+
+        expect(post).not.toHaveBeenCalled();
+      });
+
+      test('any other POST route renders html', async () => {
+        process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES = 'true';
+
+        await ssrServer();
+
+        const post = jest.fn();
+        register.mock.calls[11][0]({
+          register: jest.fn(),
+          get: jest.fn(),
+          post,
+        }, null, jest.fn());
+
+        const reply = {
+          sendHtml: jest.fn(() => reply),
+        };
+
+        post.mock.calls[0][1](null, reply);
+
+        expect(post.mock.calls[0][0]).toEqual('/*');
+        expect(reply.sendHtml).toHaveBeenCalled();
+      });
+    });
+
+    test('setNotFoundHandler responds with 404', async () => {
+      _setConfig({
+        serviceWorker: false,
+      });
+
+      await ssrServer();
+
+      const reply = {
+        code: jest.fn(() => reply),
+        send: jest.fn(() => reply),
+      };
+
+      await setNotFoundHandler.mock.calls[0][0](null, reply);
+
+      expect(reply.code).toHaveBeenCalledWith(404);
+      expect(reply.send).toHaveBeenCalledWith('Not found');
+    });
+
+    test('setErrorHandler logs an error and renders the static error page', async () => {
+      _setConfig({
+        serviceWorker: false,
+      });
+
+      await ssrServer();
+
+      const error = new Error('testing');
+      const request = {
+        method: 'get',
+        url: '/example',
+        headers: {},
+      };
+      const reply = {
+        code: jest.fn(() => reply),
+        send: jest.fn(() => reply),
+        raw: {},
+      };
+
+      await setErrorHandler.mock.calls[0][0](error, request, reply);
+
+      expect(console.error).toHaveBeenCalledWith('Fastify application error: method get, url "/example", correlationId "undefined", headersSent: false', error);
+      expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
+    });
+
+    test('setErrorHandler logs an error and renders the static error page with "headersSent" and "correlationId"', async () => {
+      _setConfig({
+        serviceWorker: false,
+      });
+
+      await ssrServer();
+
+      const error = new Error('testing');
+      const request = {
+        method: 'get',
+        url: '/example',
+        headers: {
+          'correlation-id': 123,
         },
-        use: useMock,
-        setNotFoundHandler: notFoundMock,
-      }));
+      };
+      const reply = {
+        code: jest.fn(() => reply),
+        send: jest.fn(() => reply),
+        raw: {
+          headersSent: 'asd',
+        },
+      };
 
-      const { createApp } = require('../../src/server/ssrServer');
+      await setErrorHandler.mock.calls[0][0](error, request, reply);
 
-      await createApp();
-
-      expect(fastify).toHaveBeenCalledWith({});
-
-      expect(registerMock).toHaveBeenCalledTimes(1);
-      expect(registerMock).toHaveBeenCalledWith(fastifyExpress);
-
-      expect(expressDisableMock).toHaveBeenCalledTimes(2);
-      expect(expressDisableMock).toHaveBeenCalledWith('x-powered-by');
-      expect(expressDisableMock).toHaveBeenCalledWith('e-tag');
-
-      expect(useMock).toHaveBeenCalledTimes(1);
-
-      expect(notFoundMock).toHaveBeenCalledTimes(1);
-      expect(notFoundMock).toHaveBeenCalledWith(sendHtml);
+      expect(console.error).toHaveBeenCalledWith('Fastify application error: method get, url "/example", correlationId "123", headersSent: true', error);
+      expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
     });
   });
 });

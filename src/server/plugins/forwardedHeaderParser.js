@@ -1,0 +1,46 @@
+/*
+ * Copyright 2019 American Express Travel Related Services Company, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+
+import fp from 'fastify-plugin';
+
+const parse = (forwarded) => forwarded
+  .split(';')
+  .map((directive) => directive.split('='))
+  .reduce((parsed, [key, value]) => ({
+    ...parsed,
+    [key]: value,
+  }), {});
+
+/**
+ * Fastify Plugin that injects 'forwarded' into the request object
+ * @param {import('fastify').FastifyInstance} fastify Fastify instance
+ * @param {import('fastify').FastifyPluginOptions} _opts plugin options
+ * @param {import('fastify').FastifyPluginCallback} done plugin callback
+ */
+const forwardedHeaderParser = (fastify, _opts, done) => {
+  fastify.addHook('onRequest', async (request) => {
+    if (request.headers.forwarded) {
+      request.forwarded = parse(request.headers.forwarded);
+    }
+  });
+
+  done();
+};
+
+export default fp(forwardedHeaderParser, {
+  fastify: '4.x',
+  name: 'forwardedHeaderParser',
+});
