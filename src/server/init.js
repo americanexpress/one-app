@@ -23,3 +23,4 @@ import './config/env/argv';
 import './utils/logging/setup';
 import './config/env/runTime';
 import './utils/heapdump';
+import './utils/externals';

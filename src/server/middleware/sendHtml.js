@@ -255,10 +255,13 @@ export function getBody({
   const bundle = isLegacy ? 'legacyBrowser' : 'browser';
   const { bodyAttributes, script } = helmetInfo;
   const bundlePrefixForBrowser = isLegacy ? `${appBundlesURLPrefix}/legacy` : appBundlesURLPrefix;
+
   return `
     <body${(bodyAttributes && ` ${bodyAttributes.toString()}`) || ''}>
       <div id="root">${appHtml || ''}</div>
       ${disableScripts ? '' : `
+      <script type="text/javascript" src="http://localhost:3001/static/modules/bundler-test/1.0.0/is-even.browser.js"></script>
+      <script type="text/javascript" src="http://localhost:3001/static/modules/bundler-test/1.0.0/semver.browser.js"></script>
       <script id="initial-state" ${scriptNonce ? `nonce="${scriptNonce}"` : ''}>
         window.__webpack_public_path__ = ${jsonStringifyForScript(`${appBundlesURLPrefix}/`)};
         window.__CLIENT_HOLOCRON_MODULE_MAP__ = ${jsonStringifyForScript(clientModuleMapCache[bundle])};
