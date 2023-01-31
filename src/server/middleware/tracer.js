@@ -57,6 +57,13 @@ class Tracer {
     };
   }
 
+  // store the error for later
+  serverErrorFetchTimer = ({ key, error }) => {
+    this.serverEndFetchTimer({ key });
+    this.fetchRecords[key].errorStack = error.stack;
+    this.fetchRecords[key].errorMessage = error.message;
+  }
+
   // Add some more useful fields to the records
   buildSynopsys = (record) => {
     const synopsys = {};
@@ -64,6 +71,12 @@ class Tracer {
     synopsys.timerDurationMs = Number((record.timerEndNs - record.timerStartNs) / 1000000n);
     synopsys.timerStartMs = Number(record.timerStartNs / 1000000n);
     synopsys.timerEndMs = Number(record.timerEndNs / 1000000n);
+    if (record.errorStack) {
+      synopsys.error = {
+        stack: record.errorStack,
+        message: record.errorMessage,
+      };
+    }
     return synopsys;
   }
 
@@ -144,9 +157,15 @@ export const enhanceFetchWithTracer = (tracer, fetch) => async (...params) => {
   const localFetchCount = tracer.fetchCount;
   tracer.fetchCount += 1;
   tracer.serverStartFetchTimer({ key: `${localFetchCount} ${params[0]}` });
-  const response = await fetch(...params);
-  tracer.serverEndFetchTimer({ key: `${localFetchCount} ${params[0]}` });
-  return response;
+  try {
+    const response = await fetch(...params);
+    tracer.serverEndFetchTimer({ key: `${localFetchCount} ${params[0]}` });
+    return response;
+  } catch (error) {
+    tracer.serverErrorFetchTimer({ key: `${localFetchCount} ${params[0]}`, error });
+    console.error(error);
+    throw error;
+  }
 };
 
 // middleware enhancer to trace how long the middleware took
