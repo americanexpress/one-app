@@ -46,14 +46,8 @@ export const verifyThresholds = ({
   && tickDelay[0] < 1
   && rootModuleExists;
 
-/**
- * Plugin that creates a reply decorator to respond with health report
- * @param {import('fastify').FastifyInstance} fastify instance
- * @param {object} _opts empty options object
- * @param {import('fastify').DoneFuncWithErrOrRes} done fastify done function
- */
 const healthCheck = (fastify, _opts, done) => {
-  fastify.decorateReply('healthReport', async function healthReport() {
+  fastify.decorateReply('healthReport', async function () {
     const reply = this;
 
     try {
@@ -93,7 +87,4 @@ const healthCheck = (fastify, _opts, done) => {
   done();
 };
 
-export default fp(healthCheck, {
-  fastify: '4.x',
-  name: 'healthCheck',
-});
+export default fp(healthCheck);

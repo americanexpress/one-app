@@ -188,7 +188,7 @@ const runTime = [
   },
   {
     name: 'ONE_REFERRER_POLICY_OVERRIDE',
-    defaultValue: () => '',
+    defaultValue: () => 'same-origin',
     validate: (value) => {
       const approvedPolicies = [
         'no-referrer',
@@ -197,7 +197,7 @@ const runTime = [
         'strict-origin',
       ];
 
-      if (value && !approvedPolicies.includes(value)) {
+      if (!approvedPolicies.includes(value)) {
         throw new Error(`"${value}" is not an approved policy. Please use: ${approvedPolicies.join(',')}.`);
       }
     },

@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`csp middleware adds ip and localhost to csp in development 1`] = `"default-src 'none'; script-src 'nonce-00000000-0000-0000-0000-000000000000' 0.0.0.0:* localhost:* ws://localhost:* 'self'; connect-src 0.0.0.0:* localhost:* ws://localhost:* 'self';"`;
+
+exports[`csp updateCSP updates cspCache with given csp 1`] = `"default-src 'self';"`;

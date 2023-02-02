@@ -19,16 +19,16 @@ let extendRestrictedAttributesAllowList;
 let validateSafeRequestRestrictedAttributes;
 let getRequiredRestrictedAttributes;
 
-jest.spyOn(console, 'error').mockImplementation(() => { });
-
 describe('safeRequest', () => {
   const dirtyRequest = {
+    acceptsLanguages: () => 'I accept languages!',
     // makes sure defined falsy values get added too
     baseUrl: '',
     forwarded: {
       host: 'foo',
     },
     method: 'GET',
+    originalUrl: '/foo/bar.html',
     corrupt: 'fields',
     params: {},
     protocol: 'https',
@@ -36,7 +36,7 @@ describe('safeRequest', () => {
     url: '/bar.html',
     dangerous: 'data',
     headers: {
-      'accept-language': 'fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5',
+      'accept-language': true,
       host: 'bar',
       'user-agent': '100.0.0.0:0000',
       flavor: 'chocolate',
@@ -50,10 +50,6 @@ describe('safeRequest', () => {
     body: {
       head: 'top',
       toes: 'bottom',
-    },
-
-    raw: {
-      url: '/foo/bar.html',
     },
   };
 
@@ -77,8 +73,9 @@ describe('safeRequest', () => {
     });
 
     it('should include all safe request fields', () => {
-      expect(cleanedRequest.acceptsLanguages()).toEqual(['fr-CH', 'fr', 'en', 'de', '*']);
+      expect(cleanedRequest.acceptsLanguages()).toBe('I accept languages!');
       expect(cleanedRequest.baseUrl).toBe('');
+      expect(cleanedRequest.forwarded.host).toBe('foo');
       expect(cleanedRequest.method).toBe('GET');
       expect(cleanedRequest.originalUrl).toBe('/foo/bar.html');
       expect(cleanedRequest.params).toStrictEqual({});
@@ -87,7 +84,7 @@ describe('safeRequest', () => {
       expect(cleanedRequest.url).toBe('/bar.html');
     });
     it('should include all safe request headers', () => {
-      expect(cleanedRequest.headers['accept-language']).toBe('fr-CH, fr;q=0.9, en;q=0.8, de;q=0.7, *;q=0.5');
+      expect(cleanedRequest.headers['accept-language']).toBe(true);
       expect(cleanedRequest.headers.host).toBe('bar');
       expect(cleanedRequest.headers['user-agent']).toBe('100.0.0.0:0000');
     });
@@ -96,6 +93,7 @@ describe('safeRequest', () => {
       expect(cleanedRequest.corrupt).toBeUndefined();
       expect(cleanedRequest.dangerous).toBeUndefined();
       expect(cleanedRequest.protocol).toBeDefined();
+      expect(cleanedRequest.forwarded).toBeDefined();
     });
 
     it('should strip unsafe request headers', () => {
@@ -257,31 +255,6 @@ describe('safeRequest', () => {
       );
       expect(cleanedBodyRequest).toHaveProperty('body');
       expect(cleanedBodyRequest.body).toEqual({ head: 'top', toes: 'bottom' });
-    });
-
-    it('parses stringified body', () => {
-      const cleanedBodyRequest = safeRequest(
-        {
-          ...dirtyRequest,
-          body: JSON.stringify({ message: 'Testing' }),
-        }, { useBodyForBuildingTheInitialState: true }
-      );
-
-      expect(cleanedBodyRequest).toHaveProperty('body');
-      expect(cleanedBodyRequest.body).toEqual({ message: 'Testing' });
-    });
-
-    it('tries to parse body and silently fails', () => {
-      const cleanedBodyRequest = safeRequest(
-        {
-          ...dirtyRequest,
-          body: '{ invalid }',
-        }, { useBodyForBuildingTheInitialState: true }
-      );
-
-      expect(cleanedBodyRequest).toHaveProperty('body');
-      expect(cleanedBodyRequest.body).toEqual('{ invalid }');
-      expect(console.error).toHaveBeenCalledWith('request body cannot be parsed', '{ invalid }');
     });
   });
 });

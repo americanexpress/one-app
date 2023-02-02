@@ -22,7 +22,7 @@ import batchModulesToUpdate from './batchModulesToUpdate';
 import getModulesToUpdate from './getModulesToUpdate';
 import { getServerStateConfig } from './stateConfig';
 import { setClientModuleMapCache } from './clientModuleMapCache';
-import { updateCSP } from '../plugins/csp';
+import { updateCSP } from '../middleware/csp';
 import addBaseUrlToModuleMap from './addBaseUrlToModuleMap';
 
 const loadModules = async () => {

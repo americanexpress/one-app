@@ -17,10 +17,11 @@
 
 import { fromJS } from 'immutable';
 
-jest.mock('@americanexpress/one-app-router', () => ({
-  ...jest.requireActual('@americanexpress/one-app-router'),
-  matchPromise: jest.fn(),
-}));
+jest.mock('@americanexpress/one-app-router', () => {
+  const reactRouter = jest.requireActual('@americanexpress/one-app-router');
+  jest.spyOn(reactRouter, 'matchPromise');
+  return reactRouter;
+});
 
 jest.mock('../../src/client/prerender', () => {
   const prerender = jest.requireActual('../../src/client/prerender');
