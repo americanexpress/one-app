@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.2.0](https://github.com/americanexpress/one-app/compare/v6.1.1...v6.2.0) (2023-02-08)
+
+
+### Features
+
+* **server:** ExpressJS to Fastify migration ([#878](https://github.com/americanexpress/one-app/issues/878)) ([85ff3c7](https://github.com/americanexpress/one-app/commit/85ff3c768c9526b49fee287e57e13afc26e35672))
+
+
 ## [6.1.1](https://github.com/americanexpress/one-app/compare/v6.1.0...v6.1.1) (2022-11-09)
 
 
