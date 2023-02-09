@@ -44,8 +44,8 @@ const createRequestStore = (
     });
 
     const fetchClient = createSsrFetch({
-      req: request.raw,
-      res: reply.raw,
+      req: request,
+      res: reply,
     })(fetch);
 
     const enhancer = createEnhancer();

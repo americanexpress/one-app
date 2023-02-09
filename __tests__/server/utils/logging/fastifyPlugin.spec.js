@@ -632,8 +632,8 @@ describe('fastifyPlugin', () => {
         await fastify.onResponse(request, reply);
 
         expect(mutateLog).toHaveBeenCalledWith({
-          req: 'raw-request',
-          res: 'raw-response',
+          req: request,
+          res: reply,
           log: {
             request: {
               address: {
