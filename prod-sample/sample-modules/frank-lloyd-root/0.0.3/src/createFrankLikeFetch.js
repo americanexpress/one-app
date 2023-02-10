@@ -14,25 +14,27 @@
  * permissions and limitations under the License.
  */
 
-// create fetch with 1second timeout
+import url from 'url';
+import { createBrowserLikeFetch } from '@americanexpress/fetch-enhancers';
 
-const createFrankLikeSsrFetch = () => (fetch) => (path, opts = {}) => {
-  const fullOpts = { ...opts };
-  fullOpts.headers = {
-    ...opts.headers,
-    'auth-token': 'yoyo',
-  };
+const parseHeaders = (req) => ({
+  Referer: url.format({
+    protocol: req.protocol,
+    hostname: req.hostname,
+    pathname: req.path,
+  }),
+  cookie: req.headers.cookie,
+});
 
-  const timeout = 1e3;
-  return Promise.race([
-    fetch(path, fullOpts),
-    new Promise((_, rej) => {
-      setTimeout(
-        () => rej(new Error(`Request to ${path} was too slow`)),
-        timeout
-      );
-    }),
-  ]);
+const createFrankLikeSsrFetch = ({ req, res }) => (fetch) => (fetchUrl, fetchOpts) => {
+  res.cookie('createFrankLikeSsrFetch', 'frank-lloyd-root-0.0.3');
+
+  return createBrowserLikeFetch({
+    headers: parseHeaders(req),
+    hostname: req.hostname,
+    res,
+    trustedDomains: [/localhost/, /americanexpress\.com/],
+  })(fetch)(fetchUrl, fetchOpts);
 };
 
 export default createFrankLikeSsrFetch;

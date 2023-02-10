@@ -129,8 +129,8 @@ const logClientRequest = (request, reply) => {
   };
 
   const configuredLog = UTILS.configureRequestLog({
-    req: request.raw,
-    res: reply.raw,
+    req: request,
+    res: reply,
     log,
   });
 
