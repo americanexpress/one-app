@@ -98,7 +98,7 @@
     "cross-fetch": "^3.0.6",
     "express": "^4.17.1",
     "helmet": "^3.22.0",
-    "holocron": "^1.2.1",
+    "holocron": "^1.4.0",
     "holocron-module-route": "^1.2.1",
     "if-env": "^1.0.4",
     "immutable": "^4.0.0",
