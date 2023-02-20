@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.15.5](https://github.com/americanexpress/one-app/compare/v5.15.4...v5.15.5) (2023-02-20)
+
+
+### Bug Fixes
+
+* **deps:** bump holocron from 1.2.1 to 1.4.0 ([bf45acc](https://github.com/americanexpress/one-app/commit/bf45acc262c439314421319d654579df06468aba))
+
+
 ## [5.15.4](https://github.com/americanexpress/one-app/compare/v5.15.3...v5.15.4) (2022-11-09)
 
 
