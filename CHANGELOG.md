@@ -10,11 +10,6 @@ All notable changes to this project will be documented in this file. See [standa
 * **deps:** bump holocron from 1.3.0 to 1.4.0 ([4ef11a8](https://github.com/americanexpress/one-app/commit/4ef11a801cdec3dea6f0baf7de05282c14e1e53e))
 
 
-### Features
-
-* **server:** ExpressJS to Fastify migration ([#878](https://github.com/americanexpress/one-app/issues/878)) ([85ff3c7](https://github.com/americanexpress/one-app/commit/85ff3c768c9526b49fee287e57e13afc26e35672))
-
-
 ## [6.1.1](https://github.com/americanexpress/one-app/compare/v6.1.0...v6.1.1) (2022-11-09)
 
 
