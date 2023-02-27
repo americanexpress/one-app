@@ -115,7 +115,7 @@
     "joi": "^17.6.0",
     "lean-intl": "^4.2.2",
     "matcher": "^4.0.0",
-    "opossum": "^6.4.0",
+    "opossum": "^7.1.0",
     "opossum-prometheus": "^0.3.0",
     "pidusage": "^3.0.2",
     "prom-client": "^14.0.1",
