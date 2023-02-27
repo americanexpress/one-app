@@ -166,7 +166,7 @@
     "eslint-plugin-jest-dom": "^3.9.4",
     "expect": "^28.1.1",
     "find-up": "^5.0.0",
-    "fs-extra": "^10.1.0",
+    "fs-extra": "^11.1.0",
     "https-proxy-agent": "^5.0.1",
     "husky": "^8.0.1",
     "if-node-version": "^1.1.1",
