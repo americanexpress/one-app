@@ -29,6 +29,8 @@ Please see [`createSsrFetch`](./App-Configuration.md#createssrfetch) in the [App
 
 Please see the [Holocron Module Configuration](https://github.com/americanexpress/holocron/blob/main/packages/holocron/docs/api/README.md#holocron-module-configuration) from the Holocron API Docs for more information about other properties.
 
+Modules can trigger a server side redirect from `loadModuleData` by throwing an error that has the property `abortComposeModules` set to true and a `redirect` property containing an object with an HTTP status code (`status`) and the destination URL (`url`).
+
 ### `Module.holocron.loadModuleData`
 
 **Runs On**

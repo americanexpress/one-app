@@ -281,6 +281,7 @@ describe('runTime', () => {
       expect(holocronModuleMapPath.defaultValue()).not.toBeDefined();
     });
 
+    // eslint-disable-next-line jest/expect-expect -- assertion is in nodeUrl
     it('ensures node can reach the URL', nodeUrl(holocronModuleMapPath));
 
     it('should use port numbers specified via HTTP_ONE_APP_DEV_CDN_PORT', () => {
@@ -299,6 +300,7 @@ describe('runTime', () => {
       expect(holocronServerMaxModulesRetry.defaultValue).toBe(undefined);
     });
 
+    // eslint-disable-next-line jest/expect-expect -- assertion is in positiveInteger
     it('validates the value as a positive integer', positiveInteger(holocronServerMaxModulesRetry));
   });
 
@@ -311,6 +313,7 @@ describe('runTime', () => {
       expect(holocronServerMaxSimModulesFetch.defaultValue).toBe(undefined);
     });
 
+    // eslint-disable-next-line jest/expect-expect -- assertion is in positiveInteger
     it(
       'validates the value as a positive integer',
       positiveInteger(holocronServerMaxSimModulesFetch)

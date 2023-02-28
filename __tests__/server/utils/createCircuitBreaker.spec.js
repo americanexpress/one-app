@@ -23,7 +23,7 @@ import createCircuitBreaker, {
 
 jest.useFakeTimers();
 
-const asyncFunctionThatMightFail = jest.fn(async () => false);
+const asyncFunctionThatMightFail = jest.fn(async () => ({ fallback: false }));
 const mockCircuitBreaker = createCircuitBreaker(asyncFunctionThatMightFail);
 
 jest.mock('holocron', () => ({
@@ -50,7 +50,7 @@ describe('Circuit breaker', () => {
     const input = 'hello, world';
     const value = await mockCircuitBreaker.fire(input);
     expect(asyncFunctionThatMightFail).toHaveBeenCalledWith(input);
-    expect(value).toBe(false);
+    expect(value).toEqual({ fallback: false });
   });
 
   it('should open the circuit when event loop delay threshold is exceeded', async () => {
@@ -62,7 +62,7 @@ describe('Circuit breaker', () => {
     jest.clearAllMocks();
     const value = await mockCircuitBreaker.fire('hola, mundo');
     expect(asyncFunctionThatMightFail).not.toHaveBeenCalled();
-    expect(value).toBe(true);
+    expect(value).toEqual({ fallback: true });
   });
 
   it('should not open the circuit when in development environment', async () => {
@@ -75,7 +75,7 @@ describe('Circuit breaker', () => {
     jest.clearAllMocks();
     const value = await mockCircuitBreaker.fire('hola, mundo');
     expect(asyncFunctionThatMightFail).toHaveBeenCalled();
-    expect(value).toBe(false);
+    expect(value).toEqual({ fallback: false });
   });
 
   it('should not open the circuit when threshold not exceeded', async () => {
@@ -87,7 +87,7 @@ describe('Circuit breaker', () => {
     jest.clearAllMocks();
     const value = await mockCircuitBreaker.fire('hola, mundo');
     expect(asyncFunctionThatMightFail).toHaveBeenCalled();
-    expect(value).toBe(false);
+    expect(value).toEqual({ fallback: false });
   });
 
   it('should not open the circuit when the root module is not loaded', async () => {
@@ -100,7 +100,7 @@ describe('Circuit breaker', () => {
     jest.clearAllMocks();
     const value = await mockCircuitBreaker.fire('hola, mundo');
     expect(asyncFunctionThatMightFail).toHaveBeenCalled();
-    expect(value).toBe(false);
+    expect(value).toEqual({ fallback: false });
   });
 
   it('should log when the healthcheck fails', async () => {
