@@ -338,7 +338,7 @@ if (!global.BROWSER) {
 if (!global.BROWSER) {
   Module.appConfig = {
     configureRequestLog: ({
-      req, // Express req
+      req, // Fastify request object
       log, // One App Log Shape
     }) => ({
       // returns reshaped log object
@@ -420,8 +420,8 @@ The `extendSafeRequestRestrictedAttributes` directive accepts a list of cookie n
 if (!global.BROWSER) {
   RootModule.appConfig = {
     createSsrFetch: ({
-      req, // Express req
-      res, // Express res
+      req, // Fastify request object
+      res, // Fastify reply object
     }) => (fetch) => (fetchUrl, fetchOpts) => Promise,
   };
 }

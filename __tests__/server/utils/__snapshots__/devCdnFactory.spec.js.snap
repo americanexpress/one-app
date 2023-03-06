@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`one-app-dev-cdn module-map.json extends the remote map with the local map 1`] = `"{"key":"not-used-in-development","modules":{"module-b":{"node":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.node.js","integrity":"123"},"browser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.browser.js","integrity":"234"},"legacyBrowser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.legacy.browser.js","integrity":"345"}},"module-a":{"node":{"url":"https://example.com/module-a/1.0.0/module-a.node.js","integrity":"123"},"browser":{"url":"https://example.com/module-a/1.0.0/module-a.browser.js","integrity":"234"},"legacyBrowser":{"url":"https://example.com/module-a/1.0.0/module-a.legacy.browser.js","integrity":"345"}}}}"`;
+
+exports[`one-app-dev-cdn module-map.json extends the remote map with the local map and uses host instead of localhost 1`] = `"{"key":"not-used-in-development","modules":{"module-b":{"node":{"url":"http://localhost:80/static/cdn/module-b/1.0.0/module-b.node.js","integrity":"123"},"browser":{"url":"http://localhost:80/static/cdn/module-b/1.0.0/module-b.browser.js","integrity":"234"},"legacyBrowser":{"url":"http://localhost:80/static/cdn/module-b/1.0.0/module-b.legacy.browser.js","integrity":"345"}},"module-a":{"node":{"url":"https://example.com/module-a/1.0.0/module-a.node.js","integrity":"123"},"browser":{"url":"https://example.com/module-a/1.0.0/module-a.browser.js","integrity":"234"},"legacyBrowser":{"url":"https://example.com/module-a/1.0.0/module-a.legacy.browser.js","integrity":"345"}}}}"`;
+
+exports[`one-app-dev-cdn module-map.json uses the local map overriding the cdn url placeholder with the one-app-dev-cdn url 1`] = `
+{
+  "key": "not-used-in-development",
+  "modules": {
+    "module-a": {
+      "browser": {
+        "integrity": "234",
+        "url": "http://localhost:3001/module-a/1.0.0/module-a.browser.js",
+      },
+      "legacyBrowser": {
+        "integrity": "345",
+        "url": "http://localhost:3001/module-a/1.0.0/module-a.legacy.browser.js",
+      },
+      "node": {
+        "integrity": "123",
+        "url": "http://localhost:3001/module-a/1.0.0/module-a.node.js",
+      },
+    },
+  },
+}
+`;
+
+exports[`one-app-dev-cdn modules gets remote modules: module map response 1`] = `"{"key":"not-used-in-development","modules":{"module-b":{"node":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.node.js","integrity":"123"},"browser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.browser.js","integrity":"234"},"legacyBrowser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.legacy.browser.js","integrity":"345"}}}}"`;
+
+exports[`one-app-dev-cdn modules returns a 404 if a request for something not known as a module from the module map comes in: module map response 1`] = `"{"key":"not-used-in-development","modules":{"module-b":{"node":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.node.js","integrity":"123"},"browser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.browser.js","integrity":"234"},"legacyBrowser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.legacy.browser.js","integrity":"345"}}}}"`;
+
+exports[`one-app-dev-cdn modules returns a 500 if a request to proxy a module from the module map fails: module map response 1`] = `"{"key":"not-used-in-development","modules":{"module-b":{"node":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.node.js","integrity":"123"},"browser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.browser.js","integrity":"234"},"legacyBrowser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.legacy.browser.js","integrity":"345"}}}}"`;
+
+exports[`one-app-dev-cdn usage should throw if appPort is not given 1`] = `"appPort is a required param"`;
+
+exports[`one-app-dev-cdn usage should throw if localDevPublicPath is not given 1`] = `"localDevPublicPath is a required param"`;
+
+exports[`one-app-dev-cdn usage should throw if neither remoteModuleMapUrl nor useLocalModules is given 1`] = `"remoteModuleMapUrl is a required param when useLocalModules is not true"`;

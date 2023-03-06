@@ -12,6 +12,7 @@ exports[`production-formatter encodes as parseable JSON 1`] = `
   },
   "level": "error",
   "message": "1 2 3",
+  "nodeFramework": "fastify",
   "schemaVersion": "0.3.0",
   "timestamp": "2018-03-02T02:39:32.948Z",
 }
@@ -35,6 +36,7 @@ exports[`production-formatter errors encodes ClientReportedError Error as parsea
 ",
   },
   "level": "error",
+  "nodeFramework": "fastify",
   "request": {
     "address": {
       "uri": "https://example.com/page-the/error/occurred-on",
@@ -82,6 +84,7 @@ exports[`production-formatter errors encodes Server Reported Error as parseable 
       },
     },
   },
+  "nodeFramework": "fastify",
   "schemaVersion": "0.3.0",
   "timestamp": "2018-03-02T02:39:32.948Z",
 }
@@ -112,6 +115,7 @@ exports[`production-formatter errors encodes as parseable JSON 1`] = `
   },
   "level": "error",
   "message": "unable to do the thing",
+  "nodeFramework": "fastify",
   "schemaVersion": "0.3.0",
   "timestamp": "2018-03-02T02:39:32.948Z",
 }
@@ -204,6 +208,7 @@ exports[`production-formatter types encodes request as parseable JSON 1`] = `
     "id": "host-123:1234",
   },
   "level": "error",
+  "nodeFramework": "fastify",
   "request": {
     "address": {
       "url": "https://example.org/server",
@@ -241,6 +246,7 @@ exports[`production-formatter types uses the default util.format when given an u
   },
   "level": "error",
   "message": "{ type: 'yolo' }",
+  "nodeFramework": "fastify",
   "schemaVersion": "0.3.0",
   "timestamp": "2018-03-02T02:39:32.948Z",
 }

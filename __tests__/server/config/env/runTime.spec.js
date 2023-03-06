@@ -426,7 +426,7 @@ describe('runTime', () => {
     const referrerPolicyOverride = getEnvVarConfig('ONE_REFERRER_POLICY_OVERRIDE');
 
     it('default value', () => {
-      expect(referrerPolicyOverride.defaultValue()).toEqual('same-origin');
+      expect(referrerPolicyOverride.defaultValue()).toEqual('');
     });
 
     it('validates approved policy', () => {

@@ -14,6 +14,8 @@
  * permissions and limitations under the License.
  */
 
+import accepts from 'accepts';
+
 function pick(request, safeKeys) {
   return safeKeys.reduce((obj, safeKey) => {
     if (request && request[safeKey] !== undefined) {
@@ -25,11 +27,8 @@ function pick(request, safeKeys) {
 }
 
 const requestAllowList = [
-  'acceptsLanguages',
-  'baseUrl',
   'forwarded',
   'method',
-  'originalUrl',
   'params',
   'protocol',
   'query',
@@ -123,19 +122,38 @@ export const validateSafeRequestRestrictedAttributes = (requiredAttributes, modu
   }
 };
 
-export default function safeRequest(req, { useBodyForBuildingTheInitialState = false } = {}) {
-  const request = pick(req, requestAllowList);
+export default function safeRequest(request, { useBodyForBuildingTheInitialState = false } = {}) {
+  const filteredRequest = pick(request, requestAllowList);
 
   Object.keys(restrictedRequestAttributes).forEach((restrictedAttribute) => {
-    request[restrictedAttribute] = pick(
-      req[restrictedAttribute],
+    filteredRequest[restrictedAttribute] = pick(
+      request[restrictedAttribute],
       restrictedRequestAttributes[restrictedAttribute]
     );
   });
 
   if (useBodyForBuildingTheInitialState) {
-    request.body = req.body;
+    filteredRequest.body = request.body;
+
+    if (filteredRequest.body && typeof filteredRequest.body === 'string') {
+      try {
+        filteredRequest.body = JSON.parse(filteredRequest.body);
+      } catch (err) {
+        console.error('request body cannot be parsed', filteredRequest.body);
+      }
+    }
   }
 
-  return request;
+  /* Backwards Compatibility */
+
+  // 'acceptsLanguages' is only available in ExpressJS
+  filteredRequest.acceptsLanguages = () => accepts(request).languages();
+
+  // Fastify does not mutate url
+  filteredRequest.originalUrl = request.raw.url;
+
+  // Not available in Fastify
+  filteredRequest.baseUrl = '';
+
+  return filteredRequest;
 }
