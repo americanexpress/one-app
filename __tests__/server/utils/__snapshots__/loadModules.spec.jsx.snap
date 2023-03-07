@@ -16,10 +16,10 @@ Object {
   "browser": Object {
     "modules": Object {
       "some-root": Object {
-        "baseUrl": "https://example.com/cdn/some-root/2.2.2/",
+        "baseUrl": "https://example.com/cdn/some-root/1.1.2/",
         "browser": Object {
           "integrity": "nggdfhr34",
-          "url": "https://example.com/cdn/some-root/2.2.2/some-root.browser.js",
+          "url": "https://example.com/cdn/some-root/1.1.2/some-root.browser.js",
         },
       },
     },
@@ -27,10 +27,10 @@ Object {
   "legacyBrowser": Object {
     "modules": Object {
       "some-root": Object {
-        "baseUrl": "https://example.com/cdn/some-root/2.2.2/",
+        "baseUrl": "https://example.com/cdn/some-root/1.1.2/",
         "legacyBrowser": Object {
           "integrity": "7567ee",
-          "url": "https://example.com/cdn/some-root/2.2.2/some-root.legacy.browser.js",
+          "url": "https://example.com/cdn/some-root/1.1.2/some-root.legacy.browser.js",
         },
       },
     },
