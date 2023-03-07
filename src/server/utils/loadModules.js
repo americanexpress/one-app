@@ -26,17 +26,17 @@ import { setClientModuleMapCache } from './clientModuleMapCache';
 import { updateCSP } from '../plugins/csp';
 import addBaseUrlToModuleMap from './addBaseUrlToModuleMap';
 
-let cashedModuleMapHash;
+let cachedModuleMapHash;
 
 const loadModules = async () => {
   const moduleMapResponse = await fetch(process.env.HOLOCRON_MODULE_MAP_URL);
   const moduleMap = addBaseUrlToModuleMap(await moduleMapResponse.json());
 
   const moduleMapHash = hash(moduleMap);
-  if (cashedModuleMapHash && cashedModuleMapHash === moduleMapHash) {
+  if (cachedModuleMapHash && cachedModuleMapHash === moduleMapHash) {
     return {};
   }
-  cashedModuleMapHash = moduleMapHash;
+  cachedModuleMapHash = moduleMapHash;
   const serverConfig = getServerStateConfig();
 
   const loadedModules = await updateModuleRegistry({
