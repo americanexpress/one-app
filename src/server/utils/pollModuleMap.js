@@ -32,11 +32,12 @@ import { backupModuleStateConfig, restoreModuleStateConfig } from './stateConfig
 let moduleMapHealthy = null;
 export const getModuleMapHealth = () => moduleMapHealthy;
 
+const minPollTimeLimit = 1e3; // 1 second
 export const MIN_POLL_TIME = Math.max(
   process.env.ONE_MAP_POLLING_MIN
     ? Number.parseInt(process.env.ONE_MAP_POLLING_MIN, 10) * 1e3
-    : 0,
-  1e3 * 5 // 5s
+    : 1e3 * 5, // 5 seconds
+  minPollTimeLimit
 );
 
 export const MAX_POLL_TIME = process.env.ONE_MAP_POLLING_MAX

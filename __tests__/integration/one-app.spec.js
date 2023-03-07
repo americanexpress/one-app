@@ -51,6 +51,8 @@ yargs.array('scanEnvironment');
 
 jest.setTimeout(95000);
 
+const minPollTime = 1e3; // 1 second
+
 describe('Tests that require Docker setup', () => {
   describe('one-app startup with bad module module', () => {
     let originalModuleMap;
@@ -196,7 +198,7 @@ describe('Tests that require Docker setup', () => {
           }),
         });
         // wait for change to be picked up
-        await waitFor(5000);
+        await waitFor(minPollTime);
       });
 
       // Success is tested in block:
@@ -225,7 +227,7 @@ describe('Tests that require Docker setup', () => {
       afterAll(async () => {
         writeModuleMap(originalModuleMap);
         // wait for modules to revert
-        await waitFor(5000);
+        await waitFor(minPollTime);
       });
     });
 
@@ -319,7 +321,7 @@ describe('Tests that require Docker setup', () => {
 
           removeModuleFromModuleMap('healthy-frank');
           // not ideal but need to wait for app to poll;
-          await waitFor(5000);
+          await waitFor(minPollTime);
 
           await browser.url(`${appAtTestUrls.browserUrl}/demo/healthy-frank`);
           const missingModuleMessageElement = await browser.$('.missingModuleMessage');
@@ -352,7 +354,7 @@ describe('Tests that require Docker setup', () => {
             }),
           });
           // not ideal but need to wait for app to poll;
-          await waitFor(5000);
+          await waitFor(minPollTime);
 
           await browser.url(`${appAtTestUrls.browserUrl}/demo/late-frank`);
           const frankHeader = await browser.$('.lateFrank');
@@ -384,7 +386,7 @@ describe('Tests that require Docker setup', () => {
                 version: nextVersion,
               }),
             });
-            await waitFor(5000);
+            await waitFor(minPollTime);
           });
 
           afterEach(async () => {
@@ -427,7 +429,7 @@ describe('Tests that require Docker setup', () => {
                 version: nextVersion,
               }),
             });
-            await waitFor(5000);
+            await waitFor(minPollTime);
           });
 
           afterEach(async () => {
@@ -468,7 +470,7 @@ describe('Tests that require Docker setup', () => {
           await deployBrokenModule(brokenModuleDetails);
           await addModuleToModuleMap(brokenModuleDetails);
           // not ideal but need to wait for app to poll;
-          await waitFor(5000);
+          await waitFor(minPollTime);
         });
 
         afterAll(async () => {
@@ -522,7 +524,7 @@ describe('Tests that require Docker setup', () => {
           await addModuleToModuleMap(moduleDetails);
           blocklistingOfModuleLogSearch = searchForNextLogMatch(blocklistRegex);
           // not ideal but need to wait for app to poll;
-          await waitFor(5000);
+          await waitFor(minPollTime);
         });
 
         afterAll(async () => {
@@ -572,7 +574,7 @@ describe('Tests that require Docker setup', () => {
           };
           await addModuleToModuleMap(moduleDetails);
           // not ideal but need to wait for app to poll;
-          await waitFor(5000);
+          await waitFor(minPollTime);
         });
 
         afterAll(() => {
@@ -614,7 +616,7 @@ describe('Tests that require Docker setup', () => {
                 version: '0.0.0',
                 integrityDigests,
               });
-              await waitFor(5000);
+              await waitFor(minPollTime);
             });
             test('should have SSR preload module state with readPosts', async () => {
               await browser.url(
@@ -662,7 +664,7 @@ describe('Tests that require Docker setup', () => {
                 version: '0.0.1',
                 integrityDigests,
               });
-              await waitFor(5000);
+              await waitFor(minPollTime);
             });
             test('should timeout on client if request exceeds six seconds', async () => {
               await browser.url(
@@ -709,7 +711,7 @@ describe('Tests that require Docker setup', () => {
               version,
             });
             // not ideal but need to wait for app to poll;
-            await waitFor(5000);
+            await waitFor(minPollTime);
           });
 
           afterAll(() => {
@@ -751,7 +753,7 @@ describe('Tests that require Docker setup', () => {
               version,
             });
             // not ideal but need to wait for app to poll;
-            await waitFor(5000);
+            await waitFor(minPollTime);
           });
 
           afterAll(() => {
@@ -791,7 +793,7 @@ describe('Tests that require Docker setup', () => {
               version,
             });
             // not ideal but need to wait for app to poll;
-            await waitFor(5000);
+            await waitFor(minPollTime);
 
             await expect(requiredExternalsError).resolves.toMatch(requiredExternalsErrorMatch);
           });
@@ -804,7 +806,7 @@ describe('Tests that require Docker setup', () => {
               version,
             });
             // not ideal but need to wait for app to poll;
-            await waitFor(5000);
+            await waitFor(minPollTime);
             const loggedError = await requiredExternalsError;
             const [, problemModule, problemModuleUrl, workingUrl] = revertErrorMatch
               .exec(loggedError);
@@ -829,7 +831,7 @@ describe('Tests that require Docker setup', () => {
               version: modVersion,
             });
             // not ideal but need to wait for app to poll;
-            await waitFor(5000);
+            await waitFor(minPollTime);
             const loggedError = await requiredExternalsError;
             const [, problemModule, problemModuleUrl, ignoredModule] = revertErrorMatch
               .exec(loggedError);
@@ -867,13 +869,13 @@ describe('Tests that require Docker setup', () => {
               version: '0.0.2',
             });
             // not ideal but need to wait for app to poll;
-            await waitFor(5000);
+            await waitFor(minPollTime);
           });
 
           afterAll(async () => {
             writeModuleMap(originalModuleMap);
             // not ideal but need to wait for app to poll;
-            await waitFor(5000);
+            await waitFor(minPollTime);
           });
 
           test('does not write a warning to log if a child module is configured with `requiredExternals`', async () => {
@@ -913,7 +915,7 @@ describe('Tests that require Docker setup', () => {
           }),
         });
         // not ideal but need to wait for app to poll;
-        await waitFor(5000);
+        await waitFor(minPollTime);
       });
 
       afterAll(() => {
@@ -1003,7 +1005,7 @@ describe('Tests that require Docker setup', () => {
           version: '0.0.2',
         });
         // wait for change to be picked up
-        await waitFor(5000);
+        await waitFor(minPollTime);
       };
 
       afterAll(() => {
@@ -1036,7 +1038,7 @@ describe('Tests that require Docker setup', () => {
           version: '0.0.0',
         });
         // wait for change to be picked up
-        await waitFor(5000);
+        await waitFor(minPollTime);
       };
       const loadPWARoot = async () => {
         await addModuleToModuleMap({
@@ -1044,7 +1046,7 @@ describe('Tests that require Docker setup', () => {
           version: '0.0.3',
         });
         // wait for change to be picked up
-        await waitFor(5000);
+        await waitFor(minPollTime);
       };
 
       afterAll(() => {
@@ -1205,7 +1207,7 @@ describe('Tests that require Docker setup', () => {
                 version: '0.0.0',
               });
               // wait for change to be picked up
-              await waitFor(5000);
+              await waitFor(minPollTime);
             });
 
             describe('module version', () => {
@@ -1224,7 +1226,7 @@ describe('Tests that require Docker setup', () => {
                   version: '0.0.1',
                 });
                 // wait for change to be picked up
-                await waitFor(5000);
+                await waitFor(minPollTime);
                 await expect(fetchServiceWorkerScript()).resolves.toContain('late-frank/0.0.1');
               });
             });
@@ -1825,7 +1827,7 @@ describe('Tests that can run against either local Docker setup or remote One App
         test('uses language from the language pack to render on the initial page load', async () => {
           await browser.url(`${appInstanceUrls.browserUrl}/demo/cultured-frankie`);
           const greetingMessage = await browser.$('#greeting-message');
-          await waitFor(1000);
+          await waitFor(minPollTime);
           expect(await greetingMessage.getText()).toBe(
             'Hello, my name is Frankie and I am in the United States!'
           );
@@ -1836,13 +1838,13 @@ describe('Tests that can run against either local Docker setup or remote One App
           const greetingMessage = await browser.$('#greeting-message');
           const localeSelector = await browser.$('#locale-selector');
           await localeSelector.selectByVisibleText('en-CA');
-          await waitFor(1000);
+          await waitFor(minPollTime);
           expect(await greetingMessage.getText()).toBe(
             'Hello, my name is Frankie and I am in Canada!'
           );
-          await waitFor(1000);
+          await waitFor(minPollTime);
           await localeSelector.selectByVisibleText('es-MX');
-          await waitFor(1000);
+          await waitFor(minPollTime);
           expect(await greetingMessage.getText()).toBe(
             'Hola! Mi nombre es Frankie y estoy en Mexico!'
           );
