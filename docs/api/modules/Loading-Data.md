@@ -42,7 +42,16 @@ Modules can trigger a server side redirect from `loadModuleData` by throwing an 
 HelloWorldModule.holocron = {
   loadModuleData: async ({
     store, fetchClient, ownProps, module,
-  }) => {},
+  }) => {
+    const res = await fetchClient('https://example-api.com/data');
+    const data = await res.json();
+    if (data.redirect) {
+      const redirectError = new Error(`Redirect user to ${data.redirect.url}`);
+      redirectError.abortComposeModules = true;
+      redirectError.redirect = { status: 302, url: data.redirect.url };
+      throw redirectError;
+    }
+  },
 };
 ```
 
