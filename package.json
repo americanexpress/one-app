@@ -117,6 +117,7 @@
     "lean-intl": "^4.2.2",
     "matcher": "^4.0.0",
     "node-fetch": "^2.6.7",
+    "object-hash": "^3.0.0",
     "opossum": "^7.1.0",
     "opossum-prometheus": "^0.3.0",
     "pidusage": "^3.0.2",
