@@ -48,7 +48,8 @@ describe('fastifyPlugin', () => {
 
     fastifyPlugin(fastify, null, done);
 
-    expect(fastify.addHook).toHaveBeenCalledTimes(4);
+    expect(fastify.addHook).toHaveBeenCalledTimes(5);
+    expect(fastify.addHook).toHaveBeenCalledWith('onRequest', expect.any(Function));
     expect(fastify.addHook).toHaveBeenCalledWith('onRequest', expect.any(Function));
     expect(fastify.addHook).toHaveBeenCalledWith('preHandler', expect.any(Function));
     expect(fastify.addHook).toHaveBeenCalledWith('onSend', expect.any(Function));
@@ -56,6 +57,220 @@ describe('fastifyPlugin', () => {
   });
 
   describe('onRequest', () => {
+    it('mutates the raw request and reply to make it compatible with express-like objects', async () => {
+      const fastify = {
+        decorateRequest: jest.fn((name, fn) => {
+          fastify[name] = fn;
+        }),
+        addHook: jest.fn((name, fn) => {
+          if (!fastify[name]) {
+            fastify[name] = fn;
+          }
+        }),
+      };
+
+      fastifyPlugin(fastify, null, jest.fn());
+
+      const request = {
+        raw: {
+          url: '/testing',
+        },
+        id: 123,
+        hostname: 'unit-testing',
+        ip: '127.0.0.1',
+        ips: [],
+        log: 'nothing',
+      };
+      const reply = {
+        raw: {},
+      };
+
+      await fastify.onRequest(request, reply);
+
+      expect(request).toEqual({
+        hostname: 'unit-testing',
+        id: 123,
+        ip: '127.0.0.1',
+        ips: [],
+        log: 'nothing',
+        raw: {
+          hostname: 'unit-testing',
+          id: 123,
+          ip: '127.0.0.1',
+          ips: [],
+          log: 'nothing',
+          originalUrl: '/testing',
+          url: '/testing',
+        },
+      });
+      expect(reply).toEqual({ raw: { log: 'nothing' } });
+    });
+
+    it('injects the body into raw', async () => {
+      const fastify = {
+        decorateRequest: jest.fn((name, fn) => {
+          fastify[name] = fn;
+        }),
+        addHook: jest.fn((name, fn) => {
+          if (!fastify[name]) {
+            fastify[name] = fn;
+          }
+        }),
+      };
+
+      fastifyPlugin(fastify, null, jest.fn());
+
+      const request = {
+        raw: {
+          url: '/testing',
+        },
+        id: 123,
+        hostname: 'unit-testing',
+        ip: '127.0.0.1',
+        ips: [],
+        log: 'nothing',
+        body: {
+          testing: {
+            something: true,
+          },
+        },
+      };
+      const reply = {
+        raw: {},
+      };
+
+      await fastify.onRequest(request, reply);
+
+      expect(request).toEqual({
+        hostname: 'unit-testing',
+        id: 123,
+        ip: '127.0.0.1',
+        ips: [],
+        log: 'nothing',
+        body: {
+          testing: {
+            something: true,
+          },
+        },
+        raw: {
+          hostname: 'unit-testing',
+          id: 123,
+          ip: '127.0.0.1',
+          ips: [],
+          log: 'nothing',
+          originalUrl: '/testing',
+          url: '/testing',
+          body: {
+            testing: {
+              something: true,
+            },
+          },
+        },
+      });
+    });
+
+    it('injects the cookies into raw', async () => {
+      const fastify = {
+        decorateRequest: jest.fn((name, fn) => {
+          fastify[name] = fn;
+        }),
+        addHook: jest.fn((name, fn) => {
+          if (!fastify[name]) {
+            fastify[name] = fn;
+          }
+        }),
+      };
+
+      fastifyPlugin(fastify, null, jest.fn());
+
+      const request = {
+        raw: {
+          url: '/testing',
+        },
+        id: 123,
+        hostname: 'unit-testing',
+        ip: '127.0.0.1',
+        ips: [],
+        log: 'nothing',
+        cookies: 'with milk',
+      };
+      const reply = {
+        raw: {},
+      };
+
+      await fastify.onRequest(request, reply);
+
+      expect(request).toEqual({
+        hostname: 'unit-testing',
+        id: 123,
+        ip: '127.0.0.1',
+        ips: [],
+        log: 'nothing',
+        cookies: 'with milk',
+        raw: {
+          hostname: 'unit-testing',
+          id: 123,
+          ip: '127.0.0.1',
+          ips: [],
+          log: 'nothing',
+          originalUrl: '/testing',
+          url: '/testing',
+          cookies: 'with milk',
+        },
+      });
+    });
+
+    it('injects the protocol into raw', async () => {
+      const fastify = {
+        decorateRequest: jest.fn((name, fn) => {
+          fastify[name] = fn;
+        }),
+        addHook: jest.fn((name, fn) => {
+          if (!fastify[name]) {
+            fastify[name] = fn;
+          }
+        }),
+      };
+
+      fastifyPlugin(fastify, null, jest.fn());
+
+      const request = {
+        raw: {
+          url: '/testing',
+        },
+        id: 123,
+        hostname: 'unit-testing',
+        ip: '127.0.0.1',
+        ips: [],
+        log: 'nothing',
+        protocol: 'http',
+      };
+      const reply = {
+        raw: {},
+      };
+
+      await fastify.onRequest(request, reply);
+
+      expect(request).toEqual({
+        hostname: 'unit-testing',
+        id: 123,
+        ip: '127.0.0.1',
+        ips: [],
+        log: 'nothing',
+        protocol: 'http',
+        raw: {
+          hostname: 'unit-testing',
+          id: 123,
+          ip: '127.0.0.1',
+          ips: [],
+          log: 'nothing',
+          originalUrl: '/testing',
+          url: '/testing',
+        },
+      });
+      expect(request.raw.protocol).toBeDefined();
+    });
+
     it('starts Request Overhead and Request Full Duration timers', async () => {
       const fastify = {
         decorateRequest: jest.fn((name, fn) => {
@@ -417,8 +632,8 @@ describe('fastifyPlugin', () => {
         await fastify.onResponse(request, reply);
 
         expect(mutateLog).toHaveBeenCalledWith({
-          req: 'raw-request',
-          res: 'raw-response',
+          req: request,
+          res: reply,
           log: {
             request: {
               address: {

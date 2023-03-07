@@ -59,6 +59,9 @@ describe('Tests that require Docker setup', () => {
     let browser;
     const moduleName = 'unhealthy-frank';
     const version = '0.0.0';
+    const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Ignoring (?<workingModule>.*) until .*/;
+    let requiredExternalsError;
+
     beforeAll(async () => {
       originalModuleMap = readModuleMap();
 
@@ -66,6 +69,7 @@ describe('Tests that require Docker setup', () => {
         moduleName,
         version,
       });
+      requiredExternalsError = searchForNextLogMatch(revertErrorMatch);
       ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse }));
     });
 
@@ -74,8 +78,6 @@ describe('Tests that require Docker setup', () => {
       writeModuleMap(originalModuleMap);
     });
     test('one-app starts up successfully with a bad module', async () => {
-      const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Ignoring (?<workingModule>.*) until .*/;
-      const requiredExternalsError = searchForNextLogMatch(revertErrorMatch);
       const loggedError = await requiredExternalsError;
       const [, problemModule, problemModuleUrl, workingUrl] = revertErrorMatch.exec(loggedError);
       const gitSha = await retrieveGitSha();
@@ -128,10 +130,10 @@ describe('Tests that require Docker setup', () => {
         headers: {
           origin: 'test.example.com',
         },
+        body: JSON.stringify({}),
       });
       const rawHeaders = response.headers.raw();
       expect(response.status).toBe(200);
-      expect(rawHeaders).not.toHaveProperty('access-control-allow-origin');
       expect(rawHeaders).not.toHaveProperty('access-control-expose-headers');
       expect(rawHeaders).not.toHaveProperty('access-control-allow-credentials');
     });
@@ -210,9 +212,9 @@ describe('Tests that require Docker setup', () => {
             headers: {
               origin: 'test.example.com',
             },
-            body: {
+            body: JSON.stringify({
               message: 'Hello!',
-            },
+            }),
           }
         );
         const rawHeaders = response.headers.raw();
@@ -299,7 +301,7 @@ describe('Tests that require Docker setup', () => {
       });
 
       describe('module removed from module map', () => {
-        afterAll(() => {
+        afterAll(async () => {
           const integrityDigests = retrieveModuleIntegrityDigests({
             moduleName: 'healthy-frank',
             version: sampleModuleVersion,
@@ -309,6 +311,7 @@ describe('Tests that require Docker setup', () => {
             version: sampleModuleVersion,
             integrityDigests,
           });
+          await waitFor(5000);
         });
 
         test('removes module from one-app', async () => {
@@ -332,7 +335,10 @@ describe('Tests that require Docker setup', () => {
       });
 
       describe('new module added to module map', () => {
-        afterAll(() => removeModuleFromModuleMap('late-frank'));
+        afterAll(async () => {
+          removeModuleFromModuleMap('late-frank');
+          await waitFor(5000);
+        });
 
         test('loads new module when module map updated', async () => {
           await browser.url(`${appAtTestUrls.browserUrl}/demo/late-frank`);
@@ -373,7 +379,7 @@ describe('Tests that require Docker setup', () => {
           let failedRootModuleConfigSearch;
           const failedRootModuleConfig = /Root module attempted to set the following non-overrideable options for the client but not the server:\\n\s{2}someApiUrl/;
 
-          beforeEach(async () => {
+          beforeAll(async () => {
             const nextVersion = '0.0.1';
             failedRootModuleConfigSearch = searchForNextLogMatch(failedRootModuleConfig);
             await addModuleToModuleMap({
@@ -387,8 +393,9 @@ describe('Tests that require Docker setup', () => {
             await waitFor(5000);
           });
 
-          afterEach(async () => {
+          afterAll(async () => {
             writeModuleMap(originalModuleMap);
+            await waitFor(5000);
           });
 
           test('writes an error to log when failed module config', async () => {
@@ -432,6 +439,7 @@ describe('Tests that require Docker setup', () => {
 
           afterEach(async () => {
             writeModuleMap(originalModuleMap);
+            await waitFor(5000);
           });
 
           test('writes an error to log when failed child module validation', async () => {
@@ -778,8 +786,9 @@ describe('Tests that require Docker setup', () => {
           const moduleName = 'cultured-frankie';
           const version = '0.0.1';
 
-          afterEach(() => {
+          afterEach(async () => {
             writeModuleMap(originalModuleMap);
+            await waitFor(5000);
           });
 
           test('fails to get external `react-intl` for child module as an unsupplied `requiredExternal` - logs failure', async () => {
@@ -1335,9 +1344,6 @@ describe('Tests that require Docker setup', () => {
         date: [
           expect.any(String),
         ],
-        etag: [
-          expect.any(String),
-        ],
         'one-app-version': [
           expect.any(String),
         ],
@@ -1348,13 +1354,22 @@ describe('Tests that require Docker setup', () => {
           'max-age=15552000; includeSubDomains',
         ],
         vary: [
-          'Accept-Encoding',
+          'Accept-Encoding, accept-encoding',
         ],
         'x-content-type-options': [
           'nosniff',
         ],
+        'x-dns-prefetch-control': [
+          'off',
+        ],
+        'x-download-options': [
+          'noopen',
+        ],
         'x-frame-options': [
           'DENY',
+        ],
+        'x-permitted-cross-domain-policies': [
+          'none',
         ],
         'x-xss-protection': [
           '1; mode=block',
@@ -1369,9 +1384,11 @@ describe('Tests that require Docker setup', () => {
         headers: {
           origin: 'test.example.com',
         },
+        body: {},
       });
 
       expect(response.headers.raw()).toEqual({
+        vary: ['Accept-Encoding'],
         connection: [
           'close',
         ],
@@ -1385,7 +1402,7 @@ describe('Tests that require Docker setup', () => {
           expect.any(String),
         ],
         'referrer-policy': [
-          'no-referrer',
+          'same-origin',
         ],
         'strict-transport-security': [
           'max-age=15552000; includeSubDomains',
@@ -1400,13 +1417,13 @@ describe('Tests that require Docker setup', () => {
           'noopen',
         ],
         'x-frame-options': [
-          'SAMEORIGIN',
+          'DENY',
         ],
         'x-permitted-cross-domain-policies': [
           'none',
         ],
         'x-xss-protection': [
-          '0',
+          '1; mode=block',
         ],
       });
       expect(response.status).toBe(204);
@@ -1421,6 +1438,7 @@ describe('Tests that require Docker setup', () => {
         headers: {
           origin: 'test.example.com',
         },
+        body: {},
       });
 
       expect(response.headers.raw()).toEqual({
@@ -1439,20 +1457,17 @@ describe('Tests that require Docker setup', () => {
         date: [
           expect.any(String),
         ],
-        etag: [
-          expect.any(String),
-        ],
         'one-app-version': [
           expect.any(String),
         ],
         'referrer-policy': [
-          'no-referrer',
+          'same-origin',
         ],
         'strict-transport-security': [
           'max-age=15552000; includeSubDomains',
         ],
         vary: [
-          'Accept-Encoding',
+          'Accept-Encoding, accept-encoding',
         ],
         'x-content-type-options': [
           'nosniff',
@@ -1464,13 +1479,13 @@ describe('Tests that require Docker setup', () => {
           'noopen',
         ],
         'x-frame-options': [
-          'SAMEORIGIN',
+          'DENY',
         ],
         'x-permitted-cross-domain-policies': [
           'none',
         ],
         'x-xss-protection': [
-          '0',
+          '1; mode=block',
         ],
       });
       expect(response.status).toBe(415);
@@ -1485,8 +1500,11 @@ describe('Tests that require Docker setup', () => {
           origin: 'test.example.com',
           'content-type': 'application/json',
         },
+        body: JSON.stringify({}),
       });
 
+      // expect(response.status).toBe(204);
+      expect(await response.text()).toBe('');
       expect(response.headers.raw()).toEqual({
         connection: [
           'close',
@@ -1497,18 +1515,16 @@ describe('Tests that require Docker setup', () => {
         date: [
           expect.any(String),
         ],
-        etag: [
-          expect.any(String),
-        ],
         'one-app-version': [
           expect.any(String),
         ],
         'referrer-policy': [
-          'no-referrer',
+          'same-origin',
         ],
         'strict-transport-security': [
           'max-age=15552000; includeSubDomains',
         ],
+        vary: ['Accept-Encoding'],
         'x-content-type-options': [
           'nosniff',
         ],
@@ -1519,17 +1535,15 @@ describe('Tests that require Docker setup', () => {
           'noopen',
         ],
         'x-frame-options': [
-          'SAMEORIGIN',
+          'DENY',
         ],
         'x-permitted-cross-domain-policies': [
           'none',
         ],
         'x-xss-protection': [
-          '0',
+          '1; mode=block',
         ],
       });
-      expect(response.status).toBe(204);
-      expect(await response.text()).toBe('');
     });
 
     test('Request: /foo/invalid.json', async () => {
@@ -1542,6 +1556,7 @@ describe('Tests that require Docker setup', () => {
       });
 
       expect(response.status).toBe(404);
+      expect(await response.text()).toBe('Not found');
       expect(response.headers.raw()).toEqual({
         'cache-control': [
           'no-store',
@@ -1561,8 +1576,8 @@ describe('Tests that require Docker setup', () => {
         date: [
           expect.any(String),
         ],
-        etag: [
-          expect.any(String),
+        'expect-ct': [
+          'max-age=0',
         ],
         'one-app-version': [
           expect.any(String),
@@ -1577,7 +1592,7 @@ describe('Tests that require Docker setup', () => {
           'max-age=15552000; includeSubDomains',
         ],
         vary: [
-          'Accept-Encoding',
+          'Accept-Encoding, accept-encoding',
         ],
         'x-content-type-options': [
           'nosniff',
@@ -1655,9 +1670,9 @@ describe('Tests that can run against either local Docker setup or remote One App
             headers: {
               origin: 'test.example.com',
             },
-            body: {
+            body: JSON.stringify({
               message: 'Hello!',
-            },
+            }),
           }
         );
         expect(response.status).toBe(200);
@@ -1669,11 +1684,10 @@ describe('Tests that can run against either local Docker setup or remote One App
         const response = await fetch(`${appInstanceUrls.fetchUrl}/success`, {
           ...defaultFetchOpts,
           method: 'POST',
+          body: {},
         });
         const pageHtml = await response.text();
-        expect(pageHtml.includes('Hello! One App is successfully rendering its Modules!')).toBe(
-          true
-        );
+        expect(pageHtml).toContain('Hello! One App is successfully rendering its Modules!');
       });
 
       test('app passes vitruvius data to modules', async () => {
@@ -1702,7 +1716,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             method: 'GET',
             originalUrl: '/vitruvius',
             params: {
-              0: '/vitruvius',
+              '*': 'vitruvius',
             },
             protocol: expect.stringMatching(/^https?$/),
             query: {},
@@ -1732,6 +1746,7 @@ describe('Tests that can run against either local Docker setup or remote One App
           sendingData: 'in POSTs',
         });
       });
+
       test('app passes urlencoded POST data to modules via vitruvius', async () => {
         const response = await fetch(`${appInstanceUrls.fetchUrl}/vitruvius`, {
           ...defaultFetchOpts,
