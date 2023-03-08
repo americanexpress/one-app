@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.2.0](https://github.com/americanexpress/one-app/compare/v6.1.2...v6.2.0) (2023-03-08)
+
+
+### Bug Fixes
+
+* **load-modules:** unnecessary calls to updateModuleRegistry ([#939](https://github.com/americanexpress/one-app/issues/939)) ([99ef4f1](https://github.com/americanexpress/one-app/commit/99ef4f1818fda4fde941041ba4ea22af2a27f726))
+
+
+### Features
+
+* **middleware:** trigger a redirect from loadModuleData ([#927](https://github.com/americanexpress/one-app/issues/927)) ([f948db1](https://github.com/americanexpress/one-app/commit/f948db19ff18be63f304bb1f9f3b034c47562292))
+* **server:** ExpressJS to Fastify migration  ([#938](https://github.com/americanexpress/one-app/issues/938)) ([9b0c4b3](https://github.com/americanexpress/one-app/commit/9b0c4b3d5a1a8830225e4bf62d18f8ba566c5a07))
+
+
 # [6.1.2](https://github.com/americanexpress/one-app/compare/v6.1.1...v6.1.2) (2023-02-20)
 
 
