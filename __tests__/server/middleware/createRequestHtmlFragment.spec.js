@@ -18,8 +18,7 @@ import url from 'url';
 import { browserHistory, matchPromise } from '@americanexpress/one-app-router';
 import { Map as iMap, fromJS } from 'immutable';
 import { composeModules } from 'holocron';
-// getBreaker is only added in the mock
-/* eslint-disable-next-line import/named */
+// eslint-disable-next-line import/named -- getBreaker is only added in the mock
 import { getBreaker } from '../../../src/server/utils/createCircuitBreaker';
 
 import * as reactRendering from '../../../src/server/utils/reactRendering';
@@ -38,10 +37,7 @@ jest.mock('holocron', () => ({
 jest.mock('../../../src/server/utils/createCircuitBreaker', () => {
   const breaker = jest.fn();
   const mockCreateCircuitBreaker = (asyncFunctionThatMightFail) => {
-    breaker.fire = jest.fn((...args) => {
-      asyncFunctionThatMightFail(...args);
-      return false;
-    });
+    breaker.fire = jest.fn(async (...args) => asyncFunctionThatMightFail(...args));
     return breaker;
   };
   mockCreateCircuitBreaker.getBreaker = () => breaker;
@@ -291,7 +287,7 @@ describe('createRequestHtmlFragment', () => {
       '../../../src/server/middleware/createRequestHtmlFragment'
     ).default;
     const breaker = getBreaker();
-    breaker.fire.mockReturnValueOnce(true);
+    breaker.fire.mockReturnValueOnce({ fallback: true });
     const middleware = createRequestHtmlFragment({ createRoutes });
     await middleware(req, res, next);
     expect(next).toHaveBeenCalled();
@@ -299,6 +295,57 @@ describe('createRequestHtmlFragment', () => {
     expect(renderForStringSpy).not.toHaveBeenCalled();
     expect(renderForStaticMarkupSpy).not.toHaveBeenCalled();
     expect(req.appHtml).toBe('');
+  });
+
+  it('should redirect instead of rendering when the circuit breaker returns a redirect', async () => {
+    expect.assertions(5);
+    const createRequestHtmlFragment = require(
+      '../../../src/server/middleware/createRequestHtmlFragment'
+    ).default;
+    composeModules.mockImplementationOnce(() => {
+      const error = new Error('An error that redirects');
+      error.abortComposeModules = true;
+      error.redirect = { status: 302, url: 'https://example.com' };
+      throw error;
+    });
+    const middleware = createRequestHtmlFragment({ createRoutes });
+    await middleware(req, res, next);
+    expect(res.redirect).toHaveBeenCalledWith(302, 'https://example.com');
+    expect(next).not.toHaveBeenCalled();
+    expect(getBreaker().fire).toHaveBeenCalled();
+    expect(renderForStringSpy).not.toHaveBeenCalled();
+    expect(renderForStaticMarkupSpy).not.toHaveBeenCalled();
+  });
+
+  it('should default to a 302 redirect', async () => {
+    expect.assertions(1);
+    const createRequestHtmlFragment = require(
+      '../../../src/server/middleware/createRequestHtmlFragment'
+    ).default;
+    composeModules.mockImplementationOnce(() => {
+      const error = new Error('An error that redirects');
+      error.abortComposeModules = true;
+      error.redirect = { url: 'https://example.com' };
+      throw error;
+    });
+    const middleware = createRequestHtmlFragment({ createRoutes });
+    await middleware(req, res, next);
+    expect(res.redirect).toHaveBeenCalledWith(302, 'https://example.com');
+  });
+
+  it('should rethrow if the error does not contain a redirect', async () => {
+    expect.assertions(5);
+    const createRequestHtmlFragment = require(
+      '../../../src/server/middleware/createRequestHtmlFragment'
+    ).default;
+    composeModules.mockImplementationOnce(() => { throw new Error('An error that does not redirect'); });
+    const middleware = createRequestHtmlFragment({ createRoutes });
+    await middleware(req, res, next);
+    expect(res.redirect).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalled();
+    expect(getBreaker().fire).toHaveBeenCalled();
+    expect(renderForStringSpy).not.toHaveBeenCalled();
+    expect(renderForStaticMarkupSpy).not.toHaveBeenCalled();
   });
 
   it('should not use the circuit breaker for partials', async () => {
