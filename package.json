@@ -107,6 +107,7 @@
     "lean-intl": "^4.2.2",
     "make-promises-safe": "^5.1.0",
     "matcher": "^3.0.0",
+    "object-hash": "^3.0.0",
     "opossum": "^6.2.1",
     "opossum-prometheus": "^0.3.0",
     "pidusage": "^3.0.0",

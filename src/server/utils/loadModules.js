@@ -17,6 +17,7 @@
 import { getModule } from 'holocron';
 import { updateModuleRegistry } from 'holocron/server';
 
+import hash from 'object-hash';
 import onModuleLoad, { CONFIGURATION_KEY } from './onModuleLoad';
 import batchModulesToUpdate from './batchModulesToUpdate';
 import getModulesToUpdate from './getModulesToUpdate';
@@ -25,9 +26,17 @@ import { setClientModuleMapCache } from './clientModuleMapCache';
 import { updateCSP } from '../middleware/csp';
 import addBaseUrlToModuleMap from './addBaseUrlToModuleMap';
 
+let cachedModuleMapHash;
+
 const loadModules = async () => {
   const moduleMapResponse = await fetch(process.env.HOLOCRON_MODULE_MAP_URL);
   const moduleMap = addBaseUrlToModuleMap(await moduleMapResponse.json());
+
+  const moduleMapHash = hash(moduleMap);
+  if (cachedModuleMapHash && cachedModuleMapHash === moduleMapHash) {
+    return {};
+  }
+  cachedModuleMapHash = moduleMapHash;
   const serverConfig = getServerStateConfig();
 
   const loadedModules = await updateModuleRegistry({

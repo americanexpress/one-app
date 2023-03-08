@@ -44,47 +44,36 @@ jest.mock('../../../src/server/middleware/csp', () => ({
 
 const RootModule = () => ({});
 
-describe('loadModules', () => {
-  const moduleMap = {
-    modules: {
-      'some-root': {
-        node: {
-          url: 'https://example.com/cdn/some-root/2.2.2/some-root.node.js',
-          integrity: '4y45hr',
-        },
-        browser: {
-          url: 'https://example.com/cdn/some-root/2.2.2/some-root.browser.js',
-          integrity: 'nggdfhr34',
-        },
-        legacyBrowser: {
-          url: 'https://example.com/cdn/some-root/2.2.2/some-root.legacy.browser.js',
-          integrity: '7567ee',
-        },
+let modules;
+let fetchedModuleMap;
+function setFetchedRootModuleVersion(version) {
+  modules = {
+    'some-root': {
+      node: {
+        url: `https://example.com/cdn/some-root/${version}/some-root.node.js`,
+        integrity: '4y45hr',
+      },
+      browser: {
+        url: `https://example.com/cdn/some-root/${version}/some-root.browser.js`,
+        integrity: 'nggdfhr34',
+      },
+      legacyBrowser: {
+        url: `https://example.com/cdn/some-root/${version}/some-root.legacy.browser.js`,
+        integrity: '7567ee',
       },
     },
   };
 
+  fetchedModuleMap = { modules };
+}
+
+describe('loadModules', () => {
   beforeAll(() => {
     getModule.mockImplementation(() => RootModule);
-    updateModuleRegistry.mockImplementation(() => ({
-      'some-root': {
-        node: {
-          url: 'https://example.com/cdn/some-root/2.2.2/some-root.node.js',
-          integrity: '4y45hr',
-        },
-        browser: {
-          url: 'https://example.com/cdn/some-root/2.2.2/some-root.browser.js',
-          integrity: 'nggdfhr34',
-        },
-        legacyBrowser: {
-          url: 'https://example.com/cdn/some-root/2.2.2/some-root.legacy.browser.js',
-          integrity: '7567ee',
-        },
-      },
-    }));
+    updateModuleRegistry.mockImplementation(() => modules);
 
     global.fetch = jest.fn(() => Promise.resolve({
-      json: () => Promise.resolve(moduleMap),
+      json: () => Promise.resolve(fetchedModuleMap),
     }));
   });
 
@@ -94,9 +83,10 @@ describe('loadModules', () => {
   });
 
   it('updates the holocron module registry', async () => {
+    setFetchedRootModuleVersion('1.1.1');
     await loadModules();
     expect(updateModuleRegistry).toHaveBeenCalledWith({
-      moduleMap: addBaseUrlToModuleMap(moduleMap),
+      moduleMap: addBaseUrlToModuleMap(fetchedModuleMap),
       batchModulesToUpdate: require('../../../src/server/utils/batchModulesToUpdate').default,
       getModulesToUpdate: require('../../../src/server/utils/getModulesToUpdate').default,
       onModuleLoad: require('../../../src/server/utils/onModuleLoad').default,
@@ -104,11 +94,34 @@ describe('loadModules', () => {
   });
 
   it('updates the client module map cache', async () => {
+    setFetchedRootModuleVersion('1.1.2');
     await loadModules();
     expect(getClientModuleMapCache()).toMatchSnapshot();
   });
 
+  it('returns loaded modules', async () => {
+    setFetchedRootModuleVersion('2.0.0');
+    const loadedModules = await loadModules();
+    expect(loadedModules).toEqual({
+      'some-root': {
+        browser: {
+          integrity: 'nggdfhr34',
+          url: 'https://example.com/cdn/some-root/2.0.0/some-root.browser.js',
+        },
+        legacyBrowser: {
+          integrity: '7567ee',
+          url: 'https://example.com/cdn/some-root/2.0.0/some-root.legacy.browser.js',
+        },
+        node: {
+          integrity: '4y45hr',
+          url: 'https://example.com/cdn/some-root/2.0.0/some-root.node.js',
+        },
+      },
+    });
+  });
+
   it('doesnt update caches when there are no changes', async () => {
+    setFetchedRootModuleVersion('1.1.3');
     updateModuleRegistry.mockImplementationOnce(() => ({}));
     await loadModules();
     expect(getClientModuleMapCache()).toMatchSnapshot();
@@ -118,12 +131,13 @@ describe('loadModules', () => {
     RootModule[CONFIGURATION_KEY] = {
       csp: "default-src 'none';",
     };
-
+    setFetchedRootModuleVersion('1.1.4');
     await loadModules();
     expect(updateCSP).toHaveBeenCalledWith("default-src 'none';");
   });
 
   it('calls updateCSP even when csp is not set', async () => {
+    setFetchedRootModuleVersion('1.1.5');
     delete RootModule[CONFIGURATION_KEY].csp;
     await loadModules();
     expect(updateCSP).toHaveBeenCalledWith(undefined);
@@ -150,8 +164,25 @@ describe('loadModules', () => {
     });
 
     it('does not attempt to update CSP', async () => {
+      setFetchedRootModuleVersion('1.1.6');
       await loadModules();
       expect(updateCSP).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when module map does not change', () => {
+    beforeAll(async () => {
+      setFetchedRootModuleVersion('1.1.1');
+      await loadModules();
+      jest.clearAllMocks();
+    });
+    it('does not updateModuleRegistry', async () => {
+      await loadModules();
+      expect(updateModuleRegistry).not.toHaveBeenCalled();
+    });
+    it('does not return any modules', async () => {
+      const loadedModules = await loadModules();
+      expect(loadedModules).toEqual({});
     });
   });
 });

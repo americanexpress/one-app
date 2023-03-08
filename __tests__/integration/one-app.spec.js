@@ -64,6 +64,9 @@ describe('Tests that require Docker setup', () => {
     let browser;
     const moduleName = 'unhealthy-frank';
     const version = '0.0.0';
+    const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Ignoring (?<workingModule>.*) until .*/;
+    let requiredExternalsError;
+
     beforeAll(async () => {
       originalModuleMap = readModuleMap();
 
@@ -71,6 +74,7 @@ describe('Tests that require Docker setup', () => {
         moduleName,
         version,
       });
+      requiredExternalsError = searchForNextLogMatch(revertErrorMatch);
       ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse }));
     });
 
@@ -79,8 +83,6 @@ describe('Tests that require Docker setup', () => {
       writeModuleMap(originalModuleMap);
     });
     test('one-app starts up successfully with a bad module', async () => {
-      const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Ignoring (?<workingModule>.*) until .*/;
-      const requiredExternalsError = searchForNextLogMatch(revertErrorMatch);
       const loggedError = await requiredExternalsError;
       const [,
         problemModule,
@@ -315,13 +317,17 @@ describe('Tests that require Docker setup', () => {
       });
 
       describe('module removed from module map', () => {
-        afterAll(() => {
-          const integrityDigests = retrieveModuleIntegrityDigests({ moduleName: 'healthy-frank', version: sampleModuleVersion });
+        afterAll(async () => {
+          const integrityDigests = retrieveModuleIntegrityDigests({
+            moduleName: 'healthy-frank',
+            version: sampleModuleVersion,
+          });
           addModuleToModuleMap({
             moduleName: 'healthy-frank',
             version: sampleModuleVersion,
             integrityDigests,
           });
+          await waitFor(5000);
         });
 
         test('removes module from one-app', async () => {
@@ -343,7 +349,10 @@ describe('Tests that require Docker setup', () => {
       });
 
       describe('new module added to module map', () => {
-        afterAll(() => removeModuleFromModuleMap('late-frank'));
+        afterAll(async () => {
+          removeModuleFromModuleMap('late-frank');
+          await waitFor(5000);
+        });
 
         test('loads new module when module map updated', async () => {
           await browser.url(`${appAtTestUrls.browserUrl}/demo/late-frank`);
@@ -379,7 +388,7 @@ describe('Tests that require Docker setup', () => {
           let failedRootModuleConfigSearch;
           const failedRootModuleConfig = /Root module attempted to set the following non-overrideable options for the client but not the server:\\n\s{2}someApiUrl/;
 
-          beforeEach(async () => {
+          beforeAll(async () => {
             const nextVersion = '0.0.1';
             failedRootModuleConfigSearch = searchForNextLogMatch(failedRootModuleConfig);
             await addModuleToModuleMap({
@@ -390,8 +399,9 @@ describe('Tests that require Docker setup', () => {
             await waitFor(5000);
           });
 
-          afterEach(async () => {
+          afterAll(async () => {
             writeModuleMap(originalModuleMap);
+            await waitFor(5000);
           });
 
           test('writes an error to log when failed module config', async () => {
@@ -432,6 +442,7 @@ describe('Tests that require Docker setup', () => {
 
           afterEach(async () => {
             writeModuleMap(originalModuleMap);
+            await waitFor(5000);
           });
 
           test('writes an error to log when failed child module validation', async () => {
@@ -751,8 +762,9 @@ describe('Tests that require Docker setup', () => {
           const moduleName = 'cultured-frankie';
           const version = '0.0.1';
 
-          afterEach(() => {
+          afterEach(async () => {
             writeModuleMap(originalModuleMap);
+            await waitFor(5000);
           });
 
           test('fails to get external `react-intl` for child module as an unsupplied `requiredExternal` - logs failure', async () => {
