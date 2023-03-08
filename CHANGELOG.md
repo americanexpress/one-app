@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.16.0](https://github.com/americanexpress/one-app/compare/v5.15.5...v5.16.0) (2023-03-08)
+
+
+### Features
+
+* **createRequestHtmlFragment:** allow modules to trigger a redirect from loadModuleData ([#941](https://github.com/americanexpress/one-app/issues/941)) ([3622526](https://github.com/americanexpress/one-app/commit/3622526194ffa4374a6970d33e6f2fc9322b3613))
+
+
 ## [5.15.5](https://github.com/americanexpress/one-app/compare/v5.15.4...v5.15.5) (2023-02-20)
 
 
