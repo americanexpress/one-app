@@ -52,25 +52,7 @@ describe('one-app-dev-cdn', () => {
       },
     },
   };
-  const defaultRemoteMap = {
-    key: '234234',
-    modules: {
-      'module-b': {
-        node: {
-          url: 'https://example.com/cdn/module-b/1.0.0/module-b.node.js',
-          integrity: '123',
-        },
-        browser: {
-          url: 'https://example.com/cdn/module-b/1.0.0/module-b.browser.js',
-          integrity: '234',
-        },
-        legacyBrowser: {
-          url: 'https://example.com/cdn/module-b/1.0.0/module-b.legacy.browser.js',
-          integrity: '345',
-        },
-      },
-    },
-  };
+  let defaultRemoteMap;
 
   const defaultPublicDirContentsSetting = {
     moduleMapContent: JSON.stringify(defaultLocalMap),
@@ -92,6 +74,7 @@ describe('one-app-dev-cdn', () => {
     if (!allowCacheWrite) {
       mkdirp(pathToCache, { mode: 444 });
     }
+
     const modulesDir = path.join(mockLocalDevPublicPath, 'modules');
 
     mkdirp.sync(modulesDir);
@@ -138,7 +121,25 @@ describe('one-app-dev-cdn', () => {
     jest
       .resetAllMocks()
       .resetModules();
-
+    defaultRemoteMap = {
+      key: '234234',
+      modules: {
+        'module-b': {
+          node: {
+            url: 'https://example.com/cdn/module-b/1.0.0/module-b.node.js',
+            integrity: '123',
+          },
+          browser: {
+            url: 'https://example.com/cdn/module-b/1.0.0/module-b.browser.js',
+            integrity: '234',
+          },
+          legacyBrowser: {
+            url: 'https://example.com/cdn/module-b/1.0.0/module-b.legacy.browser.js',
+            integrity: '345',
+          },
+        },
+      },
+    };
     fetch.mockImplementation((url) => Promise.reject(new Error(`no mock for ${url} set up`)));
   });
 
@@ -629,7 +630,7 @@ describe('one-app-dev-cdn', () => {
       await fcdn.inject()
         .get('/module-map.json');
 
-      fetch.mockReturnFileOnce(gotError);
+      fetch.mockReturnFileOnce('body', 501);
       const moduleResponse = await fcdn.inject()
         .get('/cdn/module-b/1.0.0/some-langpack.json');
       expect(moduleResponse.statusCode).toBe(501);

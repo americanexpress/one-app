@@ -51,7 +51,7 @@ const consumeRemoteRequest = async (remoteModuleMapUrl, hostAddress, remoteModul
     // clear out remoteModuleBaseUrls as the new module map now has different urls in it
     // not clearing would result in an ever growing array
     remoteModuleBaseUrls.splice(0, remoteModuleBaseUrls.length);
-    const remoteModuleMap = JSON.parse(response.body);
+    const remoteModuleMap = await response.json();
     const { modules } = remoteModuleMap;
     const oneAppDevStaticsAddress = `${hostAddress}/static`;
     Object.keys(modules).map((moduleName) => {
@@ -135,13 +135,14 @@ export const oneAppDevCdnFactory = ({
   // merge local with remote, with local taking preference
   oneAppDevCdn.get(`${routePrefix}/module-map.json`, async (req, reply) => {
     const hostAddress = useHost ? `http://${req.headers.host}` : `http://localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}`;
-
     const localMap = useLocalModules ? JSON.parse(getLocalModuleMap({
       pathToModuleMap: path.join(localDevPublicPath, 'module-map.json'),
       oneAppDevCdnAddress: hostAddress,
     })) : {};
 
-    const remoteMap = remoteModuleMapUrl != null ? await consumeRemoteRequest(remoteModuleMapUrl, hostAddress, remoteModuleBaseUrls) : {}; // eslint-disable-line max-len
+    const remoteMap = remoteModuleMapUrl != null
+      ? await consumeRemoteRequest(remoteModuleMapUrl, hostAddress, remoteModuleBaseUrls)
+      : {};
     // remoteMap always fulfilled
     const map = {
       ...remoteMap,
@@ -166,22 +167,15 @@ export const oneAppDevCdnFactory = ({
         remoteModuleBaseUrls
       );
       const remoteModuleBaseUrlOrigin = new URL(knownRemoteModuleBaseUrl).origin;
-      try {
-        const remoteModuleResponse = await fetch(`${remoteModuleBaseUrlOrigin}/${incomingRequestPath}`, {
-
-          headers: { connection: 'keep-alive' },
-          agent: new ProxyAgent(),
-        });
-        reply
-          .code(remoteModuleResponse.statusCode)
-          .type(path.extname(req.url))
-          .send(remoteModuleResponse.body);
-      } catch (err) {
-        const status = err.statusCode === 'ERR_NON_2XX_3XX_RESPONSE' ? err.response.statusCode : 500;
-        return reply
-          .code(status)
-          .send(err);
-      }
+      const remoteModuleResponse = await fetch(`${remoteModuleBaseUrlOrigin}/${incomingRequestPath}`, {
+        headers: { connection: 'keep-alive' },
+        agent: new ProxyAgent(),
+      });
+      const { status, type } = remoteModuleResponse;
+      reply
+        .code(status)
+        .type(type)
+        .send(await remoteModuleResponse.text());
     } else {
       reply
         .code(404)
