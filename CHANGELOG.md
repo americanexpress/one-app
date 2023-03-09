@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.2.1](https://github.com/americanexpress/one-app/compare/v6.2.0...v6.2.1) (2023-03-09)
+
+
+### Bug Fixes
+
+* **devCdn:** requests were not using node-fetch API ([#949](https://github.com/americanexpress/one-app/issues/949)) ([8a3ff0a](https://github.com/americanexpress/one-app/commit/8a3ff0acea0e654a8ba532016b23f8ca6c199dc2))
+
+
 # [6.2.0](https://github.com/americanexpress/one-app/compare/v6.1.2...v6.2.0) (2023-03-08)
 
 
