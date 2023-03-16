@@ -18,14 +18,23 @@ fetch.mockReturnJsonOnce = (obj) => {
     return fetch.mockImplementationOnce(() => Promise.reject(obj));
   }
 
-  return fetch.mockImplementationOnce(() => Promise.resolve({ body: JSON.stringify(obj) }));
+  return fetch.mockImplementationOnce(() => Promise.resolve({
+    json: () => Promise.resolve(obj),
+    text: () => Promise.resolve(JSON.stringify(obj)),
+    status: 200,
+  }));
 };
 
-fetch.mockReturnFileOnce = (body) => {
+fetch.mockReturnFileOnce = (body, status = 200) => {
   if (body instanceof Error) {
     return fetch.mockImplementationOnce(() => Promise.reject(body));
   }
 
-  return fetch.mockImplementationOnce(() => Promise.resolve({ body, statusCode: 200 }));
+  return fetch.mockImplementationOnce(
+    () => Promise.resolve({
+      text: () => Promise.resolve(body),
+      status,
+    })
+  );
 };
 module.exports = fetch;

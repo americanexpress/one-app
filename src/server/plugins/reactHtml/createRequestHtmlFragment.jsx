@@ -29,8 +29,13 @@ import {
 } from '../../utils/reactRendering';
 
 const getModuleData = async ({ dispatch, modules }) => {
-  await dispatch(composeModules(modules));
-  return false;
+  try {
+    await dispatch(composeModules(modules));
+  } catch (err) {
+    if (err.abortComposeModules && err.redirect) return { redirect: err.redirect, fallback: false };
+    throw err;
+  }
+  return { fallback: false };
 };
 
 const getModuleDataBreaker = createCircuitBreaker(getModuleData);
@@ -95,10 +100,15 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
       if (getRenderMethodName(state) === 'renderForStaticMarkup') {
         await dispatch(composeModules(routeModules));
       } else {
-        const fallback = await getModuleDataBreaker.fire({
+        const { fallback, redirect } = await getModuleDataBreaker.fire({
           dispatch,
           modules: routeModules,
         });
+
+        if (redirect) {
+          reply.redirect(redirect.status || 302, redirect.url);
+          return;
+        }
 
         if (fallback) {
           request.appHtml = '';

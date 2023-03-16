@@ -29,6 +29,14 @@
         // console methods are how we log events
         "no-console": 0
       }
+    },
+    {
+      "files": [
+        "**/*.md"
+      ],
+      "rules": {
+        "no-console": 0
+      }
     }
   ]
 }
