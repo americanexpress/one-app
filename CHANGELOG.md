@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.3.0](https://github.com/americanexpress/one-app/compare/v6.2.1...v6.3.0) (2023-03-22)
+
+
+### Features
+
+* **holocron:** allow mapStateToProps to be passed to holocron ([#951](https://github.com/americanexpress/one-app/issues/951)) ([ba8bad9](https://github.com/americanexpress/one-app/commit/ba8bad96f8bb0e32a7853bd83de9d3c759b394c9))
+
+
 ## [6.2.1](https://github.com/americanexpress/one-app/compare/v6.2.0...v6.2.1) (2023-03-09)
 
 

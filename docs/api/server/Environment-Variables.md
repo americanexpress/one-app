@@ -682,7 +682,7 @@ Must be one of: `no-referrer`, `no-referrer-when-downgrade`, `same-origin` or `s
 ```bash
 ONE_REFERRER_POLICY_OVERRIDE=String
 ```
-**Exampke**
+**Example**
 ```bash
 ONE_REFERRER_POLICY_OVERRIDE=no-referrer
 ```

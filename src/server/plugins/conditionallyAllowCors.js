@@ -30,7 +30,7 @@ export const setCorsOrigins = (newCorsOrigins = []) => {
 setCorsOrigins();
 
 /**
- * Sets configurable cors when 'renderPatialOnly' is enabled
+ * Sets configurable cors when 'renderPartialOnly' is enabled
  * @param {import('fastify').FastifyInstance} fastify app instance
  */
 const conditionallyAllowCors = async (fastify) => {
