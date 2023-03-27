@@ -35,7 +35,7 @@ export default Child;
 
 ## Module Locale Files
 
-Next create the locale files. [one-app-locale-bundler](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-locale-bundler) will bundle the locale files as a part of [one-app-bundler](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler). More information about locale folder stucture and naming can be found in the [README](https://github.com/americanexpress/one-app-cli/blob/main/packages/one-app-locale-bundler/README.md).
+Next create the locale files. [one-app-locale-bundler](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-locale-bundler) will bundle the locale files as a part of [one-app-bundler](https://github.com/americanexpress/one-app-cli/tree/main/packages/one-app-bundler). More information about locale folder structure and naming can be found in the [README](https://github.com/americanexpress/one-app-cli/blob/main/packages/one-app-locale-bundler/README.md).
 
 Create a folder structure and content as follows (locale must follow BCP-47):
 ```
@@ -113,7 +113,7 @@ export default Parent;
 ```
 
 ## Access Locale and Language Pack
-Utilizing [mapStateToProps](https://react-redux.js.org/api/connect#mapstatetoprops-state-ownprops-object) will allow accessing the langugage pack and locale from the Redux state and provide them as props in the `Parent` component.
+Utilizing [mapStateToProps](https://react-redux.js.org/api/connect#mapstatetoprops-state-ownprops-object) will allow accessing the language pack and locale from the Redux state and provide them as props in the `Parent` component.
 
 Install React-Redux, Immutable, and PropTypes:
 ```
