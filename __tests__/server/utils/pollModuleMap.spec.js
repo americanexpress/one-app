@@ -217,7 +217,7 @@ describe('pollModuleMap', () => {
   });
 
   it('resets the time to the next polling to the minimum if there were updates', async () => {
-    const { default: pollModuleMap } = load();
+    const { default: pollModuleMap, MIN_POLL_TIME } = load();
     const moduleMapUpdates = { 'module-name': 'module-data-here' };
     loadModulesPromise = Promise.resolve({ loadedModules: moduleMapUpdates });
     await pollModuleMap();
@@ -228,7 +228,7 @@ describe('pollModuleMap', () => {
     expect(console.log.mock.calls[2][1]).toEqual(moduleMapUpdates);
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
-    expect(setTimeout).toHaveBeenCalledWith(pollModuleMap, 5e3);
+    expect(setTimeout).toHaveBeenCalledWith(pollModuleMap, MIN_POLL_TIME);
 
     expect(setGauge).toHaveBeenCalledTimes(1);
     expect(setGauge).toHaveBeenCalledWith(holocronMetrics.moduleMapPollWait, 5);
@@ -237,7 +237,7 @@ describe('pollModuleMap', () => {
   });
 
   it('increases the time to the next polling if there were no updates', async () => {
-    const { default: pollModuleMap } = load();
+    const { default: pollModuleMap, MIN_POLL_TIME } = load();
     await pollModuleMap();
     expect(loadModules).toHaveBeenCalledTimes(1);
 
@@ -248,7 +248,8 @@ describe('pollModuleMap', () => {
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
     expect(setTimeout.mock.calls[0][0]).toBe(pollModuleMap);
-    expect(setTimeout.mock.calls[0][1]).toBeGreaterThanOrEqual(5e3 * 1.25);
+    // check that the interval has increased
+    expect(setTimeout.mock.calls[0][1]).toBeGreaterThanOrEqual(MIN_POLL_TIME * 1.25);
 
     expect(setGauge).toHaveBeenCalledTimes(1);
     expect(setGauge.mock.calls[0][0]).toBe(holocronMetrics.moduleMapPollWait);
@@ -258,7 +259,7 @@ describe('pollModuleMap', () => {
   });
 
   it('resets the time to the next polling to the minimum if there were errors', async () => {
-    const { default: pollModuleMap } = load();
+    const { default: pollModuleMap, MIN_POLL_TIME } = load();
     const error = { message: 'sample test error' };
     loadModulesPromise = Promise.reject(error);
     await pollModuleMap();
@@ -267,7 +268,8 @@ describe('pollModuleMap', () => {
     expect(console.error).toHaveBeenCalledWith('pollModuleMap: error polling', error);
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
-    expect(setTimeout).toHaveBeenCalledWith(pollModuleMap, 5e3);
+    // check that the interval has reset
+    expect(setTimeout).toHaveBeenCalledWith(pollModuleMap, MIN_POLL_TIME);
 
     expect(setGauge).toHaveBeenCalledTimes(1);
     expect(setGauge).toHaveBeenCalledWith(holocronMetrics.moduleMapPollWait, 5);
@@ -276,7 +278,7 @@ describe('pollModuleMap', () => {
   });
 
   it('resets the time to the next polling to the minimum if there were rejected modules', async () => {
-    const { default: pollModuleMap } = load();
+    const { default: pollModuleMap, MIN_POLL_TIME } = load();
     loadModulesPromise = Promise.resolve({ rejectedModules: { 'bad-module': { reasonForRejection: 'not compatible' } } });
     await pollModuleMap();
     expect(loadModules).toHaveBeenCalledTimes(1);
@@ -285,7 +287,8 @@ describe('pollModuleMap', () => {
     expect(console.warn).toHaveBeenCalledWith('pollModuleMap: 1 modules rejected:', ['bad-module: not compatible']);
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
-    expect(setTimeout).toHaveBeenCalledWith(pollModuleMap, 5e3);
+    // check that the poll interval is reset to min.
+    expect(setTimeout).toHaveBeenCalledWith(pollModuleMap, MIN_POLL_TIME);
 
     expect(setGauge).toHaveBeenCalledTimes(1);
     expect(setGauge).toHaveBeenCalledWith(holocronMetrics.moduleMapPollWait, 5);
