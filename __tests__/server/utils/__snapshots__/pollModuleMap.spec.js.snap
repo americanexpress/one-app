@@ -29,18 +29,3 @@ Array [
   "pollModuleMap: polling is working as expected. Last poll: 2000ms ago, Max poll: 10000ms.",
 ]
 `;
-
-exports[`pollModuleMap restores the state config on poll failure 1`] = `
-Array [
-  Array [
-    Object {
-      "client": Object {
-        "someUrl": "http://client.com",
-      },
-      "server": Object {
-        "someUrl": "http://server.com",
-      },
-    },
-  ],
-]
-`;
