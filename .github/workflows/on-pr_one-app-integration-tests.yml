@@ -5,7 +5,7 @@ jobs:
     name:  One App Integration Tests - PR
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/cache@v2
         with:
           path: ~/.npm

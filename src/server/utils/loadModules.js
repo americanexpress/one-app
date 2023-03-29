@@ -27,6 +27,7 @@ import { updateCSP } from '../plugins/csp';
 import addBaseUrlToModuleMap from './addBaseUrlToModuleMap';
 
 let cachedModuleMapHash;
+let rejectedModulesCache = {};
 
 const loadModules = async () => {
   const moduleMapResponse = await fetch(process.env.HOLOCRON_MODULE_MAP_URL);
@@ -34,18 +35,19 @@ const loadModules = async () => {
 
   const moduleMapHash = hash(moduleMap);
   if (cachedModuleMapHash && cachedModuleMapHash === moduleMapHash) {
-    return {};
+    return { loadedModules: {}, rejectedModules: rejectedModulesCache };
   }
   cachedModuleMapHash = moduleMapHash;
   const serverConfig = getServerStateConfig();
-
-  const loadedModules = await updateModuleRegistry({
+  const { loadedModules = {}, rejectedModules = {} } = await updateModuleRegistry({
     moduleMap,
     batchModulesToUpdate,
     onModuleLoad,
     getModulesToUpdate,
+    listRejectedModules: true,
   });
 
+  rejectedModulesCache = rejectedModules;
   const loadedModuleNames = Object.keys(loadedModules);
 
   if (loadedModuleNames.length > 0) {
@@ -54,15 +56,13 @@ const loadModules = async () => {
 
   const rootModuleLoaded = loadedModuleNames.includes(serverConfig.rootModuleName);
 
-  if (!rootModuleLoaded) {
-    return loadedModules;
+  if (rootModuleLoaded) {
+    const RootModule = getModule(serverConfig.rootModuleName);
+    const { [CONFIGURATION_KEY]: { csp } = {} } = RootModule;
+    updateCSP(csp);
   }
 
-  const RootModule = getModule(serverConfig.rootModuleName);
-  const { [CONFIGURATION_KEY]: { csp } = {} } = RootModule;
-  updateCSP(csp);
-
-  return loadedModules;
+  return { loadedModules, rejectedModules };
 };
 
 export default loadModules;

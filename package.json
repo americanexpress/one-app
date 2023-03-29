@@ -108,7 +108,7 @@
     "fastify": "^4.10.2",
     "fastify-plugin": "^4.2.0",
     "helmet": "^6.0.0",
-    "holocron": "^1.6.0",
+    "holocron": "^1.7.0",
     "holocron-module-route": "^1.3.0",
     "if-env": "^1.0.4",
     "immutable": "^4.1.0",
