@@ -23,11 +23,6 @@ import {
 
   holocron as holocronMetrics,
 } from '../metrics';
-import {
-  getModulesUsingExternals,
-  setModulesUsingExternals,
-} from './onModuleLoad';
-import { backupModuleStateConfig, restoreModuleStateConfig } from './stateConfig';
 
 let moduleMapHealthy = null;
 export const getModuleMapHealth = () => moduleMapHealthy;
@@ -133,26 +128,36 @@ async function pollModuleMap() {
   // triggers additional poll during current poll.
   recordPollingForMonitor();
   startPollingMonitorIfNotAlready();
-  let modulesUsingExternalsBeforeUpdate;
-  let configBeforeUpdate;
-
   try {
-    configBeforeUpdate = backupModuleStateConfig();
-    modulesUsingExternalsBeforeUpdate = getModulesUsingExternals();
     console.log('pollModuleMap: polling...');
     incrementCounter(holocronMetrics.moduleMapPoll);
 
-    const modulesLoaded = await loadModules();
+    const { loadedModules = {}, rejectedModules = {} } = await loadModules();
 
-    moduleMapHealthy = true;
-    resetGauge(holocronMetrics.moduleMapPollConsecutiveErrors);
-    const numberOfModulesLoaded = Object.keys(modulesLoaded).length;
+    const numberOfModulesLoaded = Object.keys(loadedModules).length;
+    const numberOfModulesRejected = Object.keys(rejectedModules).length;
+
+    moduleMapHealthy = !numberOfModulesRejected;
+
     if (numberOfModulesLoaded) {
       console.log(
         `pollModuleMap: ${numberOfModulesLoaded} modules loaded/updated:`,
-        modulesLoaded
+        loadedModules
       );
       incrementCounter(holocronMetrics.moduleMapUpdated);
+    }
+
+    if (numberOfModulesRejected) {
+      const rejectedModuleMessages = Object.entries(rejectedModules).map(([moduleName, { reasonForRejection }]) => `${moduleName}: ${reasonForRejection}`);
+      console.warn(
+        `pollModuleMap: ${numberOfModulesRejected} modules rejected:`, rejectedModuleMessages
+      );
+      incrementGauge(holocronMetrics.moduleMapPollConsecutiveErrors);
+    } else {
+      resetGauge(holocronMetrics.moduleMapPollConsecutiveErrors);
+    }
+
+    if (numberOfModulesLoaded || numberOfModulesRejected) {
       resetPollTime();
     } else {
       incrementPollTime();
@@ -162,10 +167,6 @@ async function pollModuleMap() {
     }
   } catch (pollingError) {
     try {
-      restoreModuleStateConfig(configBeforeUpdate);
-      if (modulesUsingExternalsBeforeUpdate) {
-        setModulesUsingExternals(modulesUsingExternalsBeforeUpdate);
-      }
       resetPollTime();
       moduleMapHealthy = false;
       incrementGauge(holocronMetrics.moduleMapPollConsecutiveErrors);
