@@ -121,7 +121,7 @@
     "opossum": "^7.1.0",
     "opossum-prometheus": "^0.3.0",
     "pidusage": "^3.0.2",
-    "prom-client": "^14.0.1",
+    "prom-client": "^14.2.0",
     "prop-types": "^15.8.1",
     "proxy-agent": "^5.0.0",
     "react": "^17.0.2",
