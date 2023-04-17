@@ -184,7 +184,7 @@
     "mkdirp": "^2.1.5",
     "node-mocks-http": "^1.11.0",
     "nodemon": "^2.0.20",
-    "ora": "^5.4.1",
+    "ora": "^6.3.0",
     "parse-prometheus-text-format": "^1.1.1",
     "prettier": "^2.7.1",
     "react-test-renderer": "^17.0.2",
