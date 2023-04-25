@@ -63,10 +63,23 @@ describe('initClient', () => {
     },
   };
 
+  const requiredHolocronExternals = {
+    'module-a': {
+      'that-dep': {
+        filename: 'this-dep.js',
+        semanticRange: '^2.2.0',
+        integrity: '12345hash',
+        version: '2.3.1',
+      },
+    },
+  };
+
   beforeEach(() => {
     global.fetch = jest.fn(() => Promise.resolve());
     // eslint-disable-next-line no-underscore-dangle
     global.__CLIENT_HOLOCRON_MODULE_MAP__ = clientHolocronModuleMap;
+    // eslint-disable-next-line no-underscore-dangle
+    global.__holocron_externals__ = requiredHolocronExternals;
     jest.resetModules();
     jest.clearAllMocks();
   });
@@ -219,5 +232,12 @@ describe('initClient', () => {
 
     expect(getModuleMap().equals(fromJS(clientHolocronModuleMap))).toBe(true);
     expect(getModuleMap()).toMatchSnapshot();
+  });
+
+  it('sets the required external registry', async () => {
+    const initClient = require('../../src/client/initClient').default;
+    await initClient();
+    const { getRequiredExternalsRegistry } = require('holocron');
+    expect(getRequiredExternalsRegistry()).toEqual(requiredHolocronExternals);
   });
 });
