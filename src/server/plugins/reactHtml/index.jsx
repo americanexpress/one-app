@@ -106,12 +106,23 @@ export function renderModuleScripts({
   }).join(isDevelopmentEnv ? '\n          ' : '');
 }
 
+function isDuplicateExternal({ name, version }, currentExternals) {
+  return currentExternals
+    .some((current) => (name === current.name) && (version === current.version));
+}
+
 export function renderExternalFallbacks({ clientInitialState, moduleMap, isDevelopmentEnv }) {
   const loadedModules = clientInitialState.getIn(['holocron', 'loaded'], iSet()).toArray();
-  // TODO: remove duplicate fallbacks, needs to be uniq for dep name and version
   const requiredFallbacks = loadedModules
-    .reduce((fallbacks, moduleName) => [...fallbacks, ...getRequiredExternals(moduleName)], []);
+    .reduce((externals, moduleName) => {
+      const requiredExternals = getRequiredExternals(moduleName)
+        .filter((nextExternal) => !isDuplicateExternal(nextExternal, externals));
 
+      return [
+        ...externals,
+        ...requiredExternals,
+      ];
+    }, []);
   const { clientCacheRevision, modules } = moduleMap;
 
   return requiredFallbacks

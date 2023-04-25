@@ -908,6 +908,9 @@ describe('reactHtml', () => {
         'child-module-a': {
           baseUrl: 'https://example.com/cdn/child-module-a/1.0.0',
         },
+        'child-module-b': {
+          baseUrl: 'https://example.com/cdn/child-module-b/1.1.0',
+        },
       },
     };
 
@@ -932,6 +935,40 @@ describe('reactHtml', () => {
         })
       ).toMatchInlineSnapshot(
         '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
+      );
+    });
+
+    it('does not create scripts for duplicate scripts for same name and version', () => {
+      setRequiredExternalsRegistry({
+        'child-module-a': {
+          'this-dep': {
+            filename: 'this-dep.js',
+            semanticRange: '^2.2.0',
+            integrity: '12345hash',
+            version: '2.3.1',
+          },
+        },
+        'child-module-b': {
+          'this-dep': {
+            filename: 'this-dep.js',
+            semanticRange: '^2.2.0',
+            integrity: '12345hash',
+            version: '2.3.1',
+          },
+        },
+      });
+
+      expect(
+        renderExternalFallbacks({
+          clientInitialState: fromJS({
+            holocron: {
+              loaded: ['child-module-b', 'child-module-a'],
+            },
+          }),
+          moduleMap,
+        })
+      ).toMatchInlineSnapshot(
+        '"<script src="https://example.com/cdn/child-module-b/1.1.0/this-dep.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
       );
     });
 
