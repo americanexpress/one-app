@@ -18,7 +18,9 @@ import fp from 'fastify-plugin';
 import React from 'react';
 import striptags from 'striptags';
 import { Set as iSet, Map as iMap } from 'immutable';
-import { composeModules, RenderModule } from 'holocron';
+import {
+  composeModules, RenderModule, getRequiredExternals, getRequiredExternalsRegistry,
+} from 'holocron';
 import { Provider } from 'react-redux';
 
 import createRequestStoreHook from './createRequestStore';
@@ -71,6 +73,16 @@ function renderI18nScript(clientInitialState, appBundlesURLPrefix) {
   return `<script src="${appBundlesURLPrefix}/${i18nFile}" crossorigin="anonymous"></script>`;
 }
 
+function renderScript({
+  src, integrity, isDevelopmentEnv, clientCacheRevision,
+}) {
+  const additionalAttributes = isDevelopmentEnv ? '' : `integrity="${integrity}"`;
+  const scriptSource = isDevelopmentEnv || !clientCacheRevision
+    ? src
+    : `${src}?clientCacheRevision=${clientCacheRevision}`;
+  return `<script src="${scriptSource}" crossorigin="anonymous" ${additionalAttributes}></script>`;
+}
+
 export function renderModuleScripts({
   clientInitialState, moduleMap, isDevelopmentEnv, bundle,
 }) {
@@ -88,10 +100,32 @@ export function renderModuleScripts({
   return orderedLoadedModules.map((moduleName) => {
     const { integrity, url: src } = moduleMap.modules[moduleName][bundle];
     const { clientCacheRevision } = moduleMap;
-    const additionalAttributes = isDevelopmentEnv ? '' : `integrity="${integrity}"`;
-    const scriptSource = isDevelopmentEnv || !clientCacheRevision ? src : `${src}?clientCacheRevision=${clientCacheRevision}`;
-    return `<script src="${scriptSource}" crossorigin="anonymous" ${additionalAttributes}></script>`;
+    return renderScript({
+      src, integrity, isDevelopmentEnv, clientCacheRevision,
+    });
   }).join(isDevelopmentEnv ? '\n          ' : '');
+}
+
+export function renderExternalFallbacks({ clientInitialState, moduleMap, isDevelopmentEnv }) {
+  const loadedModules = clientInitialState.getIn(['holocron', 'loaded'], iSet()).toArray();
+  // TODO: remove duplicate fallbacks, needs to be uniq for dep name and version
+  const requiredFallbacks = loadedModules
+    .reduce((fallbacks, moduleName) => [...fallbacks, ...getRequiredExternals(moduleName)], []);
+
+  const { clientCacheRevision, modules } = moduleMap;
+
+  return requiredFallbacks
+    .map(({ filename, integrity, moduleName }) => {
+      const { baseUrl } = modules[moduleName];
+      const endsWithSlash = baseUrl.endsWith('/');
+      const src = `${baseUrl}${endsWithSlash ? '' : '/'}${filename}`;
+      return renderScript({
+        src,
+        integrity,
+        isDevelopmentEnv,
+        clientCacheRevision,
+      });
+    }).join(isDevelopmentEnv ? '\n          ' : '');
 }
 
 function serializeClientInitialState(clientInitialState, request) {
@@ -194,7 +228,10 @@ export function getBody({
   return `
     <body${(bodyAttributes && ` ${bodyAttributes.toString()}`) || ''}>
       <div id="root">${appHtml || ''}</div>
-      ${disableScripts ? '' : `
+      ${
+  disableScripts
+    ? ''
+    : `
       <script id="initial-state" ${scriptNonce ? `nonce="${scriptNonce}"` : ''}>
         window.__webpack_public_path__ = ${jsonStringifyForScript(`${appBundlesURLPrefix}/`)};
         window.__CLIENT_HOLOCRON_MODULE_MAP__ = ${jsonStringifyForScript(clientModuleMapCache[bundle])};
@@ -202,18 +239,27 @@ export function getBody({
         window.__holocron_module_bundle_type__ = '${bundle}';
         window.__pwa_metadata__ = ${jsonStringifyForScript(pwaMetadata)};
         window.__render_mode__ = '${renderMode}';
+        window.__holocron_externals__ = ${jsonStringifyForScript(getRequiredExternalsRegistry())};
       </script>
       ${assets}
       ${renderI18nScript(clientInitialState, bundlePrefixForBrowser)}
+      ${renderExternalFallbacks({
+    clientInitialState,
+    moduleMap: clientModuleMapCache[bundle],
+    isDevelopmentEnv: nodeEnvIsDevelopment,
+  })}
       ${renderModuleScripts({
     clientInitialState,
     moduleMap: clientModuleMapCache[bundle],
     isDevelopmentEnv: nodeEnvIsDevelopment,
     bundle,
   })}
-      <script src="${bundlePrefixForBrowser}/app.js" integrity="${integrityManifest[isLegacy ? 'legacy/app.js' : 'app.js']}" crossorigin="anonymous"></script>
+      <script src="${bundlePrefixForBrowser}/app.js" integrity="${
+  integrityManifest[isLegacy ? 'legacy/app.js' : 'app.js']
+}" crossorigin="anonymous"></script>
       ${(script && script.toString()) || ''}
-      `}
+      `
+}
     </body>
   `;
 }
