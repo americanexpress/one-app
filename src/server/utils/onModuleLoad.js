@@ -17,6 +17,7 @@
 import semver from 'semver';
 import { Set as ImmutableSet } from 'immutable';
 import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
+import { validateExternal, addRequiredExternal } from 'holocron';
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from './stateConfig';
 import { setCorsOrigins } from '../plugins/conditionallyAllowCors';
 import readJsonFile from './readJsonFile';
@@ -28,7 +29,6 @@ import setupDnsCache from './setupDnsCache';
 import { configurePWA } from '../pwa';
 import { validatePWAConfig } from './validation';
 import { setErrorPage } from '../plugins/reactHtml/staticErrorPage';
-
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
 const appVersion = buildVersion.slice(0, -9);
@@ -41,6 +41,8 @@ const registerModuleUsingExternals = (moduleName) => {
 const clearModulesUsingExternals = () => {
   modulesUsingExternals = modulesUsingExternals.clear();
 };
+
+export const CONFIGURATION_KEY = 'appConfig';
 
 export const getModulesUsingExternals = () => modulesUsingExternals.toJS();
 
@@ -63,7 +65,71 @@ function validateConfig(configValidators, config) {
     });
 }
 
-export const CONFIGURATION_KEY = 'appConfig';
+function getRootModuleProvidedExternals() {
+  // getTenantRootModule is only added when a root module provides an external
+  const RootModule = global.getTenantRootModule && global.getTenantRootModule();
+  return (RootModule && RootModule[CONFIGURATION_KEY].providedExternals) || {};
+}
+
+function validateRequiredExternals(requiredExternals, moduleName) {
+  const messages = [];
+  const rootProvidedExternals = getRootModuleProvidedExternals();
+  let moduleCanBeSafelyLoaded = true;
+  const fallbackExternals = [];
+
+  Object.keys(requiredExternals).forEach((externalName) => {
+    const providedExternal = rootProvidedExternals[externalName];
+    const requiredExternal = requiredExternals[externalName];
+    // account for older requiredExternals api
+    const semanticRange = requiredExternal.semanticRange || requiredExternal;
+    const { version, filename, integrity } = requiredExternal;
+    const fallbackExternalAvailable = filename && version;
+    let failedValidationMessage;
+
+    if (!providedExternal) {
+      failedValidationMessage = `External '${externalName}' is required by ${moduleName}, but is not provided by the root module`;
+    } else if (
+      !validateExternal({
+        providedVersion: providedExternal.version,
+        requestedRange: semanticRange,
+      })
+    ) {
+      failedValidationMessage = `${externalName}@${semanticRange} is required by ${moduleName}, but the root module provides ${providedExternal.version}`;
+    }
+
+    if (failedValidationMessage) {
+      messages.push(failedValidationMessage);
+
+      const fallbackBlockedByRootModule = !!providedExternal && !providedExternal.fallbackEnabled;
+
+      if (fallbackBlockedByRootModule || !fallbackExternalAvailable) {
+        moduleCanBeSafelyLoaded = false;
+      }
+
+      if (fallbackExternalAvailable) {
+        fallbackExternals.push({
+          moduleName,
+          externalName,
+          version,
+          filename,
+          semanticRange,
+          integrity,
+        });
+      }
+    }
+  });
+
+  if (messages.length > 0) {
+    if (moduleCanBeSafelyLoaded || (process.env.ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS === 'true')) {
+      console.warn(messages.join('\n'));
+    } else {
+      throw new Error(messages.join('\n'));
+    }
+    fallbackExternals.forEach((external) => {
+      addRequiredExternal(external);
+    });
+  }
+}
 
 export function validateCspIsPresent(csp) {
   if (!csp && process.env.ONE_DANGEROUSLY_DISABLE_CSP !== 'true') {
@@ -145,28 +211,7 @@ export default function onModuleLoad({
   }
 
   if (requiredExternals) {
-    const messages = [];
-    const RootModule = global.getTenantRootModule();
-
-    Object.entries(requiredExternals).forEach(([externalName, requestedExternalVersion]) => {
-      const providedExternal = RootModule[CONFIGURATION_KEY].providedExternals[externalName];
-
-      if (!providedExternal) {
-        messages.push(`External '${externalName}' is required by ${moduleName}, but is not provided by the root module`);
-      } else if (!semver.satisfies(providedExternal.version, requestedExternalVersion)) {
-        const failedExternalMessage = `${externalName}@${requestedExternalVersion} is required by ${moduleName}, but the root module provides ${providedExternal.version}`;
-        if (process.env.ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS) {
-          console.warn(failedExternalMessage);
-        } else {
-          messages.push(failedExternalMessage);
-        }
-      }
-    });
-
-    if (messages.length > 0) {
-      throw new Error(messages.join('\n'));
-    }
-
+    validateRequiredExternals(requiredExternals, moduleName);
     registerModuleUsingExternals(moduleName);
   }
 

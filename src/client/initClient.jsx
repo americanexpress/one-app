@@ -18,7 +18,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { browserHistory, Router, matchPromise } from '@americanexpress/one-app-router';
-import { setModuleMap } from 'holocron';
+import { setModuleMap, setRequiredExternalsRegistry } from 'holocron';
 
 import {
   initializeClientStore, loadPrerenderScripts, moveHelmetScripts, loadServiceWorker,
@@ -29,6 +29,8 @@ export default async function initClient() {
   try {
     // eslint-disable-next-line no-underscore-dangle
     setModuleMap(global.__CLIENT_HOLOCRON_MODULE_MAP__);
+    // eslint-disable-next-line no-underscore-dangle
+    setRequiredExternalsRegistry(global.__holocron_externals__);
     moveHelmetScripts();
 
     const store = initializeClientStore();

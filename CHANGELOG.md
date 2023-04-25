@@ -2,19 +2,6 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-# [6.4.0](https://github.com/americanexpress/one-app/compare/v6.3.0...v6.4.0) (2023-04-17)
-
-
-### Bug Fixes
-
-* **server:** remove extra nodeFramework key from log entries ([#974](https://github.com/americanexpress/one-app/issues/974)) ([973537c](https://github.com/americanexpress/one-app/commit/973537ce0b2a9ca044b2fa831b3c9707b2db3eb6))
-
-
-### Features
-
-* **pollModuleMap:** holocron provide rejected externals ([#962](https://github.com/americanexpress/one-app/issues/962)) ([dfc8745](https://github.com/americanexpress/one-app/commit/dfc87451896690bbf095d4a9038dbc28fa2c238e))
-
-
 # [6.3.0](https://github.com/americanexpress/one-app/compare/v6.2.1...v6.3.0) (2023-03-22)
 
 
