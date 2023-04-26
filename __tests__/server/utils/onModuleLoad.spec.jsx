@@ -396,7 +396,7 @@ describe('onModuleLoad', () => {
       moduleName: 'module-will-fallback',
     });
     expect(addRequiredExternal).toHaveBeenCalledWith({
-      externalName: 'some-dep',
+      name: 'some-dep',
       filename: 'some-dep.js',
       integrity: '123',
       moduleName: 'module-will-fallback',
@@ -430,7 +430,7 @@ describe('onModuleLoad', () => {
       moduleName: 'module-will-fallback',
     });
     expect(addRequiredExternal).toHaveBeenCalledWith({
-      externalName: 'some-dep',
+      name: 'some-dep',
       filename: 'some-dep.js',
       integrity: '123',
       moduleName: 'module-will-fallback',

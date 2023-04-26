@@ -111,7 +111,7 @@ function validateRequiredExternals(requiredExternals, moduleName) {
       if (fallbackExternalAvailable) {
         fallbackExternals.push({
           moduleName,
-          externalName,
+          name: externalName,
           version,
           filename,
           semanticRange,
