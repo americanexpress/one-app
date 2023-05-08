@@ -130,11 +130,7 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
 
       const finishRenderTimer = startSummaryTimer(
         ssrMetrics.reactRendering,
-        {
-          // strip query params and trailing slash
-          path: /^(.+?)\/?(\?.+)?$/.exec(request.url)[1],
-          renderMethodName: getRenderMethodName(state),
-        }
+        { renderMethodName: getRenderMethodName(state) }
       );
       /* eslint-disable react/jsx-props-no-spreading */
       const { renderedString, helmetInfo } = renderMethod(

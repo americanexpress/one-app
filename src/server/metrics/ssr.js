@@ -23,8 +23,7 @@ const ssrNamespace = createMetricNamespace('ssr');
 createSummary({
   name: ssrNamespace('react_rendering', 'seconds'),
   help: 'time taken by React to render HTML',
-  percentiles: [0.1, 0.5, 0.9, 0.95],
-  labelNames: ['path', 'renderMethodName'],
+  labelNames: ['renderMethodName'],
 });
 
 export default ssrNamespace.getMetricNames();
