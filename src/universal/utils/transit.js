@@ -18,7 +18,8 @@
 // the browser or on the server
 /* eslint-disable global-require */
 
-import transit from 'transit-immutable-js';
+import instance, { handlers } from 'transit-immutable-js';
+import transit from 'transit-js';
 import { serializeError } from 'serialize-error';
 
 const concealOrigin = (href) => href && href.replace(/\/\/[^/]+/g, '//***');
@@ -27,7 +28,6 @@ export function writeError(value) {
   const error = serializeError(value);
   delete error.stack;
   error.message = concealOrigin(error.message);
-
   if (error.response) {
     error.response.url = concealOrigin(error.response.url);
   }
@@ -35,7 +35,7 @@ export function writeError(value) {
   return error;
 }
 
-export default transit.withExtraHandlers([
+const extraHandlers = [
   {
     tag: 'error',
     class: Error,
@@ -57,4 +57,32 @@ export default transit.withExtraHandlers([
       : require('url').parse(value)
     ),
   },
-]);
+];
+
+const modifiedHandlers = handlers.withExtraHandlers(extraHandlers);
+
+const reader = transit.reader('json', {
+  handlers: modifiedHandlers.read,
+  cache: false,
+  // Copied from transit-immutable-js. Without this, Error fails to read.
+  mapBuilder: {
+    init() {
+      return {};
+    },
+    add(m, k, v) {
+      // eslint-disable-next-line no-param-reassign
+      m[k] = v;
+      return m;
+    },
+    finalize(m) {
+      return m;
+    },
+  },
+});
+const writer = transit.writer('json', { handlers: modifiedHandlers.write, cache: false });
+
+export default {
+  ...instance.withExtraHandlers(extraHandlers), // added for test cases
+  toJSON: (data) => writer.write(data),
+  fromJSON: (json) => reader.read(json),
+};
