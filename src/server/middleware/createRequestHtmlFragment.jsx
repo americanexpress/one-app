@@ -43,15 +43,15 @@ const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 export default function createRequestHtmlFragment({ createRoutes }) {
   return async (req, res, next) => {
     try {
-      req.tracer.serverStartTimer({ key: 'createRoutes' });
+      req.tracer.startServerPhaseTimer('3');
 
       const { store } = req;
       const { dispatch } = store;
       const routes = createRoutes(store);
 
-      req.tracer.serverEndTimer({ key: 'createRoutes' });
+      req.tracer.endServerPhaseTimer('3');
 
-      req.tracer.serverStartTimer({ key: 'checkRoutes' });
+      req.tracer.startServerPhaseTimer('4');
       const { redirectLocation, renderProps } = await matchPromise({
         routes,
         location: req.url,
@@ -72,9 +72,9 @@ export default function createRequestHtmlFragment({ createRoutes }) {
         throw new Error('unable to match routes');
       }
 
-      req.tracer.serverEndTimer({ key: 'checkRoutes' });
+      req.tracer.endServerPhaseTimer('4');
 
-      req.tracer.serverStartTimer({ key: 'buildRenderProps' });
+      req.tracer.startServerPhaseTimer('5');
       const { httpStatus } = renderProps.routes.slice(-1)[0];
       if (httpStatus) {
         res.status(httpStatus);
@@ -98,9 +98,9 @@ export default function createRequestHtmlFragment({ createRoutes }) {
         }));
 
       const state = store.getState();
-      req.tracer.serverEndTimer({ key: 'buildRenderProps' });
+      req.tracer.endServerPhaseTimer('5');
 
-      req.tracer.serverStartTimer({ key: 'loadModuleData' });
+      req.tracer.startServerPhaseTimer('6');
       if (getRenderMethodName(state) === 'renderForStaticMarkup') {
         await dispatch(composeModules(routeModules));
       } else {
@@ -120,8 +120,8 @@ export default function createRequestHtmlFragment({ createRoutes }) {
           return next();
         }
       }
-      req.tracer.serverEndTimer({ key: 'loadModuleData', message: 'Load Module Data' });
-      req.tracer.serverStartTimer({ key: 'renderToString' });
+      req.tracer.endServerPhaseTimer('6');
+      req.tracer.startServerPhaseTimer('7');
       const renderMethod = getRenderMethodName(state) === 'renderForStaticMarkup'
         ? renderForStaticMarkup
         : renderForString;
@@ -132,12 +132,13 @@ export default function createRequestHtmlFragment({ createRoutes }) {
           <RouterContext {...renderProps} />
         </Provider>
       );
-      req.tracer.serverEndTimer({ key: 'renderToString', message: 'Render To String' });
       /* eslint-ensable react/jsx-props-no-spreading */
       req.appHtml = renderedString;
       req.helmetInfo = helmetInfo;
+      req.tracer.endServerPhaseTimer('7');
     } catch (err) {
       console.error(util.format('error creating request HTML fragment for %s', req.url), err);
+      req.tracer.endServerPhaseTimer('7');
     }
 
     return next();

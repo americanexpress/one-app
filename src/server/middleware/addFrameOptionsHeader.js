@@ -18,7 +18,6 @@ import matcher from 'matcher';
 import { getCSP } from './csp';
 
 export default function addFrameOptionsHeader(req, res, next) {
-  req.tracer.serverStartTimer({ key: 'addFrameOptionsHeader' });
   const referer = req.get('Referer');
 
   const frameAncestorDomains = getCSP()['frame-ancestors'];
@@ -29,7 +28,5 @@ export default function addFrameOptionsHeader(req, res, next) {
   if (matchedDomain) {
     res.set('X-Frame-Options', `ALLOW-FROM ${referer}`);
   }
-  req.tracer.serverEndTimer({ key: 'addFrameOptionsHeader' });
-
   next();
 }

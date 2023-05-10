@@ -39,7 +39,7 @@ export default function createRequestStore(
         config: serverConfig,
       });
 
-      const fetchClient = enhanceFetchWithTracer(req.tracer, createSsrFetch({
+      const fetchClient = enhanceFetchWithTracer(req, createSsrFetch({
         req,
         res,
       })(fetch));

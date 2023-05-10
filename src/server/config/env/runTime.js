@@ -237,6 +237,22 @@ const runTime = [
       }
     },
   },
+  // Allow opt out of tracing
+  {
+    name: 'ONE_NO_SERVER_TRACING',
+    defaultValue: 'false',
+    normalize: (input) => {
+      if (input.toLowerCase() === 'true') {
+        return 'true';
+      }
+      return 'false';
+    },
+    validate: (input) => {
+      if (input !== 'true' && input !== 'false') {
+        throw new Error(`Expected "${input}" to be "true" or "false"`);
+      }
+    },
+  },
 ];
 runTime.forEach(preprocessEnvVar);
 export { ip };

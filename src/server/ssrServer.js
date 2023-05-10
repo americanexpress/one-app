@@ -84,14 +84,14 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
   app.get(
     '*',
     initializeTracer,
-    traceMiddleware(addFrameOptionsHeader),
-    traceMiddleware(createRequestStore(oneApp)),
+    traceMiddleware(addFrameOptionsHeader, '1'),
+    traceMiddleware(createRequestStore(oneApp), '2'),
     // createRequestHtmlFragment traces itself
     createRequestHtmlFragment(oneApp),
-    traceMiddleware(conditionallyAllowCors),
-    traceMiddleware(checkStateForRedirect),
-    traceMiddleware(checkStateForStatusCode),
-    traceMiddleware(sendHtml),
+    traceMiddleware(conditionallyAllowCors, '8'),
+    traceMiddleware(checkStateForRedirect, '9'),
+    traceMiddleware(checkStateForStatusCode, '10'),
+    traceMiddleware(sendHtml, '11'),
     completeTracer
   );
 

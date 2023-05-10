@@ -14,165 +14,184 @@
  * permissions and limitations under the License.
  */
 
+// eslint-disable-next-line max-classes-per-file -- The NoOpTracer is a close varient to the Tracer and so is ok in this file
 class Tracer {
+  #serverPhaseTimers;
+
+  #fetchTimers;
+
+  #requestStartArbitraryTimeNs;
+
+  #requestStartTimeMs;
+
+  #requestEndTimeNs;
+
+  #fetchCount;
+
   constructor() {
-    this.timerRecords = {};
-    this.fetchRecords = {};
-    this.timers = {};
-    this.requestStartTimeNs = process.hrtime.bigint();
-    this.requestEndTimeNs = null;
-    // keep track of fetch count so duplicated calls can be traced
-    this.fetchCount = 0;
+    this.#serverPhaseTimers = {};
+    this.#fetchTimers = {};
+    this.#requestStartArbitraryTimeNs = process.hrtime.bigint();
+    this.#requestStartTimeMs = Date.now();
+    this.#requestEndTimeNs = null;
+
+    // The fetch count helps the tracing of fetches by enumerating the keys.
+    // This ensures if the server does make duplicate calls, both calls appear in the tracer
+    this.#fetchCount = 0;
   }
 
-  completeTrace = () => {
-    this.requestEndTimeNs = process.hrtime.bigint();
+  completeTraceAndLog = () => {
+    this.#requestEndTimeNs = process.hrtime.bigint();
+
+    console.log(`Trace: ${JSON.stringify(this.#formatTrace())} `);
   }
 
-  // start a timer. Timers should only be used for tracing things that block the main thread
-  // There should only be one timer running at once.
-  serverStartTimer = ({ key }) => {
-    this.timers[key] = process.hrtime.bigint();
+  // Start a timer for a server phase
+  // There should only be server phase timer running at once
+  /* The server phases are as follows
+    * "1": addFrameOptionsHeader
+    * "2": createRequestStoreMiddleware
+    * "3": createRequestHtmlFragment -> createRoutes
+    * "4": createRequestHtmlFragment -> checkRoutes
+    * "5": createRequestHtmlFragment -> buildRenderProps
+    * "6": createRequestHtmlFragment -> loadModuleData
+    * "7": createRequestHtmlFragment -> renderToString
+    * "8": conditionallyAllowCors
+    * "9": checkStateForRedirect
+    * "10": checkStateForStatusCode
+    * "11": sendHtml
+   */
+  startServerPhaseTimer = (serverPhasekey) => {
+    this.#serverPhaseTimers[serverPhasekey] = { startTimeNs: process.hrtime.bigint() };
   }
 
-  // end a timer and create a record out of it
-  serverEndTimer = ({ key }) => {
-    const timeNs = process.hrtime.bigint();
-    this.timerRecords[key] = {
-      timerStartNs: this.timers[key],
-      timerEndNs: timeNs,
-    };
+  // End a timer for a server phase
+  endServerPhaseTimer = (serverPhasekey) => {
+    this.#serverPhaseTimers[serverPhasekey].endTimeNs = process.hrtime.bigint();
   }
 
+  // Start a timer for a fetch
   // Fetch timers should be wrapped closely around calls to fetch (use enhanceFetchWithTracer)
-  // Since fetch's are asyncronous there can be more than one fetch timer running at once.
-  serverStartFetchTimer = this.serverStartTimer;
-
-  // end a fetch and create a record out of it
-  serverEndFetchTimer = ({ key }) => {
-    const timeNs = process.hrtime.bigint();
-    this.fetchRecords[key] = {
-      timerStartNs: this.timers[key],
-      timerEndNs: timeNs,
-    };
+  // Since fetch's are asyncronous there can be more than one fetch timer running at once
+  startFetchTimer = (key) => {
+    this.#fetchTimers[key] = { startTimeNs: process.hrtime.bigint() };
   }
 
-  // store the error for later
-  serverErrorFetchTimer = ({ key, error }) => {
-    this.serverEndFetchTimer({ key });
-    this.fetchRecords[key].errorStack = error.stack;
-    this.fetchRecords[key].errorMessage = error.message;
+  // End a timer for a fetch.
+  endFetchTimer = (key) => {
+    this.#fetchTimers[key].endTimeNs = process.hrtime.bigint();
   }
 
-  // Add some more useful fields to the records
-  buildSynopsys = (record) => {
-    const synopsys = {};
+  // End a timer for a fetch with an error
+  endFetchTimerWithError = (key, error) => {
+    this.endFetchTimer(key);
+    this.fetchRecords[key].error = error;
+  }
 
-    synopsys.timerDurationMs = Number((record.timerEndNs - record.timerStartNs) / 1000000n);
-    synopsys.timerStartMs = Number(record.timerStartNs / 1000000n);
-    synopsys.timerEndMs = Number(record.timerEndNs / 1000000n);
-    if (record.errorStack) {
-      synopsys.error = {
-        stack: record.errorStack,
-        message: record.errorMessage,
-      };
+  // increment the fetch count
+  getAndIncrementFetchCount = () => {
+    const previousCount = this.#fetchCount;
+    this.#fetchCount += 1;
+    return previousCount;
+  }
+
+  #nsToMs = (timeNs) => Number(timeNs / 1000000n);
+
+  // Populate a timer record given a timer
+  #buildRecord = (timer) => {
+    const record = {};
+    record.s = this.#nsToMs(timer.startTimeNs - this.#requestStartArbitraryTimeNs);
+    if (timer.endTimeNs) {
+      record.d = this.#nsToMs(timer.endTimeNs - timer.startTimeNs);
     }
-    return synopsys;
+    if (timer.error) {
+      record.em = timer.error.message;
+      record.es = timer.error.stack;
+    }
+    return record;
   }
 
-  // collect all trace information into a single object for logging
-  formatTrace = () => {
-    const timersSynopsys = {};
-    const fetchSynopsys = {};
-    const openTimers = {};
+  // Build the trace object
+  #formatTrace = () => {
+    const traceObject = {};
+    traceObject.t = this.#requestStartTimeMs;
+    traceObject.d = this.#nsToMs(this.#requestEndTimeNs - this.#requestStartArbitraryTimeNs);
 
-    const processedKeys = [];
-    Object.keys(this.timerRecords).forEach((recordKey) => {
-      timersSynopsys[recordKey] = this.buildSynopsys(this.timerRecords[recordKey]);
-      processedKeys.push(recordKey);
-    });
-    Object.keys(this.fetchRecords).forEach((recordKey) => {
-      fetchSynopsys[recordKey] = this.buildSynopsys(this.fetchRecords[recordKey]);
-      processedKeys.push(recordKey);
-    });
-    Object.keys(this.timers).forEach((timerKey) => {
-      if (!processedKeys.includes(timerKey)) {
-        const synopsys = {};
-
-        // open timers get a fake duration of 10ms
-        synopsys.timerDurationMs = 10;
-        synopsys.timerStartMs = Number(this.timers[timerKey] / 1000000n);
-        synopsys.timerEndMs = synopsys.timerStartMs + 10;
-        openTimers[timerKey] = synopsys;
-      }
+    Object.keys(this.#serverPhaseTimers).forEach((serverPhaseKey) => {
+      traceObject[serverPhaseKey] = this.#buildRecord(this.#serverPhaseTimers[serverPhaseKey]);
     });
 
-    const totalTimersMs = Object.values(timersSynopsys).reduce(
-      (acc, timerSynopsys) => acc + timerSynopsys.timerDurationMs, 0
-    );
+    // don't attack empty fetch blocks
+    const fetchTimerKeys = Object.keys(this.#fetchTimers);
+    if (fetchTimerKeys.length > 0) {
+      traceObject.f = {};
+      fetchTimerKeys.forEach((fetchKey) => {
+        traceObject.f[fetchKey] = this.#buildRecord(this.#fetchTimers[fetchKey]);
+      });
+    }
 
-    const totalDurationMs = Number((this.requestEndTimeNs - this.requestStartTimeNs) / 1000000n);
-
-    const serverDurationMs = totalDurationMs - totalTimersMs;
-
-    const sortedFetchSynopsys = {};
-
-    const sortedFetchKeys = Object.keys(fetchSynopsys).sort(
-      (aKey, bKey) => fetchSynopsys[bKey].timerDurationMs - fetchSynopsys[aKey].timerDurationMs
-    );
-
-    sortedFetchKeys.forEach((key) => {
-      sortedFetchSynopsys[key] = fetchSynopsys[key];
-    });
-
-    return {
-      totalDurationMs,
-      serverDurationMs,
-      timersSynopsys,
-      fetchSynopsys: sortedFetchSynopsys,
-      openTimers,
-    };
+    return traceObject;
   }
 }
 
+// The NoOpTracer will be installed when the ONE_NO_SERVER_TRACING env var is set to true.
+// This allows the majority of the app to forgo constant checks to ONE_NO_SERVER_TRACING.
+// Instead, all parts of the system should 'trace' like normal
+class NoOpTracer {
+  completeTraceAndLog = () => {}
+
+  startServerPhaseTimer = () => {}
+
+  endServerPhaseTimer = () => {}
+
+  startFetchTimer = () => {}
+
+  endFetchTimer = () => {}
+
+  endFetchTimerWithError = () => {}
+
+  getAndIncrementFetchCount = () => {}
+}
+
 // Express middleware to create a new trace and attach it to the request object
+// This should be the very first middleware in a request you wish to trace
 export const initializeTracer = (req, res, next) => {
-  req.tracer = new Tracer();
+  // install the NoOpTracer, so nothing else needs to check ONE_NO_SERVER_TRACING
+  if (process.env.ONE_NO_SERVER_TRACING === 'true') {
+    req.tracer = new NoOpTracer();
+  } else {
+    req.tracer = new Tracer();
+  }
 
   next();
 };
 
 // Express middleware complete a trace and log it
+// This should be the very last middleware in a request you wish to trace
 export const completeTracer = (req, res, next) => {
-  req.tracer.completeTrace();
-
-  console.log('Trace:');
-  console.log(JSON.stringify(req.tracer.formatTrace()));
-
+  req.tracer.completeTraceAndLog();
   next();
 };
 
-// fetch enhancer to add fetch tracing around api calls
-export const enhanceFetchWithTracer = (tracer, fetch) => async (...params) => {
-  const localFetchCount = tracer.fetchCount;
-  tracer.fetchCount += 1;
-  tracer.serverStartFetchTimer({ key: `${localFetchCount} ${params[0]}` });
-  try {
-    const response = await fetch(...params);
-    tracer.serverEndFetchTimer({ key: `${localFetchCount} ${params[0]}` });
-    return response;
-  } catch (error) {
-    tracer.serverErrorFetchTimer({ key: `${localFetchCount} ${params[0]}`, error });
-    console.error(error);
-    throw error;
-  }
-};
-
 // middleware enhancer to trace how long the middleware took
-export const traceMiddleware = (middleware) => async (req, res, next) => {
-  req.tracer.serverStartTimer({ key: middleware.name });
+export const traceMiddleware = (middleware, serverPhaseKey) => async (req, res, next) => {
+  req.tracer.startServerPhaseTimer(serverPhaseKey);
   return middleware(req, res, () => {
-    req.tracer.serverEndTimer({ key: middleware.name });
+    req.tracer.endServerPhaseTimer(serverPhaseKey);
     next();
   });
+};
+
+// fetch enhancer to add fetch tracing around api calls
+export const enhanceFetchWithTracer = (req, fetch) => async (...params) => {
+  const localFetchCount = req.tracer.getAndIncrementFetchCount();
+  req.tracer.startFetchTimer(`${localFetchCount} ${params[0]}`);
+  try {
+    const response = await fetch(...params);
+    req.tracer.endFetchTimer(`${localFetchCount} ${params[0]}`);
+    return response;
+  } catch (error) {
+    req.tracer.endFetchTimerWithError(`${localFetchCount} ${params[0]}`, error);
+    throw error;
+  }
 };
