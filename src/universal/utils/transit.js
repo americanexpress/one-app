@@ -64,13 +64,14 @@ const modifiedHandlers = handlers.withExtraHandlers(extraHandlers);
 const reader = transit.reader('json', {
   handlers: modifiedHandlers.read,
   cache: false,
-  // Copied from transit-immutable-js. Without this, Error fails to read.
+  // Taken from transit-immutable-js. Without this, Error fails to read.
+  // https://github.com/glenjamin/transit-immutable-js/blob/cb0ac0799d730080ea2403dba4061cf9c9d7b9bd/index.js#L6
   mapBuilder: {
     init() {
       return {};
     },
     add(m, k, v) {
-      // eslint-disable-next-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign -- Keeping what is done by transit-immutable-js
       m[k] = v;
       return m;
     },
