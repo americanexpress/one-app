@@ -22,8 +22,6 @@ import enData from 'lean-intl/locale-data/json/en.json';
 
 import './init';
 // Allow env config to run before importing holocron. (x2)
-// eslint-disable-next-line import/no-extraneous-dependencies
-import oneAppDevProxy from '@americanexpress/one-app-dev-proxy';
 import ssrServer from './ssrServer';
 import metricsServer from './metricsServer';
 import { addServer, shutdown } from './shutdown';
@@ -116,8 +114,9 @@ async function devHolocronCDNStart() {
 
 async function oneAppDevProxyStart() {
   const { argv } = require('yargs');
-  // eslint-disable-next-line import/no-extraneous-dependencies
   const oneAppDevProxyPort = process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT;
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy').default;
   const instance = oneAppDevProxy({
     useMiddleware: argv.m,
     pathToMiddleware: path.join(__dirname, '../../.dev/middleware'),
