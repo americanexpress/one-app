@@ -1,7 +1,8 @@
 {
   "extends": "amex",
   "rules": {
-    "import/no-unresolved": "warn",
-    "react/no-unknown-property": "warn"
+    "import/no-unresolved": "off",
+    "react/no-unknown-property": "off",
+    "you-dont-need-lodash-underscore/get": "off"
   }
 }
