@@ -66,7 +66,6 @@ function getBaseEntry(level) {
     device,
     level: nodeLevelToSchemaLevel[level],
     timestamp: new Date().toISOString(),
-    nodeFramework: 'fastify',
   };
 }
 
