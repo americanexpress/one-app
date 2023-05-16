@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "5.16.0-experimental-ssr-render-tracer-001",
+  "version": "5.16.0-experimental-ssr-render-tracer-002",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
@@ -98,7 +98,7 @@
     "cross-fetch": "^3.0.6",
     "express": "^4.17.1",
     "helmet": "^3.22.0",
-    "holocron": "file:../holocron/packages/holocron/holocron-1.6.0.tgz",
+    "holocron": "file:experimental-node-modules/holocron-1.6.0.tgz",
     "holocron-module-route": "^1.2.1",
     "if-env": "^1.0.4",
     "immutable": "^4.0.0",
