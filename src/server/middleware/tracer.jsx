@@ -15,10 +15,15 @@
  */
 
 // eslint-disable-next-line max-classes-per-file -- The NoOpTracer is a close varient to the Tracer and so is ok in this file
+import React, { useCallback } from 'react';
+import PropTypes from 'prop-types';
+
 class Tracer {
   #serverPhaseTimers;
 
   #fetchTimers;
+
+  #renderTimers;
 
   #requestStartArbitraryTimeNs;
 
@@ -28,9 +33,12 @@ class Tracer {
 
   #fetchCount;
 
+  #renderCount;
+
   constructor() {
     this.#serverPhaseTimers = {};
     this.#fetchTimers = {};
+    this.#renderTimers = {};
     this.#requestStartArbitraryTimeNs = process.hrtime.bigint();
     this.#requestStartTimeMs = Date.now();
     this.#requestEndTimeNs = null;
@@ -38,6 +46,8 @@ class Tracer {
     // The fetch count helps the tracing of fetches by enumerating the keys.
     // This ensures if the server does make duplicate calls, both calls appear in the tracer
     this.#fetchCount = 0;
+
+    this.#renderCount = 0;
   }
 
   completeTraceAndLog = () => {
@@ -97,12 +107,28 @@ class Tracer {
 
   #nsToMs = (timeNs) => Number(timeNs / 1000000n);
 
+  #nsToUs = (timeNs) => Number(timeNs / 1000n);
+
   // Populate a timer record given a timer
   #buildRecord = (timer) => {
     const record = {};
     record.s = this.#nsToMs(timer.startTimeNs - this.#requestStartArbitraryTimeNs);
     if (timer.endTimeNs) {
       record.d = this.#nsToMs(timer.endTimeNs - timer.startTimeNs);
+    }
+    if (timer.error) {
+      record.em = timer.error.message;
+      record.es = timer.error.stack;
+    }
+    return record;
+  }
+
+  // Populate a timer record given a timer
+  #buildRecordUs = (timer) => {
+    const record = {};
+    record.sU = this.#nsToUs(timer.startTimeNs - this.#requestStartArbitraryTimeNs);
+    if (timer.endTimeNs) {
+      record.dU = this.#nsToUs(timer.endTimeNs - timer.startTimeNs);
     }
     if (timer.error) {
       record.em = timer.error.message;
@@ -121,6 +147,14 @@ class Tracer {
       traceObject[serverPhaseKey] = this.#buildRecord(this.#serverPhaseTimers[serverPhaseKey]);
     });
 
+    const renderTimerKeys = Object.keys(this.#renderTimers);
+    if (renderTimerKeys.length > 0) {
+      traceObject.r = {};
+      renderTimerKeys.forEach((id) => {
+        traceObject.r[id] = this.#buildRecordUs(this.#renderTimers[id]);
+      });
+    }
+
     // don't attack empty fetch blocks
     const fetchTimerKeys = Object.keys(this.#fetchTimers);
     if (fetchTimerKeys.length > 0) {
@@ -132,6 +166,55 @@ class Tracer {
 
     return traceObject;
   }
+
+  #startRenderTimer = (renderCount, moduleName, componentName) => {
+    this.#renderTimers[`${renderCount} ${moduleName} ${componentName}`] = { startTimeNs: process.hrtime.bigint() };
+  }
+
+  // End a timer for a server phase
+  #endRenderTimer = (renderCount, moduleName, componentName) => {
+    this.#renderTimers[`${renderCount} ${moduleName} ${componentName}`].endTimeNs = process.hrtime.bigint();
+  }
+
+  #makeHolocronPerformanceToolkitTracingComponent = () => {
+    const startRenderTimer = this.#startRenderTimer;
+    const endRenderTimer = this.#endRenderTimer;
+    const useRenderCount = () => {
+      this.#renderCount += 1;
+      return this.#renderCount;
+    };
+
+    const OneAppTraceRender = ({ children, moduleName, componentName }) => {
+      const renderCount = useRenderCount();
+      const StartTraceComponent = useCallback(() => {
+        startRenderTimer(renderCount, moduleName, componentName);
+        return false;
+      }, []);
+      const EndTraceComponent = useCallback(() => {
+        endRenderTimer(renderCount, moduleName, componentName);
+        return false;
+      }, []);
+      return (
+        <>
+          <StartTraceComponent />
+          {children}
+          <EndTraceComponent />
+        </>
+      );
+    };
+
+    OneAppTraceRender.propTypes = {
+      children: PropTypes.node.isRequired,
+      moduleName: PropTypes.string.isRequired,
+      componentName: PropTypes.string.isRequired,
+    };
+
+    return OneAppTraceRender;
+  }
+
+  makeHolocronPerformanceToolkit = () => ({
+    TraceChildRender: this.#makeHolocronPerformanceToolkitTracingComponent(),
+  })
 }
 
 // The NoOpTracer will be installed when the ONE_NO_SERVER_TRACING env var is set to true.

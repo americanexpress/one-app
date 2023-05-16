@@ -44,6 +44,8 @@ export default function createRequestStore(
         res,
       })(fetch));
 
+      const { tracer } = req;
+
       const enhancer = createEnhancer();
       const localsForBuildInitialState = {
         req: safeRequest(req, { useBodyForBuildingTheInitialState }),
@@ -57,6 +59,7 @@ export default function createRequestStore(
         enhancer,
         localsForBuildInitialState,
         extraThunkArguments: { fetchClient },
+        performanceToolkit: tracer.makeHolocronPerformanceToolkit(),
       });
 
       // TODO: namespace?
