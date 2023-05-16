@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.18.0](https://github.com/americanexpress/one-app/compare/v5.17.0...v5.18.0) (2023-05-16)
+
+
+### Bug Fixes
+
+* **memoryLeak:** disable cache for transitjs ([#992](https://github.com/americanexpress/one-app/issues/992)) ([7eed2bc](https://github.com/americanexpress/one-app/commit/7eed2bca654ddb60696167af5771035f5f1ef584))
+
+
+### Features
+
+* **pollModuleMap:** holocron provide rejected externals ([#965](https://github.com/americanexpress/one-app/issues/965)) ([3ee6569](https://github.com/americanexpress/one-app/commit/3ee65695edebf61a77622ce4502335bc8c8aae62))
+
+
 # [5.17.0](https://github.com/americanexpress/one-app/compare/v5.16.0...v5.17.0) (2023-03-22)
 
 
