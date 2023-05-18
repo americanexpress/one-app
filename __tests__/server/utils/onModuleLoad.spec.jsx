@@ -407,6 +407,46 @@ describe('onModuleLoad', () => {
     });
   });
 
+  it('only includes fallbacks for externals which fail validation', () => {
+    RootModule[CONFIGURATION_KEY] = {
+      enableMissingExternalFallbacks: true,
+      providedExternals: {
+        'some-dep': { version: '1.3.0', module: () => 0 },
+      },
+    };
+
+    const configuration = {
+      requiredExternals: {
+        'some-dep': {
+          version: '1.2.3',
+          semanticRange: '^1.2.0',
+          integrity: '123',
+          filename: 'some-dep.js',
+        },
+        'missing-dep': {
+          version: '1.2.3',
+          semanticRange: '^1.2.0',
+          integrity: '321',
+          filename: 'missing-dep.js',
+        },
+      },
+    };
+    onModuleLoad({
+      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.12' } },
+      moduleName: 'module-will-fallback',
+    });
+
+    expect(addRequiredExternal).toHaveBeenCalledTimes(1);
+    expect(addRequiredExternal).toHaveBeenCalledWith({
+      name: 'missing-dep',
+      filename: 'missing-dep.js',
+      integrity: '321',
+      moduleName: 'module-will-fallback',
+      semanticRange: '^1.2.0',
+      version: '1.2.3',
+    });
+  });
+
   it('does not add fallback when root module does not provide external or enable fallbacks', () => {
     delete global.getTenantRootModule;
 
