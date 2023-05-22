@@ -18,6 +18,8 @@ stats.json
 bundle.integrity.manifest.json
 *.tgz
 
+!holocron-v1.7.0.tgz
+
 # test
 test-results
 .jest-cache
