@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.4.1](https://github.com/americanexpress/one-app/compare/v6.4.0...v6.4.1) (2023-05-17)
+
+
+### Bug Fixes
+
+* **memoryLeak:** disable cache for transitjs ([#993](https://github.com/americanexpress/one-app/issues/993)) ([bb83c07](https://github.com/americanexpress/one-app/commit/bb83c07ed51be163cd9b9e52d22f9fae0a61770d))
+
+
 # [6.4.0](https://github.com/americanexpress/one-app/compare/v6.3.0...v6.4.0) (2023-04-17)
 
 
