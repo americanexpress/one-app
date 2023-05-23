@@ -51,13 +51,14 @@ describe('server index', () => {
       'frank-lloyd-root',
     ];
 
-    jest.doMock('@americanexpress/one-app-dev-proxy', () => jest.fn(() => ({
-      listen: jest.fn((port, cb) => {
-        setTimeout(() => (oneAppDevProxyError ? cb(new Error('test error')) : cb(null, { port })));
-        return { close: 'one-app-dev-proxy' };
-      }),
-    }))
-    );
+    jest.doMock('@americanexpress/one-app-dev-proxy', () => ({
+      default: jest.fn(() => ({
+        listen: jest.fn((port, cb) => {
+          setTimeout(() => (oneAppDevProxyError ? cb(new Error('test error')) : cb(null, { port })));
+          return { close: 'one-app-dev-proxy' };
+        }),
+      })),
+    }));
 
     jest.doMock('holocron', () => ({
       getModule: getModuleImplementation,
@@ -158,7 +159,7 @@ describe('server index', () => {
     it('starts one-app-dev-proxy with config derived from what is passed in CLI args', async () => {
       process.env.NODE_ENV = 'development';
       await load();
-      const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy');
+      const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy').default;
       expect(oneAppDevProxy).toHaveBeenCalledTimes(1);
       expect(oneAppDevProxy.mock.calls[0][0]).toEqual({
         remotes: expect.any(Object),
@@ -181,7 +182,7 @@ describe('server index', () => {
       );
       await load();
       fs.existsSync = origFsExistsSync;
-      const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy');
+      const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy').default;
       expect(oneAppDevProxy).toHaveBeenCalledTimes(1);
       expect(oneAppDevProxy.mock.calls[0][0].remotes).toMatchSnapshot();
     });
@@ -200,7 +201,7 @@ describe('server index', () => {
       );
       await load();
       fs.existsSync = origFsExistsSync;
-      const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy');
+      const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy').default;
       expect(oneAppDevProxy).toHaveBeenCalledTimes(1);
       expect(oneAppDevProxy.mock.calls[0][0].remotes).toEqual({});
     });
@@ -317,7 +318,7 @@ describe('server index', () => {
 
     it('does not start one-app-dev-proxy', async () => {
       await load();
-      const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy');
+      const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy').default;
       expect(oneAppDevProxy).not.toHaveBeenCalled();
     });
   });
