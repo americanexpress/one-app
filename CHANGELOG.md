@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.4.2](https://github.com/americanexpress/one-app/compare/v6.4.1...v6.4.2) (2023-05-24)
+
+
+### Bug Fixes
+
+* **memLeak:** update one-app-ducks to fix memory leak ([#1008](https://github.com/americanexpress/one-app/issues/1008)) ([f428a77](https://github.com/americanexpress/one-app/commit/f428a779e8936dbcaa646bdcb86d1472e5d1150c))
+
+
 ## [6.4.1](https://github.com/americanexpress/one-app/compare/v6.4.0...v6.4.1) (2023-05-17)
 
 
