@@ -28,7 +28,6 @@ import { addServer, shutdown } from './shutdown';
 import pollModuleMap from './utils/pollModuleMap';
 import loadModules from './utils/loadModules';
 import getHttpsConfig from './utils/getHttpsConfig';
-
 /*    🛠️ UTILITIES 🛠️    */
 
 const getRemotesFromDevEndpointsFile = () => {
@@ -115,9 +114,9 @@ async function devHolocronCDNStart() {
 
 async function oneAppDevProxyStart() {
   const { argv } = require('yargs');
-  // eslint-disable-next-line import/no-extraneous-dependencies
-  const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy');
   const oneAppDevProxyPort = process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT;
+  // eslint-disable-next-line import/no-extraneous-dependencies
+  const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy').default;
   const instance = oneAppDevProxy({
     useMiddleware: argv.m,
     pathToMiddleware: path.join(__dirname, '../../.dev/middleware'),
