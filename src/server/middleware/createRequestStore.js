@@ -23,7 +23,7 @@ import safeRequest from '../utils/safeRequest';
 import { getServerStateConfig, getClientStateConfig } from '../utils/stateConfig';
 import createSsrFetch from '../utils/createSsrFetch';
 import { getClientModuleMapCache } from '../utils/clientModuleMapCache';
-import { enhanceFetchWithTracer } from './tracer';
+import { enhanceFetchWithTracer } from '../utils/tracer';
 
 export default function createRequestStore(
   { reducers },

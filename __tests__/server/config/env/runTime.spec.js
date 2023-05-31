@@ -499,4 +499,30 @@ describe('runTime', () => {
       expect(() => postRequestMaxPayload.validate('20kb')).not.toThrow();
     });
   });
+
+  describe('ONE_ENABLE_SERVER_TRACING', () => {
+    const oneEnableServerTracing = getEnvVarConfig('ONE_ENABLE_SERVER_TRACING');
+    it('should have a default value of "false"', () => {
+      expect(oneEnableServerTracing.defaultValue).toBe('false');
+    });
+
+    it('should normalize the value to be either true or false', () => {
+      expect(oneEnableServerTracing.normalize('True')).toBe('true');
+      expect(oneEnableServerTracing.normalize('TRUE')).toBe('true');
+      expect(oneEnableServerTracing.normalize('true')).toBe('true');
+      expect(oneEnableServerTracing.normalize('FALSE')).toBe('false');
+    });
+
+    it('should pass validation when value is "true" or "false"', () => {
+      expect(() => oneEnableServerTracing.validate('true')).not.toThrow();
+      expect(() => oneEnableServerTracing.validate('false')).not.toThrow();
+    });
+
+    it('should fail validation when value is not "true" or "false"', () => {
+      expect(() => oneEnableServerTracing.validate('bad value')
+      ).toThrowErrorMatchingInlineSnapshot(
+        '"Expected \\"bad value\\" to be \\"true\\" or \\"false\\""'
+      );
+    });
+  });
 });

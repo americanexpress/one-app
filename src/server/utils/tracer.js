@@ -14,8 +14,9 @@
  * permissions and limitations under the License.
  */
 
-// eslint-disable-next-line max-classes-per-file -- The NoOpTracer is a close varient to the Tracer and so is ok in this file
-class Tracer {
+// The NoOpTracer is a close variant to the Tracer and so is ok in this file
+// eslint-disable-next-line max-classes-per-file
+export class Tracer {
   #serverPhaseTimers;
 
   #fetchTimers;
@@ -85,7 +86,7 @@ class Tracer {
   // End a timer for a fetch with an error
   endFetchTimerWithError = (key, error) => {
     this.endFetchTimer(key);
-    this.fetchRecords[key].error = error;
+    this.#fetchTimers[key].error = error;
   }
 
   // increment the fetch count
@@ -134,10 +135,10 @@ class Tracer {
   }
 }
 
-// The NoOpTracer will be installed when the ONE_NO_SERVER_TRACING env var is set to true.
-// This allows the majority of the app to forgo constant checks to ONE_NO_SERVER_TRACING.
+// The NoOpTracer will be installed when the ONE_ENABLE_SERVER_TRACING env var is set to false.
+// This allows the majority of the app to forgo constant checks to ONE_ENABLE_SERVER_TRACING.
 // Instead, all parts of the system should 'trace' like normal
-class NoOpTracer {
+export class NoOpTracer {
   completeTraceAndLog = () => {}
 
   startServerPhaseTimer = () => {}
@@ -156,11 +157,11 @@ class NoOpTracer {
 // Express middleware to create a new trace and attach it to the request object
 // This should be the very first middleware in a request you wish to trace
 export const initializeTracer = (req, res, next) => {
-  // install the NoOpTracer, so nothing else needs to check ONE_NO_SERVER_TRACING
-  if (process.env.ONE_NO_SERVER_TRACING === 'true') {
-    req.tracer = new NoOpTracer();
-  } else {
+  if (process.env.ONE_ENABLE_SERVER_TRACING === 'true' || process.env.NODE_ENV === 'development') {
     req.tracer = new Tracer();
+  } else {
+    // install the NoOpTracer, so nothing else needs to check ONE_ENABLE_SERVER_TRACING
+    req.tracer = new NoOpTracer();
   }
 
   next();

@@ -237,9 +237,8 @@ const runTime = [
       }
     },
   },
-  // Allow opt out of tracing
   {
-    name: 'ONE_NO_SERVER_TRACING',
+    name: 'ONE_ENABLE_SERVER_TRACING',
     defaultValue: 'false',
     normalize: (input) => {
       if (input.toLowerCase() === 'true') {

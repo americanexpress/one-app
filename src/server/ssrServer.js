@@ -50,7 +50,7 @@ import {
   webManifestMiddleware,
   offlineMiddleware,
 } from './middleware/pwa';
-import { completeTracer, initializeTracer, traceMiddleware } from './middleware/tracer';
+import { completeTracer, initializeTracer, traceMiddleware } from './utils/tracer';
 
 export function createApp({ enablePostToModuleRoutes = false } = {}) {
   const app = express();
