@@ -46,9 +46,11 @@ const RootModule = () => ({});
 
 let modules;
 let fetchedModuleMap;
-function setFetchedRootModuleVersion(version) {
+
+// set new version ensuring that updateModuleRegistry will be called.
+function setFetchedModuleVersion(name = 'some-root', version = '1.0.0') {
   modules = {
-    'some-root': {
+    [name]: {
       node: {
         url: `https://example.com/cdn/some-root/${version}/some-root.node.js`,
         integrity: '4y45hr',
@@ -70,7 +72,9 @@ function setFetchedRootModuleVersion(version) {
 describe('loadModules', () => {
   beforeAll(() => {
     getModule.mockImplementation(() => RootModule);
-    updateModuleRegistry.mockImplementation(() => modules);
+    updateModuleRegistry.mockImplementation(() => ({
+      loadedModules: modules,
+    }));
 
     global.fetch = jest.fn(() => Promise.resolve({
       json: () => Promise.resolve(fetchedModuleMap),
@@ -83,25 +87,26 @@ describe('loadModules', () => {
   });
 
   it('updates the holocron module registry', async () => {
-    setFetchedRootModuleVersion('1.1.1');
+    setFetchedModuleVersion('some-root', '1.1.1');
     await loadModules();
     expect(updateModuleRegistry).toHaveBeenCalledWith({
       moduleMap: addBaseUrlToModuleMap(fetchedModuleMap),
       batchModulesToUpdate: require('../../../src/server/utils/batchModulesToUpdate').default,
       getModulesToUpdate: require('../../../src/server/utils/getModulesToUpdate').default,
       onModuleLoad: require('../../../src/server/utils/onModuleLoad').default,
+      listRejectedModules: true,
     });
   });
 
   it('updates the client module map cache', async () => {
-    setFetchedRootModuleVersion('1.1.2');
+    setFetchedModuleVersion('some-root', '1.1.2');
     await loadModules();
     expect(getClientModuleMapCache()).toMatchSnapshot();
   });
 
   it('returns loaded modules', async () => {
-    setFetchedRootModuleVersion('2.0.0');
-    const loadedModules = await loadModules();
+    setFetchedModuleVersion('some-root', '2.0.0');
+    const { loadedModules } = await loadModules();
     expect(loadedModules).toEqual({
       'some-root': {
         browser: {
@@ -121,8 +126,8 @@ describe('loadModules', () => {
   });
 
   it('doesnt update caches when there are no changes', async () => {
-    setFetchedRootModuleVersion('1.1.3');
-    updateModuleRegistry.mockImplementationOnce(() => ({}));
+    setFetchedModuleVersion('some-root', '1.1.3');
+    updateModuleRegistry.mockImplementationOnce(() => ({ loadedModules: {}, rejectedModules: {} }));
     await loadModules();
     expect(getClientModuleMapCache()).toMatchSnapshot();
   });
@@ -131,21 +136,49 @@ describe('loadModules', () => {
     RootModule[CONFIGURATION_KEY] = {
       csp: "default-src 'none';",
     };
-    setFetchedRootModuleVersion('1.1.4');
+    setFetchedModuleVersion('some-root', '1.1.4');
     await loadModules();
     expect(updateCSP).toHaveBeenCalledWith("default-src 'none';");
   });
 
   it('calls updateCSP even when csp is not set', async () => {
-    setFetchedRootModuleVersion('1.1.5');
+    setFetchedModuleVersion('some-root', '1.1.5');
     delete RootModule[CONFIGURATION_KEY].csp;
     await loadModules();
     expect(updateCSP).toHaveBeenCalledWith(undefined);
   });
 
+  it('updates rejected module cache', async () => {
+    setFetchedModuleVersion('rejected-module', '1.0.0');
+    const rejectedModules = {
+      'rejected-module': {
+        node: {
+          url: 'https://example.com/cdn/rejected-module/1.0.0/rejected-module.node.js',
+          integrity: '4y45hr',
+        },
+        browser: {
+          url: 'https://example.com/cdn/rejected-module/1.0.0/rejected-module.browser.js',
+          integrity: 'nggdfhr34',
+        },
+        legacyBrowser: {
+          url: 'https://example.com/cdn/rejected-module/1.0.0/rejected-module.legacy.browser.js',
+          integrity: '7567ee',
+        },
+        reasonForRejection: 'not compatible',
+      },
+    };
+    updateModuleRegistry.mockImplementationOnce(() => ({ rejectedModules }));
+    // first call to populate cache
+    await loadModules();
+    // second call to retrieve from cache
+    const loadedModules = await loadModules();
+    expect(updateModuleRegistry.mock.calls).toHaveLength(1);
+    expect(loadedModules.rejectedModules).toEqual(rejectedModules);
+  });
+
   describe('when root module not loaded', () => {
     beforeAll(() => {
-      updateModuleRegistry.mockImplementation(() => ({
+      const loadedModules = {
         'not-a-root': {
           node: {
             url: 'https://example.com/cdn/not-a-root/2.2.2/not-a-root.node.js',
@@ -160,11 +193,15 @@ describe('loadModules', () => {
             integrity: '7567ee',
           },
         },
+      };
+      updateModuleRegistry.mockImplementation(() => ({
+        loadedModules,
+        rejectedModules: {},
       }));
     });
 
     it('does not attempt to update CSP', async () => {
-      setFetchedRootModuleVersion('1.1.6');
+      setFetchedModuleVersion('not-a-root', '2.2.2');
       await loadModules();
       expect(updateCSP).not.toHaveBeenCalled();
     });
@@ -172,7 +209,7 @@ describe('loadModules', () => {
 
   describe('when module map does not change', () => {
     beforeAll(async () => {
-      setFetchedRootModuleVersion('1.1.1');
+      setFetchedModuleVersion('some-root', '1.1.1');
       await loadModules();
       jest.clearAllMocks();
     });
@@ -181,7 +218,7 @@ describe('loadModules', () => {
       expect(updateModuleRegistry).not.toHaveBeenCalled();
     });
     it('does not return any modules', async () => {
-      const loadedModules = await loadModules();
+      const { loadedModules } = await loadModules();
       expect(loadedModules).toEqual({});
     });
   });
