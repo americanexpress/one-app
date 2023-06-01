@@ -15,7 +15,7 @@
  */
 
 import {
-  NoOpTracer, Tracer, initializeTracer, completeTracer, traceMiddleware,
+  NoOpTracer, Tracer, initializeTracer, completeTracer, traceMiddleware, enhanceFetchWithTracer,
 } from '../../../src/server/utils/tracer';
 
 jest.spyOn(console, 'log');
@@ -298,6 +298,141 @@ describe('the tracer module', () => { // Note hrTime is in nanoseconds,
       const tracedMiddleware = traceMiddleware(middleware, serverKeySymbol);
       await tracedMiddleware({ tracer: new Tracer() }, res, mockedNext);
       expect(mockedNext).toHaveBeenCalled();
+    });
+  });
+
+  describe('enhanceFetchWithTracer fetch higher middleware', () => {
+    const paramsSymbol = Symbol('fetch param symbol');
+    const fetchParams = ['1.url.com.example', paramsSymbol];
+    let fetchPromiseFunctor = null;
+    const fetch = jest.fn(() => new Promise(fetchPromiseFunctor));
+
+    let tracer;
+    let req;
+    let startHrTime;
+    let endHrTime;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      fetchPromiseFunctor = null;
+
+      tracer = new Tracer();
+
+      jest.spyOn(tracer, 'startFetchTimer');
+      tracer.startFetchTimer.mockImplementation(() => {
+        startHrTime = process.hrtime.bigint();
+      });
+      jest.spyOn(tracer, 'endFetchTimer');
+      tracer.endFetchTimer.mockImplementation(() => {
+        endHrTime = process.hrtime.bigint();
+      });
+      jest.spyOn(tracer, 'endFetchTimerWithError');
+      tracer.endFetchTimerWithError.mockImplementation(() => {
+        endHrTime = process.hrtime.bigint();
+      });
+
+      req = { tracer };
+    });
+    it('should start a fetch timer, then await the fetch, then stop a fetch timer on the tracer in the req', async () => {
+      const resolutionSymbol = Symbol('the value returned from fetch');
+
+      fetchPromiseFunctor = (resolve) => {
+        addMockHrTimeMs(56773);
+        resolve(resolutionSymbol);
+      };
+
+      const tracedFetch = enhanceFetchWithTracer(req, fetch);
+      const fetchedResponse = await tracedFetch(...fetchParams);
+
+      // the tracedFetch returns what the passed fetch did untouched
+      expect(fetchedResponse).toBe(resolutionSymbol);
+
+      // This is an odd sort of test.
+      // But here the 'fetch' we are tracing is one that does nothing but
+      // add some time to the timer
+      // Therefore, if the time added is present in endHrTime but not startHrTime,
+      // then that fetch must have run between the calls to
+      // startServerPhaseTimer and endServerPhaseTimer
+      expect(endHrTime - 56773000000n).toBe(startHrTime);
+
+      // Then just make sure all the functions were passed what they need
+      expect(tracer.startFetchTimer).toHaveBeenCalledTimes(1);
+      expect(tracer.startFetchTimer).toHaveBeenCalledWith(`0 ${fetchParams[0]}`);
+
+      expect(tracer.endFetchTimer).toHaveBeenCalledTimes(1);
+      expect(tracer.endFetchTimer).toHaveBeenCalledWith(`0 ${fetchParams[0]}`);
+
+      expect(tracer.endFetchTimerWithError).toHaveBeenCalledTimes(0);
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledWith(...fetchParams);
+    });
+
+    it('should start a fetch timer, then await the fetch, then stop the timer with an error if the fetch threw', async () => {
+      const error = new Error('the error thrown from fetch');
+
+      fetchPromiseFunctor = (resolve, reject) => {
+        addMockHrTimeMs(56773);
+        reject(error);
+      };
+
+      const tracedFetch = enhanceFetchWithTracer(req, fetch);
+      // await tracedFetch(...fetchParams)
+      await expect(() => tracedFetch(...fetchParams)).rejects.toThrow(error);
+
+      // This is an odd sort of test.
+      // But here the 'fetch' we are tracing is one that does nothing but
+      // add some time to the timer
+      // Therefore, if the time added is present in endHrTime but not startHrTime,
+      // then that fetch must have run between the calls to
+      // startServerPhaseTimer and endServerPhaseTimer
+      expect(endHrTime - 56773000000n).toBe(startHrTime);
+
+      // Then just make sure all the functions were passed what they need
+      expect(tracer.startFetchTimer).toHaveBeenCalledTimes(1);
+      expect(tracer.startFetchTimer).toHaveBeenCalledWith(`0 ${fetchParams[0]}`);
+
+      expect(tracer.endFetchTimer).toHaveBeenCalledTimes(0);
+
+      expect(tracer.endFetchTimerWithError).toHaveBeenCalledTimes(1);
+      expect(tracer.endFetchTimerWithError).toHaveBeenCalledWith(`0 ${fetchParams[0]}`, error);
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenCalledWith(...fetchParams);
+    });
+    it('should produce unique keys, by enumeration, for each call even if the url is the same', async () => {
+      fetchPromiseFunctor = (resolve) => {
+        resolve(true);
+      };
+
+      const tracedFetch = enhanceFetchWithTracer(req, fetch);
+      await tracedFetch(...fetchParams);
+      await tracedFetch(...fetchParams);
+
+      const secondApiFetchParams = ['2.url.com.example', paramsSymbol];
+
+      await tracedFetch(...secondApiFetchParams);
+      await tracedFetch(...secondApiFetchParams);
+
+      expect(tracer.startFetchTimer).toHaveBeenCalledTimes(4);
+      expect(tracer.startFetchTimer).toHaveBeenNthCalledWith(1, `0 ${fetchParams[0]}`);
+      expect(tracer.startFetchTimer).toHaveBeenNthCalledWith(2, `1 ${fetchParams[0]}`);
+      expect(tracer.startFetchTimer).toHaveBeenNthCalledWith(3, `2 ${secondApiFetchParams[0]}`);
+      expect(tracer.startFetchTimer).toHaveBeenNthCalledWith(4, `3 ${secondApiFetchParams[0]}`);
+
+      expect(tracer.endFetchTimer).toHaveBeenCalledTimes(4);
+      expect(tracer.endFetchTimer).toHaveBeenNthCalledWith(1, `0 ${fetchParams[0]}`);
+      expect(tracer.endFetchTimer).toHaveBeenNthCalledWith(2, `1 ${fetchParams[0]}`);
+      expect(tracer.endFetchTimer).toHaveBeenNthCalledWith(3, `2 ${secondApiFetchParams[0]}`);
+      expect(tracer.endFetchTimer).toHaveBeenNthCalledWith(4, `3 ${secondApiFetchParams[0]}`);
+
+      expect(tracer.endFetchTimerWithError).toHaveBeenCalledTimes(0);
+
+      expect(fetch).toHaveBeenCalledTimes(4);
+      expect(fetch).toHaveBeenNthCalledWith(1, ...fetchParams);
+      expect(fetch).toHaveBeenNthCalledWith(2, ...fetchParams);
+      expect(fetch).toHaveBeenNthCalledWith(3, ...secondApiFetchParams);
+      expect(fetch).toHaveBeenNthCalledWith(4, ...secondApiFetchParams);
     });
   });
 });
