@@ -511,18 +511,7 @@ describe('runTime', () => {
       expect(oneEnableServerTracing.normalize('TRUE')).toBe('true');
       expect(oneEnableServerTracing.normalize('true')).toBe('true');
       expect(oneEnableServerTracing.normalize('FALSE')).toBe('false');
-    });
-
-    it('should pass validation when value is "true" or "false"', () => {
-      expect(() => oneEnableServerTracing.validate('true')).not.toThrow();
-      expect(() => oneEnableServerTracing.validate('false')).not.toThrow();
-    });
-
-    it('should fail validation when value is not "true" or "false"', () => {
-      expect(() => oneEnableServerTracing.validate('bad value')
-      ).toThrowErrorMatchingInlineSnapshot(
-        '"Expected \\"bad value\\" to be \\"true\\" or \\"false\\""'
-      );
+      expect(oneEnableServerTracing.normalize('EbwEfbWEFBE')).toBe('false');
     });
   });
 });
