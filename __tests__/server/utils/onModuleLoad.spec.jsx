@@ -380,7 +380,7 @@ describe('onModuleLoad', () => {
 
   it('adds fallback when root module does not provide external and enables missing fallbacks', () => {
     RootModule[CONFIGURATION_KEY] = {
-      enableMissingExternalFallbacks: true,
+      enableUnlistedExternalFallbacks: true,
     };
 
     const configuration = {

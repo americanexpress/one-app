@@ -126,10 +126,10 @@ export function renderExternalFallbacks({ clientInitialState, moduleMap, isDevel
   const { clientCacheRevision, modules } = moduleMap;
 
   return requiredFallbacks
-    .map(({ filename, integrity, moduleName }) => {
+    .map(({ name, integrity, moduleName }) => {
       const { baseUrl } = modules[moduleName];
       const endsWithSlash = baseUrl.endsWith('/');
-      const src = `${baseUrl}${endsWithSlash ? '' : '/'}${filename}`;
+      const src = `${baseUrl}${endsWithSlash ? '' : '/'}${name}.browser.js`;
       return renderScript({
         src,
         integrity,
@@ -239,8 +239,7 @@ export function getBody({
   return `
     <body${(bodyAttributes && ` ${bodyAttributes.toString()}`) || ''}>
       <div id="root">${appHtml || ''}</div>
-      ${
-  disableScripts
+      ${disableScripts
     ? ''
     : `
       <script id="initial-state" ${scriptNonce ? `nonce="${scriptNonce}"` : ''}>
@@ -265,8 +264,7 @@ export function getBody({
     isDevelopmentEnv: nodeEnvIsDevelopment,
     bundle,
   })}
-      <script src="${bundlePrefixForBrowser}/app.js" integrity="${
-  integrityManifest[isLegacy ? 'legacy/app.js' : 'app.js']
+      <script src="${bundlePrefixForBrowser}/app.js" integrity="${integrityManifest[isLegacy ? 'legacy/app.js' : 'app.js']
 }" crossorigin="anonymous"></script>
       ${(script && script.toString()) || ''}
       `

@@ -83,24 +83,26 @@ function validateRequiredExternals({
   requiredExternals,
   moduleName,
   providedExternals,
-  enableMissingExternalFallbacks,
+  enableUnlistedExternalFallbacks,
 }) {
   const messages = [];
   let moduleCanBeSafelyLoaded = true;
   const fallbackExternals = [];
+
+  console.log('--requiredExternals', requiredExternals);
 
   Object.keys(requiredExternals).forEach((externalName) => {
     const providedExternal = providedExternals[externalName];
     const requiredExternal = requiredExternals[externalName];
     // handle older requiredExternals api
     const semanticRange = requiredExternal.semanticRange || requiredExternal;
-    const { version, filename, integrity } = requiredExternal;
-    const fallbackExternalAvailable = !!filename && !!version;
+    const { version, name, integrity } = requiredExternal;
+    const fallbackExternalAvailable = !!name && !!version;
     const fallbackBlockedByRootModule = !!providedExternal && !providedExternal.fallbackEnabled;
 
     if (!providedExternal) {
       messages.push(`External '${externalName}' is required by ${moduleName}, but is not provided by the root module`);
-      if (!enableMissingExternalFallbacks) {
+      if (!enableUnlistedExternalFallbacks) {
         moduleCanBeSafelyLoaded = false;
       }
     } else if (
@@ -119,14 +121,15 @@ function validateRequiredExternals({
     if (fallbackExternalAvailable) {
       fallbackExternals.push({
         moduleName,
-        name: externalName,
+        name,
         version,
-        filename,
         semanticRange,
         integrity,
       });
     }
   });
+
+  console.log('--messages', messages);
 
   if (messages.length > 0) {
     if (moduleCanBeSafelyLoaded || (process.env.ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS === 'true')) {
@@ -134,6 +137,9 @@ function validateRequiredExternals({
     } else {
       throw new Error(messages.join('\n'));
     }
+
+    console.log('--fallbackExternals', fallbackExternals);
+
     fallbackExternals.forEach((external) => {
       addRequiredExternal(external);
     });
@@ -212,6 +218,8 @@ export default function onModuleLoad({
     [META_DATA_KEY]: metaData,
   } = module;
 
+  console.log('--onModuleLoad', moduleName, module);
+
   if (appCompatibility) {
     if (!semver.satisfies(appVersion, appCompatibility, { includePrerelease: true })) {
       throw new Error(`${moduleName}@${metaData.version} is not compatible with this version of one-app (${appVersion}), it requires ${appCompatibility}.`);
@@ -238,16 +246,17 @@ export default function onModuleLoad({
   }
 
   if (requiredExternals) {
+    const rootModuleConfig = getRootModuleConfig();
     const {
       providedExternals: rootProvidedExternals,
-      enableMissingExternalFallbacks,
-    } = getRootModuleConfig();
+      enableUnlistedExternalFallbacks,
+    } = rootModuleConfig;
 
     validateRequiredExternals({
       moduleName,
       requiredExternals,
       providedExternals: rootProvidedExternals || {},
-      enableMissingExternalFallbacks,
+      enableUnlistedExternalFallbacks,
     });
     registerModuleUsingExternals(moduleName);
   }
@@ -255,4 +264,6 @@ export default function onModuleLoad({
   validateSafeRequestRestrictedAttributes(requiredSafeRequestRestrictedAttributes);
 
   logModuleLoad(moduleName, metaData.version);
+
+  console.log('--finish onModuleLoad from One App');
 }
