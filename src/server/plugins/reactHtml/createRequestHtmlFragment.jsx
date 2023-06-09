@@ -35,9 +35,9 @@ import {
   renderForString,
 } from '../../utils/reactRendering';
 
-const renderWarnThreshold = 'ONE_EXPERIMENTAL_RENDER_WARN_THRESHOLD' in process.env ?
-  parseFloat(process.env.ONE_EXPERIMENTAL_RENDER_WARN_THRESHOLD) :
-  undefined;
+const renderWarnThreshold = 'ONE_EXPERIMENTAL_RENDER_WARN_THRESHOLD' in process.env
+  ? Number.parseFloat(process.env.ONE_EXPERIMENTAL_RENDER_WARN_THRESHOLD)
+  : undefined;
 
 const getModuleData = async ({ dispatch, modules }) => {
   try {
@@ -51,6 +51,71 @@ const getModuleData = async ({ dispatch, modules }) => {
 
 const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 
+async function reactRender({ renderProps, store, requestURL }) {
+  const props = {
+    location: renderProps.location,
+    params: renderProps.params,
+    router: renderProps.router,
+    routes: renderProps.routes,
+  };
+
+  const routeModules = renderProps.routes
+    .filter((route) => !!route.moduleName)
+    .map((route) => ({
+      name: route.moduleName,
+      props: {
+        ...props,
+        route,
+      },
+    }));
+
+  const { dispatch } = store;
+  const state = store.getState();
+
+  const renderMethodName = getRenderMethodName(state);
+
+  if (renderMethodName === 'renderForStaticMarkup') {
+    await dispatch(composeModules(routeModules));
+  } else {
+    const { fallback, redirect } = await getModuleDataBreaker.fire({
+      dispatch,
+      modules: routeModules,
+    });
+
+    if (redirect) {
+      return { redirect };
+    }
+
+    if (fallback) {
+      return { renderedString: '', helmetInfo: {} };
+    }
+  }
+
+  const renderMethod = renderMethodName === 'renderForStaticMarkup'
+    ? renderForStaticMarkup
+    : renderForString;
+
+  const finishRenderTimer = startSummaryTimer(
+    ssrMetrics.reactRendering,
+    { renderMethodName }
+  );
+  /* eslint-disable react/jsx-props-no-spreading */
+  const { renderedString, helmetInfo } = renderMethod(
+    <Provider store={store}>
+      <RouterContext {...renderProps} />
+    </Provider>
+  );
+  /* eslint-enable react/jsx-props-no-spreading */
+  const renderTime = finishRenderTimer();
+
+  console.info(`took ${renderTime}s to ${renderMethodName} path ${requestURL}`);
+  if (renderWarnThreshold !== undefined && renderTime >= renderWarnThreshold) {
+    console.warn(`render warning threshold of ${renderWarnThreshold}s met or exceeded: took ${renderTime}s to ${renderMethodName} path ${requestURL}`);
+  }
+
+  return { renderedString, helmetInfo };
+}
+
 /**
  * Creates html fragment and stores it in the request object.
  * It redirects if something is not right.
@@ -61,7 +126,6 @@ const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
   try {
     const { store } = request;
-    const { dispatch } = store;
     const routes = createRoutes(store);
 
     const { redirectLocation, renderProps } = await matchPromise({
@@ -77,83 +141,31 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
       } else {
         reply.redirect(302, redirectLocation.pathname + redirectLocation.search);
       }
-    } else {
-      if (!renderProps) {
-        reply.code(404);
-        throw new Error('unable to match routes');
-      }
-
-      const { httpStatus } = renderProps.routes.slice(-1)[0];
-
-      if (httpStatus) {
-        reply.code(httpStatus);
-      }
-
-      const props = {
-        location: renderProps.location,
-        params: renderProps.params,
-        router: renderProps.router,
-        routes: renderProps.routes,
-      };
-
-      const routeModules = renderProps.routes
-        .filter((route) => !!route.moduleName)
-        .map((route) => ({
-          name: route.moduleName,
-          props: {
-            ...props,
-            route,
-          },
-        }));
-
-      const state = store.getState();
-
-      const renderMethodName = getRenderMethodName(state);
-
-      if (renderMethodName === 'renderForStaticMarkup') {
-        await dispatch(composeModules(routeModules));
-      } else {
-        const { fallback, redirect } = await getModuleDataBreaker.fire({
-          dispatch,
-          modules: routeModules,
-        });
-
-        if (redirect) {
-          reply.redirect(redirect.status || 302, redirect.url);
-          return;
-        }
-
-        if (fallback) {
-          request.appHtml = '';
-          request.helmetInfo = {};
-          return;
-        }
-      }
-
-      const renderMethod = renderMethodName === 'renderForStaticMarkup'
-        ? renderForStaticMarkup
-        : renderForString;
-
-      const finishRenderTimer = startSummaryTimer(
-        ssrMetrics.reactRendering,
-        { renderMethodName: renderMethodName }
-      );
-      /* eslint-disable react/jsx-props-no-spreading */
-      const { renderedString, helmetInfo } = renderMethod(
-        <Provider store={store}>
-          <RouterContext {...renderProps} />
-        </Provider>
-      );
-      /* eslint-enable react/jsx-props-no-spreading */
-      const renderTime = finishRenderTimer();
-      console.info(`took ${renderTime}s to ${renderMethodName} path ${request.url}`);
-      if (renderWarnThreshold !== undefined && renderTime >= renderWarnThreshold) {
-        console.warn(`render warning threshold of ${renderWarnThreshold}s met or exceeded: took ${renderTime}s to ${renderMethodName} path ${request.url}`);
-      }
-
-      request.appHtml = renderedString;
-      request.helmetInfo = helmetInfo;
+      return;
     }
+
+    if (!renderProps) {
+      reply.code(404);
+      throw new Error('unable to match routes');
+    }
+
+    const { httpStatus } = renderProps.routes.slice(-1)[0];
+
+    if (httpStatus) {
+      reply.code(httpStatus);
+    }
+
+    const { redirect, renderedString, helmetInfo } = await reactRender(
+      { renderProps, store, requestURL: request.url }
+    );
+
+    if (redirect) {
+      reply.redirect(redirect.status || 302, redirect.url);
+      return;
+    }
+
+    request.appHtml = renderedString;
+    request.helmetInfo = helmetInfo;
   } catch (err) {
     console.error(util.format('error creating request HTML fragment for %s', request.url), err);
   }

@@ -240,12 +240,12 @@ const runTime = [
   // threshold to emit a warning when the time to render a route is met or exceeded
   {
     name: 'ONE_EXPERIMENTAL_RENDER_WARN_THRESHOLD',
-    defaultValue: 0.010,
+    defaultValue: 0.01,
     validate(input) {
       if (!input) {
         return undefined;
       }
-      const parsed = parseFloat(input);
+      const parsed = Number.parseFloat(input);
       if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
         throw new Error(`env var ONE_EXPERIMENTAL_RENDER_WARN_THRESHOLD needs to be a valid number in seconds, given "${input}"`);
       }
@@ -254,7 +254,7 @@ const runTime = [
       }
       return parsed;
     },
-  }
+  },
 ];
 runTime.forEach(preprocessEnvVar);
 export { ip };
