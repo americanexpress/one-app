@@ -240,7 +240,7 @@ const runTime = [
   // threshold to emit a warning when the time to render a route is met or exceeded
   {
     name: 'ONE_EXPERIMENTAL_RENDER_WARN_THRESHOLD',
-    defaultValue: 0.01,
+    defaultValue: '0.010',
     validate(input) {
       if (!input) {
         return undefined;
