@@ -35,6 +35,10 @@ import {
   renderForString,
 } from '../../utils/reactRendering';
 
+const renderWarnThreshold = 'ONE_EXPERIMENTAL_RENDER_WARN_THRESHOLD' in process.env ?
+  parseFloat(process.env.ONE_EXPERIMENTAL_RENDER_WARN_THRESHOLD) :
+  undefined;
+
 const getModuleData = async ({ dispatch, modules }) => {
   try {
     await dispatch(composeModules(modules));
@@ -104,7 +108,9 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
 
       const state = store.getState();
 
-      if (getRenderMethodName(state) === 'renderForStaticMarkup') {
+      const renderMethodName = getRenderMethodName(state);
+
+      if (renderMethodName === 'renderForStaticMarkup') {
         await dispatch(composeModules(routeModules));
       } else {
         const { fallback, redirect } = await getModuleDataBreaker.fire({
@@ -124,13 +130,13 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         }
       }
 
-      const renderMethod = getRenderMethodName(state) === 'renderForStaticMarkup'
+      const renderMethod = renderMethodName === 'renderForStaticMarkup'
         ? renderForStaticMarkup
         : renderForString;
 
       const finishRenderTimer = startSummaryTimer(
         ssrMetrics.reactRendering,
-        { renderMethodName: getRenderMethodName(state) }
+        { renderMethodName: renderMethodName }
       );
       /* eslint-disable react/jsx-props-no-spreading */
       const { renderedString, helmetInfo } = renderMethod(
@@ -138,8 +144,12 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
           <RouterContext {...renderProps} />
         </Provider>
       );
-      /* eslint-ensable react/jsx-props-no-spreading */
-      finishRenderTimer();
+      /* eslint-enable react/jsx-props-no-spreading */
+      const renderTime = finishRenderTimer();
+      console.info(`took ${renderTime}s to ${renderMethodName} path ${request.url}`);
+      if (renderWarnThreshold !== undefined && renderTime >= renderWarnThreshold) {
+        console.warn(`render warning threshold of ${renderWarnThreshold}s met or exceeded: took ${renderTime}s to ${renderMethodName} path ${request.url}`);
+      }
 
       request.appHtml = renderedString;
       request.helmetInfo = helmetInfo;

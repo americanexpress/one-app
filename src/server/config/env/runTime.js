@@ -237,6 +237,24 @@ const runTime = [
       }
     },
   },
+  // threshold to emit a warning when the time to render a route is met or exceeded
+  {
+    name: 'ONE_EXPERIMENTAL_RENDER_WARN_THRESHOLD',
+    defaultValue: 0.010,
+    validate(input) {
+      if (!input) {
+        return undefined;
+      }
+      const parsed = parseFloat(input);
+      if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
+        throw new Error(`env var ONE_EXPERIMENTAL_RENDER_WARN_THRESHOLD needs to be a valid number in seconds, given "${input}"`);
+      }
+      if (parsed < 0) {
+        throw new Error(`env var ONE_EXPERIMENTAL_RENDER_WARN_THRESHOLD needs to be a positive number in seconds, saw "${input}"`);
+      }
+      return parsed;
+    },
+  }
 ];
 runTime.forEach(preprocessEnvVar);
 export { ip };
