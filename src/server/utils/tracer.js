@@ -27,14 +27,18 @@ export class Tracer {
 
   #requestEndTimeNs;
 
+  #requestUrl;
+
   #fetchCount;
 
-  constructor() {
+  constructor(requestUrl = '-') {
     this.#serverPhaseTimers = {};
     this.#fetchTimers = {};
     this.#requestStartArbitraryTimeNs = process.hrtime.bigint();
     this.#requestStartTimeMs = Date.now();
     this.#requestEndTimeNs = null;
+
+    this.#requestUrl = requestUrl;
 
     // The fetch count helps the tracing of fetches by enumerating the keys.
     // This ensures if the server does make duplicate calls, both calls appear in the tracer
@@ -118,6 +122,7 @@ export class Tracer {
   // Build the trace object
   #formatTrace = () => {
     const traceObject = {};
+    traceObject.u = this.#requestUrl;
     traceObject.t = this.#requestStartTimeMs;
     traceObject.d = this.#nsToMs(this.#requestEndTimeNs - this.#requestStartArbitraryTimeNs);
 
@@ -161,7 +166,7 @@ export class NoOpTracer {
 // This should be the very first middleware in a request you wish to trace
 export const initializeTracer = (req, res, next) => {
   if (process.env.ONE_ENABLE_SERVER_TRACING === 'true' || process.env.NODE_ENV === 'development') {
-    req.tracer = new Tracer();
+    req.tracer = new Tracer(`${req.protocol}://${req.get('Host')}${req.url}`);
   } else {
     // install the NoOpTracer, so nothing else needs to check ONE_ENABLE_SERVER_TRACING
     req.tracer = new NoOpTracer();

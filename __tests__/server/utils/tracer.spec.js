@@ -15,17 +15,25 @@
  */
 
 import {
-  NoOpTracer, Tracer, initializeTracer, completeTracer, traceMiddleware, enhanceFetchWithTracer,
+  NoOpTracer,
+  Tracer,
+  initializeTracer,
+  completeTracer,
+  traceMiddleware,
+  enhanceFetchWithTracer,
 } from '../../../src/server/utils/tracer';
 
 jest.spyOn(console, 'log');
 jest.useFakeTimers().setSystemTime(new Date('1993-07-25'));
 jest.spyOn(process.hrtime, 'bigint');
 
-describe('the tracer module', () => { // Note hrTime is in nanoseconds,
+describe('the tracer module', () => {
+  // Note hrTime is in nanoseconds,
   // if you want to progress the time by milliseconds, you need to add at-least 1000000
   let mockHrTime = 0n;
-  const setMockHrTime = (nextHrTime) => { mockHrTime = BigInt(nextHrTime); };
+  const setMockHrTime = (nextHrTime) => {
+    mockHrTime = BigInt(nextHrTime);
+  };
   const addMockHrTimeMs = (additionalHrTime) => {
     mockHrTime += BigInt(additionalHrTime * 1000000);
   };
@@ -38,13 +46,24 @@ describe('the tracer module', () => { // Note hrTime is in nanoseconds,
   });
 
   describe('Tracer Class', () => {
-    it("should By default, create an trace with only a 't' and 'd' field", () => {
+    it("should By default, create an trace with only a 't', 'd' and 'u' field", () => {
       const tracer = new Tracer();
       addMockHrTimeMs(12);
       tracer.completeTraceAndLog();
       expect(console.log.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Trace: {\\"t\\":743558400000,\\"d\\":12} ",
+          "Trace: {\\"u\\":\\"-\\",\\"t\\":743558400000,\\"d\\":12} ",
+        ]
+      `);
+    });
+
+    it("should use the passed value as the 'u' field", () => {
+      const tracer = new Tracer('https://mock.com/mock/url');
+      addMockHrTimeMs(12);
+      tracer.completeTraceAndLog();
+      expect(console.log.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "Trace: {\\"u\\":\\"https://mock.com/mock/url\\",\\"t\\":743558400000,\\"d\\":12} ",
         ]
       `);
     });
@@ -67,7 +86,7 @@ describe('the tracer module', () => { // Note hrTime is in nanoseconds,
       tracer.completeTraceAndLog();
       expect(console.log.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Trace: {\\"1\\":{\\"s\\":12,\\"d\\":10},\\"2\\":{\\"s\\":22,\\"d\\":100},\\"3\\":{\\"s\\":122,\\"d\\":30},\\"t\\":743558400000,\\"d\\":152} ",
+          "Trace: {\\"1\\":{\\"s\\":12,\\"d\\":10},\\"2\\":{\\"s\\":22,\\"d\\":100},\\"3\\":{\\"s\\":122,\\"d\\":30},\\"u\\":\\"-\\",\\"t\\":743558400000,\\"d\\":152} ",
         ]
       `);
     });
@@ -90,7 +109,7 @@ describe('the tracer module', () => { // Note hrTime is in nanoseconds,
       tracer.completeTraceAndLog();
       expect(console.log.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Trace: {\\"t\\":743558400000,\\"d\\":152,\\"f\\":{\\"1.url.com.example\\":{\\"s\\":12,\\"d\\":10},\\"2.url.com.example\\":{\\"s\\":12,\\"d\\":140},\\"3.url.com.example\\":{\\"s\\":122,\\"d\\":30}}} ",
+          "Trace: {\\"u\\":\\"-\\",\\"t\\":743558400000,\\"d\\":152,\\"f\\":{\\"1.url.com.example\\":{\\"s\\":12,\\"d\\":10},\\"2.url.com.example\\":{\\"s\\":12,\\"d\\":140},\\"3.url.com.example\\":{\\"s\\":122,\\"d\\":30}}} ",
         ]
       `);
     });
@@ -110,7 +129,7 @@ describe('the tracer module', () => { // Note hrTime is in nanoseconds,
       tracer.completeTraceAndLog();
       expect(console.log.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Trace: {\\"t\\":743558400000,\\"d\\":152,\\"f\\":{\\"1.url.com.example\\":{\\"s\\":12},\\"2.url.com.example\\":{\\"s\\":12},\\"3.url.com.example\\":{\\"s\\":122}}} ",
+          "Trace: {\\"u\\":\\"-\\",\\"t\\":743558400000,\\"d\\":152,\\"f\\":{\\"1.url.com.example\\":{\\"s\\":12},\\"2.url.com.example\\":{\\"s\\":12},\\"3.url.com.example\\":{\\"s\\":122}}} ",
         ]
       `);
     });
@@ -142,7 +161,7 @@ describe('the tracer module', () => { // Note hrTime is in nanoseconds,
       tracer.completeTraceAndLog();
       expect(console.log.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "Trace: {\\"t\\":743558400000,\\"d\\":152,\\"f\\":{\\"1.url.com.example\\":{\\"s\\":12,\\"d\\":10,\\"em\\":\\"Error calling 1.url.com.example\\",\\"es\\":\\"mock Stack\\"},\\"2.url.com.example\\":{\\"s\\":12,\\"d\\":140,\\"em\\":\\"Error calling 2.url.com.example\\",\\"es\\":\\"mock Stack\\"},\\"3.url.com.example\\":{\\"s\\":122,\\"d\\":30,\\"em\\":\\"Error calling 3.url.com.example\\",\\"es\\":\\"mock Stack\\"}}} ",
+          "Trace: {\\"u\\":\\"-\\",\\"t\\":743558400000,\\"d\\":152,\\"f\\":{\\"1.url.com.example\\":{\\"s\\":12,\\"d\\":10,\\"em\\":\\"Error calling 1.url.com.example\\",\\"es\\":\\"mock Stack\\"},\\"2.url.com.example\\":{\\"s\\":12,\\"d\\":140,\\"em\\":\\"Error calling 2.url.com.example\\",\\"es\\":\\"mock Stack\\"},\\"3.url.com.example\\":{\\"s\\":122,\\"d\\":30,\\"em\\":\\"Error calling 3.url.com.example\\",\\"es\\":\\"mock Stack\\"}}} ",
         ]
       `);
     });
@@ -176,10 +195,21 @@ describe('the tracer module', () => { // Note hrTime is in nanoseconds,
     let prevNodeEnv = null;
     let prevOneEnableServerTracing = null;
     const res = Symbol('untouched response object');
+    let req;
     const next = () => {};
     beforeEach(() => {
       prevNodeEnv = process.env.NODE_ENV;
       prevOneEnableServerTracing = process.env.ONE_ENABLE_SERVER_TRACING;
+      req = {
+        protocol: 'mockProtocol',
+        get: (field) => {
+          if (field !== 'Host') {
+            throw new Error('These tests should only end up calling get("Host");');
+          }
+          return 'mockHost';
+        },
+        url: '/mock/Url/',
+      };
     });
     afterEach(() => {
       process.env.NODE_ENV = prevNodeEnv;
@@ -189,16 +219,12 @@ describe('the tracer module', () => { // Note hrTime is in nanoseconds,
       process.env.NODE_ENV = 'production';
       process.env.ONE_ENABLE_SERVER_TRACING = 'true';
 
-      const req = {};
-
       initializeTracer(req, res, next);
       expect(req.tracer instanceof Tracer).toBeTruthy();
     });
     it('should install the Tracer if ONE_ENABLE_SERVER_TRACING is false in development', () => {
       process.env.NODE_ENV = 'development';
       process.env.ONE_ENABLE_SERVER_TRACING = 'false';
-
-      const req = {};
 
       initializeTracer(req, res, next);
       expect(req.tracer instanceof Tracer).toBeTruthy();
@@ -207,15 +233,13 @@ describe('the tracer module', () => { // Note hrTime is in nanoseconds,
       process.env.NODE_ENV = 'production';
       process.env.ONE_ENABLE_SERVER_TRACING = 'false';
 
-      const req = {};
-
       initializeTracer(req, res, next);
       expect(req.tracer instanceof NoOpTracer).toBeTruthy();
     });
     it('should call next to keep the middleware chain going', () => {
       const mockedNext = jest.fn();
 
-      initializeTracer({}, res, mockedNext);
+      initializeTracer(req, res, mockedNext);
       expect(mockedNext).toHaveBeenCalled();
     });
   });
