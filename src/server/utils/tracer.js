@@ -61,6 +61,9 @@ export class Tracer {
     * "9": checkStateForRedirect
     * "10": checkStateForStatusCode
     * "11": sendHtml
+    * "12": (on post request) addSecurityHeaders
+    * "13": (on post request) body-parser.json
+    * "14": (on post request) body-parser.urlencoded
    */
   startServerPhaseTimer = (serverPhasekey) => {
     this.#serverPhaseTimers[serverPhasekey] = { startTimeNs: process.hrtime.bigint() };
