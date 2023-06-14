@@ -19,6 +19,7 @@
 /* eslint-disable global-require */
 
 import path from 'path';
+
 import bytes from 'bytes';
 import compress from '@fastify/compress';
 import Fastify from 'fastify';

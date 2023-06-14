@@ -14,13 +14,20 @@
  * permissions and limitations under the License.
  */
 
+import util from 'util';
+
 import React from 'react';
 import { Provider } from 'react-redux';
 import url, { Url } from 'url';
-import util from 'util';
 import { RouterContext, matchPromise } from '@americanexpress/one-app-router';
 import { composeModules } from 'holocron';
+
 import createCircuitBreaker from '../../utils/createCircuitBreaker';
+import {
+  startSummaryTimer,
+
+  ssr as ssrMetrics,
+} from '../../metrics';
 
 import {
   getRenderMethodName,
@@ -121,6 +128,10 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         ? renderForStaticMarkup
         : renderForString;
 
+      const finishRenderTimer = startSummaryTimer(
+        ssrMetrics.reactRendering,
+        { renderMethodName: getRenderMethodName(state) }
+      );
       /* eslint-disable react/jsx-props-no-spreading */
       const { renderedString, helmetInfo } = renderMethod(
         <Provider store={store}>
@@ -128,6 +139,8 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         </Provider>
       );
       /* eslint-ensable react/jsx-props-no-spreading */
+      finishRenderTimer();
+
       request.appHtml = renderedString;
       request.helmetInfo = helmetInfo;
     }
