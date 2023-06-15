@@ -14,7 +14,7 @@ jobs:
             ${{ runner.os }}-node-
       - uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version: 18.x
       - name: npm install
         run: NODE_ENV=development npm ci
       - name: Build docker image
