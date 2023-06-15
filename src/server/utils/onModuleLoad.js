@@ -23,7 +23,7 @@ import readJsonFile from './readJsonFile';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from './safeRequest';
 import { setConfigureRequestLog } from './logging/serverMiddleware';
 import { setCreateSsrFetch } from './createSsrFetch';
-import { setEventLoopDelayThreshold } from './createCircuitBreaker';
+import { setEventLoopDelayThreshold, setEventLoopDelayPercentile } from './createCircuitBreaker';
 import setupDnsCache from './setupDnsCache';
 import { configurePWA } from '../middleware/pwa';
 import { validatePWAConfig } from './validation';
@@ -86,6 +86,7 @@ export default function onModuleLoad({
       extendSafeRequestRestrictedAttributes = {},
       createSsrFetch,
       eventLoopDelayThreshold,
+      eventLoopDelayPercentile,
       pwa,
       errorPageUrl,
       dnsCache,
@@ -129,6 +130,7 @@ export default function onModuleLoad({
     setConfigureRequestLog(configureRequestLog);
     setCreateSsrFetch(createSsrFetch);
     setEventLoopDelayThreshold(eventLoopDelayThreshold);
+    setEventLoopDelayPercentile(eventLoopDelayPercentile);
     configurePWA(validatePWAConfig(pwa, {
       clientStateConfig: getClientStateConfig(),
     }));

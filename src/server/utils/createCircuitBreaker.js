@@ -22,12 +22,24 @@ import { registerCircuitBreaker } from '../metrics/circuit-breaker';
 
 const { rootModuleName } = getServerStateConfig();
 let eventLoopDelayThreshold = 250;
+let eventLoopDelayPercentile = 100;
 
 export const setEventLoopDelayThreshold = (n) => {
-  eventLoopDelayThreshold = Number(n) || 250;
+  eventLoopDelayThreshold = Number.parseInt(n, 10) || 250;
+};
+
+export const setEventLoopDelayPercentile = (n) => {
+  if (typeof n !== 'undefined' && (n !== Number.parseInt(n, 10) || n < 1 || n > 100)) {
+    console.warn(`Event loop percentile must be an integer in range 1-100; given ${JSON.stringify(n)}. Defaulting to p(100).`);
+    eventLoopDelayPercentile = 100;
+    return;
+  }
+  // Default to p(100) to avoid breaking change for users expecting max delay
+  eventLoopDelayPercentile = n || 100;
 };
 
 export const getEventLoopDelayThreshold = () => eventLoopDelayThreshold;
+export const getEventLoopDelayPercentile = () => eventLoopDelayPercentile;
 
 const options = {
   // Do not use a timeout
@@ -41,16 +53,27 @@ const options = {
 const eventLoopDelayHistogram = monitorEventLoopDelay();
 eventLoopDelayHistogram.enable();
 
-const checkMaxEventLoopDelay = async () => {
+export const getEventLoopDelayHistogram = () => eventLoopDelayHistogram;
+
+let histogramResetInterval;
+const clearAndResetHistorgramResetInterval = () => {
+  clearInterval(histogramResetInterval);
+  // Reset histogram every 30 seconds because it biases lower over time
+  histogramResetInterval = setInterval(() => eventLoopDelayHistogram.reset(), 30e3);
+};
+
+const checkEventLoopDelay = async () => {
   if (process.env.NODE_ENV === 'development') return;
   // Return if root module is not loaded, as that is where threshold is configured
   if (!getModule(rootModuleName)) return;
   // Get event loop delay in milliseconds (from nanoseconds)
-  const maxEventLoopDelay = eventLoopDelayHistogram.max / 1e6;
+  const eventLoopDelay = eventLoopDelayHistogram.percentile(eventLoopDelayPercentile) / 1e6;
   // Open the circuit if event loop delay is greater than threshold
-  if (maxEventLoopDelay > eventLoopDelayThreshold) {
+  if (eventLoopDelay > eventLoopDelayThreshold) {
     eventLoopDelayHistogram.reset();
-    throw new Error(`Opening circuit, event loop delay (${maxEventLoopDelay}ms) is > eventLoopDelayThreshold (${eventLoopDelayThreshold}ms)`);
+    // Resetting interval on circuit open will guarantee at least 10s of data on retry
+    clearAndResetHistorgramResetInterval();
+    throw new Error(`Opening circuit, p(${eventLoopDelayPercentile}) event loop delay (${eventLoopDelay}ms) is > eventLoopDelayThreshold (${eventLoopDelayThreshold}ms)`);
   }
 };
 
@@ -59,8 +82,9 @@ const createCircuitBreaker = (asyncFunctionThatMightFail) => {
   const breaker = new CircuitBreaker(asyncFunctionThatMightFail, options);
   // Fallback returns true to indicate fallback behavior is needed
   breaker.fallback(() => ({ fallback: true }));
-  // Check the max event loop delay every 5 seconds
-  breaker.healthCheck(checkMaxEventLoopDelay, 5e3);
+  // Check the event loop delay every 5 seconds
+  breaker.healthCheck(checkEventLoopDelay, 5e3);
+  clearAndResetHistorgramResetInterval();
   // Log when circuit breaker opens and closes
   breaker.on('open', () => console.log(`Circuit breaker [${asyncFunctionThatMightFail.name}] opened`));
   breaker.on('close', () => console.log(`Circuit breaker [${asyncFunctionThatMightFail.name}] closed`));

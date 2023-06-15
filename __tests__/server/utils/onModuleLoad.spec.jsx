@@ -30,7 +30,7 @@ import { setCorsOrigins } from '../../../src/server/middleware/conditionallyAllo
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from '../../../src/server/utils/safeRequest';
 import { setConfigureRequestLog } from '../../../src/server/utils/logging/serverMiddleware';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
-import { getEventLoopDelayThreshold } from '../../../src/server/utils/createCircuitBreaker';
+import { getEventLoopDelayThreshold, getEventLoopDelayPercentile } from '../../../src/server/utils/createCircuitBreaker';
 import setupDnsCache from '../../../src/server/utils/setupDnsCache';
 import { configurePWA } from '../../../src/server/middleware/pwa';
 import { setErrorPage } from '../../../src/server/middleware/sendHtml';
@@ -374,7 +374,7 @@ describe('onModuleLoad', () => {
     expect(setErrorPage).toHaveBeenCalledWith(errorPageUrl);
   });
 
-  it('sets the event loop lag threshold from the root module', () => {
+  it('sets the event loop delay threshold from the root module', () => {
     const eventLoopDelayThreshold = 50;
     expect(getEventLoopDelayThreshold()).not.toBe(eventLoopDelayThreshold);
     onModuleLoad({
@@ -388,6 +388,22 @@ describe('onModuleLoad', () => {
       moduleName: 'some-root',
     });
     expect(getEventLoopDelayThreshold()).toBe(eventLoopDelayThreshold);
+  });
+
+  it('sets the event loop delay percentile from the root module', () => {
+    const eventLoopDelayPercentile = 95;
+    expect(getEventLoopDelayPercentile()).not.toBe(eventLoopDelayPercentile);
+    onModuleLoad({
+      module: {
+        [CONFIGURATION_KEY]: {
+          csp,
+          eventLoopDelayPercentile,
+        },
+        [META_DATA_KEY]: { version: '1.0.14' },
+      },
+      moduleName: 'some-root',
+    });
+    expect(getEventLoopDelayPercentile()).toBe(eventLoopDelayPercentile);
   });
 
   it('logs when the root module is loaded', () => {
