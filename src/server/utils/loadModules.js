@@ -17,7 +17,6 @@
 import { getModule } from 'holocron';
 import { updateModuleRegistry } from 'holocron/server';
 
-import hash from 'object-hash';
 import onModuleLoad, { CONFIGURATION_KEY } from './onModuleLoad';
 import batchModulesToUpdate from './batchModulesToUpdate';
 import getModulesToUpdate from './getModulesToUpdate';
@@ -26,18 +25,22 @@ import { setClientModuleMapCache } from './clientModuleMapCache';
 import { updateCSP } from '../middleware/csp';
 import addBaseUrlToModuleMap from './addBaseUrlToModuleMap';
 
-let cachedModuleMapHash;
+let cachedModuleMapText;
 let rejectedModulesCache = {};
+
+const noChange = () => ({ loadedModules: {}, rejectedModules: rejectedModulesCache });
 
 const loadModules = async () => {
   const moduleMapResponse = await fetch(process.env.HOLOCRON_MODULE_MAP_URL);
-  const moduleMap = addBaseUrlToModuleMap(await moduleMapResponse.json());
+  const moduleMapAsText = await moduleMapResponse.text();
 
-  const moduleMapHash = hash(moduleMap);
-  if (cachedModuleMapHash && cachedModuleMapHash === moduleMapHash) {
-    return { loadedModules: {}, rejectedModules: rejectedModulesCache };
+  if (cachedModuleMapText && cachedModuleMapText === moduleMapAsText) {
+    return noChange();
   }
-  cachedModuleMapHash = moduleMapHash;
+  cachedModuleMapText = moduleMapAsText;
+
+  const moduleMap = addBaseUrlToModuleMap(JSON.parse(moduleMapAsText));
+
   const serverConfig = getServerStateConfig();
   const { loadedModules = {}, rejectedModules = {} } = await updateModuleRegistry({
     moduleMap,

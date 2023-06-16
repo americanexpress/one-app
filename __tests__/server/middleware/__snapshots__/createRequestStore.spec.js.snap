@@ -2,27 +2,33 @@
 
 exports[`createRequestStore should add the client holocron module map cache to the request object 1`] = `
 Object {
-  "browser": Object {
-    "modules": Object {
-      "test-root": Object {
-        "baseUrl": "https://example.com/cdn/test-root/2.2.2/",
-        "browser": Object {
-          "integrity": "nggdfhr34",
-          "url": "https://example.com/cdn/test-root/2.2.2/test-root.browser.js",
+  "asObject": Object {
+    "browser": Object {
+      "modules": Object {
+        "test-root": Object {
+          "baseUrl": "https://example.com/cdn/test-root/2.2.2/",
+          "browser": Object {
+            "integrity": "nggdfhr34",
+            "url": "https://example.com/cdn/test-root/2.2.2/test-root.browser.js",
+          },
+        },
+      },
+    },
+    "legacyBrowser": Object {
+      "modules": Object {
+        "test-root": Object {
+          "baseUrl": "https://example.com/cdn/test-root/2.2.2/",
+          "legacyBrowser": Object {
+            "integrity": "7567ee",
+            "url": "https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js",
+          },
         },
       },
     },
   },
-  "legacyBrowser": Object {
-    "modules": Object {
-      "test-root": Object {
-        "baseUrl": "https://example.com/cdn/test-root/2.2.2/",
-        "legacyBrowser": Object {
-          "integrity": "7567ee",
-          "url": "https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js",
-        },
-      },
-    },
+  "asString": Object {
+    "browser": "{\\"modules\\":{\\"test-root\\":{\\"baseUrl\\":\\"https://example.com/cdn/test-root/2.2.2/\\",\\"browser\\":{\\"url\\":\\"https://example.com/cdn/test-root/2.2.2/test-root.browser.js\\",\\"integrity\\":\\"nggdfhr34\\"}}}}",
+    "legacyBrowser": "{\\"modules\\":{\\"test-root\\":{\\"baseUrl\\":\\"https://example.com/cdn/test-root/2.2.2/\\",\\"legacyBrowser\\":{\\"url\\":\\"https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js\\",\\"integrity\\":\\"7567ee\\"}}}}",
   },
 }
 `;

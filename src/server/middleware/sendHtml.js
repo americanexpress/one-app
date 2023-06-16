@@ -262,18 +262,18 @@ export function getBody({
       <div id="root">${appHtml || ''}</div>
       ${disableScripts ? '' : `
       <script id="initial-state" ${scriptNonce ? `nonce="${scriptNonce}"` : ''}>
-        window.__webpack_public_path__ = ${jsonStringifyForScript(`${appBundlesURLPrefix}/`)};
-        window.__CLIENT_HOLOCRON_MODULE_MAP__ = ${jsonStringifyForScript(clientModuleMapCache[bundle])};
+        window.__webpack_public_path__ = "${appBundlesURLPrefix}/";
+        window.__CLIENT_HOLOCRON_MODULE_MAP__ = ${clientModuleMapCache.asString[bundle]};
         window.__INITIAL_STATE__ = ${jsonStringifyForScript(serializeClientInitialState(clientInitialState))};
         window.__holocron_module_bundle_type__ = '${bundle}';
-        window.__pwa_metadata__ = ${jsonStringifyForScript(pwaMetadata)};
+        window.__pwa_metadata__ = ${pwaMetadata};
         window.__render_mode__ = '${renderMode}';
       </script>
       ${assets}
       ${renderI18nScript(clientInitialState, bundlePrefixForBrowser)}
       ${renderModuleScripts({
     clientInitialState,
-    moduleMap: clientModuleMapCache[bundle],
+    moduleMap: clientModuleMapCache.asObject[bundle],
     isDevelopmentEnv: nodeEnvIsDevelopment,
     bundle,
   })}
@@ -365,7 +365,7 @@ export default function sendHtml(req, res) {
       disableScripts,
       disableStyles,
       scriptNonce,
-      pwaMetadata,
+      pwaMetadata: pwaMetadata.asObject,
     };
 
     const bodySectionArgs = {
@@ -379,7 +379,7 @@ export default function sendHtml(req, res) {
       disableScripts,
       clientModuleMapCache,
       scriptNonce,
-      pwaMetadata,
+      pwaMetadata: pwaMetadata.asString,
     };
 
     body = `

@@ -16,6 +16,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import jsonStringifyForScript from '../../utils/jsonStringifyForScript';
 
 const defaultPWAConfig = {
   webManifest: false,
@@ -28,15 +29,36 @@ const defaultPWAConfig = {
 
 let webAppManifest = null;
 let pwaConfig = { ...defaultPWAConfig };
+let clientPWAConfig = {};
 
-function resetPWAConfig() {
-  pwaConfig = { ...defaultPWAConfig };
-  return pwaConfig;
+function setClientPWAConfig(_pwaConfig) {
+  const {
+    webManifest, serviceWorker, serviceWorkerRecoveryMode, serviceWorkerScope,
+  } = _pwaConfig;
+  const asObject = {
+    serviceWorker,
+    serviceWorkerRecoveryMode,
+    serviceWorkerScope,
+    serviceWorkerScriptUrl: serviceWorker && '/_/pwa/service-worker.js',
+    webManifestUrl: webManifest && '/_/pwa/manifest.webmanifest',
+    offlineUrl: serviceWorker && '/_/pwa/shell',
+  };
+  clientPWAConfig = {
+    asObject,
+    asString: jsonStringifyForScript(asObject),
+  };
 }
+
+setClientPWAConfig(pwaConfig);
 
 function setPWAConfig(newConfiguration) {
   pwaConfig = newConfiguration;
+  setClientPWAConfig(newConfiguration);
   return pwaConfig;
+}
+
+function resetPWAConfig() {
+  return setPWAConfig({ ...defaultPWAConfig });
 }
 
 function createServiceWorkerConfig(config) {
@@ -97,17 +119,7 @@ export function getServerPWAConfig() {
 }
 
 export function getClientPWAConfig() {
-  const {
-    webManifest, serviceWorker, serviceWorkerRecoveryMode, serviceWorkerScope,
-  } = pwaConfig;
-  return {
-    serviceWorker,
-    serviceWorkerRecoveryMode,
-    serviceWorkerScope,
-    serviceWorkerScriptUrl: serviceWorker && '/_/pwa/service-worker.js',
-    webManifestUrl: webManifest && '/_/pwa/manifest.webmanifest',
-    offlineUrl: serviceWorker && '/_/pwa/shell',
-  };
+  return clientPWAConfig;
 }
 
 export function configurePWA(config = {}) {

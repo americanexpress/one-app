@@ -19,7 +19,7 @@ import { getClientModuleMapCache } from '../../utils/clientModuleMapCache';
 import { getServerPWAConfig } from './config';
 
 function processServiceWorkerScript(script) {
-  const holocronModuleMap = `'${JSON.stringify(getClientModuleMapCache().browser)}'`;
+  const holocronModuleMap = `'${getClientModuleMapCache().asString.browser}'`;
   return Buffer.from(script.toString().replace('process.env.HOLOCRON_MODULE_MAP', holocronModuleMap));
 }
 

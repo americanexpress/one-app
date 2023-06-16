@@ -15,6 +15,7 @@
  */
 
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
+import jsonStringifyForScript from '../../../src/server/utils/jsonStringifyForScript';
 
 const moduleMap = {
   modules: {
@@ -59,14 +60,15 @@ describe('clientModuleMapCache', () => {
   });
 
   it('creates a cache with separate entries for browser and legacyBrowser', () => {
-    expect(Object.keys(moduleMapCache)).toEqual(cacheKeys);
+    expect(Object.keys(moduleMapCache.asObject)).toEqual(cacheKeys);
+    expect(Object.keys(moduleMapCache.asString)).toEqual(cacheKeys);
   });
 
   it('only includes values for a single bundle per module in each map', () => {
     // conflicting eslint rules here
     // eslint-disable-next-line max-len
-    cacheKeys.forEach((cacheKey) => Object.keys(moduleMapCache[cacheKey].modules).forEach((moduleName) => {
-      const module = moduleMapCache[cacheKey].modules[moduleName];
+    cacheKeys.forEach((cacheKey) => Object.keys(moduleMapCache.asObject[cacheKey].modules).forEach((moduleName) => {
+      const module = moduleMapCache.asObject[cacheKey].modules[moduleName];
       expect(Object.keys(module)).toEqual(['baseUrl', cacheKey]);
       expect(module[cacheKey]).toEqual({
         url: `https://example.com/cdn/${moduleName}/1.0.0/${moduleName}.${cacheKey === 'browser' ? 'browser' : 'legacy.browser'}.js`,
@@ -74,5 +76,12 @@ describe('clientModuleMapCache', () => {
       });
     })
     );
+  });
+
+  it('includes a stringified module map', () => {
+    expect(moduleMapCache.asString).toMatchObject({
+      browser: jsonStringifyForScript(moduleMapCache.asObject.browser),
+      legacyBrowser: jsonStringifyForScript(moduleMapCache.asObject.legacyBrowser),
+    });
   });
 });

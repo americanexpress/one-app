@@ -92,15 +92,18 @@ jest.mock('../../../src/server/utils/readJsonFile', () => (filePath) => {
       throw new Error('Couldn\'t find JSON file to read');
   }
 });
-jest.mock('../../../src/server/middleware/pwa/config', () => ({
-  getClientPWAConfig: jest.fn(() => ({
+jest.mock('../../../src/server/middleware/pwa/config', () => {
+  const config = {
     serviceWorker: false,
     serviceWorkerScope: null,
     serviceWorkerScriptUrl: false,
     webManifestUrl: false,
     offlineUrl: false,
-  })),
-}));
+  };
+  return {
+    getClientPWAConfig: jest.fn(() => ({ asObject: config, asString: JSON.stringify(config) })),
+  };
+});
 jest.mock('../../../src/universal/ducks/config');
 jest.mock('../../../src/universal/utils/transit', () => ({
   toJSON: jest.fn(() => 'serialized in a string'),
@@ -109,7 +112,7 @@ jest.mock('../../../src/universal/utils/transit', () => ({
 jest.spyOn(console, 'info').mockImplementation(() => {});
 jest.spyOn(console, 'log').mockImplementation(() => {});
 jest.spyOn(console, 'error').mockImplementation(() => {});
-jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
+jest.spyOn(console, 'warn').mockImplementation(() => {});
 
 describe('sendHtml', () => {
   const appHtml = '<p>Why, hello!</p>';
@@ -456,12 +459,16 @@ describe('sendHtml', () => {
       });
 
       it('includes __pwa_metadata__ with enabled values', () => {
-        getClientPWAConfig.mockImplementationOnce(() => ({
+        const PWAConfig = {
           serviceWorker: true,
           serviceWorkerScope: '/',
           serviceWorkerScriptUrl: '/_/pwa/service-worker.js',
           webManifestUrl: '/_/pwa/manifest.webmanifest',
           offlineUrl: '/_/pwa/shell',
+        };
+        getClientPWAConfig.mockImplementationOnce(() => ({
+          asObject: PWAConfig,
+          asString: JSON.stringify(PWAConfig),
         }));
         sendHtml(req, res);
         expect(res.send).toHaveBeenCalledTimes(1);
@@ -697,7 +704,7 @@ describe('sendHtml', () => {
     it('adds cache busting clientCacheRevision from module map to each module script src if NODE_ENV is production', () => {
       expect(renderModuleScripts({
         clientInitialState: req.store.getState(),
-        moduleMap: clientModuleMapCache.browser,
+        moduleMap: clientModuleMapCache.asObject.browser,
         isDevelopmentEnv: false,
         bundle: 'browser',
       })).toMatchSnapshot();
@@ -706,14 +713,14 @@ describe('sendHtml', () => {
     it('does not add cache busting clientCacheRevision from module map to each module script src if NODE_ENV is development', () => {
       expect(renderModuleScripts({
         clientInitialState: req.store.getState(),
-        moduleMap: clientModuleMapCache.browser,
+        moduleMap: clientModuleMapCache.asObject.browser,
         isDevelopmentEnv: true,
         bundle: 'browser',
       })).toMatchSnapshot();
     });
 
     it('does not add cache busting clientCacheRevision if not present', () => {
-      const moduleMap = { ...clientModuleMapCache.browser };
+      const moduleMap = { ...clientModuleMapCache.asObject.browser };
       delete moduleMap.clientCacheRevision;
       expect(renderModuleScripts({
         clientInitialState: req.store.getState(),
@@ -726,7 +733,7 @@ describe('sendHtml', () => {
     it('sends a rendered page with cross origin scripts', () => {
       expect(renderModuleScripts({
         clientInitialState: req.store.getState(),
-        moduleMap: clientModuleMapCache.browser,
+        moduleMap: clientModuleMapCache.asObject.browser,
         isDevelopmentEnv: true,
         bundle: 'browser',
       })).toMatchSnapshot();
@@ -742,7 +749,7 @@ describe('sendHtml', () => {
       });
       expect(renderModuleScripts({
         clientInitialState: holocronState,
-        moduleMap: getClientModuleMapCache().browser,
+        moduleMap: getClientModuleMapCache().asObject.browser,
         isDevelopmentEnv: false,
         bundle: 'browser',
       })).toMatchSnapshot();
@@ -758,7 +765,7 @@ describe('sendHtml', () => {
       });
       expect(renderModuleScripts({
         clientInitialState: holocronState,
-        moduleMap: getClientModuleMapCache().browser,
+        moduleMap: getClientModuleMapCache().asObject.browser,
         isDevelopmentEnv: false,
         bundle: 'browser',
       })).toMatchSnapshot();
@@ -772,7 +779,7 @@ describe('sendHtml', () => {
       });
       expect(renderModuleScripts({
         clientInitialState: holocronState,
-        moduleMap: clientModuleMapCache.browser,
+        moduleMap: clientModuleMapCache.asObject.browser,
         isDevelopmentEnv: false,
         bundle: 'browser',
       })).toMatchSnapshot();

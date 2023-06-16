@@ -2,38 +2,50 @@
 
 exports[`loadModules doesnt update caches when there are no changes 1`] = `
 Object {
-  "browser": Object {
-    "modules": Object {},
+  "asObject": Object {
+    "browser": Object {
+      "modules": Object {},
+    },
+    "legacyBrowser": Object {
+      "modules": Object {},
+    },
   },
-  "legacyBrowser": Object {
-    "modules": Object {},
+  "asString": Object {
+    "browser": "{\\"modules\\":{}}",
+    "legacyBrowser": "{\\"modules\\":{}}",
   },
 }
 `;
 
 exports[`loadModules updates the client module map cache 1`] = `
 Object {
-  "browser": Object {
-    "modules": Object {
-      "some-root": Object {
-        "baseUrl": "https://example.com/cdn/some-root/1.1.2/",
-        "browser": Object {
-          "integrity": "nggdfhr34",
-          "url": "https://example.com/cdn/some-root/1.1.2/some-root.browser.js",
+  "asObject": Object {
+    "browser": Object {
+      "modules": Object {
+        "some-root": Object {
+          "baseUrl": "https://example.com/cdn/some-root/1.1.2/",
+          "browser": Object {
+            "integrity": "nggdfhr34",
+            "url": "https://example.com/cdn/some-root/1.1.2/some-root.browser.js",
+          },
+        },
+      },
+    },
+    "legacyBrowser": Object {
+      "modules": Object {
+        "some-root": Object {
+          "baseUrl": "https://example.com/cdn/some-root/1.1.2/",
+          "legacyBrowser": Object {
+            "integrity": "7567ee",
+            "url": "https://example.com/cdn/some-root/1.1.2/some-root.legacy.browser.js",
+          },
         },
       },
     },
   },
-  "legacyBrowser": Object {
-    "modules": Object {
-      "some-root": Object {
-        "baseUrl": "https://example.com/cdn/some-root/1.1.2/",
-        "legacyBrowser": Object {
-          "integrity": "7567ee",
-          "url": "https://example.com/cdn/some-root/1.1.2/some-root.legacy.browser.js",
-        },
-      },
-    },
+  "asString": Object {
+    "browser": "{\\"modules\\":{\\"some-root\\":{\\"baseUrl\\":\\"https://example.com/cdn/some-root/1.1.2/\\",\\"browser\\":{\\"url\\":\\"https://example.com/cdn/some-root/1.1.2/some-root.browser.js\\",\\"integrity\\":\\"nggdfhr34\\"}}}}",
+    "legacyBrowser": "{\\"modules\\":{\\"some-root\\":{\\"baseUrl\\":\\"https://example.com/cdn/some-root/1.1.2/\\",\\"legacyBrowser\\":{\\"url\\":\\"https://example.com/cdn/some-root/1.1.2/some-root.legacy.browser.js\\",\\"integrity\\":\\"7567ee\\"}}}}",
   },
 }
 `;

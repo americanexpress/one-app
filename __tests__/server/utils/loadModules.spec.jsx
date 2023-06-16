@@ -78,6 +78,7 @@ describe('loadModules', () => {
 
     global.fetch = jest.fn(() => Promise.resolve({
       json: () => Promise.resolve(fetchedModuleMap),
+      text: () => Promise.resolve(JSON.stringify(fetchedModuleMap)),
     }));
   });
 

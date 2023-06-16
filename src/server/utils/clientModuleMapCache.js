@@ -13,8 +13,12 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+import jsonStringifyForScript from './jsonStringifyForScript';
 
-let cache = {};
+let cache = {
+  asString: {},
+  asObject: {},
+};
 
 /* Filters bundle types so only the required client moduleBundleType is returned
 in ../server/middleware/sendHtml.js and reducing the html payload size */
@@ -34,9 +38,18 @@ function filterBundles(moduleMap, moduleBundleType) {
 }
 
 export function setClientModuleMapCache(moduleMap) {
+  const browser = filterBundles(moduleMap, 'browser');
+  const legacyBrowser = filterBundles(moduleMap, 'legacyBrowser');
+
   cache = {
-    browser: filterBundles(moduleMap, 'browser'),
-    legacyBrowser: filterBundles(moduleMap, 'legacyBrowser'),
+    asObject: {
+      browser,
+      legacyBrowser,
+    },
+    asString: {
+      browser: jsonStringifyForScript(browser),
+      legacyBrowser: jsonStringifyForScript(legacyBrowser),
+    },
   };
 }
 

@@ -44,7 +44,8 @@ function createServiceWorkerConfig({ type, scope } = {}) {
 
 beforeAll(() => {
   getClientModuleMapCache.mockImplementation(() => ({
-    browser: { modules: {} },
+    asObject: { browser: { modules: {} } },
+    asString: { browser: JSON.stringify({ modules: {} }) },
   }));
 });
 
@@ -151,6 +152,6 @@ describe('service worker middleware', () => {
     expect(res.type).toHaveBeenCalledWith('js');
     expect(res.set).toHaveBeenCalledWith('Service-Worker-Allowed', '/');
     expect(res.set).toHaveBeenCalledWith('Cache-Control', 'no-store, no-cache');
-    expect(res.send).toHaveBeenCalledWith(Buffer.from(`'${JSON.stringify(getClientModuleMapCache().browser)}'`));
+    expect(res.send).toHaveBeenCalledWith(Buffer.from(`'${getClientModuleMapCache().asString.browser}'`));
   });
 });
