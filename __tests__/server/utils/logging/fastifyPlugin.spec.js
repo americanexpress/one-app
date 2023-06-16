@@ -728,6 +728,37 @@ describe('fastifyPlugin', () => {
         });
       });
     });
+
+    it('catches and logs errors', async () => {
+      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      const request = {
+        headers: {},
+      };
+      const reply = {
+        getHeader: jest.fn(),
+        raw: {},
+      };
+
+      const fastify = {
+        decorateRequest: jest.fn((name, fn) => {
+          fastify[name] = fn;
+        }),
+        addHook: jest.fn((name, fn) => {
+          if (!fastify[name]) {
+            fastify[name] = fn;
+          }
+        }),
+      };
+
+      fastifyPlugin(fastify, null, jest.fn());
+      const boomError = new Error('boom');
+      setConfigureRequestLog(() => {
+        throw boomError;
+      });
+      await expect(() => fastify.onResponse(request, reply)).rejects.toEqual(boomError);
+      expect(errorSpy).toHaveBeenCalledWith(boomError);
+    });
   });
 
   describe('setConfigureRequestLog', () => {

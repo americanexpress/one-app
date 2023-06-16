@@ -201,12 +201,17 @@ const fastifyPlugin = (fastify, _opts, done) => {
   });
 
   fastify.addHook('onResponse', async (request, reply) => {
-    endTimer(request, $ResponseBuilder);
-    // same as 'reply.getResponseTime()' but our approach
-    // helps us to make the code cleaner
-    endTimer(request, $RequestFullDuration);
+    try {
+      endTimer(request, $ResponseBuilder);
+      // same as 'reply.getResponseTime()' but our approach
+      // helps us to make the code cleaner
+      endTimer(request, $RequestFullDuration);
 
-    logClientRequest(request, reply);
+      logClientRequest(request, reply);
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   });
 
   done();
