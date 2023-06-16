@@ -729,4 +729,68 @@ describe('fastifyPlugin', () => {
       });
     });
   });
+
+  describe('setConfigureRequestLog', () => {
+    it('resets to default', async () => {
+      const request = {
+        headers: {},
+      };
+      const reply = {
+        getHeader: jest.fn(),
+        raw: {},
+      };
+
+      const fastify = {
+        decorateRequest: jest.fn((name, fn) => {
+          fastify[name] = fn;
+        }),
+        addHook: jest.fn((name, fn) => {
+          if (!fastify[name]) {
+            fastify[name] = fn;
+          }
+        }),
+      };
+
+      fastifyPlugin(fastify, null, jest.fn());
+      setConfigureRequestLog(() => {
+        throw new Error('shh');
+      });
+      setConfigureRequestLog();
+
+      await fastify.onResponse(request, reply);
+
+      expect(logger.info.mock.calls[0][0]).toMatchInlineSnapshot(`
+        {
+          "request": {
+            "address": {
+              "uri": "",
+            },
+            "direction": "in",
+            "metaData": {
+              "correlationId": undefined,
+              "forwarded": null,
+              "forwardedFor": null,
+              "host": null,
+              "locale": undefined,
+              "location": undefined,
+              "method": undefined,
+              "referrer": null,
+              "userAgent": null,
+            },
+            "protocol": undefined,
+            "statusCode": undefined,
+            "statusText": undefined,
+            "timings": {
+              "duration": 0,
+              "requestOverhead": NaN,
+              "responseBuilder": 0,
+              "routeHandler": NaN,
+              "ttfb": 0,
+            },
+          },
+          "type": "request",
+        }
+      `);
+    });
+  });
 });

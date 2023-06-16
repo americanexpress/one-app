@@ -35,8 +35,9 @@ export const $RequestOverhead = Symbol('$RequestOverhead');
 export const $RouteHandler = Symbol('$RouteHandler');
 export const $ResponseBuilder = Symbol('$ResponseBuilder');
 
+const passThrough = ({ log }) => log;
 const UTILS = {
-  configureRequestLog: ({ log }) => log,
+  configureRequestLog: passThrough,
 };
 
 const getLocale = (req) => {
@@ -137,7 +138,7 @@ const logClientRequest = (request, reply) => {
   logger.info(configuredLog);
 };
 
-export const setConfigureRequestLog = (newConfigureRequestLog) => {
+export const setConfigureRequestLog = (newConfigureRequestLog = passThrough) => {
   UTILS.configureRequestLog = newConfigureRequestLog;
 };
 
