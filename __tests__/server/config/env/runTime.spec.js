@@ -499,4 +499,19 @@ describe('runTime', () => {
       expect(() => postRequestMaxPayload.validate('20kb')).not.toThrow();
     });
   });
+
+  describe('ONE_ENABLE_SERVER_TRACING', () => {
+    const oneEnableServerTracing = getEnvVarConfig('ONE_ENABLE_SERVER_TRACING');
+    it('should have a default value of "false"', () => {
+      expect(oneEnableServerTracing.defaultValue).toBe('false');
+    });
+
+    it('should normalize the value to be either true or false', () => {
+      expect(oneEnableServerTracing.normalize('True')).toBe('true');
+      expect(oneEnableServerTracing.normalize('TRUE')).toBe('true');
+      expect(oneEnableServerTracing.normalize('true')).toBe('true');
+      expect(oneEnableServerTracing.normalize('FALSE')).toBe('false');
+      expect(oneEnableServerTracing.normalize('EbwEfbWEFBE')).toBe('false');
+    });
+  });
 });

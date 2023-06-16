@@ -22,6 +22,7 @@ import { composeModules } from 'holocron';
 import { getBreaker } from '../../../src/server/utils/createCircuitBreaker';
 
 import * as reactRendering from '../../../src/server/utils/reactRendering';
+import { NoOpTracer } from '../../../src/server/utils/tracer';
 
 jest.mock('@americanexpress/one-app-router', () => {
   const reactRouter = jest.requireActual('@americanexpress/one-app-router');
@@ -87,6 +88,8 @@ describe('createRequestHtmlFragment', () => {
     res.end = jest.fn(() => res);
     req.url = 'http://example.com/request';
     req.store = { dispatch, getState };
+
+    req.tracer = new NoOpTracer();
 
     next = jest.fn();
 

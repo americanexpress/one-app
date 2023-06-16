@@ -28,6 +28,5 @@ export default function addFrameOptionsHeader(req, res, next) {
   if (matchedDomain) {
     res.set('X-Frame-Options', `ALLOW-FROM ${referer}`);
   }
-
   next();
 }

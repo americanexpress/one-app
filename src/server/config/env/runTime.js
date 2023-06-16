@@ -34,7 +34,6 @@ const isPositiveIntegerIfDefined = (input) => {
 
   throw new Error(`Expected ${input} to be a positive integer`);
 };
-
 // the set of env vars to validate and normalize
 // order matters, ex: ONE_CLIENT_REPORTING_URL uses HTTP_PORT
 const runTime = [
@@ -213,12 +212,7 @@ const runTime = [
   {
     name: 'ONE_ENABLE_POST_TO_MODULE_ROUTES',
     defaultValue: 'false',
-    normalize: (input) => {
-      if (input.toLowerCase() === 'false') {
-        return 'false';
-      }
-      return `${!!input}`;
-    },
+    normalize: (input) => (input.toLowerCase() === 'false' ? 'false' : `${!!input}`),
     validate: (input) => {
       if (input !== 'true' && input !== 'false') {
         throw new Error(`Expected "${input}" to be "true" or "false"`);
@@ -236,6 +230,11 @@ const runTime = [
         throw new Error(`Expected "${input}" to be parseable by bytes utility https://www.npmjs.com/package/bytes`);
       }
     },
+  },
+  {
+    name: 'ONE_ENABLE_SERVER_TRACING',
+    defaultValue: 'false',
+    normalize: (input) => (input.toLowerCase() === 'true' ? 'true' : 'false'),
   },
 ];
 runTime.forEach(preprocessEnvVar);
