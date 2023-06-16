@@ -71,6 +71,7 @@ export function validateCspIsPresent(csp) {
   }
 }
 
+/* eslint complexity:  ['error', 12] */
 export default function onModuleLoad({
   module,
   moduleName,
@@ -129,8 +130,8 @@ export default function onModuleLoad({
     extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
     setConfigureRequestLog(configureRequestLog);
     setCreateSsrFetch(createSsrFetch);
-    setEventLoopDelayThreshold(eventLoopDelayThreshold);
-    setEventLoopDelayPercentile(eventLoopDelayPercentile);
+    if (eventLoopDelayThreshold) setEventLoopDelayThreshold(eventLoopDelayThreshold);
+    if (eventLoopDelayPercentile) setEventLoopDelayPercentile(eventLoopDelayPercentile);
     configurePWA(validatePWAConfig(pwa, {
       clientStateConfig: getClientStateConfig(),
     }));

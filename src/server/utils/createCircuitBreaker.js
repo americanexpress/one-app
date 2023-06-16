@@ -28,14 +28,14 @@ export const setEventLoopDelayThreshold = (n) => {
   eventLoopDelayThreshold = Number.parseInt(n, 10) || 250;
 };
 
-export const setEventLoopDelayPercentile = (n) => {
-  if (typeof n !== 'undefined' && (n !== Number.parseInt(n, 10) || n < 1 || n > 100)) {
+// Default to p(100) to avoid breaking change for users expecting max delay
+export const setEventLoopDelayPercentile = (n = 100) => {
+  if (n !== Number.parseInt(n, 10) || n < 1 || n > 100) {
     console.warn(`Event loop percentile must be an integer in range 1-100; given ${JSON.stringify(n)}. Defaulting to p(100).`);
     eventLoopDelayPercentile = 100;
     return;
   }
-  // Default to p(100) to avoid breaking change for users expecting max delay
-  eventLoopDelayPercentile = n || 100;
+  eventLoopDelayPercentile = n;
 };
 
 export const getEventLoopDelayThreshold = () => eventLoopDelayThreshold;
