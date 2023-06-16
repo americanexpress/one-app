@@ -90,7 +90,7 @@ export async function setErrorPage(fallbackUrl) {
   return errorPage;
 }
 
-export async function renderStaticErrorPage(res) {
+export function renderStaticErrorPage(res) {
   if (!res.statusCode) {
     res.status(500);
   }
@@ -315,7 +315,7 @@ export function renderPartial({
 }
 
 // TODO add additional client side scripts
-export default function sendHtml(req, res) {
+export default function sendHtml(req, res, next) {
   let body;
   try {
     const {
@@ -345,12 +345,14 @@ export default function sendHtml(req, res) {
     const allowedHtmlTags = clientInitialState.getIn(['rendering', 'renderTextOnlyOptions', 'allowedHtmlTags']);
 
     if (renderPartialOnly) {
-      return safeSend(res, renderPartial({ html: req.appHtml, store, disableStyles }));
+      safeSend(res, renderPartial({ html: req.appHtml, store, disableStyles }));
+      return next();
     }
 
     if (renderTextOnly) {
       res.setHeader('content-type', 'text/plain');
-      return safeSend(res, striptags(req.appHtml, allowedHtmlTags, htmlTagReplacement));
+      safeSend(res, striptags(req.appHtml, allowedHtmlTags, htmlTagReplacement));
+      return next();
     }
 
     const chunkAssets = isLegacy ? legacyBrowserChunkAssets : modernBrowserChunkAssets;
@@ -391,8 +393,10 @@ export default function sendHtml(req, res) {
     `;
   } catch (err) {
     console.error('sendHtml had an error, sending static error page', err);
-    return renderStaticErrorPage(res);
+    renderStaticErrorPage(res);
+    return next();
   }
 
-  return safeSend(res, body);
+  safeSend(res, body);
+  return next();
 }
