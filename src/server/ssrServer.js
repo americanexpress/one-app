@@ -50,6 +50,7 @@ import {
   webManifestMiddleware,
   offlineMiddleware,
 } from './middleware/pwa';
+import { completeTracer, initializeTracer, traceMiddleware } from './utils/tracer';
 
 export function createApp({ enablePostToModuleRoutes = false } = {}) {
   const app = express();
@@ -82,13 +83,16 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
   app.get('/_/pwa/shell', offlineMiddleware(oneApp));
   app.get(
     '*',
-    addFrameOptionsHeader,
-    createRequestStore(oneApp),
+    initializeTracer,
+    traceMiddleware(addFrameOptionsHeader, '1'),
+    traceMiddleware(createRequestStore(oneApp), '2'),
+    // createRequestHtmlFragment traces itself
     createRequestHtmlFragment(oneApp),
-    conditionallyAllowCors,
-    checkStateForRedirect,
-    checkStateForStatusCode,
-    sendHtml
+    traceMiddleware(conditionallyAllowCors, '8'),
+    traceMiddleware(checkStateForRedirect, '9'),
+    traceMiddleware(checkStateForStatusCode, '10'),
+    traceMiddleware(sendHtml, '11'),
+    completeTracer
   );
 
   if (enablePostToModuleRoutes) {
@@ -102,16 +106,19 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
 
     app.post(
       '*',
-      addSecurityHeaders,
-      json({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
-      urlencoded({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }),
-      addFrameOptionsHeader,
-      createRequestStore(oneApp, { useBodyForBuildingTheInitialState: true }),
+      initializeTracer,
+      traceMiddleware(addSecurityHeaders, '12'),
+      traceMiddleware(json({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }), '13'),
+      traceMiddleware(urlencoded({ limit: process.env.ONE_MAX_POST_REQUEST_PAYLOAD }), '14'),
+      traceMiddleware(addFrameOptionsHeader, '1'),
+      traceMiddleware(createRequestStore(oneApp, { useBodyForBuildingTheInitialState: true }), '2'),
+      // createRequestHtmlFragment traces itself
       createRequestHtmlFragment(oneApp),
-      conditionallyAllowCors,
-      checkStateForRedirect,
-      checkStateForStatusCode,
-      sendHtml
+      traceMiddleware(conditionallyAllowCors, '8'),
+      traceMiddleware(checkStateForRedirect, '9'),
+      traceMiddleware(checkStateForStatusCode, '10'),
+      traceMiddleware(sendHtml, '11'),
+      completeTracer
     );
   }
 

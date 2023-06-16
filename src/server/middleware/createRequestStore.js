@@ -23,12 +23,13 @@ import safeRequest from '../utils/safeRequest';
 import { getServerStateConfig, getClientStateConfig } from '../utils/stateConfig';
 import createSsrFetch from '../utils/createSsrFetch';
 import { getClientModuleMapCache } from '../utils/clientModuleMapCache';
+import { enhanceFetchWithTracer } from '../utils/tracer';
 
 export default function createRequestStore(
   { reducers },
   { useBodyForBuildingTheInitialState = false } = {}
 ) {
-  return (req, res, next) => {
+  const createRequestStoreMiddleware = (req, res, next) => {
     try {
       const serverConfig = getServerStateConfig();
       const clientConfig = getClientStateConfig();
@@ -38,10 +39,10 @@ export default function createRequestStore(
         config: serverConfig,
       });
 
-      const fetchClient = createSsrFetch({
+      const fetchClient = enhanceFetchWithTracer(req, createSsrFetch({
         req,
         res,
-      })(fetch);
+      })(fetch));
 
       const enhancer = createEnhancer();
       const localsForBuildInitialState = {
@@ -68,4 +69,5 @@ export default function createRequestStore(
       return renderStaticErrorPage(res);
     }
   };
+  return createRequestStoreMiddleware;
 }
