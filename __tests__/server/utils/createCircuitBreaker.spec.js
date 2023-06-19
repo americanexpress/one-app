@@ -19,12 +19,19 @@ import { getModule } from 'holocron';
 import createCircuitBreaker, {
   setEventLoopDelayThreshold,
   getEventLoopDelayThreshold,
+  setEventLoopDelayPercentile,
+  getEventLoopDelayPercentile,
+  getEventLoopDelayHistogram,
 } from '../../../src/server/utils/createCircuitBreaker';
 
 jest.useFakeTimers();
 
 const asyncFunctionThatMightFail = jest.fn(async () => ({ fallback: false }));
 const mockCircuitBreaker = createCircuitBreaker(asyncFunctionThatMightFail);
+
+const eventLoopDelayHistogram = getEventLoopDelayHistogram();
+const histogramPercentileSpy = jest.spyOn(eventLoopDelayHistogram, 'percentile');
+const histogramResetSpy = jest.spyOn(eventLoopDelayHistogram, 'reset');
 
 jest.mock('holocron', () => ({
   getModule: jest.fn(() => true),
@@ -33,16 +40,25 @@ jest.mock('holocron', () => ({
 describe('Circuit breaker', () => {
   const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => 0);
   const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => 0);
+  const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => 0);
 
   beforeEach(() => {
     process.env.NODE_ENV = 'production';
     setEventLoopDelayThreshold();
+    setEventLoopDelayPercentile();
     mockCircuitBreaker.close();
     jest.clearAllMocks();
   });
 
   it('should be an opossum circuit breaker', () => {
     expect(mockCircuitBreaker).toBeInstanceOf(CircuitBreaker);
+  });
+
+  it('should reset the histogram every 30 seconds', () => {
+    jest.advanceTimersByTime(30e3 + 10);
+    expect(histogramResetSpy).toHaveBeenCalledTimes(1);
+    jest.advanceTimersByTime(30e3 + 10);
+    expect(histogramResetSpy).toHaveBeenCalledTimes(2);
   });
 
   it('should call the given function', async () => {
@@ -78,6 +94,14 @@ describe('Circuit breaker', () => {
     expect(value).toEqual({ fallback: false });
   });
 
+  it('should validate against the configured percentile', async () => {
+    jest.advanceTimersByTime(5e3 + 10);
+    expect(histogramPercentileSpy).toHaveBeenCalledWith(100);
+    setEventLoopDelayPercentile(95);
+    jest.advanceTimersByTime(5e3 + 10);
+    expect(histogramPercentileSpy).toHaveBeenCalledWith(95);
+  });
+
   it('should not open the circuit when threshold not exceeded', async () => {
     expect.assertions(2);
     setEventLoopDelayThreshold(250);
@@ -111,7 +135,7 @@ describe('Circuit breaker', () => {
     expect(consoleErrorSpy.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Opening circuit, event loop delay (0ms) is > eventLoopDelayThreshold (-1ms)],
+          [Error: Opening circuit, p(100) event loop delay (0ms) is > eventLoopDelayThreshold (-1ms)],
         ],
       ]
     `);
@@ -142,12 +166,12 @@ describe('Circuit breaker', () => {
   });
 
   describe('event loop delay threshold', () => {
-    it('should set a default value of 30ms', () => {
+    it('should set a default value of 250ms', () => {
       setEventLoopDelayThreshold();
       expect(getEventLoopDelayThreshold()).toBe(250);
     });
 
-    it('should set value to 30ms if input is not a number', () => {
+    it('should set value to 250ms if input is not a number', () => {
       setEventLoopDelayThreshold('hello, world');
       expect(getEventLoopDelayThreshold()).toBe(250);
     });
@@ -160,6 +184,52 @@ describe('Circuit breaker', () => {
     it('should handle numbers as strings', () => {
       setEventLoopDelayThreshold('55');
       expect(getEventLoopDelayThreshold()).toBe(55);
+    });
+  });
+
+  describe('event loop delay percentile', () => {
+    it('should set a default value of 100', () => {
+      setEventLoopDelayPercentile();
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
+      expect(getEventLoopDelayPercentile()).toBe(100);
+    });
+
+    it('should warn and set value to 100 if input is not a number', () => {
+      setEventLoopDelayPercentile('hello, world');
+      expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(
+        '"Event loop percentile must be an integer in range 1-100; given \\"hello, world\\". Defaulting to p(100)."'
+      );
+      expect(getEventLoopDelayPercentile()).toBe(100);
+    });
+
+    it('should warn and set value to 100 if input less than 1', () => {
+      setEventLoopDelayPercentile(0);
+      expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(
+        '"Event loop percentile must be an integer in range 1-100; given 0. Defaulting to p(100)."'
+      );
+      expect(getEventLoopDelayPercentile()).toBe(100);
+    });
+
+    it('should warn and set value to 100 if input less grater than 100', () => {
+      setEventLoopDelayPercentile(101);
+      expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(
+        '"Event loop percentile must be an integer in range 1-100; given 101. Defaulting to p(100)."'
+      );
+      expect(getEventLoopDelayPercentile()).toBe(100);
+    });
+
+    it('should warn and set value to 100 if input is a float', () => {
+      setEventLoopDelayPercentile(99.9);
+      expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(
+        '"Event loop percentile must be an integer in range 1-100; given 99.9. Defaulting to p(100)."'
+      );
+      expect(getEventLoopDelayPercentile()).toBe(100);
+    });
+
+    it('should set the given value', () => {
+      setEventLoopDelayPercentile(44);
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
+      expect(getEventLoopDelayPercentile()).toBe(44);
     });
   });
 });
