@@ -23,7 +23,7 @@ import {
 const requestMetrics = (fastify, _opts, done) => {
   fastify.decorateRequest('finishRouteTimer', null);
 
-  fastify.addHook('onRequest', (request) => {
+  fastify.addHook('onRequest', async (request) => {
     request.finishRouteTimer = startSummaryTimer(routeMetrics.responseTime);
   });
 

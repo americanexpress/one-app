@@ -1578,9 +1578,6 @@ describe('Tests that require Docker setup', () => {
         date: [
           expect.any(String),
         ],
-        'expect-ct': [
-          'max-age=0',
-        ],
         'one-app-version': [
           expect.any(String),
         ],

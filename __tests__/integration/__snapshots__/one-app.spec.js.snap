@@ -74,6 +74,7 @@ exports[`Tests that require Docker setup one-app successfully started metrics ha
   "oneapp_holocron_module_map_poll_wait_seconds",
   "oneapp_holocron_module_map_updated_total",
   "oneapp_intl_cache_size_total",
+  "oneapp_route_response_time_seconds",
   "oneapp_ssr_react_rendering_seconds",
   "oneapp_version_info",
   "process_cpu_seconds_total",
