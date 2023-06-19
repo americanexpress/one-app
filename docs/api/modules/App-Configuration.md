@@ -19,6 +19,7 @@ if (!global.BROWSER) {
     pwa,
     createSsrFetch,
     eventLoopDelayThreshold,
+    eventLoopDelayPercentile,
     errorPageUrl,
     dnsCache,
     /* Child Module Specific */
@@ -67,6 +68,7 @@ export default MyModule;
   - [`extendSafeRequestRestrictedAttributes`](#extendsaferequestrestrictedattributes)
   - [`createSsrFetch`](#createssrfetch)
   - [`eventLoopDelayThreshold`](#eventloopdelaythreshold)
+  - [`eventLoopDelayPercentile`](#eventloopdelaypercentile)
   - [`errorPageUrl`](#errorpageurl)
   - [`dnsCache`](#dnsCache)
   - [`validateStateConfig`](#validatestateconfig)
@@ -452,13 +454,29 @@ if (!global.BROWSER) {
 }
 ```
 
-The `eventLoopDelayThreshold` directive accepts a number representing the threshold of the event loop delay (in milliseconds) before opening the circuit. Once the circuit is open, it will remain open for 10 seconds and close at that time pending the event loop delay. The default value is `250`. If you desire to disable the event loop delay potion of the circuit breaker, set this value to `Infinity`. The circuit will also open if the error rate exceeds 10%. In practice, `eventLoopDelayThreshold` allows for tuning server side rendering (SSR) of Modules. We may increase request throughput by temporarily disabling SSR at high load through event loop delay monitoring.
+The `eventLoopDelayThreshold` directive accepts a number representing the threshold of the event loop delay (in milliseconds) before opening the circuit. Once the circuit is open, it will remain open for 10 seconds and close at that time pending the event loop delay. The default value is `250`. If you desire to disable the event loop delay portion of the circuit breaker, set this value to `Infinity`. The circuit will also open if the error rate exceeds 10%. In practice, `eventLoopDelayThreshold` allows for tuning server side rendering (SSR) of Modules. We may increase request throughput by temporarily disabling SSR at high load through event loop delay monitoring.
 
 > This is disabled when NODE_ENV=development
 
 **📘 More Information**
 * [Frank Lloyd Root's `appConfig`](../../../prod-sample/sample-modules/frank-lloyd-root/0.0.0/src/config.js)
 * Library: [Opossum](https://nodeshift.dev/opossum/)
+
+## `eventLoopDelayPercentile`
+**Module Type**
+* ✅ Root Module
+* 🚫 Child Module
+
+**Shape**
+```js
+if (!global.BROWSER) {
+  Module.appConfig = {
+    eventLoopDelayPercentile: Number,
+  };
+}
+```
+
+The `eventLoopDelayPercentile` directive accepts an integer 1-100 representing the percentile upon which the `eventLoopDelayThreshold` must be crossed before opening the circuit. The default value is `100` which represents the maximum event loop delay. This default will likely change in future major versions as to not base the circuit breaker state on an outlier, but rather a trend.
 
 ## `errorPageUrl`
 
