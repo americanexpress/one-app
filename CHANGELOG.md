@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.19.0](https://github.com/americanexpress/one-app/compare/v5.18.1...v5.19.0) (2023-06-19)
+
+
+### Features
+
+* **circuitBreaker:** configurable event loop delay percentile ([#1024](https://github.com/americanexpress/one-app/issues/1024)) ([b161652](https://github.com/americanexpress/one-app/commit/b161652cb0ab7daeee668788553f23f8e6f85b3a))
+* **server:** add SSR React rendering summary metric ([#1020](https://github.com/americanexpress/one-app/issues/1020)) ([c57d1de](https://github.com/americanexpress/one-app/commit/c57d1dea4991b10f618ac72e665dc5b7d602e0f4))
+* **tracing:** a server tracing system for one-app ([21c6a21](https://github.com/americanexpress/one-app/commit/21c6a21b7ff2dbd1cb4b6bf23049ed6fe8aa7567))
+
+
 ## [5.18.1](https://github.com/americanexpress/one-app/compare/v5.18.0...v5.18.1) (2023-05-22)
 
 
