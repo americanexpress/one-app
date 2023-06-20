@@ -299,7 +299,7 @@ export default function EmailPartialsChildModule() {
 
   return (
     <dangerously-return-only-doctype
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: html }} // eslint-disable-line react/no-danger
     />
   );
 }

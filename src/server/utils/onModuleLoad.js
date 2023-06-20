@@ -23,7 +23,7 @@ import readJsonFile from './readJsonFile';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from './safeRequest';
 import { setConfigureRequestLog } from './logging/fastifyPlugin';
 import { setCreateSsrFetch } from './createSsrFetch';
-import { setEventLoopDelayThreshold } from './createCircuitBreaker';
+import { setEventLoopDelayThreshold, setEventLoopDelayPercentile } from './createCircuitBreaker';
 import setupDnsCache from './setupDnsCache';
 import { configurePWA } from '../pwa';
 import { validatePWAConfig } from './validation';
@@ -71,6 +71,7 @@ export function validateCspIsPresent(csp) {
   }
 }
 
+/* eslint complexity:  ['error', 12] */
 export default function onModuleLoad({
   module,
   moduleName,
@@ -86,6 +87,7 @@ export default function onModuleLoad({
       extendSafeRequestRestrictedAttributes = {},
       createSsrFetch,
       eventLoopDelayThreshold,
+      eventLoopDelayPercentile,
       pwa,
       errorPageUrl,
       dnsCache,
@@ -128,7 +130,8 @@ export default function onModuleLoad({
     extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
     setConfigureRequestLog(configureRequestLog);
     setCreateSsrFetch(createSsrFetch);
-    setEventLoopDelayThreshold(eventLoopDelayThreshold);
+    if (eventLoopDelayThreshold) setEventLoopDelayThreshold(eventLoopDelayThreshold);
+    if (eventLoopDelayPercentile) setEventLoopDelayPercentile(eventLoopDelayPercentile);
     configurePWA(validatePWAConfig(pwa, {
       clientStateConfig: getClientStateConfig(),
     }));
