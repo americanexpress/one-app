@@ -22,6 +22,7 @@ import holocron from './holocron';
 import intlCache from './intl-cache';
 import * as appVersion from './app-version';
 import ssr from './ssr';
+import route from './route';
 
 export {
   // counters
@@ -40,4 +41,5 @@ export {
   appVersion,
   intlCache,
   ssr,
+  route,
 };

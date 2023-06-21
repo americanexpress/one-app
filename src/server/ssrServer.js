@@ -39,6 +39,7 @@ import renderHtml from './plugins/reactHtml';
 import renderStaticErrorPage from './plugins/reactHtml/staticErrorPage';
 import addFrameOptionsHeader from './plugins/addFrameOptionsHeader';
 import addCacheHeaders from './plugins/addCacheHeaders';
+import addRequestMetrics from './plugins/addRequestMetrics';
 import { getServerPWAConfig, serviceWorkerHandler, webManifestMiddleware } from './pwa';
 
 const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
@@ -198,6 +199,7 @@ export async function createApp(opts = {}) {
     );
     instance.register(addFrameOptionsHeader);
     instance.register(renderHtml);
+    instance.register(addRequestMetrics);
 
     instance.get('/_/pwa/shell', (_request, reply) => {
       if (getServerPWAConfig().serviceWorker) {
