@@ -56,6 +56,7 @@ import { completeTracer, initializeTracer, traceMiddleware } from './utils/trace
 const metricsMiddleware = promBundle({
   includeMethod: true,
   includePath: false,
+  includeUp: false,
 });
 
 export function createApp({ enablePostToModuleRoutes = false } = {}) {
