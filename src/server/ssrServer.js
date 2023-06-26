@@ -28,6 +28,7 @@ import fastifyFormbody from '@fastify/formbody';
 import fastifyStatic from '@fastify/static';
 import fastifyHelmet from '@fastify/helmet';
 import fastifySensible from '@fastify/sensible';
+import fastifyMetrics from 'fastify-metrics';
 
 import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
@@ -39,7 +40,6 @@ import renderHtml from './plugins/reactHtml';
 import renderStaticErrorPage from './plugins/reactHtml/staticErrorPage';
 import addFrameOptionsHeader from './plugins/addFrameOptionsHeader';
 import addCacheHeaders from './plugins/addCacheHeaders';
-import addRequestMetrics from './plugins/addRequestMetrics';
 import { getServerPWAConfig, serviceWorkerHandler, webManifestMiddleware } from './pwa';
 
 const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
@@ -68,6 +68,11 @@ export async function createApp(opts = {}) {
   fastify.register(ensureCorrelationId);
   fastify.register(fastifyCookie);
   fastify.register(logging);
+  fastify.register(fastifyMetrics, {
+    defaultMetrics: { enabled: false },
+    endpoint: null,
+  });
+
   fastify.register(compress, {
     zlibOptions: {
       level: 1,
@@ -85,7 +90,6 @@ export async function createApp(opts = {}) {
   });
   fastify.register(setAppVersionHeader);
   fastify.register(forwardedHeaderParser);
-
   // Static routes
   fastify.register((instance, _opts, done) => {
     instance.register(fastifyStatic, {
@@ -199,7 +203,6 @@ export async function createApp(opts = {}) {
     );
     instance.register(addFrameOptionsHeader);
     instance.register(renderHtml);
-    instance.register(addRequestMetrics);
 
     instance.get('/_/pwa/shell', (_request, reply) => {
       if (getServerPWAConfig().serviceWorker) {
