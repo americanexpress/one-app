@@ -26,6 +26,7 @@ import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'body-parser';
 import helmet from 'helmet';
 import cors from 'cors';
+import promBundle from 'express-prom-bundle';
 
 import conditionallyAllowCors from './middleware/conditionallyAllowCors';
 import ensureCorrelationId from './middleware/ensureCorrelationId';
@@ -52,6 +53,11 @@ import {
 } from './middleware/pwa';
 import { completeTracer, initializeTracer, traceMiddleware } from './utils/tracer';
 
+const metricsMiddleware = promBundle({
+  includeMethod: true,
+  includePath: false,
+});
+
 export function createApp({ enablePostToModuleRoutes = false } = {}) {
   const app = express();
 
@@ -61,7 +67,6 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
   app.get('*', addSecurityHeaders);
   app.use(setAppVersionHeader);
   app.use(forwardedHeaderParser);
-
   app.use('/_/static', express.static(path.join(__dirname, '../../build'), { maxage: '182d' }));
   app.get('/_/status', (req, res) => res.sendStatus(200));
   app.get('/_/pwa/service-worker.js', serviceWorkerMiddleware());
@@ -81,6 +86,8 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
   app.get('**/*.(json|js|css|map)', (req, res) => res.sendStatus(404));
 
   app.get('/_/pwa/shell', offlineMiddleware(oneApp));
+  // only register metrics for module routes.
+  app.use(metricsMiddleware);
   app.get(
     '*',
     initializeTracer,
