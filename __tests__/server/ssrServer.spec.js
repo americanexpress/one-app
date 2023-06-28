@@ -107,6 +107,7 @@ describe('ssrServer', () => {
       setNotFoundHandler,
       setErrorHandler,
       ready,
+      addContentTypeParser: jest.fn(),
     }));
   });
 
@@ -325,7 +326,10 @@ describe('ssrServer', () => {
           }, null, jest.fn());
 
           const request = {
-            body: {},
+            headers: {
+              'Content-Type': 'application/csp-report',
+            },
+            body: JSON.stringify({}),
           };
           const reply = {
             status: jest.fn(() => reply),
@@ -353,7 +357,7 @@ describe('ssrServer', () => {
         }, null, jest.fn());
 
         const request = {
-          body: {
+          body: JSON.stringify({
             'csp-report': {
               'document-uri': 'document-uri',
               'violated-directive': 'violated-directive',
@@ -362,7 +366,7 @@ describe('ssrServer', () => {
               'column-number': 'column-number',
               'source-file': 'source-file',
             },
-          },
+          }),
         };
         const reply = {
           status: jest.fn(() => reply),
@@ -450,9 +454,9 @@ describe('ssrServer', () => {
 
           const request = {
             headers: {},
-            body: {
+            body: JSON.stringify({
               unit: 'testing',
-            },
+            }),
           };
           const reply = {
             status: jest.fn(() => reply),
@@ -462,9 +466,7 @@ describe('ssrServer', () => {
           post.mock.calls[0][1](request, reply);
 
           expect(post.mock.calls[0][0]).toEqual('/_/report/security/csp-violation');
-          expect(console.warn).toHaveBeenCalledWith(`CSP Violation: {
-  "unit": "testing"
-}`);
+          expect(console.warn).toHaveBeenCalledWith('CSP Violation: {"unit":"testing"}');
           expect(reply.status).toHaveBeenCalledWith(204);
           expect(reply.send).toHaveBeenCalled();
         });
