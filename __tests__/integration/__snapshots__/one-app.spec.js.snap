@@ -46,6 +46,8 @@ exports[`Tests that require Docker setup one-app successfully started metrics ha
 [
   "circuit",
   "circuit_perf",
+  "http_request_duration_seconds",
+  "http_request_summary_seconds",
   "nodejs_active_handles",
   "nodejs_active_handles_total",
   "nodejs_active_requests",
@@ -90,4 +92,4 @@ exports[`Tests that require Docker setup one-app successfully started metrics ha
 
 exports[`Tests that require Docker setup one-app successfully started one-app server provides reporting routes client reported errors logs errors when reported to /_/report/errors 1`] = `"reported client error"`;
 
-exports[`Tests that require Docker setup one-app successfully started one-app server provides reporting routes csp-violations reported to server logs violations reported to /_/report/errors 1`] = `"CSP Violation: {\\n  \\"csp-report\\": {\\n    \\"document-uri\\": \\"bad.example.com"`;
+exports[`Tests that require Docker setup one-app successfully started one-app server provides reporting routes csp-violations reported to server logs violations reported to /_/report/errors 1`] = `"CSP Violation: {\\"csp-report\\":{\\"document-uri\\":\\"bad.example.com"`;

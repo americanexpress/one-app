@@ -273,7 +273,7 @@ describe('Tests that require Docker setup', () => {
             ...defaultFetchOptions,
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/csp-report',
             },
             body: JSON.stringify({
               'csp-report': {
@@ -1577,9 +1577,6 @@ describe('Tests that require Docker setup', () => {
         ],
         date: [
           expect.any(String),
-        ],
-        'expect-ct': [
-          'max-age=0',
         ],
         'one-app-version': [
           expect.any(String),
