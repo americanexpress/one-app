@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.5.0](https://github.com/americanexpress/one-app/compare/v6.4.2...v6.5.0) (2023-06-29)
+
+
+### Bug Fixes
+
+* **configureRequestLog:** use default when configured with undefined ([#1029](https://github.com/americanexpress/one-app/issues/1029)) ([02eda87](https://github.com/americanexpress/one-app/commit/02eda8772a5546ce8e54c53854361b47b17f0dac))
+* **csp-report:** add application/csp-report content type support ([#1038](https://github.com/americanexpress/one-app/issues/1038)) ([077fbc3](https://github.com/americanexpress/one-app/commit/077fbc3266e07e98f1a1072056a38b2b72b6a9a4))
+
+
+### Features
+
+* **circuitBreaker:** configurable event loop delay percentile ([#1032](https://github.com/americanexpress/one-app/issues/1032)) ([e5daa0c](https://github.com/americanexpress/one-app/commit/e5daa0c42787d9ce7d838f0bde9538bcf000bafa))
+* **metrics:** response time summary ([#1026](https://github.com/americanexpress/one-app/issues/1026)) ([ad92ba2](https://github.com/americanexpress/one-app/commit/ad92ba2d8486428747925d8475492ea6629738c5))
+* **metrics:** switch to fastify-metrics ([#1034](https://github.com/americanexpress/one-app/issues/1034)) ([b531606](https://github.com/americanexpress/one-app/commit/b5316069d20ff4cc749700df24f9f20f9f6bc1bd))
+* **server:** add SSR React rendering summary metric ([#991](https://github.com/americanexpress/one-app/issues/991)) ([3e24352](https://github.com/americanexpress/one-app/commit/3e24352f9223508cd14c6441699408d4931bbda1))
+
+
 ## [6.4.2](https://github.com/americanexpress/one-app/compare/v6.4.1...v6.4.2) (2023-05-24)
 
 
