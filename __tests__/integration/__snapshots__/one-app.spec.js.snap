@@ -46,6 +46,7 @@ exports[`Tests that require Docker setup one-app successfully started metrics ha
 Array [
   "circuit",
   "circuit_perf",
+  "http_request_duration_seconds",
   "nodejs_active_handles",
   "nodejs_active_handles_total",
   "nodejs_active_requests",
