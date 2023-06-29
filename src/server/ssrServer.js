@@ -103,16 +103,19 @@ export async function createApp(opts = {}) {
     done();
   });
 
-  // PWA
+  fastify.addContentTypeParser('application/csp-report', { parseAs: 'string' }, (req, body, doneParsing) => {
+    doneParsing(null, body);
+  });
+
+  // pwa manifest & Report routes for csp and errors
   fastify.register((instance, _opts, done) => {
     instance.register(addCacheHeaders);
     instance.register(csp);
-
     instance.get('/_/pwa/manifest.webmanifest', webManifestMiddleware);
 
     if (nodeEnvIsDevelopment()) {
       instance.post('/_/report/security/csp-violation', (request, reply) => {
-        const violation = request.body && request.body['csp-report'];
+        const violation = request.body && JSON.parse(request.body)['csp-report'];
         if (!violation) {
           console.warn('CSP Violation reported, but no data received');
         } else {
@@ -131,7 +134,7 @@ export async function createApp(opts = {}) {
       });
     } else {
       instance.post('/_/report/security/csp-violation', (request, reply) => {
-        const violation = request.body ? JSON.stringify(request.body, null, 2) : 'No data received!';
+        const violation = request.body ? request.body : 'No data received!';
         console.warn(`CSP Violation: ${violation}`);
         reply.status(204).send();
       });

@@ -273,7 +273,7 @@ describe('Tests that require Docker setup', () => {
             ...defaultFetchOptions,
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/csp-report',
             },
             body: JSON.stringify({
               'csp-report': {
