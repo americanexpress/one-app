@@ -108,7 +108,7 @@
     "fastify": "^4.18.0",
     "fastify-metrics": "^10.3.0",
     "fastify-plugin": "^4.2.0",
-    "helmet": "^6.0.0",
+    "helmet": "^7.0.0",
     "holocron": "^1.7.0",
     "holocron-module-route": "^1.7.0",
     "if-env": "^1.0.4",
