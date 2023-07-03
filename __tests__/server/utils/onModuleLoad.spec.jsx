@@ -18,10 +18,7 @@ import util from 'util';
 import React from 'react';
 import { preprocessEnvVar } from '@americanexpress/env-config-utils';
 import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
-import { addRequiredExternal } from 'holocron';
 import onModuleLoad, {
-  setModulesUsingExternals,
-  getModulesUsingExternals,
   CONFIGURATION_KEY,
   validateCspIsPresent,
 } from '../../../src/server/utils/onModuleLoad';
@@ -71,14 +68,6 @@ jest.mock('../../../src/server/plugins/reactHtml/staticErrorPage', () => ({
   setErrorPage: jest.fn(),
 }));
 
-jest.mock('holocron', () => {
-  const holocron = jest.requireActual('holocron');
-  return {
-    addRequiredExternal: jest.fn(),
-    validateExternal: holocron.validateExternal,
-  };
-});
-
 const RootModule = () => <h1>Hello, world</h1>;
 const csp = "default: 'none'";
 const missingCsp = undefined;
@@ -97,10 +86,6 @@ describe('onModuleLoad', () => {
     getClientStateConfig.mockImplementation(() => ({
       rootModuleName: 'some-root',
     }));
-  });
-
-  afterEach(() => {
-    setModulesUsingExternals([]);
   });
 
   it('does not do anything if there is not an environment variable config', () => {
@@ -261,114 +246,6 @@ describe('onModuleLoad', () => {
     expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('throws if the root module does not provide the expected external', () => {
-    RootModule[CONFIGURATION_KEY] = {
-      providedExternals: {
-        'dep-a': { version: '2.1.0', module: () => 0 },
-      },
-    };
-    const configuration = {
-      requiredExternals: {
-        'dep-b': '^2.0.0',
-      },
-    };
-    expect(() => onModuleLoad({
-      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.9' } },
-      moduleName: 'my-awesome-module',
-    })
-    ).toThrowErrorMatchingSnapshot();
-  });
-
-  it('throws if the root module provides an incompatible version of a required external', () => {
-    RootModule[CONFIGURATION_KEY].providedExternals = {
-      'dep-a': { version: '2.1.0', module: () => 0 },
-    };
-    const configuration = {
-      requiredExternals: {
-        'dep-a': '^2.1.1',
-      },
-    };
-    expect(() => onModuleLoad({
-      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.10' } },
-      moduleName: 'my-awesome-module',
-    })
-    ).toThrowErrorMatchingSnapshot();
-  });
-
-  it('includes messages about all missing or incompatible externals', () => {
-    RootModule[CONFIGURATION_KEY] = {
-      providedExternals: {
-        'dep-a': { version: '3.2.0', module: () => 0 },
-        'dep-b': { version: '5.9.6', module: () => 0 },
-        'dep-c': { version: '3.0.10', module: () => 0 },
-      },
-    };
-    const configuration = {
-      requiredExternals: {
-        'dep-a': '^2.0.0',
-        'dep-b': '~5.8.0',
-        'dep-c': '>1.0.0',
-        'dep-d': '^3.1.2',
-      },
-    };
-    expect(() => onModuleLoad({
-      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.11' } },
-      moduleName: 'my-awesome-module',
-    })
-    ).toThrowErrorMatchingSnapshot();
-  });
-
-  it('logs a warning if the root module provides an incompatible version of a required external and ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS is set to true', () => {
-    process.env.ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS = true;
-    RootModule[CONFIGURATION_KEY].providedExternals = {
-      'dep-a': { version: '2.1.0', module: () => 0 },
-    };
-    const configuration = {
-      requiredExternals: {
-        'dep-a': '^2.1.1',
-      },
-    };
-    expect(() => onModuleLoad({
-      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.10' } },
-      moduleName: 'my-awesome-module',
-    })
-    ).not.toThrow();
-    expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('keeps track of the externals a module is using', () => {
-    RootModule[CONFIGURATION_KEY] = {
-      providedExternals: {
-        'dep-a': { version: '2.1.0', module: () => 0 },
-        'dep-b': { version: '5.8.6', module: () => 0 },
-        'dep-c': { version: '3.0.10', module: () => 0 },
-      },
-    };
-    const configuration = {
-      requiredExternals: {
-        'dep-a': '^2.0.0',
-        'dep-b': '~5.8.0',
-      },
-    };
-    expect(getModulesUsingExternals()).toEqual([]);
-    onModuleLoad({
-      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.12' } },
-      moduleName: 'my-awesome-module',
-    });
-    expect(getModulesUsingExternals()).toEqual(['my-awesome-module']);
-  });
-
-  it('clears the modules using externals when loading the root module', () => {
-    const modulesUsingExternals = ['a', 'b', 'c'];
-    setModulesUsingExternals(modulesUsingExternals);
-    expect(getModulesUsingExternals()).toEqual(modulesUsingExternals);
-    onModuleLoad({
-      module: { [CONFIGURATION_KEY]: { csp }, [META_DATA_KEY]: { version: '1.0.13' } },
-      moduleName: 'some-root',
-    });
-    expect(getModulesUsingExternals()).toEqual([]);
-  });
-
   it('validates csp added to the root module', () => {
     const callOnModuleLoad = () => onModuleLoad({
       module: {},
@@ -376,202 +253,6 @@ describe('onModuleLoad', () => {
     });
 
     expect(callOnModuleLoad).toThrowErrorMatchingSnapshot();
-  });
-
-  it('adds fallback when root module does not provide external and enables missing fallbacks', () => {
-    RootModule[CONFIGURATION_KEY] = {
-      enableUnlistedExternalFallbacks: true,
-    };
-
-    const configuration = {
-      requiredExternals: {
-        'some-dep': {
-          version: '1.2.3',
-          semanticRange: '^1.2.0',
-          integrity: '123',
-          filename: 'some-dep.js',
-        },
-      },
-    };
-    onModuleLoad({
-      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.12' } },
-      moduleName: 'module-will-fallback',
-    });
-    expect(addRequiredExternal).toHaveBeenCalledWith({
-      name: 'some-dep',
-      filename: 'some-dep.js',
-      integrity: '123',
-      moduleName: 'module-will-fallback',
-      semanticRange: '^1.2.0',
-      version: '1.2.3',
-    });
-  });
-
-  it('only includes fallbacks for externals which fail validation', () => {
-    RootModule[CONFIGURATION_KEY] = {
-      enableMissingExternalFallbacks: true,
-      providedExternals: {
-        'some-dep': { version: '1.3.0', module: () => 0 },
-      },
-    };
-
-    const configuration = {
-      requiredExternals: {
-        'some-dep': {
-          version: '1.2.3',
-          semanticRange: '^1.2.0',
-          integrity: '123',
-          filename: 'some-dep.js',
-        },
-        'missing-dep': {
-          version: '1.2.3',
-          semanticRange: '^1.2.0',
-          integrity: '321',
-          filename: 'missing-dep.js',
-        },
-      },
-    };
-    onModuleLoad({
-      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.12' } },
-      moduleName: 'module-will-fallback',
-    });
-
-    expect(addRequiredExternal).toHaveBeenCalledTimes(1);
-    expect(addRequiredExternal).toHaveBeenCalledWith({
-      name: 'missing-dep',
-      filename: 'missing-dep.js',
-      integrity: '321',
-      moduleName: 'module-will-fallback',
-      semanticRange: '^1.2.0',
-      version: '1.2.3',
-    });
-  });
-
-  it('does not add fallback when root module does not provide external or enable fallbacks', () => {
-    delete global.getTenantRootModule;
-
-    const configuration = {
-      requiredExternals: {
-        'some-dep': {
-          version: '1.2.3',
-          semanticRange: '^1.2.0',
-          integrity: '123',
-          filename: 'some-dep.js',
-        },
-      },
-    };
-
-    expect(() => onModuleLoad({
-      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.12' } },
-      moduleName: 'module-will-not-fallback',
-    })
-    ).toThrow();
-
-    expect(addRequiredExternal).not.toHaveBeenCalled();
-  });
-
-  it('adds fallback for external when root module enables fallback', () => {
-    RootModule[CONFIGURATION_KEY] = {
-      providedExternals: {
-        'some-dep': {
-          version: '1.0.0',
-          fallbackEnabled: true,
-          module: () => 0,
-        },
-      },
-    };
-    const configuration = {
-      requiredExternals: {
-        'some-dep': {
-          version: '2.2.3',
-          semanticRange: '^2.2.0',
-          integrity: '123',
-          filename: 'some-dep.js',
-        },
-      },
-    };
-    onModuleLoad({
-      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.12' } },
-      moduleName: 'module-will-fallback',
-    });
-
-    expect(addRequiredExternal).toHaveBeenCalledWith({
-      name: 'some-dep',
-      filename: 'some-dep.js',
-      integrity: '123',
-      moduleName: 'module-will-fallback',
-      semanticRange: '^2.2.0',
-      version: '2.2.3',
-    });
-  });
-
-  it('does not add fallback external when root modules provides valid version', () => {
-    RootModule[CONFIGURATION_KEY] = {
-      providedExternals: {
-        'some-dep': { version: '1.3.0', module: () => 0 },
-      },
-    };
-    const configuration = {
-      requiredExternals: {
-        'some-dep': {
-          version: '1.2.3',
-          semanticRange: '^1.2.0',
-          integrity: '123',
-          filename: 'some-dep.js',
-        },
-      },
-    };
-    onModuleLoad({
-      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.12' } },
-      moduleName: 'module-will-not-fallback',
-    });
-    expect(addRequiredExternal).not.toHaveBeenCalled();
-  });
-
-  it('does not add fallback external when module does not provide external fallback', () => {
-    RootModule[CONFIGURATION_KEY] = {
-      providedExternals: {},
-    };
-    const configuration = {
-      requiredExternals: ['some-dep'],
-    };
-    expect(() => onModuleLoad({
-      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.12' } },
-      moduleName: 'module-will-not-fallback',
-    })
-    ).toThrow();
-    expect(addRequiredExternal).not.toHaveBeenCalled();
-  });
-
-  it('does not add fallback when root module provides external but does not enable fallback', () => {
-    let caughtError;
-    RootModule[CONFIGURATION_KEY] = {
-      providedExternals: {
-        'some-dep': {
-          version: '1.2.3',
-          module: () => 0,
-        },
-      },
-    };
-    const configuration = {
-      requiredExternals: {
-        'some-dep': {
-          version: '2.2.3',
-          semanticRange: '^2.2.0',
-          integrity: '123',
-        },
-      },
-    };
-    try {
-      onModuleLoad({
-        module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.12' } },
-        moduleName: 'module-will-not-fallback',
-      });
-    } catch (error) {
-      caughtError = error;
-    }
-    expect(addRequiredExternal).not.toHaveBeenCalled();
-    expect(caughtError.message).toEqual('some-dep@^2.2.0 is required by module-will-not-fallback, but the root module provides 1.2.3');
   });
 
   it('updates createSsrFetch when added on the root module', () => {

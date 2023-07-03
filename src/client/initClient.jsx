@@ -30,7 +30,7 @@ export default async function initClient() {
     // eslint-disable-next-line no-underscore-dangle
     setModuleMap(global.__CLIENT_HOLOCRON_MODULE_MAP__);
     // eslint-disable-next-line no-underscore-dangle
-    setRequiredExternalsRegistry(global.__holocron_externals__);
+    setRequiredExternalsRegistry(global.__HOLOCRON_EXTERNALS__);
     moveHelmetScripts();
 
     const store = initializeClientStore();

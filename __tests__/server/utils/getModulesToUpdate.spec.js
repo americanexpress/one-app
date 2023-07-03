@@ -152,7 +152,7 @@ describe('getModulesToUpdate', () => {
         },
       },
     };
-    expect(getModulesToUpdate(current, next)).toEqual(['first-module', 'another-module', 'test-root']);
+    expect(getModulesToUpdate(current, next)).toEqual(['test-root']);
   });
 
   it('throws when the root module does not exists', () => {

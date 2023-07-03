@@ -106,17 +106,18 @@ export function renderModuleScripts({
   }).join(isDevelopmentEnv ? '\n          ' : '');
 }
 
-function isDuplicateExternal({ name, version }, currentExternals) {
-  return currentExternals
-    .some((current) => (name === current.name) && (version === current.version));
-}
-
 export function renderExternalFallbacks({ clientInitialState, moduleMap, isDevelopmentEnv }) {
   const loadedModules = clientInitialState.getIn(['holocron', 'loaded'], iSet()).toArray();
   const requiredFallbacks = loadedModules
     .reduce((externals, moduleName) => {
+      const externalsMap = externals.reduce((obj, { name, version }) => ({
+        ...obj,
+        [name]: version,
+      }), {});
       const requiredExternals = getRequiredExternals(moduleName)
-        .filter((nextExternal) => !isDuplicateExternal(nextExternal, externals));
+        .filter(
+          ({ name, version }) => !externalsMap[name] || externalsMap[name].version !== version
+        );
 
       return [
         ...externals,
@@ -249,7 +250,7 @@ export function getBody({
         window.__holocron_module_bundle_type__ = '${bundle}';
         window.__pwa_metadata__ = ${jsonStringifyForScript(pwaMetadata)};
         window.__render_mode__ = '${renderMode}';
-        window.__holocron_externals__ = ${jsonStringifyForScript(getRequiredExternalsRegistry())};
+        window.__HOLOCRON_EXTERNALS__ = ${jsonStringifyForScript(getRequiredExternalsRegistry())};
       </script>
       ${assets}
       ${renderI18nScript(clientInitialState, bundlePrefixForBrowser)}

@@ -934,7 +934,7 @@ describe('reactHtml', () => {
           moduleMap,
         })
       ).toMatchInlineSnapshot(
-        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
       );
     });
 
@@ -968,7 +968,7 @@ describe('reactHtml', () => {
           moduleMap,
         })
       ).toMatchInlineSnapshot(
-        '"<script src="https://example.com/cdn/child-module-b/1.1.0/this-dep.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
+        '"<script src="https://example.com/cdn/child-module-b/1.1.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script><script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
       );
     });
 
@@ -980,7 +980,7 @@ describe('reactHtml', () => {
           isDevelopmentEnv: true,
         })
       ).toMatchInlineSnapshot(
-        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.js" crossorigin="anonymous" ></script>"'
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js" crossorigin="anonymous" ></script>"'
       );
     });
 
@@ -998,7 +998,7 @@ describe('reactHtml', () => {
           },
         })
       ).toMatchInlineSnapshot(
-        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
       );
     });
   });
