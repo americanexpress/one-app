@@ -153,7 +153,7 @@
     "@commitlint/cli": "^17.0.3",
     "@commitlint/config-conventional": "^17.3.0",
     "@rollup/plugin-babel": "^5.3.1",
-    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-node-resolve": "^15.1.0",
     "@rollup/plugin-replace": "^4.0.0",
     "amex-jest-preset": "^7.0.0",
     "babel-eslint": "^10.1.0",
