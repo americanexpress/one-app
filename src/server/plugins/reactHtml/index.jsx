@@ -106,7 +106,12 @@ export function renderModuleScripts({
   }).join(isDevelopmentEnv ? '\n          ' : '');
 }
 
-export function renderExternalFallbacks({ clientInitialState, moduleMap, isDevelopmentEnv }) {
+export function renderExternalFallbacks({
+  clientInitialState,
+  moduleMap,
+  isDevelopmentEnv,
+  isLegacy,
+}) {
   const loadedModules = clientInitialState.getIn(['holocron', 'loaded'], iSet()).toArray();
   const requiredFallbacks = loadedModules
     .reduce((externals, moduleName) => {
@@ -130,7 +135,16 @@ export function renderExternalFallbacks({ clientInitialState, moduleMap, isDevel
     .map(({ name, integrity, moduleName }) => {
       const { baseUrl } = modules[moduleName];
       const endsWithSlash = baseUrl.endsWith('/');
-      const src = `${baseUrl}${endsWithSlash ? '' : '/'}${name}.browser.js`;
+      const src = [
+        baseUrl,
+        [
+          name,
+          isLegacy ? 'legacy' : '',
+          'browser',
+          'js',
+        ].filter(Boolean).join('.'),
+      ].join(endsWithSlash ? '' : '/');
+
       return renderScript({
         src,
         integrity,
@@ -258,6 +272,7 @@ export function getBody({
     clientInitialState,
     moduleMap: clientModuleMapCache[bundle],
     isDevelopmentEnv: nodeEnvIsDevelopment,
+    isLegacy,
   })}
       ${renderModuleScripts({
     clientInitialState,

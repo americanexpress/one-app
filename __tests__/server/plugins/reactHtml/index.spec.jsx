@@ -1001,6 +1001,19 @@ describe('reactHtml', () => {
         '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
       );
     });
+
+    it('supports legacy browsers', () => {
+      expect(
+        renderExternalFallbacks({
+          clientInitialState,
+          moduleMap,
+          isDevelopmentEnv: true,
+          isLegacy: true,
+        })
+      ).toMatchInlineSnapshot(
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.legacy.browser.js" crossorigin="anonymous" ></script>"'
+      );
+    });
   });
 
   describe('serializing the client initial state', () => {
