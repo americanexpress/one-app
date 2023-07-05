@@ -1024,8 +1024,12 @@ describe('Tests that require Docker setup', () => {
         beforeAll(loadCustomErrorPageRoot);
         test('responds with a custom error page', async () => {
           const response = await fetch(
-            `${appAtTestUrls.fetchUrl}/%c0.%c0./%c0.%c0./%c0.%c0./%c0.%c0./winnt/win.ini`,
-            defaultFetchOptions
+            `${appAtTestUrls.fetchUrl}/%c0.%c0./%c0.%c0./%c0.%c0./%c0.%c0./winnt/win.ini`, {
+              ...defaultFetchOptions,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
           );
           const body = await response.text();
           expect(body).toContain('Here is a custom error page though.');
