@@ -11,9 +11,9 @@ describe('redirectAllowList', () => {
   });
   describe('setRedirectAllowList', () => {
     it('should set redirect allow list', () => {
-      const redirectAllowList = ['https://americanexpress.com', '*.aexp.com'];
+      const redirectAllowList = ['https://americanexpress.com', '*.example.com'];
       setRedirectAllowList(redirectAllowList);
-      expect(getRedirectAllowList()).toEqual(['https://americanexpress.com', 'https://*.aexp.com']);
+      expect(getRedirectAllowList()).toEqual(['https://americanexpress.com', 'https://*.example.com']);
     });
     it('should log an error if allow list is not an array', () => {
       jest.spyOn(console, 'error').mockImplementation(() => {});
