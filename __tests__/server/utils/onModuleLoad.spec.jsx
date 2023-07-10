@@ -26,6 +26,7 @@ import onModuleLoad, {
 // This named export exists only on the mock
 // eslint-disable-next-line import/named
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from '../../../src/server/utils/stateConfig';
+import { setRedirectAllowList } from '../../../src/server/utils/redirectAllowList';
 import { setCorsOrigins } from '../../../src/server/plugins/conditionallyAllowCors';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from '../../../src/server/utils/safeRequest';
 import { setConfigureRequestLog } from '../../../src/server/utils/logging/fastifyPlugin';
@@ -39,6 +40,9 @@ jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
   getClientStateConfig: jest.fn(),
   getServerStateConfig: jest.fn(() => ({ rootModuleName: 'root-module' })),
+}));
+jest.mock('../../../src/server/utils/redirectAllowList', () => ({
+  setRedirectAllowList: jest.fn(),
 }));
 jest.mock('@americanexpress/env-config-utils');
 jest.mock('../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: '4.43.0-0-38f0178d' }));
@@ -179,6 +183,19 @@ describe('onModuleLoad', () => {
       moduleName: 'some-root',
     });
     expect(setStateConfig).toHaveBeenCalledWith(provideStateConfig);
+  });
+  it('calls setStateConfig if setRedirectAllowList is supplied', () => {
+    onModuleLoad({
+      module: {
+        [CONFIGURATION_KEY]: {
+          redirectAllowList: ['https://americanexpress.com'],
+          csp,
+        },
+        [META_DATA_KEY]: { version: '1.0.5' },
+      },
+      moduleName: 'some-root',
+    });
+    expect(setRedirectAllowList).toHaveBeenCalledWith(['https://americanexpress.com']);
   });
 
   it('does not throw if the root module provides the expected versions of required externals', () => {
