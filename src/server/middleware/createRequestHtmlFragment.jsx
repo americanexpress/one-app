@@ -34,6 +34,9 @@ import {
   renderForStaticMarkup,
   renderForString,
 } from '../utils/reactRendering';
+import { renderStaticErrorPage } from './sendHtml';
+
+import { validateRedirectUrl } from '../utils/redirectAllowList';
 
 const getModuleData = async ({ dispatch, modules }) => {
   try {
@@ -48,6 +51,7 @@ const getModuleData = async ({ dispatch, modules }) => {
 const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 
 export default function createRequestHtmlFragment({ createRoutes }) {
+  // eslint-disable-next-line complexity
   return async (req, res, next) => {
     try {
       req.tracer.startServerPhaseTimer('3');
@@ -117,6 +121,11 @@ export default function createRequestHtmlFragment({ createRoutes }) {
         });
 
         if (redirect) {
+          if (!validateRedirectUrl(redirect.url)) {
+            renderStaticErrorPage(res);
+            console.error(`'${redirect.url}' is not an allowed redirect URL`);
+            return next();
+          }
           res.redirect(redirect.status || 302, redirect.url);
           return null;
         }

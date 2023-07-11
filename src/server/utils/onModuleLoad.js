@@ -28,6 +28,7 @@ import setupDnsCache from './setupDnsCache';
 import { configurePWA } from '../middleware/pwa';
 import { validatePWAConfig } from './validation';
 import { setErrorPage } from '../middleware/sendHtml';
+import { setRedirectAllowList } from './redirectAllowList';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
@@ -71,7 +72,7 @@ export function validateCspIsPresent(csp) {
   }
 }
 
-/* eslint complexity:  ['error', 12] */
+/* eslint complexity:  ['error', 13] */
 export default function onModuleLoad({
   module,
   moduleName,
@@ -91,6 +92,7 @@ export default function onModuleLoad({
       pwa,
       errorPageUrl,
       dnsCache,
+      redirectAllowList,
       // Child Module Specific
       requiredExternals,
       validateStateConfig,
@@ -125,6 +127,9 @@ export default function onModuleLoad({
     }
     if (errorPageUrl) {
       setErrorPage(errorPageUrl);
+    }
+    if (redirectAllowList) {
+      setRedirectAllowList(redirectAllowList);
     }
     setCorsOrigins(corsOrigins);
     extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);

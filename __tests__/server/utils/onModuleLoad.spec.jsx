@@ -34,11 +34,15 @@ import { getEventLoopDelayThreshold, getEventLoopDelayPercentile } from '../../.
 import setupDnsCache from '../../../src/server/utils/setupDnsCache';
 import { configurePWA } from '../../../src/server/middleware/pwa';
 import { setErrorPage } from '../../../src/server/middleware/sendHtml';
+import { setRedirectAllowList } from '../../../src/server/utils/redirectAllowList';
 
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
   getClientStateConfig: jest.fn(),
   getServerStateConfig: jest.fn(() => ({ rootModuleName: 'root-module' })),
+}));
+jest.mock('../../../src/server/utils/redirectAllowList', () => ({
+  setRedirectAllowList: jest.fn(),
 }));
 jest.mock('@americanexpress/env-config-utils');
 jest.mock('../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: '4.43.0-0-38f0178d' }));
@@ -180,7 +184,19 @@ describe('onModuleLoad', () => {
     });
     expect(setStateConfig).toHaveBeenCalledWith(provideStateConfig);
   });
-
+  it('calls setStateConfig if setRedirectAllowList is supplied', () => {
+    onModuleLoad({
+      module: {
+        [CONFIGURATION_KEY]: {
+          redirectAllowList: ['https://americanexpress.com'],
+          csp,
+        },
+        [META_DATA_KEY]: { version: '1.0.5' },
+      },
+      moduleName: 'some-root',
+    });
+    expect(setRedirectAllowList).toHaveBeenCalledWith(['https://americanexpress.com']);
+  });
   it('does not throw if the root module provides the expected versions of required externals', () => {
     RootModule[CONFIGURATION_KEY] = {
       providedExternals: {
