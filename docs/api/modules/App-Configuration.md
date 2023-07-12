@@ -540,8 +540,7 @@ if (!global.BROWSER) {
 }
 ```
 
-The `redirectAllowList` config option allows you to configure a list of domains that the server is allowed to redirect to. Each URL in this list should include the protocol (`https://`).
-
+The `redirectAllowList` config option allows you to configure a list of domains that the server is allowed to redirect to when the [`abortComposeModules`](https://github.com/americanexpress/one-app/blob/5.x.x/docs/api/modules/Loading-Data.md?rgh-link-date=2023-07-11T20%3A52%3A18Z#holocron-module-configuration) option is used.. Each URL in this list should include the protocol (`https://`).
 You can also provide wildcard matches (`*`) to allow any subdomain. Example: 
 
 ```javascript
