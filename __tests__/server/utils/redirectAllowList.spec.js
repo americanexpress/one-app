@@ -1,4 +1,3 @@
-import { beforeEach } from 'jest-circus';
 import {
   setRedirectAllowList,
   validateRedirectUrl,
