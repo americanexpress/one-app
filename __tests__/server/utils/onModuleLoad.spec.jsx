@@ -197,6 +197,18 @@ describe('onModuleLoad', () => {
     });
     expect(setRedirectAllowList).toHaveBeenCalledWith(['https://americanexpress.com']);
   });
+  it('calls setStateConfig with empty array if setRedirectAllowList is NOT supplied', () => {
+    onModuleLoad({
+      module: {
+        [CONFIGURATION_KEY]: {
+          csp,
+        },
+        [META_DATA_KEY]: { version: '1.0.5' },
+      },
+      moduleName: 'some-root',
+    });
+    expect(setRedirectAllowList).toHaveBeenCalledWith([]);
+  });
   it('does not throw if the root module provides the expected versions of required externals', () => {
     RootModule[CONFIGURATION_KEY] = {
       providedExternals: {

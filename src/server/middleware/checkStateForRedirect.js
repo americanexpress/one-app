@@ -14,13 +14,13 @@
  * permissions and limitations under the License.
  */
 import { renderStaticErrorPage } from './sendHtml';
-import { validateRedirectUrl } from '../utils/redirectAllowList';
+import { isRedirectUrlAllowed } from '../utils/redirectAllowList';
 
 export default function checkStateForRedirect(req, res, next) {
   const destination = req.store.getState().getIn(['redirection', 'destination']);
 
   if (destination) {
-    if (!validateRedirectUrl(destination)) {
+    if (!isRedirectUrlAllowed(destination)) {
       renderStaticErrorPage(res);
       console.error(`'${destination}' is not an allowed redirect URL`);
       return next();

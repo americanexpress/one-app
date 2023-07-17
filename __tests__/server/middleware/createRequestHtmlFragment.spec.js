@@ -21,7 +21,7 @@ import { composeModules } from 'holocron';
 // eslint-disable-next-line import/named -- getBreaker is only added in the mock
 import { getBreaker } from '../../../src/server/utils/createCircuitBreaker';
 import { renderStaticErrorPage } from '../../../src/server/middleware/sendHtml';
-import { validateRedirectUrl } from '../../../src/server/utils/redirectAllowList';
+import { isRedirectUrlAllowed } from '../../../src/server/utils/redirectAllowList';
 import * as reactRendering from '../../../src/server/utils/reactRendering';
 import { NoOpTracer } from '../../../src/server/utils/tracer';
 
@@ -40,7 +40,7 @@ jest.mock('../../../src/server/middleware/sendHtml', () => ({
   renderStaticErrorPage: jest.fn(),
 }));
 jest.mock('../../../src/server/utils/redirectAllowList', () => ({
-  validateRedirectUrl: jest.fn(() => true),
+  isRedirectUrlAllowed: jest.fn(() => true),
 }));
 
 jest.mock('../../../src/server/utils/createCircuitBreaker', () => {
@@ -350,7 +350,7 @@ describe('createRequestHtmlFragment', () => {
     const createRequestHtmlFragment = require(
       '../../../src/server/middleware/createRequestHtmlFragment'
     ).default;
-    validateRedirectUrl.mockImplementationOnce(() => false);
+    isRedirectUrlAllowed.mockImplementationOnce(() => false);
     const destination = 'https://example.com';
     composeModules.mockImplementationOnce(() => {
       const error = new Error('An error that redirects');

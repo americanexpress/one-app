@@ -1,6 +1,6 @@
 import {
   setRedirectAllowList,
-  validateRedirectUrl,
+  isRedirectUrlAllowed,
   getRedirectAllowList,
 } from '../../../src/server/utils/redirectAllowList';
 
@@ -27,19 +27,19 @@ describe('redirectAllowList', () => {
       expect(console.error).toBeCalledWith('Insecure protocols (http://) are not allowed to be redirect locations. Ignoring \'http://americanexpress.com\' listed in redirectAlowList configuration.');
     });
   });
-  describe('validateRedirectUrl', () => {
+  describe('isRedirectUrlAllowed', () => {
     it('should return true if redirectAllowList is not set', () => {
-      expect(validateRedirectUrl('https://americanexpress.com')).toBeTruthy();
+      expect(isRedirectUrlAllowed('https://americanexpress.com')).toBeTruthy();
     });
     it('should return true if URL is in allow list', () => {
       const redirectAllowList = ['https://americanexpress.com'];
       setRedirectAllowList(redirectAllowList);
-      expect(validateRedirectUrl('https://americanexpress.com')).toBeTruthy();
+      expect(isRedirectUrlAllowed('https://americanexpress.com')).toBeTruthy();
     });
     it('should return false if URL is NOT in allow list', () => {
       const redirectAllowList = ['https://americanexpress.com'];
       setRedirectAllowList(redirectAllowList);
-      expect(validateRedirectUrl('https://americanxpress.com')).toBeFalsy();
+      expect(isRedirectUrlAllowed('https://americanxpress.com')).toBeFalsy();
     });
   });
 });

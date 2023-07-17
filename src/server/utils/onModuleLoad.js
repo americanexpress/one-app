@@ -130,6 +130,8 @@ export default function onModuleLoad({
     }
     if (redirectAllowList) {
       setRedirectAllowList(redirectAllowList);
+    } else {
+      setRedirectAllowList([]);
     }
     setCorsOrigins(corsOrigins);
     extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);

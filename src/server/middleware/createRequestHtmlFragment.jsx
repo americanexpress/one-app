@@ -36,7 +36,7 @@ import {
 } from '../utils/reactRendering';
 import { renderStaticErrorPage } from './sendHtml';
 
-import { validateRedirectUrl } from '../utils/redirectAllowList';
+import { isRedirectUrlAllowed } from '../utils/redirectAllowList';
 
 const getModuleData = async ({ dispatch, modules }) => {
   try {
@@ -121,7 +121,7 @@ export default function createRequestHtmlFragment({ createRoutes }) {
         });
 
         if (redirect) {
-          if (!validateRedirectUrl(redirect.url)) {
+          if (!isRedirectUrlAllowed(redirect.url)) {
             renderStaticErrorPage(res);
             console.error(`'${redirect.url}' is not an allowed redirect URL`);
             return next();
