@@ -23,7 +23,7 @@ import { RouterContext, matchPromise } from '@americanexpress/one-app-router';
 import { composeModules } from 'holocron';
 
 import createCircuitBreaker from '../../utils/createCircuitBreaker';
-import { validateRedirectUrl } from '../../utils/redirectAllowList';
+import { isRedirectUrlAllowed } from '../../utils/redirectAllowList';
 import {
   startSummaryTimer,
 
@@ -117,7 +117,7 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         });
 
         if (redirect) {
-          if (!validateRedirectUrl(redirect.url)) {
+          if (!isRedirectUrlAllowed(redirect.url)) {
             renderStaticErrorPage(request, reply);
             throw new Error(`'${redirect.url}' is not an allowed redirect URL`);
           }

@@ -130,6 +130,10 @@ export default function onModuleLoad({
     }
     if (redirectAllowList) {
       setRedirectAllowList(redirectAllowList);
+    } else {
+      // This is to maintain backwards compatibility.
+      // This else-check can be removed in future versions.
+      setRedirectAllowList([]);
     }
     setCorsOrigins(corsOrigins);
     extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);

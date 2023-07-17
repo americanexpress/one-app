@@ -1,6 +1,7 @@
 import wcmatch from 'wildcard-match';
 
 let redirectAllowList = [];
+let isAllowedUrl = wcmatch(redirectAllowList, { separator: '.' });
 
 export const setRedirectAllowList = (allowList) => {
   if (!Array.isArray(allowList)) {
@@ -20,12 +21,14 @@ export const setRedirectAllowList = (allowList) => {
     }
     redirectAllowList.push(url);
   });
+
+  isAllowedUrl = wcmatch(redirectAllowList, { separator: '.' });
 };
 
-export const getRedirectAllowList = () => redirectAllowList;
+// Spread it to keep it immutable
+export const getRedirectAllowList = () => [...redirectAllowList];
 
-export const validateRedirectUrl = (url) => {
-  const isAllowedUrl = wcmatch(redirectAllowList, { separator: '.' });
+export const isRedirectUrlAllowed = (url) => {
   // If a redirect list is not configured, allow the redirect.
   // This prevents the redirect allow list from becoming a breaking change.
   if (redirectAllowList.length === 0 || isAllowedUrl(url)) {
