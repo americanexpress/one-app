@@ -20,22 +20,42 @@ describe('setup', () => {
   let monkeypatches;
   let logger;
   let startTimer;
+  let replaceGlobalConsoleWithOtelLogger;
 
-  function load() {
+  function load(useOtel = false) {
     jest.resetModules();
-
+    if (useOtel) {
+      process.env.OTEL_LOG_COLLECTOR_URL = 'http://localhost:4318/v1/logs';
+    } else {
+      delete process.env.OTEL_LOG_COLLECTOR_URL;
+    }
     jest.mock('@americanexpress/lumberjack');
     jest.mock('../../../../src/server/utils/logging/timing', () => ({
       startTimer: jest.fn(),
       measureTime: jest.fn(() => 12),
     }));
     jest.mock('../../../../src/server/utils/logging/logger', () => ({ info: jest.fn() }));
+    jest.mock('../../../../src/server/utils/logging/otel/logger');
 
     ({ monkeypatches } = require('@americanexpress/lumberjack'));
     ({ startTimer } = require('../../../../src/server/utils/logging/timing'));
+    ({ replaceGlobalConsoleWithOtelLogger } = require('../../../../src/server/utils/logging/otel/logger'));
     logger = require('../../../../src/server/utils/logging/logger');
     require('../../../../src/server/utils/logging/setup');
   }
+
+  it('replaces the global console with lumberjack logger when not using Otel', () => {
+    load();
+    expect(replaceGlobalConsoleWithOtelLogger).not.toHaveBeenCalled();
+    expect(monkeypatches.replaceGlobalConsole).toHaveBeenCalledTimes(1);
+    expect(monkeypatches.replaceGlobalConsole).toHaveBeenCalledWith(logger);
+  });
+
+  it('replaces the global console with OTel logger when using OTel', () => {
+    load(true);
+    expect(monkeypatches.replaceGlobalConsole).not.toHaveBeenCalled();
+    expect(replaceGlobalConsoleWithOtelLogger).toHaveBeenCalledTimes(1);
+  });
 
   it('replaces the global console with logger', () => {
     load();

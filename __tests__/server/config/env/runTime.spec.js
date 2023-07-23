@@ -514,4 +514,71 @@ describe('runTime', () => {
       expect(oneEnableServerTracing.normalize('EbwEfbWEFBE')).toBe('false');
     });
   });
+
+  describe('OTEL_SERVICE_NAME', () => {
+    const otelServiceName = getEnvVarConfig('OTEL_SERVICE_NAME');
+
+    it('should have a default value of "One App"', () => {
+      expect(otelServiceName.defaultValue).toBe('One App');
+    });
+
+    it('should pass validation when OTEL_LOG_COLLECTOR_URL is also set', () => {
+      process.env.OTEL_LOG_COLLECTOR_URL = 'http://localhost:4318/v1/logs';
+      expect(() => otelServiceName.validate('test')).not.toThrow();
+    });
+
+    it('should fail validation when OTEL_LOG_COLLECTOR_URL is not set', () => {
+      delete process.env.OTEL_LOG_COLLECTOR_URL;
+      expect(() => otelServiceName.validate('test')).toThrowErrorMatchingInlineSnapshot(
+        '"Expected OTEL_LOG_COLLECTOR_URL to be set"'
+      );
+    });
+
+    it('should pass validation when not and OTEL_LOG_COLLECTOR_URL is also not set', () => {
+      delete process.env.OTEL_LOG_COLLECTOR_URL;
+      expect(() => otelServiceName.validate()).not.toThrow();
+    });
+  });
+
+  describe('OTEL_SERVICE_NAMESPACE', () => {
+    const otelServiceNamespace = getEnvVarConfig('OTEL_SERVICE_NAMESPACE');
+
+    it('should pass validation when OTEL_LOG_COLLECTOR_URL is also set', () => {
+      process.env.OTEL_LOG_COLLECTOR_URL = 'http://localhost:4318/v1/logs';
+      expect(() => otelServiceNamespace.validate('test')).not.toThrow();
+    });
+
+    it('should fail validation when OTEL_LOG_COLLECTOR_URL is not set', () => {
+      delete process.env.OTEL_LOG_COLLECTOR_URL;
+      expect(() => otelServiceNamespace.validate('test')).toThrowErrorMatchingInlineSnapshot(
+        '"Expected OTEL_LOG_COLLECTOR_URL to be set"'
+      );
+    });
+
+    it('should pass validation when not and OTEL_LOG_COLLECTOR_URL is also not set', () => {
+      delete process.env.OTEL_LOG_COLLECTOR_URL;
+      expect(() => otelServiceNamespace.validate()).not.toThrow();
+    });
+  });
+
+  describe('OTEL_RESOURCE_ATTRIBUTES', () => {
+    const otelResouceAttributes = getEnvVarConfig('OTEL_RESOURCE_ATTRIBUTES');
+
+    it('should pass validation when OTEL_LOG_COLLECTOR_URL is also set', () => {
+      process.env.OTEL_LOG_COLLECTOR_URL = 'http://localhost:4318/v1/logs';
+      expect(() => otelResouceAttributes.validate('test')).not.toThrow();
+    });
+
+    it('should fail validation when OTEL_LOG_COLLECTOR_URL is not set', () => {
+      delete process.env.OTEL_LOG_COLLECTOR_URL;
+      expect(() => otelResouceAttributes.validate('test')).toThrowErrorMatchingInlineSnapshot(
+        '"Expected OTEL_LOG_COLLECTOR_URL to be set"'
+      );
+    });
+
+    it('should pass validation when not and OTEL_LOG_COLLECTOR_URL is also not set', () => {
+      delete process.env.OTEL_LOG_COLLECTOR_URL;
+      expect(() => otelResouceAttributes.validate()).not.toThrow();
+    });
+  });
 });

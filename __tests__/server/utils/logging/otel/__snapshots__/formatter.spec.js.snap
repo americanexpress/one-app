@@ -1,0 +1,183 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`otel formatter errors encodes ClientReportedError Error as parseable JSON 1`] = `
+Object {
+  "attributes": Object {
+    "agent": "Darwin x64",
+    "device": Object {
+      "agent": "Browser/5.0 (compatible; WXYZ 100.0; Doors LQ 81.4; Boat/1.0)",
+    },
+    "error": Object {
+      "message": "something broke",
+      "name": "ClientReportedError",
+      "stacktrace": "Error: something broke
+    at methodA (resource-a.js:1:1)
+    at methodB (resource-b.js:1:1)
+",
+    },
+    "request": Object {
+      "address": Object {
+        "uri": "https://example.com/page-the/error/occurred-on",
+      },
+      "metaData": Object {
+        "code": "500",
+        "collectionMethod": "applicationError",
+        "correlationId": "123abc",
+        "moduleID": "healthy-frank",
+      },
+    },
+  },
+  "body": "something broke",
+  "severityNumber": 17,
+  "severityText": "ERROR",
+}
+`;
+
+exports[`otel formatter errors encodes Server Reported Error as parseable JSON with nested metadata objects 1`] = `
+Object {
+  "attributes": Object {
+    "agent": "Darwin x64",
+    "error": Object {
+      "message": "something broke",
+      "name": "Error",
+      "stacktrace": "Error: something broke
+    at methodA (resource-a.js:1:1)
+    at methodB (resource-b.js:1:1)
+",
+    },
+    "metaData": Object {
+      "moduleID": "healthy-frank",
+      "nestedObject": Object {
+        "level1": Object {
+          "level2": Object {
+            "level3": Object {
+              "level4": "logs nested objects correctly",
+            },
+          },
+        },
+      },
+    },
+  },
+  "body": "something broke",
+  "severityNumber": 17,
+  "severityText": "ERROR",
+}
+`;
+
+exports[`otel formatter errors puts a lone error in the error field 1`] = `
+Object {
+  "message": "test error",
+  "name": "Error",
+  "stacktrace": "Error: test error
+  at Object.<anonymous> (one-app/__tests__/server/utils/logging/production-formatter.spec.js:36:64)
+  at Object.asyncFn (one-app/node_modules/jest-jasmine2/build/jasmine_async.js:124:345)
+  at resolve (one-app/node_modules/jest-jasmine2/build/queue_runner.js:46:12)
+  at new Promise (<anonymous>)
+  at mapper (one-app/node_modules/jest-jasmine2/build/queue_runner.js:34:499)
+  at promise.then (one-app/node_modules/jest-jasmine2/build/queue_runner.js:74:39)
+  at <anonymous>
+  at process._tickCallback (internal/process/next_tick.js:188:7)",
+}
+`;
+
+exports[`otel formatter errors puts an error paired with a message in the error field 1`] = `
+Object {
+  "message": "test error",
+  "name": "Error",
+  "stacktrace": "Error: test error
+  at Object.<anonymous> (one-app/__tests__/server/utils/logging/production-formatter.spec.js:36:64)
+  at Object.asyncFn (one-app/node_modules/jest-jasmine2/build/jasmine_async.js:124:345)
+  at resolve (one-app/node_modules/jest-jasmine2/build/queue_runner.js:46:12)
+  at new Promise (<anonymous>)
+  at mapper (one-app/node_modules/jest-jasmine2/build/queue_runner.js:34:499)
+  at promise.then (one-app/node_modules/jest-jasmine2/build/queue_runner.js:74:39)
+  at <anonymous>
+  at process._tickCallback (internal/process/next_tick.js:188:7)",
+}
+`;
+
+exports[`otel formatter errors puts an error with other arguments in the error field and uses only the other args for the body 1`] = `
+Object {
+  "message": "test error",
+  "name": "Error",
+  "stacktrace": "Error: test error
+  at Object.<anonymous> (one-app/__tests__/server/utils/logging/production-formatter.spec.js:36:64)
+  at Object.asyncFn (one-app/node_modules/jest-jasmine2/build/jasmine_async.js:124:345)
+  at resolve (one-app/node_modules/jest-jasmine2/build/queue_runner.js:46:12)
+  at new Promise (<anonymous>)
+  at mapper (one-app/node_modules/jest-jasmine2/build/queue_runner.js:34:499)
+  at promise.then (one-app/node_modules/jest-jasmine2/build/queue_runner.js:74:39)
+  at <anonymous>
+  at process._tickCallback (internal/process/next_tick.js:188:7)",
+}
+`;
+
+exports[`otel formatter errors uses the error in the message when the error is paired with a message and other arguments 1`] = `
+Object {
+  "message": "test error",
+  "name": "Error",
+  "stacktrace": "Error: test error
+  at Object.<anonymous> (one-app/__tests__/server/utils/logging/production-formatter.spec.js:36:64)
+  at Object.asyncFn (one-app/node_modules/jest-jasmine2/build/jasmine_async.js:124:345)
+  at resolve (one-app/node_modules/jest-jasmine2/build/queue_runner.js:46:12)
+  at new Promise (<anonymous>)
+  at mapper (one-app/node_modules/jest-jasmine2/build/queue_runner.js:34:499)
+  at promise.then (one-app/node_modules/jest-jasmine2/build/queue_runner.js:74:39)
+  at <anonymous>
+  at process._tickCallback (internal/process/next_tick.js:188:7)",
+}
+`;
+
+exports[`otel formatter errors uses the error in the message when the error is paired with a message and other arguments 2`] = `
+"unable to do the thing Error: test error
+  at Object.<anonymous> (one-app/__tests__/server/utils/logging/production-formatter.spec.js:36:64)
+  at Object.asyncFn (one-app/node_modules/jest-jasmine2/build/jasmine_async.js:124:345)
+  at resolve (one-app/node_modules/jest-jasmine2/build/queue_runner.js:46:12)
+  at new Promise (<anonymous>)
+  at mapper (one-app/node_modules/jest-jasmine2/build/queue_runner.js:34:499)
+  at promise.then (one-app/node_modules/jest-jasmine2/build/queue_runner.js:74:39)
+  at <anonymous>
+  at process._tickCallback (internal/process/next_tick.js:188:7) 12 times"
+`;
+
+exports[`otel formatter types encodes request as parseable JSON 1`] = `
+Object {
+  "attributes": Object {
+    "agent": "Darwin x64",
+    "request": Object {
+      "address": Object {
+        "url": "https://example.org/server",
+      },
+      "direction": "in",
+      "metaData": Object {
+        "correlationId": "123",
+        "host": "example.org",
+        "location": undefined,
+        "method": "GET",
+        "referrer": "https://example.org/other-page",
+        "userAgent": "Browser/8.0 (compatible; WXYZ 100.0; Doors LQ 81.4; Boat/1.0)",
+      },
+      "protocol": "https",
+      "statusCode": 200,
+      "statusText": "OK",
+      "timings": Object {
+        "duration": 10,
+        "ttfb": 20,
+      },
+    },
+  },
+  "severityNumber": 17,
+  "severityText": "ERROR",
+}
+`;
+
+exports[`otel formatter types uses the default util.format when given an unknown type 1`] = `
+Object {
+  "attributes": Object {
+    "agent": "Darwin x64",
+  },
+  "body": "{ type: 'yolo' }",
+  "severityNumber": 17,
+  "severityText": "ERROR",
+}
+`;

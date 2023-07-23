@@ -45,6 +45,11 @@ One App can be configured via Environment Variables:
   * [`ONE_MAP_POLLING_MIN`](#one_map_polling_min)
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
   * [`ONE_SERVICE_WORKER`](#one_service_worker)
+* OpenTelemetry
+  * [`OTEL_LOG_COLLECTOR_URL`](#otel_log_collector_url)
+  * [`OTEL_SERVICE_NAME`](#otel_service_name)
+  * [`OTEL_SERVICE_NAMESPACE`](#otel_service_namespace)
+  * [`OTEL_RESOURCE_ATTRIBUTES`](#ote;_resource_attributes)
 
 <details>
   <summary>Alphabetical Contents</summary>
@@ -75,6 +80,11 @@ One App can be configured via Environment Variables:
   * [`ONE_MAX_POST_REQUEST_PAYLOAD`](#one_max_post_request_payload)
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
   * [`ONE_SERVICE_WORKER`](#one_service_worker)
+  * [`OTEL_LOG_COLLECTOR_URL`](#otel_log_collector_url)
+  * [`OTEL_RESOURCE_ATTRIBUTES`](#ote;_resource_attributes)
+  * [`OTEL_SERVICE_NAME`](#otel_service_name)
+  * [`OTEL_SERVICE_NAMESPACE`](#otel_service_namespace)
+
 </details>
 
 > ⚠️ = Required
@@ -682,7 +692,8 @@ Must be one of: `no-referrer`, `no-referrer-when-downgrade`, `same-origin` or `s
 ```bash
 ONE_REFERRER_POLICY_OVERRIDE=String
 ```
-**Exampke**
+
+**Example**
 ```bash
 ONE_REFERRER_POLICY_OVERRIDE=no-referrer
 ```
@@ -714,6 +725,90 @@ ONE_SERVICE_WORKER=true
 ONE_SERVICE_WORKER=false
 ```
 
+## `OTEL_LOG_COLLECTOR_URL`
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+When set, One App will emit OpenTelemetry logs over GRPC to the configured endpoint.
+
+**Shape**
+```bash
+OTEL_LOG_COLLECTOR_URL=String
+```
+
+**Example**
+```bash
+OTEL_LOG_COLLECTOR_URL=http://localhost:4318/v1/logs
+```
+
+## `OTEL_SERVICE_NAME`
+
+> ⚠️ Requires [`OTEL_LOG_COLLECTOR_URL`] to be set.
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+Service name for OpenTelemtry resource.
+See [OTel Environment Variable Specification] for more details
+
+**Shape**
+```bash
+OTEL_SERVICE_NAME=String
+```
+
+**Example**
+```bash
+OTEL_SERVICE_NAME=MyApplication
+```
+
+**Default Value**
+```bash
+OTEL_SERVICE_NAME="One App"
+```
+
+## `OTEL_SERVICE_NAMESPACE`
+
+> ⚠️ Requires [`OTEL_LOG_COLLECTOR_URL`] to be set.
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+Service namespace for OpenTelemtry resource.
+
+**Shape**
+```bash
+OTEL_SERVICE_NAMESPACE=String
+```
+
+**Example**
+```bash
+OTEL_SERVICE_NAMESPACE=MyApplicationNamespace
+```
+
+## `OTEL_RESOURCE_ATTRIBUTES`
+
+> ⚠️ Requires [`OTEL_LOG_COLLECTOR_URL`] to be set.
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+Additional OpenTelemetry resource attributes in [W3C Baggage format](https://w3c.github.io/baggage).
+See OTel Environment Variable Specification] & [OTel Resource SDK documentation] for more details.
+
+**Shape**
+```bash
+OTEL_RESOURCE_ATTRIBUTES=String
+```
+
+**Example**
+```bash
+OTEL_RESOURCE_ATTRIBUTES="foo=bar;baz=qux"
+```
 
 **📘 More Information**
 * Useful NodeJS Env Variables: [Node CLI Docs](https://nodejs.org/api/cli.html#cli_node_extra_ca_certs_file)
@@ -733,3 +828,5 @@ ONE_SERVICE_WORKER=false
 [`HTTPS_TRUSTED_CA_PATH`]: #https_trusted_ca_path
 [`HTTPS_PRIVATE_KEY_PASS_FILE_PATH`]: #https_private_key_pass_file_path
 [`HTTPS_PORT`]: #https_port
+[OTel Environment Variable Specification]: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/
+[OTel Resource SDK documentation]: https://opentelemetry.io/docs/specs/otel/resource/sdk/#specifying-resource-information-via-an-environment-variable

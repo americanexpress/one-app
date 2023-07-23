@@ -236,6 +236,32 @@ const runTime = [
     defaultValue: 'false',
     normalize: (input) => (input.toLowerCase() === 'true' ? 'true' : 'false'),
   },
+  // OpenTelemetry Configuration
+  {
+    name: 'OTEL_SERVICE_NAME',
+    defaultValue: 'One App',
+    validate: (input) => {
+      if (input && !process.env.OTEL_LOG_COLLECTOR_URL) {
+        throw new Error('Expected OTEL_LOG_COLLECTOR_URL to be set');
+      }
+    },
+  },
+  {
+    name: 'OTEL_SERVICE_NAMESPACE',
+    validate: (input) => {
+      if (input && !process.env.OTEL_LOG_COLLECTOR_URL) {
+        throw new Error('Expected OTEL_LOG_COLLECTOR_URL to be set');
+      }
+    },
+  },
+  {
+    name: 'OTEL_RESOURCE_ATTRIBUTES',
+    validate: (input) => {
+      if (input && !process.env.OTEL_LOG_COLLECTOR_URL) {
+        throw new Error('Expected OTEL_LOG_COLLECTOR_URL to be set');
+      }
+    },
+  },
 ];
 runTime.forEach(preprocessEnvVar);
 export { ip };
