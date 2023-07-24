@@ -89,6 +89,7 @@ describe('runTime', () => {
   function nodeUrl(entry) {
     return () => {
       expect(() => entry.validate('https://example.com/path')).not.toThrow();
+      expect(() => entry.validate('//example.com/path')).toThrow();
       expect(() => entry.validate('/path')).toThrow();
     };
   }
@@ -515,6 +516,17 @@ describe('runTime', () => {
     });
   });
 
+  describe('OTEL_LOG_COLLECTOR_URL', () => {
+    const otelLogCollectorUrl = getEnvVarConfig('OTEL_LOG_COLLECTOR_URL');
+
+    // eslint-disable-next-line jest/expect-expect -- assertion is in nodeUrl
+    it('ensures node can reach the URL', nodeUrl(otelLogCollectorUrl));
+
+    it('is not required', () => {
+      expect(() => otelLogCollectorUrl.validate()).not.toThrow();
+    });
+  });
+
   describe('OTEL_SERVICE_NAME', () => {
     const otelServiceName = getEnvVarConfig('OTEL_SERVICE_NAME');
 
@@ -543,6 +555,10 @@ describe('runTime', () => {
   describe('OTEL_SERVICE_NAMESPACE', () => {
     const otelServiceNamespace = getEnvVarConfig('OTEL_SERVICE_NAMESPACE');
 
+    it('is not required', () => {
+      expect(() => otelServiceNamespace.validate()).not.toThrow();
+    });
+
     it('should pass validation when OTEL_LOG_COLLECTOR_URL is also set', () => {
       process.env.OTEL_LOG_COLLECTOR_URL = 'http://localhost:4318/v1/logs';
       expect(() => otelServiceNamespace.validate('test')).not.toThrow();
@@ -563,6 +579,10 @@ describe('runTime', () => {
 
   describe('OTEL_RESOURCE_ATTRIBUTES', () => {
     const otelResouceAttributes = getEnvVarConfig('OTEL_RESOURCE_ATTRIBUTES');
+
+    it('should default to an empty string', () => {
+      expect(otelResouceAttributes.defaultValue).toBe('');
+    });
 
     it('should pass validation when OTEL_LOG_COLLECTOR_URL is also set', () => {
       process.env.OTEL_LOG_COLLECTOR_URL = 'http://localhost:4318/v1/logs';

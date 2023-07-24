@@ -238,6 +238,14 @@ const runTime = [
   },
   // OpenTelemetry Configuration
   {
+    name: 'OTEL_LOG_COLLECTOR_URL',
+    validate: (input) => {
+      if (!input) return;
+      // eslint-disable-next-line no-new -- intentionally using new for side effect of validation
+      new URL(input);
+    },
+  },
+  {
     name: 'OTEL_SERVICE_NAME',
     defaultValue: 'One App',
     validate: (input) => {
@@ -256,6 +264,7 @@ const runTime = [
   },
   {
     name: 'OTEL_RESOURCE_ATTRIBUTES',
+    defaultValue: '',
     validate: (input) => {
       if (input && !process.env.OTEL_LOG_COLLECTOR_URL) {
         throw new Error('Expected OTEL_LOG_COLLECTOR_URL to be set');
