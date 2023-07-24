@@ -57,6 +57,7 @@ const metricsMiddleware = promBundle({
   includeMethod: true,
   includePath: false,
   includeUp: false,
+  metricType: 'summary',
 });
 
 export function createApp({ enablePostToModuleRoutes = false } = {}) {
