@@ -29,7 +29,7 @@ import readJsonFile from '../../readJsonFile';
 
 const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
 
-let logger;
+const logMethods = ['error', 'warn', 'log', 'info', 'debug'];
 
 export const createOtelLogger = () => {
   const customResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES.split(';').reduce((acc, curr) => {
@@ -66,20 +66,21 @@ export const createOtelLogger = () => {
   loggerProvider.addLogRecordProcessor(new SimpleLogRecordProcessor(logExporter));
   logs.setGlobalLoggerProvider(loggerProvider);
 
-  logger = logs.getLogger(process.env.OTEL_SERVICE_NAME);
+  const otelLogger = logs.getLogger(process.env.OTEL_SERVICE_NAME);
+
+  const logger = logMethods.reduce((acc, curr) => {
+    function emitLog(...args) {
+      const logRecord = formatter(curr, ...args);
+      otelLogger.emit(logRecord);
+    }
+    return { ...acc, [curr]: emitLog };
+  }, {});
 
   return logger;
 };
 
-function replaceConsoleMethod(methodName) {
-  console[methodName] = function monkeypatchedMethod(...args) {
-    const logRecord = formatter(methodName, ...args);
-    logger.emit(logRecord);
-  };
-}
-
 export function replaceGlobalConsoleWithOtelLogger() {
-  createOtelLogger();
-  const methods = ['error', 'warn', 'log', 'info', 'debug'];
-  methods.forEach(replaceConsoleMethod);
+  const logger = createOtelLogger();
+  logMethods.forEach((methodName) => { console[methodName] = logger[methodName]; });
+  return logger;
 }
