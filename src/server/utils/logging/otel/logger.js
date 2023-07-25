@@ -24,12 +24,27 @@ import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-grpc';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { logs } from '@opentelemetry/api-logs';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import formatter from './formatter';
 import readJsonFile from '../../readJsonFile';
 
 const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
 
 const logMethods = ['error', 'warn', 'log', 'info', 'debug'];
+
+const setupTracer = () => {
+  const provider = new NodeTracerProvider();
+  provider.register();
+  registerInstrumentations({
+    instrumentations: [
+      new HttpInstrumentation(),
+      new ExpressInstrumentation(),
+    ],
+  });
+};
 
 export const createOtelLogger = () => {
   const customResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES.split(';').reduce((acc, curr) => {
@@ -67,6 +82,9 @@ export const createOtelLogger = () => {
   logs.setGlobalLoggerProvider(loggerProvider);
 
   const otelLogger = logs.getLogger(process.env.OTEL_SERVICE_NAME);
+
+  // Add trace IDs to logs
+  setupTracer();
 
   const logger = logMethods.reduce((acc, curr) => {
     function emitLog(...args) {

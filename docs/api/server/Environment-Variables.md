@@ -81,7 +81,7 @@ One App can be configured via Environment Variables:
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
   * [`ONE_SERVICE_WORKER`](#one_service_worker)
   * [`OTEL_LOG_COLLECTOR_URL`](#otel_log_collector_url)
-  * [`OTEL_RESOURCE_ATTRIBUTES`](#ote;_resource_attributes)
+  * [`OTEL_RESOURCE_ATTRIBUTES`](#otel_resource_attributes)
   * [`OTEL_SERVICE_NAME`](#otel_service_name)
   * [`OTEL_SERVICE_NAMESPACE`](#otel_service_namespace)
 

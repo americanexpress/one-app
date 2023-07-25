@@ -596,9 +596,14 @@ describe('runTime', () => {
       );
     });
 
-    it('should pass validation when not and OTEL_LOG_COLLECTOR_URL is also not set', () => {
+    it('should pass validation when not set and OTEL_LOG_COLLECTOR_URL is also not set', () => {
       delete process.env.OTEL_LOG_COLLECTOR_URL;
       expect(() => otelResouceAttributes.validate()).not.toThrow();
+    });
+
+    it('should pass validation when set to default and OTEL_LOG_COLLECTOR_URL is also not set', () => {
+      delete process.env.OTEL_LOG_COLLECTOR_URL;
+      expect(() => otelResouceAttributes.validate('')).not.toThrow();
     });
   });
 });

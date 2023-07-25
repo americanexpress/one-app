@@ -16,6 +16,9 @@
 
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-grpc';
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import {
   ConsoleLogRecordExporter,
   SimpleLogRecordProcessor,
@@ -38,6 +41,9 @@ jest.mock('@opentelemetry/api-logs', () => {
 
 jest.mock('@opentelemetry/sdk-logs');
 jest.mock('@opentelemetry/exporter-logs-otlp-grpc');
+jest.mock('@opentelemetry/instrumentation');
+jest.mock('@opentelemetry/instrumentation-http');
+jest.mock('@opentelemetry/instrumentation-express');
 
 jest.mock('../../../../../src/server/utils/readJsonFile', () => () => ({
   buildVersion: '1.2.3-abc123',
@@ -131,6 +137,16 @@ describe('OpenTelemetry logger', () => {
         expect.any(ConsoleLogRecordExporter)
       );
       expect(SimpleLogRecordProcessor).toHaveBeenCalledWith(expect.any(OTLPLogExporter));
+    });
+
+    it('should register HTTP & Express instrumentation', () => {
+      createOtelLogger();
+      expect(registerInstrumentations).toHaveBeenCalledWith({
+        instrumentations: [
+          expect.any(HttpInstrumentation),
+          expect.any(ExpressInstrumentation),
+        ],
+      });
     });
   });
 
