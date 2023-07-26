@@ -20,7 +20,7 @@ import { SeverityNumber } from '@opentelemetry/api-logs';
 
 function getBaseRecord(level) {
   let severityText = level.toUpperCase();
-  if (!Object.keys(SeverityNumber).includes(severityText)) severityText = 'UNSPECIFIED';
+  if (!Object.keys(SeverityNumber).includes(severityText)) severityText = 'INFO';
   return {
     attributes: {
       agent: `${os.type()} ${os.arch()}`,

@@ -516,8 +516,8 @@ describe('runTime', () => {
     });
   });
 
-  describe('OTEL_LOG_COLLECTOR_URL', () => {
-    const otelLogCollectorUrl = getEnvVarConfig('OTEL_LOG_COLLECTOR_URL');
+  describe('OTEL_EXPORTER_OTLP_LOGS_ENDPOINT', () => {
+    const otelLogCollectorUrl = getEnvVarConfig('OTEL_EXPORTER_OTLP_LOGS_ENDPOINT');
 
     // eslint-disable-next-line jest/expect-expect -- assertion is in nodeUrl
     it('ensures node can reach the URL', nodeUrl(otelLogCollectorUrl));
@@ -534,20 +534,20 @@ describe('runTime', () => {
       expect(otelServiceName.defaultValue).toBe('One App');
     });
 
-    it('should pass validation when OTEL_LOG_COLLECTOR_URL is also set', () => {
-      process.env.OTEL_LOG_COLLECTOR_URL = 'http://localhost:4318/v1/logs';
+    it('should pass validation when OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is also set', () => {
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://localhost:4318/v1/logs';
       expect(() => otelServiceName.validate('test')).not.toThrow();
     });
 
-    it('should fail validation when OTEL_LOG_COLLECTOR_URL is not set', () => {
-      delete process.env.OTEL_LOG_COLLECTOR_URL;
+    it('should fail validation when OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is not set', () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
       expect(() => otelServiceName.validate('test')).toThrowErrorMatchingInlineSnapshot(
-        '"Expected OTEL_LOG_COLLECTOR_URL to be set"'
+        '"Expected OTEL_EXPORTER_OTLP_LOGS_ENDPOINT to be set"'
       );
     });
 
-    it('should pass validation when not and OTEL_LOG_COLLECTOR_URL is also not set', () => {
-      delete process.env.OTEL_LOG_COLLECTOR_URL;
+    it('should pass validation when not and OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is also not set', () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
       expect(() => otelServiceName.validate()).not.toThrow();
     });
   });
@@ -559,20 +559,20 @@ describe('runTime', () => {
       expect(() => otelServiceNamespace.validate()).not.toThrow();
     });
 
-    it('should pass validation when OTEL_LOG_COLLECTOR_URL is also set', () => {
-      process.env.OTEL_LOG_COLLECTOR_URL = 'http://localhost:4318/v1/logs';
+    it('should pass validation when OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is also set', () => {
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://localhost:4318/v1/logs';
       expect(() => otelServiceNamespace.validate('test')).not.toThrow();
     });
 
-    it('should fail validation when OTEL_LOG_COLLECTOR_URL is not set', () => {
-      delete process.env.OTEL_LOG_COLLECTOR_URL;
+    it('should fail validation when OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is not set', () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
       expect(() => otelServiceNamespace.validate('test')).toThrowErrorMatchingInlineSnapshot(
-        '"Expected OTEL_LOG_COLLECTOR_URL to be set"'
+        '"Expected OTEL_EXPORTER_OTLP_LOGS_ENDPOINT to be set"'
       );
     });
 
-    it('should pass validation when not and OTEL_LOG_COLLECTOR_URL is also not set', () => {
-      delete process.env.OTEL_LOG_COLLECTOR_URL;
+    it('should pass validation when not and OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is also not set', () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
       expect(() => otelServiceNamespace.validate()).not.toThrow();
     });
   });
@@ -584,25 +584,25 @@ describe('runTime', () => {
       expect(otelResouceAttributes.defaultValue).toBe('');
     });
 
-    it('should pass validation when OTEL_LOG_COLLECTOR_URL is also set', () => {
-      process.env.OTEL_LOG_COLLECTOR_URL = 'http://localhost:4318/v1/logs';
+    it('should pass validation when OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is also set', () => {
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://localhost:4318/v1/logs';
       expect(() => otelResouceAttributes.validate('test')).not.toThrow();
     });
 
-    it('should fail validation when OTEL_LOG_COLLECTOR_URL is not set', () => {
-      delete process.env.OTEL_LOG_COLLECTOR_URL;
+    it('should fail validation when OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is not set', () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
       expect(() => otelResouceAttributes.validate('test')).toThrowErrorMatchingInlineSnapshot(
-        '"Expected OTEL_LOG_COLLECTOR_URL to be set"'
+        '"Expected OTEL_EXPORTER_OTLP_LOGS_ENDPOINT to be set"'
       );
     });
 
-    it('should pass validation when not set and OTEL_LOG_COLLECTOR_URL is also not set', () => {
-      delete process.env.OTEL_LOG_COLLECTOR_URL;
+    it('should pass validation when not set and OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is also not set', () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
       expect(() => otelResouceAttributes.validate()).not.toThrow();
     });
 
-    it('should pass validation when set to default and OTEL_LOG_COLLECTOR_URL is also not set', () => {
-      delete process.env.OTEL_LOG_COLLECTOR_URL;
+    it('should pass validation when set to default and OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is also not set', () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
       expect(() => otelResouceAttributes.validate('')).not.toThrow();
     });
   });

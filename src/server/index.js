@@ -128,5 +128,5 @@ if (process.env.NODE_ENV === 'development') {
 
 export default serverChain.catch((err) => {
   console.error(err);
-  shutdown();
+  return shutdown();
 });

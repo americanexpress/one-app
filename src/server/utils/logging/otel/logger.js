@@ -19,6 +19,7 @@ import {
   LoggerProvider,
   ConsoleLogRecordExporter,
   SimpleLogRecordProcessor,
+  BatchLogRecordProcessor,
 } from '@opentelemetry/sdk-logs';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-grpc';
 import { Resource } from '@opentelemetry/resources';
@@ -34,6 +35,13 @@ import readJsonFile from '../../readJsonFile';
 const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
 
 const logMethods = ['error', 'warn', 'log', 'info', 'debug'];
+
+let batchLogProcessor;
+
+export const shutdownOtelLogger = () => {
+  if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) return batchLogProcessor.shutdown();
+  return undefined;
+};
 
 const setupTracer = () => {
   const provider = new NodeTracerProvider();
@@ -64,7 +72,6 @@ export const createOtelLogger = () => {
   });
 
   const collectorOptions = {
-    url: process.env.OTEL_LOG_COLLECTOR_URL,
     headers: {},
     concurrencyLimit: 10,
     resource,
@@ -78,7 +85,10 @@ export const createOtelLogger = () => {
       new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())
     );
   }
-  loggerProvider.addLogRecordProcessor(new SimpleLogRecordProcessor(logExporter));
+
+  batchLogProcessor = new BatchLogRecordProcessor(logExporter);
+
+  loggerProvider.addLogRecordProcessor(batchLogProcessor);
   logs.setGlobalLoggerProvider(loggerProvider);
 
   const otelLogger = logs.getLogger(process.env.OTEL_SERVICE_NAME);

@@ -28,7 +28,7 @@ function formatProtocol(parsedUrl) {
 
 let logger;
 
-if (process.env.OTEL_LOG_COLLECTOR_URL) {
+if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
   logger = replaceGlobalConsoleWithOtelLogger();
 } else {
   logger = lumberjackLogger;

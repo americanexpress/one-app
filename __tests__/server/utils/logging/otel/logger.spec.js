@@ -22,10 +22,12 @@ import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import {
   ConsoleLogRecordExporter,
   SimpleLogRecordProcessor,
+  BatchLogRecordProcessor,
 } from '@opentelemetry/sdk-logs';
 import {
   createOtelLogger,
   replaceGlobalConsoleWithOtelLogger,
+  shutdownOtelLogger,
 } from '../../../../../src/server/utils/logging/otel/logger';
 
 jest.mock('@opentelemetry/api-logs', () => {
@@ -59,7 +61,7 @@ Object.defineProperty(process, 'pid', {
 });
 
 const loadEnvVars = () => {
-  process.env.OTEL_LOG_COLLECTOR_URL = 'http://localhost:4318/v1/logs';
+  process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://localhost:4318/v1/logs';
   process.env.OTEL_SERVICE_NAME = 'One App';
   process.env.OTEL_SERVICE_NAMESPACE = 'Namespace';
   process.env.OTEL_RESOURCE_ATTRIBUTES = 'foo=bar;baz=qux';
@@ -68,7 +70,7 @@ const loadEnvVars = () => {
 const originalNodeEnv = process.env.NODE_ENV;
 
 const unloadEnvVars = () => {
-  delete process.env.OTEL_LOG_COLLECTOR_URL;
+  delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
   delete process.env.OTEL_SERVICE_NAME;
   delete process.env.OTEL_SERVICE_NAMESPACE;
   delete process.env.OTEL_RESOURCE_ATTRIBUTES;
@@ -88,6 +90,26 @@ describe('OpenTelemetry logger', () => {
   beforeAll(loadEnvVars);
   beforeEach(jest.resetAllMocks);
   afterAll(unloadEnvVars);
+
+  describe('shutdownOtelLogger', () => {
+    it('shuts down the batch processor', async () => {
+      const batchProcessor = { shutdown: jest.fn() };
+      BatchLogRecordProcessor.mockReturnValueOnce(batchProcessor);
+      createOtelLogger();
+      await shutdownOtelLogger();
+      expect(batchProcessor.shutdown).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not attempt to shut down the batch processor if not using OTel', async () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
+      const batchProcessor = { shutdown: jest.fn() };
+      BatchLogRecordProcessor.mockReturnValueOnce(batchProcessor);
+      createOtelLogger();
+      await shutdownOtelLogger();
+      expect(batchProcessor.shutdown).not.toHaveBeenCalled();
+      loadEnvVars();
+    });
+  });
 
   describe('createOtelLogger', () => {
     it('should create an exporter with the expected collector options', () => {
@@ -116,7 +138,6 @@ describe('OpenTelemetry logger', () => {
             },
             "asyncAttributesPending": false,
           },
-          "url": "http://localhost:4318/v1/logs",
         }
       `);
     });
@@ -124,28 +145,24 @@ describe('OpenTelemetry logger', () => {
     it('should export to STDOUT and OTLP in development', () => {
       process.env.NODE_ENV = 'development';
       createOtelLogger();
-      expect(SimpleLogRecordProcessor).toHaveBeenCalledTimes(2);
+      expect(SimpleLogRecordProcessor).toHaveBeenCalledTimes(1);
+      expect(BatchLogRecordProcessor).toHaveBeenCalledTimes(1);
       expect(SimpleLogRecordProcessor).toHaveBeenCalledWith(expect.any(ConsoleLogRecordExporter));
-      expect(SimpleLogRecordProcessor).toHaveBeenCalledWith(expect.any(OTLPLogExporter));
+      expect(BatchLogRecordProcessor).toHaveBeenCalledWith(expect.any(OTLPLogExporter));
     });
 
     it('should not export to STDOUT in production', () => {
       process.env.NODE_ENV = 'production';
       createOtelLogger();
-      expect(SimpleLogRecordProcessor).toHaveBeenCalledTimes(1);
-      expect(SimpleLogRecordProcessor).not.toHaveBeenCalledWith(
-        expect.any(ConsoleLogRecordExporter)
-      );
-      expect(SimpleLogRecordProcessor).toHaveBeenCalledWith(expect.any(OTLPLogExporter));
+      expect(BatchLogRecordProcessor).toHaveBeenCalledTimes(1);
+      expect(SimpleLogRecordProcessor).not.toHaveBeenCalled();
+      expect(BatchLogRecordProcessor).toHaveBeenCalledWith(expect.any(OTLPLogExporter));
     });
 
     it('should register HTTP & Express instrumentation', () => {
       createOtelLogger();
       expect(registerInstrumentations).toHaveBeenCalledWith({
-        instrumentations: [
-          expect.any(HttpInstrumentation),
-          expect.any(ExpressInstrumentation),
-        ],
+        instrumentations: [expect.any(HttpInstrumentation), expect.any(ExpressInstrumentation)],
       });
     });
   });
@@ -159,51 +176,61 @@ describe('OpenTelemetry logger', () => {
     it('should replace console.error', () => {
       console.error(new Error('error test'));
       expect(logger.emit).toHaveBeenCalledTimes(1);
-      expect(logger.emit).toHaveBeenCalledWith(expect.objectContaining({
-        body: 'error test',
-        severityText: 'ERROR',
-        severityNumber: SeverityNumber.ERROR,
-      }));
+      expect(logger.emit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: 'error test',
+          severityText: 'ERROR',
+          severityNumber: SeverityNumber.ERROR,
+        })
+      );
     });
 
     it('should replace console.warn', () => {
       console.warn('warn test');
       expect(logger.emit).toHaveBeenCalledTimes(1);
-      expect(logger.emit).toHaveBeenCalledWith(expect.objectContaining({
-        body: 'warn test',
-        severityText: 'WARN',
-        severityNumber: SeverityNumber.WARN,
-      }));
+      expect(logger.emit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: 'warn test',
+          severityText: 'WARN',
+          severityNumber: SeverityNumber.WARN,
+        })
+      );
     });
 
     it('should replace console.log', () => {
       console.log('log test');
       expect(logger.emit).toHaveBeenCalledTimes(1);
-      expect(logger.emit).toHaveBeenCalledWith(expect.objectContaining({
-        body: 'log test',
-        severityText: 'UNSPECIFIED',
-        severityNumber: SeverityNumber.UNSPECIFIED,
-      }));
+      expect(logger.emit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: 'log test',
+          severityText: 'INFO',
+          severityNumber: SeverityNumber.INFO,
+        })
+      );
     });
 
     it('should replace console.info', () => {
       console.info('info test');
       expect(logger.emit).toHaveBeenCalledTimes(1);
-      expect(logger.emit).toHaveBeenCalledWith(expect.objectContaining({
-        body: 'info test',
-        severityText: 'INFO',
-        severityNumber: SeverityNumber.INFO,
-      }));
+      expect(logger.emit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: 'info test',
+          severityText: 'INFO',
+          severityNumber: SeverityNumber.INFO,
+        })
+      );
     });
 
     it('should replace console.debug', () => {
       console.debug('debug test');
       expect(logger.emit).toHaveBeenCalledTimes(1);
-      expect(logger.emit).toHaveBeenCalledWith(expect.objectContaining({
-        body: 'debug test',
-        severityText: 'DEBUG',
-        severityNumber: SeverityNumber.DEBUG,
-      }));
+      expect(logger.emit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: 'debug test',
+          severityText: 'DEBUG',
+          severityNumber: SeverityNumber.DEBUG,
+        })
+      );
     });
   });
 });

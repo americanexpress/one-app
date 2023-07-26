@@ -46,7 +46,7 @@ One App can be configured via Environment Variables:
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
   * [`ONE_SERVICE_WORKER`](#one_service_worker)
 * OpenTelemetry
-  * [`OTEL_LOG_COLLECTOR_URL`](#otel_log_collector_url)
+  * [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`](#otel_log_collector_url)
   * [`OTEL_SERVICE_NAME`](#otel_service_name)
   * [`OTEL_SERVICE_NAMESPACE`](#otel_service_namespace)
   * [`OTEL_RESOURCE_ATTRIBUTES`](#ote;_resource_attributes)
@@ -80,7 +80,7 @@ One App can be configured via Environment Variables:
   * [`ONE_MAX_POST_REQUEST_PAYLOAD`](#one_max_post_request_payload)
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
   * [`ONE_SERVICE_WORKER`](#one_service_worker)
-  * [`OTEL_LOG_COLLECTOR_URL`](#otel_log_collector_url)
+  * [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`](#otel_log_collector_url)
   * [`OTEL_RESOURCE_ATTRIBUTES`](#otel_resource_attributes)
   * [`OTEL_SERVICE_NAME`](#otel_service_name)
   * [`OTEL_SERVICE_NAMESPACE`](#otel_service_namespace)
@@ -725,7 +725,7 @@ ONE_SERVICE_WORKER=true
 ONE_SERVICE_WORKER=false
 ```
 
-## `OTEL_LOG_COLLECTOR_URL`
+## `OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`
 
 **Runs In**
 * ✅ Production
@@ -735,17 +735,17 @@ When set, One App will emit OpenTelemetry logs over GRPC to the configured endpo
 
 **Shape**
 ```bash
-OTEL_LOG_COLLECTOR_URL=String
+OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=String
 ```
 
 **Example**
 ```bash
-OTEL_LOG_COLLECTOR_URL=http://localhost:4318/v1/logs
+OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://localhost:4318/v1/logs
 ```
 
 ## `OTEL_SERVICE_NAME`
 
-> ⚠️ Requires [`OTEL_LOG_COLLECTOR_URL`] to be set.
+> ⚠️ Requires [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`] to be set.
 
 **Runs In**
 * ✅ Production
@@ -771,7 +771,7 @@ OTEL_SERVICE_NAME="One App"
 
 ## `OTEL_SERVICE_NAMESPACE`
 
-> ⚠️ Requires [`OTEL_LOG_COLLECTOR_URL`] to be set.
+> ⚠️ Requires [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`] to be set.
 
 **Runs In**
 * ✅ Production
@@ -791,7 +791,7 @@ OTEL_SERVICE_NAMESPACE=MyApplicationNamespace
 
 ## `OTEL_RESOURCE_ATTRIBUTES`
 
-> ⚠️ Requires [`OTEL_LOG_COLLECTOR_URL`] to be set.
+> ⚠️ Requires [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`] to be set.
 
 **Runs In**
 * ✅ Production

@@ -25,9 +25,9 @@ describe('setup', () => {
   function load(useOtel = false) {
     jest.resetModules();
     if (useOtel) {
-      process.env.OTEL_LOG_COLLECTOR_URL = 'http://localhost:4318/v1/logs';
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://localhost:4318/v1/logs';
     } else {
-      delete process.env.OTEL_LOG_COLLECTOR_URL;
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
     }
     jest.mock('@americanexpress/lumberjack');
     jest.mock('../../../../src/server/utils/logging/timing', () => ({

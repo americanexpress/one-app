@@ -238,7 +238,7 @@ const runTime = [
   },
   // OpenTelemetry Configuration
   {
-    name: 'OTEL_LOG_COLLECTOR_URL',
+    name: 'OTEL_EXPORTER_OTLP_LOGS_ENDPOINT',
     validate: (input) => {
       if (!input) return;
       // eslint-disable-next-line no-new -- intentionally using new for side effect of validation
@@ -249,16 +249,16 @@ const runTime = [
     name: 'OTEL_SERVICE_NAME',
     defaultValue: 'One App',
     validate: (input) => {
-      if (input && !process.env.OTEL_LOG_COLLECTOR_URL) {
-        throw new Error('Expected OTEL_LOG_COLLECTOR_URL to be set');
+      if (input && !process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
+        throw new Error('Expected OTEL_EXPORTER_OTLP_LOGS_ENDPOINT to be set');
       }
     },
   },
   {
     name: 'OTEL_SERVICE_NAMESPACE',
     validate: (input) => {
-      if (input && !process.env.OTEL_LOG_COLLECTOR_URL) {
-        throw new Error('Expected OTEL_LOG_COLLECTOR_URL to be set');
+      if (input && !process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
+        throw new Error('Expected OTEL_EXPORTER_OTLP_LOGS_ENDPOINT to be set');
       }
     },
   },
@@ -266,8 +266,8 @@ const runTime = [
     name: 'OTEL_RESOURCE_ATTRIBUTES',
     defaultValue: '',
     validate: (input) => {
-      if (input && !process.env.OTEL_LOG_COLLECTOR_URL) {
-        throw new Error('Expected OTEL_LOG_COLLECTOR_URL to be set');
+      if (input && !process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
+        throw new Error('Expected OTEL_EXPORTER_OTLP_LOGS_ENDPOINT to be set');
       }
     },
   },
