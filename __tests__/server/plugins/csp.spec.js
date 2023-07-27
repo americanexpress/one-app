@@ -51,15 +51,15 @@ describe('csp', () => {
     expect(headers).not.toHaveProperty('content-security-policy-report-only');
   });
 
-  it('does not set csp header if ONE_DANGEROUSLY_DISABLE_CSP is present', async () => {
+  it('sets csp header to null if ONE_DANGEROUSLY_DISABLE_CSP is present', async () => {
     process.env.ONE_DANGEROUSLY_DISABLE_CSP = 'true';
     const response = await (await buildApp()).inject({
       method: 'GET',
       url: '/',
     });
     const { headers } = response;
-
-    expect(headers).not.toHaveProperty('Content-Security-Policy');
+    expect(headers['content-security-policy']).toBe(null);
+    expect(headers).toHaveProperty('content-security-policy');
   });
 
   it('defaults to production csp', async () => {
