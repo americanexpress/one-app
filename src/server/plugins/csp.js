@@ -86,8 +86,6 @@ const csp = (fastify, _opts, done) => {
     }
     if (process.env.ONE_DANGEROUSLY_DISABLE_CSP !== 'true') {
       reply.header('Content-Security-Policy', updatedPolicy);
-    } else {
-      reply.header('Content-Security-Policy', null);
     }
   });
 

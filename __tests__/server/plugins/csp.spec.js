@@ -16,6 +16,7 @@
 /* eslint-disable global-require */
 
 import Fastify from 'fastify';
+import fastifyHelmet from '@fastify/helmet';
 import csp, { updateCSP, getCSP, cspCache } from '../../../src/server/plugins/csp';
 
 const sanitizeCspString = (cspString) => cspString
@@ -25,9 +26,15 @@ const sanitizeCspString = (cspString) => cspString
 
 const buildApp = async () => {
   const app = Fastify();
-
   app.register(csp);
-
+  app.register(fastifyHelmet, {
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
+    crossOriginResourcePolicy: false,
+    originAgentCluster: false,
+    contentSecurityPolicy: false,
+  }
+  );
   app.get('/', () => 'test');
 
   return app;
@@ -51,15 +58,14 @@ describe('csp', () => {
     expect(headers).not.toHaveProperty('content-security-policy-report-only');
   });
 
-  it('sets csp header to null if ONE_DANGEROUSLY_DISABLE_CSP is present', async () => {
+  it('does not set csp header if ONE_DANGEROUSLY_DISABLE_CSP is present', async () => {
     process.env.ONE_DANGEROUSLY_DISABLE_CSP = 'true';
     const response = await (await buildApp()).inject({
       method: 'GET',
       url: '/',
     });
     const { headers } = response;
-    expect(headers['content-security-policy']).toBe(null);
-    expect(headers).toHaveProperty('content-security-policy');
+    expect(headers).not.toHaveProperty('content-security-policy');
   });
 
   it('defaults to production csp', async () => {
