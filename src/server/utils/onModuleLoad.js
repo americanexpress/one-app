@@ -120,7 +120,6 @@ export function setRootModuleConfigurations(module, moduleName) {
   logModuleLoad(moduleName, metaData.version);
 }
 
-/* eslint complexity:  ['error', 13] */
 export default function onModuleLoad({
   module,
   moduleName,
