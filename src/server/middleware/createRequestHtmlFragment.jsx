@@ -51,7 +51,7 @@ const getModuleData = async ({ dispatch, modules }) => {
 const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 
 export default function createRequestHtmlFragment({ createRoutes }) {
-  // eslint-disable-next-line complexity
+  // eslint-disable-next-line complexity -- requires decent refactor
   return async (req, res, next) => {
     try {
       req.tracer.startServerPhaseTimer('3');

@@ -72,15 +72,10 @@ export function validateCspIsPresent(csp) {
   }
 }
 
-/* eslint complexity:  ['error', 13] */
-export default function onModuleLoad({
-  module,
-  moduleName,
-}) {
+export function setRootModuleConfigurations(module, moduleName) {
   const {
     [CONFIGURATION_KEY]: {
       // Root Module Specific
-      providedExternals,
       provideStateConfig,
       csp,
       corsOrigins,
@@ -93,6 +88,44 @@ export default function onModuleLoad({
       errorPageUrl,
       dnsCache,
       redirectAllowList,
+    } = {},
+    [META_DATA_KEY]: metaData,
+  } = module;
+  validateCspIsPresent(csp);
+  clearModulesUsingExternals();
+  if (provideStateConfig) {
+    setStateConfig(provideStateConfig);
+  }
+  if (errorPageUrl) {
+    setErrorPage(errorPageUrl);
+  }
+  if (redirectAllowList) {
+    setRedirectAllowList(redirectAllowList);
+  } else {
+    setRedirectAllowList([]);
+  }
+  setCorsOrigins(corsOrigins);
+  extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
+  setConfigureRequestLog(configureRequestLog);
+  setCreateSsrFetch(createSsrFetch);
+  if (eventLoopDelayThreshold) setEventLoopDelayThreshold(eventLoopDelayThreshold);
+  if (eventLoopDelayPercentile) setEventLoopDelayPercentile(eventLoopDelayPercentile);
+  configurePWA(validatePWAConfig(pwa, {
+    clientStateConfig: getClientStateConfig(),
+  }));
+  setupDnsCache(dnsCache);
+
+  logModuleLoad(moduleName, metaData.version);
+}
+
+export default function onModuleLoad({
+  module,
+  moduleName,
+}) {
+  const {
+    [CONFIGURATION_KEY]: {
+      // Root Module Specific
+      providedExternals,
       // Child Module Specific
       requiredExternals,
       validateStateConfig,
@@ -120,31 +153,7 @@ export default function onModuleLoad({
   }
 
   if (moduleName === serverStateConfig.rootModuleName) {
-    validateCspIsPresent(csp);
-    clearModulesUsingExternals();
-    if (provideStateConfig) {
-      setStateConfig(provideStateConfig);
-    }
-    if (errorPageUrl) {
-      setErrorPage(errorPageUrl);
-    }
-    if (redirectAllowList) {
-      setRedirectAllowList(redirectAllowList);
-    } else {
-      setRedirectAllowList([]);
-    }
-    setCorsOrigins(corsOrigins);
-    extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
-    setConfigureRequestLog(configureRequestLog);
-    setCreateSsrFetch(createSsrFetch);
-    if (eventLoopDelayThreshold) setEventLoopDelayThreshold(eventLoopDelayThreshold);
-    if (eventLoopDelayPercentile) setEventLoopDelayPercentile(eventLoopDelayPercentile);
-    configurePWA(validatePWAConfig(pwa, {
-      clientStateConfig: getClientStateConfig(),
-    }));
-    setupDnsCache(dnsCache);
-
-    logModuleLoad(moduleName, metaData.version);
+    setRootModuleConfigurations(module, moduleName);
     return;
   }
 
