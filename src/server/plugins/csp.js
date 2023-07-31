@@ -84,7 +84,6 @@ const csp = (fastify, _opts, done) => {
       request.scriptNonce = scriptNonce;
       updatedPolicy = insertSource(policy, 'script-src', `'nonce-${scriptNonce}'`);
     }
-
     if (process.env.ONE_DANGEROUSLY_DISABLE_CSP !== 'true') {
       reply.header('Content-Security-Policy', updatedPolicy);
     }

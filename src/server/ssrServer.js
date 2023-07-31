@@ -202,6 +202,7 @@ export async function createApp(opts = {}) {
         crossOriginOpenerPolicy: false,
         crossOriginResourcePolicy: false,
         originAgentCluster: false,
+        contentSecurityPolicy: false,
       }
     );
     instance.register(addFrameOptionsHeader);
