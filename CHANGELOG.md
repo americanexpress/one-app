@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.21.0-ship-otel-logs.0](https://github.com/americanexpress/one-app/compare/v5.20.0...v5.21.0-ship-otel-logs.0) (2023-08-01)
+
+
+### Bug Fixes
+
+* **http-metrics:** use summary metrics to match v6 ([#1054](https://github.com/americanexpress/one-app/issues/1054)) ([2b5c876](https://github.com/americanexpress/one-app/commit/2b5c87650bdcb8ae0f4d7cf211027f75e36bfe83))
+* **logging:** attach global request spy to OTel logger ([965cf02](https://github.com/americanexpress/one-app/commit/965cf021d39c2784dfb450037ed08cf55c6bac80))
+
+
+### Features
+
+* **logging:** add trace IDs to OTel logs ([7f567ac](https://github.com/americanexpress/one-app/commit/7f567ac1175b41e758885b0bf5a876c44bc79e71))
+* **logging:** added OpenTelemetry support ([80f32ba](https://github.com/americanexpress/one-app/commit/80f32baf6dbedc614487310fed0f31b13807abbd))
+* **logging:** batch shipping of OTel log records ([8eb00eb](https://github.com/americanexpress/one-app/commit/8eb00eb29429be4c23719dd56fea7eb475d7d9d1))
+* **logging:** flatten attributes on OTel log records ([ef7b9f5](https://github.com/americanexpress/one-app/commit/ef7b9f5c785a8ade4f7dd268157735e1daa0da42))
+* **runTime:** better validation of OTel env vars ([655175f](https://github.com/americanexpress/one-app/commit/655175f4536dd6f748b4747e9156f8c6f00ddbac))
+
+
 # [5.20.0](https://github.com/americanexpress/one-app/compare/v5.19.0...v5.20.0) (2023-07-03)
 
 
