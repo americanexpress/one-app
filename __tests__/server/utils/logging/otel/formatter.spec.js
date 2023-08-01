@@ -59,71 +59,56 @@ describe('otel formatter', () => {
 
   describe('errors', () => {
     it('puts a lone error in the error field', () => {
-      expect.assertions(2);
       load();
       const record = formatter('error', createErrorWithMockedStacktrace('test error'));
-      expect(record.attributes).toHaveProperty('error');
-      expect(record.attributes.error).toMatchSnapshot();
+      expect(record.attributes).toMatchSnapshot();
     });
 
     it('does not include a message key when given a lone error', () => {
-      expect.assertions(1);
       load();
       const record = formatter('error', new Error('irrelevant'));
       expect(record).not.toHaveProperty('message');
     });
 
     it('puts an error with other arguments in the error field and uses only the other args for the body', () => {
-      expect.assertions(4);
       load();
       const record = formatter('error', createErrorWithMockedStacktrace('test error'), 'say hi %i times', 7);
-      expect(record.attributes).toHaveProperty('error');
-      expect(record).toHaveProperty('body');
-      expect(record.attributes.error).toMatchSnapshot();
+      expect(record.attributes).toMatchSnapshot();
       expect(record.body).toBe('say hi 7 times');
     });
 
     it('puts an error paired with a message in the error field', () => {
-      expect.assertions(4);
       load();
       const record = formatter('error', 'unable to do the thing', createErrorWithMockedStacktrace('test error'));
-      expect(record.attributes).toHaveProperty('error');
-      expect(record).toHaveProperty('body');
-      expect(record.attributes.error).toMatchSnapshot();
+      expect(record.attributes).toMatchSnapshot();
       expect(record.body).toBe('unable to do the thing');
     });
 
     it('uses the error in the message when the error is paired with a message and other arguments', () => {
-      expect.assertions(4);
       load();
       const record = formatter('error', 'unable to do the thing %O %d times', createErrorWithMockedStacktrace('test error'), 12);
       const errorText = record.body
         .replace('[', '')
         .replace(']', '');
-      expect(record.attributes).toHaveProperty('error');
       expect(record).toHaveProperty('body');
-      expect(record.attributes.error).toMatchSnapshot();
+      expect(record.attributes).toMatchSnapshot();
       expect(errorText).toMatchSnapshot();
     });
 
     it('records the error message as <none> if not present', () => {
-      expect.assertions(2);
       load();
       const err = createErrorWithMockedStacktrace('test error');
       delete err.message;
       const record = formatter('error', 'unable to do the thing', err);
-      expect(record.attributes).toHaveProperty('error');
-      expect(record.attributes.error).toHaveProperty('message', '<none>');
+      expect(record.attributes['error.message']).toBe('<none>');
     });
 
     it('records the error stacktrace as <none> if not present', () => {
-      expect.assertions(2);
       load();
       const err = createErrorWithMockedStacktrace('test error');
       delete err.stack;
       const record = formatter('error', 'unable to do the thing', err);
-      expect(record.attributes).toHaveProperty('error');
-      expect(record.attributes.error).toHaveProperty('stacktrace', '<none>');
+      expect(record.attributes['error.stacktrace']).toBe('<none>');
     });
 
     it('encodes ClientReportedError Error as parseable JSON', () => {

@@ -17,6 +17,7 @@
 import os from 'os';
 import util from 'util';
 import { SeverityNumber } from '@opentelemetry/api-logs';
+import flatten from 'flat';
 
 function getBaseRecord(level) {
   let severityText = level.toUpperCase();
@@ -99,22 +100,25 @@ function recordFromLogType(level, logType) {
 
 const formatter = (level, ...args) => {
   const [arg0, arg1] = args;
+  let record;
 
   if (arg0 instanceof Error) {
-    return leadingErrorWithOtherArgs(level, ...args);
+    record = leadingErrorWithOtherArgs(level, ...args);
   }
   if (typeof arg0 === 'string' && arg1 instanceof Error) {
-    return leadingStringWithError(level, ...args);
+    record = leadingStringWithError(level, ...args);
   }
   if (typeof arg0 === 'object' && arg0 && arg0.type) {
-    const record = recordFromLogType(level, arg0);
-    if (record) {
-      return record;
-    }
+    record = recordFromLogType(level, arg0);
   }
 
-  const record = getBaseRecord(level);
-  record.body = util.format(...args);
+  if (!record) {
+    record = getBaseRecord(level);
+    record.body = util.format(...args);
+  }
+
+  record.attributes = flatten(record.attributes);
+
   return record;
 };
 
