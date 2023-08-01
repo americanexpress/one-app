@@ -100,7 +100,7 @@ export const extendRestrictedAttributesAllowList = (restrictedAttributeAdditions
 export const validateSafeRequestRestrictedAttributes = (requiredAttributes, moduleName) => {
   const missingRequestItemsMessages = [];
   Object.keys(requiredAttributes)
-    // only validate for attibutes defined in restrictedRequestAttributes
+    // only validate for attributes defined in restrictedRequestAttributes
     .filter((key) => Object.keys(restrictedRequestAttributes).includes(key))
     .forEach((key) => {
       const requiredItems = requiredAttributes[key];
