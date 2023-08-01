@@ -107,8 +107,7 @@ export const createOtelLogger = () => {
   return logger;
 };
 
-export function replaceGlobalConsoleWithOtelLogger() {
-  const logger = createOtelLogger();
+export function replaceGlobalConsoleWithOtelLogger(logger) {
   logMethods.forEach((methodName) => { console[methodName] = logger[methodName]; });
   return logger;
 }

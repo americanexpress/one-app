@@ -74,7 +74,6 @@ const unloadEnvVars = () => {
   delete process.env.OTEL_SERVICE_NAME;
   delete process.env.OTEL_SERVICE_NAMESPACE;
   delete process.env.OTEL_RESOURCE_ATTRIBUTES;
-  delete process.env.ONE_OTLP_ONLY_NO_STDOUT;
   process.env.NODE_ENV = originalNodeEnv;
 };
 
@@ -168,7 +167,9 @@ describe('OpenTelemetry logger', () => {
   });
 
   describe('replaceGlobalConsoleWithOtelLogger', () => {
-    beforeAll(replaceGlobalConsoleWithOtelLogger);
+    beforeAll(() => {
+      replaceGlobalConsoleWithOtelLogger(createOtelLogger());
+    });
     afterAll(restoreConsole);
 
     const logger = logs.getLogger();
