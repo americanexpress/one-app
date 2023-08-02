@@ -13,11 +13,18 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+import { renderStaticErrorPage } from './sendHtml';
+import { isRedirectUrlAllowed } from '../utils/redirectAllowList';
 
 export default function checkStateForRedirect(req, res, next) {
   const destination = req.store.getState().getIn(['redirection', 'destination']);
 
   if (destination) {
+    if (!isRedirectUrlAllowed(destination)) {
+      renderStaticErrorPage(res);
+      console.error(`'${destination}' is not an allowed redirect URL`);
+      return next();
+    }
     return res.redirect(302, destination);
   }
 
