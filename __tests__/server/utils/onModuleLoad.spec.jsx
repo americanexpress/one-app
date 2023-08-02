@@ -184,7 +184,7 @@ describe('onModuleLoad', () => {
     });
     expect(setStateConfig).toHaveBeenCalledWith(provideStateConfig);
   });
-  it('calls setStateConfig if setRedirectAllowList is supplied', () => {
+  it('calls setRedirectAllowList if setRedirectAllowList is supplied', () => {
     onModuleLoad({
       module: {
         [CONFIGURATION_KEY]: {
@@ -197,7 +197,7 @@ describe('onModuleLoad', () => {
     });
     expect(setRedirectAllowList).toHaveBeenCalledWith(['https://americanexpress.com']);
   });
-  it('calls setStateConfig with empty array if setRedirectAllowList is NOT supplied', () => {
+  it('calls setRedirectAllowList with empty array if setRedirectAllowList is NOT supplied', () => {
     onModuleLoad({
       module: {
         [CONFIGURATION_KEY]: {

@@ -28,11 +28,6 @@ export const setRedirectAllowList = (allowList) => {
 // Spread it to keep it immutable
 export const getRedirectAllowList = () => [...redirectAllowList];
 
-export const isRedirectUrlAllowed = (url) => {
-  // If a redirect list is not configured, allow the redirect.
-  // This prevents the redirect allow list from becoming a breaking change.
-  if (redirectAllowList.length === 0 || isAllowedUrl(url)) {
-    return true;
-  }
-  return false;
-};
+// If a redirect list is not configured, allow the redirect.
+// This prevents the redirect allow list from becoming a breaking change.
+export const isRedirectUrlAllowed = (url) => redirectAllowList.length === 0 || isAllowedUrl(url);

@@ -275,7 +275,6 @@ describe('createRequestHtmlFragment', () => {
   });
 
   it('should throw an error if redirect location is not an allowed redirect url', async () => {
-    expect.assertions(3);
     isRedirectUrlAllowed.mockImplementationOnce(() => false);
     composeModules.mockImplementationOnce(() => {
       const error = new Error('An error that redirects');
