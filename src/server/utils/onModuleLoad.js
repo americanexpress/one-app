@@ -15,7 +15,6 @@
  */
 
 import semver from 'semver';
-import { Set as ImmutableSet } from 'immutable';
 import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
 
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from './stateConfig';
@@ -77,7 +76,9 @@ export function setRootModuleConfigurations(module, moduleName) {
     } = {},
     [META_DATA_KEY]: metaData,
   } = module;
+
   validateCspIsPresent(csp);
+
   if (provideStateConfig) {
     setStateConfig(provideStateConfig);
   }
@@ -122,8 +123,6 @@ export default function onModuleLoad({
     [META_DATA_KEY]: metaData,
   } = module;
 
-  console.log('--onModuleLoad', moduleName, module);
-
   if (appCompatibility) {
     if (!semver.satisfies(appVersion, appCompatibility, { includePrerelease: true })) {
       throw new Error(`${moduleName}@${metaData.version} is not compatible with this version of one-app (${appVersion}), it requires ${appCompatibility}.`);
@@ -142,7 +141,6 @@ export default function onModuleLoad({
 
   if (moduleName === serverStateConfig.rootModuleName) {
     setRootModuleConfigurations(module, moduleName);
-    logModuleLoad(moduleName, metaData.version);
     return;
   }
 
@@ -153,6 +151,4 @@ export default function onModuleLoad({
   validateSafeRequestRestrictedAttributes(requiredSafeRequestRestrictedAttributes);
 
   logModuleLoad(moduleName, metaData.version);
-
-  console.log('--finish onModuleLoad from One App');
 }
