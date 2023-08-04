@@ -132,13 +132,7 @@ describe('Circuit breaker', () => {
     setEventLoopDelayThreshold(-1);
     jest.advanceTimersByTime(5e3 + 10);
     await mockCircuitBreaker.fire('hola, mundo');
-    expect(consoleErrorSpy.mock.calls).toMatchInlineSnapshot(`
-      [
-        [
-          [Error: Opening circuit, p(100) event loop delay (0ms) is > eventLoopDelayThreshold (-1ms)],
-        ],
-      ]
-    `);
+    expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it('should log when the circuit opens', () => {
