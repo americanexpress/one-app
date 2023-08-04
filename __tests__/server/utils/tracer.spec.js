@@ -24,6 +24,7 @@ import {
 } from '../../../src/server/utils/tracer';
 
 jest.spyOn(console, 'log');
+jest.spyOn(console, 'warn');
 jest.useFakeTimers().setSystemTime(new Date('1993-07-25'));
 jest.spyOn(process.hrtime, 'bigint');
 
@@ -162,6 +163,35 @@ describe('the tracer module', () => {
       expect(console.log.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "Trace: {\\"u\\":\\"-\\",\\"t\\":743558400000,\\"d\\":152,\\"f\\":{\\"1.url.com.example\\":{\\"s\\":12,\\"d\\":10,\\"em\\":\\"Error calling 1.url.com.example\\",\\"es\\":\\"mock Stack\\"},\\"2.url.com.example\\":{\\"s\\":12,\\"d\\":140,\\"em\\":\\"Error calling 2.url.com.example\\",\\"es\\":\\"mock Stack\\"},\\"3.url.com.example\\":{\\"s\\":122,\\"d\\":30,\\"em\\":\\"Error calling 3.url.com.example\\",\\"es\\":\\"mock Stack\\"}}} ",
+        ]
+      `);
+    });
+
+    it('should log a warning if tracer was stopped without being started', () => {
+      const tracer = new Tracer();
+      addMockHrTimeMs(12);
+
+      tracer.endFetchTimer('1.url.com.example');
+      expect(console.warn.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "Tracer Error: endFetchTimer was called without startFetchTimer",
+        ]
+      `);
+      tracer.endFetchTimerWithError('1.url.com.example');
+      expect(console.warn.mock.calls[1]).toMatchInlineSnapshot(`
+        Array [
+          "Tracer Error: endFetchTimer was called without startFetchTimer",
+        ]
+      `);
+      expect(console.warn.mock.calls[2]).toMatchInlineSnapshot(`
+        Array [
+          "Tracer Error: endFetchTimerWithError was called without startFetchTimer",
+        ]
+      `);
+      tracer.endServerPhaseTimer('1');
+      expect(console.warn.mock.calls[3]).toMatchInlineSnapshot(`
+        Array [
+          "Tracer Error: endServerPhaseTimer was called without startServerPhaseTimer",
         ]
       `);
     });

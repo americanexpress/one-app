@@ -28,6 +28,7 @@ import setupDnsCache from './setupDnsCache';
 import { configurePWA } from '../middleware/pwa';
 import { validatePWAConfig } from './validation';
 import { setErrorPage } from '../middleware/sendHtml';
+import { setRedirectAllowList } from './redirectAllowList';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
@@ -71,15 +72,10 @@ export function validateCspIsPresent(csp) {
   }
 }
 
-/* eslint complexity:  ['error', 12] */
-export default function onModuleLoad({
-  module,
-  moduleName,
-}) {
+export function setRootModuleConfigurations(module, moduleName) {
   const {
     [CONFIGURATION_KEY]: {
       // Root Module Specific
-      providedExternals,
       provideStateConfig,
       csp,
       corsOrigins,
@@ -91,6 +87,45 @@ export default function onModuleLoad({
       pwa,
       errorPageUrl,
       dnsCache,
+      redirectAllowList,
+    } = {},
+    [META_DATA_KEY]: metaData,
+  } = module;
+  validateCspIsPresent(csp);
+  clearModulesUsingExternals();
+  if (provideStateConfig) {
+    setStateConfig(provideStateConfig);
+  }
+  if (errorPageUrl) {
+    setErrorPage(errorPageUrl);
+  }
+  if (redirectAllowList) {
+    setRedirectAllowList(redirectAllowList);
+  } else {
+    setRedirectAllowList([]);
+  }
+  setCorsOrigins(corsOrigins);
+  extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
+  setConfigureRequestLog(configureRequestLog);
+  setCreateSsrFetch(createSsrFetch);
+  if (eventLoopDelayThreshold) setEventLoopDelayThreshold(eventLoopDelayThreshold);
+  if (eventLoopDelayPercentile) setEventLoopDelayPercentile(eventLoopDelayPercentile);
+  configurePWA(validatePWAConfig(pwa, {
+    clientStateConfig: getClientStateConfig(),
+  }));
+  setupDnsCache(dnsCache);
+
+  logModuleLoad(moduleName, metaData.version);
+}
+
+export default function onModuleLoad({
+  module,
+  moduleName,
+}) {
+  const {
+    [CONFIGURATION_KEY]: {
+      // Root Module Specific
+      providedExternals,
       // Child Module Specific
       requiredExternals,
       validateStateConfig,
@@ -118,26 +153,7 @@ export default function onModuleLoad({
   }
 
   if (moduleName === serverStateConfig.rootModuleName) {
-    validateCspIsPresent(csp);
-    clearModulesUsingExternals();
-    if (provideStateConfig) {
-      setStateConfig(provideStateConfig);
-    }
-    if (errorPageUrl) {
-      setErrorPage(errorPageUrl);
-    }
-    setCorsOrigins(corsOrigins);
-    extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
-    setConfigureRequestLog(configureRequestLog);
-    setCreateSsrFetch(createSsrFetch);
-    if (eventLoopDelayThreshold) setEventLoopDelayThreshold(eventLoopDelayThreshold);
-    if (eventLoopDelayPercentile) setEventLoopDelayPercentile(eventLoopDelayPercentile);
-    configurePWA(validatePWAConfig(pwa, {
-      clientStateConfig: getClientStateConfig(),
-    }));
-    setupDnsCache(dnsCache);
-
-    logModuleLoad(moduleName, metaData.version);
+    setRootModuleConfigurations(module, moduleName);
     return;
   }
 

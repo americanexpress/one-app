@@ -75,6 +75,10 @@ export class Tracer {
 
   // End a timer for a server phase
   endServerPhaseTimer = (serverPhasekey) => {
+    if (!this.#serverPhaseTimers[serverPhasekey]) {
+      console.warn('Tracer Error: endServerPhaseTimer was called without startServerPhaseTimer');
+      return;
+    }
     this.#serverPhaseTimers[serverPhasekey].endTimeNs = process.hrtime.bigint();
   }
 
@@ -87,12 +91,20 @@ export class Tracer {
 
   // End a timer for a fetch.
   endFetchTimer = (key) => {
+    if (!this.#fetchTimers[key]) {
+      console.warn('Tracer Error: endFetchTimer was called without startFetchTimer');
+      return;
+    }
     this.#fetchTimers[key].endTimeNs = process.hrtime.bigint();
   }
 
   // End a timer for a fetch with an error
   endFetchTimerWithError = (key, error) => {
     this.endFetchTimer(key);
+    if (!this.#fetchTimers[key]) {
+      console.warn('Tracer Error: endFetchTimerWithError was called without startFetchTimer');
+      return;
+    }
     this.#fetchTimers[key].error = error;
   }
 

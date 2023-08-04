@@ -17,6 +17,15 @@
 import { fromJS } from 'immutable';
 
 import checkStateForRedirect from '../../../src/server/middleware/checkStateForRedirect';
+import { isRedirectUrlAllowed } from '../../../src/server/utils/redirectAllowList';
+import { renderStaticErrorPage } from '../../../src/server/middleware/sendHtml';
+
+jest.mock('../../../src/server/utils/redirectAllowList', () => ({
+  isRedirectUrlAllowed: jest.fn(() => true),
+}));
+jest.mock('../../../src/server/middleware/sendHtml', () => ({
+  renderStaticErrorPage: jest.fn(),
+}));
 
 describe('checkStateForRedirect', () => {
   const destination = 'http://example.com/';
@@ -39,5 +48,15 @@ describe('checkStateForRedirect', () => {
     checkStateForRedirect(req, res, next);
     expect(res.redirect).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalled();
+  });
+  it('should call next with an error if the redirect URL is not in the allow list', () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => null);
+    isRedirectUrlAllowed.mockImplementationOnce(() => false);
+    state = fromJS({ redirection: { destination } });
+    checkStateForRedirect(req, res, next);
+    expect(res.redirect).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(`'${destination}' is not an allowed redirect URL`);
+    expect(renderStaticErrorPage).toHaveBeenCalled();
   });
 });

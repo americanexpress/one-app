@@ -20,7 +20,8 @@ import { Map as iMap, fromJS } from 'immutable';
 import { composeModules } from 'holocron';
 // eslint-disable-next-line import/named -- getBreaker is only added in the mock
 import { getBreaker } from '../../../src/server/utils/createCircuitBreaker';
-
+import { renderStaticErrorPage } from '../../../src/server/middleware/sendHtml';
+import { isRedirectUrlAllowed } from '../../../src/server/utils/redirectAllowList';
 import * as reactRendering from '../../../src/server/utils/reactRendering';
 import { NoOpTracer } from '../../../src/server/utils/tracer';
 
@@ -33,6 +34,13 @@ jest.mock('@americanexpress/one-app-router', () => {
 jest.mock('holocron', () => ({
   composeModules: jest.fn(() => 'composeModules'),
   getModule: () => () => 0,
+}));
+
+jest.mock('../../../src/server/middleware/sendHtml', () => ({
+  renderStaticErrorPage: jest.fn(),
+}));
+jest.mock('../../../src/server/utils/redirectAllowList', () => ({
+  isRedirectUrlAllowed: jest.fn(() => true),
 }));
 
 jest.mock('../../../src/server/utils/createCircuitBreaker', () => {
@@ -334,6 +342,28 @@ describe('createRequestHtmlFragment', () => {
     const middleware = createRequestHtmlFragment({ createRoutes });
     await middleware(req, res, next);
     expect(res.redirect).toHaveBeenCalledWith(302, 'https://example.com');
+  });
+
+  it('should log an error if redirect location is not an allowed redirect url', async () => {
+    expect.assertions(4);
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => null);
+    const createRequestHtmlFragment = require(
+      '../../../src/server/middleware/createRequestHtmlFragment'
+    ).default;
+    isRedirectUrlAllowed.mockImplementationOnce(() => false);
+    const destination = 'https://example.com';
+    composeModules.mockImplementationOnce(() => {
+      const error = new Error('An error that redirects');
+      error.abortComposeModules = true;
+      error.redirect = { status: 302, url: destination };
+      throw error;
+    });
+    const middleware = createRequestHtmlFragment({ createRoutes });
+    await middleware(req, res, next);
+    expect(res.redirect).not.toHaveBeenCalled();
+    expect(getBreaker().fire).toHaveBeenCalled();
+    expect(renderStaticErrorPage).toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(`'${destination}' is not an allowed redirect URL`);
   });
 
   it('should rethrow if the error does not contain a redirect', async () => {
