@@ -86,8 +86,10 @@ const restoreConsole = () => {
 };
 
 describe('OpenTelemetry logger', () => {
-  beforeAll(loadEnvVars);
-  beforeEach(jest.resetAllMocks);
+  beforeEach(() => {
+    jest.clearAllMocks();
+    loadEnvVars();
+  });
   afterAll(unloadEnvVars);
 
   describe('shutdownOtelLogger', () => {
@@ -139,6 +141,12 @@ describe('OpenTelemetry logger', () => {
           },
         }
       `);
+    });
+
+    it('should not throw if no custom resource attributes are set', () => {
+      delete process.env.OTEL_RESOURCE_ATTRIBUTES;
+      expect(() => createOtelLogger()).not.toThrow();
+      loadEnvVars();
     });
 
     it('should export to STDOUT and OTLP in development', () => {

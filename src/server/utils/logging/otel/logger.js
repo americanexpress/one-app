@@ -55,13 +55,13 @@ const setupTracer = () => {
 };
 
 export const createOtelLogger = () => {
-  const customResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES.split(';').reduce((acc, curr) => {
+  const customResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES ? process.env.OTEL_RESOURCE_ATTRIBUTES.split(';').reduce((acc, curr) => {
     const [key, value] = curr.split('=');
     return {
       ...acc,
       [key]: value,
     };
-  }, {});
+  }, {}) : {};
 
   const resource = new Resource({
     [SemanticResourceAttributes.SERVICE_NAME]: process.env.OTEL_SERVICE_NAME,

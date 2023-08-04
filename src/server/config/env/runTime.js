@@ -248,28 +248,6 @@ const runTime = [
   {
     name: 'OTEL_SERVICE_NAME',
     defaultValue: 'One App',
-    validate: (input) => {
-      if (input && !process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
-        throw new Error('Expected OTEL_EXPORTER_OTLP_LOGS_ENDPOINT to be set');
-      }
-    },
-  },
-  {
-    name: 'OTEL_SERVICE_NAMESPACE',
-    validate: (input) => {
-      if (input && !process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
-        throw new Error('Expected OTEL_EXPORTER_OTLP_LOGS_ENDPOINT to be set');
-      }
-    },
-  },
-  {
-    name: 'OTEL_RESOURCE_ATTRIBUTES',
-    defaultValue: '',
-    validate: (input) => {
-      if (input && !process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
-        throw new Error('Expected OTEL_EXPORTER_OTLP_LOGS_ENDPOINT to be set');
-      }
-    },
   },
 ];
 runTime.forEach(preprocessEnvVar);

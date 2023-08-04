@@ -732,6 +732,8 @@ ONE_SERVICE_WORKER=false
 * ✅ Development
 
 When set, One App will emit OpenTelemetry logs over GRPC to the configured endpoint.
+See the [OpenTlemetry documentation](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_logs_endpoint) for more information.
+
 
 **Shape**
 ```bash
@@ -744,8 +746,6 @@ OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://localhost:4318/v1/logs
 ```
 
 ## `OTEL_SERVICE_NAME`
-
-> ⚠️ Requires [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`] to be set.
 
 **Runs In**
 * ✅ Production
@@ -771,8 +771,6 @@ OTEL_SERVICE_NAME="One App"
 
 ## `OTEL_SERVICE_NAMESPACE`
 
-> ⚠️ Requires [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`] to be set.
-
 **Runs In**
 * ✅ Production
 * ✅ Development
@@ -790,8 +788,6 @@ OTEL_SERVICE_NAMESPACE=MyApplicationNamespace
 ```
 
 ## `OTEL_RESOURCE_ATTRIBUTES`
-
-> ⚠️ Requires [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`] to be set.
 
 **Runs In**
 * ✅ Production
