@@ -56,5 +56,6 @@ ENV NODE_ENV=production
 EXPOSE 3000
 EXPOSE 3005
 WORKDIR /opt/one-app
-USER $USERCMD ["node", "--dns-result-order=ipv4first", "--no-experimental-fetch", "lib/server"]
+USER $USER
+CMD ["node", "--dns-result-order=ipv4first", "--no-experimental-fetch", "lib/server"]
 COPY --from=builder --chown=node:node /opt/one-app/production ./
