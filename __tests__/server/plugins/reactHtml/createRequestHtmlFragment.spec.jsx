@@ -20,9 +20,15 @@ import { Map as iMap, fromJS } from 'immutable';
 import { composeModules } from 'holocron';
 // eslint-disable-next-line import/named -- getBreaker is only added in the mock
 import { getBreaker } from '../../../../src/server/utils/createCircuitBreaker';
+import renderStaticErrorPage from '../../../../src/server/plugins/reactHtml/staticErrorPage';
+import { isRedirectUrlAllowed } from '../../../../src/server/utils/redirectAllowList';
 
 import * as reactRendering from '../../../../src/server/utils/reactRendering';
 
+jest.mock('../../../../src/server/plugins/reactHtml/staticErrorPage', () => jest.fn());
+jest.mock('../../../../src/server/utils/redirectAllowList', () => ({
+  isRedirectUrlAllowed: jest.fn(() => true),
+}));
 jest.mock('@americanexpress/one-app-router', () => ({
   ...jest.requireActual('@americanexpress/one-app-router'),
   matchPromise: jest.fn(),
@@ -266,6 +272,20 @@ describe('createRequestHtmlFragment', () => {
     expect(getBreaker().fire).toHaveBeenCalled();
     expect(renderForStringSpy).not.toHaveBeenCalled();
     expect(renderForStaticMarkupSpy).not.toHaveBeenCalled();
+  });
+
+  it('should throw an error if redirect location is not an allowed redirect url', async () => {
+    isRedirectUrlAllowed.mockImplementationOnce(() => false);
+    composeModules.mockImplementationOnce(() => {
+      const error = new Error('An error that redirects');
+      error.abortComposeModules = true;
+      error.redirect = { status: 302, url: 'https://example.com' };
+      throw error;
+    });
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+    expect(res.redirect).not.toHaveBeenCalled();
+    expect(getBreaker().fire).toHaveBeenCalled();
+    expect(renderStaticErrorPage).toHaveBeenCalled();
   });
 
   it('should not use the circuit breaker for partials', async () => {

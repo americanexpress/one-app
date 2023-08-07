@@ -22,6 +22,7 @@ if (!global.BROWSER) {
     eventLoopDelayPercentile,
     errorPageUrl,
     dnsCache,
+    redirectAllowList,
     /* Child Module Specific */
     validateStateConfig,
     requiredSafeRequestRestrictedAttributes,
@@ -71,6 +72,7 @@ export default MyModule;
   - [`eventLoopDelayPercentile`](#eventloopdelaypercentile)
   - [`errorPageUrl`](#errorpageurl)
   - [`dnsCache`](#dnsCache)
+  - [`redirectAllowList](#redirectAllowList)
   - [`validateStateConfig`](#validatestateconfig)
   - [`requiredSafeRequestRestrictedAttributes`](#requiredsaferequestrestrictedattributes)
 
@@ -521,7 +523,38 @@ The `dnsCache` option allows for enabling application-level DNS caching. It is d
 
 `maxTtl` affects the maximum lifetime of the entries received from the specified DNS server (TTL in seconds). If set to 0, it will make a new DNS query each time. It is not recommended to be lower than the DNS server response time in order to prevent bottlenecks.
 
+## `redirectAllowList`
 
+**Module Type**
+
+- ✅ Root Module
+- 🚫 Child Module
+
+**Shape**
+
+```js
+if (!global.BROWSER) {
+  Module.appConfig = {
+    redirectAllowList: ['string'],
+  };
+}
+```
+
+The `redirectAllowList` config option allows you to configure a list of domains that the server is allowed to redirect to when the [`abortComposeModules`](https://github.com/americanexpress/one-app/blob/main/docs/api/modules/Loading-Data.md?rgh-link-date=2023-07-11T20%3A52%3A18Z#holocron-module-configuration) option is used.. Each URL in this list should include the protocol (`https://`).
+
+You can also provide wildcard matches (`*`) to allow any subdomain. Example: 
+
+```javascript
+if (!global.BROWSER) {
+  Module.appConfig = {
+    redirectAllowList: ['https://*.example.com'],
+  };
+}
+```
+
+If a redirect is attempted to a URL that is not in the allow list, One App will return with an error page, and subsequently throw an error in the server.
+
+If this list is **not** configured, the server will always allow redirects. In future versions of One App, this behavior will change to always require a `redirectAllowList`.
 
 ## `validateStateConfig`
 
