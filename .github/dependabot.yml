@@ -31,3 +31,35 @@ updates:
       - "github-actions"
       - "dependabot"
     target-branch: "main"
+  # again, but for the n-1 version branch
+    # Enable npm updates for all of our package.json
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "npm"
+      - "dependencies"
+      - "dependabot"
+      - "one app"
+    allow:
+      - dependency-type: "direct"
+    target-branch: "5.x.x"
+  # Enable version updates for Docker
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "docker"
+      - "dependabot"
+    target-branch: "5.x.x"
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "github-actions"
+      - "dependabot"
+    target-branch: "5.x.x"
