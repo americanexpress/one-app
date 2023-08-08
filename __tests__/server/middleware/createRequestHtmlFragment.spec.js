@@ -252,16 +252,7 @@ describe('createRequestHtmlFragment', () => {
 
   it('should catch any errors and call the next middleware', () => {
     expect.assertions(3);
-    let error;
-    try {
-      let empty;
-      // Creating an error reading properties of undefined for tests to work in
-      // both Node 12 and 16 where the message has changed.
-      // eslint-disable-next-line no-unused-expressions
-      empty.dispatch;
-    } catch (err) {
-      error = err;
-    }
+
     const createRequestHtmlFragment = require(
       '../../../src/server/middleware/createRequestHtmlFragment'
     ).default;
@@ -272,7 +263,7 @@ describe('createRequestHtmlFragment', () => {
     console.error = jest.fn();
     middleware(req, res, next);
     expect(console.error).toHaveBeenCalled();
-    expect(console.error.mock.calls[0]).toEqual(['error creating request HTML fragment for http://example.com/request', error]);
+    expect(console.error.mock.calls[0][0]).toEqual('error creating request HTML fragment for http://example.com/request');
     expect(next).toHaveBeenCalled();
     /* eslint-enable no-console */
   });

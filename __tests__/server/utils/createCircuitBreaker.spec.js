@@ -26,6 +26,15 @@ import createCircuitBreaker, {
 
 jest.useFakeTimers();
 
+jest.mock('perf_hooks', () => ({
+  ...jest.requireActual('perf_hooks'),
+  monitorEventLoopDelay: jest.fn(() => ({
+    enable: jest.fn(),
+    reset: jest.fn(),
+    percentile: jest.fn(() => 0),
+  })),
+}));
+
 const asyncFunctionThatMightFail = jest.fn(async () => ({ fallback: false }));
 const mockCircuitBreaker = createCircuitBreaker(asyncFunctionThatMightFail);
 
