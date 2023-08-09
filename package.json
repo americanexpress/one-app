@@ -187,7 +187,7 @@
     "standard-version": "^9.0.0",
     "supertest": "^4.0.2",
     "tar": "^6.1.9",
-    "webdriverio": "^6.1.24"
+    "webdriverio": "^8.14.3"
   },
   "husky": {
     "hooks": {
