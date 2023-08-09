@@ -21,7 +21,7 @@ jest.mock('../../../src/server/utils/stateConfig', () => ({
     rootModuleName: 'test-root',
   })),
 }));
-jest.mock('../../../src/server/utils/onModuleLoad', () => ({
+jest.mock('holocron', () => ({
   getModulesUsingExternals: jest.fn(() => ['first-module', 'another-module']),
 }));
 
@@ -152,7 +152,7 @@ describe('getModulesToUpdate', () => {
         },
       },
     };
-    expect(getModulesToUpdate(current, next)).toEqual(['test-root']);
+    expect(getModulesToUpdate(current, next)).toEqual(['first-module', 'another-module', 'test-root']);
   });
 
   it('throws when the root module does not exists', () => {
