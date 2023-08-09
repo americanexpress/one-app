@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.21.0](https://github.com/americanexpress/one-app/compare/v5.20.0...v5.21.0) (2023-08-09)
+
+
+### Bug Fixes
+
+* **http-metrics:** use summary metrics to match v6 ([#1054](https://github.com/americanexpress/one-app/issues/1054)) ([2b5c876](https://github.com/americanexpress/one-app/commit/2b5c87650bdcb8ae0f4d7cf211027f75e36bfe83))
+* **tracer:** ending timers without starting would crash server ([#1066](https://github.com/americanexpress/one-app/issues/1066)) ([91e53c0](https://github.com/americanexpress/one-app/commit/91e53c0f44aa92700e1aef53d65821c946b8ee40))
+
+
+### Features
+
+* **config:** new config redirectAllowList ([#1051](https://github.com/americanexpress/one-app/issues/1051)) ([cfa0416](https://github.com/americanexpress/one-app/commit/cfa04162092224b08c331579eb16fd41c37d6cee))
+* **node:** upgrade to node 18 ([#1068](https://github.com/americanexpress/one-app/issues/1068)) ([cd3264f](https://github.com/americanexpress/one-app/commit/cd3264f3c38e0dfdec3df467a9efefc633739b6b))
+
+
 # [5.20.0](https://github.com/americanexpress/one-app/compare/v5.19.0...v5.20.0) (2023-07-03)
 
 
