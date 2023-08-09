@@ -174,7 +174,7 @@
     "markdown-table": "^2.0.0",
     "mkdirp": "^1.0.4",
     "node-mocks-http": "^1.10.1",
-    "nodemon": "^2.0.15",
+    "nodemon": "^3.0.1",
     "ora": "^5.4.0",
     "parse-prometheus-text-format": "^1.1.1",
     "prettier": "^2.2.1",
