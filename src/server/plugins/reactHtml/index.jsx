@@ -35,6 +35,7 @@ import readJsonFile from '../../utils/readJsonFile';
 import { getClientPWAConfig, getServerPWAConfig } from '../../pwa';
 import { renderForStaticMarkup } from '../../utils/reactRendering';
 import renderStaticErrorPage from './staticErrorPage';
+import { isRedirectUrlAllowed } from '../../utils/redirectAllowList';
 
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
 const integrityManifest = readJsonFile('../../../bundle.integrity.manifest.json');
@@ -251,6 +252,11 @@ export const checkStateForRedirectAndStatusCode = (request, reply) => {
   const destination = request.store.getState().getIn(['redirection', 'destination']);
 
   if (destination) {
+    if (!isRedirectUrlAllowed(destination)) {
+      renderStaticErrorPage(request, reply);
+      console.error(`'${destination}' is not an allowed redirect URL`);
+      return;
+    }
     reply.redirect(302, destination);
   } else {
     const error = request.store.getState().get('error');

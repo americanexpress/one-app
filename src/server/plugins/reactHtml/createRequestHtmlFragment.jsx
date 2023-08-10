@@ -21,6 +21,7 @@ import { RouterContext, matchPromise } from '@americanexpress/one-app-router';
 import { composeModules } from 'holocron';
 
 import createCircuitBreaker from '../../utils/createCircuitBreaker';
+import { isRedirectUrlAllowed } from '../../utils/redirectAllowList';
 import {
   startSummaryTimer,
 
@@ -32,6 +33,8 @@ import {
   renderForStaticMarkup,
   renderForString,
 } from '../../utils/reactRendering';
+
+import renderStaticErrorPage from './staticErrorPage';
 
 const getModuleData = async ({ dispatch, modules }) => {
   try {
@@ -52,6 +55,7 @@ const getModuleDataBreaker = createCircuitBreaker(getModuleData);
  * @param {import('fastify').FastifyReply} reply fastify reply object
  * @param {*} opts options
  */
+// eslint-disable-next-line complexity
 const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
   try {
     const { store } = request;
@@ -111,6 +115,10 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         });
 
         if (redirect) {
+          if (!isRedirectUrlAllowed(redirect.url)) {
+            renderStaticErrorPage(request, reply);
+            throw new Error(`'${redirect.url}' is not an allowed redirect URL`);
+          }
           reply.redirect(redirect.status || 302, redirect.url);
           return;
         }

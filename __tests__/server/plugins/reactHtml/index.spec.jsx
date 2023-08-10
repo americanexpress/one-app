@@ -32,10 +32,16 @@ import { getClientPWAConfig, getServerPWAConfig } from '../../../../src/server/p
 import createRequestStoreHook from '../../../../src/server/plugins/reactHtml/createRequestStore';
 import createRequestHtmlFragmentHook from '../../../../src/server/plugins/reactHtml/createRequestHtmlFragment';
 import conditionallyAllowCors from '../../../../src/server/plugins/conditionallyAllowCors';
+import { isRedirectUrlAllowed } from '../../../../src/server/utils/redirectAllowList';
 
 jest.spyOn(console, 'error').mockImplementation(() => 0);
 
 jest.mock('react-helmet');
+
+jest.mock('../../../../src/server/utils/redirectAllowList', () => ({
+  isRedirectUrlAllowed: jest.fn(() => true),
+}));
+
 jest.mock('holocron', () => {
   const actualHolocron = jest.requireActual('holocron');
 
@@ -879,7 +885,7 @@ describe('reactHtml', () => {
   describe('checkStateForRedirectAndStatusCode', () => {
     const destination = 'http://example.com/';
     let state = fromJS({ redirection: { destination: null } });
-    const req = { store: { getState: () => state } };
+    const req = { store: { getState: () => state }, headers: {} };
     const res = { redirect: jest.fn(), code: jest.fn() };
 
     beforeEach(() => jest.clearAllMocks());
@@ -908,6 +914,14 @@ describe('reactHtml', () => {
       checkStateForRedirectAndStatusCode(req, res);
       expect(res.redirect).not.toHaveBeenCalled();
       expect(res.code).not.toHaveBeenCalled();
+    });
+
+    it('should not allow redirects if the destination URL is not in the allow list', () => {
+      state = fromJS({ redirection: { destination } });
+      jest.spyOn(console, 'error');
+      isRedirectUrlAllowed.mockImplementationOnce(() => false);
+      checkStateForRedirectAndStatusCode(req, reply);
+      expect(console.error).toHaveBeenCalledWith(`'${destination}' is not an allowed redirect URL`);
     });
   });
 

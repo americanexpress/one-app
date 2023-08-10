@@ -203,6 +203,7 @@ describe('ssrServer', () => {
         crossOriginOpenerPolicy: false,
         crossOriginResourcePolicy: false,
         originAgentCluster: false,
+        contentSecurityPolicy: false,
       },
     ]);
     expect(renderRegister.mock.calls[3][0]).toEqual(addFrameOptionsHeader);

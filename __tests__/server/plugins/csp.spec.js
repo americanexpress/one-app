@@ -16,6 +16,7 @@
 /* eslint-disable global-require */
 
 import Fastify from 'fastify';
+import fastifyHelmet from '@fastify/helmet';
 import csp, { updateCSP, getCSP, cspCache } from '../../../src/server/plugins/csp';
 
 const sanitizeCspString = (cspString) => cspString
@@ -25,9 +26,15 @@ const sanitizeCspString = (cspString) => cspString
 
 const buildApp = async () => {
   const app = Fastify();
-
   app.register(csp);
-
+  app.register(fastifyHelmet, {
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
+    crossOriginResourcePolicy: false,
+    originAgentCluster: false,
+    contentSecurityPolicy: false,
+  }
+  );
   app.get('/', () => 'test');
 
   return app;
@@ -58,8 +65,7 @@ describe('csp', () => {
       url: '/',
     });
     const { headers } = response;
-
-    expect(headers).not.toHaveProperty('Content-Security-Policy');
+    expect(headers).not.toHaveProperty('content-security-policy');
   });
 
   it('defaults to production csp', async () => {

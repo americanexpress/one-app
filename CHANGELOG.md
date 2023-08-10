@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.6.0](https://github.com/americanexpress/one-app/compare/v6.5.1...v6.6.0) (2023-08-09)
+
+
+### Bug Fixes
+
+* **csp:** removed csp default from fastify helmet ([e77372a](https://github.com/americanexpress/one-app/commit/e77372af879cdea478c0cfd5fd820f9b7daeeb7f))
+
+
+### Features
+
+* **config:** new config redirectAllowList ([#1050](https://github.com/americanexpress/one-app/issues/1050)) ([d3a94e2](https://github.com/americanexpress/one-app/commit/d3a94e22e7bc347ba94b98aa23e2a022622b7031))
+* **node:** upgrade to node 18 ([#1067](https://github.com/americanexpress/one-app/issues/1067)) ([f1fd340](https://github.com/americanexpress/one-app/commit/f1fd34026e67eb695dba28e5909c3a63522de5e7))
+
+
 ## [6.5.1](https://github.com/americanexpress/one-app/compare/v6.5.0...v6.5.1) (2023-07-05)
 
 

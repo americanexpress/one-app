@@ -37,6 +37,15 @@ jest.mock('holocron', () => ({
   getModule: jest.fn(() => true),
 }));
 
+jest.mock('perf_hooks', () => ({
+  ...jest.requireActual('perf_hooks'),
+  monitorEventLoopDelay: jest.fn(() => ({
+    enable: jest.fn(),
+    reset: jest.fn(),
+    percentile: jest.fn(() => 0),
+  })),
+}));
+
 describe('Circuit breaker', () => {
   const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => 0);
   const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => 0);
