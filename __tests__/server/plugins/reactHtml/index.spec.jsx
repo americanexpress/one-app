@@ -33,6 +33,8 @@ import createRequestStoreHook from '../../../../src/server/plugins/reactHtml/cre
 import createRequestHtmlFragmentHook from '../../../../src/server/plugins/reactHtml/createRequestHtmlFragment';
 import conditionallyAllowCors from '../../../../src/server/plugins/conditionallyAllowCors';
 
+jest.spyOn(console, 'error').mockImplementation(() => 0);
+
 jest.mock('react-helmet');
 jest.mock('holocron', () => {
   const actualHolocron = jest.requireActual('holocron');
@@ -134,11 +136,6 @@ jest.mock('../../../../src/server/utils/createCircuitBreaker', () => {
 jest.mock('../../../../src/server/plugins/reactHtml/createRequestStore');
 jest.mock('../../../../src/server/plugins/reactHtml/createRequestHtmlFragment');
 jest.mock('../../../../src/server/plugins/conditionallyAllowCors');
-
-jest.spyOn(console, 'info').mockImplementation(() => {});
-jest.spyOn(console, 'log').mockImplementation(() => {});
-jest.spyOn(console, 'error').mockImplementation(() => {});
-jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
 
 global.fetch = () => Promise.resolve({ data: 'data' });
 
@@ -253,6 +250,10 @@ describe('reactHtml', () => {
     };
     request.clientModuleMapCache = getClientModuleMapCache();
     request.appHtml = appHtml;
+    request.log = {
+      info: jest.fn(),
+      error: jest.fn(),
+    };
 
     reply = jest.fn();
     reply.status = jest.fn(() => reply);
@@ -285,7 +286,7 @@ describe('reactHtml', () => {
     it('sends a rendered page', () => {
       sendHtml(request, reply);
 
-      expect(console.error).not.toHaveBeenCalled();
+      expect(request.log.error).not.toHaveBeenCalled();
 
       expect(reply.send).toHaveBeenCalledTimes(1);
       expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
@@ -310,7 +311,7 @@ describe('reactHtml', () => {
 
       sendHtml(request, reply);
 
-      expect(console.error).not.toHaveBeenCalled();
+      expect(request.log.error).not.toHaveBeenCalled();
 
       expect(reply.send).toHaveBeenCalledTimes(1);
       expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
@@ -431,10 +432,8 @@ describe('reactHtml', () => {
       request.store = {
         getState: jest.fn(() => { throw new Error('cannot get state'); }),
       };
-      /* eslint-disable no-console */
       sendHtml(request, reply);
-      expect(console.error).toHaveBeenCalled();
-      /* eslint-enable no-console */
+      expect(request.log.error).toHaveBeenCalled();
       expect(reply.send).toHaveBeenCalledTimes(1);
       expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
       expect(reply.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
@@ -443,14 +442,12 @@ describe('reactHtml', () => {
 
     it('sends the static error page when appHtml is not a string', () => {
       request.appHtml = [1, 2, 3];
-      /* eslint-disable no-console */
       sendHtml(request, reply);
-      expect(console.error).toHaveBeenCalled();
+      expect(request.log.error).toHaveBeenCalled();
       expect(reply.code).toHaveBeenCalledWith(500);
       expect(reply.send).toHaveBeenCalledTimes(1);
       expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
       expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
-      /* eslint-enable no-console */
     });
 
     it('sends a page with an empty div#root when appHtml is undefined', () => {
@@ -599,9 +596,10 @@ describe('reactHtml', () => {
           send: jest.fn(() => fakeReply),
           code: jest.fn(() => fakeReply),
           header: jest.fn(() => fakeReply),
+          type: jest.fn(() => fakeReply),
         };
         sendHtml(request, fakeReply);
-        expect(console.error).not.toHaveBeenCalled();
+        expect(request.log.error).not.toHaveBeenCalled();
         expect(fakeReply.send).toHaveBeenCalledTimes(1);
         expect(fakeReply.header).toHaveBeenCalledWith('content-type', 'text/plain; charset=utf-8');
         expect(fakeReply.send.mock.calls[0][0]).not.toContain('<!DOCTYPE html>');
@@ -834,10 +832,8 @@ describe('reactHtml', () => {
         .mockImplementationOnce(() => 'serialized bare state possible');
 
       sendHtml(request, reply);
-      /* eslint-disable no-console */
-      expect(console.error).toHaveBeenCalledTimes(1);
-      expect(console.error).toHaveBeenCalledWith('encountered an error serializing full client initial state', fullStateError);
-      /* eslint-enable no-console */
+      expect(request.log.error).toHaveBeenCalledTimes(1);
+      expect(request.log.error).toHaveBeenCalledWith('encountered an error serializing full client initial state', fullStateError);
       expect(transit.toJSON).toHaveBeenCalledTimes(3);
 
       expect(reply.send).toHaveBeenCalledTimes(1);
@@ -864,11 +860,9 @@ describe('reactHtml', () => {
         .mockImplementationOnce(() => 'second cache clean call');
 
       sendHtml(request, reply);
-      /* eslint-disable no-console */
-      expect(console.error).toHaveBeenCalledTimes(3);
-      expect(console.error).toHaveBeenCalledWith('encountered an error serializing full client initial state', fullStateError);
-      expect(console.error).toHaveBeenCalledWith('unable to build the most basic initial state for a client to startup', minimalStateError);
-      /* eslint-enable no-console */
+      expect(request.log.error).toHaveBeenCalledTimes(3);
+      expect(request.log.error).toHaveBeenCalledWith('encountered an error serializing full client initial state', fullStateError);
+      expect(request.log.error).toHaveBeenCalledWith('unable to build the most basic initial state for a client to startup', minimalStateError);
       expect(transit.toJSON).toHaveBeenCalledTimes(4);
 
       expect(reply.send).toHaveBeenCalledTimes(1);
@@ -1028,7 +1022,7 @@ describe('reactHtml', () => {
 
       await fastify.decorateReply.mock.calls[0][1].bind(reply)(request, reply);
 
-      expect(console.error).not.toHaveBeenCalled();
+      expect(request.log.error).not.toHaveBeenCalled();
 
       expect(reply.send).toHaveBeenCalledTimes(1);
       expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');

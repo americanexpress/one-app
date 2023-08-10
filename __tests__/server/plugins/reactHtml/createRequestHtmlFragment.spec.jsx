@@ -23,6 +23,8 @@ import { getBreaker } from '../../../../src/server/utils/createCircuitBreaker';
 
 import * as reactRendering from '../../../../src/server/utils/reactRendering';
 
+jest.spyOn(console, 'error').mockImplementation(() => 0);
+
 jest.mock('@americanexpress/one-app-router', () => ({
   ...jest.requireActual('@americanexpress/one-app-router'),
   matchPromise: jest.fn(),
@@ -47,8 +49,6 @@ const renderForStringSpy = jest.spyOn(reactRendering, 'renderForString');
 const renderForStaticMarkupSpy = jest.spyOn(reactRendering, 'renderForStaticMarkup');
 
 describe('createRequestHtmlFragment', () => {
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-
   let req;
   let res;
   let createRoutes;
@@ -75,6 +75,7 @@ describe('createRequestHtmlFragment', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     req = jest.fn();
+    req.log = { error: jest.fn() };
     req.headers = {};
 
     res = jest.fn();
@@ -90,7 +91,7 @@ describe('createRequestHtmlFragment', () => {
 
     renderForStringSpy.mockClear();
     renderForStaticMarkupSpy.mockClear();
-    console.error.mockClear();
+    req.log.error.mockClear();
   });
 
   const requireCreateRequestHtmlFragment = (...args) => require(
@@ -155,7 +156,7 @@ describe('createRequestHtmlFragment', () => {
 
     await requireCreateRequestHtmlFragment(req, res, { createRoutes });
 
-    expect(console.error).toHaveBeenCalledWith('error creating request HTML fragment for http://example.com/request', expect.any(Error));
+    expect(req.log.error).toHaveBeenCalledWith('error creating request HTML fragment for %s', 'http://example.com/request', expect.any(Error));
     expect(res.code).toHaveBeenCalledWith(404);
     expect(createRoutes).toHaveBeenCalledWith(req.store);
     expect(req.appHtml).toBe(undefined);
@@ -202,8 +203,8 @@ describe('createRequestHtmlFragment', () => {
 
     await requireCreateRequestHtmlFragment(req, res, { createRoutes: brokenCreateRoutes });
 
-    expect(console.error).toHaveBeenCalled();
-    expect(console.error.mock.calls[0]).toEqual(['error creating request HTML fragment for http://example.com/request', createRoutesError]);
+    expect(req.log.error).toHaveBeenCalled();
+    expect(req.log.error.mock.calls[0]).toEqual(['error creating request HTML fragment for %s', 'http://example.com/request', createRoutesError]);
   });
 
   it('should use a circuit breaker', async () => {

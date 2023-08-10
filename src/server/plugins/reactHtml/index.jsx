@@ -93,12 +93,12 @@ export function renderModuleScripts({
   }).join(isDevelopmentEnv ? '\n          ' : '');
 }
 
-function serializeClientInitialState(clientInitialState) {
+function serializeClientInitialState(clientInitialState, request) {
   // try to build the full state, this _might_ fail (ex: 'Error serializing unrecognized object')
   try {
     return transit.toJSON(clientInitialState);
   } catch (err) {
-    console.error('encountered an error serializing full client initial state', err);
+    request.log.error('encountered an error serializing full client initial state', err);
 
     // clear out an internal cache that corrupts the serialization generated on the next call
     // TODO: understand transit-js and transit-immutable-js internals to properly fix the bug
@@ -117,7 +117,7 @@ function serializeClientInitialState(clientInitialState) {
   } catch (err) {
     transit.toJSON('clear out an internal cache, again');
     // something is really wrong
-    console.error('unable to build the most basic initial state for a client to startup', err);
+    request.log.error('unable to build the most basic initial state for a client to startup', err);
     throw err;
   }
 }
@@ -185,6 +185,7 @@ export function getBody({
   clientModuleMapCache,
   scriptNonce,
   pwaMetadata,
+  request,
 }) {
   const bundle = isLegacy ? 'legacyBrowser' : 'browser';
   const { bodyAttributes, script } = helmetInfo;
@@ -196,7 +197,7 @@ export function getBody({
       <script id="initial-state" ${scriptNonce ? `nonce="${scriptNonce}"` : ''}>
         window.__webpack_public_path__ = ${jsonStringifyForScript(`${appBundlesURLPrefix}/`)};
         window.__CLIENT_HOLOCRON_MODULE_MAP__ = ${jsonStringifyForScript(clientModuleMapCache[bundle])};
-        window.__INITIAL_STATE__ = ${jsonStringifyForScript(serializeClientInitialState(clientInitialState))};
+        window.__INITIAL_STATE__ = ${jsonStringifyForScript(serializeClientInitialState(clientInitialState, request))};
         window.__holocron_module_bundle_type__ = '${bundle}';
         window.__pwa_metadata__ = ${jsonStringifyForScript(pwaMetadata)};
         window.__render_mode__ = '${renderMode}';
@@ -283,7 +284,7 @@ export const sendHtml = (request, reply) => {
     const userAgent = headers['user-agent'];
     const isLegacy = legacyUserAgent(userAgent);
 
-    console.info(`sendHtml, have store? ${!!store}, have appHtml? ${!!appHtml}`);
+    request.log.info('sendHtml, have store? %s, have appHtml? %s', !!store, !!appHtml);
 
     if (appHtml && typeof appHtml !== 'string') {
       throw new Error(`appHtml was not a string, was ${typeof appHtml}`, appHtml);
@@ -340,6 +341,7 @@ export const sendHtml = (request, reply) => {
       clientModuleMapCache,
       scriptNonce,
       pwaMetadata,
+      request,
     };
 
     const html = `
@@ -352,7 +354,7 @@ export const sendHtml = (request, reply) => {
 
     return reply.header('content-type', 'text/html; charset=utf-8').send(html);
   } catch (err) {
-    console.error('sendHtml had an error, sending static error page', err);
+    request.log.error('sendHtml had an error, sending static error page', err);
     return renderStaticErrorPage(request, reply);
   }
 };

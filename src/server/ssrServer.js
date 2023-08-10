@@ -41,6 +41,7 @@ import renderStaticErrorPage from './plugins/reactHtml/staticErrorPage';
 import addFrameOptionsHeader from './plugins/addFrameOptionsHeader';
 import addCacheHeaders from './plugins/addCacheHeaders';
 import { getServerPWAConfig, serviceWorkerHandler, webManifestMiddleware } from './pwa';
+import logger from './utils/logging/logger';
 
 const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
 
@@ -49,14 +50,17 @@ const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
  * @param {import('fastify').FastifyHttp2Options} opts Fastify app options
  * @returns {import('fastify').FastifyInstance}
  */
+
 export async function createApp(opts = {}) {
   const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
   const fastify = Fastify({
+    logger,
+    disableRequestLogging: true,
     frameworkErrors: function frameworkErrors(error, request, reply) {
       const { method, url, headers } = request;
       const correlationId = headers['correlation-id'];
 
-      console.error(`Fastify internal error: method ${method}, url "${url}", correlationId "${correlationId}"`, error);
+      request.log.error('Fastify internal error: method %s, url "%s", correlationId "%s"', method, url, correlationId, error);
 
       return renderStaticErrorPage(request, reply);
     },
@@ -117,7 +121,7 @@ export async function createApp(opts = {}) {
       instance.post('/_/report/security/csp-violation', (request, reply) => {
         const violation = request.body && JSON.parse(request.body)['csp-report'];
         if (!violation) {
-          console.warn('CSP Violation reported, but no data received');
+          request.log.warn('CSP Violation reported, but no data received');
         } else {
           const {
             'document-uri': documentUri,
@@ -127,7 +131,7 @@ export async function createApp(opts = {}) {
             'column-number': columnNumber,
             'source-file': sourceFile,
           } = violation;
-          console.warn(`CSP Violation: ${sourceFile}:${lineNumber}:${columnNumber} on page ${documentUri} violated the ${violatedDirective} policy via ${blockedUri}`);
+          request.log.warn('CSP Violation: %s:%s:%s on page %s violated the %s policy via %s', sourceFile, lineNumber, columnNumber, documentUri, violatedDirective, blockedUri);
         }
 
         reply.status(204).send();
@@ -135,7 +139,7 @@ export async function createApp(opts = {}) {
     } else {
       instance.post('/_/report/security/csp-violation', (request, reply) => {
         const violation = request.body ? request.body : 'No data received!';
-        console.warn(`CSP Violation: ${violation}`);
+        request.log.warn('CSP Violation: %s', violation);
         reply.status(204).send();
       });
     }
@@ -160,7 +164,7 @@ export async function createApp(opts = {}) {
           errorsReported.forEach((raw) => {
             if (!raw || typeof raw !== 'object') {
               // drop on the floor, this is the wrong interface
-              console.warn(`dropping an error report, wrong interface (${typeof raw})`);
+              request.log.warn('dropping an error report, wrong interface (%s)', typeof raw);
               return;
             }
             const {
@@ -177,11 +181,11 @@ export async function createApp(opts = {}) {
                 correlationId,
               },
             });
-            console.error(err);
+            request.log.error(err);
           });
         } else {
           // drop on the floor, this is the wrong interface
-          console.warn(`dropping an error report group, wrong interface (${typeof errorsReported})`);
+          request.log.warn('dropping an error report group, wrong interface (%s)', typeof errorsReported);
         }
       }
 
@@ -237,7 +241,7 @@ export async function createApp(opts = {}) {
     const correlationId = request.headers['correlation-id'];
     const headersSent = !!reply.raw.headersSent;
 
-    console.error(`Fastify application error: method ${method}, url "${url}", correlationId "${correlationId}", headersSent: ${headersSent}`, error);
+    request.log.error('Fastify application error: method %s, url "%s", correlationId "%s", headersSent: %s', method, url, correlationId, headersSent, error);
 
     return renderStaticErrorPage(request, reply);
   });

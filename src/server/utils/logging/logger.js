@@ -14,23 +14,21 @@
  * permissions and limitations under the License.
  */
 
-// the cleanest way to express the logic w/o loading development formatters, alternatives welcome
-/* eslint-disable no-nested-ternary */
-
 import { argv } from 'yargs';
-import Lumberjack from '@americanexpress/lumberjack';
+import pino from 'pino';
+import productionConfig from './config/production';
 
-import productionFormatter from './production-formatter';
+const useProductionConfig = !!(argv.logFormat === 'machine' || process.env.NODE_ENV !== 'development');
 
-const nodeEnvIsDevelopment = process.env.NODE_ENV === 'development';
-const productionConfig = { formatter: productionFormatter };
-
-const logger = new Lumberjack(
-  argv.logFormat === 'machine' ? productionConfig
+const logger = pino({
+  level: argv.logLevel,
+  customLevels: {
+    log: 35,
+  },
+  dedupe: true,
   // development-formatters should not be loaded in production
-  // eslint-disable-next-line no-extra-parens -- conflicting lint rule
-  : (nodeEnvIsDevelopment ? require('./development-formatters') // eslint-disable-line global-require, indent
-  : productionConfig) // eslint-disable-line indent
-);
+  // eslint-disable-next-line no-extra-parens, global-require -- conflicting lint rule
+  ...(useProductionConfig && productionConfig),
+}, useProductionConfig ? undefined : require('./config/development').default);
 
 export default logger;

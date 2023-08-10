@@ -14,6 +14,8 @@
  * permissions and limitations under the License.
  */
 
+jest.mock('pino');
+
 describe('metricsServer', () => {
   jest.mock('../../src/server/metrics/intl-cache', () => ({
     cacheSizeCollector: 'cacheSizeCollector',

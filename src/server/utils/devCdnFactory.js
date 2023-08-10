@@ -21,6 +21,7 @@ import Fastify from 'fastify';
 import ip from 'ip';
 import ProxyAgent from 'proxy-agent';
 import fetch from 'node-fetch';
+import logger from './logging/logger';
 
 const getLocalModuleMap = ({ pathToModuleMap, oneAppDevCdnAddress }) => {
   const moduleMap = JSON.parse(fs.readFileSync(pathToModuleMap, 'utf8').toString());
@@ -109,7 +110,7 @@ export const oneAppDevCdnFactory = ({
     console.error('do not include one-app-dev-cdn in production');
   }
 
-  const oneAppDevCdn = Fastify();
+  const oneAppDevCdn = Fastify({ logger, disableRequestLogging: true });
   oneAppDevCdn.register(compress, {
     global: false,
   });

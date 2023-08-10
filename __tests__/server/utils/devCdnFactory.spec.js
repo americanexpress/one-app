@@ -22,6 +22,7 @@ import ProxyAgent from 'proxy-agent';
 import oneAppDevCdn from '../../../src/server/utils/devCdnFactory';
 
 jest.mock('node-fetch');
+jest.mock('pino');
 
 const pathToStubs = path.join(__dirname, 'stubs');
 const pathToCache = path.join(__dirname, '..', '.cache');
