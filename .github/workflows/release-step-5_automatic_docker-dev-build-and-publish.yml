@@ -68,7 +68,7 @@ jobs:
       - name: Docker login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Build development docker image
-        run: docker build -t dev . --target=development
+        run: docker build -t dev . --target=development --build-arg VERSION=$(cat .nvmrc)
       - name: Tag Docker Images
         run: |
           # Always tag the exact version

@@ -9,9 +9,6 @@ jobs:
   one-app-unit-tests:
     name: One App Unit and Lint Tests
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x, "^18 < 18.16"]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -22,7 +19,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version-file: .nvmrc
       - uses: actions/cache@v3
         with:
           path: ~/.npm
