@@ -13,16 +13,69 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
-import fs from 'fs';
-import path from 'path';
+import { satisfies, parse } from 'semver';
 
 const PACKAGE_DIR_PATH = path.resolve(path.join(__dirname, '../'));
 
 describe('package.json', () => {
-  it('is formatted properly', () => {
-    const rawPkg = fs.readFileSync(path.join(PACKAGE_DIR_PATH, 'package.json'), 'utf8');
+  it('is parseable', async () => {
+    expect.assertions(1);
+    const rawPkg = await fs.readFile(path.join(PACKAGE_DIR_PATH, 'package.json'), 'utf8');
+    expect(() => JSON.parse(rawPkg)).not.toThrow();
+  });
+  it('is formatted like npm does', async () => {
+    expect.assertions(1);
+    const rawPkg = await fs.readFile(path.join(PACKAGE_DIR_PATH, 'package.json'), 'utf8');
     const parsedPkg = JSON.parse(rawPkg);
-    expect(rawPkg).toEqual(`${JSON.stringify(parsedPkg, null, 2)}\n`);
+    const builtPkg = { ...parsedPkg };
+
+    [
+      'dependencies',
+      'devDependencies',
+      'optionalDependencies',
+    ].forEach((listName) => {
+      if (!Object.hasOwnProperty.call(parsedPkg, listName)) {
+        return;
+      }
+      builtPkg[listName] = Object
+        .entries(parsedPkg[listName])
+        .sort(([packageNameA], [packageNameB]) => (
+          // let the engine do the work of sorting the strings
+          [packageNameA, packageNameB].sort()[0] === packageNameA ? -1 : 1)
+        )
+        // ECMAScript Objects do not have an order to their keys, but the V8 implementation does
+        .reduce(
+          (orderedList, [packageName, versionRange]) => {
+            // adding properties one at a time is less bad than rebuilding (via destructuring) a
+            // new object every iteration of the loop
+            /* eslint-disable-next-line no-param-reassign */
+            orderedList[packageName] = versionRange;
+            return orderedList;
+          },
+          {}
+        );
+    });
+
+    expect(rawPkg).toEqual(`${JSON.stringify(builtPkg, null, 2)}\n`);
+  });
+
+  describe('engines', () => {
+    describe('node', () => {
+      it('is satisified by .nvmrc', async () => {
+        expect.assertions(1);
+        const rawNVM = await fs.readFile(path.join(PACKAGE_DIR_PATH, '.nvmrc'), 'utf8');
+        const { engines } = JSON.parse(await fs.readFile(path.join(PACKAGE_DIR_PATH, 'package.json')));
+        expect(satisfies(rawNVM, engines.node)).toBe(true);
+      });
+      it('is inline with .nvmrc', async () => {
+        expect.assertions(1);
+        const rawNVM = await fs.readFile(path.join(PACKAGE_DIR_PATH, '.nvmrc'), 'utf8');
+        const { engines } = JSON.parse(await fs.readFile(path.join(PACKAGE_DIR_PATH, 'package.json')));
+        expect(engines.node).toBe(`^${parse(rawNVM).major}`);
+      });
+    });
   });
 });
