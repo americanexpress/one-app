@@ -12,6 +12,9 @@
  * under the License.
  */
 
+// This file is only used in development so imports should be devDeps unless used elsewhere
+/* eslint "import/no-extraneous-dependencies": ["error", {"devDependencies": true}] */
+
 import path from 'path';
 import fs from 'fs';
 import cors from '@fastify/cors';
