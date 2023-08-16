@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.6.1](https://github.com/americanexpress/one-app/compare/v6.6.0...v6.6.1) (2023-08-16)
+
+
+### Bug Fixes
+
+* **image:** exclude devDeps from non-dev image ([#1085](https://github.com/americanexpress/one-app/issues/1085)) ([4d68dba](https://github.com/americanexpress/one-app/commit/4d68dba1cce2353ee56ba61e2296779d3480d678))
+
+
 # [6.6.0](https://github.com/americanexpress/one-app/compare/v6.5.1...v6.6.0) (2023-08-09)
 
 
