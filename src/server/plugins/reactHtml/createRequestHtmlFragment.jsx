@@ -14,19 +14,29 @@
  * permissions and limitations under the License.
  */
 
+import util from 'util';
+
 import React from 'react';
 import { Provider } from 'react-redux';
 import url, { Url } from 'url';
-import util from 'util';
 import { RouterContext, matchPromise } from '@americanexpress/one-app-router';
 import { composeModules } from 'holocron';
+
 import createCircuitBreaker from '../../utils/createCircuitBreaker';
+import { isRedirectUrlAllowed } from '../../utils/redirectAllowList';
+import {
+  startSummaryTimer,
+
+  ssr as ssrMetrics,
+} from '../../metrics';
 
 import {
   getRenderMethodName,
   renderForStaticMarkup,
   renderForString,
 } from '../../utils/reactRendering';
+
+import renderStaticErrorPage from './staticErrorPage';
 
 const getModuleData = async ({ dispatch, modules }) => {
   try {
@@ -47,6 +57,7 @@ const getModuleDataBreaker = createCircuitBreaker(getModuleData);
  * @param {import('fastify').FastifyReply} reply fastify reply object
  * @param {*} opts options
  */
+// eslint-disable-next-line complexity
 const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
   try {
     const { store } = request;
@@ -106,6 +117,10 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         });
 
         if (redirect) {
+          if (!isRedirectUrlAllowed(redirect.url)) {
+            renderStaticErrorPage(request, reply);
+            throw new Error(`'${redirect.url}' is not an allowed redirect URL`);
+          }
           reply.redirect(redirect.status || 302, redirect.url);
           return;
         }
@@ -121,6 +136,10 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         ? renderForStaticMarkup
         : renderForString;
 
+      const finishRenderTimer = startSummaryTimer(
+        ssrMetrics.reactRendering,
+        { renderMethodName: getRenderMethodName(state) }
+      );
       /* eslint-disable react/jsx-props-no-spreading */
       const { renderedString, helmetInfo } = renderMethod(
         <Provider store={store}>
@@ -128,6 +147,8 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         </Provider>
       );
       /* eslint-ensable react/jsx-props-no-spreading */
+      finishRenderTimer();
+
       request.appHtml = renderedString;
       request.helmetInfo = helmetInfo;
     }

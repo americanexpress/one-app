@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2023 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,30 +14,26 @@
  * permissions and limitations under the License.
  */
 
-import { incrementCounter } from './counters';
-import { incrementGauge, setGauge, resetGauge } from './gauges';
-import { startSummaryTimer } from './summaries';
+import { Summary } from 'prom-client';
 
-import holocron from './holocron';
-import intlCache from './intl-cache';
-import * as appVersion from './app-version';
-import ssr from './ssr';
+const summaries = {};
+
+function createSummary(opts) {
+  const { name } = opts;
+  if (summaries[name]) {
+    return;
+  }
+  summaries[name] = new Summary(opts);
+}
+
+function startSummaryTimer(name, ...args) {
+  if (!summaries[name]) {
+    throw new Error(`unable to find summary ${name}, please create it first`);
+  }
+  return summaries[name].startTimer(...args);
+}
 
 export {
-  // counters
-  incrementCounter,
-
-  // gauges
-  incrementGauge,
-  setGauge,
-  resetGauge,
-
-  // summaries
+  createSummary,
   startSummaryTimer,
-
-  // metrics
-  holocron,
-  appVersion,
-  intlCache,
-  ssr,
 };

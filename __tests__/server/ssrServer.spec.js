@@ -22,6 +22,7 @@ import fastifyFormbody from '@fastify/formbody';
 import fastifyStatic from '@fastify/static';
 import fastifyHelmet from '@fastify/helmet';
 import fastifySensible from '@fastify/sensible';
+import fastifyMetrics from 'fastify-metrics';
 
 import ensureCorrelationId from '../../src/server/plugins/ensureCorrelationId';
 import setAppVersionHeader from '../../src/server/plugins/setAppVersionHeader';
@@ -49,6 +50,8 @@ jest.mock('@fastify/formbody');
 jest.mock('@fastify/static');
 jest.mock('@fastify/helmet');
 jest.mock('@fastify/sensible');
+jest.mock('fastify-metrics');
+
 jest.mock('../../src/server/plugins/ensureCorrelationId');
 jest.mock('../../src/server/plugins/setAppVersionHeader');
 jest.mock('../../src/server/plugins/addSecurityHeaders');
@@ -104,6 +107,7 @@ describe('ssrServer', () => {
       setNotFoundHandler,
       setErrorHandler,
       ready,
+      addContentTypeParser: jest.fn(),
     }));
   });
 
@@ -115,12 +119,13 @@ describe('ssrServer', () => {
       bodyLimit: 10485760,
     });
 
-    expect(register).toHaveBeenCalledTimes(12);
+    expect(register).toHaveBeenCalledTimes(13);
     expect(register.mock.calls[0][0]).toEqual(fastifySensible);
     expect(register.mock.calls[1][0]).toEqual(ensureCorrelationId);
     expect(register.mock.calls[2][0]).toEqual(fastifyCookie);
     expect(register.mock.calls[3][0]).toEqual(logging);
-    expect(register.mock.calls[4]).toEqual([compress, {
+    expect(register.mock.calls[4][0]).toEqual(fastifyMetrics);
+    expect(register.mock.calls[5]).toEqual([compress, {
       zlibOptions: {
         level: 1,
       },
@@ -128,22 +133,22 @@ describe('ssrServer', () => {
         'gzip',
       ],
     }]);
-    expect(register.mock.calls[5][0]).toEqual(fastifyFormbody);
-    expect(register.mock.calls[6]).toEqual([addSecurityHeadersPlugin, {
+    expect(register.mock.calls[6][0]).toEqual(fastifyFormbody);
+    expect(register.mock.calls[7]).toEqual([addSecurityHeadersPlugin, {
       matchGetRoutes: [
         '/_/status',
         '/_/pwa/service-worker.js',
         '/_/pwa/manifest.webmanifest',
       ],
     }]);
-    expect(register.mock.calls[7][0]).toEqual(setAppVersionHeader);
-    expect(register.mock.calls[8][0]).toEqual(forwardedHeaderParser);
-    expect(register.mock.calls[9][0]).toEqual(expect.any(Function)); // abstraction
+    expect(register.mock.calls[8][0]).toEqual(setAppVersionHeader);
+    expect(register.mock.calls[9][0]).toEqual(forwardedHeaderParser);
     expect(register.mock.calls[10][0]).toEqual(expect.any(Function)); // abstraction
     expect(register.mock.calls[11][0]).toEqual(expect.any(Function)); // abstraction
+    expect(register.mock.calls[12][0]).toEqual(expect.any(Function)); // abstraction
 
     const staticRegister = jest.fn();
-    register.mock.calls[9][0]({
+    register.mock.calls[10][0]({
       register: staticRegister,
       get: jest.fn(),
     }, null, jest.fn());
@@ -158,7 +163,7 @@ describe('ssrServer', () => {
     ]);
 
     const pwaRegister = jest.fn();
-    register.mock.calls[10][0]({
+    register.mock.calls[11][0]({
       register: pwaRegister,
       get: jest.fn(),
       post: jest.fn(),
@@ -168,7 +173,7 @@ describe('ssrServer', () => {
     expect(pwaRegister.mock.calls[1][0]).toEqual(csp);
 
     const renderRegister = jest.fn();
-    register.mock.calls[11][0]({
+    register.mock.calls[12][0]({
       register: renderRegister,
       get: jest.fn(),
       post: jest.fn(),
@@ -183,6 +188,7 @@ describe('ssrServer', () => {
         crossOriginOpenerPolicy: false,
         crossOriginResourcePolicy: false,
         originAgentCluster: false,
+        contentSecurityPolicy: false,
       },
     ]);
     expect(renderRegister.mock.calls[3][0]).toEqual(addFrameOptionsHeader);
@@ -222,7 +228,7 @@ describe('ssrServer', () => {
 
       const get = jest.fn();
 
-      register.mock.calls[9][0]({
+      register.mock.calls[10][0]({
         register: jest.fn(),
         get,
       }, null, jest.fn());
@@ -244,7 +250,7 @@ describe('ssrServer', () => {
 
       const get = jest.fn();
 
-      register.mock.calls[9][0]({
+      register.mock.calls[10][0]({
         register: jest.fn(),
         get,
       }, null, jest.fn());
@@ -265,7 +271,7 @@ describe('ssrServer', () => {
 
       const get = jest.fn();
 
-      register.mock.calls[10][0]({
+      register.mock.calls[11][0]({
         register: jest.fn(),
         get,
         post: jest.fn(),
@@ -287,7 +293,7 @@ describe('ssrServer', () => {
 
           const post = jest.fn();
 
-          register.mock.calls[10][0]({
+          register.mock.calls[11][0]({
             register: jest.fn(),
             get: jest.fn(),
             post,
@@ -314,14 +320,17 @@ describe('ssrServer', () => {
 
           const post = jest.fn();
 
-          register.mock.calls[10][0]({
+          register.mock.calls[11][0]({
             register: jest.fn(),
             get: jest.fn(),
             post,
           }, null, jest.fn());
 
           const request = {
-            body: {},
+            headers: {
+              'Content-Type': 'application/csp-report',
+            },
+            body: JSON.stringify({}),
           };
           const reply = {
             status: jest.fn(() => reply),
@@ -342,14 +351,14 @@ describe('ssrServer', () => {
 
         const post = jest.fn();
 
-        register.mock.calls[10][0]({
+        register.mock.calls[11][0]({
           register: jest.fn(),
           get: jest.fn(),
           post,
         }, null, jest.fn());
 
         const request = {
-          body: {
+          body: JSON.stringify({
             'csp-report': {
               'document-uri': 'document-uri',
               'violated-directive': 'violated-directive',
@@ -358,7 +367,7 @@ describe('ssrServer', () => {
               'column-number': 'column-number',
               'source-file': 'source-file',
             },
-          },
+          }),
         };
         const reply = {
           status: jest.fn(() => reply),
@@ -378,7 +387,7 @@ describe('ssrServer', () => {
 
         const post = jest.fn();
 
-        register.mock.calls[10][0]({
+        register.mock.calls[11][0]({
           register: jest.fn(),
           get: jest.fn(),
           post,
@@ -408,7 +417,7 @@ describe('ssrServer', () => {
 
           const post = jest.fn();
 
-          register.mock.calls[10][0]({
+          register.mock.calls[11][0]({
             register: jest.fn(),
             get: jest.fn(),
             post,
@@ -438,7 +447,7 @@ describe('ssrServer', () => {
 
           const post = jest.fn();
 
-          register.mock.calls[10][0]({
+          register.mock.calls[11][0]({
             register: jest.fn(),
             get: jest.fn(),
             post,
@@ -446,9 +455,9 @@ describe('ssrServer', () => {
 
           const request = {
             headers: {},
-            body: {
+            body: JSON.stringify({
               unit: 'testing',
-            },
+            }),
           };
           const reply = {
             status: jest.fn(() => reply),
@@ -458,9 +467,7 @@ describe('ssrServer', () => {
           post.mock.calls[0][1](request, reply);
 
           expect(post.mock.calls[0][0]).toEqual('/_/report/security/csp-violation');
-          expect(console.warn).toHaveBeenCalledWith(`CSP Violation: {
-  "unit": "testing"
-}`);
+          expect(console.warn).toHaveBeenCalledWith('CSP Violation: {"unit":"testing"}');
           expect(reply.status).toHaveBeenCalledWith(204);
           expect(reply.send).toHaveBeenCalled();
         });
@@ -473,7 +480,7 @@ describe('ssrServer', () => {
 
         const post = jest.fn();
 
-        register.mock.calls[10][0]({
+        register.mock.calls[11][0]({
           register: jest.fn(),
           get: jest.fn(),
           post,
@@ -505,7 +512,7 @@ describe('ssrServer', () => {
 
         const post = jest.fn();
 
-        register.mock.calls[10][0]({
+        register.mock.calls[11][0]({
           register: jest.fn(),
           get: jest.fn(),
           post,
@@ -540,7 +547,7 @@ describe('ssrServer', () => {
 
         const post = jest.fn();
 
-        register.mock.calls[10][0]({
+        register.mock.calls[11][0]({
           register: jest.fn(),
           get: jest.fn(),
           post,
@@ -581,7 +588,7 @@ describe('ssrServer', () => {
 
         const post = jest.fn();
 
-        register.mock.calls[10][0]({
+        register.mock.calls[11][0]({
           register: jest.fn(),
           get: jest.fn(),
           post,
@@ -635,7 +642,7 @@ describe('ssrServer', () => {
         await ssrServer();
 
         const get = jest.fn();
-        register.mock.calls[11][0]({
+        register.mock.calls[12][0]({
           register: jest.fn(),
           get,
         }, null, jest.fn());
@@ -658,7 +665,7 @@ describe('ssrServer', () => {
         await ssrServer();
 
         const get = jest.fn();
-        register.mock.calls[11][0]({
+        register.mock.calls[12][0]({
           register: jest.fn(),
           get,
         }, null, jest.fn());
@@ -679,7 +686,7 @@ describe('ssrServer', () => {
         await ssrServer();
 
         const get = jest.fn();
-        register.mock.calls[11][0]({
+        register.mock.calls[12][0]({
           register: jest.fn(),
           get,
         }, null, jest.fn());
@@ -698,7 +705,7 @@ describe('ssrServer', () => {
         await ssrServer();
 
         const post = jest.fn();
-        register.mock.calls[11][0]({
+        register.mock.calls[12][0]({
           register: jest.fn(),
           get: jest.fn(),
           post,
@@ -713,7 +720,7 @@ describe('ssrServer', () => {
         await ssrServer();
 
         const post = jest.fn();
-        register.mock.calls[11][0]({
+        register.mock.calls[12][0]({
           register: jest.fn(),
           get: jest.fn(),
           post,

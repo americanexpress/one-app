@@ -23,11 +23,12 @@ import readJsonFile from './readJsonFile';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from './safeRequest';
 import { setConfigureRequestLog } from './logging/fastifyPlugin';
 import { setCreateSsrFetch } from './createSsrFetch';
-import { setEventLoopDelayThreshold } from './createCircuitBreaker';
+import { setEventLoopDelayThreshold, setEventLoopDelayPercentile } from './createCircuitBreaker';
 import setupDnsCache from './setupDnsCache';
 import { configurePWA } from '../pwa';
 import { validatePWAConfig } from './validation';
 import { setErrorPage } from '../plugins/reactHtml/staticErrorPage';
+import { setRedirectAllowList } from './redirectAllowList';
 
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
@@ -71,6 +72,54 @@ export function validateCspIsPresent(csp) {
   }
 }
 
+export function setRootModuleConfigurations(module, moduleName) {
+  const {
+    [CONFIGURATION_KEY]: {
+      // Root Module Specific
+      provideStateConfig,
+      csp,
+      corsOrigins,
+      configureRequestLog,
+      extendSafeRequestRestrictedAttributes = {},
+      createSsrFetch,
+      eventLoopDelayThreshold,
+      eventLoopDelayPercentile,
+      pwa,
+      errorPageUrl,
+      dnsCache,
+      redirectAllowList,
+    } = {},
+    [META_DATA_KEY]: metaData,
+  } = module;
+  validateCspIsPresent(csp);
+  clearModulesUsingExternals();
+  if (provideStateConfig) {
+    setStateConfig(provideStateConfig);
+  }
+  if (errorPageUrl) {
+    setErrorPage(errorPageUrl);
+  }
+  if (redirectAllowList) {
+    setRedirectAllowList(redirectAllowList);
+  } else {
+    // This is to maintain backwards compatibility.
+    // This else-check can be removed in future versions.
+    setRedirectAllowList([]);
+  }
+  setCorsOrigins(corsOrigins);
+  extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
+  setConfigureRequestLog(configureRequestLog);
+  setCreateSsrFetch(createSsrFetch);
+  if (eventLoopDelayThreshold) setEventLoopDelayThreshold(eventLoopDelayThreshold);
+  if (eventLoopDelayPercentile) setEventLoopDelayPercentile(eventLoopDelayPercentile);
+  configurePWA(validatePWAConfig(pwa, {
+    clientStateConfig: getClientStateConfig(),
+  }));
+  setupDnsCache(dnsCache);
+
+  logModuleLoad(moduleName, metaData.version);
+}
+
 export default function onModuleLoad({
   module,
   moduleName,
@@ -79,16 +128,6 @@ export default function onModuleLoad({
     [CONFIGURATION_KEY]: {
       // Root Module Specific
       providedExternals,
-      provideStateConfig,
-      csp,
-      corsOrigins,
-      configureRequestLog,
-      extendSafeRequestRestrictedAttributes = {},
-      createSsrFetch,
-      eventLoopDelayThreshold,
-      pwa,
-      errorPageUrl,
-      dnsCache,
       // Child Module Specific
       requiredExternals,
       validateStateConfig,
@@ -116,25 +155,7 @@ export default function onModuleLoad({
   }
 
   if (moduleName === serverStateConfig.rootModuleName) {
-    validateCspIsPresent(csp);
-    clearModulesUsingExternals();
-    if (provideStateConfig) {
-      setStateConfig(provideStateConfig);
-    }
-    if (errorPageUrl) {
-      setErrorPage(errorPageUrl);
-    }
-    setCorsOrigins(corsOrigins);
-    extendRestrictedAttributesAllowList(extendSafeRequestRestrictedAttributes);
-    setConfigureRequestLog(configureRequestLog);
-    setCreateSsrFetch(createSsrFetch);
-    setEventLoopDelayThreshold(eventLoopDelayThreshold);
-    configurePWA(validatePWAConfig(pwa, {
-      clientStateConfig: getClientStateConfig(),
-    }));
-    setupDnsCache(dnsCache);
-
-    logModuleLoad(moduleName, metaData.version);
+    setRootModuleConfigurations(module, moduleName);
     return;
   }
 
