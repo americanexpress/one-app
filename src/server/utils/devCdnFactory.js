@@ -24,6 +24,10 @@ import Fastify from 'fastify';
 import ip from 'ip';
 import ProxyAgent from 'proxy-agent';
 import fetch from 'node-fetch';
+import { getCachedModules, writeToCache, removeDuplicatedModules } from './cacheCDNModules';
+
+let moduleNames = [];
+const cachedModules = getCachedModules();
 
 const getLocalModuleMap = ({ pathToModuleMap, oneAppDevCdnAddress }) => {
   const moduleMap = JSON.parse(fs.readFileSync(pathToModuleMap, 'utf8').toString());
@@ -155,7 +159,7 @@ export const oneAppDevCdnFactory = ({
         ...localMap.modules,
       },
     };
-
+    moduleNames = Object.keys(map.modules);
     reply
       .code(200)
       .send(map);
@@ -170,15 +174,29 @@ export const oneAppDevCdnFactory = ({
         remoteModuleBaseUrls
       );
       const remoteModuleBaseUrlOrigin = new URL(knownRemoteModuleBaseUrl).origin;
+      if (cachedModules[incomingRequestPath]) {
+        return reply
+          .code(200)
+          .type(path.extname(incomingRequestPath))
+          .send(cachedModules[incomingRequestPath]);
+      }
       const remoteModuleResponse = await fetch(`${remoteModuleBaseUrlOrigin}/${incomingRequestPath}`, {
         headers: { connection: 'keep-alive' },
         agent: new ProxyAgent(),
       });
       const { status, type } = remoteModuleResponse;
+      const responseText = await remoteModuleResponse.text();
+      const updatedCachedModules = removeDuplicatedModules(
+        incomingRequestPath,
+        cachedModules,
+        moduleNames
+      );
+      updatedCachedModules[incomingRequestPath] = responseText;
+      writeToCache(updatedCachedModules);
       reply
         .code(status)
         .type(type)
-        .send(await remoteModuleResponse.text());
+        .send(responseText);
     } else {
       reply
         .code(404)
