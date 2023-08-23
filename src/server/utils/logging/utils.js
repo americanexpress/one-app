@@ -68,9 +68,38 @@ function printDurationTime(obj) {
   return chalk.black.bgRed(duration);
 }
 
+const serializeError = (err) => ({
+  name: err.name,
+  message: err.message || '<none>',
+  stacktrace: err.stack || '<none>',
+});
+
+function formatLogEntry(entry) {
+  /* eslint-disable no-param-reassign */
+  if (entry.error) {
+    if (entry.error.name === 'ClientReportedError') {
+      entry.device = {
+        agent: entry.error.userAgent,
+      };
+      entry.request = {
+        address: {
+          uri: entry.error.uri,
+        },
+        metaData: entry.error.metaData,
+      };
+    } else if (entry.error.metaData) {
+      entry.metaData = entry.error.metaData;
+    }
+  }
+
+  return entry;
+}
+
 export {
   coloredLevels,
   printStatusCode,
   printStatusMessage,
   printDurationTime,
+  serializeError,
+  formatLogEntry,
 };

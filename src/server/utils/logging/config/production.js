@@ -15,6 +15,10 @@
  */
 
 import os from 'os';
+import {
+  serializeError,
+  formatLogEntry,
+} from '../utils';
 import readJsonFile from '../../readJsonFile';
 
 const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
@@ -35,13 +39,7 @@ export default {
     },
   },
   serializers: {
-    err(err) {
-      return {
-        name: err.name,
-        message: err.message || '<none>',
-        stacktrace: err.stack || '<none>',
-      };
-    },
+    err: serializeError,
   },
   formatters: {
     level(label) {
@@ -53,24 +51,6 @@ export default {
       };
       return { level: nodeLevelToSchemaLevel[label] || label };
     },
-    log(entry) {
-      /* eslint-disable no-param-reassign */
-      if (entry.error) {
-        if (entry.error.name === 'ClientReportedError') {
-          entry.device = {
-            agent: entry.error.userAgent,
-          };
-          entry.request = {
-            address: {
-              uri: entry.error.uri,
-            },
-            metaData: entry.error.metaData,
-          };
-        } else if (entry.error.metaData) {
-          entry.metaData = entry.error.metaData;
-        }
-      }
-      return entry;
-    },
+    log: formatLogEntry,
   },
 };
