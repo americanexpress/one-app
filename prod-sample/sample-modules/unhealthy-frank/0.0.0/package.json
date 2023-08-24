@@ -16,7 +16,7 @@
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-redux": "^7.2.8",
-    "semver": "7.3.5"
+    "semver": "7.5.2"
   },
   "devDependencies": {
     "@americanexpress/one-app-bundler": "^6.15.0",
