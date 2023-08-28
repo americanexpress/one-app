@@ -85,22 +85,18 @@ function recordPollingForMonitor() {
 
 let startPollingMonitorIfNotAlready = () => {
   const pollingMonitorTimeInterval = MAX_POLL_TIME * 1.1;
-  console.log(`pollModuleMap: setting up polling monitor to run every ${pollingMonitorTimeInterval / 1e3}s`);
+  console.log('pollModuleMap: setting up polling monitor to run every %ds', pollingMonitorTimeInterval / 1e3);
 
   function pollingMonitor() {
     console.log('pollModuleMap: running polling monitor');
     const monitorRunningAt = Date.now();
     const lastPollingTimeAgo = monitorRunningAt - lastPollingRecordedAt;
     if (lastPollingTimeAgo <= MAX_POLL_TIME) {
-      console.log(
-        `pollModuleMap: polling is working as expected. Last poll: ${lastPollingTimeAgo}ms ago, Max poll: ${MAX_POLL_TIME}ms.`
-      );
+      console.log('pollModuleMap: polling is working as expected. Last poll: %dms ago, Max poll: %dms.', lastPollingTimeAgo, MAX_POLL_TIME);
       return;
     }
 
-    console.warn(
-      `pollModuleMap: polling has unexpectedly stopped. Last poll: ${lastPollingTimeAgo}ms ago, Max poll: ${MAX_POLL_TIME}ms.`
-    );
+    console.warn('pollModuleMap: polling has unexpectedly stopped. Last poll: %dms ago, Max poll: %dms.', lastPollingTimeAgo, MAX_POLL_TIME);
 
     // something really unusual happened, re-start polling
     // ensure that the last timeout has actually stopped
@@ -140,18 +136,13 @@ async function pollModuleMap() {
     moduleMapHealthy = !numberOfModulesRejected;
 
     if (numberOfModulesLoaded) {
-      console.log(
-        `pollModuleMap: ${numberOfModulesLoaded} modules loaded/updated:`,
-        loadedModules
-      );
+      console.log('pollModuleMap: %d modules loaded/updated:\n%o', numberOfModulesLoaded, loadedModules);
       incrementCounter(holocronMetrics.moduleMapUpdated);
     }
 
     if (numberOfModulesRejected) {
       const rejectedModuleMessages = Object.entries(rejectedModules).map(([moduleName, { reasonForRejection }]) => `${moduleName}: ${reasonForRejection}`);
-      console.warn(
-        `pollModuleMap: ${numberOfModulesRejected} modules rejected:`, rejectedModuleMessages
-      );
+      console.warn('pollModuleMap: %d modules rejected:\n%o', numberOfModulesRejected, rejectedModuleMessages);
       incrementGauge(holocronMetrics.moduleMapPollConsecutiveErrors);
     } else {
       resetGauge(holocronMetrics.moduleMapPollConsecutiveErrors);
@@ -161,9 +152,7 @@ async function pollModuleMap() {
       resetPollTime();
     } else {
       incrementPollTime();
-      console.log(
-        `pollModuleMap: no updates, looking again in ${Math.round(currentPollTime / 1e3)}s`
-      );
+      console.log('pollModuleMap: no updates, looking again in %ds', Math.round(currentPollTime / 1e3));
     }
   } catch (pollingError) {
     try {

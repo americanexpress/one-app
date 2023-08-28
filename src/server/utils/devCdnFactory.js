@@ -82,9 +82,7 @@ const consumeRemoteRequest = async (remoteModuleMapUrl, hostAddress, remoteModul
     });
     return remoteModuleMap;
   } catch (error) {
-    console.warn(
-      `one-app-dev-cdn error loading module map from ${remoteModuleMapUrl}: ${error}`
-    );
+    console.warn('one-app-dev-cdn error loading module map from %s:', remoteModuleMapUrl, error);
     return {};
   }
 };
@@ -104,7 +102,7 @@ export const oneAppDevCdnFactory = ({
   if (!appPort) { throw new Error('appPort is a required param'); }
 
   if (remoteModuleMapUrl) {
-    console.log(`one-app-dev-cdn loading module map from ${remoteModuleMapUrl}`);
+    console.log('one-app-dev-cdn loading module map from %s', remoteModuleMapUrl);
   } else {
     console.log('one-app-dev-cdn only using locally served modules');
   }

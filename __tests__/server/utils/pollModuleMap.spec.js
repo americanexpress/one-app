@@ -13,6 +13,7 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+import util from 'util';
 
 jest.useFakeTimers();
 jest.spyOn(global, 'setTimeout');
@@ -127,9 +128,13 @@ describe('pollModuleMap', () => {
     const { default: pollModuleMap } = load();
     console.log
       // monitor setup
-      .mockImplementationOnce(() => { /* noop a few times */ })
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
       // pollModuleMap run 1
-      .mockImplementationOnce(() => { throw new Error('STDOUT pipe closed unexpectedly'); });
+      .mockImplementationOnce(() => {
+        throw new Error('STDOUT pipe closed unexpectedly');
+      });
     await pollModuleMap();
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -140,15 +145,27 @@ describe('pollModuleMap', () => {
     const { default: pollModuleMap, MIN_POLL_TIME } = load();
     console.log
       // monitor setup
-      .mockImplementationOnce(() => { /* noop a few times */ })
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
       // pollModuleMap run 1
-      .mockImplementationOnce(() => { /* noop a few times */ })
-      .mockImplementationOnce(() => { /* noop a few times */ })
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
       // pollModuleMap run 2
-      .mockImplementationOnce(() => { /* noop a few times */ })
-      .mockImplementationOnce(() => { /* noop a few times */ })
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
       // pollModuleMap run 3
-      .mockImplementationOnce(() => { throw new Error('STDOUT pipe closed unexpectedly later on'); });
+      .mockImplementationOnce(() => {
+        throw new Error('STDOUT pipe closed unexpectedly later on');
+      });
 
     await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -166,10 +183,17 @@ describe('pollModuleMap', () => {
 
   it('schedules a new poll after a polling error despite resetGauge throwing', async () => {
     const { default: pollModuleMap, MIN_POLL_TIME } = load();
-    resetGauge.mockClear()
-      .mockImplementationOnce(() => { /* noop a few times */ })
-      .mockImplementationOnce(() => { /* noop a few times */ })
-      .mockImplementationOnce(() => { throw new Error('unable to increment gague'); });
+    resetGauge
+      .mockClear()
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('unable to increment gague');
+      });
 
     await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -187,10 +211,17 @@ describe('pollModuleMap', () => {
 
   it('schedules a new poll after a polling error despite setGauge throwing', async () => {
     const { default: pollModuleMap, MIN_POLL_TIME } = load();
-    setGauge.mockClear()
-      .mockImplementationOnce(() => { /* noop a few times */ })
-      .mockImplementationOnce(() => { /* noop a few times */ })
-      .mockImplementationOnce(() => { throw new Error('unable to increment gague'); });
+    setGauge
+      .mockClear()
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('unable to increment gague');
+      });
 
     await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -224,8 +255,10 @@ describe('pollModuleMap', () => {
 
     expect(loadModules).toHaveBeenCalledTimes(1);
     expect(console.log).toHaveBeenCalledTimes(3);
-    expect(console.log.mock.calls[2][0]).toMatch(/^pollModuleMap: 1 modules loaded\/updated:$/);
-    expect(console.log.mock.calls[2][1]).toEqual(moduleMapUpdates);
+    expect(util.format(...console.log.mock.calls[2])).toMatchInlineSnapshot(`
+      "pollModuleMap: 1 modules loaded/updated:
+      { 'module-name': 'module-data-here' }"
+    `);
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
     expect(setTimeout).toHaveBeenCalledWith(pollModuleMap, MIN_POLL_TIME);
@@ -242,7 +275,7 @@ describe('pollModuleMap', () => {
     expect(loadModules).toHaveBeenCalledTimes(1);
 
     expect(console.log).toHaveBeenCalledTimes(3);
-    expect(console.log.mock.calls[2][0]).toMatch(
+    expect(util.format(...console.log.mock.calls[2])).toMatch(
       /^pollModuleMap: no updates, looking again in \d+s$/
     );
 
@@ -279,12 +312,17 @@ describe('pollModuleMap', () => {
 
   it('resets the time to the next polling to the minimum if there were rejected modules', async () => {
     const { default: pollModuleMap, MIN_POLL_TIME } = load();
-    loadModulesPromise = Promise.resolve({ rejectedModules: { 'bad-module': { reasonForRejection: 'not compatible' } } });
+    loadModulesPromise = Promise.resolve({
+      rejectedModules: { 'bad-module': { reasonForRejection: 'not compatible' } },
+    });
     await pollModuleMap();
     expect(loadModules).toHaveBeenCalledTimes(1);
 
     expect(console.warn).toHaveBeenCalledTimes(1);
-    expect(console.warn).toHaveBeenCalledWith('pollModuleMap: 1 modules rejected:', ['bad-module: not compatible']);
+    expect(util.format(...console.warn.mock.calls[0])).toMatchInlineSnapshot(`
+      "pollModuleMap: 1 modules rejected:
+      [ 'bad-module: not compatible', [length]: 1 ]"
+    `);
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
     // check that the poll interval is reset to min.
@@ -299,7 +337,9 @@ describe('pollModuleMap', () => {
   it('schedules a new polling despite console.error throwing on the initial check', async () => {
     const { default: pollModuleMap } = load();
     loadModulesPromise = Promise.reject(new Error('sample test error'));
-    console.error.mockImplementationOnce(() => { throw new Error('STDERR pipe closed unexpectedly'); });
+    console.error.mockImplementationOnce(() => {
+      throw new Error('STDERR pipe closed unexpectedly');
+    });
     await pollModuleMap();
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
@@ -308,9 +348,15 @@ describe('pollModuleMap', () => {
   it('schedules a new poll after a polling error despite console.error throwing', async () => {
     const { default: pollModuleMap } = load();
     console.error
-      .mockImplementationOnce(() => { /* noop a few times */ })
-      .mockImplementationOnce(() => { /* noop a few times */ })
-      .mockImplementationOnce(() => { throw new Error('STDERR pipe closed unexpectedly'); });
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('STDERR pipe closed unexpectedly');
+      });
 
     loadModulesPromise = Promise.reject(new Error('sample test error'));
 
@@ -329,10 +375,17 @@ describe('pollModuleMap', () => {
 
   it('schedules a new poll after a polling error despite incrementGauge throwing', async () => {
     const { default: pollModuleMap } = load();
-    incrementGauge.mockClear()
-      .mockImplementationOnce(() => { /* noop a few times */ })
-      .mockImplementationOnce(() => { /* noop a few times */ })
-      .mockImplementationOnce(() => { throw new Error('unable to increment gague'); });
+    incrementGauge
+      .mockClear()
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
+      .mockImplementationOnce(() => {
+        /* noop a few times */
+      })
+      .mockImplementationOnce(() => {
+        throw new Error('unable to increment gague');
+      });
 
     loadModulesPromise = Promise.reject(new Error('sample test error'));
 
@@ -442,8 +495,8 @@ describe('pollModuleMap', () => {
       expect(setInterval).toHaveBeenCalledTimes(1);
       setInterval.mock.calls[0][0]();
       expect(console.log).toHaveBeenCalledTimes(2);
-      expect(console.log.mock.calls[0]).toMatchSnapshot();
-      expect(console.log.mock.calls[1]).toMatchSnapshot();
+      expect(util.format(...console.log.mock.calls[0])).toMatchSnapshot();
+      expect(util.format(...console.log.mock.calls[1])).toMatchSnapshot();
     });
 
     it('logs when polling is considered stopped', async () => {
@@ -460,8 +513,8 @@ describe('pollModuleMap', () => {
       expect(console.log).toHaveBeenCalledTimes(1);
       expect(console.log.mock.calls[0]).toMatchSnapshot();
       expect(console.warn).toHaveBeenCalledTimes(2);
-      expect(console.warn.mock.calls[0]).toMatchSnapshot();
-      expect(console.warn.mock.calls[1]).toMatchSnapshot();
+      expect(util.format(...console.warn.mock.calls[0])).toMatchSnapshot();
+      expect(util.format(...console.warn.mock.calls[1])).toMatchSnapshot();
     });
   });
 });

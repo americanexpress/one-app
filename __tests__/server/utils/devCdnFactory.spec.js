@@ -13,6 +13,7 @@
  */
 
 /* eslint-disable no-console -- console used in tests */
+import util from 'util';
 import fetch from 'node-fetch';
 import fs from 'fs';
 import rimraf from 'rimraf';
@@ -459,8 +460,8 @@ describe('one-app-dev-cdn', () => {
           expect(response.body).toEqual(JSON.stringify(defaultLocalMap));
           expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
           expect(console.warn).toHaveBeenCalledTimes(1);
-          expect(console.warn).toHaveBeenCalledWith(
-            'one-app-dev-cdn error loading module map from https://my-domain.com/map/module-map.json: Error: simulated timeout or some other network error!'
+          expect(util.format(...console.warn.mock.calls[0])).toMatch(
+            /one-app-dev-cdn error loading module map from https:\/\/my-domain.com\/map\/module-map.json: Error: simulated timeout or some other network error!/
           );
         });
     });
@@ -480,8 +481,8 @@ describe('one-app-dev-cdn', () => {
           expect(response.body).toEqual(JSON.stringify(defaultLocalMap));
           expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
           expect(console.warn).toHaveBeenCalledTimes(1);
-          expect(console.warn).toHaveBeenCalledWith(
-            'one-app-dev-cdn error loading module map from https://my-domain.com/map/module-map.json: TypeError: Cannot convert undefined or null to object'
+          expect(util.format(...console.warn.mock.calls[0])).toMatch(
+            /one-app-dev-cdn error loading module map from https:\/\/my-domain.com\/map\/module-map.json: TypeError: Cannot convert undefined or null to object/
           );
         });
     });
