@@ -33,6 +33,7 @@ describe('development logger stream', () => {
         "info": 30,
         "log": 35,
         "trace": 10,
+        "warn": 40,
       }
     `);
   });

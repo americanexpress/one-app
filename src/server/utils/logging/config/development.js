@@ -29,6 +29,7 @@ export default pinoPretty({
     debug: 20,
     info: 30,
     log: 35,
+    warn: 40,
     error: 50,
     fatal: 60,
   },
