@@ -14,21 +14,16 @@
  * permissions and limitations under the License.
  */
 
+import deepmerge from 'deepmerge';
 import { argv } from 'yargs';
 import pino from 'pino';
 import productionConfig from './config/production';
+import baseConfig from './config/base';
 
 const useProductionConfig = !!(argv.logFormat === 'machine' || process.env.NODE_ENV !== 'development');
 
-const logger = pino({
-  level: argv.logLevel,
-  customLevels: {
-    log: 35,
-  },
-  dedupe: true,
-  // development-formatters should not be loaded in production
-  // eslint-disable-next-line no-extra-parens, global-require -- conflicting lint rule
-  ...(useProductionConfig && productionConfig),
-}, useProductionConfig ? undefined : require('./config/development').default);
+// development-formatters should not be loaded in production
+// eslint-disable-next-line global-require
+const logger = pino(deepmerge(baseConfig, useProductionConfig ? productionConfig : {}), useProductionConfig ? undefined : require('./config/development').default);
 
 export default logger;

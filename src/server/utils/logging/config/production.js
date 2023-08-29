@@ -21,8 +21,8 @@ const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
 
 export default {
   timestamp: () => `,"timestamp":"${new Date(Date.now()).toISOString()}"`,
+  // TODO: move messageKey to base config once pino bug is resolved
   messageKey: 'message',
-  errorKey: 'error',
   base: {
     schemaVersion: '0.3.0',
     application: {
@@ -70,6 +70,14 @@ export default {
           entry.metaData = entry.error.metaData;
         }
       }
+
+      // TODO: this is required due to a pino bug in the hook, remove once resolved
+      // ADD LINK TO BUG HERE BEFORE MERGING!
+      if (entry.msg) {
+        entry.message = entry.msg;
+        delete entry.msg;
+      }
+
       return entry;
     },
   },

@@ -55,7 +55,7 @@ describe('setup', () => {
   it('replaces the global console with logger', () => {
     load();
     logMethods.forEach((method) => {
-      expect(console[method].name).toBe('bound LOG');
+      expect(console[method].name).toBe('bound hookWrappedLog');
       expect(console[method]).not.toBe(originalConsole[method]);
     });
   });

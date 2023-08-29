@@ -13,6 +13,7 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+import deepmerge from 'deepmerge';
 
 jest.mock('yargs', () => ({
   argv: {
@@ -24,6 +25,7 @@ describe('logger', () => {
   let logger;
   let pino;
   let productionConfig;
+  let baseConfig;
   let developmentStream;
 
   function load(nodeEnv) {
@@ -37,6 +39,7 @@ describe('logger', () => {
 
     jest.mock('pino', () => jest.fn(() => 'pino'));
     pino = require('pino');
+    baseConfig = require('../../../../src/server/utils/logging/config/base').default;
     productionConfig = require('../../../../src/server/utils/logging/config/production').default;
     developmentStream = require('../../../../src/server/utils/logging/config/development').default;
     logger = require('../../../../src/server/utils/logging/logger').default;
@@ -50,39 +53,19 @@ describe('logger', () => {
   it('uses the production formatter by default', () => {
     load();
     expect(pino).toHaveBeenCalledTimes(1);
-    expect(pino).toHaveBeenCalledWith({
-      level: 'debug',
-      customLevels: {
-        log: 35,
-      },
-      dedupe: true,
-      ...productionConfig,
-    }, undefined);
+    expect(pino).toHaveBeenCalledWith(deepmerge(baseConfig, productionConfig), undefined);
   });
 
   it('uses a development formatter when NODE_ENV is development', () => {
     load('development');
     expect(pino).toHaveBeenCalledTimes(1);
-    expect(pino).toHaveBeenCalledWith({
-      level: 'debug',
-      customLevels: {
-        log: 35,
-      },
-      dedupe: true,
-    }, developmentStream);
+    expect(pino).toHaveBeenCalledWith(baseConfig, developmentStream);
   });
 
   it('uses the production formatter when the log-format flag is set to machine', () => {
     jest.mock('yargs', () => ({ argv: { logFormat: 'machine', logLevel: 'info' } }));
     load();
     expect(pino).toHaveBeenCalledTimes(1);
-    expect(pino).toHaveBeenCalledWith({
-      level: 'info',
-      customLevels: {
-        log: 35,
-      },
-      dedupe: true,
-      ...productionConfig,
-    }, undefined);
+    expect(pino).toHaveBeenCalledWith(deepmerge(baseConfig, productionConfig), undefined);
   });
 });

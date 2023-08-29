@@ -19,3 +19,6 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 
 process.env.ONE_CONFIG_ENV = 'test';
+
+// Required for logger tests
+process.setMaxListeners(15);
