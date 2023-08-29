@@ -16,12 +16,58 @@
 
 import { getModule } from 'holocron';
 
+/**
+ * Generates a style tag with unique ID attribute per CSS file loaded.
+ * @returns {string}
+ */
+const generateStyleTag = ({ css, digest }) => `
+<style id="${digest}" data-ssr="true">
+  ${css}
+</style>`;
+
+const generateServerStyleTag = (css) => `<style class="ssr-css">${css}</style>`;
+
+const filterOutDuplicateDigests = (sheet, existingDigests) => sheet
+  .filter(({ css, digest }) => css && digest && !existingDigests.has(digest))
+  .map((styles) => {
+    existingDigests.add(styles.digest);
+    return styles;
+  });
+
 export default function renderModuleStyles(store) {
-  return store.getState().getIn(['holocron', 'loaded'], [])
+  const existingDigests = new Set();
+  const modulesWithSSRStyles = store.getState().getIn(['holocron', 'loaded'], [])
     .map((moduleName) => getModule(moduleName, store.modules))
-    .filter((module) => !!module.ssrStyles)
-    .map((module) => module.ssrStyles.getFullSheet())
+    .filter((module) => !!module.ssrStyles);
+
+  const collatedStyles = modulesWithSSRStyles
+    .reduce((acc, module) => {
+      // Backwards compatibility for older bundles.
+      if (!module.ssrStyles.aggregatedStyles) {
+        const ssrStylesFullSheet = module.ssrStyles.getFullSheet();
+        if (ssrStylesFullSheet) {
+          acc.legacy.push({ css: ssrStylesFullSheet });
+        }
+        return acc;
+      }
+
+      const { aggregatedStyles } = module.ssrStyles;
+      return {
+        ...acc,
+        aggregated: [
+          ...acc.aggregated,
+          ...filterOutDuplicateDigests(aggregatedStyles, existingDigests),
+        ],
+      };
+    }, { aggregated: [], legacy: [] });
+
+  return [...collatedStyles.legacy, ...collatedStyles.aggregated]
     .filter(Boolean)
-    .map((ssrStylesFullSheet) => `<style class="ssr-css">${ssrStylesFullSheet}</style>`)
-    .join('');
+    .reduce((acc, { css, digest }) => {
+      if (!digest) {
+        return acc + generateServerStyleTag(css);
+      }
+
+      return acc + generateStyleTag({ css, digest });
+    }, '');
 }
