@@ -25,6 +25,7 @@ import {
 export const pinoPrettyOptions = {
   ignore: 'pid,hostname,time,type,request',
   // TODO: Uncomment once pino bug is resolved
+  // https://github.com/pinojs/pino/issues/1790
   // messageKey: 'message',
   customLevels: {
     trace: 10,

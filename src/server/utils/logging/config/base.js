@@ -35,6 +35,7 @@ export default {
           // TODO: The default message key "msg" is required here to prevent
           // duplicate messages in entry. Production log formatter replaces "msg" from these
           // logs with "message". Change the key to message once bug is resolved.
+          // https://github.com/pinojs/pino/issues/1790
           return method.call(this, { error, msg: message });
         }
       }

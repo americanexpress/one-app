@@ -22,6 +22,7 @@ const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
 export default {
   timestamp: () => `,"timestamp":"${new Date(Date.now()).toISOString()}"`,
   // TODO: move messageKey to base config once pino bug is resolved
+  // https://github.com/pinojs/pino/issues/1790
   messageKey: 'message',
   base: {
     schemaVersion: '0.3.0',
@@ -72,7 +73,7 @@ export default {
       }
 
       // TODO: this is required due to a pino bug in the hook, remove once resolved
-      // ADD LINK TO BUG HERE BEFORE MERGING!
+      // https://github.com/pinojs/pino/issues/1790
       if (entry.msg) {
         entry.message = entry.msg;
         delete entry.msg;
