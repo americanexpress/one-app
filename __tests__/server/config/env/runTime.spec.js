@@ -40,6 +40,7 @@ describe('runTime', () => {
     'HOLOCRON_MODULE_MAP_URL',
     'HTTP_ONE_APP_DEV_CDN_PORT',
     'HTTP_ONE_APP_DEV_PROXY_SERVER_PORT',
+    'HTTP_ONE_APP_DEBUG_PORT',
     'HOLOCRON_SERVER_MAX_MODULES_RETRY',
     'HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH',
     'ONE_CLIENT_REPORTING_URL',
@@ -244,6 +245,35 @@ describe('runTime', () => {
     it('has no default value for production', () => {
       process.env.NODE_ENV = 'production';
       expect(devProxyPort.defaultValue()).not.toBeDefined();
+    });
+  });
+
+  describe('HTTP_ONE_APP_DEBUG_PORT', () => {
+    const debugPort = getEnvVarConfig('HTTP_ONE_APP_DEBUG_PORT');
+
+    it('normalizes numeric input', () => {
+      expect(debugPort.normalize('1337')).toEqual(1337);
+      expect(() => debugPort.normalize('r00t')).toThrowErrorMatchingInlineSnapshot(
+        '"env var HTTP_ONE_APP_DEBUG_PORT needs to be a valid integer, given \\"r00t\\""'
+      );
+      expect(debugPort.normalize('0002345')).toEqual(2345);
+      expect(() => debugPort.normalize('0002345a')).toThrow();
+    });
+
+    it('does not normalize if no value is given', () => {
+      expect(debugPort.normalize()).toEqual(undefined);
+    });
+
+    it('has a default value for development', () => {
+      process.env.NODE_ENV = 'development';
+      delete process.env.HTTP_ONE_APP_DEV_CDN_PORT;
+      expect(debugPort.defaultValue()).toBeDefined();
+      expect(debugPort.defaultValue()).toBe(9229);
+    });
+
+    it('has no default value for production', () => {
+      process.env.NODE_ENV = 'production';
+      expect(debugPort.defaultValue()).not.toBeDefined();
     });
   });
 

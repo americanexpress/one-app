@@ -129,6 +129,25 @@ const runTime = [
       ? 3002
       : undefined),
   },
+  {
+    name: 'HTTP_ONE_APP_DEBUG_PORT',
+    normalize: (input) => {
+      if (input) {
+        const parsed = Number.parseInt(input, 10);
+        // make sure the parsed value is the same value as input
+        // input may be a string or a number, we don't want === in this case, just ==
+        if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
+          throw new Error(`env var HTTP_ONE_APP_DEBUG_PORT needs to be a valid integer, given "${input}"`);
+        } else {
+          return parsed;
+        }
+      }
+      return undefined;
+    },
+    defaultValue: () => (process.env.NODE_ENV === 'development'
+      ? 9229
+      : undefined),
+  },
   // holocron config, the modules to use
   {
     name: 'HOLOCRON_MODULE_MAP_URL',

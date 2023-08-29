@@ -39,6 +39,7 @@ EXPOSE 3000
 EXPOSE 3001
 EXPOSE 3002
 EXPOSE 3005
+EXPOSE 9229
 WORKDIR /opt/one-app
 RUN chown node:node /opt/one-app
 USER $USER
