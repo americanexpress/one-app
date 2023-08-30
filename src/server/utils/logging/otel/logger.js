@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import os from 'os';
+import os from 'node:os';
 import {
   LoggerProvider,
   ConsoleLogRecordExporter,
@@ -66,7 +66,7 @@ export const createOtelLogger = () => {
   const resource = new Resource({
     [SemanticResourceAttributes.SERVICE_NAME]: process.env.OTEL_SERVICE_NAME,
     [SemanticResourceAttributes.SERVICE_NAMESPACE]: process.env.OTEL_SERVICE_NAMESPACE,
-    [SemanticResourceAttributes.SERVICE_INSTANCE_ID]: `${os.hostname()}:${process.pid}`,
+    [SemanticResourceAttributes.SERVICE_INSTANCE_ID]: os.hostname(),
     [SemanticResourceAttributes.SERVICE_VERSION]: version,
     ...customResourceAttributes,
   });

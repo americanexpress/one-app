@@ -50,15 +50,11 @@ jest.mock('@opentelemetry/instrumentation-express');
 jest.mock('../../../../../src/server/utils/readJsonFile', () => () => ({
   buildVersion: '1.2.3-abc123',
 }));
-jest.mock('os', () => ({
+jest.mock('node:os', () => ({
   hostname: () => 'host-123',
   type: () => 'Darwin',
   arch: () => 'x64',
 }));
-Object.defineProperty(process, 'pid', {
-  writable: true,
-  value: 1234,
-});
 
 const loadEnvVars = () => {
   process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://localhost:4318/v1/logs';
@@ -124,7 +120,7 @@ describe('OpenTelemetry logger', () => {
             "_attributes": Object {
               "baz": "qux",
               "foo": "bar",
-              "service.instance.id": "host-123:1234",
+              "service.instance.id": "host-123",
               "service.name": "One App",
               "service.namespace": "Namespace",
               "service.version": "1.2.3-abc123",
@@ -132,7 +128,7 @@ describe('OpenTelemetry logger', () => {
             "_syncAttributes": Object {
               "baz": "qux",
               "foo": "bar",
-              "service.instance.id": "host-123:1234",
+              "service.instance.id": "host-123",
               "service.name": "One App",
               "service.namespace": "Namespace",
               "service.version": "1.2.3-abc123",

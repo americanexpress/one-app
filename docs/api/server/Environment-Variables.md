@@ -731,8 +731,9 @@ ONE_SERVICE_WORKER=false
 * ✅ Production
 * ✅ Development
 
-When set, One App will emit OpenTelemetry logs over GRPC to the configured endpoint.
+When set, One App will emit OpenTelemetry logs over gRPC to the configured endpoint.
 See the [OpenTlemetry documentation](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_logs_endpoint) for more information.
+When set, the `--log-format` command line argument is ignored.
 
 
 **Shape**
