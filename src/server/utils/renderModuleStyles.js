@@ -28,11 +28,10 @@ const generateStyleTag = ({ css, digest }) => `
 const generateServerStyleTag = (css) => `<style class="ssr-css">${css}</style>`;
 
 const filterOutDuplicateDigests = (sheet, existingDigests) => sheet
-  .filter(({ css, digest }) => css && digest && !existingDigests.has(digest))
-  .map((styles) => {
-    existingDigests.add(styles.digest);
-    return styles;
-  });
+  .filter(({ css, digest }) => css && digest && !existingDigests.has(digest));
+
+const updateExistingDigests = (filteredSheets, existingDigests) => filteredSheets
+  .forEach((sheet) => { existingDigests.add(sheet.digest); });
 
 export default function renderModuleStyles(store) {
   const existingDigests = new Set();
@@ -52,11 +51,14 @@ export default function renderModuleStyles(store) {
       }
 
       const { aggregatedStyles } = module.ssrStyles;
+      const uniqueStyles = filterOutDuplicateDigests(aggregatedStyles, existingDigests);
+      updateExistingDigests(uniqueStyles, existingDigests);
+
       return {
         ...acc,
         aggregated: [
           ...acc.aggregated,
-          ...filterOutDuplicateDigests(aggregatedStyles, existingDigests),
+          ...uniqueStyles,
         ],
       };
     }, { aggregated: [], legacy: [] });
