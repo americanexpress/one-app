@@ -20,10 +20,7 @@ import { getModule } from 'holocron';
  * Generates a style tag with unique ID attribute per CSS file loaded.
  * @returns {string}
  */
-const generateStyleTag = ({ css, digest }) => `
-<style id="${digest}" data-ssr="true">
-  ${css}
-</style>`;
+const generateStyleTag = ({ css, digest }) => `<style id="${digest}" data-ssr="true">${css}</style>`;
 
 const generateServerStyleTag = (css) => `<style class="ssr-css">${css}</style>`;
 
@@ -44,10 +41,15 @@ export default function renderModuleStyles(store) {
       // Backwards compatibility for older bundles.
       if (!module.ssrStyles.aggregatedStyles) {
         const ssrStylesFullSheet = module.ssrStyles.getFullSheet();
-        if (ssrStylesFullSheet) {
-          acc.legacy.push({ css: ssrStylesFullSheet });
-        }
-        return acc;
+        return {
+          ...acc,
+          legacy: ssrStylesFullSheet
+            ? [
+              ...acc.legacy,
+              { css: ssrStylesFullSheet },
+            ]
+            : acc.legacy,
+        };
       }
 
       const { aggregatedStyles } = module.ssrStyles;
