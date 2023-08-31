@@ -4,8 +4,8 @@
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
-    "node": "^18",
-    "npm": "^9"
+    "node": ">=16",
+    "npm": ">=8"
   },
   "scripts": {
     "preinstall": "npx check-engines@1",

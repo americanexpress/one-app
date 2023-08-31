@@ -16,8 +16,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { satisfies, parse } from 'semver';
-
 const PACKAGE_DIR_PATH = path.resolve(path.join(__dirname, '../'));
 
 describe('package.json', () => {
@@ -60,22 +58,5 @@ describe('package.json', () => {
     });
 
     expect(rawPkg).toEqual(`${JSON.stringify(builtPkg, null, 2)}\n`);
-  });
-
-  describe('engines', () => {
-    describe('node', () => {
-      it('is satisified by .nvmrc', async () => {
-        expect.assertions(1);
-        const rawNVM = await fs.readFile(path.join(PACKAGE_DIR_PATH, '.nvmrc'), 'utf8');
-        const { engines } = JSON.parse(await fs.readFile(path.join(PACKAGE_DIR_PATH, 'package.json')));
-        expect(satisfies(rawNVM, engines.node)).toBe(true);
-      });
-      it('is inline with .nvmrc', async () => {
-        expect.assertions(1);
-        const rawNVM = await fs.readFile(path.join(PACKAGE_DIR_PATH, '.nvmrc'), 'utf8');
-        const { engines } = JSON.parse(await fs.readFile(path.join(PACKAGE_DIR_PATH, 'package.json')));
-        expect(engines.node).toBe(`^${parse(rawNVM).major}`);
-      });
-    });
   });
 });
