@@ -73,7 +73,7 @@ jobs:
       - name: Docker login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Build production docker image
-        run: docker build -t prod .
+        run: DOCKER_BUILDKIT=0 docker build -t prod .
       - name: Tag Docker Images
         run: |
           # Always tag the exact version
