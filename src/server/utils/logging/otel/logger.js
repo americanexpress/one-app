@@ -38,12 +38,12 @@ const logMethods = ['error', 'warn', 'log', 'info', 'debug'];
 
 let batchLogProcessor;
 
-export const shutdownOtelLogger = () => {
-  if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) return batchLogProcessor.shutdown();
+export function shutdownOtelLogger() {
+  if (batchLogProcessor) return batchLogProcessor.shutdown();
   return undefined;
-};
+}
 
-const setupTracer = () => {
+function setupTracer() {
   const provider = new NodeTracerProvider();
   provider.register();
   registerInstrumentations({
@@ -52,9 +52,9 @@ const setupTracer = () => {
       new ExpressInstrumentation(),
     ],
   });
-};
+}
 
-export const createOtelLogger = () => {
+export function createOtelLogger() {
   const customResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES ? process.env.OTEL_RESOURCE_ATTRIBUTES.split(';').reduce((acc, curr) => {
     const [key, value] = curr.split('=');
     return {
@@ -96,16 +96,16 @@ export const createOtelLogger = () => {
   // Add trace IDs to logs
   setupTracer();
 
-  const logger = logMethods.reduce((acc, curr) => {
+  const logger = logMethods.reduce((loggerObj, logMethod) => {
     function emitLog(...args) {
-      const logRecord = formatter(curr, ...args);
+      const logRecord = formatter(logMethod, ...args);
       otelLogger.emit(logRecord);
     }
-    return { ...acc, [curr]: emitLog };
+    return { ...loggerObj, [logMethod]: emitLog };
   }, {});
 
   return logger;
-};
+}
 
 export function replaceGlobalConsoleWithOtelLogger(logger) {
   logMethods.forEach((methodName) => { console[methodName] = logger[methodName]; });

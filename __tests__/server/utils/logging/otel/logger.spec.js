@@ -98,11 +98,12 @@ describe('OpenTelemetry logger', () => {
     });
 
     it('does not attempt to shut down the batch processor if not using OTel', async () => {
+      jest.resetModules();
+      const { shutdownOtelLogger: shutdownOtelLogger2 } = require('../../../../../src/server/utils/logging/otel/logger');
       delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
       const batchProcessor = { shutdown: jest.fn() };
       BatchLogRecordProcessor.mockReturnValueOnce(batchProcessor);
-      createOtelLogger();
-      await shutdownOtelLogger();
+      await shutdownOtelLogger2();
       expect(batchProcessor.shutdown).not.toHaveBeenCalled();
       loadEnvVars();
     });

@@ -21,7 +21,9 @@ import flatten from 'flat';
 
 function getBaseRecord(level) {
   let severityText = level.toUpperCase();
-  if (!Object.keys(SeverityNumber).includes(severityText)) severityText = 'INFO';
+  if (typeof SeverityNumber[severityText] === 'undefined') {
+    severityText = 'INFO';
+  }
   return {
     attributes: {
       agent: `${os.type()} ${os.arch()}`,
@@ -117,6 +119,8 @@ const formatter = (level, ...args) => {
     record.body = util.format(...args);
   }
 
+  // flatten takes a deeply-nested object and returns an object of values one
+  // level deep with period-delimited keys
   record.attributes = flatten(record.attributes);
 
   return record;
