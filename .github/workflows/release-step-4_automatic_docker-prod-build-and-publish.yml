@@ -67,13 +67,13 @@ jobs:
           echo ::set-output name=metatag::do_not_tag
           echo For other branch: do_not_tag
           fi
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
         with:
           ref: "v${{ steps.set_docker_version.outputs.docker_version }}"
       - name: Docker login
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Build production docker image
-        run: docker build -t prod .
+        run: DOCKER_BUILDKIT=0 docker build -t prod .
       - name: Tag Docker Images
         run: |
           # Always tag the exact version
