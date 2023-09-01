@@ -99,7 +99,7 @@
     "express": "^4.17.1",
     "express-prom-bundle": "^6.6.0",
     "helmet": "^3.22.0",
-    "holocron": "^1.7.0",
+    "holocron": "^1.8.1",
     "holocron-module-route": "^1.2.1",
     "immutable": "^4.0.0",
     "ip": "^1.1.5",
