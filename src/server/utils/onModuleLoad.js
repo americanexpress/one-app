@@ -16,6 +16,7 @@
 
 import semver from 'semver';
 import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
+import { clearModulesUsingExternals } from 'holocron';
 
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from './stateConfig';
 import { setCorsOrigins } from '../plugins/conditionallyAllowCors';
@@ -141,6 +142,9 @@ export default function onModuleLoad({
 
   if (moduleName === serverStateConfig.rootModuleName) {
     setRootModuleConfigurations(module, moduleName);
+    // NOTE: ideally clearModulesUsingExternals should be called in holocron.
+    // however holocron does not possess the right context to reliably call this.
+    clearModulesUsingExternals();
     return;
   }
 

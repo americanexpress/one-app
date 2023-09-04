@@ -18,6 +18,8 @@ import util from 'util';
 import React from 'react';
 import { preprocessEnvVar } from '@americanexpress/env-config-utils';
 import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
+import { clearModulesUsingExternals } from 'holocron';
+
 import onModuleLoad, {
   CONFIGURATION_KEY,
   validateCspIsPresent,
@@ -38,6 +40,9 @@ import setupDnsCache from '../../../src/server/utils/setupDnsCache';
 import { configurePWA } from '../../../src/server/pwa';
 import { setErrorPage } from '../../../src/server/plugins/reactHtml/staticErrorPage';
 
+jest.mock('holocron', () => ({
+  clearModulesUsingExternals: jest.fn(),
+}));
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
   getClientStateConfig: jest.fn(),
@@ -369,6 +374,11 @@ describe('onModuleLoad', () => {
     });
     expect(consoleInfoSpy).toHaveBeenCalledTimes(1);
     expect(util.format(...consoleInfoSpy.mock.calls[0])).toBe('Loaded module not-the-root-module@1.0.16');
+  });
+
+  it('clears the modules using externals when loading the root module', () => {
+    onModuleLoad({ module: { [CONFIGURATION_KEY]: { csp }, [META_DATA_KEY]: { version: '1.0.13' } }, moduleName: 'some-root' });
+    expect(clearModulesUsingExternals).toHaveBeenCalled();
   });
 
   it('updates allowed safeRequest values from the root module', () => {
