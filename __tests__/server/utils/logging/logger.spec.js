@@ -15,9 +15,11 @@
  */
 
 import { EventEmitter } from 'events';
+import deepmerge from 'deepmerge';
 import pino from 'pino';
 import { argv } from 'yargs';
 import exportedLogger, { createLogger } from '../../../../src/server/utils/logging/logger';
+import baseConfig from '../../../../src/server/utils/logging/config/base';
 import productionConfig from '../../../../src/server/utils/logging/config/production';
 import developmentStream from '../../../../src/server/utils/logging/config/development';
 import otelConfig, { createOtelTransport } from '../../../../src/server/utils/logging/config/otel';
@@ -65,14 +67,7 @@ describe('logger', () => {
     const logger = createLogger();
     expect(pino.pino).toHaveBeenCalledTimes(1);
     expect(pino.pino.mock.results[0].value).toBe(logger);
-    expect(pino.pino).toHaveBeenCalledWith({
-      level: 'debug',
-      customLevels: {
-        log: 35,
-      },
-      dedupe: true,
-      ...productionConfig,
-    }, undefined);
+    expect(pino.pino).toHaveBeenCalledWith(deepmerge(baseConfig, productionConfig), undefined);
   });
 
   it('uses a development formatter when NODE_ENV is development', () => {
@@ -80,13 +75,7 @@ describe('logger', () => {
     const logger = createLogger();
     expect(pino.pino).toHaveBeenCalledTimes(1);
     expect(pino.pino.mock.results[0].value).toBe(logger);
-    expect(pino.pino).toHaveBeenCalledWith({
-      level: 'debug',
-      customLevels: {
-        log: 35,
-      },
-      dedupe: true,
-    }, developmentStream);
+    expect(pino.pino).toHaveBeenCalledWith(baseConfig, developmentStream);
   });
 
   it('uses the production formatter when the log-format flag is set to machine', () => {
@@ -95,14 +84,7 @@ describe('logger', () => {
     const logger = createLogger();
     expect(pino.pino).toHaveBeenCalledTimes(1);
     expect(pino.pino.mock.results[0].value).toBe(logger);
-    expect(pino.pino).toHaveBeenCalledWith({
-      level: 'info',
-      customLevels: {
-        log: 35,
-      },
-      dedupe: true,
-      ...productionConfig,
-    }, undefined);
+    expect(pino.pino).toHaveBeenCalledWith(deepmerge(baseConfig, productionConfig), undefined);
   });
 
   it('uses the OpenTelemetry config when OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is set', () => {
@@ -110,14 +92,10 @@ describe('logger', () => {
     const logger = createLogger();
     expect(pino.pino).toHaveBeenCalledTimes(1);
     expect(pino.pino.mock.results[0].value).toBe(logger);
-    expect(pino.pino).toHaveBeenCalledWith({
-      level: 'debug',
-      customLevels: {
-        log: 35,
-      },
-      dedupe: true,
-      ...otelConfig,
-    }, createOtelTransport());
+    expect(pino.pino).toHaveBeenCalledWith(
+      deepmerge(baseConfig, otelConfig),
+      createOtelTransport()
+    );
     expect(pino.multistream).not.toHaveBeenCalled();
   });
 
@@ -132,13 +110,9 @@ describe('logger', () => {
       { stream: developmentStream },
       createOtelTransport(),
     ]);
-    expect(pino.pino).toHaveBeenCalledWith({
-      level: 'debug',
-      customLevels: {
-        log: 35,
-      },
-      dedupe: true,
-      ...otelConfig,
-    }, pino.multistream.mock.results[0].value);
+    expect(pino.pino).toHaveBeenCalledWith(
+      deepmerge(baseConfig, otelConfig),
+      pino.multistream.mock.results[0].value
+    );
   });
 });

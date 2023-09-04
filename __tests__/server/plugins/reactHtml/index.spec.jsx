@@ -14,6 +14,7 @@
  * permissions and limitations under the License.
  */
 
+import util from 'util';
 import Fastify from 'fastify';
 import { fromJS } from 'immutable';
 import reactHtml, {
@@ -35,6 +36,7 @@ import conditionallyAllowCors from '../../../../src/server/plugins/conditionally
 import { isRedirectUrlAllowed } from '../../../../src/server/utils/redirectAllowList';
 
 jest.spyOn(console, 'error').mockImplementation(() => 0);
+jest.spyOn(console, 'warn').mockImplementation(() => 0);
 
 jest.mock('react-helmet');
 
@@ -921,7 +923,7 @@ describe('reactHtml', () => {
       jest.spyOn(console, 'error');
       isRedirectUrlAllowed.mockImplementationOnce(() => false);
       checkStateForRedirectAndStatusCode(req, reply);
-      expect(console.error).toHaveBeenCalledWith(`'${destination}' is not an allowed redirect URL`);
+      expect(util.format(...console.error.mock.calls[0])).toBe(`'${destination}' is not an allowed redirect URL`);
     });
   });
 

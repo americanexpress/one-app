@@ -22,13 +22,17 @@ import {
   printDurationTime,
 } from '../utils';
 
-export default pinoPretty({
-  ignore: 'pid,hostname,time',
+export const pinoPrettyOptions = {
+  ignore: 'pid,hostname,time,type,request',
+  // TODO: Uncomment once pino bug is resolved
+  // https://github.com/pinojs/pino/issues/1790
+  // messageKey: 'message',
   customLevels: {
     trace: 10,
     debug: 20,
     info: 30,
     log: 35,
+    warn: 40,
     error: 50,
     fatal: 60,
   },
@@ -42,4 +46,6 @@ export default pinoPretty({
     }
     return log[messageKey];
   },
-});
+};
+
+export default pinoPretty(pinoPrettyOptions);

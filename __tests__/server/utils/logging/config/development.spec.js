@@ -14,33 +14,71 @@
  * permissions and limitations under the License.
  */
 
+import { PassThrough } from 'stream';
 import pinoPretty from 'pino-pretty';
-import '../../../../../src/server/utils/logging/config/development';
+import pino from 'pino';
+import { pinoPrettyOptions } from '../../../../../src/server/utils/logging/config/development';
+import baseConfig from '../../../../../src/server/utils/logging/config/base';
 
-jest.mock('pino-pretty');
+jest.mock('yargs', () => ({
+  argv: {
+    logLevel: 'trace',
+  },
+}));
 
-describe('development logger stream', () => {
-  it('should ignore pid, hostname & time', () => {
-    expect(pinoPretty.mock.calls[0][0].ignore).toBe('pid,hostname,time');
-  });
+let streamData = '';
+const mockStream = new PassThrough();
+mockStream.on('data', (d) => {
+  streamData += d;
+});
+const resetStreamData = () => {
+  streamData = '';
+};
 
-  it('should set custom levels', () => {
-    expect(pinoPretty.mock.calls[0][0].customLevels).toMatchInlineSnapshot(`
-      {
-        "debug": 20,
-        "error": 50,
-        "fatal": 60,
-        "info": 30,
-        "log": 35,
-        "trace": 10,
-      }
+const pinoPrettyStream = pinoPretty({
+  ...pinoPrettyOptions,
+  destination: mockStream,
+  colorize: false,
+});
+const logger = pino(baseConfig, pinoPrettyStream);
+
+describe('development logger', () => {
+  beforeEach(() => resetStreamData());
+  afterAll(() => mockStream.destroy());
+
+  it('should not include pid, hostname or time', () => {
+    logger.log('this is a test');
+    expect(streamData).toMatchInlineSnapshot(`
+      "LOG: this is a test
+      "
     `);
   });
 
-  it('should set custom colors', () => {
-    expect(pinoPretty.mock.calls[0][0].customColors).toBe(
-      'trace:white,debug:green,info:gray,log:blue,warn:yellow,error:red,fatal:bgRed'
+  it('should set different colors for each level', () => {
+    const loggerWithColor = pino(
+      baseConfig,
+      pinoPretty({
+        ...pinoPrettyOptions,
+        destination: mockStream,
+      })
     );
+    loggerWithColor.trace();
+    loggerWithColor.debug();
+    loggerWithColor.info();
+    loggerWithColor.log();
+    loggerWithColor.warn();
+    loggerWithColor.error();
+    loggerWithColor.fatal();
+    expect(streamData).toMatchInlineSnapshot(`
+      "[37mTRACE[39m: 
+      [32mDEBUG[39m: 
+      [90mINFO[39m: 
+      [34mLOG[39m: 
+      [33mWARN[39m: 
+      [31mERROR[39m: 
+      [41mFATAL[49m: 
+      "
+    `);
   });
 
   it('pretty-prints an incoming request', () => {
@@ -55,7 +93,6 @@ describe('development logger stream', () => {
         metaData: {
           method: 'GET',
           correlationId: '123',
-          // null to explicitly signal no value, undefined if not expected for every request
           host: 'example.com',
           referrer: 'https://example.com/other-resource',
           userAgent: 'Browser/8.0 (compatible; WXYZ 100.0; Doors LQ 81.4; Boat/1.0)',
@@ -69,9 +106,11 @@ describe('development logger stream', () => {
         statusText: 'OK',
       },
     };
-    expect(pinoPretty.mock.calls[0][0].messageFormat(entry, 'msg')).toMatchInlineSnapshot(
-      '"🌍 ➡ 💻 <green>200</green> OK GET https://example.com/resource 12/13ms"'
-    );
+    logger.info(entry);
+    expect(streamData).toMatchInlineSnapshot(`
+      "INFO: 🌍 ➡ 💻 <green>200</green> OK GET https://example.com/resource 12/13ms
+      "
+    `);
   });
 
   it('pretty-prints an outgoing request', () => {
@@ -85,7 +124,6 @@ describe('development logger stream', () => {
         },
         metaData: {
           method: 'GET',
-          // null to explicitly signal no value, undefined if not expected for every request
           correlationId: '123',
         },
         timings: {
@@ -95,13 +133,51 @@ describe('development logger stream', () => {
         statusText: 'OK',
       },
     };
-    expect(pinoPretty.mock.calls[0][0].messageFormat(entry, 'msg')).toMatchInlineSnapshot(
-      '"💻 ➡ 🗄️ <green>200</green> OK GET https://example.com/resource <green>13</green>ms"'
-    );
+    logger.info(entry);
+    expect(streamData).toMatchInlineSnapshot(`
+      "INFO: 💻 ➡ 🗄️ <green>200</green> OK GET https://example.com/resource <green>13</green>ms
+      "
+    `);
   });
 
-  it('does not modify non-request logs', () => {
-    const msg = 'mock log';
-    expect(pinoPretty.mock.calls[0][0].messageFormat({ msg }, 'msg')).toBe(msg);
+  describe('logMethod hook', () => {
+    const mockError = new Error('mockError');
+    delete mockError.stack;
+
+    it('should take an error from the end of a log call and put it in the error key', () => {
+      logger.error('This is a %s', 'test', mockError);
+      expect(streamData).toMatchInlineSnapshot(`
+        "ERROR: This is a test
+            error: {
+              "type": "Error",
+              "message": "mockError",
+              "stack":
+                  
+            }
+        "
+      `);
+    });
+
+    it('should take an error from the beginning of a log call and put it in the error key', () => {
+      logger.warn(mockError, 'This is another %s', 'test');
+      expect(streamData).toMatchInlineSnapshot(`
+        "WARN: This is another test
+            error: {
+              "type": "Error",
+              "message": "mockError",
+              "stack":
+                  
+            }
+        "
+      `);
+    });
+
+    it('should not change log calls that do not begin or end with errors', () => {
+      logger.info('This is a third %s', 'test');
+      expect(streamData).toMatchInlineSnapshot(`
+        "INFO: This is a third test
+        "
+      `);
+    });
   });
 });

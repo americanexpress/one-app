@@ -14,6 +14,17 @@
  * permissions and limitations under the License.
  */
 
+import { PassThrough } from 'stream';
+import deepmerge from 'deepmerge';
+import pino from 'pino';
+import baseConfig from '../../../../../src/server/utils/logging/config/base';
+
+jest.mock('yargs', () => ({
+  argv: {
+    logLevel: 'trace',
+  },
+}));
+
 jest.mock('os', () => ({
   hostname: () => 'mockHostname',
   type: () => 'mockType',
@@ -26,13 +37,24 @@ jest.mock('../../../../../src/server/utils/readJsonFile', () => () => ({
 
 jest.spyOn(Date, 'now').mockReturnValue(1691618794070);
 
-Object.defineProperty(process, 'pid', {
-  writable: true,
-  value: 1234,
+let streamData = '';
+const mockStream = new PassThrough();
+mockStream.on('data', (d) => {
+  streamData += d;
 });
+const resetStreamData = () => {
+  streamData = '';
+};
+const readLog = () => {
+  const entry = JSON.parse(streamData);
+  resetStreamData();
+  return entry;
+};
 
-describe('production logger config', () => {
+describe('production logger', () => {
   let productionConfig;
+  let pinoConfig;
+  let logger;
 
   beforeAll(() => {
     Object.defineProperty(process, 'pid', {
@@ -40,21 +62,16 @@ describe('production logger config', () => {
       value: 1234,
     });
     productionConfig = require('../../../../../src/server/utils/logging/config/production').default;
+    pinoConfig = deepmerge(baseConfig, productionConfig);
+    logger = pino(pinoConfig, mockStream);
   });
 
-  it('should return timestamp in the ISO 8601 format with the key "timestamp"', () => {
-    expect(productionConfig.timestamp()).toMatchInlineSnapshot(
-      '","timestamp":"2023-08-09T22:06:34.070Z""'
-    );
-  });
+  beforeEach(() => resetStreamData());
+  afterAll(() => mockStream.destroy());
 
-  it('should configure the error and message keys', () => {
-    expect(productionConfig.errorKey).toBe('error');
-    expect(productionConfig.messageKey).toBe('message');
-  });
-
-  it('should add the schema, application data and device data to each log', () => {
-    expect(productionConfig.base).toMatchInlineSnapshot(`
+  it('should add the expected base data', () => {
+    logger.log('hello, word');
+    expect(readLog()).toMatchInlineSnapshot(`
       {
         "application": {
           "name": "One App",
@@ -64,156 +81,308 @@ describe('production logger config', () => {
           "agent": "mockType mockArch",
           "id": "mockHostname:1234",
         },
+        "level": "notice",
+        "message": "hello, word",
         "schemaVersion": "0.3.0",
+        "timestamp": "2023-08-09T22:06:34.070Z",
       }
     `);
   });
 
-  it('should serialize an error with a name, message & stacktrace', () => {
-    let error;
-    try {
-      error = new Error('mock error');
-    } catch (e) {
-      // do nothing
-    }
+  it('should serialize an error', () => {
+    const error = new Error('mock error');
     error.stack = 'mock stack';
-    expect(productionConfig.serializers.err(error)).toMatchInlineSnapshot(`
+    logger.error(error);
+    expect(readLog()).toMatchInlineSnapshot(`
       {
+        "application": {
+          "name": "One App",
+          "version": "1.2.3-abc123",
+        },
+        "device": {
+          "agent": "mockType mockArch",
+          "id": "mockHostname:1234",
+        },
+        "error": {
+          "message": "mock error",
+          "name": "Error",
+          "stacktrace": "mock stack",
+        },
+        "level": "error",
         "message": "mock error",
-        "name": "Error",
-        "stacktrace": "mock stack",
+        "schemaVersion": "0.3.0",
+        "timestamp": "2023-08-09T22:06:34.070Z",
       }
     `);
   });
 
-  it('should serialize an error with a missing message & stacktrace', () => {
-    let error;
-    try {
-      error = new Error();
-    } catch (e) {
-      // do nothing
-    }
+  it('should serialize an error with a missing message and stacktrace', () => {
+    const error = new Error();
     delete error.stack;
-    expect(productionConfig.serializers.err(error)).toMatchInlineSnapshot(`
+    logger.error(error);
+    expect(readLog()).toMatchInlineSnapshot(`
       {
-        "message": "<none>",
-        "name": "Error",
-        "stacktrace": "<none>",
+        "application": {
+          "name": "One App",
+          "version": "1.2.3-abc123",
+        },
+        "device": {
+          "agent": "mockType mockArch",
+          "id": "mockHostname:1234",
+        },
+        "error": {
+          "message": "<none>",
+          "name": "Error",
+          "stacktrace": "<none>",
+        },
+        "level": "error",
+        "message": "",
+        "schemaVersion": "0.3.0",
+        "timestamp": "2023-08-09T22:06:34.070Z",
       }
     `);
   });
 
   it('should map the log level to the schema level', () => {
-    expect(productionConfig.formatters.level('error')).toEqual({ level: 'error' });
-    expect(productionConfig.formatters.level('warn')).toEqual({ level: 'warning' });
-    expect(productionConfig.formatters.level('log')).toEqual({ level: 'notice' });
-    expect(productionConfig.formatters.level('info')).toEqual({ level: 'info' });
-    expect(productionConfig.formatters.level('debug')).toEqual({ level: 'debug' });
+    logger.error();
+    expect(readLog().level).toBe('error');
+    logger.warn();
+    expect(readLog().level).toBe('warning');
+    logger.log();
+    expect(readLog().level).toBe('notice');
+    logger.info();
+    expect(readLog().level).toBe('info');
+    logger.debug();
+    expect(readLog().level).toBe('debug');
+    logger.trace();
+    expect(readLog().level).toBe('trace');
   });
 
-  it('encodes ClientReportedError Error', () => {
-    function buildClientErrorEntry() {
-      const error = new Error('something broke');
-      Object.assign(error, {
-        name: 'ClientReportedError',
-        stack:
-          'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n',
-        userAgent: 'Browser/5.0 (compatible; WXYZ 100.0; Doors LQ 81.4; Boat/1.0)',
-        uri: 'https://example.com/page-the/error/occurred-on',
-        metaData: {
-          moduleID: 'healthy-frank',
-          code: '500',
-          collectionMethod: 'applicationError',
-          correlationId: '123abc',
-        },
-      });
-      return { error };
-    }
+  describe('logMethod hook', () => {
+    const mockError = new Error('mockError');
+    delete mockError.stack;
 
-    const entry = productionConfig.formatters.log(buildClientErrorEntry());
-    expect(entry).toMatchInlineSnapshot(`
-      {
-        "device": {
-          "agent": "Browser/5.0 (compatible; WXYZ 100.0; Doors LQ 81.4; Boat/1.0)",
-        },
-        "error": [ClientReportedError: something broke],
-        "request": {
-          "address": {
-            "uri": "https://example.com/page-the/error/occurred-on",
+    it('should take an error from the end of a log call and put it in the error key', () => {
+      logger.error('This is a %s', 'test', mockError);
+      expect(readLog()).toMatchInlineSnapshot(`
+        {
+          "application": {
+            "name": "One App",
+            "version": "1.2.3-abc123",
           },
+          "device": {
+            "agent": "mockType mockArch",
+            "id": "mockHostname:1234",
+          },
+          "error": {
+            "message": "mockError",
+            "name": "Error",
+            "stacktrace": "<none>",
+          },
+          "level": "error",
+          "message": "This is a test",
+          "schemaVersion": "0.3.0",
+          "timestamp": "2023-08-09T22:06:34.070Z",
+        }
+      `);
+    });
+
+    it('should take an error from the beginning of a log call and put it in the error key', () => {
+      logger.warn(mockError, 'This is another %s', 'test');
+      expect(readLog()).toMatchInlineSnapshot(`
+        {
+          "application": {
+            "name": "One App",
+            "version": "1.2.3-abc123",
+          },
+          "device": {
+            "agent": "mockType mockArch",
+            "id": "mockHostname:1234",
+          },
+          "error": {
+            "message": "mockError",
+            "name": "Error",
+            "stacktrace": "<none>",
+          },
+          "level": "warning",
+          "message": "This is another test",
+          "schemaVersion": "0.3.0",
+          "timestamp": "2023-08-09T22:06:34.070Z",
+        }
+      `);
+    });
+
+    it('should not change log calls that do not begin or end with errors', () => {
+      logger.info('This is a third %s', 'test');
+      expect(readLog()).toMatchInlineSnapshot(`
+        {
+          "application": {
+            "name": "One App",
+            "version": "1.2.3-abc123",
+          },
+          "device": {
+            "agent": "mockType mockArch",
+            "id": "mockHostname:1234",
+          },
+          "level": "info",
+          "message": "This is a third test",
+          "schemaVersion": "0.3.0",
+          "timestamp": "2023-08-09T22:06:34.070Z",
+        }
+      `);
+    });
+  });
+
+  describe('log formatter', () => {
+    it('encodes ClientReportedError Error', () => {
+      function buildClientErrorEntry() {
+        const error = new Error('something broke');
+        Object.assign(error, {
+          name: 'ClientReportedError',
+          stack:
+            'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n',
+          userAgent: 'Browser/5.0 (compatible; WXYZ 100.0; Doors LQ 81.4; Boat/1.0)',
+          uri: 'https://example.com/page-the/error/occurred-on',
+          metaData: {
+            moduleID: 'healthy-frank',
+            code: '500',
+            collectionMethod: 'applicationError',
+            correlationId: '123abc',
+          },
+        });
+        return { error };
+      }
+      logger.warn(buildClientErrorEntry());
+      expect(readLog()).toMatchInlineSnapshot(`
+        {
+          "application": {
+            "name": "One App",
+            "version": "1.2.3-abc123",
+          },
+          "device": {
+            "agent": "Browser/5.0 (compatible; WXYZ 100.0; Doors LQ 81.4; Boat/1.0)",
+          },
+          "error": {
+            "message": "something broke",
+            "name": "ClientReportedError",
+            "stacktrace": "Error: something broke
+            at methodA (resource-a.js:1:1)
+            at methodB (resource-b.js:1:1)
+        ",
+          },
+          "level": "warning",
+          "message": "something broke",
+          "request": {
+            "address": {
+              "uri": "https://example.com/page-the/error/occurred-on",
+            },
+            "metaData": {
+              "code": "500",
+              "collectionMethod": "applicationError",
+              "correlationId": "123abc",
+              "moduleID": "healthy-frank",
+            },
+          },
+          "schemaVersion": "0.3.0",
+          "timestamp": "2023-08-09T22:06:34.070Z",
+        }
+      `);
+    });
+
+    it('encodes Server Reported Error without metadata', () => {
+      function buildServerSideErrorEntry() {
+        const error = new Error('something broke');
+        Object.assign(error, {
+          stack:
+            'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n',
+        });
+        return { error };
+      }
+      logger.error(buildServerSideErrorEntry());
+      expect(readLog()).toMatchInlineSnapshot(`
+        {
+          "application": {
+            "name": "One App",
+            "version": "1.2.3-abc123",
+          },
+          "device": {
+            "agent": "mockType mockArch",
+            "id": "mockHostname:1234",
+          },
+          "error": {
+            "message": "something broke",
+            "name": "Error",
+            "stacktrace": "Error: something broke
+            at methodA (resource-a.js:1:1)
+            at methodB (resource-b.js:1:1)
+        ",
+          },
+          "level": "error",
+          "message": "something broke",
+          "schemaVersion": "0.3.0",
+          "timestamp": "2023-08-09T22:06:34.070Z",
+        }
+      `);
+    });
+
+    it('encodes Server Reported Error with nested metadata objects', () => {
+      function buildServerSideErrorEntry() {
+        const error = new Error('something broke');
+        Object.assign(error, {
+          stack:
+            'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n',
+          metaData: {
+            moduleID: 'healthy-frank',
+            nestedObject: {
+              level1: {
+                level2: {
+                  level3: {
+                    level4: 'logs nested objects correctly',
+                  },
+                },
+              },
+            },
+          },
+        });
+        return { error };
+      }
+      logger.error(buildServerSideErrorEntry());
+      expect(readLog()).toMatchInlineSnapshot(`
+        {
+          "application": {
+            "name": "One App",
+            "version": "1.2.3-abc123",
+          },
+          "device": {
+            "agent": "mockType mockArch",
+            "id": "mockHostname:1234",
+          },
+          "error": {
+            "message": "something broke",
+            "name": "Error",
+            "stacktrace": "Error: something broke
+            at methodA (resource-a.js:1:1)
+            at methodB (resource-b.js:1:1)
+        ",
+          },
+          "level": "error",
+          "message": "something broke",
           "metaData": {
-            "code": "500",
-            "collectionMethod": "applicationError",
-            "correlationId": "123abc",
             "moduleID": "healthy-frank",
-          },
-        },
-      }
-    `);
-  });
-
-  it('encodes Server Reported Error without metadata', () => {
-    function buildServerSideErrorEntry() {
-      const error = new Error('something broke');
-      Object.assign(error, {
-        stack:
-          'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n',
-      });
-      return { error };
-    }
-
-    const entry = productionConfig.formatters.log(buildServerSideErrorEntry());
-    expect(entry).toMatchInlineSnapshot(`
-      {
-        "error": [Error: something broke],
-      }
-    `);
-  });
-
-  it('encodes Server Reported Error with nested metadata objects', () => {
-    function buildServerSideErrorEntry() {
-      const error = new Error('something broke');
-      Object.assign(error, {
-        stack:
-          'Error: something broke\n    at methodA (resource-a.js:1:1)\n    at methodB (resource-b.js:1:1)\n',
-        metaData: {
-          moduleID: 'healthy-frank',
-          nestedObject: {
-            level1: {
-              level2: {
-                level3: {
-                  level4: 'logs nested objects correctly',
+            "nestedObject": {
+              "level1": {
+                "level2": {
+                  "level3": {
+                    "level4": "logs nested objects correctly",
+                  },
                 },
               },
             },
           },
-        },
-      });
-      return { error };
-    }
-
-    const entry = productionConfig.formatters.log(buildServerSideErrorEntry());
-    expect(entry).toMatchInlineSnapshot(`
-      {
-        "error": [Error: something broke],
-        "metaData": {
-          "moduleID": "healthy-frank",
-          "nestedObject": {
-            "level1": {
-              "level2": {
-                "level3": {
-                  "level4": "logs nested objects correctly",
-                },
-              },
-            },
-          },
-        },
-      }
-    `);
-  });
-
-  it('does not modify non-error logs', () => {
-    const mockLog = { message: 'mock message' };
-    expect(productionConfig.formatters.log(mockLog)).toBe(mockLog);
+          "schemaVersion": "0.3.0",
+          "timestamp": "2023-08-09T22:06:34.070Z",
+        }
+      `);
+    });
   });
 });

@@ -254,7 +254,7 @@ export const checkStateForRedirectAndStatusCode = (request, reply) => {
   if (destination) {
     if (!isRedirectUrlAllowed(destination)) {
       renderStaticErrorPage(request, reply);
-      console.error(`'${destination}' is not an allowed redirect URL`);
+      console.error('\'%s\' is not an allowed redirect URL', destination);
       return;
     }
     reply.redirect(302, destination);

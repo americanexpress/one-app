@@ -15,6 +15,7 @@
  * permissions and limitations under the License.
  */
 
+import util from 'util';
 import fs from 'fs';
 import path from 'path';
 
@@ -359,14 +360,16 @@ describe('server index', () => {
       await load({ ssrServerError: true });
 
       expect(console.error).toHaveBeenCalled();
-      expect(console.error.mock.calls[0][0]).toMatchSnapshot();
+      console.error.mock.calls[0].pop();
+      expect(util.format(...console.error.mock.calls[0])).toMatchSnapshot();
     });
 
     it('logs errors when listening on the metrics server fails', async () => {
       await load({ metricsServerError: true });
 
       expect(console.error).toHaveBeenCalled();
-      expect(console.error.mock.calls[0][0]).toMatchSnapshot();
+      console.error.mock.calls[0].pop();
+      expect(util.format(...console.error.mock.calls[0])).toMatchSnapshot();
     });
 
     it('closes servers when starting ssrServer fails', async () => {
@@ -383,7 +386,7 @@ describe('server index', () => {
       await load();
 
       expect(console.log).toHaveBeenCalled();
-      expect(console.log.mock.calls[1][0]).toMatch('🌎 One App server listening on port 3000');
+      expect(util.format(...console.log.mock.calls[1])).toMatch('🌎 One App server listening on port 3000');
     });
 
     it('logs when metrics server is successfully listening on the port', async () => {
@@ -393,7 +396,7 @@ describe('server index', () => {
       await load();
 
       expect(console.log).toHaveBeenCalled();
-      expect(console.log.mock.calls[0][0]).toMatch('📊 Metrics server listening on port 3005');
+      expect(util.format(...console.log.mock.calls[0])).toMatch('📊 Metrics server listening on port 3005');
     });
 
     it('initiates module-map polling if successfully listening on port', async () => {

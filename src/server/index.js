@@ -56,13 +56,13 @@ export const listen = async ({
       port,
     });
 
-    console.log(`${context} listening on port ${port}`);
+    console.log('%s listening on port %d', context, port);
 
     addServer(instance);
 
     return instance;
   } catch (error) {
-    console.error(`Error encountered starting ${context}`, error);
+    console.error('Error encountered starting %s', context, error);
     throw error;
   }
 };
@@ -129,7 +129,7 @@ async function oneAppDevProxyStart() {
       if (err) {
         rej(err);
       } else {
-        console.log(`👖 one-app-dev-proxy server listening on port ${oneAppDevProxyPort}`);
+        console.log('👖 one-app-dev-proxy server listening on port %d', oneAppDevProxyPort);
         res();
       }
     }));

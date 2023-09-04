@@ -14,12 +14,14 @@
  * permissions and limitations under the License.
  */
 
+import deepmerge from 'deepmerge';
 import { argv } from 'yargs';
 import { pino, multistream } from 'pino';
 import productionConfig from './config/production';
 import otelConfig, {
   createOtelTransport,
 } from './config/otel';
+import baseConfig from './config/base';
 
 export function createLogger() {
   const useProductionConfig = !!(argv.logFormat === 'machine' || process.env.NODE_ENV !== 'development');
@@ -37,16 +39,15 @@ export function createLogger() {
     transport = createOtelTransport();
   }
 
-  return pino({
-    level: argv.logLevel,
-    customLevels: {
-      log: 35,
-    },
-    dedupe: true,
-    ...process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
-      ? otelConfig
-      : useProductionConfig && productionConfig,
-  }, transport);
+  return pino(
+    deepmerge(
+      baseConfig,
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+        ? otelConfig
+        : useProductionConfig && productionConfig
+    ),
+    transport
+  );
 }
 
 export default createLogger();
