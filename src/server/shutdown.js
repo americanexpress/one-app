@@ -14,15 +14,22 @@
  * permissions and limitations under the License.
  */
 
+import { shutdownOtelLogger } from './utils/logging/otel/logger';
+
 const FORCIBLE_SHUTDOWN_TIMEOUT = 10e3;
 const servers = [];
 let shouldHaveShutDown = false;
 
 function addServer(s) { servers.unshift(s); }
 
-function shutdown() {
+async function shutdown() {
   shouldHaveShutDown = true;
   console.log('shutting down, closing servers');
+  try {
+    await shutdownOtelLogger();
+  } catch (error) {
+    console.error(error);
+  }
   servers.forEach((s) => s.close());
 }
 
@@ -37,7 +44,7 @@ function shutdownForcibly() {
   'SIGINT',
   'SIGTERM',
 ]
-  .forEach((signalName) => process.on(signalName, () => {
+  .forEach((signalName) => process.on(signalName, async () => {
     if (shouldHaveShutDown) {
       // second signal, something is keeping node up
       console.log(`received ${signalName}, forcibly shutting down`);
@@ -46,7 +53,7 @@ function shutdownForcibly() {
     }
 
     console.log(`received ${signalName}, shutting down`);
-    shutdown();
+    await shutdown();
     // `shouldHaveShutDown` is now `true`, BUT
     // we never get additional signals when running in babel-node
     // https://github.com/babel/babel/issues/1062

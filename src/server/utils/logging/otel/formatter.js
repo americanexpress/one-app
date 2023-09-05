@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2023 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,24 @@
  * permissions and limitations under the License.
  */
 
-import util from 'util';
 import os from 'node:os';
-import dropEntryBasedOnLevel from './level-dropper';
-import readJsonFile from '../readJsonFile';
+import util from 'util';
+import { SeverityNumber } from '@opentelemetry/api-logs';
+import flatten from 'flat';
 
-const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
-const schemaVersion = '0.3.0';
-
-const application = {
-  name: 'One App',
-  version,
-};
-
-const device = {
-  id: `${os.hostname()}:${process.pid}`,
-  agent: `${os.type()} ${os.arch()}`,
-};
-
-const nodeLevelToSchemaLevel = {
-  // 'emergency',
-  // 'alert',
-  // 'critical',
-  error: 'error',
-  warn: 'warning',
-  log: 'notice',
-  info: 'info',
-  // 'debug',
-};
+function getBaseRecord(level) {
+  let severityText = level.toUpperCase();
+  if (typeof SeverityNumber[severityText] === 'undefined') {
+    severityText = 'INFO';
+  }
+  return {
+    attributes: {
+      agent: `${os.type()} ${os.arch()}`,
+    },
+    severityText,
+    severityNumber: SeverityNumber[severityText],
+  };
+}
 
 function generateErrorField(err) {
   return {
@@ -59,89 +49,81 @@ function generateErrorField(err) {
   };
 }
 
-function getBaseEntry(level) {
-  return {
-    schemaVersion,
-    application,
-    device,
-    level: nodeLevelToSchemaLevel[level],
-    timestamp: new Date().toISOString(),
-  };
-}
-
 function leadingErrorWithOtherArgs(level, ...args) {
   const [err] = args;
-  const entry = getBaseEntry(level);
-  entry.error = generateErrorField(err);
+  const record = getBaseRecord(level);
+  record.body = err.message;
+  record.attributes.error = generateErrorField(err);
 
   if (err.name === 'ClientReportedError') {
-    entry.device = {
+    record.attributes.device = {
       agent: err.userAgent,
     };
-    entry.request = {
+    record.attributes.request = {
       address: {
         uri: err.uri,
       },
       metaData: err.metaData,
     };
   } else if (err.metaData) {
-    entry.metaData = err.metaData;
+    record.attributes.metaData = err.metaData;
   }
 
   if (args.length > 1) {
     const allButFirst = [...args];
     allButFirst.shift();
-    entry.message = util.format(...allButFirst);
+    record.body = util.format(...allButFirst);
   }
-  return entry;
+  return record;
 }
 
 function leadingStringWithError(level, ...args) {
-  const entry = getBaseEntry(level);
-  entry.error = generateErrorField(args[1]);
+  const record = getBaseRecord(level);
+  record.attributes.error = generateErrorField(args[1]);
   if (args.length === 2) {
-    [entry.message] = args;
+    [record.body] = args;
   } else {
-    entry.message = util.format(...args);
+    record.body = util.format(...args);
   }
-  return entry;
+  return record;
 }
 
-function entryFromLogType(level, logType) {
-  const entry = getBaseEntry(level);
+function recordFromLogType(level, logType) {
+  const record = getBaseRecord(level);
   switch (logType.type) {
     case 'request':
-      entry.request = logType.request;
+      record.attributes.request = logType.request;
       break;
     default:
       return false;
   }
-  return entry;
+  return record;
 }
 
 const formatter = (level, ...args) => {
-  if (dropEntryBasedOnLevel(level)) {
-    return null;
-  }
-
   const [arg0, arg1] = args;
+  let record;
 
   if (arg0 instanceof Error) {
-    return JSON.stringify(leadingErrorWithOtherArgs(level, ...args));
+    record = leadingErrorWithOtherArgs(level, ...args);
   }
   if (typeof arg0 === 'string' && arg1 instanceof Error) {
-    return JSON.stringify(leadingStringWithError(level, ...args));
+    record = leadingStringWithError(level, ...args);
   }
   if (typeof arg0 === 'object' && arg0 && arg0.type) {
-    const entry = entryFromLogType(level, arg0);
-    if (entry) {
-      return JSON.stringify(entry);
-    }
+    record = recordFromLogType(level, arg0);
   }
 
-  const entry = getBaseEntry(level);
-  entry.message = util.format(...args);
-  return JSON.stringify(entry);
+  if (!record) {
+    record = getBaseRecord(level);
+    record.body = util.format(...args);
+  }
+
+  // flatten takes a deeply-nested object and returns an object of values one
+  // level deep with period-delimited keys
+  record.attributes = flatten(record.attributes);
+
+  return record;
 };
 
 export default formatter;
