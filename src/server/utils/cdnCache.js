@@ -79,12 +79,12 @@ let timerId = null;
 export const writeToCache = (content, delay = 500) => {
   // added debounce
   clearTimeout(timerId);
-  timerId = setTimeout(async () => {
-    try {
-      await fsPromises.writeFile(oneAppModuleCachePath, JSON.stringify(content, null, 2));
-    } catch (error) {
-      console.error(`There was an error updating content \n ${error}`);
-    }
+  timerId = setTimeout(() => {
+    fs.writeFile(oneAppModuleCachePath, JSON.stringify(content, null, 2), (error) => {
+      if (error) {
+        console.log(`There was an error updating content \n ${error}`);
+      }
+    });
     timerId = null;
   }, delay);
 };

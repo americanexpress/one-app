@@ -133,7 +133,7 @@ describe('cacheUtils', () => {
   });
 
   describe('getCachedModules', () => {
-    beforeEach(() => {
+    beforeAll(() => {
       fsPromises.stat.mockResolvedValue('');
       fsPromises.mkdir.mockResolvedValue();
       fsPromises.writeFile.mockResolvedValue();
@@ -186,30 +186,30 @@ describe('cacheUtils', () => {
     });
 
     it('should set content on cache after a delay', () => {
-      fsPromises.writeFile.mockResolvedValue();
+      fs.writeFile.mockImplementation((_filePath, _content, callback) => callback(null));
 
       const content = { module: 'test' };
       writeToCache(content);
 
-      expect(fsPromises.writeFile).not.toHaveBeenCalled();
+      expect(fs.writeFile).not.toHaveBeenCalled();
 
       jest.runAllTimers();
 
-      expect(fsPromises.writeFile).toHaveBeenCalled();
-      expect(fsPromises.writeFile.mock.calls[0][1]).toBe(JSON.stringify(content, null, 2));
+      expect(fs.writeFile).toHaveBeenCalled();
+      expect(fs.writeFile.mock.calls[0][1]).toBe(JSON.stringify(content, null, 2));
     });
 
     it('should handle error when writing to file fails', () => {
-      const expectedError = new Error('write error');
-      fsPromises.writeFile.mockRejectedValueOnce(expectedError);
-      const content = { module: 'test' };
+      const error = new Error('write error');
+      fs.writeFile.mockImplementation((_filePath, _content, callback) => callback(error));
 
+      const content = { module: 'test' };
       writeToCache(content);
 
       jest.runAllTimers();
 
-      expect(fsPromises.writeFile).toHaveBeenCalled();
-      expect(errorSpy).toHaveBeenCalledWith(`There was an error updating content \n ${expectedError}`);
+      expect(fs.writeFile).toHaveBeenCalled();
+      expect(logSpy).toHaveBeenCalledWith(`There was an error updating content \n ${error}`);
     });
   });
 
