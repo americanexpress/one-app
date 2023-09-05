@@ -12,43 +12,55 @@
  * under the License.
  */
 
-import fs from 'fs';
-
+import fs, { promises as fsPromises } from 'fs';
+import chalk from 'chalk';
 import {
   getUserHomeDirectory,
+  showCacheInfo,
+  setupCacheFile,
   getCachedModules,
   writeToCache,
   removeDuplicatedModules,
-  showCacheInfo,
-  setupCacheFile,
   cacheFileName,
   oneAppDirectoryName,
   oneAppDirectoryPath,
   oneAppModuleCachePath,
-} from '../../../src/server/utils/cacheCDNModules';
+} from '../../../src/server/utils/cdnCache';
 
-jest.mock('fs');
+jest.mock('fs', () => {
+  const actualFsModule = jest.requireActual('fs');
+  const actualFsPromisesModule = jest.requireActual('fs/promises');
+  return {
+    ...actualFsModule,
+    existsSync: jest.spyOn(actualFsModule, 'existsSync'),
+    readFileSync: jest.spyOn(actualFsModule, 'readFileSync'),
+    ...actualFsPromisesModule,
+    stat: jest.spyOn(actualFsPromisesModule, 'stat'),
+    mkdir: jest.spyOn(actualFsPromisesModule, 'mkdir'),
+    writeFile: jest.spyOn(actualFsPromisesModule, 'writeFile'),
+  };
+});
+
 jest.mock('chalk', () => ({
   bold: {
-    greenBright: (txt) => txt,
-    cyanBright: (txt) => txt,
-    redBright: (txt) => txt,
+    cyanBright: jest.fn((text) => text),
+    greenBright: jest.fn((text) => text),
+    redBright: jest.fn((text) => text),
   },
 }));
 
-describe('Cache module utils', () => {
+describe('cacheUtils', () => {
   let logSpy;
   let errorSpy;
-
   beforeEach(() => {
     logSpy = jest.spyOn(console, 'log');
     errorSpy = jest.spyOn(console, 'error');
-    process.env.HOME = '';
   });
 
   afterEach(() => {
     logSpy.mockRestore();
     errorSpy.mockRestore();
+    jest.clearAllMocks();
   });
 
   it('should get USERPROFILE for windows user', () => {
@@ -58,94 +70,84 @@ describe('Cache module utils', () => {
   });
 
   describe('showCacheInfo', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('should display the cache info when there is no error', () => {
+    it('showCacheInfo should log cache information', async () => {
       const mockStats = {
-        size: 1048576 * 5, // 5 MB
+        size: 1024 * 1024 * 5, // 5 MB
       };
+      fsPromises.stat.mockResolvedValue(mockStats);
 
-      fs.stat.mockImplementation((_path, callback) => {
-        callback(null, mockStats);
-      });
+      await showCacheInfo();
 
-      showCacheInfo();
-
-      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('CACHE INFORMATION'));
-      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('File size of .one-app-module-cache: 5.00'));
-      expect(errorSpy).not.toHaveBeenCalled();
+      expect(fsPromises.stat).toHaveBeenCalledWith(oneAppModuleCachePath);
+      expect(chalk.bold.cyanBright).toHaveBeenCalledTimes(2);
+      expect(chalk.bold.redBright).toHaveBeenCalledWith('CACHE INFORMATION');
+      expect(chalk.bold.greenBright).toHaveBeenCalledWith('5.00', 'MB');
     });
 
-    it('should display an error when there is an error checking file stats', () => {
-      const mockError = new Error('Test error');
+    it('showCacheInfo should handle error', async () => {
+      const expectedError = new Error('File not found');
+      fsPromises.stat.mockRejectedValue(expectedError);
 
-      fs.stat.mockImplementation((_path, callback) => {
-        callback(mockError, null);
-      });
+      await showCacheInfo();
 
-      showCacheInfo();
-
-      expect(errorSpy).toHaveBeenCalledWith('There was error checking file stat', mockError);
+      expect(fsPromises.stat).toHaveBeenCalledWith(oneAppModuleCachePath);
+      expect(logSpy).not.toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith('There was error checking file stat', expectedError);
     });
   });
 
   describe('setupCacheFile', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-      fs.mkdir.mockRestore();
-      fs.writeFileSync.mockRestore();
-    });
+    it('setupCacheFile should create cache directory and file', async () => {
+      fsPromises.mkdir.mockResolvedValueOnce();
+      fsPromises.writeFile.mockResolvedValueOnce();
+      await setupCacheFile();
 
-    it('should log success message when directory and file are created', () => {
-      fs.mkdir.mockImplementationOnce((_filePath, _options, cb) => cb(null));
-      fs.writeFileSync.mockImplementationOnce(() => ({}));
-
-      setupCacheFile();
-
+      expect(fsPromises.mkdir).toHaveBeenCalledWith(oneAppDirectoryPath, { recursive: true });
       expect(logSpy).toHaveBeenCalledWith(`Successfully created ${oneAppDirectoryPath}`);
       expect(logSpy).toHaveBeenCalledWith(`Creating ${cacheFileName}`);
+      expect(fsPromises.writeFile).toHaveBeenCalledWith(
+        oneAppModuleCachePath,
+        JSON.stringify('{}')
+      );
       expect(logSpy).toHaveBeenCalledWith(`${cacheFileName} created successfully on ${oneAppModuleCachePath}`);
+      expect(errorSpy).not.toHaveBeenCalled();
     });
 
-    it('should log error when unable to create a directory', () => {
-      fs.mkdir.mockImplementationOnce((_filePath, _options, cb) => cb(new Error('Error creating directory')));
-      fs.writeFileSync.mockImplementationOnce(() => {});
+    it('setupCacheFile should handle error when creating cache file', async () => {
+      const expectedError = new Error('Failed to write file');
+      fsPromises.mkdir.mockResolvedValueOnce();
+      fsPromises.writeFile.mockRejectedValueOnce(expectedError);
+      await setupCacheFile();
+      expect(fsPromises.mkdir).toHaveBeenCalledWith(oneAppDirectoryPath, { recursive: true });
+      expect(errorSpy).toHaveBeenCalledWith(`Error creating ${cacheFileName} on ${oneAppModuleCachePath}, \n${expectedError}`);
+    });
 
-      setupCacheFile();
+    it('setupCacheFile should handle error when creating cache directory', async () => {
+      const expectedError = new Error('Failed to create directory');
+      fsPromises.mkdir.mockRejectedValue(expectedError);
+
+      await setupCacheFile();
+      expect(fsPromises.mkdir).toHaveBeenCalledWith(oneAppDirectoryPath, { recursive: true });
       expect(errorSpy).toHaveBeenCalledWith(`There was error creating ${oneAppDirectoryName} directory`);
-      fs.mkdir.mockRestore();
-    });
-
-    it('should log error when unable to create a file', () => {
-      const error = new Error('Cannot create file');
-
-      fs.mkdir.mockImplementationOnce((_filePath, _options, cb) => cb(null));
-      fs.writeFileSync.mockImplementationOnce(() => { throw error; });
-      setupCacheFile();
-      expect(errorSpy).toHaveBeenCalledWith(`Error creating ${cacheFileName} on ${oneAppModuleCachePath}, \n${error}`);
     });
   });
 
   describe('getCachedModules', () => {
+    beforeEach(() => {
+      fsPromises.stat.mockResolvedValue('');
+      fsPromises.mkdir.mockResolvedValue();
+      fsPromises.writeFile.mockResolvedValue();
+    });
+
     it('should return an empty object if the cache file does not exist', () => {
       fs.existsSync.mockImplementationOnce(() => false);
-
       const result = getCachedModules();
-
       expect(result).toEqual({});
     });
 
     it('should create a new cache file and return an empty object if the cache file does not exist', () => {
       fs.existsSync.mockImplementationOnce(() => false);
-      fs.mkdir.mockImplementationOnce((_filePath, _options, cb) => cb(null));
-      fs.writeFileSync.mockImplementationOnce(() => {});
-
       const result = getCachedModules();
-
-      expect(logSpy).toHaveBeenCalledWith(`Successfully created ${oneAppDirectoryPath}`);
-      expect(logSpy).toHaveBeenCalledWith(`${cacheFileName} created successfully on ${oneAppModuleCachePath}`);
       expect(result).toEqual({});
     });
 
@@ -169,9 +171,7 @@ describe('Cache module utils', () => {
       const validJSON = '{"module":"test"}';
       fs.existsSync.mockImplementationOnce(() => true);
       fs.readFileSync.mockImplementationOnce(() => validJSON);
-
       const result = getCachedModules();
-
       expect(result).toEqual(JSON.parse(validJSON));
     });
   });
@@ -186,30 +186,30 @@ describe('Cache module utils', () => {
     });
 
     it('should set content on cache after a delay', () => {
-      fs.writeFile.mockImplementation((_filePath, _content, callback) => callback(null));
+      fsPromises.writeFile.mockResolvedValue();
 
       const content = { module: 'test' };
       writeToCache(content);
 
-      expect(fs.writeFile).not.toHaveBeenCalled();
+      expect(fsPromises.writeFile).not.toHaveBeenCalled();
 
       jest.runAllTimers();
 
-      expect(fs.writeFile).toHaveBeenCalled();
-      expect(fs.writeFile.mock.calls[0][1]).toBe(JSON.stringify(content, null, 2));
+      expect(fsPromises.writeFile).toHaveBeenCalled();
+      expect(fsPromises.writeFile.mock.calls[0][1]).toBe(JSON.stringify(content, null, 2));
     });
 
     it('should handle error when writing to file fails', () => {
-      const error = new Error('write error');
-      fs.writeFile.mockImplementation((_filePath, _content, callback) => callback(error));
-
+      const expectedError = new Error('write error');
+      fsPromises.writeFile.mockRejectedValueOnce(expectedError);
       const content = { module: 'test' };
+
       writeToCache(content);
 
       jest.runAllTimers();
 
-      expect(fs.writeFile).toHaveBeenCalled();
-      expect(logSpy).toHaveBeenCalledWith(`There was an error updating content \n ${error}`);
+      expect(fsPromises.writeFile).toHaveBeenCalled();
+      expect(errorSpy).toHaveBeenCalledWith(`There was an error updating content \n ${expectedError}`);
     });
   });
 

@@ -20,11 +20,11 @@ import path from 'path';
 import mkdirp from 'mkdirp';
 import ProxyAgent from 'proxy-agent';
 import oneAppDevCdn from '../../../src/server/utils/devCdnFactory';
-import { removeDuplicatedModules } from '../../../src/server/utils/cacheCDNModules';
+import { removeDuplicatedModules } from '../../../src/server/utils/cdnCache';
 
 jest.mock('node-fetch');
 
-jest.mock('../../../src/server/utils/cacheCDNModules', () => ({
+jest.mock('../../../src/server/utils/cdnCache', () => ({
   getCachedModules: jest.fn(() => ({
     '/cdn/module-b/1.0.0/module-c.node.js': 'console.log("c");',
   })),
@@ -580,7 +580,7 @@ describe('one-app-dev-cdn', () => {
       const moduleResponse = await fcdn.inject()
         .get('/cdn/module-b/1.0.0/module-c.node.js');
       expect(moduleResponse.statusCode).toBe(200);
-      expect(moduleResponse.headers['content-type']).toMatch('.js');
+      expect(moduleResponse.headers['content-type']).toMatch('application/json');
       expect(moduleResponse.body).toBe('console.log("c");');
     });
 

@@ -13,7 +13,7 @@
  */
 
 import path from 'path';
-import fs from 'fs';
+import fs, { promises as fsPromises } from 'fs';
 import chalk from 'chalk';
 
 export const getUserHomeDirectory = () => process.env.HOME || process.env.USERPROFILE;
@@ -24,59 +24,54 @@ export const oneAppDirectoryPath = path.join(getUserHomeDirectory(), oneAppDirec
 export const oneAppModuleCachePath = path.join(oneAppDirectoryPath, cacheFileName);
 
 // show cache size and how to delete info on start
-export const showCacheInfo = () => {
-  fs.stat(oneAppModuleCachePath, (error, stats) => {
-    if (error) {
-      console.error('There was error checking file stat', error);
-    } else {
-      const fileSizeOnMB = stats.size / (1024 * 1024); // bytes to mb
-      const message = `File size of ${cacheFileName}: ${chalk.bold.greenBright(fileSizeOnMB.toFixed(2), 'MB')}`;
-      const separator = '*'.repeat(message.length);
-      console.log(chalk.bold.cyanBright(separator));
-      console.log(chalk.bold.redBright('CACHE INFORMATION'));
-      console.log(message);
-      console.log(`To delete cache, please run \n  ${chalk.bold.redBright('  rm ', oneAppModuleCachePath)}`);
-      console.log(chalk.bold.cyanBright(separator));
-    }
-  });
+export const showCacheInfo = async () => {
+  try {
+    const stats = await fsPromises.stat(oneAppModuleCachePath);
+    const fileSizeOnMB = stats.size / (1024 * 1024); // bytes to mb
+    const message = `File size of ${cacheFileName}: ${chalk.bold.greenBright(fileSizeOnMB.toFixed(2), 'MB')}`;
+    const separator = '*'.repeat(message.length);
+    console.log(chalk.bold.cyanBright(separator));
+    console.log(chalk.bold.redBright('CACHE INFORMATION'));
+    console.log(message);
+    console.log(`To delete cache, please run \n  ${chalk.bold.redBright('  rm ', oneAppModuleCachePath)}`);
+    console.log(chalk.bold.cyanBright(separator));
+  } catch (error) {
+    console.error('There was error checking file stat', error);
+  }
 };
 
 // setup folder and file
-export const setupCacheFile = () => {
-  fs.mkdir(oneAppDirectoryPath, { recursive: true }, (error) => {
-    if (error) {
-      console.error(`There was error creating ${oneAppDirectoryName} directory`);
-    } else {
-      console.log(`Successfully created ${oneAppDirectoryPath}`);
-      console.log(`Creating ${cacheFileName}`);
-      try {
-        fs.writeFileSync(oneAppModuleCachePath, JSON.stringify('{}'));
-        console.log(`${cacheFileName} created successfully on ${oneAppModuleCachePath}`);
-      } catch (err) {
-        console.error(`Error creating ${cacheFileName} on ${oneAppModuleCachePath}, \n${err}`);
-      }
+export const setupCacheFile = async () => {
+  try {
+    await fsPromises.mkdir(oneAppDirectoryPath, { recursive: true });
+    console.log(`Successfully created ${oneAppDirectoryPath}`);
+    console.log(`Creating ${cacheFileName}`);
+    try {
+      await fsPromises.writeFile(oneAppModuleCachePath, JSON.stringify('{}'));
+      console.log(`${cacheFileName} created successfully on ${oneAppModuleCachePath}`);
+    } catch (error) {
+      console.error(`Error creating ${cacheFileName} on ${oneAppModuleCachePath}, \n${error}`);
     }
-  });
+  } catch (error) {
+    console.error(`There was error creating ${oneAppDirectoryName} directory`);
+  }
 };
 
 // gets cached module from ~/.one-app/.one-app-module-cache
 export const getCachedModules = () => {
-  let hasCachedFile = false;
-  if (fs.existsSync(oneAppModuleCachePath)) {
-    hasCachedFile = true;
-  } else {
+  if (!fs.existsSync(oneAppModuleCachePath)) {
     setupCacheFile();
+    return {};
   }
-  if (hasCachedFile) {
-    try {
-      showCacheInfo();
-      const cachedContent = fs.readFileSync(oneAppModuleCachePath, 'utf8');
-      return JSON.parse(cachedContent);
-    } catch (err) {
-      console.error('Could not parse JSON content', err);
-    }
+
+  try {
+    showCacheInfo();
+    const cachedContent = fs.readFileSync(oneAppModuleCachePath, 'utf8');
+    return JSON.parse(cachedContent);
+  } catch (error) {
+    console.error('Could not parse JSON content', error);
+    return {};
   }
-  return {};
 };
 
 let timerId = null;
@@ -84,12 +79,12 @@ let timerId = null;
 export const writeToCache = (content, delay = 500) => {
   // added debounce
   clearTimeout(timerId);
-  timerId = setTimeout(() => {
-    fs.writeFile(oneAppModuleCachePath, JSON.stringify(content, null, 2), (error) => {
-      if (error) {
-        console.log(`There was an error updating content \n ${error}`);
-      }
-    });
+  timerId = setTimeout(async () => {
+    try {
+      await fsPromises.writeFile(oneAppModuleCachePath, JSON.stringify(content, null, 2));
+    } catch (error) {
+      console.error(`There was an error updating content \n ${error}`);
+    }
     timerId = null;
   }, delay);
 };

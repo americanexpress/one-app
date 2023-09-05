@@ -24,7 +24,7 @@ import Fastify from 'fastify';
 import ip from 'ip';
 import ProxyAgent from 'proxy-agent';
 import fetch from 'node-fetch';
-import { getCachedModules, writeToCache, removeDuplicatedModules } from './cacheCDNModules';
+import { getCachedModules, writeToCache, removeDuplicatedModules } from './cdnCache';
 
 let moduleNames = [];
 const cachedModules = getCachedModules();
@@ -129,12 +129,10 @@ export const oneAppDevCdnFactory = ({
   });
 
   // for locally served modules
-
   oneAppDevCdn.register(fastifyStatic, {
     root: `${localDevPublicPath}/modules`,
     prefix: `${routePrefix}/modules`,
     index: false,
-
   });
 
   const remoteModuleBaseUrls = [];
@@ -177,7 +175,7 @@ export const oneAppDevCdnFactory = ({
       if (cachedModules[incomingRequestPath]) {
         return reply
           .code(200)
-          .type(path.extname(incomingRequestPath))
+          .type('application/json')
           .send(cachedModules[incomingRequestPath]);
       }
       const remoteModuleResponse = await fetch(`${remoteModuleBaseUrlOrigin}/${incomingRequestPath}`, {
