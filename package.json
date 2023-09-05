@@ -171,7 +171,6 @@
     "js-yaml": "^4.1.0",
     "lockfile-lint": "^4.3.7",
     "lodash.set": "^4.3.2",
-    "markdown-table": "^2.0.0",
     "mkdirp": "^1.0.4",
     "node-mocks-http": "^1.10.1",
     "nodemon": "^3.0.1",
