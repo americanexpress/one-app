@@ -14,8 +14,6 @@
  * permissions and limitations under the License.
  */
 
-import util from 'util';
-
 import React from 'react';
 import { Provider } from 'react-redux';
 import url, { Url } from 'url';
@@ -153,7 +151,7 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
       request.helmetInfo = helmetInfo;
     }
   } catch (err) {
-    console.error(util.format('error creating request HTML fragment for %s', request.url), err);
+    request.log.error('error creating request HTML fragment for %s', request.url, err);
   }
 };
 

@@ -54,9 +54,6 @@ holocron.getModuleMap.mockImplementation(() => fromJS({
 setClientModuleMapCache(holocron.getModuleMap().toJS());
 
 describe('createRequestStore', () => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-
   let request;
   let reply;
   let reducers;
@@ -81,6 +78,7 @@ describe('createRequestStore', () => {
       url: '/',
       raw: {},
       method: 'get',
+      log: { error: jest.fn() },
     };
 
     reply = {
@@ -99,7 +97,7 @@ describe('createRequestStore', () => {
   it('should add a store to the request object', () => {
     createRequestStore(request, reply, { reducers });
 
-    expect(console.error).not.toHaveBeenCalled();
+    expect(request.log.error).not.toHaveBeenCalled();
     expect(request.store).toBeTruthy();
   });
 
@@ -112,7 +110,7 @@ describe('createRequestStore', () => {
   it('should send the static error page when there is an error', () => {
     createRequestStore(request, reply, { reducers: null });
 
-    expect(console.error).toHaveBeenCalled();
+    expect(request.log.error).toHaveBeenCalled();
     expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
   });
 

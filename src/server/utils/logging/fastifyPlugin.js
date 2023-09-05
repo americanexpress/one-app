@@ -14,10 +14,8 @@
  * permissions and limitations under the License.
  */
 
-import url from 'url';
+import url from 'node:url';
 import fp from 'fastify-plugin';
-
-import logger from './logger';
 
 /*
 TIMERS
@@ -90,7 +88,6 @@ const logClientRequest = (request, reply) => {
   const getTimer = (symbol) => request[symbol];
   const ttfb = getTimer($RequestFullDuration) - getTimer($ResponseBuilder);
   const log = {
-    type: 'request',
     request: {
       direction: 'in',
       protocol: request.protocol,
@@ -135,7 +132,7 @@ const logClientRequest = (request, reply) => {
     log,
   });
 
-  logger.info(configuredLog);
+  request.log.info(configuredLog);
 };
 
 export const setConfigureRequestLog = (newConfigureRequestLog = passThrough) => {
@@ -209,7 +206,7 @@ const fastifyPlugin = (fastify, _opts, done) => {
 
       logClientRequest(request, reply);
     } catch (error) {
-      console.error(error);
+      request.log.error(error);
       throw error;
     }
   });

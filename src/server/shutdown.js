@@ -40,19 +40,19 @@ function shutdownForcibly() {
   .forEach((signalName) => process.on(signalName, () => {
     if (shouldHaveShutDown) {
       // second signal, something is keeping node up
-      console.log(`received ${signalName}, forcibly shutting down`);
+      console.log('received %s, forcibly shutting down', signalName);
       shutdownForcibly();
       return;
     }
 
-    console.log(`received ${signalName}, shutting down`);
+    console.log('received %s, shutting down', signalName);
     shutdown();
     // `shouldHaveShutDown` is now `true`, BUT
     // we never get additional signals when running in babel-node
     // https://github.com/babel/babel/issues/1062
     // at least, until https://github.com/babel/babel/pull/7902 is published
     const forcibleRef = setTimeout(() => {
-      console.error(`still running after ${FORCIBLE_SHUTDOWN_TIMEOUT / 1e3}s, forcibly shutting down`);
+      console.error('still running after %ds, forcibly shutting down', FORCIBLE_SHUTDOWN_TIMEOUT / 1e3);
       shutdownForcibly();
     }, FORCIBLE_SHUTDOWN_TIMEOUT);
     // don't have the timeout the thing keeping node running

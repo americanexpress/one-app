@@ -14,6 +14,7 @@
  * permissions and limitations under the License.
  */
 
+import util from 'util';
 import CircuitBreaker from 'opossum';
 import { getModule } from 'holocron';
 import createCircuitBreaker, {
@@ -141,37 +142,27 @@ describe('Circuit breaker', () => {
     setEventLoopDelayThreshold(-1);
     jest.advanceTimersByTime(5e3 + 10);
     await mockCircuitBreaker.fire('hola, mundo');
-    expect(consoleErrorSpy.mock.calls).toMatchInlineSnapshot(`
+    expect(consoleErrorSpy.mock.calls[0]).toMatchInlineSnapshot(`
       [
-        [
-          [Error: Opening circuit, p(100) event loop delay (0ms) is > eventLoopDelayThreshold (-1ms)],
-        ],
+        [Error: Opening circuit, p(100) event loop delay (0ms) is > eventLoopDelayThreshold (-1ms)],
       ]
     `);
   });
 
   it('should log when the circuit opens', () => {
     mockCircuitBreaker.open();
-    expect(consoleLogSpy.mock.calls).toMatchInlineSnapshot(`
-      [
-        [
-          "Circuit breaker [mockConstructor] opened",
-        ],
-      ]
-    `);
+    expect(util.format(...consoleLogSpy.mock.calls[0])).toMatchInlineSnapshot(
+      '"Circuit breaker [mockConstructor] opened"'
+    );
   });
 
   it('should log when the circuit closes', () => {
     mockCircuitBreaker.open();
     jest.clearAllMocks();
     mockCircuitBreaker.close();
-    expect(consoleLogSpy.mock.calls).toMatchInlineSnapshot(`
-      [
-        [
-          "Circuit breaker [mockConstructor] closed",
-        ],
-      ]
-    `);
+    expect(util.format(...consoleLogSpy.mock.calls[0])).toMatchInlineSnapshot(
+      '"Circuit breaker [mockConstructor] closed"'
+    );
   });
 
   describe('event loop delay threshold', () => {
@@ -205,7 +196,7 @@ describe('Circuit breaker', () => {
 
     it('should warn and set value to 100 if input is not a number', () => {
       setEventLoopDelayPercentile('hello, world');
-      expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(
+      expect(util.format(...consoleWarnSpy.mock.calls[0])).toMatchInlineSnapshot(
         '"Event loop percentile must be an integer in range 1-100; given "hello, world". Defaulting to p(100)."'
       );
       expect(getEventLoopDelayPercentile()).toBe(100);
@@ -213,7 +204,7 @@ describe('Circuit breaker', () => {
 
     it('should warn and set value to 100 if input less than 1', () => {
       setEventLoopDelayPercentile(0);
-      expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(
+      expect(util.format(...consoleWarnSpy.mock.calls[0])).toMatchInlineSnapshot(
         '"Event loop percentile must be an integer in range 1-100; given 0. Defaulting to p(100)."'
       );
       expect(getEventLoopDelayPercentile()).toBe(100);
@@ -221,7 +212,7 @@ describe('Circuit breaker', () => {
 
     it('should warn and set value to 100 if input less grater than 100', () => {
       setEventLoopDelayPercentile(101);
-      expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(
+      expect(util.format(...consoleWarnSpy.mock.calls[0])).toMatchInlineSnapshot(
         '"Event loop percentile must be an integer in range 1-100; given 101. Defaulting to p(100)."'
       );
       expect(getEventLoopDelayPercentile()).toBe(100);
@@ -229,7 +220,7 @@ describe('Circuit breaker', () => {
 
     it('should warn and set value to 100 if input is a float', () => {
       setEventLoopDelayPercentile(99.9);
-      expect(consoleWarnSpy.mock.calls[0][0]).toMatchInlineSnapshot(
+      expect(util.format(...consoleWarnSpy.mock.calls[0])).toMatchInlineSnapshot(
         '"Event loop percentile must be an integer in range 1-100; given 99.9. Defaulting to p(100)."'
       );
       expect(getEventLoopDelayPercentile()).toBe(100);

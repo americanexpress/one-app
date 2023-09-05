@@ -19,7 +19,6 @@ exports[`setup logging outgoing requests is level info 1`] = `
         "duration": 12,
       },
     },
-    "type": "request",
   },
 ]
 `;
