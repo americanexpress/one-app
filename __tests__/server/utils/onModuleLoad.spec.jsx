@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import util from 'util';
+import util from 'node:util';
 import React from 'react';
 import { preprocessEnvVar } from '@americanexpress/env-config-utils';
 import { META_DATA_KEY } from '@americanexpress/one-app-bundler';

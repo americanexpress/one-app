@@ -27,7 +27,7 @@ jest.mock('../../../../../src/server/utils/logging/utils', () => ({
 
 jest.mock('../../../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: 'X.X.X' }));
 
-jest.mock('os', () => ({
+jest.mock('node:os', () => ({
   hostname: () => 'mockHostName',
 }));
 

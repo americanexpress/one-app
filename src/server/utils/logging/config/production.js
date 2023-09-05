@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import os from 'os';
+import os from 'node:os';
 import {
   serializeError,
   formatLogEntry,

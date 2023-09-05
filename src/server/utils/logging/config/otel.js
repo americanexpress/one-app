@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import os from 'os';
+import os from 'node:os';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 // import { registerInstrumentations } from '@opentelemetry/instrumentation';
 // import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';

@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import util from 'util';
+import util from 'node:util';
 import { argv } from 'yargs';
 
 export default {

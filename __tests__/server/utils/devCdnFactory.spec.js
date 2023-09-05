@@ -13,7 +13,7 @@
  */
 
 /* eslint-disable no-console -- console used in tests */
-import util from 'util';
+import util from 'node:util';
 import fetch from 'node-fetch';
 import fs from 'fs';
 import rimraf from 'rimraf';

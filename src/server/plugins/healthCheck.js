@@ -24,7 +24,7 @@ migrated to Fastify
 
 import fp from 'fastify-plugin';
 import pidusage from 'pidusage';
-import { promisify } from 'util';
+import { promisify } from 'node:util';
 import { getModule } from 'holocron';
 import { getClientStateConfig } from '../utils/stateConfig';
 import { getModuleMapHealth } from '../utils/pollModuleMap';

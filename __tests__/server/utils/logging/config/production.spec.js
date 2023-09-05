@@ -25,7 +25,7 @@ jest.mock('yargs', () => ({
   },
 }));
 
-jest.mock('os', () => ({
+jest.mock('node:os', () => ({
   hostname: () => 'mockHostname',
   type: () => 'mockType',
   arch: () => 'mockArch',
