@@ -14,11 +14,12 @@
  * permissions and limitations under the License.
  */
 
+import util from 'util';
 import ssrServer from '../../src/server/ssrServer';
 
 const { NODE_ENV } = process.env;
-const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
+jest.mock('pino');
 jest.mock('fastify-metrics', () => (_req, _opts, done) => done());
 
 describe('ssrServer route testing', () => {
@@ -44,9 +45,11 @@ describe('ssrServer route testing', () => {
   describe('/_/report/security/csp-violation', () => {
     describe('production', () => {
       let server;
+      let warnSpy;
       beforeAll(async () => {
         process.env.NODE_ENV = 'production';
         server = await ssrServer();
+        warnSpy = jest.spyOn(server.log, 'warn');
       });
 
       test('with csp-report', async () => {
@@ -62,7 +65,9 @@ describe('ssrServer route testing', () => {
             },
           }),
         });
-        expect(warnSpy).toHaveBeenCalledWith('CSP Violation: {"csp-report":{"document-uri":"bad.example.com"}}');
+        expect(util.format(...warnSpy.mock.calls[0])).toMatchInlineSnapshot(
+          '"CSP Violation: {"csp-report":{"document-uri":"bad.example.com"}}"'
+        );
         expect(resp.statusCode).toEqual(204);
       });
 
@@ -74,16 +79,20 @@ describe('ssrServer route testing', () => {
             'Content-Type': 'application/csp-report',
           },
         });
-        expect(warnSpy).toHaveBeenCalledWith('CSP Violation: No data received!');
+        expect(util.format(...warnSpy.mock.calls[0])).toMatchInlineSnapshot(
+          '"CSP Violation: No data received!"'
+        );
         expect(resp.statusCode).toEqual(204);
       });
     });
 
     describe('development', () => {
       let server;
+      let warnSpy;
       beforeAll(async () => {
         process.env.NODE_ENV = 'development';
         server = await ssrServer();
+        warnSpy = jest.spyOn(server.log, 'warn');
       });
 
       test('with csp-report', async () => {
@@ -104,7 +113,9 @@ describe('ssrServer route testing', () => {
             },
           }),
         });
-        expect(warnSpy).toHaveBeenCalledWith('CSP Violation: sourceFile.js:123:432 on page bad.example.com violated the script-src policy via blockedUri.example.com');
+        expect(util.format(...warnSpy.mock.calls[0])).toMatchInlineSnapshot(
+          '"CSP Violation: sourceFile.js:123:432 on page bad.example.com violated the script-src policy via blockedUri.example.com"'
+        );
         expect(resp.statusCode).toEqual(204);
       });
 
@@ -116,7 +127,9 @@ describe('ssrServer route testing', () => {
             'Content-Type': 'application/csp-report',
           },
         });
-        expect(warnSpy).toHaveBeenCalledWith('CSP Violation reported, but no data received');
+        expect(util.format(...warnSpy.mock.calls[0])).toMatchInlineSnapshot(
+          '"CSP Violation reported, but no data received"'
+        );
         expect(resp.statusCode).toEqual(204);
       });
     });

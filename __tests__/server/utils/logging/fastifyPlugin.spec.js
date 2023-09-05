@@ -21,8 +21,8 @@ import fastifyPlugin, {
   $ResponseBuilder,
   setConfigureRequestLog,
 } from '../../../../src/server/utils/logging/fastifyPlugin';
-import logger from '../../../../src/server/utils/logging/logger';
 
+jest.mock('pino');
 jest.mock('../../../../src/server/utils/logging/logger');
 
 describe('fastifyPlugin', () => {
@@ -368,6 +368,7 @@ describe('fastifyPlugin', () => {
 
       const request = {
         headers: {},
+        log: { info: jest.fn() },
       };
       const reply = {
         getHeader: jest.fn(),
@@ -379,6 +380,7 @@ describe('fastifyPlugin', () => {
       expect(process.hrtime).toHaveBeenCalledTimes(2);
       expect(request).toEqual({
         headers: {},
+        log: request.log,
         [$ResponseBuilder]: 0.001,
         [$RequestFullDuration]: 0.001,
       });
@@ -404,7 +406,10 @@ describe('fastifyPlugin', () => {
         expect(process.hrtime).toHaveBeenCalledTimes(0);
 
         const request = {
-          headers: {
+          headers: {},
+          log: {
+            error: jest.fn(),
+            info: jest.fn(),
           },
         };
         const reply = {
@@ -417,9 +422,8 @@ describe('fastifyPlugin', () => {
         await fastify.onSend(request, reply);
         await fastify.onResponse(request, reply);
 
-        expect(logger.info).toHaveBeenCalledTimes(1);
-        expect(logger.info).toHaveBeenCalledWith({
-          type: 'request',
+        expect(request.log.info).toHaveBeenCalledTimes(1);
+        expect(request.log.info).toHaveBeenCalledWith({
           request: {
             address: {
               uri: '',
@@ -478,6 +482,7 @@ describe('fastifyPlugin', () => {
           hostname: 'amex.com',
           originalUrl: 'amex.com',
           method: 'GET',
+          log: { info: jest.fn() },
         };
         const reply = {
           getHeader: jest.fn((header) => {
@@ -501,9 +506,8 @@ describe('fastifyPlugin', () => {
         await fastify.onSend(request, reply);
         await fastify.onResponse(request, reply);
 
-        expect(logger.info).toHaveBeenCalledTimes(1);
-        expect(logger.info).toHaveBeenCalledWith({
-          type: 'request',
+        expect(request.log.info).toHaveBeenCalledTimes(1);
+        expect(request.log.info).toHaveBeenCalledWith({
           request: {
             address: {
               uri: 'https://amex.com:1234/amex.com',
@@ -549,13 +553,13 @@ describe('fastifyPlugin', () => {
         expect(process.hrtime).toHaveBeenCalledTimes(0);
 
         const request = {
-          headers: {
-          },
+          headers: {},
           store: {
             getState: () => ({
               getIn: () => 'us_en',
             }),
           },
+          log: { info: jest.fn() },
         };
         const reply = {
           getHeader: jest.fn(),
@@ -567,9 +571,8 @@ describe('fastifyPlugin', () => {
         await fastify.onSend(request, reply);
         await fastify.onResponse(request, reply);
 
-        expect(logger.info).toHaveBeenCalledTimes(1);
-        expect(logger.info).toHaveBeenCalledWith({
-          type: 'request',
+        expect(request.log.info).toHaveBeenCalledTimes(1);
+        expect(request.log.info).toHaveBeenCalledWith({
           request: {
             address: {
               uri: '',
@@ -617,9 +620,9 @@ describe('fastifyPlugin', () => {
         setConfigureRequestLog(mutateLog);
 
         const request = {
-          headers: {
-          },
+          headers: {},
           raw: 'raw-request',
+          log: { info: jest.fn() },
         };
         const reply = {
           getHeader: jest.fn(),
@@ -662,11 +665,10 @@ describe('fastifyPlugin', () => {
                 ttfb: 0,
               },
             },
-            type: 'request',
           },
         });
-        expect(logger.info).toHaveBeenCalledTimes(1);
-        expect(logger.info).toHaveBeenCalledWith('log changed');
+        expect(request.log.info).toHaveBeenCalledTimes(1);
+        expect(request.log.info).toHaveBeenCalledWith('log changed');
       });
 
       it('negative ttfb', async () => {
@@ -682,8 +684,8 @@ describe('fastifyPlugin', () => {
         fastifyPlugin(fastify, null, jest.fn());
 
         const request = {
-          headers: {
-          },
+          headers: {},
+          log: { info: jest.fn() },
         };
         const reply = {
           getHeader: jest.fn(),
@@ -695,8 +697,8 @@ describe('fastifyPlugin', () => {
 
         await fastify.onResponse(request, reply);
 
-        expect(logger.info).toHaveBeenCalledTimes(1);
-        expect(logger.info).toHaveBeenCalledWith({
+        expect(request.log.info).toHaveBeenCalledTimes(1);
+        expect(request.log.info).toHaveBeenCalledWith({
           request: {
             address: {
               uri: '',
@@ -724,16 +726,14 @@ describe('fastifyPlugin', () => {
               ttfb: null,
             },
           },
-          type: 'request',
         });
       });
     });
 
     it('catches and logs errors', async () => {
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
       const request = {
         headers: {},
+        log: { error: jest.fn() },
       };
       const reply = {
         getHeader: jest.fn(),
@@ -757,13 +757,14 @@ describe('fastifyPlugin', () => {
         throw boomError;
       });
       await expect(() => fastify.onResponse(request, reply)).rejects.toEqual(boomError);
-      expect(errorSpy).toHaveBeenCalledWith(boomError);
+      expect(request.log.error).toHaveBeenCalledWith(boomError);
     });
   });
 
   describe('setConfigureRequestLog', () => {
     it('resets to default', async () => {
       const request = {
+        log: { info: jest.fn() },
         headers: {},
       };
       const reply = {
@@ -790,7 +791,7 @@ describe('fastifyPlugin', () => {
 
       await fastify.onResponse(request, reply);
 
-      expect(logger.info.mock.calls[0][0]).toMatchInlineSnapshot(`
+      expect(request.log.info.mock.calls[0][0]).toMatchInlineSnapshot(`
         {
           "request": {
             "address": {
@@ -819,7 +820,6 @@ describe('fastifyPlugin', () => {
               "ttfb": 0,
             },
           },
-          "type": "request",
         }
       `);
     });

@@ -25,7 +25,8 @@ function formatProtocol(parsedUrl) {
   return protocol.replace(COLON_AT_THE_END_REGEXP, '');
 }
 
-monkeypatches.replaceGlobalConsole(logger);
+const logMethods = ['error', 'warn', 'log', 'info', 'debug'];
+logMethods.forEach((methodName) => { console[methodName] = logger[methodName].bind(logger); });
 
 function outgoingRequestSpy(externalRequest) {
   startTimer(externalRequest);
@@ -35,7 +36,6 @@ function outgoingRequestEndSpy(externalRequest, parsedUrl) {
   const { res } = externalRequest;
   const duration = Math.round(measureTime(externalRequest));
   logger.info({
-    type: 'request',
     request: {
       direction: 'out',
       protocol: formatProtocol(parsedUrl),

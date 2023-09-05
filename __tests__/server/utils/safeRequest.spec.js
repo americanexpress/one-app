@@ -19,8 +19,6 @@ let extendRestrictedAttributesAllowList;
 let validateSafeRequestRestrictedAttributes;
 let getRequiredRestrictedAttributes;
 
-jest.spyOn(console, 'error').mockImplementation(() => { });
-
 describe('safeRequest', () => {
   const dirtyRequest = {
     // makes sure defined falsy values get added too
@@ -55,6 +53,8 @@ describe('safeRequest', () => {
     raw: {
       url: '/foo/bar.html',
     },
+
+    log: { error: jest.fn() },
   };
 
   function requireSafeRequest() {
@@ -281,7 +281,7 @@ describe('safeRequest', () => {
 
       expect(cleanedBodyRequest).toHaveProperty('body');
       expect(cleanedBodyRequest.body).toEqual('{ invalid }');
-      expect(console.error).toHaveBeenCalledWith('request body cannot be parsed', '{ invalid }');
+      expect(dirtyRequest.log.error).toHaveBeenCalledWith('request body cannot be parsed', '{ invalid }');
     });
   });
 });
