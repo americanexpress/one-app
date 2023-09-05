@@ -17,7 +17,7 @@
 import util from 'util';
 
 jest.mock('../../../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: '1.2.3-abc123' }));
-jest.mock('os', () => ({
+jest.mock('node:os', () => ({
   hostname: jest.fn(() => 'host-123'),
   type: jest.fn(() => 'Darwin'),
   arch: jest.fn(() => 'x64'),

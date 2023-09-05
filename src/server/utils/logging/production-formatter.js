@@ -15,7 +15,7 @@
  */
 
 import util from 'util';
-import os from 'os';
+import os from 'node:os';
 import dropEntryBasedOnLevel from './level-dropper';
 import readJsonFile from '../readJsonFile';
 

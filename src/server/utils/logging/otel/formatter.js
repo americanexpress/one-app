@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import os from 'os';
+import os from 'node:os';
 import util from 'util';
 import { SeverityNumber } from '@opentelemetry/api-logs';
 import flatten from 'flat';
