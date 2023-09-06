@@ -21,7 +21,7 @@ import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
 import { argv } from 'yargs';
-import oneAppDevCdn from '@americanexpress/one-app-dev-cdn';
+import oneAppDevCdn from './utils/oneAppDevCdn';
 
 const hasLocalModuleMap = () => fs.existsSync(path.join(process.cwd(), 'static', 'module-map.json'));
 

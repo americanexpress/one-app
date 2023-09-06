@@ -22,7 +22,7 @@ import request from 'supertest';
 import '../../src/server/devHolocronCDN';
 
 jest.mock('cors', () => jest.fn(() => (req, res, next) => next()));
-jest.mock('@americanexpress/one-app-dev-cdn', () => jest.fn(() => (req, res, next) => next()));
+jest.mock('../../src/server/utils/oneAppDevCdn', () => jest.fn(() => (req, res, next) => next()));
 jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
 
 describe('devHolocronCDN', () => {
@@ -46,7 +46,7 @@ describe('devHolocronCDN', () => {
 
     function load() {
       cors = require('cors');
-      oneAppDevCdn = require('@americanexpress/one-app-dev-cdn');
+      oneAppDevCdn = require('../../src/server/utils/oneAppDevCdn');
       return require('../../src/server/devHolocronCDN').default;
     }
 
@@ -60,12 +60,12 @@ describe('devHolocronCDN', () => {
       expect(cors).toHaveBeenCalled();
     });
 
-    it('should add @americanexpress/one-app-dev-cdn to the static route', () => {
+    it('should add ../../src/server/utils/oneAppDevCdn to the static route', () => {
       load();
       expect(oneAppDevCdn).toHaveBeenCalled();
     });
 
-    it('should give @americanexpress/one-app-dev-cdn the path to the static directory', () => {
+    it('should give ../../src/server/utils/oneAppDevCdn the path to the static directory', () => {
       expect.assertions(1);
       const moduleMapUrl = 'https://example.com/module-map.json';
       process.argv = [
@@ -117,7 +117,7 @@ describe('devHolocronCDN', () => {
     beforeEach(() => {
       jest.resetModules();
       const cors = require('cors');
-      const oneAppDevCdn = require('@americanexpress/one-app-dev-cdn');
+      const oneAppDevCdn = require('../../src/server/utils/oneAppDevCdn');
       corsMiddleware = jest.fn((req, res, next) => next());
       cors.mockReturnValue(corsMiddleware);
       oneAppDevCdnMiddleware = jest.fn((req, res, next) => next());
