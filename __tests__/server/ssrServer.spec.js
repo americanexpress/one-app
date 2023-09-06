@@ -14,6 +14,7 @@
  * permissions and limitations under the License.
  */
 
+import util from 'util';
 import path from 'path';
 import compress from '@fastify/compress';
 import Fastify from 'fastify';
@@ -29,6 +30,7 @@ import setAppVersionHeader from '../../src/server/plugins/setAppVersionHeader';
 import addSecurityHeadersPlugin from '../../src/server/plugins/addSecurityHeaders';
 import csp from '../../src/server/plugins/csp';
 import logging from '../../src/server/utils/logging/fastifyPlugin';
+import logger from '../../src/server/utils/logging/logger';
 import forwardedHeaderParser from '../../src/server/plugins/forwardedHeaderParser';
 import renderHtml from '../../src/server/plugins/reactHtml';
 import renderStaticErrorPage from '../../src/server/plugins/reactHtml/staticErrorPage';
@@ -36,7 +38,9 @@ import addFrameOptionsHeader from '../../src/server/plugins/addFrameOptionsHeade
 import addCacheHeaders from '../../src/server/plugins/addCacheHeaders';
 import {
   // eslint-disable-next-line import/named
-  _setConfig, serviceWorkerHandler, webManifestMiddleware,
+  _setConfig,
+  serviceWorkerHandler,
+  webManifestMiddleware,
 } from '../../src/server/pwa';
 
 import ssrServer from '../../src/server/ssrServer';
@@ -51,11 +55,13 @@ jest.mock('@fastify/static');
 jest.mock('@fastify/helmet');
 jest.mock('@fastify/sensible');
 jest.mock('fastify-metrics');
+jest.mock('pino');
 
 jest.mock('../../src/server/plugins/ensureCorrelationId');
 jest.mock('../../src/server/plugins/setAppVersionHeader');
 jest.mock('../../src/server/plugins/addSecurityHeaders');
 jest.mock('../../src/server/plugins/csp');
+jest.mock('../../src/server/utils/logging/logger');
 jest.mock('../../src/server/utils/logging/fastifyPlugin');
 jest.mock('../../src/server/plugins/forwardedHeaderParser');
 jest.mock('../../src/server/plugins/reactHtml');
@@ -80,11 +86,6 @@ afterAll(() => {
 });
 
 describe('ssrServer', () => {
-  jest.spyOn(console, 'info').mockImplementation(() => { });
-  jest.spyOn(console, 'log').mockImplementation(() => { });
-  jest.spyOn(console, 'warn').mockImplementation(() => { });
-  jest.spyOn(console, 'error').mockImplementation(() => { });
-
   let register;
   let setNotFoundHandler;
   let setErrorHandler;
@@ -117,6 +118,8 @@ describe('ssrServer', () => {
     expect(Fastify).toHaveBeenCalledWith({
       frameworkErrors: expect.any(Function),
       bodyLimit: 10485760,
+      logger,
+      disableRequestLogging: true,
     });
 
     expect(register).toHaveBeenCalledTimes(13);
@@ -125,22 +128,22 @@ describe('ssrServer', () => {
     expect(register.mock.calls[2][0]).toEqual(fastifyCookie);
     expect(register.mock.calls[3][0]).toEqual(logging);
     expect(register.mock.calls[4][0]).toEqual(fastifyMetrics);
-    expect(register.mock.calls[5]).toEqual([compress, {
-      zlibOptions: {
-        level: 1,
+    expect(register.mock.calls[5]).toEqual([
+      compress,
+      {
+        zlibOptions: {
+          level: 1,
+        },
+        encodings: ['gzip'],
       },
-      encodings: [
-        'gzip',
-      ],
-    }]);
+    ]);
     expect(register.mock.calls[6][0]).toEqual(fastifyFormbody);
-    expect(register.mock.calls[7]).toEqual([addSecurityHeadersPlugin, {
-      matchGetRoutes: [
-        '/_/status',
-        '/_/pwa/service-worker.js',
-        '/_/pwa/manifest.webmanifest',
-      ],
-    }]);
+    expect(register.mock.calls[7]).toEqual([
+      addSecurityHeadersPlugin,
+      {
+        matchGetRoutes: ['/_/status', '/_/pwa/service-worker.js', '/_/pwa/manifest.webmanifest'],
+      },
+    ]);
     expect(register.mock.calls[8][0]).toEqual(setAppVersionHeader);
     expect(register.mock.calls[9][0]).toEqual(forwardedHeaderParser);
     expect(register.mock.calls[10][0]).toEqual(expect.any(Function)); // abstraction
@@ -148,10 +151,14 @@ describe('ssrServer', () => {
     expect(register.mock.calls[12][0]).toEqual(expect.any(Function)); // abstraction
 
     const staticRegister = jest.fn();
-    register.mock.calls[10][0]({
-      register: staticRegister,
-      get: jest.fn(),
-    }, null, jest.fn());
+    register.mock.calls[10][0](
+      {
+        register: staticRegister,
+        get: jest.fn(),
+      },
+      null,
+      jest.fn()
+    );
 
     expect(staticRegister.mock.calls[0]).toEqual([
       fastifyStatic,
@@ -163,21 +170,29 @@ describe('ssrServer', () => {
     ]);
 
     const pwaRegister = jest.fn();
-    register.mock.calls[11][0]({
-      register: pwaRegister,
-      get: jest.fn(),
-      post: jest.fn(),
-    }, null, jest.fn());
+    register.mock.calls[11][0](
+      {
+        register: pwaRegister,
+        get: jest.fn(),
+        post: jest.fn(),
+      },
+      null,
+      jest.fn()
+    );
 
     expect(pwaRegister.mock.calls[0][0]).toEqual(addCacheHeaders);
     expect(pwaRegister.mock.calls[1][0]).toEqual(csp);
 
     const renderRegister = jest.fn();
-    register.mock.calls[12][0]({
-      register: renderRegister,
-      get: jest.fn(),
-      post: jest.fn(),
-    }, null, jest.fn());
+    register.mock.calls[12][0](
+      {
+        register: renderRegister,
+        get: jest.fn(),
+        post: jest.fn(),
+      },
+      null,
+      jest.fn()
+    );
 
     expect(renderRegister.mock.calls[0][0]).toEqual(addCacheHeaders);
     expect(renderRegister.mock.calls[1][0]).toEqual(csp);
@@ -206,7 +221,9 @@ describe('ssrServer', () => {
     const { frameworkErrors } = Fastify.mock.calls[0][0];
 
     const error = new Error('testing');
+    delete error.stack;
     const request = {
+      log: { error: jest.fn() },
       method: 'get',
       url: 'example.com',
       headers: {},
@@ -215,9 +232,8 @@ describe('ssrServer', () => {
 
     frameworkErrors(error, request, reply);
 
-    expect(console.error).toHaveBeenCalledWith(
-      'Fastify internal error: method get, url "example.com", correlationId "undefined"',
-      error
+    expect(util.format(...request.log.error.mock.calls[0])).toMatchInlineSnapshot(
+      '"Fastify internal error: method get, url "example.com", correlationId "undefined" [Error: testing]"'
     );
     expect(renderStaticErrorPage).toHaveBeenCalled();
   });
@@ -228,10 +244,14 @@ describe('ssrServer', () => {
 
       const get = jest.fn();
 
-      register.mock.calls[10][0]({
-        register: jest.fn(),
-        get,
-      }, null, jest.fn());
+      register.mock.calls[10][0](
+        {
+          register: jest.fn(),
+          get,
+        },
+        null,
+        jest.fn()
+      );
 
       const reply = {
         status: jest.fn(() => reply),
@@ -250,10 +270,14 @@ describe('ssrServer', () => {
 
       const get = jest.fn();
 
-      register.mock.calls[10][0]({
-        register: jest.fn(),
-        get,
-      }, null, jest.fn());
+      register.mock.calls[10][0](
+        {
+          register: jest.fn(),
+          get,
+        },
+        null,
+        jest.fn()
+      );
 
       const reply = {
         status: jest.fn(() => reply),
@@ -271,11 +295,15 @@ describe('ssrServer', () => {
 
       const get = jest.fn();
 
-      register.mock.calls[11][0]({
-        register: jest.fn(),
-        get,
-        post: jest.fn(),
-      }, null, jest.fn());
+      register.mock.calls[11][0](
+        {
+          register: jest.fn(),
+          get,
+          post: jest.fn(),
+        },
+        null,
+        jest.fn()
+      );
 
       const reply = {
         status: jest.fn(() => reply),
@@ -293,13 +321,19 @@ describe('ssrServer', () => {
 
           const post = jest.fn();
 
-          register.mock.calls[11][0]({
-            register: jest.fn(),
-            get: jest.fn(),
-            post,
-          }, null, jest.fn());
+          register.mock.calls[11][0](
+            {
+              register: jest.fn(),
+              get: jest.fn(),
+              post,
+            },
+            null,
+            jest.fn()
+          );
 
-          const request = {};
+          const request = {
+            log: { warn: jest.fn() },
+          };
           const reply = {
             status: jest.fn(() => reply),
             send: jest.fn(() => reply),
@@ -308,7 +342,9 @@ describe('ssrServer', () => {
           post.mock.calls[0][1](request, reply);
 
           expect(post.mock.calls[0][0]).toEqual('/_/report/security/csp-violation');
-          expect(console.warn).toHaveBeenCalledWith('CSP Violation reported, but no data received');
+          expect(request.log.warn).toHaveBeenCalledWith(
+            'CSP Violation reported, but no data received'
+          );
           expect(reply.status).toHaveBeenCalledWith(204);
           expect(reply.send).toHaveBeenCalled();
         });
@@ -320,17 +356,22 @@ describe('ssrServer', () => {
 
           const post = jest.fn();
 
-          register.mock.calls[11][0]({
-            register: jest.fn(),
-            get: jest.fn(),
-            post,
-          }, null, jest.fn());
+          register.mock.calls[11][0](
+            {
+              register: jest.fn(),
+              get: jest.fn(),
+              post,
+            },
+            null,
+            jest.fn()
+          );
 
           const request = {
             headers: {
               'Content-Type': 'application/csp-report',
             },
             body: JSON.stringify({}),
+            log: { warn: jest.fn() },
           };
           const reply = {
             status: jest.fn(() => reply),
@@ -340,7 +381,9 @@ describe('ssrServer', () => {
           post.mock.calls[0][1](request, reply);
 
           expect(post.mock.calls[0][0]).toEqual('/_/report/security/csp-violation');
-          expect(console.warn).toHaveBeenCalledWith('CSP Violation reported, but no data received');
+          expect(request.log.warn).toHaveBeenCalledWith(
+            'CSP Violation reported, but no data received'
+          );
           expect(reply.status).toHaveBeenCalledWith(204);
           expect(reply.send).toHaveBeenCalled();
         });
@@ -351,11 +394,15 @@ describe('ssrServer', () => {
 
         const post = jest.fn();
 
-        register.mock.calls[11][0]({
-          register: jest.fn(),
-          get: jest.fn(),
-          post,
-        }, null, jest.fn());
+        register.mock.calls[11][0](
+          {
+            register: jest.fn(),
+            get: jest.fn(),
+            post,
+          },
+          null,
+          jest.fn()
+        );
 
         const request = {
           body: JSON.stringify({
@@ -368,6 +415,7 @@ describe('ssrServer', () => {
               'source-file': 'source-file',
             },
           }),
+          log: { warn: jest.fn() },
         };
         const reply = {
           status: jest.fn(() => reply),
@@ -377,7 +425,9 @@ describe('ssrServer', () => {
         post.mock.calls[0][1](request, reply);
 
         expect(post.mock.calls[0][0]).toEqual('/_/report/security/csp-violation');
-        expect(console.warn).toHaveBeenCalledWith('CSP Violation: source-file:line-number:column-number on page document-uri violated the violated-directive policy via blocked-uri');
+        expect(util.format(...request.log.warn.mock.calls[0])).toMatchInlineSnapshot(
+          '"CSP Violation: source-file:line-number:column-number on page document-uri violated the violated-directive policy via blocked-uri"'
+        );
         expect(reply.status).toHaveBeenCalledWith(204);
         expect(reply.send).toHaveBeenCalled();
       });
@@ -387,13 +437,22 @@ describe('ssrServer', () => {
 
         const post = jest.fn();
 
-        register.mock.calls[11][0]({
-          register: jest.fn(),
-          get: jest.fn(),
-          post,
-        }, null, jest.fn());
+        register.mock.calls[11][0](
+          {
+            register: jest.fn(),
+            get: jest.fn(),
+            post,
+          },
+          null,
+          jest.fn()
+        );
 
-        const request = {};
+        const request = {
+          log: {
+            warn: jest.fn(),
+            error: jest.fn(),
+          },
+        };
         const reply = {
           status: jest.fn(() => reply),
           send: jest.fn(() => reply),
@@ -402,8 +461,8 @@ describe('ssrServer', () => {
         post.mock.calls[1][1](request, reply);
 
         expect(post.mock.calls[1][0]).toEqual('/_/report/errors');
-        expect(console.warn).not.toHaveBeenCalled();
-        expect(console.error).not.toHaveBeenCalled();
+        expect(request.log.warn).not.toHaveBeenCalled();
+        expect(request.log.error).not.toHaveBeenCalled();
         expect(reply.status).toHaveBeenCalledWith(204);
         expect(reply.send).toHaveBeenCalled();
       });
@@ -417,14 +476,19 @@ describe('ssrServer', () => {
 
           const post = jest.fn();
 
-          register.mock.calls[11][0]({
-            register: jest.fn(),
-            get: jest.fn(),
-            post,
-          }, null, jest.fn());
+          register.mock.calls[11][0](
+            {
+              register: jest.fn(),
+              get: jest.fn(),
+              post,
+            },
+            null,
+            jest.fn()
+          );
 
           const request = {
             headers: {},
+            log: { warn: jest.fn() },
           };
           const reply = {
             status: jest.fn(() => reply),
@@ -434,7 +498,9 @@ describe('ssrServer', () => {
           post.mock.calls[0][1](request, reply);
 
           expect(post.mock.calls[0][0]).toEqual('/_/report/security/csp-violation');
-          expect(console.warn).toHaveBeenCalledWith('CSP Violation: No data received!');
+          expect(util.format(...request.log.warn.mock.calls[0])).toMatchInlineSnapshot(
+            '"CSP Violation: No data received!"'
+          );
           expect(reply.status).toHaveBeenCalledWith(204);
           expect(reply.send).toHaveBeenCalled();
         });
@@ -447,17 +513,22 @@ describe('ssrServer', () => {
 
           const post = jest.fn();
 
-          register.mock.calls[11][0]({
-            register: jest.fn(),
-            get: jest.fn(),
-            post,
-          }, null, jest.fn());
+          register.mock.calls[11][0](
+            {
+              register: jest.fn(),
+              get: jest.fn(),
+              post,
+            },
+            null,
+            jest.fn()
+          );
 
           const request = {
             headers: {},
             body: JSON.stringify({
               unit: 'testing',
             }),
+            log: { warn: jest.fn() },
           };
           const reply = {
             status: jest.fn(() => reply),
@@ -467,7 +538,9 @@ describe('ssrServer', () => {
           post.mock.calls[0][1](request, reply);
 
           expect(post.mock.calls[0][0]).toEqual('/_/report/security/csp-violation');
-          expect(console.warn).toHaveBeenCalledWith('CSP Violation: {"unit":"testing"}');
+          expect(util.format(...request.log.warn.mock.calls[0])).toMatchInlineSnapshot(
+            '"CSP Violation: {"unit":"testing"}"'
+          );
           expect(reply.status).toHaveBeenCalledWith(204);
           expect(reply.send).toHaveBeenCalled();
         });
@@ -480,15 +553,23 @@ describe('ssrServer', () => {
 
         const post = jest.fn();
 
-        register.mock.calls[11][0]({
-          register: jest.fn(),
-          get: jest.fn(),
-          post,
-        }, null, jest.fn());
+        register.mock.calls[11][0](
+          {
+            register: jest.fn(),
+            get: jest.fn(),
+            post,
+          },
+          null,
+          jest.fn()
+        );
 
         const request = {
           headers: {
             'content-type': 'text/plain',
+          },
+          log: {
+            warn: jest.fn(),
+            error: jest.fn(),
           },
         };
         const reply = {
@@ -499,8 +580,8 @@ describe('ssrServer', () => {
         post.mock.calls[1][1](request, reply);
 
         expect(post.mock.calls[1][0]).toEqual('/_/report/errors');
-        expect(console.warn).not.toHaveBeenCalled();
-        expect(console.error).not.toHaveBeenCalled();
+        expect(request.log.warn).not.toHaveBeenCalled();
+        expect(request.log.error).not.toHaveBeenCalled();
         expect(reply.status).toHaveBeenCalledWith(415);
         expect(reply.send).toHaveBeenCalledWith('Unsupported Media Type');
       });
@@ -512,11 +593,15 @@ describe('ssrServer', () => {
 
         const post = jest.fn();
 
-        register.mock.calls[11][0]({
-          register: jest.fn(),
-          get: jest.fn(),
-          post,
-        }, null, jest.fn());
+        register.mock.calls[11][0](
+          {
+            register: jest.fn(),
+            get: jest.fn(),
+            post,
+          },
+          null,
+          jest.fn()
+        );
 
         const request = {
           headers: {
@@ -525,6 +610,10 @@ describe('ssrServer', () => {
             'user-agent': 'userAgent',
           },
           body: 'invalid',
+          log: {
+            warn: jest.fn(),
+            error: jest.fn(),
+          },
         };
         const reply = {
           status: jest.fn(() => reply),
@@ -534,8 +623,10 @@ describe('ssrServer', () => {
         post.mock.calls[1][1](request, reply);
 
         expect(post.mock.calls[1][0]).toEqual('/_/report/errors');
-        expect(console.warn).toHaveBeenCalledWith('dropping an error report group, wrong interface (string)');
-        expect(console.error).not.toHaveBeenCalled();
+        expect(util.format(...request.log.warn.mock.calls[0])).toMatchInlineSnapshot(
+          '"dropping an error report group, wrong interface (string)"'
+        );
+        expect(request.log.error).not.toHaveBeenCalled();
         expect(reply.status).toHaveBeenCalledWith(204);
         expect(reply.send).toHaveBeenCalled();
       });
@@ -547,11 +638,15 @@ describe('ssrServer', () => {
 
         const post = jest.fn();
 
-        register.mock.calls[11][0]({
-          register: jest.fn(),
-          get: jest.fn(),
-          post,
-        }, null, jest.fn());
+        register.mock.calls[11][0](
+          {
+            register: jest.fn(),
+            get: jest.fn(),
+            post,
+          },
+          null,
+          jest.fn()
+        );
 
         const request = {
           headers: {
@@ -559,11 +654,11 @@ describe('ssrServer', () => {
             'correlation-id': 'correlationId',
             'user-agent': 'userAgent',
           },
-          body: [
-            '',
-            false,
-            'not an object',
-          ],
+          body: ['', false, 'not an object'],
+          log: {
+            warn: jest.fn(),
+            error: jest.fn(),
+          },
         };
         const reply = {
           status: jest.fn(() => reply),
@@ -573,10 +668,16 @@ describe('ssrServer', () => {
         post.mock.calls[1][1](request, reply);
 
         expect(post.mock.calls[1][0]).toEqual('/_/report/errors');
-        expect(console.warn).toHaveBeenCalledWith('dropping an error report, wrong interface (string)');
-        expect(console.warn).toHaveBeenCalledWith('dropping an error report, wrong interface (boolean)');
-        expect(console.warn).toHaveBeenCalledWith('dropping an error report, wrong interface (string)');
-        expect(console.error).not.toHaveBeenCalled();
+        expect(util.format(...request.log.warn.mock.calls[0])).toMatchInlineSnapshot(
+          '"dropping an error report, wrong interface (string)"'
+        );
+        expect(util.format(...request.log.warn.mock.calls[1])).toMatchInlineSnapshot(
+          '"dropping an error report, wrong interface (boolean)"'
+        );
+        expect(util.format(...request.log.warn.mock.calls[2])).toMatchInlineSnapshot(
+          '"dropping an error report, wrong interface (string)"'
+        );
+        expect(request.log.error).not.toHaveBeenCalled();
         expect(reply.status).toHaveBeenCalledWith(204);
         expect(reply.send).toHaveBeenCalled();
       });
@@ -588,11 +689,15 @@ describe('ssrServer', () => {
 
         const post = jest.fn();
 
-        register.mock.calls[11][0]({
-          register: jest.fn(),
-          get: jest.fn(),
-          post,
-        }, null, jest.fn());
+        register.mock.calls[11][0](
+          {
+            register: jest.fn(),
+            get: jest.fn(),
+            post,
+          },
+          null,
+          jest.fn()
+        );
 
         const request = {
           headers: {
@@ -600,14 +705,20 @@ describe('ssrServer', () => {
             'correlation-id': 'correlationId',
             'user-agent': 'userAgent',
           },
-          body: [{
-            msg: 'testing',
-            stack: 'stack',
-            href: 'href',
-            otherData: {
-              testing: true,
+          body: [
+            {
+              msg: 'testing',
+              stack: 'stack',
+              href: 'href',
+              otherData: {
+                testing: true,
+              },
             },
-          }],
+          ],
+          log: {
+            warn: jest.fn(),
+            error: jest.fn(),
+          },
         };
         const reply = {
           status: jest.fn(() => reply),
@@ -617,14 +728,14 @@ describe('ssrServer', () => {
         post.mock.calls[1][1](request, reply);
 
         expect(post.mock.calls[1][0]).toEqual('/_/report/errors');
-        expect(console.warn).not.toHaveBeenCalled();
-        expect(console.error.mock.calls.length).toBe(1);
-        expect(console.error.mock.calls[0][0] instanceof Error).toBe(true);
-        expect(console.error.mock.calls[0][0].name).toBe('ClientReportedError');
-        expect(console.error.mock.calls[0][0].stack).toBe('stack');
-        expect(console.error.mock.calls[0][0].userAgent).toBe('userAgent');
-        expect(console.error.mock.calls[0][0].uri).toBe('href');
-        expect(console.error.mock.calls[0][0].metaData).toEqual({
+        expect(request.log.warn).not.toHaveBeenCalled();
+        expect(request.log.error.mock.calls.length).toBe(1);
+        expect(request.log.error.mock.calls[0][0] instanceof Error).toBe(true);
+        expect(request.log.error.mock.calls[0][0].name).toBe('ClientReportedError');
+        expect(request.log.error.mock.calls[0][0].stack).toBe('stack');
+        expect(request.log.error.mock.calls[0][0].userAgent).toBe('userAgent');
+        expect(request.log.error.mock.calls[0][0].uri).toBe('href');
+        expect(request.log.error.mock.calls[0][0].metaData).toEqual({
           correlationId: 'correlationId',
           testing: true,
         });
@@ -642,10 +753,14 @@ describe('ssrServer', () => {
         await ssrServer();
 
         const get = jest.fn();
-        register.mock.calls[12][0]({
-          register: jest.fn(),
-          get,
-        }, null, jest.fn());
+        register.mock.calls[12][0](
+          {
+            register: jest.fn(),
+            get,
+          },
+          null,
+          jest.fn()
+        );
 
         const reply = {
           sendHtml: jest.fn(() => reply),
@@ -665,10 +780,14 @@ describe('ssrServer', () => {
         await ssrServer();
 
         const get = jest.fn();
-        register.mock.calls[12][0]({
-          register: jest.fn(),
-          get,
-        }, null, jest.fn());
+        register.mock.calls[12][0](
+          {
+            register: jest.fn(),
+            get,
+          },
+          null,
+          jest.fn()
+        );
 
         const reply = {
           status: jest.fn(() => reply),
@@ -686,10 +805,14 @@ describe('ssrServer', () => {
         await ssrServer();
 
         const get = jest.fn();
-        register.mock.calls[12][0]({
-          register: jest.fn(),
-          get,
-        }, null, jest.fn());
+        register.mock.calls[12][0](
+          {
+            register: jest.fn(),
+            get,
+          },
+          null,
+          jest.fn()
+        );
 
         const reply = {
           sendHtml: jest.fn(() => reply),
@@ -705,11 +828,15 @@ describe('ssrServer', () => {
         await ssrServer();
 
         const post = jest.fn();
-        register.mock.calls[12][0]({
-          register: jest.fn(),
-          get: jest.fn(),
-          post,
-        }, null, jest.fn());
+        register.mock.calls[12][0](
+          {
+            register: jest.fn(),
+            get: jest.fn(),
+            post,
+          },
+          null,
+          jest.fn()
+        );
 
         expect(post).not.toHaveBeenCalled();
       });
@@ -720,11 +847,15 @@ describe('ssrServer', () => {
         await ssrServer();
 
         const post = jest.fn();
-        register.mock.calls[12][0]({
-          register: jest.fn(),
-          get: jest.fn(),
-          post,
-        }, null, jest.fn());
+        register.mock.calls[12][0](
+          {
+            register: jest.fn(),
+            get: jest.fn(),
+            post,
+          },
+          null,
+          jest.fn()
+        );
 
         const reply = {
           sendHtml: jest.fn(() => reply),
@@ -763,10 +894,12 @@ describe('ssrServer', () => {
       await ssrServer();
 
       const error = new Error('testing');
+      delete error.stack;
       const request = {
         method: 'get',
         url: '/example',
         headers: {},
+        log: { error: jest.fn() },
       };
       const reply = {
         code: jest.fn(() => reply),
@@ -776,7 +909,9 @@ describe('ssrServer', () => {
 
       await setErrorHandler.mock.calls[0][0](error, request, reply);
 
-      expect(console.error).toHaveBeenCalledWith('Fastify application error: method get, url "/example", correlationId "undefined", headersSent: false', error);
+      expect(util.format(...request.log.error.mock.calls[0])).toMatchInlineSnapshot(
+        '"Fastify application error: method get, url "/example", correlationId "undefined", headersSent: false [Error: testing]"'
+      );
       expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
     });
 
@@ -788,7 +923,9 @@ describe('ssrServer', () => {
       await ssrServer();
 
       const error = new Error('testing');
+      delete error.stack;
       const request = {
+        log: { error: jest.fn() },
         method: 'get',
         url: '/example',
         headers: {
@@ -805,7 +942,9 @@ describe('ssrServer', () => {
 
       await setErrorHandler.mock.calls[0][0](error, request, reply);
 
-      expect(console.error).toHaveBeenCalledWith('Fastify application error: method get, url "/example", correlationId "123", headersSent: true', error);
+      expect(util.format(...request.log.error.mock.calls[0])).toMatchInlineSnapshot(
+        '"Fastify application error: method get, url "/example", correlationId "123", headersSent: true [Error: testing]"'
+      );
       expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
     });
   });
