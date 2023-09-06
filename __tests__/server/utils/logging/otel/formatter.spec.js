@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2023 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import util from 'util';
 
-jest.mock('../../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: '1.2.3-abc123' }));
+jest.mock('../../../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: '1.2.3-abc123' }));
 jest.mock('node:os', () => ({
   hostname: jest.fn(() => 'host-123'),
   type: jest.fn(() => 'Darwin'),
@@ -38,9 +38,8 @@ function createErrorWithMockedStacktrace(msg) {
   return err;
 }
 
-describe('production-formatter', () => {
+describe('otel formatter', () => {
   let formatter;
-  jest.spyOn(Date.prototype, 'toISOString').mockImplementation(() => '2018-03-02T02:39:32.948Z');
   jest.spyOn(util, 'format');
 
   function load(pid) {
@@ -50,7 +49,7 @@ describe('production-formatter', () => {
       writable: true,
       value: pid || 1234,
     });
-    formatter = require('../../../../src/server/utils/logging/production-formatter').default;
+    formatter = require('../../../../../src/server/utils/logging/otel/formatter').default;
   }
 
   it('is a function', () => {
@@ -58,92 +57,58 @@ describe('production-formatter', () => {
     expect(typeof formatter).toBe('function');
   });
 
-  it('encodes as parseable JSON', () => {
-    load();
-    const entry = formatter('error', 1, 2, 3);
-    expect(() => JSON.parse(entry)).not.toThrowError();
-    expect(JSON.parse(entry)).toMatchSnapshot();
-  });
-
-  it('drops lower levels', () => {
-    load();
-    expect(formatter('debug', 1, 2, 3)).toBe(null);
-  });
-
   describe('errors', () => {
-    it('encodes as parseable JSON', () => {
-      load();
-      const entry = formatter('error', 'unable to do the thing', createErrorWithMockedStacktrace('test error'));
-      expect(() => JSON.parse(entry)).not.toThrowError();
-      expect(JSON.parse(entry)).toMatchSnapshot();
-    });
-
     it('puts a lone error in the error field', () => {
-      expect.assertions(2);
       load();
-      const parsed = JSON.parse(formatter('error', createErrorWithMockedStacktrace('test error')));
-      expect(parsed).toHaveProperty('error');
-      expect(parsed.error).toMatchSnapshot();
+      const record = formatter('error', createErrorWithMockedStacktrace('test error'));
+      expect(record.attributes).toMatchSnapshot();
     });
 
     it('does not include a message key when given a lone error', () => {
-      expect.assertions(1);
       load();
-      const parsed = JSON.parse(formatter('error', new Error('irrelevant')));
-      expect(parsed).not.toHaveProperty('message');
+      const record = formatter('error', new Error('irrelevant'));
+      expect(record).not.toHaveProperty('message');
     });
 
-    it('puts an error with other arguments in the error field and uses only the other args for the message', () => {
-      expect.assertions(4);
+    it('puts an error with other arguments in the error field and uses only the other args for the body', () => {
       load();
-      const parsed = JSON.parse(formatter('error', createErrorWithMockedStacktrace('test error'), 'say hi %i times', 7));
-      expect(parsed).toHaveProperty('error');
-      expect(parsed).toHaveProperty('message');
-      expect(parsed.error).toMatchSnapshot();
-      expect(parsed.message).toBe('say hi 7 times');
+      const record = formatter('error', createErrorWithMockedStacktrace('test error'), 'say hi %i times', 7);
+      expect(record.attributes).toMatchSnapshot();
+      expect(record.body).toBe('say hi 7 times');
     });
 
     it('puts an error paired with a message in the error field', () => {
-      expect.assertions(4);
       load();
-      const parsed = JSON.parse(formatter('error', 'unable to do the thing', createErrorWithMockedStacktrace('test error')));
-      expect(parsed).toHaveProperty('error');
-      expect(parsed).toHaveProperty('message');
-      expect(parsed.error).toMatchSnapshot();
-      expect(parsed.message).toBe('unable to do the thing');
+      const record = formatter('error', 'unable to do the thing', createErrorWithMockedStacktrace('test error'));
+      expect(record.attributes).toMatchSnapshot();
+      expect(record.body).toBe('unable to do the thing');
     });
 
     it('uses the error in the message when the error is paired with a message and other arguments', () => {
-      expect.assertions(4);
       load();
-      const parsed = JSON.parse(formatter('error', 'unable to do the thing %O %d times', createErrorWithMockedStacktrace('test error'), 12));
-      const errorText = parsed.message
+      const record = formatter('error', 'unable to do the thing %O %d times', createErrorWithMockedStacktrace('test error'), 12);
+      const errorText = record.body
         .replace('[', '')
         .replace(']', '');
-      expect(parsed).toHaveProperty('error');
-      expect(parsed).toHaveProperty('message');
-      expect(parsed.error).toMatchSnapshot();
+      expect(record).toHaveProperty('body');
+      expect(record.attributes).toMatchSnapshot();
       expect(errorText).toMatchSnapshot();
     });
 
     it('records the error message as <none> if not present', () => {
-      expect.assertions(2);
       load();
       const err = createErrorWithMockedStacktrace('test error');
       delete err.message;
-      const parsed = JSON.parse(formatter('error', 'unable to do the thing', err));
-      expect(parsed).toHaveProperty('error');
-      expect(parsed.error).toHaveProperty('message', '<none>');
+      const record = formatter('error', 'unable to do the thing', err);
+      expect(record.attributes['error.message']).toBe('<none>');
     });
 
     it('records the error stacktrace as <none> if not present', () => {
-      expect.assertions(2);
       load();
       const err = createErrorWithMockedStacktrace('test error');
       delete err.stack;
-      const parsed = JSON.parse(formatter('error', 'unable to do the thing', err));
-      expect(parsed).toHaveProperty('error');
-      expect(parsed.error).toHaveProperty('stacktrace', '<none>');
+      const record = formatter('error', 'unable to do the thing', err);
+      expect(record.attributes['error.stacktrace']).toBe('<none>');
     });
 
     it('encodes ClientReportedError Error as parseable JSON', () => {
@@ -165,9 +130,8 @@ describe('production-formatter', () => {
       }
 
       load();
-      const entry = formatter('error', buildClientErrorEntry());
-      expect(() => JSON.parse(entry)).not.toThrowError();
-      expect(JSON.parse(entry)).toMatchSnapshot();
+      const record = formatter('error', buildClientErrorEntry());
+      expect(record).toMatchSnapshot();
     });
 
     it('encodes Server Reported Error as parseable JSON with nested metadata objects', () => {
@@ -192,9 +156,8 @@ describe('production-formatter', () => {
       }
 
       load();
-      const entry = formatter('error', buildServerSideErrorEntry());
-      expect(() => JSON.parse(entry)).not.toThrowError();
-      expect(JSON.parse(entry)).toMatchSnapshot();
+      const record = formatter('error', buildServerSideErrorEntry());
+      expect(record).toMatchSnapshot();
     });
   });
 
@@ -242,18 +205,16 @@ describe('production-formatter', () => {
       }
 
       load();
-      const entry = formatter('error', buildRequestEntry());
-      expect(() => JSON.parse(entry)).not.toThrowError();
-      expect(JSON.parse(entry)).toMatchSnapshot();
+      const record = formatter('error', buildRequestEntry());
+      expect(record).toMatchSnapshot();
     });
 
     it('uses the default util.format when given an unknown type', () => {
       load();
       util.format.mockClear();
-      const entry = formatter('error', { type: 'yolo' });
+      const record = formatter('error', { type: 'yolo' });
       expect(util.format).toHaveBeenCalledTimes(1);
-      expect(() => JSON.parse(entry)).not.toThrowError();
-      expect(JSON.parse(entry)).toMatchSnapshot();
+      expect(record).toMatchSnapshot();
     });
   });
 });

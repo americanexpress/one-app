@@ -16,7 +16,8 @@
 
 import { monkeypatches } from '@americanexpress/lumberjack';
 
-import logger from './logger';
+import lumberjackLogger from './logger';
+import { createOtelLogger, replaceGlobalConsoleWithOtelLogger } from './otel/logger';
 import { startTimer, measureTime } from './timing';
 
 const COLON_AT_THE_END_REGEXP = /:$/;
@@ -25,7 +26,15 @@ function formatProtocol(parsedUrl) {
   return protocol.replace(COLON_AT_THE_END_REGEXP, '');
 }
 
-monkeypatches.replaceGlobalConsole(logger);
+let logger;
+
+if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
+  logger = createOtelLogger();
+  replaceGlobalConsoleWithOtelLogger(logger);
+} else {
+  logger = lumberjackLogger;
+  monkeypatches.replaceGlobalConsole(logger);
+}
 
 function outgoingRequestSpy(externalRequest) {
   startTimer(externalRequest);

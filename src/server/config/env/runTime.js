@@ -236,6 +236,19 @@ const runTime = [
     defaultValue: 'false',
     normalize: (input) => (input.toLowerCase() === 'true' ? 'true' : 'false'),
   },
+  // OpenTelemetry Configuration
+  {
+    name: 'OTEL_EXPORTER_OTLP_LOGS_ENDPOINT',
+    validate: (input) => {
+      if (!input) return;
+      // eslint-disable-next-line no-new -- intentionally using new for side effect of validation
+      new URL(input);
+    },
+  },
+  {
+    name: 'OTEL_SERVICE_NAME',
+    defaultValue: 'One App',
+  },
 ];
 runTime.forEach(preprocessEnvVar);
 export { ip };
