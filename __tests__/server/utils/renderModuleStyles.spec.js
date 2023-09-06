@@ -17,6 +17,35 @@
 import { Map, Set as iSet, fromJS } from 'immutable';
 import renderModuleStyles from '../../../src/server/utils/renderModuleStyles';
 
+const getModuleWithMisconfiguredAggregatedStyles = (
+  moduleName,
+  includeCSS = true,
+  includeDigest = true
+) => {
+  const moduleWithMisconfiguredAggregatedStyles = () => 0;
+
+  const css = includeCSS && `.${moduleName}_deps { color: blue; }`;
+  const digest = includeDigest && `${moduleName}_hash`;
+
+  moduleWithMisconfiguredAggregatedStyles.ssrStyles = {
+    aggregatedStyles: [{ css, digest }],
+    getFullSheet: () => `.${moduleName}_class { color: red; }`,
+  };
+  return moduleWithMisconfiguredAggregatedStyles;
+};
+
+const getModuleWithAggregatedStyles = (moduleName, digest) => {
+  const moduleWithAggregatedStyles = () => 0;
+  moduleWithAggregatedStyles.ssrStyles = {
+    aggregatedStyles: [
+      { css: `.${moduleName}_deps { color: blue; }`, digest: `${digest || moduleName}_deps` },
+      { css: `.${moduleName}_local { color: rebeccapurple; }`, digest: `${digest || moduleName}_local` },
+    ],
+    getFullSheet: () => `.${moduleName}_class { color: red; }`,
+  };
+  return moduleWithAggregatedStyles;
+};
+
 const getModuleWithStyles = (moduleName) => {
   const moduleWithStyles = () => 0;
   moduleWithStyles.ssrStyles = {
@@ -24,6 +53,7 @@ const getModuleWithStyles = (moduleName) => {
   };
   return moduleWithStyles;
 };
+
 const moduleWithoutStyles = () => 0;
 
 describe('renderModuleStyles', () => {
@@ -48,10 +78,27 @@ describe('renderModuleStyles', () => {
     expect(renderModuleStyles(store)).toMatchSnapshot();
   });
 
+  it('should handle modules with aggregated SSR styles', () => {
+    const state = fromJS({ holocron: { loaded: iSet(['test-module']) } });
+    const modules = new Map({ 'test-module': getModuleWithAggregatedStyles('test-module') });
+    const store = { getState: () => state, modules };
+    expect(renderModuleStyles(store)).toMatchSnapshot();
+  });
+
+  it('should handle modules with misconfigured aggregated SSR styles', () => {
+    const state = fromJS({ holocron: { loaded: iSet(['no-css', 'no-digest']) } });
+    const modules = new Map({
+      'no-css': getModuleWithMisconfiguredAggregatedStyles('no-css', false, true),
+      'no-digest': getModuleWithMisconfiguredAggregatedStyles('no-digest', true, false),
+    });
+    const store = { getState: () => state, modules };
+    expect(renderModuleStyles(store)).toBe('');
+  });
+
   it('should handle a mix of modules with and without SSR styles', () => {
     const state = fromJS({
       holocron: {
-        loaded: iSet(['test-module-a', 'test-module-b', 'test-module-c', 'test-module-d']),
+        loaded: iSet(['test-module-a', 'test-module-b', 'test-module-c', 'test-module-d', 'test-module-e']),
       },
     });
     const modules = new Map({
@@ -59,6 +106,22 @@ describe('renderModuleStyles', () => {
       'test-module-b': getModuleWithStyles('test-module-b'),
       'test-module-c': moduleWithoutStyles,
       'test-module-d': getModuleWithStyles('test-module-d'),
+      'test-module-e': getModuleWithAggregatedStyles('test-module-e'),
+    });
+    const store = { getState: () => state, modules };
+    expect(renderModuleStyles(store)).toMatchSnapshot();
+  });
+
+  it('should deduplicate aggregatedStyles that have the same digest hash', () => {
+    const state = fromJS({
+      holocron: {
+        loaded: iSet(['test-module-a', 'test-module-b', 'test-module-c']),
+      },
+    });
+    const modules = new Map({
+      'test-module-a': getModuleWithAggregatedStyles('test-module-a', 'shared_hash'),
+      'test-module-b': getModuleWithAggregatedStyles('test-module-b', 'shared_hash'),
+      'test-module-c': getModuleWithAggregatedStyles('test-module-c', 'unique-hash'),
     });
     const store = { getState: () => state, modules };
     expect(renderModuleStyles(store)).toMatchSnapshot();
@@ -67,7 +130,7 @@ describe('renderModuleStyles', () => {
   it('should not send empty styles', () => {
     const state = fromJS({
       holocron: {
-        loaded: iSet(['test-module-a', 'test-module-b', 'test-module-c']),
+        loaded: iSet(['test-module-a', 'test-module-b', 'test-module-c', 'test-module-d']),
       },
     });
     const moduleWithEmptyStyles = () => 0;
@@ -78,6 +141,7 @@ describe('renderModuleStyles', () => {
       'test-module-a': moduleWithoutStyles,
       'test-module-b': getModuleWithStyles('test-module-b'),
       'test-module-c': moduleWithEmptyStyles,
+      'test-module-d': getModuleWithAggregatedStyles('test-module-d'),
     });
     const store = { getState: () => state, modules };
     expect(renderModuleStyles(store)).toMatchSnapshot();

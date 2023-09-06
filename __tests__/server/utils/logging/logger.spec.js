@@ -13,12 +13,20 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+import deepmerge from 'deepmerge';
+
+jest.mock('yargs', () => ({
+  argv: {
+    logLevel: 'debug',
+  },
+}));
 
 describe('logger', () => {
   let logger;
-  let Lumberjack;
-  let productionFormatter;
-  let developmentFormatter;
+  let pino;
+  let productionConfig;
+  let baseConfig;
+  let developmentStream;
 
   function load(nodeEnv) {
     jest.resetModules();
@@ -29,40 +37,35 @@ describe('logger', () => {
       delete process.env.NODE_ENV;
     }
 
-    jest.mock('@americanexpress/lumberjack', () => jest.fn());
-    jest.mock('../../../../src/server/utils/logging/production-formatter', () => jest.fn(() => 'prod'));
-    jest.mock('../../../../src/server/utils/logging/development-formatters', () => ({
-      formatter: jest.fn(() => 'dev'),
-      beforeWrite: jest.fn(),
-      afterWrite: jest.fn(),
-    }));
-
-    Lumberjack = require('@americanexpress/lumberjack');
-    productionFormatter = require('../../../../src/server/utils/logging/production-formatter');
-    developmentFormatter = require('../../../../src/server/utils/logging/development-formatters');
-
+    jest.mock('pino', () => jest.fn(() => 'pino'));
+    pino = require('pino');
+    baseConfig = require('../../../../src/server/utils/logging/config/base').default;
+    productionConfig = require('../../../../src/server/utils/logging/config/production').default;
+    developmentStream = require('../../../../src/server/utils/logging/config/development').default;
     logger = require('../../../../src/server/utils/logging/logger').default;
   }
 
-  it('is an instance of @americanexpress/lumberjack', () => {
+  it('is pino logger', () => {
     load();
-    expect(logger).toBeInstanceOf(Lumberjack);
-    expect(logger).toBe(Lumberjack.mock.instances[0]);
+    expect(logger).toBe('pino');
   });
 
   it('uses the production formatter by default', () => {
     load();
-    expect(Lumberjack.mock.calls[0][0]).toHaveProperty('formatter', productionFormatter);
+    expect(pino).toHaveBeenCalledTimes(1);
+    expect(pino).toHaveBeenCalledWith(deepmerge(baseConfig, productionConfig), undefined);
   });
 
   it('uses a development formatter when NODE_ENV is development', () => {
     load('development');
-    expect(Lumberjack.mock.calls[0][0]).toBe(developmentFormatter);
+    expect(pino).toHaveBeenCalledTimes(1);
+    expect(pino).toHaveBeenCalledWith(baseConfig, developmentStream);
   });
 
   it('uses the production formatter when the log-format flag is set to machine', () => {
-    jest.mock('yargs', () => ({ argv: { logFormat: 'machine' } }));
+    jest.mock('yargs', () => ({ argv: { logFormat: 'machine', logLevel: 'info' } }));
     load();
-    expect(Lumberjack.mock.calls[0][0]).toHaveProperty('formatter', productionFormatter);
+    expect(pino).toHaveBeenCalledTimes(1);
+    expect(pino).toHaveBeenCalledWith(deepmerge(baseConfig, productionConfig), undefined);
   });
 });

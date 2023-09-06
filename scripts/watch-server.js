@@ -43,10 +43,12 @@ const buildServiceWorkerScripts = require('./build-service-workers');
   });
 
   const flags = process.argv.filter((arg) => [
-    '--root-module-name',
+    '--log-format',
+    '--log-level',
     '--module-map-url',
-    '--use-middleware',
+    '--root-module-name',
     '--use-host',
+    '--use-middleware',
   ].find((argName) => arg.startsWith(argName)));
 
   const nodemon = spawn('nodemon', [

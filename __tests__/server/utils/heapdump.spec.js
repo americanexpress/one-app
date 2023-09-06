@@ -14,6 +14,8 @@
  * permissions and limitations under the License.
  */
 
+import util from 'util';
+
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 
 describe('heapdump', () => {
@@ -114,7 +116,7 @@ describe('heapdump', () => {
       console.warn.mockClear();
       process.on.mock.calls[0][1]();
       expect(console.warn).toHaveBeenCalledTimes(1);
-      expect(console.warn.mock.calls[0][0]).toBe(`about to write a heapdump to /tmp/heapdump-${pid}-1525145998246.heapsnapshot`);
+      expect(util.format(...console.warn.mock.calls[0])).toBe(`about to write a heapdump to /tmp/heapdump-${pid}-1525145998246.heapsnapshot`);
       await waitForStreamToFinish(fs.createWriteStream.mock.results[0].value);
       await sleep(20); // also wait for the callback to run
     });
@@ -193,7 +195,7 @@ describe('heapdump', () => {
         await sleep(20); // also wait for the callback to run
         expect(console.error).not.toHaveBeenCalled();
         expect(console.warn).toHaveBeenCalledTimes(1);
-        expect(console.warn.mock.calls[0][0]).toBe(`wrote heapdump out to /tmp/heapdump-${pid}-1525145998246.heapsnapshot`);
+        expect(util.format(...console.warn.mock.calls[0])).toBe(`wrote heapdump out to /tmp/heapdump-${pid}-1525145998246.heapsnapshot`);
       });
     });
   });
