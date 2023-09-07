@@ -20,12 +20,13 @@ import rateLimit from '@fastify/rate-limit';
 import { register as metricsRegister, collectDefaultMetrics } from 'prom-client';
 
 import logging from './utils/logging/fastifyPlugin';
+import logger from './utils/logging/logger';
 import healthCheck from './plugins/healthCheck';
 
 collectDefaultMetrics();
 
 export async function createMetricsServer() {
-  const fastify = Fastify();
+  const fastify = Fastify({ logger, disableRequestLogging: true });
 
   await fastify.register(rateLimit, {
     max: 120,

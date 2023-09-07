@@ -11,7 +11,7 @@ export const setRedirectAllowList = (allowList) => {
   redirectAllowList = [];
   allowList.forEach((url) => {
     if (url.includes('http://')) {
-      console.error(`Insecure protocols (http://) are not allowed to be redirect locations. Ignoring '${url}' listed in redirectAlowList configuration.`);
+      console.error('Insecure protocols (http://) are not allowed to be redirect locations. Ignoring \'%s\' listed in redirectAlowList configuration.', url);
       return;
     }
     if (!url.includes('https://')) {

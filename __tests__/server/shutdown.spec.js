@@ -14,6 +14,8 @@
  * permissions and limitations under the License.
  */
 
+import util from 'util';
+
 describe('shutdown', () => {
   jest.spyOn(global, 'setTimeout').mockImplementation(() => {});
   jest.spyOn(global, 'setImmediate').mockImplementation(() => {});
@@ -114,7 +116,7 @@ describe('shutdown', () => {
         expect(setTimeout).toHaveBeenCalledTimes(1);
         setTimeout.mock.calls[0][0]();
         expect(console.error).toHaveBeenCalled();
-        expect(console.error.mock.calls).toMatchSnapshot();
+        expect(console.error.mock.calls.map((args) => util.format(...args))).toMatchSnapshot();
       });
 
       it('uses node unref to prevent the exit timeout from preventing exiting', () => {

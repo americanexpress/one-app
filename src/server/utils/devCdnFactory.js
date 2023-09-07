@@ -24,6 +24,7 @@ import Fastify from 'fastify';
 import ip from 'ip';
 import ProxyAgent from 'proxy-agent';
 import fetch from 'node-fetch';
+import logger from './logging/logger';
 
 const getLocalModuleMap = ({ pathToModuleMap, oneAppDevCdnAddress }) => {
   const moduleMap = JSON.parse(fs.readFileSync(pathToModuleMap, 'utf8').toString());
@@ -81,9 +82,7 @@ const consumeRemoteRequest = async (remoteModuleMapUrl, hostAddress, remoteModul
     });
     return remoteModuleMap;
   } catch (error) {
-    console.warn(
-      `one-app-dev-cdn error loading module map from ${remoteModuleMapUrl}: ${error}`
-    );
+    console.warn('one-app-dev-cdn error loading module map from %s:', remoteModuleMapUrl, error);
     return {};
   }
 };
@@ -103,7 +102,7 @@ export const oneAppDevCdnFactory = ({
   if (!appPort) { throw new Error('appPort is a required param'); }
 
   if (remoteModuleMapUrl) {
-    console.log(`one-app-dev-cdn loading module map from ${remoteModuleMapUrl}`);
+    console.log('one-app-dev-cdn loading module map from %s', remoteModuleMapUrl);
   } else {
     console.log('one-app-dev-cdn only using locally served modules');
   }
@@ -112,7 +111,7 @@ export const oneAppDevCdnFactory = ({
     console.error('do not include one-app-dev-cdn in production');
   }
 
-  const oneAppDevCdn = Fastify();
+  const oneAppDevCdn = Fastify({ logger, disableRequestLogging: true });
   oneAppDevCdn.register(compress, {
     global: false,
   });

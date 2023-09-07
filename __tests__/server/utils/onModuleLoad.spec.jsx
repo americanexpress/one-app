@@ -14,6 +14,7 @@
  * permissions and limitations under the License.
  */
 
+import util from 'util';
 import React from 'react';
 import { preprocessEnvVar } from '@americanexpress/env-config-utils';
 import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
@@ -441,7 +442,7 @@ describe('onModuleLoad', () => {
       moduleName: 'some-root',
     });
     expect(consoleInfoSpy).toHaveBeenCalledTimes(1);
-    expect(consoleInfoSpy).toHaveBeenCalledWith('Loaded module some-root@1.0.15');
+    expect(util.format(...consoleInfoSpy.mock.calls[0])).toBe('Loaded module some-root@1.0.15');
   });
 
   it('logs when other modules are loaded', () => {
@@ -450,7 +451,7 @@ describe('onModuleLoad', () => {
       moduleName: 'not-the-root-module',
     });
     expect(consoleInfoSpy).toHaveBeenCalledTimes(1);
-    expect(consoleInfoSpy).toHaveBeenCalledWith('Loaded module not-the-root-module@1.0.16');
+    expect(util.format(...consoleInfoSpy.mock.calls[0])).toBe('Loaded module not-the-root-module@1.0.16');
   });
 
   it('updates allowed safeRequest values from the root module', () => {

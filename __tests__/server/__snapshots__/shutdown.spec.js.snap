@@ -4,12 +4,8 @@ exports[`shutdown SIGINT forcibly exits if still running later on 1`] = `10000`;
 
 exports[`shutdown SIGINT writes an error message if still running later on 1`] = `
 [
-  [
-    "still running after 10s, forcibly shutting down",
-  ],
-  [
-    "shutting down, forcibly stopping node",
-  ],
+  "still running after 10s, forcibly shutting down",
+  "shutting down, forcibly stopping node",
 ]
 `;
 
@@ -25,12 +21,8 @@ exports[`shutdown SIGTERM forcibly exits if still running later on 1`] = `10000`
 
 exports[`shutdown SIGTERM writes an error message if still running later on 1`] = `
 [
-  [
-    "still running after 10s, forcibly shutting down",
-  ],
-  [
-    "shutting down, forcibly stopping node",
-  ],
+  "still running after 10s, forcibly shutting down",
+  "shutting down, forcibly stopping node",
 ]
 `;
 

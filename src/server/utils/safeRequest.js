@@ -139,7 +139,7 @@ export default function safeRequest(request, { useBodyForBuildingTheInitialState
       try {
         filteredRequest.body = JSON.parse(filteredRequest.body);
       } catch (err) {
-        console.error('request body cannot be parsed', filteredRequest.body);
+        request.log.error('request body cannot be parsed', filteredRequest.body);
       }
     }
   }
