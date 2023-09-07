@@ -62,7 +62,7 @@ jobs:
       - name: Print docker version
         run:  |
           echo "tag: ${{ steps.set_docker_version.outputs.docker_version }}"
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: "v${{ steps.set_docker_version.outputs.docker_version }}"
       - name: Docker login

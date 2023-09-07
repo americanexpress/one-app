@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged && ( github.head_ref == 'prepare-release-for-main' || github.head_ref == 'prepare-release-for-5.x.x'  ) && (github.base_ref == 'main' || github.base_ref == '5.x.x')
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: get commit message
         id: get-commit-message
         shell: bash
