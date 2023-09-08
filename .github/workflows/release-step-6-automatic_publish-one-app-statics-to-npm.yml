@@ -21,7 +21,7 @@ jobs:
           else
           echo ::set-output name=tagversion::${{ github.event.inputs.tag_version }}
           fi
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           ref: "v${{ steps.set_tag_version.outputs.tagversion}}"
       # Setup .npmrc file to publish to npm
