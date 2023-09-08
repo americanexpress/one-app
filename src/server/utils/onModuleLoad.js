@@ -50,7 +50,7 @@ export const setModulesUsingExternals = (moduleNames) => {
 };
 
 const logModuleLoad = (moduleName, moduleVersion) => {
-  console.info(`Loaded module ${moduleName}@${moduleVersion}`);
+  console.info('Loaded module %s@%s', moduleName, moduleVersion);
 };
 
 function validateConfig(configValidators, config) {
@@ -160,9 +160,7 @@ export default function onModuleLoad({
   }
 
   if (providedExternals) {
-    console.warn(
-      `Module ${moduleName} attempted to provide externals. Only the root module can provide externals.`
-    );
+    console.warn('Module %s attempted to provide externals. Only the root module can provide externals.', moduleName);
   }
 
   if (requiredExternals) {

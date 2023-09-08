@@ -19,7 +19,7 @@ import {
   printStatusCode,
   printStatusMessage,
   printDurationTime,
-} from '../../../../../src/server/utils/logging/development-formatters/utils';
+} from '../../../../src/server/utils/logging/utils';
 
 jest.mock('chalk');
 

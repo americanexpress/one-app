@@ -33,7 +33,7 @@ if (process.execArgv.includes('--report-on-signal')) {
 
 process.on('SIGUSR2', async () => {
   const targetFilename = `/tmp/heapdump-${process.pid}-${Date.now()}.heapsnapshot`;
-  console.warn(`about to write a heapdump to ${targetFilename}`);
+  console.warn('about to write a heapdump to %s', targetFilename);
   const heapStream = v8.getHeapSnapshot();
   const fileStream = fs.createWriteStream(targetFilename);
 
@@ -44,5 +44,5 @@ process.on('SIGUSR2', async () => {
     console.error('unable to write heapdump', err);
     return;
   }
-  console.warn(`wrote heapdump out to ${targetFilename}`);
+  console.warn('wrote heapdump out to %s', targetFilename);
 });

@@ -31,7 +31,7 @@ export const setEventLoopDelayThreshold = (n) => {
 // Default to p(100) to avoid breaking change for users expecting max delay
 export const setEventLoopDelayPercentile = (n = 100) => {
   if (n !== Number.parseInt(n, 10) || n < 1 || n > 100) {
-    console.warn(`Event loop percentile must be an integer in range 1-100; given ${JSON.stringify(n)}. Defaulting to p(100).`);
+    console.warn('Event loop percentile must be an integer in range 1-100; given %s. Defaulting to p(100).', JSON.stringify(n));
     eventLoopDelayPercentile = 100;
     return;
   }
@@ -86,8 +86,8 @@ const createCircuitBreaker = (asyncFunctionThatMightFail) => {
   breaker.healthCheck(checkEventLoopDelay, 5e3);
   clearAndResetHistorgramResetInterval();
   // Log when circuit breaker opens and closes
-  breaker.on('open', () => console.log(`Circuit breaker [${asyncFunctionThatMightFail.name}] opened`));
-  breaker.on('close', () => console.log(`Circuit breaker [${asyncFunctionThatMightFail.name}] closed`));
+  breaker.on('open', () => console.log('Circuit breaker [%s] opened', asyncFunctionThatMightFail.name));
+  breaker.on('close', () => console.log('Circuit breaker [%s] closed', asyncFunctionThatMightFail.name));
   breaker.on('healthCheckFailed', (error) => console.error(error));
   // Track circuit breaker metrics
   registerCircuitBreaker(breaker);

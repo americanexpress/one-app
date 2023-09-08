@@ -16,10 +16,26 @@
 
 import url from 'url';
 
+jest.mock('yargs', () => ({
+  argv: {
+    logLevel: 'debug',
+  },
+}));
+
 describe('setup', () => {
   let monkeypatches;
   let logger;
   let startTimer;
+
+  const logMethods = ['error', 'warn', 'log', 'info', 'debug'];
+  const originalConsole = logMethods.reduce((acc, curr) => ({
+    ...acc,
+    [curr]: console[curr],
+  }), {});
+
+  afterEach(() => {
+    logMethods.forEach((method) => { console[method] = originalConsole[method]; });
+  });
 
   function load() {
     jest.resetModules();
@@ -29,18 +45,19 @@ describe('setup', () => {
       startTimer: jest.fn(),
       measureTime: jest.fn(() => 12),
     }));
-    jest.mock('../../../../src/server/utils/logging/logger', () => ({ info: jest.fn() }));
-
     ({ monkeypatches } = require('@americanexpress/lumberjack'));
     ({ startTimer } = require('../../../../src/server/utils/logging/timing'));
-    logger = require('../../../../src/server/utils/logging/logger');
+    logger = require('../../../../src/server/utils/logging/logger').default;
     require('../../../../src/server/utils/logging/setup');
+    jest.spyOn(logger, 'info').mockImplementation(() => 0);
   }
 
   it('replaces the global console with logger', () => {
     load();
-    expect(monkeypatches.replaceGlobalConsole).toHaveBeenCalledTimes(1);
-    expect(monkeypatches.replaceGlobalConsole).toHaveBeenCalledWith(logger);
+    logMethods.forEach((method) => {
+      expect(console[method].name).toBe('bound hookWrappedLog');
+      expect(console[method]).not.toBe(originalConsole[method]);
+    });
   });
 
   it('spies on HTTP requests', () => {
