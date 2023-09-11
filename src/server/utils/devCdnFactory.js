@@ -26,6 +26,11 @@ import ProxyAgent from 'proxy-agent';
 import fetch from 'node-fetch';
 import logger from './logging/logger';
 
+import { getCachedModules, writeToCache, removeDuplicatedModules } from './cdnCache';
+
+let moduleNames = [];
+const cachedModules = getCachedModules();
+
 const getLocalModuleMap = ({ pathToModuleMap, oneAppDevCdnAddress }) => {
   const moduleMap = JSON.parse(fs.readFileSync(pathToModuleMap, 'utf8').toString());
   Object.keys(moduleMap.modules).forEach((moduleName) => {
@@ -124,12 +129,10 @@ export const oneAppDevCdnFactory = ({
   });
 
   // for locally served modules
-
   oneAppDevCdn.register(fastifyStatic, {
     root: `${localDevPublicPath}/modules`,
     prefix: `${routePrefix}/modules`,
     index: false,
-
   });
 
   const remoteModuleBaseUrls = [];
@@ -154,7 +157,7 @@ export const oneAppDevCdnFactory = ({
         ...localMap.modules,
       },
     };
-
+    moduleNames = Object.keys(map.modules);
     reply
       .code(200)
       .send(map);
@@ -169,15 +172,29 @@ export const oneAppDevCdnFactory = ({
         remoteModuleBaseUrls
       );
       const remoteModuleBaseUrlOrigin = new URL(knownRemoteModuleBaseUrl).origin;
+      if (cachedModules[incomingRequestPath]) {
+        return reply
+          .code(200)
+          .type('application/json')
+          .send(cachedModules[incomingRequestPath]);
+      }
       const remoteModuleResponse = await fetch(`${remoteModuleBaseUrlOrigin}/${incomingRequestPath}`, {
         headers: { connection: 'keep-alive' },
         agent: new ProxyAgent(),
       });
       const { status, type } = remoteModuleResponse;
+      const responseText = await remoteModuleResponse.text();
+      const updatedCachedModules = removeDuplicatedModules(
+        incomingRequestPath,
+        cachedModules,
+        moduleNames
+      );
+      updatedCachedModules[incomingRequestPath] = responseText;
+      writeToCache(updatedCachedModules);
       reply
         .code(status)
         .type(type)
-        .send(await remoteModuleResponse.text());
+        .send(responseText);
     } else {
       reply
         .code(404)
