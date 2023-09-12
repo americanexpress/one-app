@@ -18,9 +18,9 @@ import util from 'util';
 import React from 'react';
 import { preprocessEnvVar } from '@americanexpress/env-config-utils';
 import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
+import { clearModulesUsingExternals } from 'holocron';
+
 import onModuleLoad, {
-  setModulesUsingExternals,
-  getModulesUsingExternals,
   CONFIGURATION_KEY,
   validateCspIsPresent,
 } from '../../../src/server/utils/onModuleLoad';
@@ -29,7 +29,10 @@ import onModuleLoad, {
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from '../../../src/server/utils/stateConfig';
 import { setRedirectAllowList } from '../../../src/server/utils/redirectAllowList';
 import { setCorsOrigins } from '../../../src/server/plugins/conditionallyAllowCors';
-import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from '../../../src/server/utils/safeRequest';
+import {
+  extendRestrictedAttributesAllowList,
+  validateSafeRequestRestrictedAttributes,
+} from '../../../src/server/utils/safeRequest';
 import { setConfigureRequestLog } from '../../../src/server/utils/logging/fastifyPlugin';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
 import { getEventLoopDelayThreshold, getEventLoopDelayPercentile } from '../../../src/server/utils/createCircuitBreaker';
@@ -37,6 +40,9 @@ import setupDnsCache from '../../../src/server/utils/setupDnsCache';
 import { configurePWA } from '../../../src/server/pwa';
 import { setErrorPage } from '../../../src/server/plugins/reactHtml/staticErrorPage';
 
+jest.mock('holocron', () => ({
+  clearModulesUsingExternals: jest.fn(),
+}));
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   setStateConfig: jest.fn(),
   getClientStateConfig: jest.fn(),
@@ -46,7 +52,9 @@ jest.mock('../../../src/server/utils/redirectAllowList', () => ({
   setRedirectAllowList: jest.fn(),
 }));
 jest.mock('@americanexpress/env-config-utils');
-jest.mock('../../../src/server/utils/readJsonFile', () => () => ({ buildVersion: '4.43.0-0-38f0178d' }));
+jest.mock('../../../src/server/utils/readJsonFile', () => () => ({
+  buildVersion: '4.43.0-0-38f0178d',
+}));
 jest.mock('../../../src/server/plugins/conditionallyAllowCors', () => ({
   setCorsOrigins: jest.fn(),
 }));
@@ -73,6 +81,7 @@ describe('onModuleLoad', () => {
   const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => null);
 
   beforeEach(() => {
+    process.env.ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS = 'false';
     process.env.ONE_DANGEROUSLY_DISABLE_CSP = 'false';
     global.getTenantRootModule = () => RootModule;
     jest.resetAllMocks();
@@ -84,42 +93,34 @@ describe('onModuleLoad', () => {
     }));
   });
 
-  afterEach(() => {
-    setModulesUsingExternals([]);
-  });
-
   it('does not do anything if there is not an environment variable config', () => {
-    expect(
-      () => onModuleLoad({ module: { [META_DATA_KEY]: { version: '1.0.0' } } })
-    ).not.toThrow();
+    expect(() => onModuleLoad({ module: { [META_DATA_KEY]: { version: '1.0.0' } } })).not.toThrow();
     expect(preprocessEnvVar).not.toHaveBeenCalled();
   });
 
   it('does not throw when the one app version is compatible', () => {
-    expect(
-      () => onModuleLoad({
-        module: {
-          [CONFIGURATION_KEY]: {
-            appCompatibility: '^4.41.0',
-          },
-          [META_DATA_KEY]: { version: '1.0.1' },
+    expect(() => onModuleLoad({
+      module: {
+        [CONFIGURATION_KEY]: {
+          appCompatibility: '^4.41.0',
         },
-        moduleName: 'some-module',
-      })
+        [META_DATA_KEY]: { version: '1.0.1' },
+      },
+      moduleName: 'some-module',
+    })
     ).not.toThrow();
   });
 
   it('throws when the one app version is incompatible', () => {
-    expect(
-      () => onModuleLoad({
-        module: {
-          [CONFIGURATION_KEY]: {
-            appCompatibility: '~4.41.0',
-          },
-          [META_DATA_KEY]: { version: '1.0.2' },
+    expect(() => onModuleLoad({
+      module: {
+        [CONFIGURATION_KEY]: {
+          appCompatibility: '~4.41.0',
         },
-        moduleName: 'some-module',
-      })
+        [META_DATA_KEY]: { version: '1.0.2' },
+      },
+      moduleName: 'some-module',
+    })
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -159,7 +160,8 @@ describe('onModuleLoad', () => {
         [META_DATA_KEY]: { version: '1.0.4' },
       },
       moduleName: 'some-module',
-    })).not.toThrow();
+    })
+    ).not.toThrow();
   });
 
   it('calls setStateConfig if provideStateConfig is supplied', () => {
@@ -226,10 +228,14 @@ describe('onModuleLoad', () => {
         'dep-c': '>1.0.0',
       },
     };
-    expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.7' } }, moduleName: 'my-awesome-module' })).not.toThrow();
+    expect(() => onModuleLoad({
+      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.7' } },
+      moduleName: 'my-awesome-module',
+    })
+    ).not.toThrow();
   });
 
-  it('warns if a module that isn\'t the root module attempts to provide externals', () => {
+  it("warns if a module that isn't the root module attempts to provide externals", () => {
     const configuration = {
       providedExternals: {
         'dep-b': {
@@ -237,96 +243,12 @@ describe('onModuleLoad', () => {
           module: () => null,
         },
       },
-
     };
-    onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.8' } }, moduleName: 'my-awesome-module' });
+    onModuleLoad({
+      module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.8' } },
+      moduleName: 'my-awesome-module',
+    });
     expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('throws if the root module does not provide the expected external', () => {
-    RootModule[CONFIGURATION_KEY] = {
-      providedExternals: {
-        'dep-a': { version: '2.1.0', module: () => 0 },
-      },
-    };
-    const configuration = {
-      requiredExternals: {
-        'dep-b': '^2.0.0',
-      },
-    };
-    expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.9' } }, moduleName: 'my-awesome-module' })).toThrowErrorMatchingSnapshot();
-  });
-
-  it('throws if the root module provides an incompatible version of a required external', () => {
-    RootModule[CONFIGURATION_KEY].providedExternals = {
-      'dep-a': { version: '2.1.0', module: () => 0 },
-    };
-    const configuration = {
-      requiredExternals: {
-        'dep-a': '^2.1.1',
-      },
-    };
-    expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.10' } }, moduleName: 'my-awesome-module' })).toThrowErrorMatchingSnapshot();
-  });
-
-  it('includes messages about all missing or incompatible externals', () => {
-    RootModule[CONFIGURATION_KEY] = {
-      providedExternals: {
-        'dep-a': { version: '3.2.0', module: () => 0 },
-        'dep-b': { version: '5.9.6', module: () => 0 },
-        'dep-c': { version: '3.0.10', module: () => 0 },
-      },
-    };
-    const configuration = {
-      requiredExternals: {
-        'dep-a': '^2.0.0',
-        'dep-b': '~5.8.0',
-        'dep-c': '>1.0.0',
-        'dep-d': '^3.1.2',
-      },
-    };
-    expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.11' } }, moduleName: 'my-awesome-module' })).toThrowErrorMatchingSnapshot();
-  });
-
-  it('logs a warning if the root module provides an incompatible version of a required external and ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS is set to true', () => {
-    process.env.ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS = true;
-    RootModule[CONFIGURATION_KEY].providedExternals = {
-      'dep-a': { version: '2.1.0', module: () => 0 },
-    };
-    const configuration = {
-      requiredExternals: {
-        'dep-a': '^2.1.1',
-      },
-    };
-    expect(() => onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.10' } }, moduleName: 'my-awesome-module' })).not.toThrow();
-    expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('keeps track of the externals a module is using', () => {
-    RootModule[CONFIGURATION_KEY] = {
-      providedExternals: {
-        'dep-a': { version: '2.1.0', module: () => 0 },
-        'dep-b': { version: '5.8.6', module: () => 0 },
-        'dep-c': { version: '3.0.10', module: () => 0 },
-      },
-    };
-    const configuration = {
-      requiredExternals: {
-        'dep-a': '^2.0.0',
-        'dep-b': '~5.8.0',
-      },
-    };
-    expect(getModulesUsingExternals()).toEqual([]);
-    onModuleLoad({ module: { [CONFIGURATION_KEY]: configuration, [META_DATA_KEY]: { version: '1.0.12' } }, moduleName: 'my-awesome-module' });
-    expect(getModulesUsingExternals()).toEqual(['my-awesome-module']);
-  });
-
-  it('clears the modules using externals when loading the root module', () => {
-    const modulesUsingExternals = ['a', 'b', 'c'];
-    setModulesUsingExternals(modulesUsingExternals);
-    expect(getModulesUsingExternals()).toEqual(modulesUsingExternals);
-    onModuleLoad({ module: { [CONFIGURATION_KEY]: { csp }, [META_DATA_KEY]: { version: '1.0.13' } }, moduleName: 'some-root' });
-    expect(getModulesUsingExternals()).toEqual([]);
   });
 
   it('validates csp added to the root module', () => {
@@ -454,6 +376,11 @@ describe('onModuleLoad', () => {
     expect(util.format(...consoleInfoSpy.mock.calls[0])).toBe('Loaded module not-the-root-module@1.0.16');
   });
 
+  it('clears the modules using externals when loading the root module', () => {
+    onModuleLoad({ module: { [CONFIGURATION_KEY]: { csp }, [META_DATA_KEY]: { version: '1.0.13' } }, moduleName: 'some-root' });
+    expect(clearModulesUsingExternals).toHaveBeenCalled();
+  });
+
   it('updates allowed safeRequest values from the root module', () => {
     onModuleLoad({
       module: {
@@ -502,7 +429,9 @@ describe('onModuleLoad', () => {
     expect(setConfigureRequestLog).toHaveBeenCalledWith(configureRequestLog);
   });
   it('Throws error if csp and ONE_DANGEROUSLY_DISABLE_CSP is not set', () => {
-    expect(() => validateCspIsPresent(missingCsp)).toThrow('Root module must provide a valid content security policy.');
+    expect(() => validateCspIsPresent(missingCsp)).toThrow(
+      'Root module must provide a valid content security policy.'
+    );
   });
 
   it('Does not throw if valid csp is present', () => {
