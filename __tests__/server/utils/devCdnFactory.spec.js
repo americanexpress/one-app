@@ -21,9 +21,18 @@ import path from 'path';
 import mkdirp from 'mkdirp';
 import ProxyAgent from 'proxy-agent';
 import oneAppDevCdn from '../../../src/server/utils/devCdnFactory';
+import { removeDuplicatedModules } from '../../../src/server/utils/cdnCache';
 
 jest.mock('node-fetch');
 jest.mock('pino');
+
+jest.mock('../../../src/server/utils/cdnCache', () => ({
+  getCachedModules: jest.fn(() => ({
+    '/cdn/module-b/1.0.0/module-c.node.js': 'console.log("c");',
+  })),
+  writeToCache: jest.fn(() => ({})),
+  removeDuplicatedModules: jest.fn(() => ({})),
+}));
 
 const pathToStubs = path.join(__dirname, 'stubs');
 const pathToCache = path.join(__dirname, '..', '.cache');
@@ -35,6 +44,7 @@ describe('one-app-dev-cdn', () => {
   jest.spyOn(console, 'warn');
   jest.spyOn(console, 'log');
   jest.spyOn(console, 'error');
+
   const defaultLocalMap = {
     key: 'not-used-in-development',
     modules: {
@@ -142,6 +152,7 @@ describe('one-app-dev-cdn', () => {
         },
       },
     };
+    removeDuplicatedModules.mockImplementation(() => ({}));
     fetch.mockImplementation((url) => Promise.reject(new Error(`no mock for ${url} set up`)));
   });
 
@@ -547,6 +558,32 @@ describe('one-app-dev-cdn', () => {
           },
         ],
       ]);
+    });
+
+    it('gets remote modules from cached data if incoming url is matching', async () => {
+      expect.assertions(6);
+      const fcdn = setupTest({
+        useLocalModules: false,
+        appPort: 3000,
+        remoteModuleMapUrl: 'https://example.com/module-map.json',
+      });
+      fetch.mockReturnJsonOnce(defaultRemoteMap);
+      fetch.mockReturnFileOnce('console.log("a");');
+
+      const moduleMapResponse = await fcdn.inject()
+        .get('/module-map.json');
+
+      expect(moduleMapResponse.statusCode).toBe(200);
+      expect(moduleMapResponse.headers['content-type']).toMatch(/^application\/json/);
+      expect(
+        sanitizeModuleMapForSnapshot(moduleMapResponse.body)
+      ).toMatchSnapshot('module map response');
+
+      const moduleResponse = await fcdn.inject()
+        .get('/cdn/module-b/1.0.0/module-c.node.js');
+      expect(moduleResponse.statusCode).toBe(200);
+      expect(moduleResponse.headers['content-type']).toMatch('application/json');
+      expect(moduleResponse.body).toBe('console.log("c");');
     });
 
     it('returns a 404 if a request for something not known as a module from the module map comes in', async () => {
