@@ -15,7 +15,7 @@
  */
 
 import { areModuleEntriesEqual } from 'holocron/server';
-import { getModulesUsingExternals } from './onModuleLoad';
+import { getModulesUsingExternals } from 'holocron';
 import { getServerStateConfig } from './stateConfig';
 
 export default function getModulesToUpdate(curr, next) {
@@ -28,6 +28,6 @@ export default function getModulesToUpdate(curr, next) {
   const rootUpdated = !areModuleEntriesEqual(curr[rootModuleName], next[rootModuleName]);
   return Object.keys(next)
     .filter((moduleName) => !areModuleEntriesEqual(curr[moduleName], next[moduleName])
-    || (rootUpdated && modulesUsingExternals.includes(moduleName))
+      || (rootUpdated && modulesUsingExternals.includes(moduleName))
     );
 }

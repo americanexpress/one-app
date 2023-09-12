@@ -17,9 +17,11 @@
 import util from 'node:util';
 import Fastify from 'fastify';
 import { fromJS } from 'immutable';
+import { setRequiredExternalsRegistry } from 'holocron';
 import reactHtml, {
   sendHtml,
   renderModuleScripts,
+  renderExternalFallbacks,
   checkStateForRedirectAndStatusCode,
 } from '../../../../src/server/plugins/reactHtml';
 // _client is a method to control the mock
@@ -28,7 +30,10 @@ import { getClientStateConfig } from '../../../../src/server/utils/stateConfig';
 // _setVars is a method to control the mock
 // eslint-disable-next-line import/named
 import transit from '../../../../src/universal/utils/transit';
-import { setClientModuleMapCache, getClientModuleMapCache } from '../../../../src/server/utils/clientModuleMapCache';
+import {
+  setClientModuleMapCache,
+  getClientModuleMapCache,
+} from '../../../../src/server/utils/clientModuleMapCache';
 import { getClientPWAConfig, getServerPWAConfig } from '../../../../src/server/pwa/config';
 import createRequestStoreHook from '../../../../src/server/plugins/reactHtml/createRequestStore';
 import createRequestHtmlFragmentHook from '../../../../src/server/plugins/reactHtml/createRequestHtmlFragment';
@@ -60,12 +65,11 @@ jest.mock('holocron', () => {
 
 jest.mock('@americanexpress/fetch-enhancers', () => ({
   createTimeoutFetch: jest.fn(
-    (timeout) => (next) => (url) => next(url)
-      .then((reply) => {
-        // eslint-disable-next-line no-param-reassign
-        reply.timeout = timeout;
-        return reply;
-      })
+    (timeout) => (next) => (url) => next(url).then((reply) => {
+      // eslint-disable-next-line no-param-reassign
+      reply.timeout = timeout;
+      return reply;
+    })
   ),
 }));
 jest.mock('../../../../src/server/utils/stateConfig');
@@ -109,7 +113,7 @@ jest.mock('../../../../src/server/utils/readJsonFile', () => (filePath) => {
         'legacy/vendors.js': 'def',
       };
     default:
-      throw new Error('Couldn\'t find JSON file to read');
+      throw new Error("Couldn't find JSON file to read");
   }
 });
 jest.mock('../../../../src/server/pwa/config', () => ({
@@ -243,7 +247,8 @@ describe('reactHtml', () => {
     request = jest.fn();
     request.headers = {
       // we need a legitimate user-agent string here to test between modern and legacy browsers
-      'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36',
+      'user-agent':
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36',
     };
     request.url = 'http://example.com/request';
     request.store = {
@@ -254,7 +259,8 @@ describe('reactHtml', () => {
         }),
         intl: fromJS({ activeLocale: 'en-US' }),
         rendering: fromJS({}),
-      })),
+      })
+      ),
     };
     request.clientModuleMapCache = getClientModuleMapCache();
     request.appHtml = appHtml;
@@ -284,10 +290,7 @@ describe('reactHtml', () => {
       return body;
     }
 
-    return body.replace(
-      /window\.__INITIAL_STATE__(.+)\n/,
-      '{removed_initial_state}\n'
-    );
+    return body.replace(/window\.__INITIAL_STATE__(.+)\n/, '{removed_initial_state}\n');
   }
 
   describe('sendHtml', () => {
@@ -305,7 +308,7 @@ describe('reactHtml', () => {
         'window.__webpack_public_path__ = "/cdnUrl/app/1.2.3-rc.4-abc123/";'
       );
       expect(reply.send.mock.calls[0][0]).toContain(
-        'window.__holocron_module_bundle_type__ = \'browser\';'
+        "window.__holocron_module_bundle_type__ = 'browser';"
       );
       expect(reply.send.mock.calls[0][0]).toContain(
         'window.__CLIENT_HOLOCRON_MODULE_MAP__ = {"modules":{"test-root":{"baseUrl":"https://example.com/cdn/test-root/2.2.2/","browser":{"url":"https://example.com/cdn/test-root/2.2.2/test-root.browser.js","integrity":"nggdfhr34"}}}};'
@@ -327,7 +330,7 @@ describe('reactHtml', () => {
 
       expect(reply.send.mock.calls[0][0]).toContain(appHtml);
       expect(reply.send.mock.calls[0][0]).toContain(
-        'window.__holocron_module_bundle_type__ = \'legacyBrowser\';'
+        "window.__holocron_module_bundle_type__ = 'legacyBrowser';"
       );
       expect(reply.send.mock.calls[0][0]).toContain(
         'window.__CLIENT_HOLOCRON_MODULE_MAP__ = {"modules":{"test-root":{"baseUrl":"https://example.com/cdn/test-root/2.2.2/","legacyBrowser":{"url":"https://example.com/cdn/test-root/2.2.2/test-root.legacy.browser.js","integrity":"7567ee"}}}};'
@@ -380,8 +383,12 @@ describe('reactHtml', () => {
     it('sends a rendered page with the one-app script tags', () => {
       sendHtml(request, reply);
       expect(reply.send).toHaveBeenCalledTimes(1);
-      expect(reply.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/bundle~common.js" integrity="1234" crossorigin="anonymous"></script>');
-      expect(reply.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/app.js" integrity="098" crossorigin="anonymous"></script>');
+      expect(reply.send.mock.calls[0][0]).toContain(
+        '<script src="/cdnUrl/app/1.2.3-rc.4-abc123/bundle~common.js" integrity="1234" crossorigin="anonymous"></script>'
+      );
+      expect(reply.send.mock.calls[0][0]).toContain(
+        '<script src="/cdnUrl/app/1.2.3-rc.4-abc123/app.js" integrity="098" crossorigin="anonymous"></script>'
+      );
     });
 
     it('sends a rendered page with the legacy app bundle according to the user agent', () => {
@@ -389,14 +396,20 @@ describe('reactHtml', () => {
       request.headers['user-agent'] = 'Browser/5.0 (compatible; NUEI 100.0; Doors TX 81.4; rv:11)';
       sendHtml(request, reply);
       expect(reply.send).toHaveBeenCalledTimes(1);
-      expect(reply.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/legacy/bundle~common.js" integrity="abc" crossorigin="anonymous"></script>');
-      expect(reply.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/legacy/app.js" integrity="zyx" crossorigin="anonymous"></script>');
+      expect(reply.send.mock.calls[0][0]).toContain(
+        '<script src="/cdnUrl/app/1.2.3-rc.4-abc123/legacy/bundle~common.js" integrity="abc" crossorigin="anonymous"></script>'
+      );
+      expect(reply.send.mock.calls[0][0]).toContain(
+        '<script src="/cdnUrl/app/1.2.3-rc.4-abc123/legacy/app.js" integrity="zyx" crossorigin="anonymous"></script>'
+      );
     });
 
     it('sends a rendered page with the locale data script tag', () => {
       sendHtml(request, reply);
       expect(reply.send).toHaveBeenCalledTimes(1);
-      expect(reply.send.mock.calls[0][0]).toContain('<script src="/cdnUrl/app/1.2.3-rc.4-abc123/i18n/en-US.js"');
+      expect(reply.send.mock.calls[0][0]).toContain(
+        '<script src="/cdnUrl/app/1.2.3-rc.4-abc123/i18n/en-US.js"'
+      );
     });
 
     it('sends a rendered page without the locale data script tag when the activeLocale is not known', () => {
@@ -409,7 +422,8 @@ describe('reactHtml', () => {
           }),
           intl: fromJS({ activeLocale: 'tlh' }),
           rendering: fromJS({}),
-        })),
+        })
+        ),
       };
       sendHtml(request, reply);
       expect(reply.send).toHaveBeenCalledTimes(1);
@@ -438,13 +452,17 @@ describe('reactHtml', () => {
 
     it('sends the static error page when the store malfunctions', () => {
       request.store = {
-        getState: jest.fn(() => { throw new Error('cannot get state'); }),
+        getState: jest.fn(() => {
+          throw new Error('cannot get state');
+        }),
       };
       sendHtml(request, reply);
       expect(request.log.error).toHaveBeenCalled();
       expect(reply.send).toHaveBeenCalledTimes(1);
       expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
-      expect(reply.send.mock.calls[0][0]).toContain('<meta name="application-name" content="one-app">');
+      expect(reply.send.mock.calls[0][0]).toContain(
+        '<meta name="application-name" content="one-app">'
+      );
       expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
     });
 
@@ -500,7 +518,9 @@ describe('reactHtml', () => {
       it('includes __pwa_metadata__ with disabled values', () => {
         sendHtml(request, reply);
         expect(reply.send).toHaveBeenCalledTimes(1);
-        expect(reply.send.mock.calls[0][0]).toContain('window.__pwa_metadata__ = {"serviceWorker":false');
+        expect(reply.send.mock.calls[0][0]).toContain(
+          'window.__pwa_metadata__ = {"serviceWorker":false'
+        );
       });
 
       it('includes __pwa_metadata__ with enabled values', () => {
@@ -516,7 +536,11 @@ describe('reactHtml', () => {
         expect(reply.send.mock.calls[0][0]).toContain(
           'window.__pwa_metadata__ = {"serviceWorker":true,"serviceWorkerScope":"/","serviceWorkerScriptUrl":"/_/pwa/service-worker.js","webManifestUrl":"/_/pwa/manifest.webmanifest","offlineUrl":"/_/pwa/shell"};'
         );
-        expect(/<link rel="manifest" href="\/_\/pwa\/manifest\.webmanifest">/.test(reply.send.mock.calls[0][0])).toBe(true);
+        expect(
+          /<link rel="manifest" href="\/_\/pwa\/manifest\.webmanifest">/.test(
+            reply.send.mock.calls[0][0]
+          )
+        ).toBe(true);
       });
     });
 
@@ -532,12 +556,15 @@ describe('reactHtml', () => {
             rendering: fromJS({
               renderPartialOnly: true,
             }),
-          })),
+          })
+          ),
         };
         setFullMap();
       });
 
-      afterEach(() => { request.appHtml = appHtml; });
+      afterEach(() => {
+        request.appHtml = appHtml;
+      });
 
       it('sends an incomplete HTML document with styles', () => {
         sendHtml(request, reply);
@@ -545,7 +572,9 @@ describe('reactHtml', () => {
         expect(reply.send.mock.calls[0][0]).not.toContain('<!DOCTYPE html>');
         expect(reply.send.mock.calls[0][0]).not.toContain('<title>One App</title>');
 
-        expect(reply.send.mock.calls[0][0]).toBe(`<style class="ssr-css">.class { background: red; }</style>${appHtml}`);
+        expect(reply.send.mock.calls[0][0]).toBe(
+          `<style class="ssr-css">.class { background: red; }</style>${appHtml}`
+        );
         expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
       });
 
@@ -556,7 +585,9 @@ describe('reactHtml', () => {
         expect(reply.send.mock.calls[0][0]).not.toContain('<!DOCTYPE html>');
         expect(reply.send.mock.calls[0][0]).not.toContain('<title>One App</title>');
 
-        expect(reply.send.mock.calls[0][0]).toBe(`<!doctype html><html><head><title>Some Title</title><style class="ssr-css">.class { background: red; }</style></head>${appHtml}</html>`);
+        expect(reply.send.mock.calls[0][0]).toBe(
+          `<!doctype html><html><head><title>Some Title</title><style class="ssr-css">.class { background: red; }</style></head>${appHtml}</html>`
+        );
         expect(removeInitialState(reply.send.mock.calls[0][0])).not.toContain('undefined');
       });
 
@@ -571,10 +602,13 @@ describe('reactHtml', () => {
             renderPartialOnly: true,
             disableStyles: true,
           }),
-        }));
+        })
+        );
         sendHtml(request, reply);
         expect(reply.send).toHaveBeenCalledTimes(1);
-        expect(reply.send.mock.calls[0][0]).toBe(`<!doctype html><html><head><title>Some Title</title></head>${appHtml}</html>`);
+        expect(reply.send.mock.calls[0][0]).toBe(
+          `<!doctype html><html><head><title>Some Title</title></head>${appHtml}</html>`
+        );
       });
     });
 
@@ -591,12 +625,15 @@ describe('reactHtml', () => {
               renderTextOnly: true,
               renderTextOnlyOptions: { htmlTagReplacement: '', allowedHtmlTags: [] },
             }),
-          })),
+          })
+          ),
         };
         setFullMap();
       });
 
-      afterEach(() => { request.appHtml = appHtml; });
+      afterEach(() => {
+        request.appHtml = appHtml;
+      });
 
       it('sends a text only response with no HTML present', () => {
         request.appHtml = 'text only without html';
@@ -628,7 +665,8 @@ describe('reactHtml', () => {
             rendering: fromJS({
               disableScripts: true,
             }),
-          })),
+          })
+          ),
         };
         setFullMap();
       });
@@ -658,7 +696,11 @@ describe('reactHtml', () => {
           meta: { toString: jest.fn(() => '<meta>') },
           style: { toString: jest.fn(() => '<style>.style</style>') },
           script: { toString: jest.fn(() => '<script>/*script*/</script>') },
-          link: { toString: jest.fn(() => '<link rel="stylesheet" /><link rel="icon" href="favicon.ico" />') },
+          link: {
+            toString: jest.fn(
+              () => '<link rel="stylesheet" /><link rel="icon" href="favicon.ico" />'
+            ),
+          },
           base: { toString: jest.fn(() => '<base>') },
         };
         sendHtml(request, reply);
@@ -678,7 +720,8 @@ describe('reactHtml', () => {
             rendering: fromJS({
               disableStyles: true,
             }),
-          })),
+          })
+          ),
         };
         setFullMap();
       });
@@ -693,7 +736,11 @@ describe('reactHtml', () => {
           meta: { toString: jest.fn(() => '<meta>') },
           style: { toString: jest.fn(() => '<style>.style</style>') },
           script: { toString: jest.fn(() => '<script>/*script*/</script>') },
-          link: { toString: jest.fn(() => '<link rel="stylesheet" /><link rel="icon" href="favicon.ico" />') },
+          link: {
+            toString: jest.fn(
+              () => '<link rel="stylesheet" /><link rel="icon" href="favicon.ico" />'
+            ),
+          },
           base: { toString: jest.fn(() => '<base>') },
         };
         sendHtml(request, reply);
@@ -710,7 +757,11 @@ describe('reactHtml', () => {
           meta: { toString: jest.fn(() => '<meta>') },
           style: { toString: jest.fn(() => '<style>.style</style>') },
           script: { toString: jest.fn(() => '<script>/*script*/</script>') },
-          link: { toString: jest.fn(() => '<link rel="stylesheet" /><link rel="icon" href="favicon.ico" />') },
+          link: {
+            toString: jest.fn(
+              () => '<link rel="stylesheet" /><link rel="icon" href="favicon.ico" />'
+            ),
+          },
           base: { toString: jest.fn(() => '<base>') },
         };
         sendHtml(request, reply);
@@ -746,41 +797,49 @@ describe('reactHtml', () => {
     });
 
     it('adds cache busting clientCacheRevision from module map to each module script src if NODE_ENV is production', () => {
-      expect(renderModuleScripts({
-        clientInitialState: request.store.getState(),
-        moduleMap: clientModuleMapCache.browser,
-        isDevelopmentEnv: false,
-        bundle: 'browser',
-      })).toMatchSnapshot();
+      expect(
+        renderModuleScripts({
+          clientInitialState: request.store.getState(),
+          moduleMap: clientModuleMapCache.browser,
+          isDevelopmentEnv: false,
+          bundle: 'browser',
+        })
+      ).toMatchSnapshot();
     });
 
     it('does not add cache busting clientCacheRevision from module map to each module script src if NODE_ENV is development', () => {
-      expect(renderModuleScripts({
-        clientInitialState: request.store.getState(),
-        moduleMap: clientModuleMapCache.browser,
-        isDevelopmentEnv: true,
-        bundle: 'browser',
-      })).toMatchSnapshot();
+      expect(
+        renderModuleScripts({
+          clientInitialState: request.store.getState(),
+          moduleMap: clientModuleMapCache.browser,
+          isDevelopmentEnv: true,
+          bundle: 'browser',
+        })
+      ).toMatchSnapshot();
     });
 
     it('does not add cache busting clientCacheRevision if not present', () => {
       const moduleMap = { ...clientModuleMapCache.browser };
       delete moduleMap.clientCacheRevision;
-      expect(renderModuleScripts({
-        clientInitialState: request.store.getState(),
-        moduleMap,
-        isDevelopmentEnv: false,
-        bundle: 'browser',
-      })).toMatchSnapshot();
+      expect(
+        renderModuleScripts({
+          clientInitialState: request.store.getState(),
+          moduleMap,
+          isDevelopmentEnv: false,
+          bundle: 'browser',
+        })
+      ).toMatchSnapshot();
     });
 
     it('sends a rendered page with cross origin scripts', () => {
-      expect(renderModuleScripts({
-        clientInitialState: request.store.getState(),
-        moduleMap: clientModuleMapCache.browser,
-        isDevelopmentEnv: true,
-        bundle: 'browser',
-      })).toMatchSnapshot();
+      expect(
+        renderModuleScripts({
+          clientInitialState: request.store.getState(),
+          moduleMap: clientModuleMapCache.browser,
+          isDevelopmentEnv: true,
+          bundle: 'browser',
+        })
+      ).toMatchSnapshot();
     });
 
     it('send a rendered page with correctly ordered modules', () => {
@@ -791,12 +850,14 @@ describe('reactHtml', () => {
           loaded: ['a', 'b', 'test-root', 'c'],
         },
       });
-      expect(renderModuleScripts({
-        clientInitialState: holocronState,
-        moduleMap: getClientModuleMapCache().browser,
-        isDevelopmentEnv: false,
-        bundle: 'browser',
-      })).toMatchSnapshot();
+      expect(
+        renderModuleScripts({
+          clientInitialState: holocronState,
+          moduleMap: getClientModuleMapCache().browser,
+          isDevelopmentEnv: false,
+          bundle: 'browser',
+        })
+      ).toMatchSnapshot();
     });
 
     it('send a rendered page keeping correctly ordered modules', () => {
@@ -807,12 +868,14 @@ describe('reactHtml', () => {
           loaded: ['test-root', 'a', 'b', 'c'],
         }),
       });
-      expect(renderModuleScripts({
-        clientInitialState: holocronState,
-        moduleMap: getClientModuleMapCache().browser,
-        isDevelopmentEnv: false,
-        bundle: 'browser',
-      })).toMatchSnapshot();
+      expect(
+        renderModuleScripts({
+          clientInitialState: holocronState,
+          moduleMap: getClientModuleMapCache().browser,
+          isDevelopmentEnv: false,
+          bundle: 'browser',
+        })
+      ).toMatchSnapshot();
     });
 
     it('send a rendered page with module script tags with integrity attribute if NODE_ENV is production', () => {
@@ -821,12 +884,135 @@ describe('reactHtml', () => {
           loaded: ['test-root'],
         }),
       });
-      expect(renderModuleScripts({
-        clientInitialState: holocronState,
-        moduleMap: clientModuleMapCache.browser,
-        isDevelopmentEnv: false,
-        bundle: 'browser',
-      })).toMatchSnapshot();
+      expect(
+        renderModuleScripts({
+          clientInitialState: holocronState,
+          moduleMap: clientModuleMapCache.browser,
+          isDevelopmentEnv: false,
+          bundle: 'browser',
+        })
+      ).toMatchSnapshot();
+    });
+  });
+
+  describe('renderExternalFallbacks', () => {
+    const clientInitialState = fromJS({
+      holocron: {
+        loaded: ['child-module-a'],
+      },
+    });
+
+    const moduleMap = {
+      clientCacheRevision: '123',
+      modules: {
+        'child-module-a': {
+          baseUrl: 'https://example.com/cdn/child-module-a/1.0.0',
+        },
+        'child-module-b': {
+          baseUrl: 'https://example.com/cdn/child-module-b/1.1.0',
+        },
+      },
+    };
+
+    beforeEach(() => {
+      setRequiredExternalsRegistry({
+        'child-module-a': {
+          'this-dep': {
+            filename: 'this-dep.js',
+            semanticRange: '^2.2.0',
+            integrity: '12345hash',
+            version: '2.3.1',
+          },
+        },
+      });
+    });
+
+    it('creates a script for each modules required fallback', () => {
+      expect(
+        renderExternalFallbacks({
+          clientInitialState,
+          moduleMap,
+        })
+      ).toMatchInlineSnapshot(
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
+      );
+    });
+
+    it('does not create scripts for duplicate scripts for same name and version', () => {
+      setRequiredExternalsRegistry({
+        'child-module-a': {
+          'this-dep': {
+            filename: 'this-dep.js',
+            semanticRange: '^2.2.0',
+            integrity: '12345hash',
+            version: '2.3.1',
+          },
+        },
+        'child-module-b': {
+          'this-dep': {
+            filename: 'this-dep.js',
+            semanticRange: '^2.2.0',
+            integrity: '12345hash',
+            version: '2.3.1',
+          },
+        },
+      });
+
+      expect(
+        renderExternalFallbacks({
+          clientInitialState: fromJS({
+            holocron: {
+              loaded: ['child-module-b', 'child-module-a'],
+            },
+          }),
+          moduleMap,
+        })
+      ).toMatchInlineSnapshot(
+        '"<script src="https://example.com/cdn/child-module-b/1.1.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script><script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
+      );
+    });
+
+    it('does not include clientCacheRevision when development', () => {
+      expect(
+        renderExternalFallbacks({
+          clientInitialState,
+          moduleMap,
+          isDevelopmentEnv: true,
+        })
+      ).toMatchInlineSnapshot(
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js" crossorigin="anonymous" ></script>"'
+      );
+    });
+
+    it('handles trailing "/" in module baseUrl', () => {
+      expect(
+        renderExternalFallbacks({
+          clientInitialState,
+          moduleMap: {
+            clientCacheRevision: '123',
+            modules: {
+              'child-module-a': {
+                baseUrl: 'https://example.com/cdn/child-module-a/1.0.0/',
+              },
+            },
+          },
+        })
+      ).toMatchInlineSnapshot(
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
+      );
+    });
+
+    it('supports legacy browsers', () => {
+      expect(
+        renderExternalFallbacks({
+          clientInitialState,
+          moduleMap,
+          isDevelopmentEnv: true,
+          isLegacy: true,
+        })
+      ).toMatchInlineSnapshot(
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.legacy.browser.js" crossorigin="anonymous" ></script>"'
+      );
     });
   });
 
@@ -835,7 +1021,9 @@ describe('reactHtml', () => {
       const fullStateError = new Error('Error serializing unrecognized object');
       transit.toJSON
         .mockClear()
-        .mockImplementationOnce(() => { throw fullStateError; })
+        .mockImplementationOnce(() => {
+          throw fullStateError;
+        })
         .mockImplementationOnce(() => 'this is the cache clean call')
         .mockImplementationOnce(() => 'serialized bare state possible');
 
@@ -862,9 +1050,13 @@ describe('reactHtml', () => {
       const minimalStateError = new Error('this is really bad');
       transit.toJSON
         .mockClear()
-        .mockImplementationOnce(() => { throw fullStateError; })
+        .mockImplementationOnce(() => {
+          throw fullStateError;
+        })
         .mockImplementationOnce(() => 'this is the cache clean call')
-        .mockImplementationOnce(() => { throw minimalStateError; })
+        .mockImplementationOnce(() => {
+          throw minimalStateError;
+        })
         .mockImplementationOnce(() => 'second cache clean call');
 
       sendHtml(request, reply);

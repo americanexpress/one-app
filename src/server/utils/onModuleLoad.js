@@ -15,8 +15,9 @@
  */
 
 import semver from 'semver';
-import { Set as ImmutableSet } from 'immutable';
 import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
+import { clearModulesUsingExternals } from 'holocron';
+
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from './stateConfig';
 import { setCorsOrigins } from '../plugins/conditionallyAllowCors';
 import readJsonFile from './readJsonFile';
@@ -33,21 +34,8 @@ import { setRedirectAllowList } from './redirectAllowList';
 // Trim build hash
 const { buildVersion } = readJsonFile('../../../.build-meta.json');
 const appVersion = buildVersion.slice(0, -9);
-let modulesUsingExternals = new ImmutableSet();
 
-const registerModuleUsingExternals = (moduleName) => {
-  modulesUsingExternals = modulesUsingExternals.add(moduleName);
-};
-
-const clearModulesUsingExternals = () => {
-  modulesUsingExternals = modulesUsingExternals.clear();
-};
-
-export const getModulesUsingExternals = () => modulesUsingExternals.toJS();
-
-export const setModulesUsingExternals = (moduleNames) => {
-  modulesUsingExternals = new ImmutableSet(moduleNames);
-};
+export const CONFIGURATION_KEY = 'appConfig';
 
 const logModuleLoad = (moduleName, moduleVersion) => {
   console.info('Loaded module %s@%s', moduleName, moduleVersion);
@@ -63,8 +51,6 @@ function validateConfig(configValidators, config) {
       validateServer(config.server[configKey]);
     });
 }
-
-export const CONFIGURATION_KEY = 'appConfig';
 
 export function validateCspIsPresent(csp) {
   if (!csp && process.env.ONE_DANGEROUSLY_DISABLE_CSP !== 'true') {
@@ -91,8 +77,9 @@ export function setRootModuleConfigurations(module, moduleName) {
     } = {},
     [META_DATA_KEY]: metaData,
   } = module;
+
   validateCspIsPresent(csp);
-  clearModulesUsingExternals();
+
   if (provideStateConfig) {
     setStateConfig(provideStateConfig);
   }
@@ -129,7 +116,6 @@ export default function onModuleLoad({
       // Root Module Specific
       providedExternals,
       // Child Module Specific
-      requiredExternals,
       validateStateConfig,
       requiredSafeRequestRestrictedAttributes = {},
       // Any Module
@@ -156,37 +142,14 @@ export default function onModuleLoad({
 
   if (moduleName === serverStateConfig.rootModuleName) {
     setRootModuleConfigurations(module, moduleName);
+    // NOTE: ideally clearModulesUsingExternals should be called in holocron.
+    // however holocron does not possess the right context to reliably call this.
+    clearModulesUsingExternals();
     return;
   }
 
   if (providedExternals) {
     console.warn('Module %s attempted to provide externals. Only the root module can provide externals.', moduleName);
-  }
-
-  if (requiredExternals) {
-    const messages = [];
-    const RootModule = global.getTenantRootModule();
-
-    Object.entries(requiredExternals).forEach(([externalName, requestedExternalVersion]) => {
-      const providedExternal = RootModule[CONFIGURATION_KEY].providedExternals[externalName];
-
-      if (!providedExternal) {
-        messages.push(`External '${externalName}' is required by ${moduleName}, but is not provided by the root module`);
-      } else if (!semver.satisfies(providedExternal.version, requestedExternalVersion)) {
-        const failedExternalMessage = `${externalName}@${requestedExternalVersion} is required by ${moduleName}, but the root module provides ${providedExternal.version}`;
-        if (process.env.ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS) {
-          console.warn(failedExternalMessage);
-        } else {
-          messages.push(failedExternalMessage);
-        }
-      }
-    });
-
-    if (messages.length > 0) {
-      throw new Error(messages.join('\n'));
-    }
-
-    registerModuleUsingExternals(moduleName);
   }
 
   validateSafeRequestRestrictedAttributes(requiredSafeRequestRestrictedAttributes);

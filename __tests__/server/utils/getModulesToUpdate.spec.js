@@ -21,7 +21,7 @@ jest.mock('../../../src/server/utils/stateConfig', () => ({
     rootModuleName: 'test-root',
   })),
 }));
-jest.mock('../../../src/server/utils/onModuleLoad', () => ({
+jest.mock('holocron', () => ({
   getModulesUsingExternals: jest.fn(() => ['first-module', 'another-module']),
 }));
 
