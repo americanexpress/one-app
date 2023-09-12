@@ -77,7 +77,7 @@ describe('initClient', () => {
     const mockError = new Error('This is a test error!!!');
     loadPrerenderScripts.mockImplementationOnce(() => { throw mockError; });
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
     const initClient = require('../../src/client/initClient').default;
 
     await initClient();
