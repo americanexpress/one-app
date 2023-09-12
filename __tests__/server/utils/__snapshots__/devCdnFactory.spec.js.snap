@@ -26,6 +26,8 @@ exports[`one-app-dev-cdn module-map.json uses the local map overriding the cdn u
 }
 `;
 
+exports[`one-app-dev-cdn modules gets remote modules from cached data if incoming url is matching: module map response 1`] = `"{"key":"not-used-in-development","modules":{"module-b":{"node":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.node.js","integrity":"123"},"browser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.browser.js","integrity":"234"},"legacyBrowser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.legacy.browser.js","integrity":"345"}}}}"`;
+
 exports[`one-app-dev-cdn modules gets remote modules: module map response 1`] = `"{"key":"not-used-in-development","modules":{"module-b":{"node":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.node.js","integrity":"123"},"browser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.browser.js","integrity":"234"},"legacyBrowser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.legacy.browser.js","integrity":"345"}}}}"`;
 
 exports[`one-app-dev-cdn modules returns a 404 if a request for something not known as a module from the module map comes in: module map response 1`] = `"{"key":"not-used-in-development","modules":{"module-b":{"node":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.node.js","integrity":"123"},"browser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.browser.js","integrity":"234"},"legacyBrowser":{"url":"http://localhost:3001/static/cdn/module-b/1.0.0/module-b.legacy.browser.js","integrity":"345"}}}}"`;
