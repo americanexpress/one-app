@@ -211,18 +211,9 @@ describe('pollModuleMap', () => {
 
   it('schedules a new poll after a polling error despite setGauge throwing', async () => {
     const { default: pollModuleMap, MIN_POLL_TIME } = load();
-    setGauge
-      .mockClear()
-      .mockImplementationOnce(() => {
-        /* noop a few times */
-      })
-      .mockImplementationOnce(() => {
-        /* noop a few times */
-      })
-      .mockImplementationOnce(() => {
-        throw new Error('unable to increment gague');
-      });
-
+    setGauge.mockClear().mockImplementation(() => {
+      /* noop */
+    });
     await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(1);
     expect(setTimeout.mock.calls[0][0]).toBe(pollModuleMap);
@@ -230,6 +221,10 @@ describe('pollModuleMap', () => {
     await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(2);
     expect(setTimeout.mock.calls[1][0]).toBe(pollModuleMap);
+
+    setGauge.mockImplementationOnce(() => {
+      throw new Error('unable to increment gague');
+    });
 
     await pollModuleMap();
     expect(setTimeout).toHaveBeenCalledTimes(3);
@@ -263,7 +258,7 @@ describe('pollModuleMap', () => {
     expect(setTimeout).toHaveBeenCalledTimes(1);
     expect(setTimeout).toHaveBeenCalledWith(pollModuleMap, MIN_POLL_TIME);
 
-    expect(setGauge).toHaveBeenCalledTimes(1);
+    expect(setGauge).toHaveBeenCalledTimes(3);
     expect(setGauge).toHaveBeenCalledWith(holocronMetrics.moduleMapPollWait, 5);
     expect(resetGauge).toHaveBeenCalledTimes(1);
     expect(resetGauge).toHaveBeenCalledWith(holocronMetrics.moduleMapPollConsecutiveErrors);
@@ -284,11 +279,11 @@ describe('pollModuleMap', () => {
     // check that the interval has increased
     expect(setTimeout.mock.calls[0][1]).toBeGreaterThanOrEqual(MIN_POLL_TIME * 1.25);
 
-    expect(setGauge).toHaveBeenCalledTimes(1);
-    expect(setGauge.mock.calls[0][0]).toBe(holocronMetrics.moduleMapPollWait);
-    expect(setGauge.mock.calls[0][1]).toBeGreaterThanOrEqual(5 * 1.25);
+    expect(setGauge).toHaveBeenCalledTimes(3);
+    expect(setGauge.mock.calls[2][0]).toBe(holocronMetrics.moduleMapPollWait);
+    expect(setGauge.mock.calls[2][1]).toBeGreaterThanOrEqual(5 * 1.25);
     // ensure we're using seconds, not milliseconds
-    expect(setGauge.mock.calls[0][1]).toBeLessThan(8 * 1.25);
+    expect(setGauge.mock.calls[2][1]).toBeLessThan(8 * 1.25);
   });
 
   it('resets the time to the next polling to the minimum if there were errors', async () => {
@@ -328,7 +323,7 @@ describe('pollModuleMap', () => {
     // check that the poll interval is reset to min.
     expect(setTimeout).toHaveBeenCalledWith(pollModuleMap, MIN_POLL_TIME);
 
-    expect(setGauge).toHaveBeenCalledTimes(1);
+    expect(setGauge).toHaveBeenCalledTimes(3);
     expect(setGauge).toHaveBeenCalledWith(holocronMetrics.moduleMapPollWait, 5);
     expect(incrementGauge).toHaveBeenCalledTimes(1);
     expect(incrementGauge).toHaveBeenCalledWith(holocronMetrics.moduleMapPollConsecutiveErrors);

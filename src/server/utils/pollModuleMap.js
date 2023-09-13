@@ -14,6 +14,7 @@
  * permissions and limitations under the License.
  */
 
+import { getRequiredExternalsRegistry } from 'holocron';
 import loadModules from './loadModules';
 import {
   incrementCounter,
@@ -132,6 +133,9 @@ async function pollModuleMap() {
 
     const numberOfModulesLoaded = Object.keys(loadedModules).length;
     const numberOfModulesRejected = Object.keys(rejectedModules).length;
+    const numberOfModulesRequiringFallback = Object.keys(getRequiredExternalsRegistry()).length;
+    setGauge(holocronMetrics.rejectedModules, numberOfModulesRejected);
+    setGauge(holocronMetrics.modulesRequiringFallbacks, numberOfModulesRequiringFallback);
 
     moduleMapHealthy = !numberOfModulesRejected;
 

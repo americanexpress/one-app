@@ -23,6 +23,8 @@ const holocron = {
   moduleMapPoll: 'module_map_poll',
   moduleMapPollConsecutiveErrors: 'module_map_poll_consecutive_errors',
   moduleMapPollWait: 'module_map_poll_wait',
+  rejectedModules: 'rejected_modules',
+  modulesRequiringFallbacks: 'modules_requiring_fallbacks',
 };
 
 const intlCache = {
