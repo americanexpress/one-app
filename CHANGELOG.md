@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.7.0](https://github.com/americanexpress/one-app/compare/v6.6.0...v6.7.0) (2023-09-13)
+
+
+### Bug Fixes
+
+* **image:** exclude devDeps from non-dev image ([#1085](https://github.com/americanexpress/one-app/issues/1085)) ([4d68dba](https://github.com/americanexpress/one-app/commit/4d68dba1cce2353ee56ba61e2296779d3480d678))
+* **node:** bump Node.js to 18.17.1 for security patches ([#1087](https://github.com/americanexpress/one-app/issues/1087)) ([b491dbf](https://github.com/americanexpress/one-app/commit/b491dbfbb0be3f43be8a7502a8778b8568ad3b6c))
+
+
+### Features
+
+* **cache-module:** implemented cached modules ([#1094](https://github.com/americanexpress/one-app/issues/1094)) ([84838a8](https://github.com/americanexpress/one-app/commit/84838a8409e6384c18a80d4e1bc828ee7d7db006))
+* **external-fallbacks:** enable modules to have external fallbacks ([#984](https://github.com/americanexpress/one-app/issues/984)) ([7d51efe](https://github.com/americanexpress/one-app/commit/7d51efe55aa23729c03bd6394c9f10ad392e0179))
+* **logging:** switch to fastify logger ([#1084](https://github.com/americanexpress/one-app/issues/1084)) ([33fa971](https://github.com/americanexpress/one-app/commit/33fa9712125a06546e377b862b838829742bf41b))
+* **styleLoader:** aggregate stylesheets and dedupe if already loaded ([#1099](https://github.com/americanexpress/one-app/issues/1099)) ([a74a5ba](https://github.com/americanexpress/one-app/commit/a74a5ba5d315f8f0188657b3ee932e7444c590f6))
+
+
 # [6.6.0](https://github.com/americanexpress/one-app/compare/v6.5.1...v6.6.0) (2023-08-09)
 
 
