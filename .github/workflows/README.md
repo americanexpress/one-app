@@ -26,8 +26,6 @@ Runs CodeQL against the PR code
 ### [on PR, Trunk] One App Unit and Lint Tests
 Runs One App's unit tests and linting tests against the PR code
 
-This workflow creates two checks, one for node 14 and one for node 16.
-
 ### [on PR] DangerJS
 Runs dangerJS against the PR code
 

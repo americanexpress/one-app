@@ -14,10 +14,10 @@ jobs:
             ${{ runner.os }}-node-
       - uses: actions/setup-node@v3
         with:
-          node-version: 16.x
+          node-version-file: .nvmrc
       - name: npm install
         run: NODE_ENV=development npm ci
       - name: Build docker image
-        run: docker build -t one-app:at-test . --build-arg USER=root
+        run: docker build -t one-app:at-test . --build-arg USER=root --build-arg VERSION=$(cat .nvmrc)
       - name: Run Integration Tests
         run: ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true npm run test:integration

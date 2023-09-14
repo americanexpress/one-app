@@ -140,7 +140,7 @@ You can build the One App [Docker](https://www.docker.com/) image and run it in 
 ```bash
 git clone https://github.com/americanexpress/one-app.git
 cd one-app
-docker build .
+docker build . --build-arg VERSION=$(cat .nvmrc)
 ```
 
 Or you can build from source which creates your server side assets at `./lib` and your client
@@ -217,6 +217,6 @@ under the "Software" category click "Edit". Enter all the required environment v
 
 After the deployment is complete, you can navigate to your application by clicking on "Go to environment". If the application health displays an error, One App might be failing to start due to a missing environment variable or missing configuration. You can request the logs and the console should display the reason why One App is crashing.
 
-More information on how to deploy Docker containers on AWS Elastic Beanstalk can be found on the official [AWS Documentation](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_docker.html). 
+More information on how to deploy Docker containers on AWS Elastic Beanstalk can be found on the official [AWS Documentation](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_docker.html).
 
 [☝️ Return To Top](#running-in-production)
