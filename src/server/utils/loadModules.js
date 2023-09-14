@@ -39,7 +39,7 @@ const loadModules = async () => {
   }
   cachedModuleMapHash = moduleMapHash;
   const serverConfig = getServerStateConfig();
-  // NODE:: this function mutates the moduleMap
+  // NOTE:: this function mutates the moduleMap
   const { loadedModules = {}, rejectedModules = {} } = await updateModuleRegistry({
     moduleMap,
     batchModulesToUpdate,
