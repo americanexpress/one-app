@@ -48,12 +48,12 @@ createGauge({
 
 createGauge({
   name: holocronNamespace('rejected_modules', 'total'),
-  help: 'how many holocron modules have failed to load',
+  help: 'how many Holocron modules have failed to load',
 });
 
 createGauge({
   name: holocronNamespace('modules_requiring_fallbacks', 'total'),
-  help: 'how many modules which require external fallbacks',
+  help: 'how many Holocron modules which require external fallbacks',
 });
 
 export default holocronNamespace.getMetricNames();

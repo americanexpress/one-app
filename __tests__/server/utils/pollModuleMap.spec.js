@@ -223,7 +223,7 @@ describe('pollModuleMap', () => {
     expect(setTimeout.mock.calls[1][0]).toBe(pollModuleMap);
 
     setGauge.mockImplementationOnce(() => {
-      throw new Error('unable to increment gague');
+      throw new Error('unable to change gauge');
     });
 
     await pollModuleMap();
