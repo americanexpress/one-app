@@ -327,6 +327,8 @@ describe('pollModuleMap', () => {
     expect(setGauge).toHaveBeenCalledWith(holocronMetrics.moduleMapPollWait, 5);
     expect(incrementGauge).toHaveBeenCalledTimes(1);
     expect(incrementGauge).toHaveBeenCalledWith(holocronMetrics.moduleMapPollConsecutiveErrors);
+    expect(setGauge).toHaveBeenCalledWith(holocronMetrics.rejectedModules, 1);
+    expect(setGauge).toHaveBeenCalledWith(holocronMetrics.modulesRequiringFallbacks, 0);
   });
 
   it('schedules a new polling despite console.error throwing on the initial check', async () => {
