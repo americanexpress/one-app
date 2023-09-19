@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.7.0-ship-otel-logs.2](https://github.com/americanexpress/one-app/compare/v6.6.0...v6.7.0-ship-otel-logs.2) (2023-09-19)
+
+
+### Bug Fixes
+
+* **image:** exclude devDeps from non-dev image ([#1085](https://github.com/americanexpress/one-app/issues/1085)) ([4d68dba](https://github.com/americanexpress/one-app/commit/4d68dba1cce2353ee56ba61e2296779d3480d678))
+* **logging:** some errors were being dropped from log entries ([a171495](https://github.com/americanexpress/one-app/commit/a1714957be254774aff5294328322cfacf39f4fd))
+* **logging:** wanrings showed as USRLVL in development ([eb479c1](https://github.com/americanexpress/one-app/commit/eb479c1f4c8781e0d0c59f30ff55d20f95c4212d))
+* **node:** bump Node.js to 18.17.1 for security patches ([#1087](https://github.com/americanexpress/one-app/issues/1087)) ([b491dbf](https://github.com/americanexpress/one-app/commit/b491dbfbb0be3f43be8a7502a8778b8568ad3b6c))
+
+
+### Features
+
+* **cache-module:** implemented cached modules ([#1094](https://github.com/americanexpress/one-app/issues/1094)) ([84838a8](https://github.com/americanexpress/one-app/commit/84838a8409e6384c18a80d4e1bc828ee7d7db006))
+* **Dockerfile:** use .nvmrc to build the image ([#1090](https://github.com/americanexpress/one-app/issues/1090)) ([42c562c](https://github.com/americanexpress/one-app/commit/42c562c76ab0b31fb7129d3f681f608a5cfe3660))
+* **external-fallbacks:** enable modules to have external fallbacks ([#984](https://github.com/americanexpress/one-app/issues/984)) ([7d51efe](https://github.com/americanexpress/one-app/commit/7d51efe55aa23729c03bd6394c9f10ad392e0179))
+* **logging:** default to info in development ([140fcf9](https://github.com/americanexpress/one-app/commit/140fcf9a0b5f619d184a942305a0ba93c9dfc19b))
+* **logging:** enable sending logs to OpenTelemetry ([b254b7b](https://github.com/americanexpress/one-app/commit/b254b7be4d8d154c49b373a5d57089b9c934b5cf))
+* **logging:** ignore schemaVersion in development logs ([3c712fd](https://github.com/americanexpress/one-app/commit/3c712fd01f6d850ad730d77a459582a11f84a3ba))
+* **logging:** switch to fastify logger ([6c1bb24](https://github.com/americanexpress/one-app/commit/6c1bb24b8cba1ed92342c54105edbc099f67b879))
+* **logging:** switch to fastify logger ([#1084](https://github.com/americanexpress/one-app/issues/1084)) ([33fa971](https://github.com/americanexpress/one-app/commit/33fa9712125a06546e377b862b838829742bf41b))
+* **styleLoader:** aggregate stylesheets and dedupe if already loaded ([#1099](https://github.com/americanexpress/one-app/issues/1099)) ([a74a5ba](https://github.com/americanexpress/one-app/commit/a74a5ba5d315f8f0188657b3ee932e7444c590f6))
+
+
 # [6.6.0](https://github.com/americanexpress/one-app/compare/v6.5.1...v6.6.0) (2023-08-09)
 
 
