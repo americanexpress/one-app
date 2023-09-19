@@ -79,6 +79,7 @@ describe('Tests that require Docker setup', () => {
       await tearDownTestRunner({ browser });
       writeModuleMap(originalModuleMap);
     });
+
     test('one-app starts up successfully with a bad module', async () => {
       const loggedError = await requiredExternalsError;
       const [, problemModule, problemModuleUrl, workingUrl] = revertErrorMatch.exec(loggedError);
@@ -794,7 +795,7 @@ describe('Tests that require Docker setup', () => {
           });
 
           test('fails to get external `react-intl` for child module as an unsupplied `requiredExternal` - logs failure', async () => {
-            const requiredExternalsErrorMatch = /Failed to get external react-intl from root module/;
+            const requiredExternalsErrorMatch = /External 'react-intl' is required by cultured-frankie, but is not provided by the root module/;
 
             const requiredExternalsError = searchForNextLogMatch(requiredExternalsErrorMatch);
             await addModuleToModuleMap({
