@@ -13,6 +13,7 @@ stats.json
 .dev
 .sass_cache
 .webpack-stats*
+.esbuild-stats*
 .build-meta.json
 .build-cache
 bundle.integrity.manifest.json
