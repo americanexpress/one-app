@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.22.0-0](https://github.com/americanexpress/one-app/compare/v5.21.0...v5.22.0-0) (2023-09-19)
+
+
+### Bug Fixes
+
+* **image:** move if-env to devDeps ([#1086](https://github.com/americanexpress/one-app/issues/1086)) ([b2d4ab2](https://github.com/americanexpress/one-app/commit/b2d4ab2ba8695515ff8854908c68522b0f3dccfc))
+* **node:** bump Node.js to 18.17.1 for security patches ([#1088](https://github.com/americanexpress/one-app/issues/1088)) ([7a365b3](https://github.com/americanexpress/one-app/commit/7a365b36bce1b7ed6f4e1b87944a85235a879e02))
+
+
+### Features
+
+* **logging:** added OpenTelemetry support ([#1059](https://github.com/americanexpress/one-app/issues/1059)) ([09eac6b](https://github.com/americanexpress/one-app/commit/09eac6b3f706e1c6f30e941ed9c84e822fc86b75))
+* **one-app-dev-cdn:** update to add module cache feature ([#1095](https://github.com/americanexpress/one-app/issues/1095)) ([1acc2e3](https://github.com/americanexpress/one-app/commit/1acc2e3894571df73764688949db12db29f919f9))
+
+
 # [5.21.0](https://github.com/americanexpress/one-app/compare/v5.20.0...v5.21.0) (2023-08-09)
 
 
