@@ -16,14 +16,38 @@
 
 import deepmerge from 'deepmerge';
 import { argv } from 'yargs';
-import pino from 'pino';
+import { pino, multistream } from 'pino';
 import productionConfig from './config/production';
+import otelConfig, {
+  createOtelTransport,
+} from './config/otel';
 import baseConfig from './config/base';
 
-const useProductionConfig = !!(argv.logFormat === 'machine' || process.env.NODE_ENV !== 'development');
+export function createLogger() {
+  const useProductionConfig = !!(argv.logFormat === 'machine' || process.env.NODE_ENV !== 'development');
 
-// development-formatters should not be loaded in production
-// eslint-disable-next-line global-require
-const logger = pino(deepmerge(baseConfig, useProductionConfig ? productionConfig : {}), useProductionConfig ? undefined : require('./config/development').default);
+  let transport;
 
-export default logger;
+  if (process.env.NODE_ENV === 'development' && process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
+    // Temporary solution until https://github.com/Vunovati/pino-opentelemetry-transport/issues/20 is resolved
+    // eslint-disable-next-line global-require -- do not load development logger in production
+    transport = multistream([{ stream: require('./config/development').default }, createOtelTransport()]);
+  } else if (!useProductionConfig && !process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
+    // eslint-disable-next-line global-require -- do not load development logger in production
+    transport = require('./config/development').default;
+  } else if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
+    transport = createOtelTransport();
+  }
+
+  return pino(
+    deepmerge(
+      baseConfig,
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+        ? otelConfig
+        : useProductionConfig && productionConfig
+    ),
+    transport
+  );
+}
+
+export default createLogger();

@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import util from 'util';
+import util from 'node:util';
 
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
 

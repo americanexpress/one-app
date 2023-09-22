@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import util from 'util';
+import util from 'node:util';
 import path from 'path';
 import compress from '@fastify/compress';
 import Fastify from 'fastify';

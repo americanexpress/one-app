@@ -23,7 +23,7 @@ import {
 } from '../utils';
 
 export const pinoPrettyOptions = {
-  ignore: 'pid,hostname,time,type,request',
+  ignore: 'pid,hostname,time,type,request,schemaVersion',
   // TODO: Uncomment once pino bug is resolved
   // https://github.com/pinojs/pino/issues/1790
   // messageKey: 'message',

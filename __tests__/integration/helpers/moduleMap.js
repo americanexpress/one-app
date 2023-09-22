@@ -16,7 +16,7 @@
 
 const fs = require('fs-extra');
 const { resolve, join } = require('path');
-const util = require('util');
+const util = require('node:util');
 const childProcess = require('child_process');
 
 const promisifiedExec = util.promisify(childProcess.exec);

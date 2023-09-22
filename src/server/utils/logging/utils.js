@@ -68,9 +68,45 @@ function printDurationTime(obj) {
   return chalk.black.bgRed(duration);
 }
 
+const serializeError = (err) => ({
+  name: err.name,
+  message: err.message || '<none>',
+  stacktrace: err.stack || '<none>',
+});
+
+function formatLogEntry(entry) {
+  /* eslint-disable no-param-reassign */
+  if (entry.error) {
+    if (entry.error.name === 'ClientReportedError') {
+      entry.device = {
+        agent: entry.error.userAgent,
+      };
+      entry.request = {
+        address: {
+          uri: entry.error.uri,
+        },
+        metaData: entry.error.metaData,
+      };
+    } else if (entry.error.metaData) {
+      entry.metaData = entry.error.metaData;
+    }
+  }
+
+  // TODO: this is required due to a pino bug in the hook, remove once resolved
+  // https://github.com/pinojs/pino/issues/1790
+  if (entry.msg) {
+    entry.message = entry.msg;
+    delete entry.msg;
+  }
+
+  return entry;
+}
+
 export {
   coloredLevels,
   printStatusCode,
   printStatusMessage,
   printDurationTime,
+  serializeError,
+  formatLogEntry,
 };
