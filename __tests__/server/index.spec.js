@@ -15,7 +15,7 @@
  * permissions and limitations under the License.
  */
 
-import util from 'util';
+import util from 'node:util';
 import fs from 'fs';
 import path from 'path';
 

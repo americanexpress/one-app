@@ -14,7 +14,11 @@
  * permissions and limitations under the License.
  */
 
-import os from 'os';
+import os from 'node:os';
+import {
+  serializeError,
+  formatLogEntry,
+} from '../utils';
 import readJsonFile from '../../readJsonFile';
 
 const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
@@ -36,13 +40,7 @@ export default {
     },
   },
   serializers: {
-    err(err) {
-      return {
-        name: err.name,
-        message: err.message || '<none>',
-        stacktrace: err.stack || '<none>',
-      };
-    },
+    err: serializeError,
   },
   formatters: {
     level(label) {
@@ -54,32 +52,6 @@ export default {
       };
       return { level: nodeLevelToSchemaLevel[label] || label };
     },
-    log(entry) {
-      /* eslint-disable no-param-reassign */
-      if (entry.error) {
-        if (entry.error.name === 'ClientReportedError') {
-          entry.device = {
-            agent: entry.error.userAgent,
-          };
-          entry.request = {
-            address: {
-              uri: entry.error.uri,
-            },
-            metaData: entry.error.metaData,
-          };
-        } else if (entry.error.metaData) {
-          entry.metaData = entry.error.metaData;
-        }
-      }
-
-      // TODO: this is required due to a pino bug in the hook, remove once resolved
-      // https://github.com/pinojs/pino/issues/1790
-      if (entry.msg) {
-        entry.message = entry.msg;
-        delete entry.msg;
-      }
-
-      return entry;
-    },
+    log: formatLogEntry,
   },
 };

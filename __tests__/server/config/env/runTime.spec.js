@@ -14,6 +14,57 @@
  * permissions and limitations under the License.
  */
 
+expect.extend({
+  toValidateURL(input) {
+    let passNegativeCase;
+    let passPositiveCase;
+    try {
+      input('//example.com/path');
+      input('/path');
+      passNegativeCase = false;
+    } catch (e) {
+      passNegativeCase = true;
+    }
+    try {
+      input('https://example.com/path');
+      passPositiveCase = true;
+    } catch (e) {
+      passPositiveCase = false;
+    }
+    return {
+      pass: passNegativeCase && passPositiveCase,
+      message: () => `${this.utils.matcherHint('toValidateURL', undefined, '')
+      }\n\nExpected function to validate input is a fetchable URL in Node`,
+    };
+  },
+  toValidatePositiveInteger(input) {
+    let passNegativeCase;
+    let passPositiveCase;
+    try {
+      input('string that evaluates to NaN');
+      input('0');
+      input('-6');
+      input('4.3');
+      passNegativeCase = false;
+    } catch (e) {
+      passNegativeCase = true;
+    }
+    try {
+      input('1');
+      input('3001');
+      input(undefined);
+      passPositiveCase = true;
+    } catch (e) {
+      passPositiveCase = false;
+    }
+    return {
+      pass: passNegativeCase && passPositiveCase,
+      message: () => `${this.utils.matcherHint('toValidatePositiveInteger', undefined, '')
+      }\n\nExpected function to validate input is a positive integer`,
+    };
+  },
+});
+
 jest.mock('ip', () => ({
   address: () => 'localhost',
 }));
@@ -85,25 +136,6 @@ describe('runTime', () => {
     Object.keys(origEnvVarVals).forEach((name) => resetEnvVar(name, origEnvVarVals[name]));
     jest.resetAllMocks();
   });
-
-  function nodeUrl(entry) {
-    return () => {
-      expect(() => entry.validate('https://example.com/path')).not.toThrow();
-      expect(() => entry.validate('/path')).toThrow();
-    };
-  }
-
-  function positiveInteger(entry) {
-    return () => {
-      expect(() => entry.validate('1')).not.toThrow();
-      expect(() => entry.validate('3001')).not.toThrow();
-      expect(() => entry.validate(undefined)).not.toThrow();
-      expect(() => entry.validate('string that evaluates to NaN')).toThrow();
-      expect(() => entry.validate('0')).toThrow();
-      expect(() => entry.validate('-6')).toThrow();
-      expect(() => entry.validate('4.3')).toThrow();
-    };
-  }
 
   it('has a name on every entry', () => {
     const runTime = require('../../../../src/server/config/env/runTime').default;
@@ -281,8 +313,9 @@ describe('runTime', () => {
       expect(holocronModuleMapPath.defaultValue()).not.toBeDefined();
     });
 
-    // eslint-disable-next-line jest/expect-expect -- assertion is in nodeUrl
-    it('ensures node can reach the URL', nodeUrl(holocronModuleMapPath));
+    it('ensures node can reach the URL', () => {
+      expect(holocronModuleMapPath.validate).toValidateURL();
+    });
 
     it('should use port numbers specified via HTTP_ONE_APP_DEV_CDN_PORT', () => {
       process.env.NODE_ENV = 'development';
@@ -300,8 +333,9 @@ describe('runTime', () => {
       expect(holocronServerMaxModulesRetry.defaultValue).toBe(undefined);
     });
 
-    // eslint-disable-next-line jest/expect-expect -- assertion is in positiveInteger
-    it('validates the value as a positive integer', positiveInteger(holocronServerMaxModulesRetry));
+    it('validates the value as a positive integer', () => {
+      expect(holocronServerMaxModulesRetry.validate).toValidatePositiveInteger();
+    });
   });
 
   describe('HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH', () => {
@@ -313,11 +347,9 @@ describe('runTime', () => {
       expect(holocronServerMaxSimModulesFetch.defaultValue).toBe(undefined);
     });
 
-    // eslint-disable-next-line jest/expect-expect -- assertion is in positiveInteger
-    it(
-      'validates the value as a positive integer',
-      positiveInteger(holocronServerMaxSimModulesFetch)
-    );
+    it('validates the value as a positive integer', () => {
+      expect(holocronServerMaxSimModulesFetch.validate).toValidatePositiveInteger();
+    });
   });
 
   describe('ONE_CLIENT_REPORTING_URL', () => {
@@ -495,6 +527,26 @@ describe('runTime', () => {
     it('should pass validation when input is parseable by bytes util', () => {
       process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES = true;
       expect(() => postRequestMaxPayload.validate('20kb')).not.toThrow();
+    });
+  });
+
+  describe('OTEL_EXPORTER_OTLP_LOGS_ENDPOINT', () => {
+    const otelLogCollectorUrl = getEnvVarConfig('OTEL_EXPORTER_OTLP_LOGS_ENDPOINT');
+
+    it('ensures node can reach the URL', () => {
+      expect(otelLogCollectorUrl.validate).toValidateURL();
+    });
+
+    it('is not required', () => {
+      expect(() => otelLogCollectorUrl.validate()).not.toThrow();
+    });
+  });
+
+  describe('OTEL_SERVICE_NAME', () => {
+    const otelServiceName = getEnvVarConfig('OTEL_SERVICE_NAME');
+
+    it('should have a default value of "One App"', () => {
+      expect(otelServiceName.defaultValue).toBe('One App');
     });
   });
 });

@@ -16,7 +16,7 @@
 import fs from 'fs';
 import v8 from 'v8';
 import { finished } from 'stream';
-import { promisify } from 'util';
+import { promisify } from 'node:util';
 
 // Use `promisify(finished)` instead of importing from `stream/promises` for Node 12 compatibility
 // TODO: switch to import from `stream/promises` in v6.0.0 release when Node 12 support is dropped

@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import util from 'util';
+import util from 'node:util';
 
 describe('shutdown', () => {
   jest.spyOn(global, 'setTimeout').mockImplementation(() => {});

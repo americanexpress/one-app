@@ -15,7 +15,6 @@
  */
 
 import { monkeypatches } from '@americanexpress/lumberjack';
-
 import logger from './logger';
 import { startTimer, measureTime } from './timing';
 
