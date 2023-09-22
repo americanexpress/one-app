@@ -35,6 +35,8 @@ exports[`holocron exports the metric names 1`] = `
     "moduleMapPollRestarted": "oneapp_holocron_module_map_poll_restarted_total",
     "moduleMapPollWait": "oneapp_holocron_module_map_poll_wait_seconds",
     "moduleMapUpdated": "oneapp_holocron_module_map_updated_total",
+    "modulesRequiringFallbacks": "oneapp_holocron_modules_requiring_fallbacks_total",
+    "rejectedModules": "oneapp_holocron_rejected_modules_total",
   },
 }
 `;
