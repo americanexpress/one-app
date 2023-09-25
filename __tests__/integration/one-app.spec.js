@@ -74,7 +74,7 @@ describe('Tests that require Docker setup', () => {
         moduleName,
         version,
       });
-      requiredExternalsError = searchForNextLogMatch(revertErrorMatch);
+      requiredExternalsError = searchForNextLogMatch(revertErrorMatch, 30000);
       ({ browser } = await setUpTestRunner({ oneAppLocalPortToUse, oneAppMetricsLocalPortToUse }));
     });
 
