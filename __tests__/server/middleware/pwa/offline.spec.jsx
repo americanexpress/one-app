@@ -20,7 +20,7 @@
 
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import { registerModule } from 'holocron';
+import { RenderModule, registerModule } from 'holocron';
 import { createRequest, createResponse } from 'node-mocks-http';
 
 import oneApp from '../../../../src/universal';
@@ -36,6 +36,10 @@ jest.mock('fs', () => ({
   existsSync: () => false,
   readFileSync: (filePath) => Buffer.from(filePath.endsWith('noop.js') ? '[service-worker-noop-script]' : '[service-worker-script]'),
 }));
+jest.mock('holocron', () => ({
+  ...jest.requireActual('holocron'),
+  RenderModule: jest.fn(),
+}));
 
 describe('offline middleware', () => {
   beforeAll(() => {
@@ -48,7 +52,9 @@ describe('offline middleware', () => {
     global.fetch = jest.fn(() => Promise.resolve({}));
 
     const rootModuleName = 'root-module';
-    registerModule(rootModuleName, () => React.createElement('p', null, 'Hi there'));
+    const RootModule = () => React.createElement('p', null, 'Hi there');
+    registerModule(rootModuleName, RootModule);
+    RenderModule.mockImplementation(() => <RootModule />);
     setStateConfig({
       rootModuleName: {
         server: rootModuleName,
@@ -100,7 +106,7 @@ describe('offline middleware', () => {
     const middleware = createOfflineMiddleware(oneApp);
     const req = createRequest();
     const res = createResponse();
-    registerModule('root-module', () => (
+    const RootModule = () => (
       <React.Fragment>
         <Helmet>
           <link rel="manifest" href="manifest.webmanifest" />
@@ -109,7 +115,9 @@ describe('offline middleware', () => {
           hello
         </p>
       </React.Fragment>
-    ));
+    );
+    registerModule('root-module', RootModule);
+    RenderModule.mockImplementation(() => <RootModule />);
 
     await expect(middleware(req, res)).resolves.toBeUndefined();
     expect(req.appHtml).toEqual('<p>hello</p>');
