@@ -107,7 +107,7 @@ describe('cacheUtils', () => {
       expect(logSpy).toHaveBeenCalledWith(`Creating ${cacheFileName}`);
       expect(fsPromises.writeFile).toHaveBeenCalledWith(
         oneAppModuleCachePath,
-        JSON.stringify('{}')
+        JSON.stringify({})
       );
       expect(logSpy).toHaveBeenCalledWith(`${cacheFileName} created successfully on ${oneAppModuleCachePath}`);
       expect(errorSpy).not.toHaveBeenCalled();
