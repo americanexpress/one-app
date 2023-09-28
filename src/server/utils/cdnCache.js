@@ -47,7 +47,7 @@ export const setupCacheFile = async () => {
     console.log(`Successfully created ${oneAppDirectoryPath}`);
     console.log(`Creating ${cacheFileName}`);
     try {
-      await fsPromises.writeFile(oneAppModuleCachePath, JSON.stringify('{}'));
+      await fsPromises.writeFile(oneAppModuleCachePath, JSON.stringify({}));
       console.log(`${cacheFileName} created successfully on ${oneAppModuleCachePath}`);
     } catch (error) {
       console.error(`Error creating ${cacheFileName} on ${oneAppModuleCachePath}, \n${error}`);
