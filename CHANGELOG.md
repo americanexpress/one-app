@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.7.1](https://github.com/americanexpress/one-app/compare/v6.7.0...v6.7.1) (2023-09-28)
+
+
+### Bug Fixes
+
+* **cache-cdn:** stringify object ([#1138](https://github.com/americanexpress/one-app/issues/1138)) ([8715017](https://github.com/americanexpress/one-app/commit/871501745ece71085173501faab4b942b968f82c))
+
+
 # [6.7.0](https://github.com/americanexpress/one-app/compare/v6.6.0...v6.7.0) (2023-09-27)
 
 
