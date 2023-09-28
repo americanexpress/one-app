@@ -29,13 +29,13 @@ jobs:
           #Checks for when a valid tag is manually pushed
           if [[ $GITHUB_REF != "" && "${{ github.event.client_payload.tagversion }}" == "" ]];
           then
-          echo ::set-output name=tagversion::$(egrep -o '^v([0-9]+\.[0-9]+\.[0-9]+)(-\S*)?' <<< $GITHUB_REF)
+          echo "tagversion=$(egrep -o '^v([0-9]+\.[0-9]+\.[0-9]+)(-\S*)?' <<< $GITHUB_REF)" >> $GITHUB_OUTPUT
           else
-          echo ::set-output name=tagversion::${{ github.event.client_payload.tagversion }}
+          echo "tagversion=${{ github.event.client_payload.tagversion }}" >> $GITHUB_OUTPUT
           fi
           if [[ "${{ github.event.inputs.tag_version }}" != "" ]]
           then
-          echo ::set-output name=tagversion::${{ github.event.inputs.tag_version }}
+          echo "tagversion=${{ github.event.inputs.tag_version }}" >> $GITHUB_OUTPUT
           fi
           echo $tagversion
       - name: Normalize meta tag
@@ -44,16 +44,16 @@ jobs:
           # if a meta tag was specified this was a manual build
           if [[ "${{ github.event.inputs.docker_meta_tag }}" != "" ]]
           then
-          echo ::set-output name=metatag::${{ github.event.inputs.docker_meta_tag }}
+          echo "metatag=${{ github.event.inputs.docker_meta_tag }}" >> $GITHUB_OUTPUT
           echo From manual run: ${{ github.event.inputs.docker_meta_tag }}
           # if we are on the main branch, default to `latest`
           elif [[ "$GITHUB_REF" == "refs/heads/main" ]]
           then
-          echo ::set-output name=metatag::latest
+          echo "metatag=latest" >> $GITHUB_OUTPUT
           echo For main branch: latest
           # if we are not on the main branch, default to `do_not_tag`
           else
-          echo ::set-output name=metatag::do_not_tag
+          echo "metatag=do_not_tag" >> $GITHUB_OUTPUT
           echo For other branch: do_not_tag
           fi
       - name: Check Tag Version
@@ -67,7 +67,7 @@ jobs:
         run: |
           # trimmed off 'v' from tagversion
           tagversion=${{ steps.set_tag_version.outputs.tagversion }}
-          echo ::set-output name=dockertag::$(sed 's/^v*//' <<< "$tagversion")
+          echo "dockertag=$(sed 's/^v*//' <<< "$tagversion")" >> $GITHUB_OUTPUT
       # ensure tag is available
       - uses: actions/checkout@v3
         with:
