@@ -26,23 +26,23 @@ jobs:
             MAJOR="$(echo ${{ github.event.client_payload.docker_tag_version}} | cut -d'.' -f1)"
             MINOR="$(echo ${{ github.event.client_payload.docker_tag_version}} | cut -d'.' -f2)"
             PATCH="$(echo ${{ github.event.client_payload.docker_tag_version}} | cut -d'.' -f3)"
-            echo ::set-output name=major_version::${MAJOR}
-            echo ::set-output name=minor_version::${MINOR}
+            echo "major_version=${MAJOR}" >> $GITHUB_OUTPUT
+            echo "minor_version=${MINOR}" >> $GITHUB_OUTPUT
       - name: Docker Image Versions
         id: set_docker_version
         run: |
           #Runs when the action is triggered by the dispatch function
           if [[ "${{ github.event.inputs.docker_tag_version }}" == "" ]]; then
-          echo ::set-output name=docker_version::${{ github.event.client_payload.docker_tag_version }}
-          echo ::set-output name=major_version::${{ steps.get_sem_version.outputs.major_version }}
-          echo ::set-output name=minor_version::${{ steps.get_sem_version.outputs.minor_version }}
+          echo "docker_version=${{ github.event.client_payload.docker_tag_version }}" >> $GITHUB_OUTPUT
+          echo "major_version=${{ steps.get_sem_version.outputs.major_version }}" >> $GITHUB_OUTPUT
+          echo "minor_version=${{ steps.get_sem_version.outputs.minor_version }}" >> $GITHUB_OUTPUT
           else
           #Runs when a tag is triggered manually
-          echo ::set-output name=docker_version::${{ github.event.inputs.docker_tag_version }}
+          echo "docker_version=${{ github.event.inputs.docker_tag_version }}" >> $GITHUB_OUTPUT
           MAJOR="$(echo ${{ github.event.inputs.docker_tag_version}} | cut -d'.' -f1)"
           MINOR="$(echo ${{ github.event.inputs.docker_tag_version}} | cut -d'.' -f2)"
-          echo ::set-output name=major_version::${MAJOR}
-          echo ::set-output name=minor_version::${MINOR}
+          echo "major_version=${MAJOR}" >> $GITHUB_OUTPUT
+          echo "minor_version=${MINOR}" >> $GITHUB_OUTPUT
           fi
       - name: Normalize meta tag
         id: set_docker_meta_tag
@@ -50,24 +50,24 @@ jobs:
           # Always use the value from the last step if it is present
           if [[ "${{ github.event.client_payload.docker_meta_tag }}" != "" ]]
           then
-          echo ::set-output name=metatag::${{ github.event.client_payload.docker_meta_tag }}
+          echo "metatag=${{ github.event.client_payload.docker_meta_tag }}" >> $GITHUB_OUTPUT
           echo From previous step: ${{ github.event.client_payload.docker_meta_tag }}
           # if a meta tag was specified this was a manual build
           elif [[ "${{ github.event.inputs.docker_meta_tag }}" != "" ]]
           then
-          echo ::set-output name=metatag::${{ github.event.inputs.docker_meta_tag }}
+          echo "metatag=${{ github.event.inputs.docker_meta_tag }}" >> $GITHUB_OUTPUT
           echo From manual run: ${{ github.event.inputs.docker_meta_tag }}
           # if we are on the main branch, default to `latest`
           elif [[ "$GITHUB_REF" == "refs/heads/main" ]]
           then
-          echo ::set-output name=metatag::latest
+          echo "metatag=latest" >> $GITHUB_OUTPUT
           echo For main branch: latest
           # if we are not on the main branch, default to `do_not_tag`
           else
-          echo ::set-output name=metatag::do_not_tag
+          echo "metatag=do_not_tag" >> $GITHUB_OUTPUT
           echo For other branch: do_not_tag
           fi
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: "v${{ steps.set_docker_version.outputs.docker_version }}"
       - name: Docker login

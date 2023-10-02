@@ -14,7 +14,7 @@ jobs:
         node-version: [16.x, 18.x]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -40,9 +40,9 @@ jobs:
         run: |
           if [[ "${{github.event_name == 'pull_request'}}" == "true" ]]
           then
-            echo ::set-output name=short_ref::${{github.base_ref}}
+            echo "short_ref=${{github.base_ref}}" >> $GITHUB_OUTPUT
           else
-            echo ::set-output name=short_ref::${{github.ref_name}}
+            echo "short_ref=${{github.ref_name}}" >> $GITHUB_OUTPUT
           fi
       - name: npm commit lint
         run: npm run test:git-history -- --from origin/${{ steps.vars.outputs.short_ref }}
