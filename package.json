@@ -183,7 +183,7 @@
     "jest-circus": "^29.2.2",
     "jest-environment-jsdom": "^28.1.2",
     "js-yaml": "^4.1.0",
-    "lockfile-lint": "^4.12.0",
+    "lockfile-lint": "^4.12.1",
     "lodash.set": "^4.3.2",
     "mkdirp": "^2.1.5",
     "node-fetch": "^2.6.7",
