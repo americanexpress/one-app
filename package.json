@@ -154,7 +154,7 @@
     "@babel/node": "^7.18.10",
     "@babel/register": "^7.22.5",
     "@commitlint/cli": "^17.0.3",
-    "@commitlint/config-conventional": "^17.3.0",
+    "@commitlint/config-conventional": "^17.7.0",
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-node-resolve": "^15.1.0",
     "@rollup/plugin-replace": "^4.0.0",
