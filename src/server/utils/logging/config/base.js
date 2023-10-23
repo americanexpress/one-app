@@ -24,6 +24,7 @@ export default {
   },
   dedupe: true,
   errorKey: 'error',
+  messageKey: 'message',
   hooks: {
     logMethod(inputArgs, method) {
       if (inputArgs.length > 1) {
@@ -32,11 +33,7 @@ export default {
         if (inputArgs[inputArgs.length - 1] instanceof Error) error = inputArgs.pop();
         if (error) {
           const message = util.format(...inputArgs);
-          // TODO: The default message key "msg" is required here to prevent
-          // duplicate messages in entry. Production log formatter replaces "msg" from these
-          // logs with "message". Change the key to message once bug is resolved.
-          // https://github.com/pinojs/pino/issues/1790
-          return method.call(this, { error, msg: message });
+          return method.call(this, { error, message });
         }
       }
       return method.apply(this, inputArgs);

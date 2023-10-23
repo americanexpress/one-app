@@ -24,7 +24,6 @@ import developmentStream from '../../../../src/server/utils/logging/config/devel
 import otelConfig, { createOtelTransport } from '../../../../src/server/utils/logging/config/otel';
 
 jest.spyOn(pino, 'pino');
-jest.spyOn(pino, 'multistream');
 
 jest.mock('yargs', () => ({
   argv: {
@@ -94,24 +93,6 @@ describe('logger', () => {
     expect(pino.pino).toHaveBeenCalledWith(
       deepmerge(baseConfig, otelConfig),
       createOtelTransport()
-    );
-    expect(pino.multistream).not.toHaveBeenCalled();
-  });
-
-  it('uses both OpenTlemetry config and development config when OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is set in development', () => {
-    process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
-    process.env.NODE_ENV = 'development';
-    const logger = createLogger();
-    expect(pino.pino).toHaveBeenCalledTimes(1);
-    expect(pino.pino.mock.results[0].value).toBe(logger);
-    expect(pino.multistream).toHaveBeenCalledTimes(1);
-    expect(pino.multistream).toHaveBeenCalledWith([
-      { stream: developmentStream },
-      createOtelTransport(),
-    ]);
-    expect(pino.pino).toHaveBeenCalledWith(
-      deepmerge(baseConfig, otelConfig),
-      pino.multistream.mock.results[0].value
     );
   });
 });

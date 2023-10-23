@@ -53,9 +53,25 @@ export function createOtelTransport() {
     };
   }, {}) : {};
 
+  const logRecordProcessorOptions = [{
+    recordProcessorType: 'batch',
+    exporterOptions: { protocol: 'grpc' },
+  }];
+
+  if (process.env.NODE_ENV === 'development') {
+    logRecordProcessorOptions.push({
+      recordProcessorType: 'simple',
+      exporterOptions: { protocol: 'console' },
+    });
+  }
+
   return pino.transport({
     target: 'pino-opentelemetry-transport',
     options: {
+      messageKey: 'message',
+      loggerName: process.env.OTEL_SERVICE_NAME,
+      serviceVersion: version,
+      logRecordProcessorOptions,
       resourceAttributes: {
         [SemanticResourceAttributes.SERVICE_NAME]: process.env.OTEL_SERVICE_NAME,
         [SemanticResourceAttributes.SERVICE_NAMESPACE]: process.env.OTEL_SERVICE_NAMESPACE,
@@ -68,7 +84,6 @@ export function createOtelTransport() {
 }
 
 export default {
-  errorKey: 'error',
   base: {
     schemaVersion: '1.0.0',
   },
