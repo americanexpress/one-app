@@ -50,6 +50,7 @@ const buildServiceWorkerScripts = require('./build-service-workers');
   ].find((argName) => arg.startsWith(argName)));
 
   const nodemon = spawn('nodemon', [
+    '--dns-result-order=ipv4first', '--no-experimental-fetch',
     '--signal', 'SIGTERM', '--watch', 'src', '--ext', 'js,jsx', 'lib/server/index.js',
   ].concat(flags.length > 0 ? ['--', ...flags] : []), {
     stdio: 'inherit',
