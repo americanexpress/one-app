@@ -34,7 +34,16 @@ jest.mock('node:os', () => ({
 jest.spyOn(pino, 'transport');
 
 describe('OpenTelemetry logging', () => {
-  beforeEach(() => jest.clearAllMocks());
+  const originalNodeEnv = process.env.NODE_ENV;
+
+  beforeEach(() => {
+    process.env.NODE_ENV = 'production';
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    process.env.NODE_ENV = originalNodeEnv;
+  });
 
   describe('config', () => {
     it('should serialize errors', () => {
@@ -47,10 +56,6 @@ describe('OpenTelemetry logging', () => {
           "schemaVersion": "1.0.0",
         }
       `);
-    });
-
-    it('should set the error key', () => {
-      expect(otelConfig.errorKey).toBe('error');
     });
 
     it('should coerce "log" level to "info" level', () => {
@@ -97,19 +102,14 @@ describe('OpenTelemetry logging', () => {
       process.env.OTEL_RESOURCE_ATTRIBUTES = 'service.custom.id=XXXXX;deployment.env=qa';
       const transport = createOtelTransport();
       expect(pino.transport).toHaveBeenCalledTimes(1);
-      expect(pino.transport.mock.calls[0][0]).toMatchInlineSnapshot(`
+      expect(pino.transport.mock.calls[0][0].options.resourceAttributes).toMatchInlineSnapshot(`
         {
-          "options": {
-            "resourceAttributes": {
-              "deployment.env": "qa",
-              "service.custom.id": "XXXXX",
-              "service.instance.id": "mockHostName",
-              "service.name": "Mock Service Name",
-              "service.namespace": "Mock Service Namespace",
-              "service.version": "X.X.X",
-            },
-          },
-          "target": "pino-opentelemetry-transport",
+          "deployment.env": "qa",
+          "service.custom.id": "XXXXX",
+          "service.instance.id": "mockHostName",
+          "service.name": "Mock Service Name",
+          "service.namespace": "Mock Service Namespace",
+          "service.version": "X.X.X",
         }
       `);
       expect(pino.transport.mock.results[0].value).toBe(transport);
@@ -125,17 +125,70 @@ describe('OpenTelemetry logging', () => {
       expect(pino.transport.mock.calls[0][0]).toMatchInlineSnapshot(`
         {
           "options": {
+            "logRecordProcessorOptions": [
+              {
+                "exporterOptions": {
+                  "protocol": "grpc",
+                },
+                "recordProcessorType": "batch",
+              },
+            ],
+            "loggerName": "Mock Service Name",
+            "messageKey": "message",
             "resourceAttributes": {
               "service.instance.id": "mockHostName",
               "service.name": "Mock Service Name",
               "service.namespace": "Mock Service Namespace",
               "service.version": "X.X.X",
             },
+            "serviceVersion": "X.X.X",
           },
           "target": "pino-opentelemetry-transport",
         }
       `);
       expect(pino.transport.mock.results[0].value).toBe(transport);
     });
+  });
+
+  it('should include the console exporter in development', () => {
+    process.env.NODE_ENV = 'development';
+    const transport = createOtelTransport();
+    expect(pino.transport).toHaveBeenCalledTimes(1);
+    expect(pino.transport.mock.calls[0][0].options.logRecordProcessorOptions)
+      .toMatchInlineSnapshot(`
+      [
+        {
+          "exporterOptions": {
+            "protocol": "grpc",
+          },
+          "recordProcessorType": "batch",
+        },
+        {
+          "exporterOptions": {
+            "protocol": "console",
+          },
+          "recordProcessorType": "simple",
+        },
+      ]
+    `);
+    expect(pino.transport.mock.results[0].value).toBe(transport);
+  });
+
+  it('should not include the console exporter in production', () => {
+    process.env.NODE_ENV = 'production';
+    const transport = createOtelTransport();
+    expect(pino.transport).toHaveBeenCalledTimes(1);
+    expect(pino.transport.mock.calls[0][0].options.logRecordProcessorOptions)
+      .toMatchInlineSnapshot(`
+      [
+        {
+          "exporterOptions": {
+            "protocol": "grpc",
+          },
+          "recordProcessorType": "batch",
+        },
+      ]
+    `);
+    expect(pino.transport.mock.results[0].value).toBe(transport);
   });
 });
