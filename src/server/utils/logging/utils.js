@@ -91,14 +91,6 @@ function formatLogEntry(entry) {
       entry.metaData = entry.error.metaData;
     }
   }
-
-  // TODO: this is required due to a pino bug in the hook, remove once resolved
-  // https://github.com/pinojs/pino/issues/1790
-  if (entry.msg) {
-    entry.message = entry.msg;
-    delete entry.msg;
-  }
-
   return entry;
 }
 
