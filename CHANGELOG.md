@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.7.2](https://github.com/americanexpress/one-app/compare/v6.7.1...v6.7.2) (2023-10-25)
+
+
+### Bug Fixes
+
+* **scripts:** start watch failed to fetch modules ([#1159](https://github.com/americanexpress/one-app/issues/1159)) ([aa98621](https://github.com/americanexpress/one-app/commit/aa98621c1fe69f943cf7240be071a861ba656898))
+
+
 ## [6.7.1](https://github.com/americanexpress/one-app/compare/v6.7.0...v6.7.1) (2023-09-28)
 
 
