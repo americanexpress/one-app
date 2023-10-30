@@ -42,7 +42,7 @@ describe('addSecurityHeaders', () => {
     expect(done).toHaveBeenCalled();
     expect(reply.header).toHaveBeenCalledTimes(9);
     expect(reply.header).toHaveBeenCalledWith('vary', 'Accept-Encoding');
-    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
     expect(reply.header).toHaveBeenCalledWith('x-dns-prefetch-control', 'off');
     expect(reply.header).toHaveBeenCalledWith('x-download-options', 'noopen');
     expect(reply.header).toHaveBeenCalledWith('x-permitted-cross-domain-policies', 'none');
@@ -78,7 +78,7 @@ describe('addSecurityHeaders', () => {
     expect(done).toHaveBeenCalled();
     expect(reply.header).toHaveBeenCalledTimes(9);
     expect(reply.header).toHaveBeenCalledWith('vary', 'Accept-Encoding');
-    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
     expect(reply.header).toHaveBeenCalledWith('x-dns-prefetch-control', 'off');
     expect(reply.header).toHaveBeenCalledWith('x-download-options', 'noopen');
     expect(reply.header).toHaveBeenCalledWith('x-permitted-cross-domain-policies', 'none');
@@ -110,7 +110,7 @@ describe('addSecurityHeaders', () => {
     expect(done).toHaveBeenCalled();
     expect(reply.header).toHaveBeenCalledTimes(9);
     expect(reply.header).toHaveBeenCalledWith('vary', 'Accept-Encoding');
-    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
     expect(reply.header).toHaveBeenCalledWith('x-dns-prefetch-control', 'off');
     expect(reply.header).toHaveBeenCalledWith('x-download-options', 'noopen');
     expect(reply.header).toHaveBeenCalledWith('x-permitted-cross-domain-policies', 'none');
@@ -143,7 +143,7 @@ describe('addSecurityHeaders', () => {
     expect(done).toHaveBeenCalled();
     expect(reply.header).toHaveBeenCalledTimes(9);
     expect(reply.header).toHaveBeenCalledWith('vary', 'Accept-Encoding');
-    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
     expect(reply.header).toHaveBeenCalledWith('x-dns-prefetch-control', 'off');
     expect(reply.header).toHaveBeenCalledWith('x-download-options', 'noopen');
     expect(reply.header).toHaveBeenCalledWith('x-permitted-cross-domain-policies', 'none');
