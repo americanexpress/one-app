@@ -17,7 +17,7 @@
 export default function addSecurityHeaders(req, res, next) {
   res.set('X-Frame-Options', 'DENY');
   res.set('X-Content-Type-Options', 'nosniff');
-  res.set('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+  res.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
   res.set('X-XSS-Protection', '1; mode=block');
   res.set('Referrer-Policy', process.env.ONE_REFERRER_POLICY_OVERRIDE || 'same-origin');
   next();
