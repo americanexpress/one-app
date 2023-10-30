@@ -1354,7 +1354,7 @@ describe('Tests that require Docker setup', () => {
           'same-origin',
         ],
         'strict-transport-security': [
-          'max-age=15552000; includeSubDomains',
+          'max-age=63072000; includeSubDomains',
         ],
         vary: [
           'Accept-Encoding, accept-encoding',
@@ -1408,7 +1408,7 @@ describe('Tests that require Docker setup', () => {
           'same-origin',
         ],
         'strict-transport-security': [
-          'max-age=15552000; includeSubDomains',
+          'max-age=63072000; includeSubDomains',
         ],
         'x-content-type-options': [
           'nosniff',
@@ -1467,7 +1467,7 @@ describe('Tests that require Docker setup', () => {
           'same-origin',
         ],
         'strict-transport-security': [
-          'max-age=15552000; includeSubDomains',
+          'max-age=63072000; includeSubDomains',
         ],
         vary: [
           'Accept-Encoding, accept-encoding',
@@ -1525,7 +1525,7 @@ describe('Tests that require Docker setup', () => {
           'same-origin',
         ],
         'strict-transport-security': [
-          'max-age=15552000; includeSubDomains',
+          'max-age=63072000; includeSubDomains',
         ],
         vary: ['Accept-Encoding'],
         'x-content-type-options': [
@@ -1589,7 +1589,7 @@ describe('Tests that require Docker setup', () => {
           'no-referrer',
         ],
         'strict-transport-security': [
-          'max-age=15552000; includeSubDomains',
+          'max-age=63072000; includeSubDomains',
         ],
         vary: [
           'Accept-Encoding, accept-encoding',

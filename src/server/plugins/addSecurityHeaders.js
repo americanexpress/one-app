@@ -27,7 +27,7 @@ const addSecurityHeaders = (fastify, opts = {}, done) => {
 
   fastify.addHook('onRequest', async (request, reply) => {
     reply.header('vary', 'Accept-Encoding');
-    reply.header('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+    reply.header('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
     reply.header('x-dns-prefetch-control', 'off');
     reply.header('x-download-options', 'noopen');
     reply.header('x-permitted-cross-domain-policies', 'none');
