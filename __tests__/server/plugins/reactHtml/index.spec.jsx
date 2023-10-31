@@ -984,6 +984,27 @@ describe('reactHtml', () => {
       );
     });
 
+    it('does not add integrity when not present', () => {
+      setRequiredExternalsRegistry({
+        'child-module-a': {
+          'this-dep': {
+            filename: 'this-dep.js',
+            semanticRange: '^2.2.0',
+            version: '2.3.1',
+          },
+        },
+      });
+
+      expect(
+        renderExternalFallbacks({
+          clientInitialState,
+          moduleMap,
+        })
+      ).toMatchInlineSnapshot(
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" ></script>"'
+      );
+    });
+
     it('handles trailing "/" in module baseUrl', () => {
       expect(
         renderExternalFallbacks({
@@ -999,19 +1020,6 @@ describe('reactHtml', () => {
         })
       ).toMatchInlineSnapshot(
         '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
-      );
-    });
-
-    it('supports legacy browsers', () => {
-      expect(
-        renderExternalFallbacks({
-          clientInitialState,
-          moduleMap,
-          isDevelopmentEnv: true,
-          isLegacy: true,
-        })
-      ).toMatchInlineSnapshot(
-        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.legacy.browser.js" crossorigin="anonymous" ></script>"'
       );
     });
   });

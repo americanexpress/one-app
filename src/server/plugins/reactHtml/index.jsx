@@ -76,7 +76,7 @@ function renderI18nScript(clientInitialState, appBundlesURLPrefix) {
 function renderScript({
   src, integrity, isDevelopmentEnv, clientCacheRevision,
 }) {
-  const additionalAttributes = isDevelopmentEnv ? '' : `integrity="${integrity}"`;
+  const additionalAttributes = isDevelopmentEnv || !integrity ? '' : `integrity="${integrity}"`;
   const scriptSource = isDevelopmentEnv || !clientCacheRevision
     ? src
     : `${src}?clientCacheRevision=${clientCacheRevision}`;
@@ -110,7 +110,6 @@ export function renderExternalFallbacks({
   clientInitialState,
   moduleMap,
   isDevelopmentEnv,
-  isLegacy,
 }) {
   const loadedModules = clientInitialState.getIn(['holocron', 'loaded'], iSet()).toArray();
   const requiredFallbacks = loadedModules
@@ -139,7 +138,6 @@ export function renderExternalFallbacks({
         baseUrl,
         [
           name,
-          isLegacy ? 'legacy' : '',
           'browser',
           'js',
         ].filter(Boolean).join('.'),
