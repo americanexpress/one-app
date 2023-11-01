@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.8.0](https://github.com/americanexpress/one-app/compare/v6.7.1...v6.8.0) (2023-11-01)
+
+
+### Bug Fixes
+
+* **scripts:** start watch failed to fetch modules ([#1159](https://github.com/americanexpress/one-app/issues/1159)) ([aa98621](https://github.com/americanexpress/one-app/commit/aa98621c1fe69f943cf7240be071a861ba656898))
+
+
+### Features
+
+* update strict transport security header to 2 years ([#1165](https://github.com/americanexpress/one-app/issues/1165)) ([6fbca9e](https://github.com/americanexpress/one-app/commit/6fbca9e8a4fa690f92d77fbe9f752625dac25659))
+
+
 ## [6.7.1](https://github.com/americanexpress/one-app/compare/v6.7.0...v6.7.1) (2023-09-28)
 
 
