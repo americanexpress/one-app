@@ -155,7 +155,7 @@
     "@babel/register": "^7.22.5",
     "@commitlint/cli": "^17.0.3",
     "@commitlint/config-conventional": "^17.7.0",
-    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-node-resolve": "^15.1.0",
     "@rollup/plugin-replace": "^4.0.0",
     "amex-jest-preset": "^7.0.0",
