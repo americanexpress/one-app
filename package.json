@@ -118,7 +118,7 @@
     "make-promises-safe": "^5.1.0",
     "matcher": "^3.0.0",
     "object-hash": "^3.0.0",
-    "opossum": "^7.1.0",
+    "opossum": "^8.1.2",
     "opossum-prometheus": "^0.3.0",
     "pidusage": "^3.0.0",
     "prom-client": "^14.0.1",
