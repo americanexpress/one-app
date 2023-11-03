@@ -133,7 +133,10 @@ describe('Tests that require Docker setup', () => {
 
     test('app responds with the correct strict transport security headers for GET route *', async () => {
       const response = await fetch(
-        `${appAtTestUrls.fetchUrl}/success`
+        `${appAtTestUrls.fetchUrl}/success`,
+        {
+          ...defaultFetchOptions,
+        }
       );
       const rawHeaders = response.headers.raw();
       expect(response.status).toBe(200);
