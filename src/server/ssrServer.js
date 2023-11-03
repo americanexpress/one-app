@@ -77,7 +77,11 @@ export function createApp({ enablePostToModuleRoutes = false } = {}) {
 
   app.disable('x-powered-by');
   app.disable('e-tag');
-  app.use(helmet());
+  app.use(helmet({
+    hsts: {
+      maxAge: 63072000,
+    },
+  }));
   app.use(csp());
   app.use(cookieParser());
   app.use(json({

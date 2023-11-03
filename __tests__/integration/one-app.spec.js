@@ -131,6 +131,14 @@ describe('Tests that require Docker setup', () => {
       writeModuleMap(originalModuleMap);
     });
 
+    test('app responds with the correct strict transport security headers for GET route *', async () => {
+      const response = await fetch(
+        `${appAtTestUrls.fetchUrl}/success`
+      );
+      const rawHeaders = response.headers.raw();
+      expect(response.status).toBe(200);
+      expect(rawHeaders['strict-transport-security']).toEqual(['max-age=63072000; includeSubDomains']);
+    });
     test('app rejects CORS POST requests', async () => {
       const response = await fetch(
         `${appAtTestUrls.fetchUrl}/success`,
