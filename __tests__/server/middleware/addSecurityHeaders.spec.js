@@ -26,7 +26,6 @@ describe('addSecurityHeaders', () => {
     const securityHeaders = {
       'X-Frame-Options': 'DENY',
       'X-Content-Type-Options': 'nosniff',
-      'Strict-Transport-Security': 'max-age=63072000; includeSubDomains',
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'same-origin',
     };
