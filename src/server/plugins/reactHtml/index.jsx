@@ -76,6 +76,7 @@ function renderI18nScript(clientInitialState, appBundlesURLPrefix) {
 function renderScript({
   src, integrity, isDevelopmentEnv, clientCacheRevision,
 }) {
+  if (!integrity && !isDevelopmentEnv) console.warn(`No integrity hash found for script ${src}, this can be a security risk.`);
   const additionalAttributes = isDevelopmentEnv || !integrity ? '' : `integrity="${integrity}"`;
   const scriptSource = isDevelopmentEnv || !clientCacheRevision
     ? src

@@ -1003,6 +1003,10 @@ describe('reactHtml', () => {
       ).toMatchInlineSnapshot(
         '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" ></script>"'
       );
+
+      expect(console.warn).toHaveBeenCalledWith(
+        'No integrity hash found for script https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js, this can be a security risk.'
+      );
     });
 
     it('handles trailing "/" in module baseUrl', () => {
