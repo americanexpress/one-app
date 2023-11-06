@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.23.1](https://github.com/americanexpress/one-app/compare/v5.23.0...v5.23.1) (2023-11-03)
+
+
+### Bug Fixes
+
+* correctly set strict transport security header ([#1182](https://github.com/americanexpress/one-app/issues/1182)) ([823a12b](https://github.com/americanexpress/one-app/commit/823a12bbac303ac53459fd1f344f1509656088c2))
+
+
 # [5.23.0](https://github.com/americanexpress/one-app/compare/v5.22.0...v5.23.0) (2023-11-01)
 
 
