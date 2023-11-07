@@ -25,7 +25,7 @@ jobs:
         with:
           ref: "v${{ steps.set_tag_version.outputs.tagversion}}"
       # Setup .npmrc file to publish to npm
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
