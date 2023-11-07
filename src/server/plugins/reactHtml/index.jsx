@@ -76,7 +76,7 @@ function renderI18nScript(clientInitialState, appBundlesURLPrefix) {
 function renderScript({
   src, integrity, isDevelopmentEnv, clientCacheRevision,
 }) {
-  if (!integrity && !isDevelopmentEnv) console.warn(`No integrity hash found for script ${src}, this can be a security risk.`);
+  if (!integrity && !isDevelopmentEnv) console.warn(`No SRI integrity hash found for script ${src}. This is a security risk.`);
   const additionalAttributes = isDevelopmentEnv || !integrity ? '' : `integrity="${integrity}"`;
   const scriptSource = isDevelopmentEnv || !clientCacheRevision
     ? src
@@ -132,7 +132,7 @@ export function renderExternalFallbacks({
   const { clientCacheRevision, modules } = moduleMap;
 
   return requiredFallbacks
-    .map(({ name, integrity, moduleName }) => {
+    .map(({ name, browserIntegrity, moduleName }) => {
       const { baseUrl } = modules[moduleName];
       const endsWithSlash = baseUrl.endsWith('/');
       const src = [
@@ -146,7 +146,7 @@ export function renderExternalFallbacks({
 
       return renderScript({
         src,
-        integrity,
+        integrity: browserIntegrity,
         isDevelopmentEnv,
         clientCacheRevision,
       });
