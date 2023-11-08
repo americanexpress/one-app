@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.8.1](https://github.com/americanexpress/one-app/compare/v6.8.0...v6.8.1) (2023-11-08)
+
+
 # [6.8.0](https://github.com/americanexpress/one-app/compare/v6.7.1...v6.8.0) (2023-11-01)
 
 
