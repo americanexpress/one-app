@@ -112,7 +112,7 @@
     "fastify-plugin": "^4.5.1",
     "flat": "^5.0.2",
     "helmet": "^7.0.0",
-    "holocron": "^1.9.0",
+    "holocron": "^1.9.1",
     "holocron-module-route": "^1.7.0",
     "immutable": "^4.1.0",
     "ip": "^1.1.8",
