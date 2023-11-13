@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.8.1](https://github.com/americanexpress/one-app/compare/v6.8.0...v6.8.1) (2023-11-13)
+
+
+### Bug Fixes
+
+* **reactHtml:** use browser integrity for external fallbacks ([#1166](https://github.com/americanexpress/one-app/issues/1166)) ([6ae1e65](https://github.com/americanexpress/one-app/commit/6ae1e6579c2b8723e92f955f6263982ee2957ab9))
+
+
 # [6.8.0](https://github.com/americanexpress/one-app/compare/v6.7.1...v6.8.0) (2023-11-01)
 
 
