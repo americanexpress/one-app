@@ -920,7 +920,8 @@ describe('reactHtml', () => {
           'this-dep': {
             filename: 'this-dep.js',
             semanticRange: '^2.2.0',
-            integrity: '12345hash',
+            browserIntegrity: '12345hash-browser',
+            nodeIntegrity: '12345hash-node',
             version: '2.3.1',
           },
         },
@@ -934,7 +935,7 @@ describe('reactHtml', () => {
           moduleMap,
         })
       ).toMatchInlineSnapshot(
-        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash-browser"></script>"'
       );
     });
 
@@ -944,7 +945,8 @@ describe('reactHtml', () => {
           'this-dep': {
             filename: 'this-dep.js',
             semanticRange: '^2.2.0',
-            integrity: '12345hash',
+            browserIntegrity: '12345hash-browser',
+            nodeIntegrity: '12345hash-node',
             version: '2.3.1',
           },
         },
@@ -952,7 +954,8 @@ describe('reactHtml', () => {
           'this-dep': {
             filename: 'this-dep.js',
             semanticRange: '^2.2.0',
-            integrity: '12345hash',
+            browserIntegrity: '12345hash-browser',
+            nodeIntegrity: '12345hash-node',
             version: '2.3.1',
           },
         },
@@ -968,7 +971,7 @@ describe('reactHtml', () => {
           moduleMap,
         })
       ).toMatchInlineSnapshot(
-        '"<script src="https://example.com/cdn/child-module-b/1.1.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script><script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
+        '"<script src="https://example.com/cdn/child-module-b/1.1.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash-browser"></script><script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash-browser"></script>"'
       );
     });
 
@@ -981,6 +984,30 @@ describe('reactHtml', () => {
         })
       ).toMatchInlineSnapshot(
         '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js" crossorigin="anonymous" ></script>"'
+      );
+    });
+
+    it('includes integrity as "undefined" when not present', () => {
+      setRequiredExternalsRegistry({
+        'child-module-a': {
+          'this-dep': {
+            filename: 'this-dep.js',
+            semanticRange: '^2.2.0',
+            version: '2.3.1',
+          },
+        },
+      });
+
+      const fallbackScripts = renderExternalFallbacks({
+        clientInitialState,
+        moduleMap,
+      });
+      expect(fallbackScripts).toMatchInlineSnapshot(
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="undefined"></script>"'
+      );
+
+      expect(console.warn).toHaveBeenCalledWith(
+        'No SRI integrity hash found for script https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js. This is a security risk.'
       );
     });
 
@@ -998,20 +1025,7 @@ describe('reactHtml', () => {
           },
         })
       ).toMatchInlineSnapshot(
-        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash"></script>"'
-      );
-    });
-
-    it('supports legacy browsers', () => {
-      expect(
-        renderExternalFallbacks({
-          clientInitialState,
-          moduleMap,
-          isDevelopmentEnv: true,
-          isLegacy: true,
-        })
-      ).toMatchInlineSnapshot(
-        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.legacy.browser.js" crossorigin="anonymous" ></script>"'
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="12345hash-browser"></script>"'
       );
     });
   });
@@ -1029,7 +1043,10 @@ describe('reactHtml', () => {
 
       sendHtml(request, reply);
       expect(request.log.error).toHaveBeenCalledTimes(1);
-      expect(request.log.error).toHaveBeenCalledWith('encountered an error serializing full client initial state', fullStateError);
+      expect(request.log.error).toHaveBeenCalledWith(
+        'encountered an error serializing full client initial state',
+        fullStateError
+      );
       expect(transit.toJSON).toHaveBeenCalledTimes(3);
 
       expect(reply.send).toHaveBeenCalledTimes(1);
@@ -1061,8 +1078,14 @@ describe('reactHtml', () => {
 
       sendHtml(request, reply);
       expect(request.log.error).toHaveBeenCalledTimes(3);
-      expect(request.log.error).toHaveBeenCalledWith('encountered an error serializing full client initial state', fullStateError);
-      expect(request.log.error).toHaveBeenCalledWith('unable to build the most basic initial state for a client to startup', minimalStateError);
+      expect(request.log.error).toHaveBeenCalledWith(
+        'encountered an error serializing full client initial state',
+        fullStateError
+      );
+      expect(request.log.error).toHaveBeenCalledWith(
+        'unable to build the most basic initial state for a client to startup',
+        minimalStateError
+      );
       expect(transit.toJSON).toHaveBeenCalledTimes(4);
 
       expect(reply.send).toHaveBeenCalledTimes(1);
@@ -1115,7 +1138,9 @@ describe('reactHtml', () => {
       jest.spyOn(console, 'error');
       isRedirectUrlAllowed.mockImplementationOnce(() => false);
       checkStateForRedirectAndStatusCode(req, reply);
-      expect(util.format(...console.error.mock.calls[0])).toBe(`'${destination}' is not an allowed redirect URL`);
+      expect(util.format(...console.error.mock.calls[0])).toBe(
+        `'${destination}' is not an allowed redirect URL`
+      );
     });
   });
 

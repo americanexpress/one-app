@@ -76,6 +76,10 @@ function renderI18nScript(clientInitialState, appBundlesURLPrefix) {
 function renderScript({
   src, integrity, isDevelopmentEnv, clientCacheRevision,
 }) {
+  if (!integrity && !isDevelopmentEnv) console.warn(`No SRI integrity hash found for script ${src}. This is a security risk.`);
+  // TODO: consider throwing an error in next major version. This is a breaking change.
+  // currently we rely on "undefined" to throw integrity error in the browser, this is
+  // results in poor DX, hard to find bugs.
   const additionalAttributes = isDevelopmentEnv ? '' : `integrity="${integrity}"`;
   const scriptSource = isDevelopmentEnv || !clientCacheRevision
     ? src
@@ -110,7 +114,6 @@ export function renderExternalFallbacks({
   clientInitialState,
   moduleMap,
   isDevelopmentEnv,
-  isLegacy,
 }) {
   const loadedModules = clientInitialState.getIn(['holocron', 'loaded'], iSet()).toArray();
   const requiredFallbacks = loadedModules
@@ -132,14 +135,13 @@ export function renderExternalFallbacks({
   const { clientCacheRevision, modules } = moduleMap;
 
   return requiredFallbacks
-    .map(({ name, integrity, moduleName }) => {
+    .map(({ name, browserIntegrity, moduleName }) => {
       const { baseUrl } = modules[moduleName];
       const endsWithSlash = baseUrl.endsWith('/');
       const src = [
         baseUrl,
         [
           name,
-          isLegacy ? 'legacy' : '',
           'browser',
           'js',
         ].filter(Boolean).join('.'),
@@ -147,7 +149,7 @@ export function renderExternalFallbacks({
 
       return renderScript({
         src,
-        integrity,
+        integrity: browserIntegrity,
         isDevelopmentEnv,
         clientCacheRevision,
       });
