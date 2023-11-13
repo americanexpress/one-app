@@ -987,7 +987,7 @@ describe('reactHtml', () => {
       );
     });
 
-    it('does not add integrity when not present', () => {
+    it('includes integrity as "undefined" when not present', () => {
       setRequiredExternalsRegistry({
         'child-module-a': {
           'this-dep': {
@@ -1003,7 +1003,7 @@ describe('reactHtml', () => {
         moduleMap,
       });
       expect(fallbackScripts).toMatchInlineSnapshot(
-        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" ></script>"'
+        '"<script src="https://example.com/cdn/child-module-a/1.0.0/this-dep.browser.js?clientCacheRevision=123" crossorigin="anonymous" integrity="undefined"></script>"'
       );
 
       expect(console.warn).toHaveBeenCalledWith(

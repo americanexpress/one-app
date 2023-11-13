@@ -77,7 +77,7 @@ function renderScript({
   src, integrity, isDevelopmentEnv, clientCacheRevision,
 }) {
   if (!integrity && !isDevelopmentEnv) console.warn(`No SRI integrity hash found for script ${src}. This is a security risk.`);
-  const additionalAttributes = isDevelopmentEnv || !integrity ? '' : `integrity="${integrity}"`;
+  const additionalAttributes = isDevelopmentEnv ? '' : `integrity="${integrity}"`;
   const scriptSource = isDevelopmentEnv || !clientCacheRevision
     ? src
     : `${src}?clientCacheRevision=${clientCacheRevision}`;
