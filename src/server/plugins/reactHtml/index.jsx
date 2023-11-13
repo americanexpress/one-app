@@ -77,6 +77,9 @@ function renderScript({
   src, integrity, isDevelopmentEnv, clientCacheRevision,
 }) {
   if (!integrity && !isDevelopmentEnv) console.warn(`No SRI integrity hash found for script ${src}. This is a security risk.`);
+  // TODO: consider throwing an error in next major version. This is a breaking change.
+  // currently we rely on "undefined" to throw integrity error in the browser, this is
+  // results in poor DX, hard to find bugs.
   const additionalAttributes = isDevelopmentEnv ? '' : `integrity="${integrity}"`;
   const scriptSource = isDevelopmentEnv || !clientCacheRevision
     ? src
