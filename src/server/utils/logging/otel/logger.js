@@ -25,10 +25,10 @@ import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-grpc';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { logs } from '@opentelemetry/api-logs';
-import { registerInstrumentations } from '@opentelemetry/instrumentation';
-import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
-import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
+// import { registerInstrumentations } from '@opentelemetry/instrumentation';
+// import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+// import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
+// import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import formatter from './formatter';
 import readJsonFile from '../../readJsonFile';
 
@@ -43,16 +43,16 @@ export function shutdownOtelLogger() {
   return undefined;
 }
 
-function setupTracer() {
-  const provider = new NodeTracerProvider();
-  provider.register();
-  registerInstrumentations({
-    instrumentations: [
-      new HttpInstrumentation(),
-      new ExpressInstrumentation(),
-    ],
-  });
-}
+// function setupTracer() {
+//   const provider = new NodeTracerProvider();
+//   provider.register();
+//   registerInstrumentations({
+//     instrumentations: [
+//       new HttpInstrumentation(),
+//       new ExpressInstrumentation(),
+//     ],
+//   });
+// }
 
 export function createOtelLogger() {
   const customResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES ? process.env.OTEL_RESOURCE_ATTRIBUTES.split(';').reduce((acc, curr) => {
@@ -94,7 +94,7 @@ export function createOtelLogger() {
   const otelLogger = logs.getLogger(process.env.OTEL_SERVICE_NAME);
 
   // Add trace IDs to logs
-  setupTracer();
+  // setupTracer();
 
   const logger = logMethods.reduce((loggerObj, logMethod) => {
     function emitLog(...args) {
