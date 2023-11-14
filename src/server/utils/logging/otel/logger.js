@@ -71,14 +71,15 @@ export function createOtelLogger() {
     ...customResourceAttributes,
   });
 
-  const collectorOptions = {
-    headers: {},
-    concurrencyLimit: 10,
-    resource,
-  };
+  // const collectorOptions = {
+  //   headers: {},
+  //   concurrencyLimit: 10,
+  //   resource,
+  // };
 
   const loggerProvider = new LoggerProvider({ resource });
-  const logExporter = new OTLPLogExporter(collectorOptions);
+  const logExporter = new OTLPLogExporter();
+  // const logExporter = new OTLPLogExporter(collectorOptions);
 
   if (process.env.NODE_ENV === 'development') {
     loggerProvider.addLogRecordProcessor(
