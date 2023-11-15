@@ -16,9 +16,9 @@
 
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-grpc';
 import { logs, SeverityNumber } from '@opentelemetry/api-logs';
-// import { registerInstrumentations } from '@opentelemetry/instrumentation';
-// import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
-// import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
+import { registerInstrumentations } from '@opentelemetry/instrumentation';
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import {
   ConsoleLogRecordExporter,
   SimpleLogRecordProcessor,
@@ -114,7 +114,7 @@ describe('OpenTelemetry logger', () => {
   describe('createOtelLogger', () => {
     it('should create an exporter with the expected collector options', () => {
       createOtelLogger();
-      expect(OTLPLogExporter.mock.calls[0][0]).toMatchInlineSnapshot('undefined');
+      expect(OTLPLogExporter.mock.calls[0][0]).toMatchInlineSnapshot(`Object {}`);
     });
 
     it('should not throw if no custom resource attributes are set', () => {
@@ -140,12 +140,12 @@ describe('OpenTelemetry logger', () => {
       expect(BatchLogRecordProcessor).toHaveBeenCalledWith(expect.any(OTLPLogExporter));
     });
 
-    // it('should register HTTP & Express instrumentation', () => {
-    //   createOtelLogger();
-    //   expect(registerInstrumentations).toHaveBeenCalledWith({
-    //     instrumentations: [expect.any(HttpInstrumentation), expect.any(ExpressInstrumentation)],
-    //   });
-    // });
+    it('should register HTTP & Express instrumentation', () => {
+      createOtelLogger();
+      expect(registerInstrumentations).toHaveBeenCalledWith({
+        instrumentations: [expect.any(HttpInstrumentation), expect.any(ExpressInstrumentation)],
+      });
+    });
   });
 
   describe('replaceGlobalConsoleWithOtelLogger', () => {
