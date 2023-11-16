@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.8.2](https://github.com/americanexpress/one-app/compare/v6.8.1...v6.8.2) (2023-11-16)
+
+
+### Bug Fixes
+
+* **holocron:** update 1.9.2 ([#1189](https://github.com/americanexpress/one-app/issues/1189)) ([b781ee6](https://github.com/americanexpress/one-app/commit/b781ee6ee2c5b4e6b845ef92a2391706b7261f51))
+
+
 ## [6.8.1](https://github.com/americanexpress/one-app/compare/v6.8.0...v6.8.1) (2023-11-13)
 
 
