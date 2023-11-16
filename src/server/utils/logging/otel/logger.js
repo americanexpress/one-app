@@ -71,14 +71,7 @@ export function createOtelLogger() {
     ...customResourceAttributes,
   });
 
-  const collectorOptions = {
-    headers: {},
-    concurrencyLimit: 10,
-    resource,
-  };
-
   const loggerProvider = new LoggerProvider({ resource });
-  const logExporter = new OTLPLogExporter(collectorOptions);
 
   if (process.env.NODE_ENV === 'development') {
     loggerProvider.addLogRecordProcessor(
@@ -86,7 +79,7 @@ export function createOtelLogger() {
     );
   }
 
-  batchLogProcessor = new BatchLogRecordProcessor(logExporter);
+  batchLogProcessor = new BatchLogRecordProcessor(new OTLPLogExporter());
 
   loggerProvider.addLogRecordProcessor(batchLogProcessor);
   logs.setGlobalLoggerProvider(loggerProvider);
