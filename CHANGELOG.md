@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.23.2](https://github.com/americanexpress/one-app/compare/v5.23.1...v5.23.2) (2023-11-16)
+
+
+### Bug Fixes
+
+* **otel:** cpu spike from grpc ([bd65722](https://github.com/americanexpress/one-app/commit/bd65722e8437d274e392c278a1ff5561d17394c2))
+
+
 ## [5.23.1](https://github.com/americanexpress/one-app/compare/v5.23.0...v5.23.1) (2023-11-03)
 
 
