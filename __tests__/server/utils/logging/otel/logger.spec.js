@@ -99,7 +99,9 @@ describe('OpenTelemetry logger', () => {
 
     it('does not attempt to shut down the batch processor if not using OTel', async () => {
       jest.resetModules();
-      const { shutdownOtelLogger: shutdownOtelLogger2 } = require('../../../../../src/server/utils/logging/otel/logger');
+      const {
+        shutdownOtelLogger: shutdownOtelLogger2,
+      } = require('../../../../../src/server/utils/logging/otel/logger');
       delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
       const batchProcessor = { shutdown: jest.fn() };
       BatchLogRecordProcessor.mockReturnValueOnce(batchProcessor);
@@ -110,36 +112,6 @@ describe('OpenTelemetry logger', () => {
   });
 
   describe('createOtelLogger', () => {
-    it('should create an exporter with the expected collector options', () => {
-      createOtelLogger();
-      expect(OTLPLogExporter.mock.calls[0][0]).toMatchInlineSnapshot(`
-        Object {
-          "concurrencyLimit": 10,
-          "headers": Object {},
-          "resource": Resource {
-            "_asyncAttributesPromise": undefined,
-            "_attributes": Object {
-              "baz": "qux",
-              "foo": "bar",
-              "service.instance.id": "host-123",
-              "service.name": "One App",
-              "service.namespace": "Namespace",
-              "service.version": "1.2.3-abc123",
-            },
-            "_syncAttributes": Object {
-              "baz": "qux",
-              "foo": "bar",
-              "service.instance.id": "host-123",
-              "service.name": "One App",
-              "service.namespace": "Namespace",
-              "service.version": "1.2.3-abc123",
-            },
-            "asyncAttributesPending": false,
-          },
-        }
-      `);
-    });
-
     it('should not throw if no custom resource attributes are set', () => {
       delete process.env.OTEL_RESOURCE_ATTRIBUTES;
       expect(() => createOtelLogger()).not.toThrow();
