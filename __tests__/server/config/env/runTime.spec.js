@@ -357,8 +357,7 @@ describe('runTime', () => {
 
     it('has a default value for development', () => {
       process.env.NODE_ENV = 'development';
-      expect(clientReportingUrl.defaultValue()).toBeDefined();
-      expect(clientReportingUrl.defaultValue()).toMatch(/^https?:\/\//);
+      expect(clientReportingUrl.defaultValue()).toBe('/_/report/errors');
     });
 
     it('has no default value for production', () => {
@@ -372,8 +371,7 @@ describe('runTime', () => {
 
     it('has a default value for development', () => {
       process.env.NODE_ENV = 'development';
-      expect(clientCSPReportingUrl.defaultValue()).toBeDefined();
-      expect(clientCSPReportingUrl.defaultValue()).toMatch(/^https?:\/\//);
+      expect(clientCSPReportingUrl.defaultValue()).toBe('/_/report/security/csp-violation');
     });
 
     it('has no default value for production', () => {
