@@ -22,7 +22,7 @@ const os = require('os');
 const assert = require('assert');
 
 const { argv } = require('yargs');
-const rimraf = require('rimraf');
+const { rimrafSync } = require('rimraf');
 
 const PATH_TO_ENDPOINTS = path.resolve(process.cwd(), argv.path || argv._[0]);
 const DEV_DIR = path.join(process.cwd(), '.dev');
@@ -35,7 +35,7 @@ const addDevFolder = () => {
 };
 
 const removeExistingEndpointsFile = () => {
-  rimraf.sync(ENDPOINTS_DIR);
+  rimrafSync(ENDPOINTS_DIR);
 };
 
 const symlinkEndpointsFile = () => {
