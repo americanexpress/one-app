@@ -97,7 +97,7 @@ const stripVersion = (url) => {
 };
 
 export const removeExistingEntryIfConflicting = (url, cachedModuleFiles) => {
-  const updatedCachedModules = cachedModuleFiles;
+  const updatedCachedModules = { ...cachedModuleFiles };
   const strippedUrl = stripVersion(url);
 
   const matchingModule = Object.keys(cachedModuleFiles)
