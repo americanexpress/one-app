@@ -21,17 +21,19 @@ import path from 'path';
 import mkdirp from 'mkdirp';
 import ProxyAgent from 'proxy-agent';
 import oneAppDevCdn from '../../../src/server/utils/devCdnFactory';
-import { removeDuplicatedModules } from '../../../src/server/utils/cdnCache';
+import {
+  removeExistingEntryIfConflicting,
+} from '../../../src/server/utils/cdnCache';
 
 jest.mock('node-fetch');
 jest.mock('pino');
 
 jest.mock('../../../src/server/utils/cdnCache', () => ({
-  getCachedModules: jest.fn(() => ({
+  getCachedModuleFiles: jest.fn(() => ({
     '/cdn/module-b/1.0.0/module-c.node.js': 'console.log("c");',
   })),
   writeToCache: jest.fn(() => ({})),
-  removeDuplicatedModules: jest.fn(() => ({})),
+  removeExistingEntryIfConflicting: jest.fn((_, cachedModuleFiles) => cachedModuleFiles),
 }));
 
 const pathToStubs = path.join(__dirname, 'stubs');
@@ -152,7 +154,9 @@ describe('one-app-dev-cdn', () => {
         },
       },
     };
-    removeDuplicatedModules.mockImplementation(() => ({}));
+    removeExistingEntryIfConflicting.mockImplementation(
+      (_, cachedModuleFiles) => cachedModuleFiles
+    );
     fetch.mockImplementation((url) => Promise.reject(new Error(`no mock for ${url} set up`)));
   });
 

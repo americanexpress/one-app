@@ -18,9 +18,9 @@ import {
   getUserHomeDirectory,
   showCacheInfo,
   setupCacheFile,
-  getCachedModules,
+  getCachedModuleFiles,
   writeToCache,
-  removeDuplicatedModules,
+  removeExistingEntryIfConflicting,
   cacheFileName,
   oneAppDirectoryName,
   oneAppDirectoryPath,
@@ -79,8 +79,7 @@ describe('cacheUtils', () => {
       await showCacheInfo();
 
       expect(fsPromises.stat).toHaveBeenCalledWith(oneAppModuleCachePath);
-      expect(chalk.bold.cyanBright).toHaveBeenCalledTimes(2);
-      expect(chalk.bold.redBright).toHaveBeenCalledWith('CACHE INFORMATION');
+      expect(chalk.bold.cyanBright).toHaveBeenCalledTimes(4);
       expect(chalk.bold.greenBright).toHaveBeenCalledWith('5.00', 'MB');
     });
 
@@ -132,7 +131,7 @@ describe('cacheUtils', () => {
     });
   });
 
-  describe('getCachedModules', () => {
+  describe('getCachedModuleFiles', () => {
     beforeAll(() => {
       fsPromises.stat.mockResolvedValue('');
       fsPromises.mkdir.mockResolvedValue();
@@ -141,13 +140,13 @@ describe('cacheUtils', () => {
 
     it('should return an empty object if the cache file does not exist', () => {
       fs.existsSync.mockImplementationOnce(() => false);
-      const result = getCachedModules();
+      const result = getCachedModuleFiles();
       expect(result).toEqual({});
     });
 
     it('should create a new cache file and return an empty object if the cache file does not exist', () => {
       fs.existsSync.mockImplementationOnce(() => false);
-      const result = getCachedModules();
+      const result = getCachedModuleFiles();
       expect(result).toEqual({});
     });
 
@@ -156,7 +155,7 @@ describe('cacheUtils', () => {
       fs.existsSync.mockImplementationOnce(() => true);
       fs.readFileSync.mockImplementationOnce(() => invalidJSON);
 
-      const result = getCachedModules();
+      const result = getCachedModuleFiles();
       let error;
       try {
         JSON.parse(invalidJSON);
@@ -171,7 +170,7 @@ describe('cacheUtils', () => {
       const validJSON = '{"module":"test"}';
       fs.existsSync.mockImplementationOnce(() => true);
       fs.readFileSync.mockImplementationOnce(() => validJSON);
-      const result = getCachedModules();
+      const result = getCachedModuleFiles();
       expect(result).toEqual(JSON.parse(validJSON));
     });
   });
@@ -215,34 +214,32 @@ describe('cacheUtils', () => {
 
   describe('removeDuplicatedModules', () => {
     it('removes the matching modules from cachedModules', () => {
-      const url = '/somepath/moduleA/someotherpath';
+      const url = '/path/to/moduleA/2.2.3/file.js';
       const cachedModules = {
-        '/path/to/moduleA/1': 'data',
-        '/path/to/moduleA/2': 'data',
-        '/path/to/moduleB/1': 'data',
+        '/path/to/moduleA/1.2.3/file.js': 'data',
+        '/path/to/moduleA/1.2.3/file.json': 'data',
+        '/path/to/moduleB/1.2.3/file.js': 'data',
       };
-      const moduleNames = ['moduleA', 'moduleB', 'moduleC'];
 
-      const result = removeDuplicatedModules(url, cachedModules, moduleNames);
+      const result = removeExistingEntryIfConflicting(url, cachedModules);
 
       expect(result).toEqual({
-        '/path/to/moduleB/1': 'data',
+        '/path/to/moduleA/1.2.3/file.json': 'data',
+        '/path/to/moduleB/1.2.3/file.js': 'data',
       });
 
-      expect(logSpy).toHaveBeenCalledWith('Deleted /path/to/moduleA/1 from cache');
-      expect(logSpy).toHaveBeenCalledWith('Deleted /path/to/moduleA/2 from cache');
+      expect(logSpy).not.toHaveBeenCalled();
     });
 
     it('returns cachedModules unchanged if no module matches', () => {
-      const url = '/somepath/moduleX/someotherpath';
+      const url = '/path/to/moduleC/2.2.3/file.js';
       const cachedModules = {
-        '/path/to/moduleA/1': 'data',
-        '/path/to/moduleA/2': 'data',
-        '/path/to/moduleB/1': 'data',
+        '/path/to/moduleA/1.2.3/file.js': 'data',
+        '/path/to/moduleA/1.2.3/file.json': 'data',
+        '/path/to/moduleB/1.2.3/file.js': 'data',
       };
-      const moduleNames = ['moduleA', 'moduleB', 'moduleC'];
 
-      const result = removeDuplicatedModules(url, cachedModules, moduleNames);
+      const result = removeExistingEntryIfConflicting(url, cachedModules);
 
       expect(result).toEqual(cachedModules);
       expect(logSpy).not.toHaveBeenCalled();
