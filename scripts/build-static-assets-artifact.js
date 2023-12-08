@@ -21,7 +21,7 @@ const fs = require('fs');
 const path = require('path');
 
 const mkdirp = require('mkdirp');
-const rimraf = require('rimraf');
+const { rimraf } = require('rimraf');
 
 const TEMP_STATIC_PATH = path.resolve(__dirname, '../.tmp-statics');
 const FINAL_TAR_DIR = path.resolve(__dirname, '../');
@@ -31,16 +31,6 @@ if (!DOCKER_IMAGE_LABEL) {
   // should be the result from `docker build --build-arg HTTPS_PROXY=$HTTPS_PROXY .` or whatever
   // temporary tag was used for that build
   throw new Error('docker image label to copy built static files from is required');
-}
-
-function removeDir(dirPath) {
-  return new Promise((res, rej) => rimraf(dirPath, { disableGlob: true }, (err) => {
-    if (err) {
-      rej(err);
-    } else {
-      res();
-    }
-  }));
 }
 
 function promisifySpawn(...args) {
@@ -132,6 +122,6 @@ function moveTar(tarPath, finalTarDir) {
     console.error('unable to build static assets artifact,', err);
     process.exitCode = 1;
   } finally {
-    await removeDir(TEMP_STATIC_PATH);
+    await rimraf(TEMP_STATIC_PATH);
   }
 })();
