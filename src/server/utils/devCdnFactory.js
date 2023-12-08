@@ -26,10 +26,9 @@ import ProxyAgent from 'proxy-agent';
 import fetch from 'node-fetch';
 import logger from './logging/logger';
 
-import { getCachedModules, writeToCache, removeDuplicatedModules } from './cdnCache';
+import { getCachedModuleFiles, writeToCache, removeExistingEntryIfConflicting } from './cdnCache';
 
-let moduleNames = [];
-const cachedModules = getCachedModules();
+let cachedModuleFiles = getCachedModuleFiles();
 
 const getLocalModuleMap = ({ pathToModuleMap, oneAppDevCdnAddress }) => {
   const moduleMap = JSON.parse(fs.readFileSync(pathToModuleMap, 'utf8').toString());
@@ -157,7 +156,6 @@ export const oneAppDevCdnFactory = ({
         ...localMap.modules,
       },
     };
-    moduleNames = Object.keys(map.modules);
     reply
       .code(200)
       .send(map);
@@ -172,11 +170,11 @@ export const oneAppDevCdnFactory = ({
         remoteModuleBaseUrls
       );
       const remoteModuleBaseUrlOrigin = new URL(knownRemoteModuleBaseUrl).origin;
-      if (cachedModules[incomingRequestPath]) {
+      if (cachedModuleFiles[incomingRequestPath]) {
         return reply
           .code(200)
           .type('application/json')
-          .send(cachedModules[incomingRequestPath]);
+          .send(cachedModuleFiles[incomingRequestPath]);
       }
       const remoteModuleResponse = await fetch(`${remoteModuleBaseUrlOrigin}/${incomingRequestPath}`, {
         headers: { connection: 'keep-alive' },
@@ -184,13 +182,12 @@ export const oneAppDevCdnFactory = ({
       });
       const { status, type } = remoteModuleResponse;
       const responseText = await remoteModuleResponse.text();
-      const updatedCachedModules = removeDuplicatedModules(
+      cachedModuleFiles = removeExistingEntryIfConflicting(
         incomingRequestPath,
-        cachedModules,
-        moduleNames
+        cachedModuleFiles
       );
-      updatedCachedModules[incomingRequestPath] = responseText;
-      writeToCache(updatedCachedModules);
+      cachedModuleFiles[incomingRequestPath] = responseText;
+      writeToCache(cachedModuleFiles);
       reply
         .code(status)
         .type(type)

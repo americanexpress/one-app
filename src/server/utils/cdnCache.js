@@ -31,9 +31,10 @@ export const showCacheInfo = async () => {
     const message = `File size of ${cacheFileName}: ${chalk.bold.greenBright(fileSizeOnMB.toFixed(2), 'MB')}`;
     const separator = '*'.repeat(message.length);
     console.log(chalk.bold.cyanBright(separator));
-    console.log(chalk.bold.redBright('CACHE INFORMATION'));
+    console.log(chalk.bold.cyanBright('CACHE INFORMATION'));
     console.log(message);
-    console.log(`To delete cache, please run \n  ${chalk.bold.redBright('  rm ', oneAppModuleCachePath)}`);
+    console.log('To delete cache, please run');
+    console.log(`  ${chalk.bold.cyanBright('  rm ', oneAppModuleCachePath)}`);
     console.log(chalk.bold.cyanBright(separator));
   } catch (error) {
     console.error('There was error checking file stat', error);
@@ -58,7 +59,7 @@ export const setupCacheFile = async () => {
 };
 
 // gets cached module from ~/.one-app/.one-app-module-cache
-export const getCachedModules = () => {
+export const getCachedModuleFiles = () => {
   if (!fs.existsSync(oneAppModuleCachePath)) {
     setupCacheFile();
     return {};
@@ -89,15 +90,21 @@ export const writeToCache = (content, delay = 500) => {
   }, delay);
 };
 
-export const removeDuplicatedModules = (url, cachedModules, moduleNames) => {
-  const matchingModule = moduleNames.find((moduleName) => url.match(new RegExp(`\\b\\/${moduleName}\\/\\b`)));
+const stripVersion = (url) => {
+  const parts = url.split('/');
+  parts.splice(-2, 1);
+  return parts.join('/');
+};
 
-  const updatedCachedModules = cachedModules;
-  Object.keys(updatedCachedModules).forEach((cachedModuleKey) => {
-    if (cachedModuleKey.match(new RegExp(`\\b\\/${matchingModule}\\/\\b`))) {
-      delete updatedCachedModules[cachedModuleKey];
-      console.log(`Deleted ${cachedModuleKey} from cache`);
-    }
-  });
+export const removeExistingEntryIfConflicting = (url, cachedModuleFiles) => {
+  const updatedCachedModules = { ...cachedModuleFiles };
+  const strippedUrl = stripVersion(url);
+
+  const matchingModule = Object.keys(cachedModuleFiles)
+    .find((cachedUrl) => stripVersion(cachedUrl) === strippedUrl);
+
+  if (matchingModule && matchingModule !== url) {
+    delete updatedCachedModules[matchingModule];
+  }
   return updatedCachedModules;
 };
