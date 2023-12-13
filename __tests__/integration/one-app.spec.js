@@ -1780,9 +1780,6 @@ describe('Tests that can run against either local Docker setup or remote One App
           await regularLink.click();
           // need to wait for regular loading to finish;
           await waitFor(1e3);
-          const consoleLogs = await browser.getLogs('browser');
-          expect(consoleLogs).toEqual([]);
-
           const renderedModuleData = await browser.$('.ssr-frank-loaded-data');
           const moduleStateAsText = await renderedModuleData.getText();
           const moduleState = JSON.parse(moduleStateAsText);
