@@ -15,7 +15,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { browserHistory, Router, matchPromise } from '@americanexpress/one-app-router';
 import { setModuleMap, setRequiredExternalsRegistry } from 'holocron';
@@ -70,12 +70,14 @@ export default async function initClient() {
     );
     /* eslint-enable react/jsx-props-no-spreading */
 
-    const render = renderMode === 'render' ? ReactDOM.render : ReactDOM.hydrate;
+    const container = document.querySelector('#root');
+    if (renderMode === 'render') {
+      const root = createRoot(container);
+      root.render(<App />);
+    } else {
+      hydrateRoot(container, <App />);
+    }
 
-    render(
-      <App />,
-      document.querySelector('#root')
-    );
     [...document.querySelectorAll('.ssr-css')]
       .forEach((style) => style.remove());
 
