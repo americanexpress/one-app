@@ -49,7 +49,7 @@ describe('ssrServer route testing', () => {
       beforeAll(async () => {
         process.env.NODE_ENV = 'production';
         server = await ssrServer();
-        warnSpy = jest.spyOn(server.log, 'warn');
+        warnSpy = jest.spyOn(server.log, 'warn').mockImplementation(util.format);
       });
 
       test('with csp-report', async () => {
@@ -65,7 +65,7 @@ describe('ssrServer route testing', () => {
             },
           }),
         });
-        expect(util.format(...warnSpy.mock.calls[0])).toMatchInlineSnapshot(
+        expect(warnSpy.mock.results[0].value).toMatchInlineSnapshot(
           '"CSP Violation: {"csp-report":{"document-uri":"bad.example.com"}}"'
         );
         expect(resp.statusCode).toEqual(204);
@@ -79,7 +79,7 @@ describe('ssrServer route testing', () => {
             'Content-Type': 'application/csp-report',
           },
         });
-        expect(util.format(...warnSpy.mock.calls[0])).toMatchInlineSnapshot(
+        expect(warnSpy.mock.results[0].value).toMatchInlineSnapshot(
           '"CSP Violation: No data received!"'
         );
         expect(resp.statusCode).toEqual(204);
@@ -113,7 +113,7 @@ describe('ssrServer route testing', () => {
             },
           }),
         });
-        expect(util.format(...warnSpy.mock.calls[0])).toMatchInlineSnapshot(
+        expect(warnSpy.mock.results[0].value).toMatchInlineSnapshot(
           '"CSP Violation: sourceFile.js:123:432 on page bad.example.com violated the script-src policy via blockedUri.example.com"'
         );
         expect(resp.statusCode).toEqual(204);
@@ -127,7 +127,7 @@ describe('ssrServer route testing', () => {
             'Content-Type': 'application/csp-report',
           },
         });
-        expect(util.format(...warnSpy.mock.calls[0])).toMatchInlineSnapshot(
+        expect(warnSpy.mock.results[0].value).toMatchInlineSnapshot(
           '"CSP Violation reported, but no data received"'
         );
         expect(resp.statusCode).toEqual(204);

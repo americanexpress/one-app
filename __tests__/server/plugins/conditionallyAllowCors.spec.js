@@ -24,6 +24,8 @@ import conditionallyAllowCors, { setCorsOrigins } from '../../../src/server/plug
 const { NODE_ENV } = process.env;
 let state = fromJS({ rendering: {} });
 let request;
+const span = { end: jest.fn() };
+const tracer = { startSpan: jest.fn(() => span) };
 
 const setup = ({ renderPartialOnly, origin }) => {
   state = state.update('rendering', (rendering) => rendering.set('renderPartialOnly', renderPartialOnly));
@@ -33,9 +35,11 @@ const setup = ({ renderPartialOnly, origin }) => {
     },
   });
   request.store = { getState: () => state };
+  request.openTelemetry = () => ({ tracer });
 };
 
 describe('conditionallyAllowCors', () => {
+  beforeEach(() => jest.clearAllMocks());
   afterAll(() => {
     process.env.NODE_ENV = NODE_ENV;
   });
@@ -106,5 +110,24 @@ describe('conditionallyAllowCors', () => {
     await conditionallyAllowCors(fastify);
 
     expect(callback).toHaveBeenCalledWith(null, { origin: false });
+  });
+
+  it('adds a tracer span', async () => {
+    delete process.env.NODE_ENV;
+    setup({ renderPartialOnly: true, origin: 'test.example.com' });
+    setCorsOrigins([/\.example.com$/]);
+
+    const callback = jest.fn();
+    const fastify = {
+      register: jest.fn((_plugin, { delegator }) => {
+        delegator(request, callback);
+      }),
+    };
+
+    await conditionallyAllowCors(fastify);
+
+    expect(tracer.startSpan).toHaveBeenCalledTimes(1);
+    expect(tracer.startSpan).toHaveBeenCalledWith('conditionallyAllowCors', { attributes: { phase: 8 } });
+    expect(span.end).toHaveBeenCalledTimes(1);
   });
 });

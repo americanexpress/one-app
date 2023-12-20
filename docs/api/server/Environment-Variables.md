@@ -46,7 +46,8 @@ One App can be configured via Environment Variables:
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
   * [`ONE_SERVICE_WORKER`](#one_service_worker)
 * OpenTelemetry
-  * [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`](#otel_log_collector_url)
+  * [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`](#otel_exporter_otlp_logs_endpoint)
+  * [`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`](#otel_exporter_otlp_traces_endpoint)
   * [`OTEL_SERVICE_NAME`](#otel_service_name)
   * [`OTEL_SERVICE_NAMESPACE`](#otel_service_namespace)
   * [`OTEL_RESOURCE_ATTRIBUTES`](#ote;_resource_attributes)
@@ -80,7 +81,8 @@ One App can be configured via Environment Variables:
   * [`ONE_MAX_POST_REQUEST_PAYLOAD`](#one_max_post_request_payload)
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
   * [`ONE_SERVICE_WORKER`](#one_service_worker)
-  * [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`](#otel_log_collector_url)
+  * [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`](#otel_exporter_otlp_logs_endpoint)
+  * [`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`](#otel_exporter_otlp_traces_endpoint)
   * [`OTEL_RESOURCE_ATTRIBUTES`](#otel_resource_attributes)
   * [`OTEL_SERVICE_NAME`](#otel_service_name)
   * [`OTEL_SERVICE_NAMESPACE`](#otel_service_namespace)
@@ -749,6 +751,27 @@ OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=String
 ```bash
 OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://localhost:4318/v1/logs
 ```
+
+## `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+When set, One App will emit OpenTelemetry traces over GRPC to the configured endpoint.
+See the [OpenTlemetry documentation](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_traces_endpoint) for more information.
+
+
+**Shape**
+```bash
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=String
+```
+
+**Example**
+```bash
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces
+```
+
 
 ## `OTEL_SERVICE_NAME`
 

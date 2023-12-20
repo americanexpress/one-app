@@ -34,6 +34,8 @@ const createRequestStore = (
   request, reply,
   { reducers }
 ) => {
+  const { tracer } = request.openTelemetry();
+  const span = tracer.startSpan('createRequestStore', { attributes: { phase: 2 } });
   try {
     const serverConfig = getServerStateConfig();
     const clientConfig = getClientStateConfig();
@@ -70,6 +72,8 @@ const createRequestStore = (
   } catch (err) {
     request.log.error('error creating store for request', err);
     renderStaticErrorPage(request, reply);
+  } finally {
+    span.end();
   }
 };
 

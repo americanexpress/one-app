@@ -17,7 +17,12 @@
 import addSecurityHeaders from '../../../src/server/plugins/addSecurityHeaders';
 
 describe('addSecurityHeaders', () => {
+  const span = { end: jest.fn() };
+  const tracer = { startSpan: jest.fn(() => span) };
+  const openTelemetry = () => ({ tracer });
+
   beforeEach(() => {
+    jest.clearAllMocks();
     delete process.env.ONE_REFERRER_POLICY_OVERRIDE;
   });
 
@@ -25,6 +30,7 @@ describe('addSecurityHeaders', () => {
     const request = {
       headers: {},
       method: 'GET',
+      openTelemetry,
     };
     const reply = {
       header: jest.fn(),
@@ -57,6 +63,7 @@ describe('addSecurityHeaders', () => {
       headers: {},
       method: 'GET',
       url: '/testing',
+      openTelemetry,
     };
     const reply = {
       header: jest.fn(),
@@ -93,6 +100,7 @@ describe('addSecurityHeaders', () => {
       headers: {},
       method: 'POST',
       url: '/testing',
+      openTelemetry,
     };
     const reply = {
       header: jest.fn(),
@@ -126,6 +134,7 @@ describe('addSecurityHeaders', () => {
     const request = {
       headers: {},
       method: 'GET',
+      openTelemetry,
     };
     const reply = {
       header: jest.fn(),
@@ -151,5 +160,28 @@ describe('addSecurityHeaders', () => {
     expect(reply.header).toHaveBeenCalledWith('X-Frame-Options', 'SAMEORIGIN');
     expect(reply.header).toHaveBeenCalledWith('X-XSS-Protection', '0');
     expect(reply.header).toHaveBeenCalledWith('Referrer-Policy', 'origin-when-cross-origin');
+  });
+
+  it('adds a tracer span', () => {
+    const request = {
+      headers: {},
+      method: 'GET',
+      openTelemetry,
+    };
+    const reply = {
+      header: jest.fn(),
+    };
+    const fastify = {
+      addHook: jest.fn(async (_hook, cb) => {
+        await cb(request, reply);
+      }),
+    };
+    const done = jest.fn();
+
+    addSecurityHeaders(fastify, {}, done);
+
+    expect(tracer.startSpan).toHaveBeenCalledTimes(1);
+    expect(tracer.startSpan).toHaveBeenCalledWith('addSecurityHeaders', { attributes: { phase: 12 } });
+    expect(span.end).toHaveBeenCalledTimes(1);
   });
 });

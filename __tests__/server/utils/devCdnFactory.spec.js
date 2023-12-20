@@ -12,7 +12,6 @@
  * under the License.
  */
 
-/* eslint-disable no-console -- console used in tests */
 import util from 'node:util';
 import fetch from 'node-fetch';
 import fs from 'fs';
@@ -135,6 +134,9 @@ describe('one-app-dev-cdn', () => {
     jest
       .resetAllMocks()
       .resetModules();
+    console.warn.mockImplementation(util.format);
+    console.log.mockImplementation(util.format);
+    console.error.mockImplementation(util.format);
     defaultRemoteMap = {
       key: '234234',
       modules: {
@@ -475,7 +477,7 @@ describe('one-app-dev-cdn', () => {
           expect(response.body).toEqual(JSON.stringify(defaultLocalMap));
           expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
           expect(console.warn).toHaveBeenCalledTimes(1);
-          expect(util.format(...console.warn.mock.calls[0])).toMatch(
+          expect(console.warn.mock.results[0].value).toMatch(
             /one-app-dev-cdn error loading module map from https:\/\/my-domain.com\/map\/module-map.json: Error: simulated timeout or some other network error!/
           );
         });
@@ -496,7 +498,7 @@ describe('one-app-dev-cdn', () => {
           expect(response.body).toEqual(JSON.stringify(defaultLocalMap));
           expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
           expect(console.warn).toHaveBeenCalledTimes(1);
-          expect(util.format(...console.warn.mock.calls[0])).toMatch(
+          expect(console.warn.mock.results[0].value).toMatch(
             /one-app-dev-cdn error loading module map from https:\/\/my-domain.com\/map\/module-map.json: TypeError: Cannot convert undefined or null to object/
           );
         });
@@ -704,5 +706,3 @@ describe('one-app-dev-cdn', () => {
     process.env.NODE_ENV = origNodeEnv;
   });
 });
-
-/* eslint-enable no-console -- because eslint-comments/disable-enable-pair */

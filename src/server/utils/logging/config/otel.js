@@ -14,45 +14,18 @@
  * permissions and limitations under the License.
  */
 
-import os from 'node:os';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-// import { registerInstrumentations } from '@opentelemetry/instrumentation';
-// import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
-// import { FastifyInstrumentation } from '@opentelemetry/instrumentation-fastify';
-// import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import pino from 'pino';
 import flatten from 'flat';
 import {
   serializeError,
   formatLogEntry,
 } from '../utils';
+import getOtelResourceAttributes from '../../getOtelResourceAttributes';
 import readJsonFile from '../../readJsonFile';
 
 const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
 
-// TODO: enable Fastify instrumentation once https://github.com/open-telemetry/opentelemetry-js-contrib/issues/1275
-// is resolved. Depends on https://github.com/fastify/fastify/pull/4470
-
-// if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
-//   const provider = new NodeTracerProvider();
-//   provider.register();
-//   registerInstrumentations({
-//     instrumentations: [
-//       new HttpInstrumentation(),
-//       new FastifyInstrumentation(),
-//     ],
-//   });
-// }
-
 export function createOtelTransport() {
-  const customResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES ? process.env.OTEL_RESOURCE_ATTRIBUTES.split(';').reduce((acc, curr) => {
-    const [key, value] = curr.split('=');
-    return {
-      ...acc,
-      [key]: value,
-    };
-  }, {}) : {};
-
   const logRecordProcessorOptions = [{
     recordProcessorType: 'batch',
     exporterOptions: { protocol: 'grpc' },
@@ -72,13 +45,7 @@ export function createOtelTransport() {
       loggerName: process.env.OTEL_SERVICE_NAME,
       serviceVersion: version,
       logRecordProcessorOptions,
-      resourceAttributes: {
-        [SemanticResourceAttributes.SERVICE_NAME]: process.env.OTEL_SERVICE_NAME,
-        [SemanticResourceAttributes.SERVICE_NAMESPACE]: process.env.OTEL_SERVICE_NAMESPACE,
-        [SemanticResourceAttributes.SERVICE_INSTANCE_ID]: os.hostname(),
-        [SemanticResourceAttributes.SERVICE_VERSION]: version,
-        ...customResourceAttributes,
-      },
+      resourceAttributes: getOtelResourceAttributes(),
     },
   });
 }

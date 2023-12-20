@@ -36,3 +36,4 @@ docker-compose.test.yml
 # misc
 .DS_Store
 .idea
+.vscode

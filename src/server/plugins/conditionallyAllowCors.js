@@ -37,10 +37,12 @@ const conditionallyAllowCors = async (fastify) => {
   await fastify.register(fastifyCors, {
     hook: 'preHandler',
     delegator: (req, callback) => {
+      const { tracer } = req.openTelemetry();
+      const span = tracer.startSpan('conditionallyAllowCors', { attributes: { phase: 8 } });
       const renderPartialOnly = req.store && req.store.getState().getIn(['rendering', 'renderPartialOnly']);
       // The HTML partials will have CORS enabled so they can be loaded client-side
       const opts = renderPartialOnly ? corsOptions : { origin: false };
-
+      span.end();
       callback(null, opts);
     },
   });

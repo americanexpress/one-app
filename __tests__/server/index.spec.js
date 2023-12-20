@@ -23,9 +23,13 @@ import { Map as ImmutableMap } from 'immutable';
 
 jest.unmock('yargs');
 
+jest.spyOn(console, 'log').mockImplementation(util.format);
+jest.spyOn(console, 'error').mockImplementation((...args) => {
+  args.pop();
+  return util.format(...args);
+});
+
 describe('server index', () => {
-  jest.spyOn(console, 'log').mockImplementation(() => { });
-  jest.spyOn(console, 'error').mockImplementation(() => { });
   const origFsExistsSync = fs.existsSync;
 
   let addServer;
@@ -55,7 +59,8 @@ describe('server index', () => {
     jest.doMock('@americanexpress/one-app-dev-proxy', () => ({
       default: jest.fn(() => ({
         listen: jest.fn((port, cb) => {
-          setTimeout(() => (oneAppDevProxyError ? cb(new Error('test error')) : cb(null, { port })));
+          setTimeout(() => (oneAppDevProxyError ? cb(new Error('test error')) : cb(null, { port }))
+          );
           return { close: 'one-app-dev-proxy' };
         }),
       })),
@@ -68,17 +73,14 @@ describe('server index', () => {
 
     jest.doMock('cross-fetch');
 
-    jest.doMock(
-      '../../src/server/utils/loadModules',
-      () => jest.fn(() => Promise.resolve())
-    );
+    jest.doMock('../../src/server/utils/loadModules', () => jest.fn(() => Promise.resolve()));
     jest.doMock('babel-polyfill', () => {
       // jest includes babel-polyfill
       // if included twice, babel-polyfill will complain that it should be only once
     });
     //
     jest.doMock('../../src/server/polyfill/intl');
-    jest.doMock('../../src/server/utils/logging/setup', () => { });
+    jest.doMock('../../src/server/utils/logging/setup', () => {});
 
     ssrServerListen = jest.fn(async () => {
       if (ssrServerError) {
@@ -118,7 +120,7 @@ describe('server index', () => {
     jest.doMock('../../src/server/shutdown', () => ({ addServer, shutdown }));
     jest.doMock('../../src/server/utils/pollModuleMap', () => jest.fn());
     jest.doMock('../../src/server/config/env/runTime', () => jest.fn());
-    jest.doMock('../../src/server/utils/heapdump', () => { });
+    jest.doMock('../../src/server/utils/heapdump', () => {});
     jest.doMock('../../src/server/utils/watchLocalModules', () => ({ default: jest.fn() }));
     jest.doMock('../../src/server/utils/getHttpsConfig', () => () => 'https-config-mock');
 
@@ -138,7 +140,6 @@ describe('server index', () => {
   describe('development', () => {
     beforeEach(() => {
       jest.resetModules();
-      jest.resetAllMocks();
       process.env.NODE_ENV = 'development';
       delete process.env.HTTP_ONE_APP_DEV_CDN_PORT;
     });
@@ -173,13 +174,15 @@ describe('server index', () => {
       const endpointsFilePath = path.join(process.cwd(), '.dev', 'endpoints', 'index.js');
       process.env.NODE_ENV = 'development';
       fs.existsSync = () => true;
-      jest.doMock(endpointsFilePath, () => () => ({
-        oneTestEndpointUrl: {
-          devProxyPath: 'test',
-          destination: 'https://example.com',
-        },
-      }),
-      { virtual: true }
+      jest.doMock(
+        endpointsFilePath,
+        () => () => ({
+          oneTestEndpointUrl: {
+            devProxyPath: 'test',
+            destination: 'https://example.com',
+          },
+        }),
+        { virtual: true }
       );
       await load();
       fs.existsSync = origFsExistsSync;
@@ -192,13 +195,15 @@ describe('server index', () => {
       const endpointsFilePath = path.join(process.cwd(), '.dev', 'endpoints', 'index.js');
       process.env.NODE_ENV = 'development';
       fs.existsSync = () => false;
-      jest.doMock(endpointsFilePath, () => () => ({
-        oneTestEndpointUrl: {
-          devProxyPath: 'test',
-          destination: 'https://example.com',
-        },
-      }),
-      { virtual: true }
+      jest.doMock(
+        endpointsFilePath,
+        () => () => ({
+          oneTestEndpointUrl: {
+            devProxyPath: 'test',
+            destination: 'https://example.com',
+          },
+        }),
+        { virtual: true }
       );
       await load();
       fs.existsSync = origFsExistsSync;
@@ -266,7 +271,6 @@ describe('server index', () => {
   describe('production', () => {
     beforeEach(() => {
       jest.resetModules();
-      jest.resetAllMocks();
       process.env.NODE_ENV = 'production';
     });
 
@@ -350,9 +354,7 @@ describe('server index', () => {
 
       await load();
 
-      expect(ssrServerListen).toHaveBeenCalledWith(
-        { host: '0.0.0.0', port: '5555' }
-      );
+      expect(ssrServerListen).toHaveBeenCalledWith({ host: '0.0.0.0', port: '5555' });
       expect(ssrServer).toHaveBeenCalledWith({ https: 'https-config-mock' });
     });
 
@@ -360,16 +362,18 @@ describe('server index', () => {
       await load({ ssrServerError: true });
 
       expect(console.error).toHaveBeenCalled();
-      console.error.mock.calls[0].pop();
-      expect(util.format(...console.error.mock.calls[0])).toMatchSnapshot();
+      expect(console.error.mock.results[0].value).toMatchInlineSnapshot(
+        '"Error encountered starting 🌎 One App server"'
+      );
     });
 
     it('logs errors when listening on the metrics server fails', async () => {
       await load({ metricsServerError: true });
 
       expect(console.error).toHaveBeenCalled();
-      console.error.mock.calls[0].pop();
-      expect(util.format(...console.error.mock.calls[0])).toMatchSnapshot();
+      expect(console.error.mock.results[0].value).toMatchInlineSnapshot(
+        '"Error encountered starting 📊 Metrics server"'
+      );
     });
 
     it('closes servers when starting ssrServer fails', async () => {
@@ -386,7 +390,9 @@ describe('server index', () => {
       await load();
 
       expect(console.log).toHaveBeenCalled();
-      expect(util.format(...console.log.mock.calls[1])).toMatch('🌎 One App server listening on port 3000');
+      expect(console.log.mock.results[1].value).toMatchInlineSnapshot(
+        '"🌎 One App server listening on port 3000"'
+      );
     });
 
     it('logs when metrics server is successfully listening on the port', async () => {
@@ -396,7 +402,9 @@ describe('server index', () => {
       await load();
 
       expect(console.log).toHaveBeenCalled();
-      expect(util.format(...console.log.mock.calls[0])).toMatch('📊 Metrics server listening on port 3005');
+      expect(console.log.mock.results[0].value).toMatchInlineSnapshot(
+        '"📊 Metrics server listening on port 3005"'
+      );
     });
 
     it('initiates module-map polling if successfully listening on port', async () => {

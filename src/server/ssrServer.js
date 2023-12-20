@@ -29,6 +29,8 @@ import fastifyStatic from '@fastify/static';
 import fastifyHelmet from '@fastify/helmet';
 import fastifySensible from '@fastify/sensible';
 import fastifyMetrics from 'fastify-metrics';
+import openTelemetryPlugin from '@autotelic/fastify-opentelemetry';
+import { argv } from 'yargs';
 
 import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
@@ -42,6 +44,7 @@ import addFrameOptionsHeader from './plugins/addFrameOptionsHeader';
 import addCacheHeaders from './plugins/addCacheHeaders';
 import { getServerPWAConfig, serviceWorkerHandler, webManifestMiddleware } from './pwa';
 import logger from './utils/logging/logger';
+import noopTracer from './plugins/noopTracer';
 
 const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
 
@@ -68,6 +71,11 @@ export async function createApp(opts = {}) {
     ...opts,
   });
 
+  if (process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || argv.logLevel === 'trace') {
+    fastify.register(openTelemetryPlugin, { wrapRoutes: true });
+  } else {
+    fastify.register(noopTracer);
+  }
   fastify.register(fastifySensible);
   fastify.register(ensureCorrelationId);
   fastify.register(fastifyCookie);
@@ -212,21 +220,23 @@ export async function createApp(opts = {}) {
     instance.register(addFrameOptionsHeader);
     instance.register(renderHtml);
 
-    instance.get('/_/pwa/shell', (_request, reply) => {
+    instance.get('/_/pwa/shell', async (_request, reply) => {
       if (getServerPWAConfig().serviceWorker) {
         reply.sendHtml();
       } else {
         reply.status(404).send('Not found');
       }
+      return reply;
     });
-
-    instance.get('/*', (_request, reply) => {
+    instance.get('/*', async (_request, reply) => {
       reply.sendHtml();
+      return reply;
     });
 
     if (enablePostToModuleRoutes) {
-      instance.post('/*', (_request, reply) => {
+      instance.post('/*', async (_request, reply) => {
         reply.sendHtml();
+        return reply;
       });
     }
 
@@ -236,7 +246,6 @@ export async function createApp(opts = {}) {
   fastify.setNotFoundHandler(async (_request, reply) => {
     reply.code(404).send('Not found');
   });
-
   fastify.setErrorHandler(async (error, request, reply) => {
     const { method, url } = request;
     const correlationId = request.headers['correlation-id'];

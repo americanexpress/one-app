@@ -21,7 +21,7 @@ import {
   getRedirectAllowList,
 } from '../../../src/server/utils/redirectAllowList';
 
-jest.spyOn(console, 'error').mockImplementation(() => {});
+jest.spyOn(console, 'error').mockImplementation(util.format);
 
 describe('redirectAllowList', () => {
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe('redirectAllowList', () => {
     it('should log an error if allow list contains insecure protocol (http)', () => {
       const redirectAllowList = ['http://americanexpress.com'];
       setRedirectAllowList(redirectAllowList);
-      expect(util.format(...console.error.mock.calls[0])).toBe('Insecure protocols (http://) are not allowed to be redirect locations. Ignoring \'http://americanexpress.com\' listed in redirectAlowList configuration.');
+      expect(console.error.mock.results[0].value).toBe('Insecure protocols (http://) are not allowed to be redirect locations. Ignoring \'http://americanexpress.com\' listed in redirectAlowList configuration.');
     });
   });
   describe('validateRedirectUrl', () => {

@@ -322,16 +322,20 @@ export function renderPartial({
 }
 
 export const checkStateForRedirectAndStatusCode = (request, reply) => {
+  const { tracer } = request.openTelemetry();
+  const checkStateForRedirectSpan = tracer.startSpan('checkStateForRedirect', { attributes: { phase: 9 } });
   const destination = request.store.getState().getIn(['redirection', 'destination']);
 
   if (destination) {
     if (!isRedirectUrlAllowed(destination)) {
       renderStaticErrorPage(request, reply);
       console.error('\'%s\' is not an allowed redirect URL', destination);
+      checkStateForRedirectSpan.end();
       return;
     }
     reply.redirect(302, destination);
   } else {
+    const checkStateForStatusCodeSpan = tracer.startSpan('checkStateForStatusCode', { attributes: { phase: 10 } });
     const error = request.store.getState().get('error');
 
     if (error) {
@@ -341,7 +345,10 @@ export const checkStateForRedirectAndStatusCode = (request, reply) => {
         reply.code(code);
       }
     }
+    checkStateForStatusCodeSpan.end();
   }
+
+  checkStateForRedirectSpan.end();
 };
 
 /**
@@ -350,6 +357,9 @@ export const checkStateForRedirectAndStatusCode = (request, reply) => {
  * @param {import('fastify').FastifyReply} reply fastify reply object
  */
 export const sendHtml = (request, reply) => {
+  const { tracer } = request.openTelemetry();
+  const span = tracer.startSpan('sendHtml', { attributes: { phase: 11 } });
+
   try {
     const {
       appHtml,
@@ -435,6 +445,8 @@ export const sendHtml = (request, reply) => {
   } catch (err) {
     request.log.error('sendHtml had an error, sending static error page', err);
     return renderStaticErrorPage(request, reply);
+  } finally {
+    span.end();
   }
 };
 

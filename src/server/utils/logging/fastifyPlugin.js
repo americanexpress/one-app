@@ -50,14 +50,18 @@ const getLocale = (req) => {
 
 const hrtimeToMs = (value) => (value[0] * 1e3) + (value[1] * 1e-6);
 
-const startTimer = (obj, symbol) => {
+export const startTimer = (obj, symbol) => {
   const time = process.hrtime();
 
   // eslint-disable-next-line no-param-reassign
   obj[symbol] = time;
 };
 
-const endTimer = (obj, symbol) => {
+export const endTimer = (obj, symbol) => {
+  if (typeof obj[symbol] === 'number') {
+    console.error('Timer %s attempted to end after timer had already ended for route %s', symbol.toString(), obj.originalUrl);
+    return obj[symbol];
+  }
   const result = process.hrtime(obj[symbol]);
   const ms = hrtimeToMs(result);
 

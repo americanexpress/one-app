@@ -26,6 +26,8 @@ const addSecurityHeaders = (fastify, opts = {}, done) => {
   const matchGetRoutes = opts.matchGetRoutes || [];
 
   fastify.addHook('onRequest', async (request, reply) => {
+    const { tracer } = request.openTelemetry();
+    const span = tracer.startSpan('addSecurityHeaders', { attributes: { phase: 12 } });
     reply.header('vary', 'Accept-Encoding');
     reply.header('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
     reply.header('x-dns-prefetch-control', 'off');
@@ -45,6 +47,7 @@ const addSecurityHeaders = (fastify, opts = {}, done) => {
       reply.header('X-XSS-Protection', '0');
       reply.header('Referrer-Policy', process.env.ONE_REFERRER_POLICY_OVERRIDE || 'no-referrer');
     }
+    span.end();
   });
 
   done();

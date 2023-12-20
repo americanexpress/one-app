@@ -24,7 +24,3 @@ exports[`server index development starts one-app-dev-proxy with remotes derived 
   "test": "https://example.com",
 }
 `;
-
-exports[`server index ssrServerStart logs errors when listening on the metrics server fails 1`] = `"Error encountered starting 📊 Metrics server"`;
-
-exports[`server index ssrServerStart logs errors when listening on the server fails 1`] = `"Error encountered starting 🌎 One App server"`;

@@ -57,6 +57,8 @@ describe('createRequestStore', () => {
   let request;
   let reply;
   let reducers;
+  const span = { end: jest.fn() };
+  const tracer = { startSpan: jest.fn(() => span) };
 
   beforeAll(() => {
     global.fetch = () => Promise.resolve({ data: 'data' });
@@ -71,6 +73,7 @@ describe('createRequestStore', () => {
     jest.clearAllMocks();
 
     request = {
+      openTelemetry: () => ({ tracer }),
       decorateRequest: jest.fn(),
       headers: {
         'correlation-id': 'abc123',
@@ -150,5 +153,23 @@ describe('createRequestStore', () => {
     createRequestStore(request, reply, { reducers });
 
     expect(holocron.createHolocronStore.mock.calls[0][0]).toHaveProperty('extraThunkArguments.fetchClient');
+  });
+
+  describe('tracer', () => {
+    it('should create a span', () => {
+      createRequestStore(request, reply, { reducers });
+
+      expect(tracer.startSpan).toHaveBeenCalledWith('createRequestStore', { attributes: { phase: 2 } });
+      expect(span.end).toHaveBeenCalled();
+    });
+
+    it('should still end the span if an error is thrown', () => {
+      createRequestStore(request, reply, { reducers: null });
+
+      expect(tracer.startSpan).toHaveBeenCalledWith('createRequestStore', { attributes: { phase: 2 } });
+      expect(request.log.error).toHaveBeenCalled();
+      expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
+      expect(span.end).toHaveBeenCalled();
+    });
   });
 });
