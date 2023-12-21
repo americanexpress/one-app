@@ -39,7 +39,7 @@ function buildUrlObject(options, defaultProtocol) {
     (protocol === 'http:' && urlObject.port === 80)
     || (protocol === 'https:' && urlObject.port === 443)
   ) {
-    delete urlObject.port;
+    urlObject.port = undefined;
   }
   return urlObject;
 }
