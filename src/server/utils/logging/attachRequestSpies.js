@@ -22,6 +22,12 @@ import onFinished from 'on-finished';
 import attachSpy from './attachSpy';
 
 function buildUrlObject(options, defaultProtocol) {
+  // TODO: url.parse is deprecated, use new URL() instead
+  // this is not a 1:1 replacement and will require changes.
+  // Currently the parsed url is used to provide href to
+  // loggers outgoingRequestEndSpy function.
+  // https://github.com/americanexpress/one-app/blob/main/src/server/utils/logging/setup.js#L42
+  // https://nodejs.org/api/url.html#urlparseurlstring-parsequerystring-slashesdenotehost
   const parsedPath = url.parse(options.path || '/');
   const protocol = options.protocol || `${defaultProtocol}:`;
   const urlObject = {
