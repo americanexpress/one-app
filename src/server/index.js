@@ -15,6 +15,7 @@
  * permissions and limitations under the License.
  */
 
+import util from 'node:util';
 import path from 'path';
 import fs from 'fs';
 import Intl from 'lean-intl';
@@ -89,6 +90,10 @@ async function ssrServerStart() {
   });
 
   await pollModuleMap();
+
+  if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
+    process.stdout.write(util.format('\none-app started successfully. Logs are being sent to OTel via gRPC at %s\n', process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT));
+  }
 }
 
 async function metricsServerStart() {
