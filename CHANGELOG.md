@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.8.4](https://github.com/americanexpress/one-app/compare/v6.8.3...v6.8.4) (2023-12-27)
+
+
+### Bug Fixes
+
+* **devCdn:** handle different module files ([48aa35f](https://github.com/americanexpress/one-app/commit/48aa35fc73c718f87531822e2cba754100993799))
+
+
 ## [6.8.3](https://github.com/americanexpress/one-app/compare/v6.8.2...v6.8.3) (2023-12-06)
 
 
