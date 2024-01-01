@@ -116,7 +116,7 @@
     "joi": "^17.11.0",
     "lean-intl": "^4.2.2",
     "make-promises-safe": "^5.1.0",
-    "matcher": "^3.0.0",
+    "matcher": "^5.0.0",
     "object-hash": "^3.0.0",
     "opossum": "^8.1.2",
     "opossum-prometheus": "^0.3.0",
