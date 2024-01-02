@@ -24,6 +24,8 @@ jest.unmock('yargs');
 describe('server index', () => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
+  jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
   const origFsExistsSync = fs.existsSync;
 
   let addServer;
@@ -48,7 +50,14 @@ describe('server index', () => {
 
     jest.doMock('@americanexpress/one-app-dev-proxy', () => jest.fn(() => ({
       listen: jest.fn((port, cb) => {
-        setTimeout(() => (oneAppDevProxyError ? cb(new Error('test error')) : cb(null, { port })));
+        setTimeout(() => {
+          if (oneAppDevProxyError) {
+            const error = new Error('dev proxy server test error');
+            error.stack = `${error.toString()}\n    at <anonymous>:1:1`;
+            return cb(error);
+          }
+          return cb(null, { port });
+        });
         return { close: 'one-app-dev-proxy' };
       }),
     }))
@@ -61,10 +70,7 @@ describe('server index', () => {
 
     jest.doMock('cross-fetch');
 
-    jest.doMock(
-      '../../src/server/utils/loadModules',
-      () => jest.fn(() => Promise.resolve())
-    );
+    jest.doMock('../../src/server/utils/loadModules', () => jest.fn(() => Promise.resolve()));
     jest.doMock('babel-polyfill', () => {
       // jest includes babel-polyfill
       // if included twice, babel-polyfill will complain that it should be only once
@@ -76,20 +82,33 @@ describe('server index', () => {
     // ms timeouts are to ensure order
     jest.doMock('../../src/server/ssrServer', () => ({
       listen: jest.fn((port, cb) => {
-        setTimeout(() => (ssrServerError ? cb(new Error('test error')) : cb(null, { port })), 50);
+        setTimeout(() => {
+          if (ssrServerError) {
+            const error = new Error('ssr server test error');
+            error.stack = `${error.toString()}\n    at <anonymous>:1:1`;
+            return cb(error);
+          }
+          return cb(null, { port });
+        }, 50);
         return { close: 'ssrServer' };
       }),
     }));
     jest.doMock('../../src/server/metricsServer', () => ({
       listen: jest.fn((port, cb) => {
-        setTimeout(() => (metricsServerError ? cb(new Error('test error')) : cb(null)), 10);
+        setTimeout(() => {
+          if (metricsServerError) {
+            const error = new Error('metrics server test error');
+            error.stack = `${error.toString()}\n    at <anonymous>:1:1`;
+            return cb(error);
+          }
+          return cb(null);
+        }, 10);
         return { close: 'metricsServer' };
       }),
     }));
 
-    jest.doMock('../../src/server/listen', () => jest.fn(
-      (app, cb) => app.listen(3000, (err) => cb(err, { port: 3000 }))
-    ));
+    jest.doMock('../../src/server/listen', () => jest.fn((app, cb) => app.listen(3000, (err) => cb(err, { port: 3000 })))
+    );
 
     addServer = jest.fn();
     shutdown = jest.fn();
@@ -103,7 +122,14 @@ describe('server index', () => {
     jest.doMock('../../src/server/devHolocronCDN', () => ({
       default: {
         listen: jest.fn((port, cb) => {
-          setTimeout(() => (devHolocronCdnError ? cb(new Error('test error')) : cb(null, { port })));
+          setTimeout(() => {
+            if (devHolocronCdnError) {
+              const error = new Error('dev cdn server test error');
+              error.stack = `${error.toString()}\n    at <anonymous>:1:1`;
+              return cb(error);
+            }
+            return cb(null, { port });
+          });
           return { close: 'devHolocronCdn' };
         }),
       },
@@ -133,8 +159,23 @@ describe('server index', () => {
       load();
       const yargs = require('yargs');
 
-      expect(yargs.getOptions().boolean).toMatchSnapshot();
-      expect(yargs.getOptions().string).toMatchSnapshot();
+      expect(yargs.getOptions().boolean).toMatchInlineSnapshot(`
+        Array [
+          "help",
+          "version",
+          "m",
+          "use-middleware",
+          "use-host",
+        ]
+      `);
+      expect(yargs.getOptions().string).toMatchInlineSnapshot(`
+        Array [
+          "root-module-name",
+          "module-map-url",
+          "log-format",
+          "log-level",
+        ]
+      `);
     });
 
     it('starts devHolocronCDN on port 4011', async () => {
@@ -160,32 +201,40 @@ describe('server index', () => {
       const endpointsFilePath = path.join(process.cwd(), '.dev', 'endpoints', 'index.js');
       process.env.NODE_ENV = 'development';
       fs.existsSync = () => true;
-      jest.doMock(endpointsFilePath, () => () => ({
-        oneTestEndpointUrl: {
-          devProxyPath: 'test',
-          destination: 'https://example.com',
-        },
-      }),
-      { virtual: true }
+      jest.doMock(
+        endpointsFilePath,
+        () => () => ({
+          oneTestEndpointUrl: {
+            devProxyPath: 'test',
+            destination: 'https://example.com',
+          },
+        }),
+        { virtual: true }
       );
       await load();
       fs.existsSync = origFsExistsSync;
       const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy');
       expect(oneAppDevProxy).toHaveBeenCalledTimes(1);
-      expect(oneAppDevProxy.mock.calls[0][0].remotes).toMatchSnapshot();
+      expect(oneAppDevProxy.mock.calls[0][0].remotes).toMatchInlineSnapshot(`
+        Object {
+          "test": "https://example.com",
+        }
+      `);
     });
 
     it('starts one-app-dev-proxy with out any remotes if there is no module endpoints file provided', async () => {
       const endpointsFilePath = path.join(process.cwd(), '.dev', 'endpoints', 'index.js');
       process.env.NODE_ENV = 'development';
       fs.existsSync = () => false;
-      jest.doMock(endpointsFilePath, () => () => ({
-        oneTestEndpointUrl: {
-          devProxyPath: 'test',
-          destination: 'https://example.com',
-        },
-      }),
-      { virtual: true }
+      jest.doMock(
+        endpointsFilePath,
+        () => () => ({
+          oneTestEndpointUrl: {
+            devProxyPath: 'test',
+            destination: 'https://example.com',
+          },
+        }),
+        { virtual: true }
       );
       await load();
       fs.existsSync = origFsExistsSync;
@@ -353,7 +402,29 @@ describe('server index', () => {
       }
 
       expect(console.error).toHaveBeenCalled();
-      expect(console.error.mock.calls[0][0]).toMatchSnapshot();
+      expect(console.error.mock.calls[0][0]).toMatchInlineSnapshot(
+        '[Error: ssr server test error]'
+      );
+    });
+
+    it('does not log a notice directly to STDERR when not using OTel and listening on the server fails', async () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
+      await load({ ssrServerError: true });
+      expect(process.stderr.write).not.toHaveBeenCalled();
+    });
+
+    it('logs a notice directly to STDERR when using OTel and listening on the server fails', async () => {
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
+      await load({ ssrServerError: true });
+      expect(process.stderr.write).toHaveBeenCalledTimes(1);
+      expect(process.stderr.write.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "
+        one-app failed to start. Logs are being sent to OTel via gRPC at http://0.0.0.0:4317/v1/logs
+
+        Error: ssr server test error
+            at <anonymous>:1:1"
+      `);
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
     });
 
     it('logs errors when listening on the metrics server fails', async () => {
@@ -364,7 +435,29 @@ describe('server index', () => {
       }
 
       expect(console.error).toHaveBeenCalled();
-      expect(console.error.mock.calls[0][0]).toMatchSnapshot();
+      expect(console.error.mock.calls[0][0]).toMatchInlineSnapshot(
+        '"error encountered starting the metrics server"'
+      );
+    });
+
+    it('does not log a notice directly to STDERR when not using OTel and listening on the metrics server fails', async () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
+      await load({ metricsServerError: true });
+      expect(process.stderr.write).not.toHaveBeenCalled();
+    });
+
+    it('logs a notice directly to STDERR when using OTel and listening on the metrics server fails', async () => {
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
+      await load({ metricsServerError: true });
+      expect(process.stderr.write).toHaveBeenCalledTimes(1);
+      expect(process.stderr.write.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "
+        one-app failed to start. Logs are being sent to OTel via gRPC at http://0.0.0.0:4317/v1/logs
+
+        Error: metrics server test error
+            at <anonymous>:1:1"
+      `);
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
     });
 
     it('closes servers when starting ssrServer fails', async () => {
@@ -401,6 +494,24 @@ describe('server index', () => {
 
       expect(console.log).toHaveBeenCalled();
       expect(console.log.mock.calls[0][0]).toMatch('📊 Metrics server listening on port 3005');
+    });
+
+    it('does not log a notice to STDOUT when not using OTel', async () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
+      await load();
+      expect(process.stdout.write).not.toHaveBeenCalled();
+    });
+
+    it('logs a notice to STDOUT when using OTel', async () => {
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
+      await load();
+      expect(process.stdout.write).toHaveBeenCalledTimes(1);
+      expect(process.stdout.write.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "
+        one-app started successfully. Logs are being sent to OTel via gRPC at http://0.0.0.0:4317/v1/logs
+        "
+      `);
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
     });
 
     it('initiates module-map polling if successfully listening on port', async () => {
