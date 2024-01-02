@@ -370,13 +370,13 @@ describe('server index', () => {
       expect(util.format(...console.error.mock.calls[0])).toMatchSnapshot();
     });
 
-    it('does not log a notice directly to STDOUT when not using OTel and listening on the server fails', async () => {
+    it('does not log a notice directly to STDERR when not using OTel and listening on the server fails', async () => {
       delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
       await load({ ssrServerError: true });
       expect(process.stderr.write).not.toHaveBeenCalled();
     });
 
-    it('logs a notice directly to STDOUT when using OTel and listening on the server fails', async () => {
+    it('logs a notice directly to STDERR when using OTel and listening on the server fails', async () => {
       process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
       await load({ ssrServerError: true });
       expect(process.stderr.write).toHaveBeenCalledTimes(1);
@@ -398,13 +398,13 @@ describe('server index', () => {
       expect(util.format(...console.error.mock.calls[0])).toMatchSnapshot();
     });
 
-    it('does not log a notice directly to STDOUT when not using OTel and listening on the metrics server fails', async () => {
+    it('does not log a notice directly to STDERR when not using OTel and listening on the metrics server fails', async () => {
       delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
       await load({ metricsServerError: true });
       expect(process.stderr.write).not.toHaveBeenCalled();
     });
 
-    it('logs a notice directly to STDOUT when using OTel and listening on the metrics server fails', async () => {
+    it('logs a notice directly to STDERR when using OTel and listening on the metrics server fails', async () => {
       process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
       await load({ metricsServerError: true });
       expect(process.stderr.write).toHaveBeenCalledTimes(1);
