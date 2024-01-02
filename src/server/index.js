@@ -158,5 +158,8 @@ const serverChain = process.env.NODE_ENV === 'development'
 
 export default serverChain.catch((err) => {
   console.error(err);
+  if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
+    process.stderr.write(util.format('\none-app failed to start. Logs are being sent to OTel via gRPC at %s\n\n%s', process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT, err.stack));
+  }
   shutdown();
 });

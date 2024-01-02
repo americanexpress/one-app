@@ -27,6 +27,7 @@ describe('server index', () => {
   jest.spyOn(console, 'log').mockImplementation(() => {});
   jest.spyOn(console, 'error').mockImplementation(() => {});
   jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
+  jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
   const origFsExistsSync = fs.existsSync;
 
   let addServer;
@@ -81,7 +82,9 @@ describe('server index', () => {
 
     ssrServerListen = jest.fn(async () => {
       if (ssrServerError) {
-        throw new Error('test error');
+        const error = new Error('ssr server test error');
+        error.stack = `${error.toString()}\n    at <anonymous>:1:1`;
+        throw error;
       }
     });
     ssrServer = jest.fn(() => ({
@@ -92,7 +95,9 @@ describe('server index', () => {
 
     metricsServerListen = jest.fn(async () => {
       if (metricsServerError) {
-        throw new Error('test error');
+        const error = new Error('metrics server test error');
+        error.stack = `${error.toString()}\n    at <anonymous>:1:1`;
+        throw error;
       }
     });
     jest.doMock('../../src/server/metricsServer', () => () => ({
@@ -102,7 +107,7 @@ describe('server index', () => {
 
     devHolocronCDNListen = jest.fn(async () => {
       if (devHolocronCdnError) {
-        throw new Error('test error');
+        throw new Error('dev cdn test error');
       }
     });
     jest.doMock('../../src/server/devHolocronCDN', () => ({
@@ -365,12 +370,52 @@ describe('server index', () => {
       expect(util.format(...console.error.mock.calls[0])).toMatchSnapshot();
     });
 
+    it('does not log a notice directly to STDOUT when not using OTel and listening on the server fails', async () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
+      await load({ ssrServerError: true });
+      expect(process.stderr.write).not.toHaveBeenCalled();
+    });
+
+    it('logs a notice directly to STDOUT when using OTel and listening on the server fails', async () => {
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
+      await load({ ssrServerError: true });
+      expect(process.stderr.write).toHaveBeenCalledTimes(1);
+      expect(process.stderr.write.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "
+        one-app failed to start. Logs are being sent to OTel via gRPC at http://0.0.0.0:4317/v1/logs
+
+        Error: ssr server test error
+            at <anonymous>:1:1"
+      `);
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
+    });
+
     it('logs errors when listening on the metrics server fails', async () => {
       await load({ metricsServerError: true });
 
       expect(console.error).toHaveBeenCalled();
       console.error.mock.calls[0].pop();
       expect(util.format(...console.error.mock.calls[0])).toMatchSnapshot();
+    });
+
+    it('does not log a notice directly to STDOUT when not using OTel and listening on the metrics server fails', async () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
+      await load({ metricsServerError: true });
+      expect(process.stderr.write).not.toHaveBeenCalled();
+    });
+
+    it('logs a notice directly to STDOUT when using OTel and listening on the metrics server fails', async () => {
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
+      await load({ metricsServerError: true });
+      expect(process.stderr.write).toHaveBeenCalledTimes(1);
+      expect(process.stderr.write.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "
+        one-app failed to start. Logs are being sent to OTel via gRPC at http://0.0.0.0:4317/v1/logs
+
+        Error: metrics server test error
+            at <anonymous>:1:1"
+      `);
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
     });
 
     it('closes servers when starting ssrServer fails', async () => {
