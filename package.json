@@ -120,7 +120,7 @@
     "object-hash": "^3.0.0",
     "opossum": "^8.1.2",
     "opossum-prometheus": "^0.3.0",
-    "pidusage": "^3.0.0",
+    "pidusage": "^3.0.2",
     "prom-client": "^14.0.1",
     "prop-types": "^15.7.2",
     "react": "^16.14.0",
