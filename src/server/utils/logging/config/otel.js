@@ -53,16 +53,16 @@ export function createOtelTransport() {
     };
   }, {}) : {};
 
-  const logRecordProcessorOptions = [{
+  let logRecordProcessorOptions = {
     recordProcessorType: 'batch',
     exporterOptions: { protocol: 'grpc' },
-  }];
+  };
 
   if (process.env.NODE_ENV === 'development') {
-    logRecordProcessorOptions.push({
+    logRecordProcessorOptions = [logRecordProcessorOptions, {
       recordProcessorType: 'simple',
       exporterOptions: { protocol: 'console' },
-    });
+    }];
   }
 
   return pino.transport({
