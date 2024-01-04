@@ -28,6 +28,8 @@ jest.spyOn(console, 'error').mockImplementation((...args) => {
   args.pop();
   return util.format(...args);
 });
+jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
+jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
 
 describe('server index', () => {
   const origFsExistsSync = fs.existsSync;
@@ -84,7 +86,9 @@ describe('server index', () => {
 
     ssrServerListen = jest.fn(async () => {
       if (ssrServerError) {
-        throw new Error('test error');
+        const error = new Error('ssr server test error');
+        error.stack = `${error.toString()}\n    at <anonymous>:1:1`;
+        throw error;
       }
     });
     ssrServer = jest.fn(() => ({
@@ -95,7 +99,9 @@ describe('server index', () => {
 
     metricsServerListen = jest.fn(async () => {
       if (metricsServerError) {
-        throw new Error('test error');
+        const error = new Error('metrics server test error');
+        error.stack = `${error.toString()}\n    at <anonymous>:1:1`;
+        throw error;
       }
     });
     jest.doMock('../../src/server/metricsServer', () => () => ({
@@ -105,7 +111,7 @@ describe('server index', () => {
 
     devHolocronCDNListen = jest.fn(async () => {
       if (devHolocronCdnError) {
-        throw new Error('test error');
+        throw new Error('dev cdn test error');
       }
     });
     jest.doMock('../../src/server/devHolocronCDN', () => ({
@@ -367,6 +373,26 @@ describe('server index', () => {
       );
     });
 
+    it('does not log a notice directly to STDERR when not using OTel and listening on the server fails', async () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
+      await load({ ssrServerError: true });
+      expect(process.stderr.write).not.toHaveBeenCalled();
+    });
+
+    it('logs a notice directly to STDERR when using OTel and listening on the server fails', async () => {
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
+      await load({ ssrServerError: true });
+      expect(process.stderr.write).toHaveBeenCalledTimes(1);
+      expect(process.stderr.write.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "
+        one-app failed to start. Logs are being sent to OTel via gRPC at http://0.0.0.0:4317/v1/logs
+
+        Error: ssr server test error
+            at <anonymous>:1:1"
+      `);
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
+    });
+
     it('logs errors when listening on the metrics server fails', async () => {
       await load({ metricsServerError: true });
 
@@ -374,6 +400,26 @@ describe('server index', () => {
       expect(console.error.mock.results[0].value).toMatchInlineSnapshot(
         '"Error encountered starting 📊 Metrics server"'
       );
+    });
+
+    it('does not log a notice directly to STDERR when not using OTel and listening on the metrics server fails', async () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
+      await load({ metricsServerError: true });
+      expect(process.stderr.write).not.toHaveBeenCalled();
+    });
+
+    it('logs a notice directly to STDERR when using OTel and listening on the metrics server fails', async () => {
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
+      await load({ metricsServerError: true });
+      expect(process.stderr.write).toHaveBeenCalledTimes(1);
+      expect(process.stderr.write.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "
+        one-app failed to start. Logs are being sent to OTel via gRPC at http://0.0.0.0:4317/v1/logs
+
+        Error: metrics server test error
+            at <anonymous>:1:1"
+      `);
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
     });
 
     it('closes servers when starting ssrServer fails', async () => {
@@ -413,6 +459,24 @@ describe('server index', () => {
       const pollModuleMap = require('../../src/server/utils/pollModuleMap');
 
       expect(pollModuleMap).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not log a notice to STDOUT when not using OTel', async () => {
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
+      await load();
+      expect(process.stdout.write).not.toHaveBeenCalled();
+    });
+
+    it('logs a notice to STDOUT when using OTel', async () => {
+      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
+      await load();
+      expect(process.stdout.write).toHaveBeenCalledTimes(1);
+      expect(process.stdout.write.mock.calls[0][0]).toMatchInlineSnapshot(`
+        "
+        one-app started successfully. Logs are being sent to OTel via gRPC at http://0.0.0.0:4317/v1/logs
+        "
+      `);
+      delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
     });
 
     afterAll(() => {

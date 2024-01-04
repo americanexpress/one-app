@@ -125,14 +125,12 @@ describe('OpenTelemetry logging', () => {
       expect(pino.transport.mock.calls[0][0]).toMatchInlineSnapshot(`
         {
           "options": {
-            "logRecordProcessorOptions": [
-              {
-                "exporterOptions": {
-                  "protocol": "grpc",
-                },
-                "recordProcessorType": "batch",
+            "logRecordProcessorOptions": {
+              "exporterOptions": {
+                "protocol": "grpc",
               },
-            ],
+              "recordProcessorType": "batch",
+            },
             "loggerName": "Mock Service Name",
             "messageKey": "message",
             "resourceAttributes": {
@@ -180,14 +178,12 @@ describe('OpenTelemetry logging', () => {
     expect(pino.transport).toHaveBeenCalledTimes(1);
     expect(pino.transport.mock.calls[0][0].options.logRecordProcessorOptions)
       .toMatchInlineSnapshot(`
-      [
-        {
-          "exporterOptions": {
-            "protocol": "grpc",
-          },
-          "recordProcessorType": "batch",
+      {
+        "exporterOptions": {
+          "protocol": "grpc",
         },
-      ]
+        "recordProcessorType": "batch",
+      }
     `);
     expect(pino.transport.mock.results[0].value).toBe(transport);
   });
