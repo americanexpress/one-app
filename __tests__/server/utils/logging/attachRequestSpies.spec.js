@@ -17,18 +17,12 @@ import https from 'node:https';
 import onFinished from 'on-finished';
 
 import attachRequestSpies from '../../../../src/server/utils/logging/attachRequestSpies';
-import attachSpy from '../../../../src/server/utils/logging/attachSpy';
 
-jest.mock('http', () => ({ request: jest.fn() }));
-jest.mock('https', () => ({ request: jest.fn() }));
+jest.mock('node:http', () => ({ request: jest.fn() }));
+jest.mock('node:https', () => ({ request: jest.fn() }));
 jest.mock('on-finished');
-jest.mock('../../../../src/server/utils/logging/attachSpy');
 
 describe('attachRequestSpies', () => {
-  beforeEach(() => {
-    attachSpy.mockClear();
-  });
-
   it('throws if requestSpy is not a function', () => {
     expect(attachRequestSpies).toThrowErrorMatchingSnapshot();
   });
@@ -42,59 +36,55 @@ describe('attachRequestSpies', () => {
   });
 
   it('attaches http and https spies', () => {
-    attachRequestSpies(jest.fn());
-    expect(attachSpy).toHaveBeenCalledTimes(2);
-    expect(attachSpy.mock.calls[0][0]).toEqual(https);
-    expect(attachSpy.mock.calls[0][1]).toBe('request');
-    expect(attachSpy.mock.calls[1][0]).toEqual(http);
-    expect(attachSpy.mock.calls[1][1]).toBe('request');
-    expect(typeof attachSpy.mock.calls[0][2]).toBe('function');
-    expect(typeof attachSpy.mock.calls[1][2]).toBe('function');
+    const requestSpy = jest.fn();
+    const originalHttpRequest = http.request;
+    const originalHttpsRequest = https.request;
+    attachRequestSpies(requestSpy);
+    expect(http.request).not.toEqual(originalHttpRequest);
+    expect(https.request).not.toEqual(originalHttpsRequest);
+    http.request('http://example.com');
+    https.request('https://example.com');
+    expect(requestSpy).toHaveBeenCalledTimes(2);
   });
 
   describe('requestSpy', () => {
     it('is called with clientRequest', () => {
+      const fakeOriginalHttpRequest = jest.fn();
+      const fakeOriginalHttpsRequest = jest.fn();
+      http.request = fakeOriginalHttpRequest;
+      https.request = fakeOriginalHttpsRequest;
+
       const requestSpy = jest.fn();
       attachRequestSpies(requestSpy);
-      expect(attachSpy).toHaveBeenCalledTimes(2);
-
-      const httpsSpy = attachSpy.mock.calls[0][2];
-      const httpSpy = attachSpy.mock.calls[1][2];
-
-      const callOriginal = jest.fn(() => 'client request object');
-
-      httpsSpy(['http://example.tld'], callOriginal);
-      httpSpy(['http://example.tld'], callOriginal);
+      http.request('http://example.tld');
+      https.request('https://example.tld');
 
       expect(requestSpy).toHaveBeenCalledTimes(2);
-      expect(requestSpy.mock.calls[0][0]).toBe('client request object');
-      expect(requestSpy.mock.calls[1][0]).toBe('client request object');
+      expect(fakeOriginalHttpRequest).toHaveBeenCalledWith('http://example.tld');
+      expect(fakeOriginalHttpsRequest).toHaveBeenCalledWith('https://example.tld');
     });
 
     it('is called with object options', () => {
       const requestSpy = jest.fn();
       attachRequestSpies(requestSpy);
-      expect(attachSpy).toHaveBeenCalledTimes(2);
-      const httpsSpy = attachSpy.mock.calls[0][2];
-      const httpSpy = attachSpy.mock.calls[1][2];
-      const callOriginal = jest.fn(() => 'client request object');
-      httpsSpy([{
+
+      https.request({
         protocol: 'https',
         hostname: 'example.tld',
         port: 8080,
         method: 'GET',
         path: '/somewhere?over=rainbow#so-blue',
         auth: 'user:password',
-      }], callOriginal);
+      });
 
-      httpSpy([{
+      http.request({
         protocol: 'http',
         hostname: 'example.tld',
         port: 8080,
         method: 'GET',
         path: '/somewhere?over=rainbow#so-blue',
         auth: 'user:password',
-      }], callOriginal);
+      });
 
       expect(requestSpy).toHaveBeenCalledTimes(2);
       expect(requestSpy.mock.calls[0][1]).toMatchSnapshot();
@@ -104,13 +94,10 @@ describe('attachRequestSpies', () => {
     it('is called with sparse object options', () => {
       const requestSpy = jest.fn();
       attachRequestSpies(requestSpy);
-      expect(attachSpy).toHaveBeenCalledTimes(2);
-      const httpsSpy = attachSpy.mock.calls[0][2];
-      const httpSpy = attachSpy.mock.calls[1][2];
 
-      const callOriginal = jest.fn(() => 'client request object');
-      httpsSpy([{ method: 'GET' }], callOriginal);
-      httpSpy([{ method: 'GET' }], callOriginal);
+      https.request({ method: 'GET' });
+      http.request({ method: 'GET' });
+
       expect(requestSpy).toHaveBeenCalledTimes(2);
       expect(requestSpy.mock.calls[0][1]).toMatchSnapshot();
       expect(requestSpy.mock.calls[1][1]).toMatchSnapshot();
@@ -119,10 +106,7 @@ describe('attachRequestSpies', () => {
     it('is called with parsed options', () => {
       const requestSpy = jest.fn();
       attachRequestSpies(requestSpy);
-      expect(attachSpy).toHaveBeenCalledTimes(2);
-      const spy = attachSpy.mock.calls[0][2];
-      const callOriginal = jest.fn(() => 'client request object');
-      spy(['http://user:password@example.tld:8080/somewhere?over=rainbow#so-blue'], callOriginal);
+      http.request('http://user:password@example.tld:8080/somewhere?over=rainbow#so-blue');
       expect(requestSpy).toHaveBeenCalledTimes(1);
       expect(requestSpy.mock.calls[0][1]).toMatchSnapshot();
     });
@@ -130,19 +114,18 @@ describe('attachRequestSpies', () => {
 
   describe('socketCloseSpy', () => {
     it('is called when the request socket closes', () => {
+      const fakeOriginalRequest = jest.fn();
+      http.request = fakeOriginalRequest;
       onFinished.mockClear();
       const socketCloseSpy = jest.fn();
       attachRequestSpies(jest.fn(), socketCloseSpy);
-      expect(attachSpy).toHaveBeenCalledTimes(2);
-      const spy = attachSpy.mock.calls[0][2];
-      const clientRequest = {};
-      const callOriginal = () => clientRequest;
-      spy(['http://example.tld'], callOriginal);
+
+      http.request('http://example.tld');
       expect(onFinished).toHaveBeenCalledTimes(1);
       onFinished.mock.calls[0][1]();
       expect(socketCloseSpy).toHaveBeenCalledTimes(1);
-      expect(socketCloseSpy.mock.calls[0][0]).toBe(clientRequest);
       expect(socketCloseSpy.mock.calls[0][1]).toMatchSnapshot();
+      expect(fakeOriginalRequest).toHaveBeenCalledTimes(1);
     });
   });
 });
