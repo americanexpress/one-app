@@ -202,7 +202,7 @@
     "standard-version": "^9.5.0",
     "supertest": "^6.2.4",
     "tar": "^6.1.15",
-    "webdriverio": "^7.20.5"
+    "webdriverio": "^7.34.0"
   },
   "standard-version": {
     "bumpFiles": [

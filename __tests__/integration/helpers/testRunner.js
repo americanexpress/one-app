@@ -44,6 +44,8 @@ const setUpTestRunner = async ({
         'selenium-chrome': {
           ports: [
             `${seleniumServerPort}:4444`,
+            '7901:7900',
+            '5901:5900',
           ],
         },
         ...oneAppLocalPortToUse && {
@@ -103,6 +105,7 @@ const setUpTestRunner = async ({
     path: '/wd/hub',
     port: seleniumServerPort,
     capabilities: {
+      acceptInsecureCerts: true,
       'goog:chromeOptions': {
         ...!oneAppLocalPortToUse && process.env.HTTPS_PROXY
         && { args: [`--proxy-server=${process.env.HTTPS_PROXY}`] },
