@@ -43,7 +43,7 @@ EXPOSE 3005
 WORKDIR /opt/one-app
 RUN chown node:node /opt/one-app
 USER $USER
-CMD ["node", "lib/server"]
+CMD ["node", "scripts/start.js"]
 COPY --from=builder --chown=node:node /opt/one-app/development ./
 
 # production image
@@ -58,5 +58,5 @@ EXPOSE 3000
 EXPOSE 3005
 WORKDIR /opt/one-app
 USER $USER
-CMD ["node", "--dns-result-order=ipv4first", "--no-experimental-fetch", "lib/server"]
+CMD ["node", "scripts/start.js"]
 COPY --from=builder --chown=node:node /opt/one-app/production ./
