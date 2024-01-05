@@ -22,6 +22,7 @@ RUN NODE_ENV=production npm run build && \
     chown node:node /opt/one-app/production && \
     mv /opt/build/LICENSE.txt /opt/one-app/production && \
     mv /opt/build/node_modules /opt/one-app/production && \
+    mv /opt/build/scripts /opt/one-app/production && \
     mv /opt/build/package.json /opt/one-app/production && \
     mv /opt/build/lib /opt/one-app/production && \
     mv /opt/build/build /opt/one-app/production && \
