@@ -116,6 +116,7 @@ const doWork = async () => {
 
   await Promise.all([
     generateCertsFor('one-app', 'localhost'),
+    generateCertsFor('otel-collector', 'collector.frank'),
     generateCertsFor('nginx', 'sample-cdn.frank'),
     generateCertsFor('api', '*.api.frank'),
   ]);

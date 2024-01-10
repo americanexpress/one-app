@@ -1,0 +1,26 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: collector.frank:443
+        tls:
+          cert_file: otel-collector-cert.pem
+          key_file: otel-collector-privkey.pem
+processors:
+      batch:
+exporters:      
+  logging:
+    verbosity: detailed
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging]
+    logs:
+      receivers: [otlp]
+      # processors: [batch]
+      exporters: [logging]
+    # metrics:
+    #   receivers: [otlp]
+    #   exporters: [logging]
