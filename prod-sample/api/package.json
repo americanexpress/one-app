@@ -9,6 +9,6 @@
   },
   "dependencies": {
     "connect-pause": "^0.1.0",
-    "json-server": "^0.17.4"
+    "json-server": "^0.15.1"
   }
 }

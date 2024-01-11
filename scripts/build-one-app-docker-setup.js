@@ -33,7 +33,7 @@ const nginxOriginStaticsAppDir = path.resolve(nginxOriginStaticsRootDir, 'app');
 
 const userIntendsToSkipOneAppImageBuild = process.env.ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD;
 const userIntendsToSkipApiImagesBuild = process.env.ONE_DANGEROUSLY_SKIP_API_IMAGES_BUILD;
-const nodeVersion = execSync('cat .nvmrc', { encoding: 'utf8' }).trim();
+const nodeVersion = fs.readFileSync('.nvmrc', { encoding: 'utf8' }).trim();
 const sanitizedEnvVars = sanitizeEnvVars();
 
 const buildApiImages = async () => {
@@ -101,7 +101,7 @@ const prodSampleApiImagesAlreadyBuilt = () => execSync('docker images prod-sampl
 const doWork = async () => {
   const oneAppImageAlreadyBuilt = execSync('docker images one-app:at-test', { encoding: 'utf8' }).includes('at-test');
   const skipOneAppImageBuild = userIntendsToSkipOneAppImageBuild && oneAppImageAlreadyBuilt;
-  const skipApiImagesBuild = userIntendsToSkipApiImagesBuild && prodSampleApiImagesAlreadyBuilt;
+  const skipApiImagesBuild = userIntendsToSkipApiImagesBuild && prodSampleApiImagesAlreadyBuilt();
 
   if (skipOneAppImageBuild) {
     console.warn(
@@ -117,9 +117,7 @@ const doWork = async () => {
       + 'environment variable being set since no pre-built One App Docker image was found.'
     );
   }
-  await Promise.all([
-    fs.emptyDir(nginxOriginStaticsAppDir),
-  ]);
+  await fs.emptyDir(nginxOriginStaticsAppDir);
 
   let extraCertsExists = true;
 
