@@ -1,4 +1,4 @@
-ARG VERSION=18.17.1
+ARG VERSION=lts
 # Use the pre-baked fat node image only in the builder
 # which includes build utils preinstalled (e.g. gcc, make, etc).
 # This will result in faster and reliable One App docker image

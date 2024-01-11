@@ -15,7 +15,7 @@ One App → nginx (mimics a CDN server and hosts the module map, module bundles,
 ## Running Locally
 
 > Note [Docker](https://docs.docker.com/install/) is required in order to run this sample
-setup as [docker-compose](https://docs.docker.com/compose/) is internally used
+setup as [docker compose](https://docs.docker.com/compose/) is internally used
 to orchestrate the building and starting up of One App and the nginx server.
 
 Running `npm run start:prod-sample` builds and starts a production One App Docker container that will use
@@ -33,16 +33,24 @@ On Mac OS, you can do so natively:
 Click connect and a window will appear with Google Chrome open. This is
 where you can access One App at `https://one-app:8443`!
 
+Alternatively you visit `http://localhost:7901/` to interact using no-vnc in your own browser.
+
 If you wish to run with node debug mode: `npm run start:prod-sample:debug`.
 
 ### Options
 
 The entire setup invoked by `npm run start:prod-sample` can take ~10 minutes and is often unnecessary
 if no changes have been made to the One App source code or the sample modules contained in
-`prod-sample/sample-modules` since the last time `npm run start:prod-sample` was ran. For these cases
-you can use the `ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD` and/or
-`ONE_DANGEROUSLY_SKIP_SAMPLE_MODULES_BUILD` environment variables to opt out of
-rebuilding the One App Docker image and/or sample modules respectively.
+`prod-sample/sample-modules` since the last time `npm run start:prod-sample` was ran.
+For these cases there are environment variables available to opt out of
+rebuilding the select Docker images.
+
+| Environment Variable                        |                                                   |
+| ------------------------------------------- | ------------------------------------------------- |
+| `ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD`  | Don't rebuild One App Docker Image        |
+| `ONE_DANGEROUSLY_SKIP_SAMPLE_MODULES_BUILD` | Don't rebuild Sample Module Docker Images |
+| `ONE_DANGEROUSLY_SKIP_API_IMAGES_BUILD`     | Don't rebuild API server Docker Images    |
+
 
 Use these environment variables with caution as they can result in you running a version of One App and/or
 the sample modules that do not reflect your source code.
@@ -72,9 +80,9 @@ $ node ./scripts/deploy-prod-sample-module.js --module-path="../path-to-module/[
 
 ### Options
 
-| Argument | Description | Example  | Required |
-|----      |---------    |----------|-         |
-| `--module-path` |  relative path to the module |`--module-path="../relative-path/[your-module]"` | X |
-| `--skip-install` |  don't install before building module |`--skip-install=true` |  |
-| `--skip-build` |  don't build the module |`--skip-build=true` |  |
+| Argument         | Description                          | Example                                          | Required |
+| ---------------- | ------------------------------------ | ------------------------------------------------ | -------- |
+| `--module-path`  | relative path to the module          | `--module-path="../relative-path/[your-module]"` | X        |
+| `--skip-install` | don't install before building module | `--skip-install=true`                            |          |
+| `--skip-build`   | don't build the module               | `--skip-build=true`                              |          |
 

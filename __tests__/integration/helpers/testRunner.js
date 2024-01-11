@@ -67,7 +67,7 @@ const setUpTestRunner = async ({
 
   fs.writeFileSync(pathToDockerComposeTestFile, yaml.dump(testDockerComposeFileContents));
 
-  const dockerComposeUpCommand = `docker-compose -f ${pathToDockerComposeTestFile} up --abort-on-container-exit --force-recreate`;
+  const dockerComposeUpCommand = `docker compose -f ${pathToDockerComposeTestFile} up --abort-on-container-exit --force-recreate`;
   const dockerComposeUpProcess = childProcess.spawn(`${dockerComposeUpCommand}`, { shell: true });
   const serverStartupTimeout = 90000;
 
@@ -121,7 +121,7 @@ const tearDownTestRunner = async ({ browser } = {}) => {
   fs.removeSync(pathToDockerComposeTestFile);
   if (browser) { await browser.deleteSession(); }
 
-  const dockerComposeDownProcess = childProcess.spawnSync('docker-compose down', { shell: true, cwd: prodSampleDir });
+  const dockerComposeDownProcess = childProcess.spawnSync('docker compose down', { shell: true, cwd: prodSampleDir });
   if (dockerComposeDownProcess.status !== 0) {
     throw new Error(
       `${'🚨 Error: Docker cleanup could not be completed. You may have to '
@@ -157,7 +157,7 @@ function spawnAsync(...args) {
 
 function sendSignal(service, signal = 'SIGKILL') {
   return spawnAsync(
-    'docker-compose',
+    'docker compose',
     [
       '-f', pathToDockerComposeTestFile,
       'kill',
