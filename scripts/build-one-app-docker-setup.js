@@ -73,6 +73,20 @@ const generateCertsFor = async (container, commonName) => {
   console.log(`✅ ${container} certs created! \n`);
 };
 
+const buildExtraCerts = async () => {
+  console.log('🛠  Building extra-certs.pem');
+  try {
+    const appCert = await fs.readFile(path.join(sampleProdDir, 'one-app', 'one-app-cert.pem'), 'utf8');
+    const apiCert = await fs.readFile(path.join(sampleProdDir, 'api', 'api-cert.pem'), 'utf8');
+    const nginxCert = await fs.readFile(path.join(sampleProdDir, 'nginx', 'nginx-cert.pem'), 'utf8');
+    await fs.writeFile(path.join(sampleProdDir, 'extra-certs.pem'), `${appCert}\n${apiCert}\n${nginxCert}`);
+  } catch (error) {
+    console.log('🚨 extra-certs.pem could not be built\n');
+    throw error;
+  }
+  console.log('✅ extra-certs.pem built! \n');
+};
+
 const collectOneAppStaticFiles = async () => {
   console.log('🛠  Collecting One App static files from Docker image');
   try {
@@ -132,17 +146,15 @@ const doWork = async () => {
     console.log('✅ Removed old extra-certs.pem');
   }
 
-  await Promise.all([
-    generateCertsFor('one-app', 'localhost'),
-    generateCertsFor('nginx', 'sample-cdn.frank'),
-    generateCertsFor('api', '*.api.frank'),
-  ]);
+  await generateCertsFor('nginx', 'sample-cdn.frank');
 
   if (!skipOneAppImageBuild) {
+    await generateCertsFor('one-app', 'localhost');
     await buildOneAppImage();
   }
 
   if (!skipApiImagesBuild) {
+    await generateCertsFor('api', '*.api.frank');
     await buildApiImages();
   } else {
     console.warn(
@@ -150,6 +162,9 @@ const doWork = async () => {
       + 'environment variable is set.'
     );
   }
+
+  // build extra extra-certs.pem
+  await buildExtraCerts();
   await collectOneAppStaticFiles();
 };
 

@@ -45,11 +45,11 @@ if no changes have been made to the One App source code or the sample modules co
 For these cases there are environment variables available to opt out of
 rebuilding the select Docker images.
 
-| Environment Variable                        |                                                   |
-| ------------------------------------------- | ------------------------------------------------- |
-| `ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD`  | Don't rebuild One App Docker Image        |
-| `ONE_DANGEROUSLY_SKIP_SAMPLE_MODULES_BUILD` | Don't rebuild Sample Module Docker Images |
-| `ONE_DANGEROUSLY_SKIP_API_IMAGES_BUILD`     | Don't rebuild API server Docker Images    |
+| Environment Variable                        |                                        |
+| ------------------------------------------- | -------------------------------------- |
+| `ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD`  | Don't rebuild One App Docker Image     |
+| `ONE_DANGEROUSLY_SKIP_SAMPLE_MODULES_BUILD` | Don't rebuild Sample Modules           |
+| `ONE_DANGEROUSLY_SKIP_API_IMAGES_BUILD`     | Don't rebuild API server Docker Images |
 
 
 Use these environment variables with caution as they can result in you running a version of One App and/or
