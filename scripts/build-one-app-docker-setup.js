@@ -76,9 +76,9 @@ const generateCertsFor = async (container, commonName) => {
 const buildExtraCerts = async () => {
   console.log('🛠  Building extra-certs.pem');
   try {
-    const appCert = await fs.readFile(path.join(sampleProdDir, 'one-app', 'one-app-cert.pem'), 'utf8');
-    const apiCert = await fs.readFile(path.join(sampleProdDir, 'api', 'api-cert.pem'), 'utf8');
     const nginxCert = await fs.readFile(path.join(sampleProdDir, 'nginx', 'nginx-cert.pem'), 'utf8');
+    const apiCert = await fs.readFile(path.join(sampleProdDir, 'api', 'api-cert.pem'), 'utf8');
+    const appCert = await fs.readFile(path.join(sampleProdDir, 'one-app', 'one-app-cert.pem'), 'utf8');
     await fs.writeFile(path.join(sampleProdDir, 'extra-certs.pem'), `${appCert}\n${apiCert}\n${nginxCert}`);
   } catch (error) {
     console.log('🚨 extra-certs.pem could not be built\n');
@@ -108,6 +108,27 @@ const collectOneAppStaticFiles = async () => {
   console.log('✅ One App Statics successfully pulled from Docker image and moved to Nginx origin dir! \n');
 };
 
+const handleCertGeneration = async ({ skipApiImagesBuild, skipOneAppImageBuild }) => {
+  try {
+    await fs.access(path.join(sampleProdDir, 'extra-certs.pem'));
+    await fs.unlink(path.join(sampleProdDir, 'extra-certs.pem'));
+    console.log('✅ Removed old extra-certs.pem');
+  } catch {
+    // swallow error
+  }
+
+  await generateCertsFor('nginx', 'sample-cdn.frank');
+
+  const oneCertExists = fs.existsSync(path.join(sampleProdDir, 'one-app', 'one-app-cert.pem'));
+  if (!skipOneAppImageBuild || !oneCertExists) {
+    await generateCertsFor('one-app', 'localhost');
+  }
+  const apiCertExists = fs.existsSync(path.join(sampleProdDir, 'api', 'api-cert.pem'));
+  if (!skipApiImagesBuild || !apiCertExists) { await generateCertsFor('api', '*.api.frank'); }
+
+  await buildExtraCerts();
+};
+
 const prodSampleApiImagesAlreadyBuilt = () => execSync('docker images prod-sample-fast-api', { encoding: 'utf8' }).includes('prod-sample-fast-api')
   && execSync('docker images prod-sample-slow-api', { encoding: 'utf8' }).includes('prod-sample-slow-api')
   && execSync('docker images prod-sample-extra-slow-api', { encoding: 'utf8' }).includes('prod-sample-extra-slow-api');
@@ -117,13 +138,13 @@ const doWork = async () => {
   const skipOneAppImageBuild = userIntendsToSkipOneAppImageBuild && oneAppImageAlreadyBuilt;
   const skipApiImagesBuild = userIntendsToSkipApiImagesBuild && prodSampleApiImagesAlreadyBuilt();
 
-  if (skipOneAppImageBuild) {
-    console.warn(
-      '⚠️  Skipping One App Docker image build since the "ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD"'
-      + 'environment variable is set.\n\nNote that your tests **may** be running against an out of date '
-      + 'version of One App that does not reflect changes you have made to the source code.'
-    );
-  }
+  // clear cdn of statics.
+  await fs.emptyDir(nginxOriginStaticsAppDir);
+
+  await handleCertGeneration({
+    skipApiImagesBuild,
+    skipOneAppImageBuild,
+  });
 
   if (userIntendsToSkipOneAppImageBuild && !oneAppImageAlreadyBuilt) {
     console.warn(
@@ -131,30 +152,18 @@ const doWork = async () => {
       + 'environment variable being set since no pre-built One App Docker image was found.'
     );
   }
-  await fs.emptyDir(nginxOriginStaticsAppDir);
-
-  let extraCertsExists = true;
-
-  try {
-    await fs.access(path.join(sampleProdDir, 'extra-certs.pem'));
-  } catch (err) {
-    extraCertsExists = false;
-  }
-
-  if (extraCertsExists) {
-    await fs.unlink(path.join(sampleProdDir, 'extra-certs.pem'));
-    console.log('✅ Removed old extra-certs.pem');
-  }
-
-  await generateCertsFor('nginx', 'sample-cdn.frank');
 
   if (!skipOneAppImageBuild) {
-    await generateCertsFor('one-app', 'localhost');
     await buildOneAppImage();
+  } else {
+    console.warn(
+      '⚠️  Skipping One App Docker image build since the "ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD"'
+      + 'environment variable is set.\n\nNote that your tests **may** be running against an out of date '
+      + 'version of One App that does not reflect changes you have made to the source code.'
+    );
   }
 
   if (!skipApiImagesBuild) {
-    await generateCertsFor('api', '*.api.frank');
     await buildApiImages();
   } else {
     console.warn(
@@ -163,8 +172,6 @@ const doWork = async () => {
     );
   }
 
-  // build extra extra-certs.pem
-  await buildExtraCerts();
   await collectOneAppStaticFiles();
 };
 
