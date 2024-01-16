@@ -25,15 +25,15 @@
     "start:watch": "node scripts/watch-server.js",
     "prestart:prod-sample": "npm run build:prod-sample",
     "prestart:prod-sample:debug": "npm run build:prod-sample",
-    "start:prod-sample": "docker-compose -f ./prod-sample/docker-compose.yml up --abort-on-container-exit",
-    "start:prod-sample:debug": "docker-compose -f ./prod-sample/docker-compose.yml -f ./prod-sample/docker-compose.debug.yml up --abort-on-container-exit",
-    "monitor:performance": "docker-compose -f ./__performance__/docker-compose.yml up --abort-on-container-exit influxdb grafana prometheus",
+    "start:prod-sample": "docker compose -f ./prod-sample/docker-compose.yml up --abort-on-container-exit",
+    "start:prod-sample:debug": "docker compose -f ./prod-sample/docker-compose.yml -f ./prod-sample/docker-compose.debug.yml up --abort-on-container-exit",
+    "monitor:performance": "docker compose -f ./__performance__/docker-compose.yml up --abort-on-container-exit influxdb grafana prometheus",
     "test:lockfile": "lockfile-lint -p package-lock.json -t npm -a npm -o https: -c -i",
     "test:lint": "eslint --ext js,jsx,md,snap .",
     "start": "node scripts/start.js",
     "start:inspect": "node scripts/start.js --inspect",
     "test:unit": "jest --testPathIgnorePatterns integration --config jest.config.js",
-    "pretest:integration": "concurrently \"npm run build:prod-sample\" \"docker-compose -f ./prod-sample/docker-compose.yml pull nginx selenium-chrome\" --kill-others-on-fail -n build-prod-sample,build-dependency-images",
+    "pretest:integration": "concurrently \"npm run build:prod-sample\" \"docker compose -f ./prod-sample/docker-compose.yml pull nginx selenium-chrome\" --kill-others-on-fail -n build-prod-sample,build-dependency-images",
     "test:integration": "JEST_TEST_REPORT_PATH=./test-results/integration-test-report.html jest integration --config jest.integration.config.js --forceExit",
     "test:danger": "if-env NODE_ENV=production && danger ci || danger local",
     "test": "npm run test:lint && npm run test:lockfile && npm run test:unit && npm run test:integration && npm run test:danger && npm run test:git-history-main",
@@ -211,7 +211,7 @@
     "standard-version": "^9.5.0",
     "supertest": "^6.2.4",
     "tar": "^6.1.15",
-    "webdriverio": "^7.20.5"
+    "webdriverio": "^7.34.0"
   },
   "standard-version": {
     "bumpFiles": [
