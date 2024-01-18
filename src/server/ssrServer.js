@@ -220,40 +220,37 @@ export async function createApp(opts = {}) {
     instance.register(addFrameOptionsHeader);
     instance.register(renderHtml);
 
-    instance.get('/_/pwa/shell', async (_request, reply) => {
+    instance.get('/_/pwa/shell', (_request, reply) => {
       if (getServerPWAConfig().serviceWorker) {
         reply.sendHtml();
       } else {
         reply.status(404).send('Not found');
       }
-      return reply;
     });
-    instance.get('/*', async (_request, reply) => {
+    instance.get('/*', (_request, reply) => {
       reply.sendHtml();
-      return reply;
     });
 
     if (enablePostToModuleRoutes) {
-      instance.post('/*', async (_request, reply) => {
+      instance.post('/*', (_request, reply) => {
         reply.sendHtml();
-        return reply;
       });
     }
 
     done();
   });
 
-  fastify.setNotFoundHandler(async (_request, reply) => {
+  fastify.setNotFoundHandler((_request, reply) => {
     reply.code(404).send('Not found');
   });
-  fastify.setErrorHandler(async (error, request, reply) => {
+  fastify.setErrorHandler((error, request, reply) => {
     const { method, url } = request;
     const correlationId = request.headers['correlation-id'];
     const headersSent = !!reply.raw.headersSent;
 
     request.log.error('Fastify application error: method %s, url "%s", correlationId "%s", headersSent: %s', method, url, correlationId, headersSent, error);
 
-    return renderStaticErrorPage(request, reply);
+    renderStaticErrorPage(request, reply);
   });
 
   await fastify.ready();
