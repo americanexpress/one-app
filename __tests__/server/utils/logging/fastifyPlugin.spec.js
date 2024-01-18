@@ -21,8 +21,6 @@ import fastifyPlugin, {
   $RouteHandler,
   $ResponseBuilder,
   setConfigureRequestLog,
-  startTimer,
-  endTimer,
 } from '../../../../src/server/utils/logging/fastifyPlugin';
 
 jest.mock('pino');
@@ -827,39 +825,6 @@ describe('fastifyPlugin', () => {
           },
         }
       `);
-    });
-  });
-
-  describe('timer', () => {
-    it('returns the duration in milliseconds', () => {
-      process.hrtime
-        .mockReturnValueOnce([0, 0])
-        .mockReturnValueOnce([0, 1e6]);
-      const timers = {};
-      const symbol = Symbol('timer');
-      startTimer(timers, symbol);
-      const result = endTimer(timers, symbol);
-      expect(result).toBe(1);
-      expect(timers[symbol]).toBe(result);
-    });
-
-    it('logs and does not throw if a timer has already ended', () => {
-      process.hrtime
-        .mockReturnValueOnce([0, 0])
-        .mockReturnValueOnce([0, 1e6])
-        .mockReturnValueOnce([0, 2e6]);
-      const timers = {};
-      const symbol = Symbol('timer');
-      startTimer(timers, symbol);
-      const result = endTimer(timers, symbol);
-      const result2 = endTimer(timers, symbol);
-      expect(result).toBeCloseTo(1, 0);
-      expect(result2).toBe(result);
-      expect(timers[symbol]).toBe(result);
-      expect(console.error).toHaveBeenCalledTimes(1);
-      expect(console.error.mock.results[0].value).toMatchInlineSnapshot(
-        '"Timer Symbol(timer) attempted to end after timer had already ended for route undefined"'
-      );
     });
   });
 });
