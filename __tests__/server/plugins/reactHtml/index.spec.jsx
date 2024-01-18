@@ -22,7 +22,7 @@ import reactHtml, {
   sendHtml,
   renderModuleScripts,
   renderExternalFallbacks,
-  checkStateForRedirectAndStatusCode,
+  checkStateForRedirectAndStatusCode, renderUseNativeIntlPolyfill,
 } from '../../../../src/server/plugins/reactHtml';
 // _client is a method to control the mock
 // eslint-disable-next-line import/named
@@ -1260,6 +1260,21 @@ describe('reactHtml', () => {
       expect(reply.send).toHaveBeenCalledTimes(1);
       expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
       expect(reply.send.mock.calls[0][0]).toContain('<title>One App</title>');
+    });
+  });
+
+  describe('renderUseNativePolyfill', () => {
+    it('should not add the polyfill script if there is no environment variable', () => {
+      expect(renderUseNativeIntlPolyfill('')).toMatchInlineSnapshot('""');
+    });
+
+    it('should add the polyfill script if there is the environment variable and it is true', () => {
+      process.env.ONE_CONFIG_USE_NATIVE_POLYFILL = 'true';
+      expect(renderUseNativeIntlPolyfill('')).toMatchInlineSnapshot(`
+        "<script id="environment-variables" >
+                window.useNativePolyfill = 'true'
+               </script>"
+      `);
     });
   });
 });

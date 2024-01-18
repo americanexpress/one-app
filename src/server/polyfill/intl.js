@@ -14,4 +14,8 @@
  * permissions and limitations under the License.
  */
 
-global.Intl = require('lean-intl');
+import Intl from 'lean-intl';
+
+if (!process.env.ONE_CONFIG_USE_NATIVE_POLYFIL) {
+  global.Intl = Intl;
+}

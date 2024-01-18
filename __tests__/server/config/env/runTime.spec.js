@@ -100,6 +100,7 @@ describe('runTime', () => {
     'ONE_CLIENT_ROOT_MODULE_NAME',
     'ONE_ENABLE_POST_TO_MODULE_ROUTES',
     'ONE_MAX_POST_REQUEST_PAYLOAD',
+    'ONE_CONFIG_USE_NATIVE_POLYFILL',
   ].forEach((name) => {
     origEnvVarVals[name] = process.env[name];
   });
@@ -545,6 +546,22 @@ describe('runTime', () => {
 
     it('should have a default value of "One App"', () => {
       expect(otelServiceName.defaultValue).toBe('One App');
+    });
+  });
+
+  describe('ONE_CONFIG_USE_NATIVE_POLYFILL', () => {
+    const useNativePolyfill = getEnvVarConfig('ONE_CONFIG_USE_NATIVE_POLYFILL');
+
+    it('should have a default value of false', () => {
+      expect(useNativePolyfill.defaultValue).toBe('false');
+    });
+
+    it('should normalise the value to either to false when not explicitly true', () => {
+      expect(useNativePolyfill.normalize('Value')).toBe('false');
+      expect(useNativePolyfill.normalize('VALUE')).toBe('false');
+      expect(useNativePolyfill.normalize('true')).toBe('true');
+      expect(useNativePolyfill.normalize('TRUE')).toBe('true');
+      expect(useNativePolyfill.normalize('FALSE')).toBe('false');
     });
   });
 });

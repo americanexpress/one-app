@@ -187,6 +187,16 @@ const runTime = [
     defaultValue: () => (process.env.NODE_ENV === 'development' ? argv.rootModuleName : undefined),
   },
   {
+    name: 'ONE_CONFIG_USE_NATIVE_POLYFILL',
+    defaultValue: 'false',
+    normalize: (input) => {
+      if (input?.toLowerCase() === 'true') {
+        return 'true';
+      }
+      return 'false';
+    },
+  },
+  {
     name: 'ONE_REFERRER_POLICY_OVERRIDE',
     defaultValue: () => '',
     validate: (value) => {
