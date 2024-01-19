@@ -83,6 +83,7 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
       } else {
         if (!renderProps) {
           reply.code(404);
+          checkRoutesSpan.end();
           throw new Error('unable to match routes');
         }
         checkRoutesSpan.end();

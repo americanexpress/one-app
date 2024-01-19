@@ -125,13 +125,13 @@ async function appPlugin(fastify) {
           request.log.warn('CSP Violation: %s:%s:%s on page %s violated the %s policy via %s', sourceFile, lineNumber, columnNumber, documentUri, violatedDirective, blockedUri);
         }
 
-        reply.status(204).send();
+        return reply.status(204).send();
       });
     } else {
       instance.post('/_/report/security/csp-violation', (request, reply) => {
         const violation = request.body ? request.body : 'No data received!';
         request.log.warn('CSP Violation: %s', violation);
-        reply.status(204).send();
+        return reply.status(204).send();
       });
     }
 
@@ -203,30 +203,31 @@ async function appPlugin(fastify) {
     instance.register(addFrameOptionsHeader);
     instance.register(renderHtml);
 
-    instance.get('/_/pwa/shell', (_request, reply) => {
+    instance.get('/_/pwa/shell', async (_request, reply) => {
       if (getServerPWAConfig().serviceWorker) {
         reply.sendHtml();
       } else {
         reply.status(404).send('Not found');
       }
+      return reply;
     });
-    instance.get('/*', (_request, reply) => {
+    instance.get('/*', async (_request, reply) => {
       reply.sendHtml();
+      return reply;
     });
 
     if (process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true') {
       instance.post('/*', (_request, reply) => {
         reply.sendHtml();
+        return reply;
       });
     }
 
     done();
   });
 
-  fastify.setNotFoundHandler((_request, reply) => {
-    reply.code(404).send('Not found');
-  });
-  fastify.setErrorHandler((error, request, reply) => {
+  fastify.setNotFoundHandler(async (_request, reply) => reply.code(404).send('Not found'));
+  fastify.setErrorHandler(async (error, request, reply) => {
     const { method, url } = request;
     const correlationId = request.headers['correlation-id'];
     const headersSent = !!reply.raw.headersSent;
@@ -234,6 +235,7 @@ async function appPlugin(fastify) {
     request.log.error('Fastify application error: method %s, url "%s", correlationId "%s", headersSent: %s', method, url, correlationId, headersSent, error);
 
     renderStaticErrorPage(request, reply);
+    return reply;
   });
 }
 
@@ -253,7 +255,8 @@ export async function createApp(opts = {}) {
 
       request.log.error('Fastify internal error: method %s, url "%s", correlationId "%s"', method, url, correlationId, error);
 
-      return renderStaticErrorPage(request, reply);
+      renderStaticErrorPage(request, reply);
+      return reply;
     },
     bodyLimit: bytes(process.env.ONE_MAX_POST_REQUEST_PAYLOAD || '10mb'), // Note: this applies to all routes
     ...opts,
