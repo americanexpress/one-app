@@ -49,28 +49,11 @@ import noopTracer from './plugins/noopTracer';
 const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
 
 /**
- * Creates a Fastify app with built-in routes and configuration
- * @param {import('fastify').FastifyHttp2Options} opts Fastify app options
- * @returns {import('fastify').FastifyInstance}
+ * Registers all the plugins and routes for the Fastify app
+ * @param {import('fastify').FastifyInstance} fastify Fastify instance
  */
 
-export async function createApp(opts = {}) {
-  const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
-  const fastify = Fastify({
-    logger,
-    disableRequestLogging: true,
-    frameworkErrors: function frameworkErrors(error, request, reply) {
-      const { method, url, headers } = request;
-      const correlationId = headers['correlation-id'];
-
-      request.log.error('Fastify internal error: method %s, url "%s", correlationId "%s"', method, url, correlationId, error);
-
-      return renderStaticErrorPage(request, reply);
-    },
-    bodyLimit: bytes(process.env.ONE_MAX_POST_REQUEST_PAYLOAD || '10mb'), // Note: this applies to all routes
-    ...opts,
-  });
-
+async function appPlugin(fastify) {
   if (process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || argv.logLevel === 'trace') {
     fastify.register(openTelemetryPlugin, { wrapRoutes: true });
   } else {
@@ -231,7 +214,7 @@ export async function createApp(opts = {}) {
       reply.sendHtml();
     });
 
-    if (enablePostToModuleRoutes) {
+    if (process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true') {
       instance.post('/*', (_request, reply) => {
         reply.sendHtml();
       });
@@ -252,6 +235,31 @@ export async function createApp(opts = {}) {
 
     renderStaticErrorPage(request, reply);
   });
+}
+
+/**
+ * Creates a Fastify app with built-in routes and configuration
+ * @param {import('fastify').FastifyHttp2Options} opts Fastify app options
+ * @returns {import('fastify').FastifyInstance}
+ */
+
+export async function createApp(opts = {}) {
+  const fastify = Fastify({
+    logger,
+    disableRequestLogging: true,
+    frameworkErrors: function frameworkErrors(error, request, reply) {
+      const { method, url, headers } = request;
+      const correlationId = headers['correlation-id'];
+
+      request.log.error('Fastify internal error: method %s, url "%s", correlationId "%s"', method, url, correlationId, error);
+
+      return renderStaticErrorPage(request, reply);
+    },
+    bodyLimit: bytes(process.env.ONE_MAX_POST_REQUEST_PAYLOAD || '10mb'), // Note: this applies to all routes
+    ...opts,
+  });
+
+  fastify.register(appPlugin);
 
   await fastify.ready();
 
