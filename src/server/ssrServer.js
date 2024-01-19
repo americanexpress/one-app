@@ -244,6 +244,7 @@ export async function createApp(opts = {}) {
 
     request.log.error('Fastify application error: method %s, url "%s", correlationId "%s", headersSent: %s', method, url, correlationId, headersSent, error);
 
+    reply.code(500);
     return renderStaticErrorPage(request, reply);
   });
 
