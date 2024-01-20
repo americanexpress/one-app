@@ -102,7 +102,7 @@ describe('tracer', () => {
       root: expect.any(TraceIdRatioBasedSampler),
     });
     expect(TraceIdRatioBasedSampler).toHaveBeenCalledTimes(1);
-    expect(TraceIdRatioBasedSampler).toHaveBeenCalledWith(0.1);
+    expect(TraceIdRatioBasedSampler).toHaveBeenCalledWith(1);
   });
 
   it('should register instrumentations', () => {

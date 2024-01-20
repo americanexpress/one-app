@@ -32,7 +32,7 @@ import getOtelResourceAttributes from './getOtelResourceAttributes';
 
 const tracerProvider = new NodeTracerProvider({
   sampler: new ParentBasedSampler({
-    root: new TraceIdRatioBasedSampler(0.1),
+    root: new TraceIdRatioBasedSampler(1),
   }),
   resource: { attributes: getOtelResourceAttributes() },
 });
