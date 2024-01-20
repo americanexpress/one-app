@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.9.0](https://github.com/americanexpress/one-app/compare/v6.8.3...v6.9.0) (2024-01-17)
+
+
+### Bug Fixes
+
+* **devCdn:** handle different module files ([48aa35f](https://github.com/americanexpress/one-app/commit/48aa35fc73c718f87531822e2cba754100993799))
+
+
+### Features
+
+* **otel:** log notice to STDOUT when using OTel ([#1215](https://github.com/americanexpress/one-app/issues/1215)) ([b4bcf21](https://github.com/americanexpress/one-app/commit/b4bcf2189e99c08ca6f8a4dad577047d9e73ffc0))
+
+
 ## [6.8.3](https://github.com/americanexpress/one-app/compare/v6.8.2...v6.8.3) (2023-12-06)
 
 

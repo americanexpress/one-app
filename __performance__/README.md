@@ -92,7 +92,7 @@ You can now view the [Grafana metrics on localhost:3030](http://localhost:3030/d
 In another new window from within `one-app/__performance__` run the following:
 
 ```bash
-docker-compose -f docker-compose.yml -f docker-compose.prod-sample.yml run k6 run --insecure-skip-tls-verify /scripts/smoke.js
+docker compose -f docker-compose.yml -f docker-compose.prod-sample.yml run k6 run --insecure-skip-tls-verify /scripts/smoke.js
 ```
 
 Each file under `__perforamance__/scripts` correlates to a different test:
@@ -137,7 +137,7 @@ You can now view the [Grafana metrics on localhost:3030](http://localhost:3030/d
 In another new window from within `one-app/__performance__` run the following:
 
 ```bash
-docker-compose run -e TARGET_URL=http://host.docker.internal:3000/success k6 run /scripts/smoke.js
+docker compose run -e TARGET_URL=http://host.docker.internal:3000/success k6 run /scripts/smoke.js
 ```
 
 Replace the `TARGET_URL` value with your intended target domain.
