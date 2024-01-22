@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "6.9.0",
+  "version": "6.9.1",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
@@ -184,7 +184,7 @@
     "expect": "^29.6.2",
     "find-up": "^5.0.0",
     "fs-extra": "^11.1.0",
-    "https-proxy-agent": "^7.0.2",
+    "https-proxy-agent": "^5.0.1",
     "husky": "^8.0.1",
     "if-env": "^1.0.4",
     "if-node-version": "^1.1.1",
