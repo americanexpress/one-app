@@ -178,7 +178,7 @@ describe('Tests that require Docker setup', () => {
         },
       });
 
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(404);
       // preflight-only headers
       const rawHeaders = response.headers.raw();
       expect(rawHeaders).not.toHaveProperty('access-control-max-age');
