@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.9.1](https://github.com/americanexpress/one-app/compare/v6.9.0...v6.9.1) (2024-01-22)
+
+
+### Bug Fixes
+
+* **proxy:** fix proxy configuration ([dd89ecd](https://github.com/americanexpress/one-app/commit/dd89ecd771647e85d17e964e3f6704b0d304a243))
+
+
 # [6.9.0](https://github.com/americanexpress/one-app/compare/v6.8.3...v6.9.0) (2024-01-17)
 
 
