@@ -182,12 +182,14 @@ export const oneAppDevCdnFactory = ({
       });
       const { status, type } = remoteModuleResponse;
       const responseText = await remoteModuleResponse.text();
-      cachedModuleFiles = removeExistingEntryIfConflicting(
-        incomingRequestPath,
-        cachedModuleFiles
-      );
-      cachedModuleFiles[incomingRequestPath] = responseText;
-      writeToCache(cachedModuleFiles);
+      if (status === 200) {
+        cachedModuleFiles = removeExistingEntryIfConflicting(
+          incomingRequestPath,
+          cachedModuleFiles
+        );
+        cachedModuleFiles[incomingRequestPath] = responseText;
+        writeToCache(cachedModuleFiles);
+      }
       reply
         .code(status)
         .type(type)
