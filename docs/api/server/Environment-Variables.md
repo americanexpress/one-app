@@ -534,6 +534,7 @@ ONE_CONFIG_ENV=undefined
 * ✅ Development
 
 Feature flag to disable lean-intl polyfill.
+This allows you to use modern intl features such as timezones, but will result in your application supporting fewer older browsers.
 
 **Shape**
 ```bash
