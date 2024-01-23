@@ -6,8 +6,8 @@
 </h1>
 
 ![One App Docker Release](https://github.com/americanexpress/one-app/actions/workflows/release-step-4_automatic_docker-prod-build-and-publish.yml/badge.svg)
-![One App Integration Tests](https://github.com/americanexpress/one-app/workflows/One%20App%20Integration%20Tests/badge.svg)
-![One App Unit and Lint Tests](https://github.com/americanexpress/one-app/workflows/One%20App%20Unit%20and%20Lint%20Tests/badge.svg)
+![One App Integration Tests](https://github.com/americanexpress/one-app/actions/workflows/on-pr_one-app-integration-tests.yml/badge.svg)
+![One App Unit and Lint Tests](https://github.com/americanexpress/one-app/actions/workflows/on-pr-and-trunk_one-app-unit-and-lint-tests.yml/badge.svg)
 
 One App is a fresh take on web application development. It consists of a
 [Node.js](https://nodejs.org) server that serves up a single page app built using [React] components

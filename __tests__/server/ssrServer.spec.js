@@ -698,6 +698,7 @@ describe('ssrServer', () => {
         '"Fastify application error: method get, url "/example", correlationId "undefined", headersSent: false [Error: testing]"'
       );
       expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
+      expect(reply.code).toHaveBeenCalledWith(500);
     });
 
     test('setErrorHandler logs an error and renders the static error page with "headersSent" and "correlationId"', async () => {
@@ -731,6 +732,7 @@ describe('ssrServer', () => {
         '"Fastify application error: method get, url "/example", correlationId "123", headersSent: true [Error: testing]"'
       );
       expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
+      expect(reply.code).toHaveBeenCalledWith(500);
     });
   });
 });
