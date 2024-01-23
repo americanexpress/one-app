@@ -1,3 +1,2 @@
 one-app-team-review-requested:
-  -any:
-    -changes-requested: ["**/*"]
+  -changes-files: "**/*"
