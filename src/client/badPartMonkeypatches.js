@@ -14,6 +14,8 @@
  * permissions and limitations under the License.
  */
 
+// made a change
+
 // remove document.(open|write|close)
 // if `document.write` is called after the page loads, the entire DOM is erased
 // we're loading javascript with async and defer, so prevent any issues
