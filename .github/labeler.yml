@@ -1,2 +1,3 @@
 one-app-team-review-requested:
-  - '**/*'
+  - changed-files:
+      - any-glob-to-any-file: "*/**"
