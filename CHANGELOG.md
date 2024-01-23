@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.9.2](https://github.com/americanexpress/one-app/compare/v6.9.1...v6.9.2) (2024-01-23)
+
+
+### Bug Fixes
+
+* **cdnCache:** make clear cache message generic ([#1248](https://github.com/americanexpress/one-app/issues/1248)) ([cac2e81](https://github.com/americanexpress/one-app/commit/cac2e81d633f1a0a051c9b1f864d9819f219e68f))
+* **deps:** revert proxy agent ([#1249](https://github.com/americanexpress/one-app/issues/1249)) ([badbd98](https://github.com/americanexpress/one-app/commit/badbd98459dfab8db3765f554beeeda96782ce64))
+* **errorHandler:** application errors would result in a 200 response ([#1243](https://github.com/americanexpress/one-app/issues/1243)) ([26a7740](https://github.com/americanexpress/one-app/commit/26a77403ced6fc11fd581788dba32d5e2d866bcb))
+* **ssrServer:** fastify scope resulted in hooks being called more than once ([#1242](https://github.com/americanexpress/one-app/issues/1242)) ([2d84d6a](https://github.com/americanexpress/one-app/commit/2d84d6a628799e75d1412226edeeeef6ce1e71c2))
+
+
 ## [6.9.1](https://github.com/americanexpress/one-app/compare/v6.9.0...v6.9.1) (2024-01-22)
 
 
