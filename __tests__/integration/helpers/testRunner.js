@@ -44,8 +44,6 @@ const setUpTestRunner = async ({
         'selenium-chrome': {
           ports: [
             `${seleniumServerPort}:4444`,
-            '7901:7900',
-            '5901:5900',
           ],
         },
         ...oneAppLocalPortToUse && {
@@ -67,7 +65,7 @@ const setUpTestRunner = async ({
 
   fs.writeFileSync(pathToDockerComposeTestFile, yaml.dump(testDockerComposeFileContents));
 
-  const dockerComposeUpCommand = `docker compose -f ${pathToDockerComposeTestFile} up --abort-on-container-exit --force-recreate`;
+  const dockerComposeUpCommand = `docker-compose -f ${pathToDockerComposeTestFile} up --abort-on-container-exit --force-recreate`;
   const dockerComposeUpProcess = childProcess.spawn(`${dockerComposeUpCommand}`, { shell: true });
   const serverStartupTimeout = 90000;
 
@@ -105,7 +103,6 @@ const setUpTestRunner = async ({
     path: '/wd/hub',
     port: seleniumServerPort,
     capabilities: {
-      acceptInsecureCerts: true,
       'goog:chromeOptions': {
         ...!oneAppLocalPortToUse && process.env.HTTPS_PROXY
         && { args: [`--proxy-server=${process.env.HTTPS_PROXY}`] },

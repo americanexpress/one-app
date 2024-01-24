@@ -14,9 +14,9 @@
  * permissions and limitations under the License.
  */
 
+import { monkeypatches } from '@americanexpress/lumberjack';
 import logger from './logger';
 import { startTimer, measureTime } from './timing';
-import attachRequestSpies from './attachRequestSpies';
 
 const COLON_AT_THE_END_REGEXP = /:$/;
 function formatProtocol(parsedUrl) {
@@ -69,4 +69,12 @@ function outgoingRequestEndSpy(externalRequest, parsedUrl) {
   });
 }
 
-attachRequestSpies(outgoingRequestSpy, outgoingRequestEndSpy);
+// In Node.js v8 and earlier https.request internally called http.request, but this is changed in
+// later versions
+// https://github.com/nodejs/node/blob/v6.x/lib/https.js#L206
+// https://github.com/nodejs/node/blob/v8.x/lib/https.js#L239
+// https://github.com/nodejs/node/blob/v10.x/lib/https.js#L271
+if (Number.parseInt(/^v(\d+)/.exec(process.version)[1], 10) > 8) {
+  monkeypatches.attachHttpsRequestSpy(outgoingRequestSpy, outgoingRequestEndSpy);
+}
+monkeypatches.attachHttpRequestSpy(outgoingRequestSpy, outgoingRequestEndSpy);

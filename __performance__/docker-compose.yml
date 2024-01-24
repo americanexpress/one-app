@@ -16,7 +16,7 @@ services:
 
   # receives one-app internals metrics
   prometheus:
-    image: prom/prometheus:v2.49.1
+    image: prom/prometheus:latest
     networks:
       - one-app-performance
     volumes:
@@ -26,7 +26,7 @@ services:
 
   # graphing of metrics
   grafana:
-    image: grafana/grafana:10.0.10
+    image: grafana/grafana:latest
     networks:
       - one-app-performance
     ports:
@@ -43,7 +43,7 @@ services:
 
   # runs performance scripts
   k6:
-    image: grafana/k6:0.48.0
+    image: loadimpact/k6:latest
     networks:
       - one-app-performance
     ports:

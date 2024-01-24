@@ -93,7 +93,7 @@ services:
           - sample-cdn.frank
   selenium-chrome:
     # specify docker image sha to ensure consistency
-    image: seleniarm/standalone-chromium:120.0
+    image: selenium/standalone-chrome-debug@sha256:e8bf805eca673e6788fb50249b105be860d991ee0fa3696422b4cb92acb5c07a
     # https://github.com/SeleniumHQ/docker-selenium#running-the-images
     volumes:
       - /dev/shm:/dev/shm
@@ -103,4 +103,4 @@ services:
     networks:
       one-app-at-test-network:
     # sleep 5s to make sure set up is completed prior to opening up chrome
-    entrypoint: bash -c '/opt/bin/entry_point.sh & sleep 5s && chromium --ignore-certificate-errors --no-first-run --autofill-server-url https://one-app:8443/success'
+    entrypoint: bash -c '/opt/bin/entry_point.sh & sleep 5s && google-chrome --ignore-certificate-errors --no-first-run --autofill-server-url https://one-app:8443/success'

@@ -23,7 +23,7 @@ jest.mock('yargs', () => ({
 }));
 
 describe('setup', () => {
-  let attachRequestSpies;
+  let monkeypatches;
   let logger;
   let startTimer;
 
@@ -40,12 +40,12 @@ describe('setup', () => {
   function load() {
     jest.resetModules();
 
-    jest.mock('../../../../src/server/utils/logging/attachRequestSpies');
+    jest.mock('@americanexpress/lumberjack');
     jest.mock('../../../../src/server/utils/logging/timing', () => ({
       startTimer: jest.fn(),
       measureTime: jest.fn(() => 12),
     }));
-    attachRequestSpies = require('../../../../src/server/utils/logging/attachRequestSpies').default;
+    ({ monkeypatches } = require('@americanexpress/lumberjack'));
     ({ startTimer } = require('../../../../src/server/utils/logging/timing'));
     logger = require('../../../../src/server/utils/logging/logger').default;
     require('../../../../src/server/utils/logging/setup');
@@ -60,9 +60,36 @@ describe('setup', () => {
     });
   });
 
-  it('spies on requests', () => {
+  it('spies on HTTP requests', () => {
     load();
-    expect(attachRequestSpies).toHaveBeenCalledTimes(1);
+    expect(monkeypatches.attachHttpRequestSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('spies on HTTPS requests when the node major version is higher than 8', () => {
+    Object.defineProperty(process, 'version', {
+      writable: true,
+      value: 'v10.0.0',
+    });
+    load();
+    expect(monkeypatches.attachHttpsRequestSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not spy on HTTPS requests when the node major version is 8 or lower', () => {
+    Object.defineProperty(process, 'version', {
+      writable: true,
+      value: 'v8.0.0',
+    });
+    load();
+    expect(monkeypatches.attachHttpsRequestSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not spy on HTTPS requests when the node major version is 6 or lower', () => {
+    Object.defineProperty(process, 'version', {
+      writable: true,
+      value: 'v6.0.0',
+    });
+    load();
+    expect(monkeypatches.attachHttpsRequestSpy).not.toHaveBeenCalled();
   });
 
   describe('logging outgoing requests', () => {
@@ -88,8 +115,8 @@ describe('setup', () => {
     it('starts a timer when the request starts', () => {
       const { externalRequest } = createExternalRequestAndParsedUrl();
       load();
-      expect(attachRequestSpies).toHaveBeenCalledTimes(1);
-      const outgoingRequestSpy = attachRequestSpies.mock.calls[0][0];
+      expect(monkeypatches.attachHttpRequestSpy).toHaveBeenCalledTimes(1);
+      const outgoingRequestSpy = monkeypatches.attachHttpRequestSpy.mock.calls[0][0];
       outgoingRequestSpy(externalRequest);
       expect(startTimer).toHaveBeenCalledTimes(1);
       expect(startTimer).toHaveBeenCalledWith(externalRequest);
@@ -98,8 +125,8 @@ describe('setup', () => {
     it('is level info', () => {
       const { externalRequest, parsedUrl } = createExternalRequestAndParsedUrl();
       load();
-      expect(attachRequestSpies).toHaveBeenCalledTimes(1);
-      const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+      expect(monkeypatches.attachHttpRequestSpy).toHaveBeenCalledTimes(1);
+      const outgoingRequestEndSpy = monkeypatches.attachHttpRequestSpy.mock.calls[0][1];
       outgoingRequestEndSpy(externalRequest, parsedUrl);
       expect(logger.info).toHaveBeenCalledTimes(1);
       expect(logger.info.mock.calls[0]).toMatchSnapshot();
@@ -113,8 +140,8 @@ describe('setup', () => {
       } = createExternalRequestAndParsedUrl();
       externalRequestHeaders['correlation-id'] = '1234';
       load();
-      expect(attachRequestSpies).toHaveBeenCalledTimes(1);
-      const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+      expect(monkeypatches.attachHttpRequestSpy).toHaveBeenCalledTimes(1);
+      const outgoingRequestEndSpy = monkeypatches.attachHttpRequestSpy.mock.calls[0][1];
       outgoingRequestEndSpy(externalRequest, parsedUrl);
       expect(logger.info).toHaveBeenCalledTimes(1);
       const entry = logger.info.mock.calls[0][0];
@@ -130,8 +157,8 @@ describe('setup', () => {
       } = createExternalRequestAndParsedUrl();
       delete externalRequestHeaders['correlation-id'];
       load();
-      expect(attachRequestSpies).toHaveBeenCalledTimes(1);
-      const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+      expect(monkeypatches.attachHttpRequestSpy).toHaveBeenCalledTimes(1);
+      const outgoingRequestEndSpy = monkeypatches.attachHttpRequestSpy.mock.calls[0][1];
       outgoingRequestEndSpy(externalRequest, parsedUrl);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request.metaData).toHaveProperty('correlationId', undefined);
@@ -141,8 +168,8 @@ describe('setup', () => {
       const { externalRequest, parsedUrl } = createExternalRequestAndParsedUrl();
       externalRequest.res.statusCode = 200;
       load();
-      expect(attachRequestSpies).toHaveBeenCalledTimes(1);
-      const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+      expect(monkeypatches.attachHttpRequestSpy).toHaveBeenCalledTimes(1);
+      const outgoingRequestEndSpy = monkeypatches.attachHttpRequestSpy.mock.calls[0][1];
       outgoingRequestEndSpy(externalRequest, parsedUrl);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request).toHaveProperty('statusCode', 200);
@@ -152,8 +179,8 @@ describe('setup', () => {
       const { externalRequest, parsedUrl } = createExternalRequestAndParsedUrl();
       delete externalRequest.res.statusCode;
       load();
-      expect(attachRequestSpies).toHaveBeenCalledTimes(1);
-      const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+      expect(monkeypatches.attachHttpRequestSpy).toHaveBeenCalledTimes(1);
+      const outgoingRequestEndSpy = monkeypatches.attachHttpRequestSpy.mock.calls[0][1];
       outgoingRequestEndSpy(externalRequest, parsedUrl);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request).toHaveProperty('statusCode', null);
@@ -163,8 +190,8 @@ describe('setup', () => {
       const { externalRequest, parsedUrl } = createExternalRequestAndParsedUrl();
       externalRequest.res.statusMessage = 'OK';
       load();
-      expect(attachRequestSpies).toHaveBeenCalledTimes(1);
-      const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+      expect(monkeypatches.attachHttpRequestSpy).toHaveBeenCalledTimes(1);
+      const outgoingRequestEndSpy = monkeypatches.attachHttpRequestSpy.mock.calls[0][1];
       outgoingRequestEndSpy(externalRequest, parsedUrl);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request).toHaveProperty('statusText', 'OK');
@@ -174,8 +201,8 @@ describe('setup', () => {
       const { externalRequest, parsedUrl } = createExternalRequestAndParsedUrl();
       delete externalRequest.res.statusMessage;
       load();
-      expect(attachRequestSpies).toHaveBeenCalledTimes(1);
-      const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+      expect(monkeypatches.attachHttpRequestSpy).toHaveBeenCalledTimes(1);
+      const outgoingRequestEndSpy = monkeypatches.attachHttpRequestSpy.mock.calls[0][1];
       outgoingRequestEndSpy(externalRequest, parsedUrl);
       const entry = logger.info.mock.calls[0][0];
       expect(entry.request).toHaveProperty('statusText', null);

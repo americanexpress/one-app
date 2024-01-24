@@ -22,7 +22,8 @@ import reactHtml, {
   sendHtml,
   renderModuleScripts,
   renderExternalFallbacks,
-  checkStateForRedirectAndStatusCode, renderUseNativeIntlPolyfill,
+  checkStateForRedirectAndStatusCode,
+  renderUseNativeIntlPolyfill,
 } from '../../../../src/server/plugins/reactHtml';
 // _client is a method to control the mock
 // eslint-disable-next-line import/named

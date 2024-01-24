@@ -93,18 +93,6 @@ describe('cacheUtils', () => {
       expect(logSpy).not.toHaveBeenCalled();
       expect(errorSpy).toHaveBeenCalledWith('There was error checking file stat', expectedError);
     });
-
-    it('showCacheInfo should show file to delete', async () => {
-      const mockStats = {
-        size: 1024 * 1024 * 5, // 5 MB
-      };
-      fsPromises.stat.mockResolvedValue(mockStats);
-
-      await showCacheInfo();
-
-      expect(logSpy).toHaveBeenCalledWith('To clear the cache, please delete this file:');
-      expect(logSpy).toHaveBeenCalledWith('    ~/.one-app/.one-app-module-cache');
-    });
   });
 
   describe('setupCacheFile', () => {

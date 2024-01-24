@@ -18,6 +18,7 @@ import chalk from 'chalk';
 
 export const getUserHomeDirectory = () => process.env.HOME || process.env.USERPROFILE;
 export const cacheFileName = '.one-app-module-cache';
+export const moduleCacheFileName = '.one-app-module-map-cache';
 export const oneAppDirectoryName = '.one-app';
 export const oneAppDirectoryPath = path.join(getUserHomeDirectory(), oneAppDirectoryName);
 export const oneAppModuleCachePath = path.join(oneAppDirectoryPath, cacheFileName);
@@ -32,8 +33,8 @@ export const showCacheInfo = async () => {
     console.log(chalk.bold.cyanBright(separator));
     console.log(chalk.bold.cyanBright('CACHE INFORMATION'));
     console.log(message);
-    console.log('To clear the cache, please delete this file:');
-    console.log(`    ${chalk.bold.cyanBright(path.join('~', oneAppDirectoryName, cacheFileName))}`);
+    console.log('To delete cache, please run');
+    console.log(`  ${chalk.bold.cyanBright('  rm ', oneAppModuleCachePath)}`);
     console.log(chalk.bold.cyanBright(separator));
   } catch (error) {
     console.error('There was error checking file stat', error);
