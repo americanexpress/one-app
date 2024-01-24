@@ -556,7 +556,7 @@ describe('runTime', () => {
       expect(useNativePolyfill.defaultValue).toBe('false');
     });
 
-    it('should normalise the value to either to false when not explicitly true', () => {
+    it('should normalise the value to false when not explicitly true', () => {
       expect(useNativePolyfill.normalize('Value')).toBe('false');
       expect(useNativePolyfill.normalize('VALUE')).toBe('false');
       expect(useNativePolyfill.normalize('true')).toBe('true');
