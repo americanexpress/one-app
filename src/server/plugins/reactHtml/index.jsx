@@ -266,7 +266,7 @@ export function getBody({
       ${disableScripts
     ? ''
     : `
-      <script id="initial-state" {nonce}>
+      <script id="initial-state" ${nonce}>
         window.__webpack_public_path__ = ${jsonStringifyForScript(`${appBundlesURLPrefix}/`)};
         window.__CLIENT_HOLOCRON_MODULE_MAP__ = ${jsonStringifyForScript(clientModuleMapCache[bundle])};
         window.__INITIAL_STATE__ = ${jsonStringifyForScript(serializeClientInitialState(clientInitialState, request))};
