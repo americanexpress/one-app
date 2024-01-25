@@ -2,8 +2,6 @@ receivers:
   otlp:
     protocols:
       grpc:
-processors:
-  batch:
 exporters:      
   logging:
     verbosity: detailed
@@ -12,3 +10,6 @@ service:
     logs:
       receivers: [otlp]
       exporters: [logging]
+    # traces:
+    #   receivers: [otlp]
+    #   exporters: [logging]
