@@ -236,6 +236,12 @@ export function getHead({
   `;
 }
 
+export function renderUseNativeIntlPolyfill(nonce) {
+  return process.env.ONE_CONFIG_USE_NATIVE_POLYFILL === 'true' ? `<script id="environment-variables" ${nonce}>
+        window.useNativePolyfill = 'true'
+       </script>` : '';
+}
+
 export function getBody({
   isLegacy,
   helmetInfo,
@@ -253,13 +259,14 @@ export function getBody({
   const bundle = isLegacy ? 'legacyBrowser' : 'browser';
   const { bodyAttributes, script } = helmetInfo;
   const bundlePrefixForBrowser = isLegacy ? `${appBundlesURLPrefix}/legacy` : appBundlesURLPrefix;
+  const nonce = scriptNonce ? `nonce="${scriptNonce}"` : '';
   return `
     <body${(bodyAttributes && ` ${bodyAttributes.toString()}`) || ''}>
       <div id="root">${appHtml || ''}</div>
       ${disableScripts
     ? ''
     : `
-      <script id="initial-state" ${scriptNonce ? `nonce="${scriptNonce}"` : ''}>
+      <script id="initial-state" {nonce}>
         window.__webpack_public_path__ = ${jsonStringifyForScript(`${appBundlesURLPrefix}/`)};
         window.__CLIENT_HOLOCRON_MODULE_MAP__ = ${jsonStringifyForScript(clientModuleMapCache[bundle])};
         window.__INITIAL_STATE__ = ${jsonStringifyForScript(serializeClientInitialState(clientInitialState, request))};
@@ -268,6 +275,7 @@ export function getBody({
         window.__render_mode__ = '${renderMode}';
         window.__HOLOCRON_EXTERNALS__ = ${jsonStringifyForScript(getRequiredExternalsRegistry())};
       </script>
+      ${renderUseNativeIntlPolyfill(nonce)}
       ${assets}
       ${renderI18nScript(clientInitialState, bundlePrefixForBrowser)}
       ${renderExternalFallbacks({
