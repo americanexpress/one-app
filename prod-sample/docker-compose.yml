@@ -31,7 +31,7 @@ services:
       - nginx
       - otel-collector
     env_file: ./one-app/base.env
-    entrypoint: sh -c 'sleep 2s && node lib/server'
+    entrypoint: sh -c 'sleep 2s && node scripts/start.js'
   fast-api:
     build:
       context: ./api
