@@ -828,7 +828,7 @@ describe('Tests that require Docker setup', () => {
             );
             // eslint-disable-next-line no-useless-escape
             expect(workingUrl).toBe(
-              `${testCdnUrl}/${gitSha}/${moduleName}/0.0.0/${moduleName}.node.js"}`
+              `${testCdnUrl}/${gitSha}/${moduleName}/0.0.0/${moduleName}.node.js)`
             );
           });
           test('fails to get external `semver` for child module as an unsupplied `requiredExternal` for new module in mooduleMap', async () => {
