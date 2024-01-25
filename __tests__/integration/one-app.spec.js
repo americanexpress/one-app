@@ -2010,9 +2010,11 @@ describe('heapdump', () => {
 
     const aboutToWriteFilePath = aboutToWriteRaw
       .replace(/^about to write a heapdump to /, '')
-      .replace(/".+$/, '');
+      .replace(/\).*$/, '');
 
-    const didWriteFilePath = didWriteRaw.replace(/^wrote heapdump out to /, '').replace(/".+$/, '');
+    const didWriteFilePath = didWriteRaw
+      .replace(/^wrote heapdump out to /, '')
+      .replace(/\).*$/, '');
 
     expect(aboutToWriteFilePath).toEqual(didWriteFilePath);
     expect(path.dirname(didWriteFilePath)).toBe('/tmp');
