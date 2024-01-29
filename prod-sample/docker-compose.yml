@@ -29,6 +29,7 @@ services:
       - slow-api
       - extra-slow-api
       - nginx
+      - otel-collector
     env_file: ./one-app/base.env
     entrypoint: sh -c 'sleep 2s && node lib/server'
   fast-api:
@@ -104,3 +105,14 @@ services:
       one-app-at-test-network:
     # sleep 5s to make sure set up is completed prior to opening up chrome
     entrypoint: bash -c '/opt/bin/entry_point.sh & sleep 5s && chromium --ignore-certificate-errors --no-first-run --autofill-server-url https://one-app:8443/success'
+  otel-collector:
+    image: 'otel/opentelemetry-collector:0.91.0'
+    volumes:
+      - ./otel-collector/config.yaml:/collector-config.yaml
+    command: ["--config=/collector-config.yaml"]
+    ports:
+      - "4317:4317"
+    networks:
+      one-app-at-test-network:
+        aliases:
+          - collector.frank
