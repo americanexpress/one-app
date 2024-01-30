@@ -24,6 +24,7 @@ process.env.ONE_CONFIG_ENV = 'test';
 // Required for logger tests
 process.setMaxListeners(15);
 
-// Issue with Jest this could be moved to amex-jest-preset-react
+// Jest does not provide TextEncoder & TextDecoder on global.
+// This could be moved to amex-jest-preset-react
 global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder;
