@@ -187,4 +187,22 @@ describe('OpenTelemetry logging', () => {
     `);
     expect(pino.transport.mock.results[0].value).toBe(transport);
   });
+
+  it('should not batch logs in integration tests', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.INTEGRATION_TEST = 'true';
+    const transport = createOtelTransport();
+    expect(pino.transport).toHaveBeenCalledTimes(1);
+    expect(pino.transport.mock.calls[0][0].options.logRecordProcessorOptions)
+      .toMatchInlineSnapshot(`
+      {
+        "exporterOptions": {
+          "protocol": "grpc",
+        },
+        "recordProcessorType": "simple",
+      }
+    `);
+    expect(pino.transport.mock.results[0].value).toBe(transport);
+    delete process.env.INTEGRATION_TEST;
+  });
 });
