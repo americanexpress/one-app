@@ -20,16 +20,8 @@ const { argv } = require('yargs');
 const { spawn } = require('child_process');
 
 (function start() {
-  const flags = process.argv.filter((arg) => [
-    '--log-format',
-    '--log-level',
-    '--module-map-url',
-    '--root-module-name',
-    '--use-host',
-    '--use-middleware',
-  ].find((argName) => arg.startsWith(argName)));
-
-  let nodeArgs = [
+  const flags = process.argv.slice(2);
+  const nodeArgs = [
     '--dns-result-order', 'ipv4first',
     '--no-experimental-fetch',
   ];
@@ -38,8 +30,10 @@ const { spawn } = require('child_process');
     nodeArgs.push('--require=./lib/server/utils/tracer.js');
   }
 
-  if (argv.inspect) {
-    nodeArgs = [...nodeArgs, '--inspect', '--expose-gc'];
+  const inspect = flags.indexOf('--inspect');
+  if (inspect !== -1) {
+    nodeArgs.push('--inspect', '--expose-gc');
+    flags.splice(inspect, 1);
   }
 
   const commandArgs = [
@@ -53,6 +47,10 @@ const { spawn } = require('child_process');
   const node = spawn('node', commandArgs, {
     stdio: 'inherit',
     killSignal: 'SIGINT',
+  });
+
+  process.on('SIGUSR2', () => {
+    // Don't kill the process. Used by one-app for collecting heapdumps.
   });
 
   process.on('exit', (code) => {
