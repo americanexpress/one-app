@@ -54,6 +54,7 @@ const { spawn } = require('child_process');
   });
 
   process.on('exit', (code) => {
+    console.log(`exiting with code: ${code}`);
     node.kill(code);
   });
 }());

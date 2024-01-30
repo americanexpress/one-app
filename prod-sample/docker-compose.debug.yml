@@ -7,4 +7,4 @@ services:
       # node inspector
       - "9229:9229"
     env_file: ./one-app/debug.env
-    entrypoint: sh -c 'sleep 2s && node --inspect=0.0.0.0 lib/server'
+    entrypoint: sh -c 'sleep 2s && node --inspect=0.0.0.0 scripts/start.js'
