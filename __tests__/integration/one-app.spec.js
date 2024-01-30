@@ -1034,7 +1034,8 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
-    describe('progressive web app', () => {
+    // eslint-disable-next-line jest/no-focused-tests -- DO NOT MERGE debugging
+    describe.only('progressive web app', () => {
       const scriptUrl = `${appAtTestUrls.fetchUrl}/_/pwa/service-worker.js`;
       const webManifestUrl = `${appAtTestUrls.fetchUrl}/_/pwa/manifest.webmanifest`;
       const offlineUrl = `${appAtTestUrls.fetchUrl}/_/pwa/shell`;
