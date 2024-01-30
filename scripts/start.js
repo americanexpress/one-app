@@ -49,8 +49,15 @@ const { spawn } = require('child_process');
     killSignal: 'SIGINT',
   });
 
-  process.on('SIGUSR2', () => {
-    // Don't kill the process. Used by one-app for collecting heapdumps.
+  [
+    'SIGINT',
+    'SIGTERM',
+    'SIGUSR2',
+  ].forEach((signal) => {
+    // forward signals to child process
+    process.on(signal, () => {
+      node.kill(signal);
+    });
   });
 
   process.on('exit', (code) => {

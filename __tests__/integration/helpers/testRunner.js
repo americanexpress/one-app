@@ -156,14 +156,15 @@ function spawnAsync(...args) {
 }
 
 function sendSignal(service, signal = 'SIGKILL') {
-  const options = [
-    '-f', pathToDockerComposeTestFile,
-    'kill',
-    '-s', signal,
-    service,
-  ];
-  console.warn(`sending signal: docker-compose ${options.join(' ')}`);
-  return spawnAsync('docker-compose', options);
+  return spawnAsync(
+    'docker-compose',
+    [
+      '-f', pathToDockerComposeTestFile,
+      'kill',
+      '-s', signal,
+      service,
+    ]
+  );
 }
 
 module.exports = {
