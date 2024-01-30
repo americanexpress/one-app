@@ -1998,8 +1998,7 @@ describe('heapdump', () => {
     await waitFor(500);
   });
 
-  // eslint-disable-next-line jest/no-focused-tests -- do not merge, debugging
-  it.only('writes a heapdump to /tmp on a SIGUSR2 signal', async () => {
+  it('writes a heapdump to /tmp on a SIGUSR2 signal', async () => {
     const tmpMountDir = path.resolve(__dirname, '../../prod-sample/one-app/tmp');
     // set up log watchers first to avoid semblance of a race condition
     const aboutToWritePromise = searchForNextLogMatch(/about to write a heapdump to .+/);
