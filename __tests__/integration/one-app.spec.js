@@ -1077,8 +1077,7 @@ describe('Tests that require Docker setup', () => {
         });
       });
 
-      // eslint-disable-next-line jest/no-disabled-tests -- DO NOT MERGE with this test disabled
-      describe.skip('progressive web app enabled', () => {
+      describe('progressive web app enabled', () => {
         // we load in the pwa enabled frank-lloyd-root
         beforeAll(loadPWARoot);
 
