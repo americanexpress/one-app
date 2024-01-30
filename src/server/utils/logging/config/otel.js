@@ -27,7 +27,7 @@ const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
 
 export function createOtelTransport() {
   let logRecordProcessorOptions = {
-    recordProcessorType: 'batch',
+    recordProcessorType: process.env.INTEGRATION_TEST === 'true' ? 'simple' : 'batch',
     exporterOptions: { protocol: 'grpc' },
   };
 

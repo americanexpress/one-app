@@ -54,7 +54,8 @@ const { spawn } = require('child_process');
     'SIGTERM',
     'SIGUSR2',
   ].forEach((signal) => {
-    // forward signals to child process
+    // Forward signals to child process
+    // This is required for Docker, but the behavior is automatic when using Node directly
     process.on(signal, () => {
       node.kill(signal);
     });

@@ -1077,8 +1077,7 @@ describe('Tests that require Docker setup', () => {
         });
       });
 
-      // eslint-disable-next-line jest/no-disabled-tests -- DO NOT MERGE with this test disabled
-      describe.skip('progressive web app enabled', () => {
+      describe('progressive web app enabled', () => {
         // we load in the pwa enabled frank-lloyd-root
         beforeAll(loadPWARoot);
 
@@ -1358,7 +1357,7 @@ describe('Tests that require Docker setup', () => {
           'max-age=63072000; includeSubDomains',
         ],
         vary: [
-          'Accept-Encoding, accept-encoding',
+          'Accept-Encoding',
         ],
         'x-content-type-options': [
           'nosniff',
@@ -1998,8 +1997,7 @@ describe('heapdump', () => {
     await waitFor(500);
   });
 
-  // eslint-disable-next-line jest/no-focused-tests -- do not merge, debugging
-  it.only('writes a heapdump to /tmp on a SIGUSR2 signal', async () => {
+  it('writes a heapdump to /tmp on a SIGUSR2 signal', async () => {
     const tmpMountDir = path.resolve(__dirname, '../../prod-sample/one-app/tmp');
     // set up log watchers first to avoid semblance of a race condition
     const aboutToWritePromise = searchForNextLogMatch(/about to write a heapdump to .+/);
