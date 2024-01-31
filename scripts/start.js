@@ -20,16 +20,8 @@ const { argv } = require('yargs');
 const { spawn } = require('child_process');
 
 (function start() {
-  const flags = process.argv.filter((arg) => [
-    '--log-format',
-    '--log-level',
-    '--module-map-url',
-    '--root-module-name',
-    '--use-host',
-    '--use-middleware',
-  ].find((argName) => arg.startsWith(argName)));
-
-  let nodeArgs = [
+  const flags = process.argv.slice(process.argv.findIndex((arg) => arg.includes('scripts/start')) + 1);
+  const nodeArgs = [
     '--dns-result-order', 'ipv4first',
     '--no-experimental-fetch',
   ];
@@ -38,8 +30,10 @@ const { spawn } = require('child_process');
     nodeArgs.push('--require=./lib/server/utils/tracer.js');
   }
 
-  if (argv.inspect) {
-    nodeArgs = [...nodeArgs, '--inspect', '--expose-gc'];
+  const inspectIndex = flags.findIndex((flag) => flag.startsWith('--inspect'));
+  if (inspectIndex !== -1) {
+    nodeArgs.push(flags[inspectIndex], '--expose-gc');
+    flags.splice(inspectIndex, 1);
   }
 
   const commandArgs = [
@@ -55,7 +49,20 @@ const { spawn } = require('child_process');
     killSignal: 'SIGINT',
   });
 
+  [
+    'SIGINT',
+    'SIGTERM',
+    'SIGUSR2',
+  ].forEach((signal) => {
+    // Forward signals to child process
+    // This is required for Docker, but the behavior is automatic when using Node directly
+    process.on(signal, () => {
+      node.kill(signal);
+    });
+  });
+
   process.on('exit', (code) => {
+    console.log(`exiting with code: ${code}`);
     node.kill(code);
   });
 }());
