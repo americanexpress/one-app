@@ -32,6 +32,7 @@ export function HealthyFrank({ children, prefetch }) {
         |
         <Link
           className="ssr-frank-link"
+          id="ssr-frank-link"
           to="/healthy-frank/ssr-frank"
         >
           baby frank
