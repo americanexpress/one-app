@@ -26,6 +26,7 @@ test-results
 
 # sample prod setup
 prod-sample/nginx/origin-statics
+prod-sample/*/tmp
 *.pem
 *.crt
 *.key
