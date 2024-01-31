@@ -130,7 +130,7 @@ describe('ssrServer', () => {
       disableRequestLogging: true,
     });
 
-    expect(register).toHaveBeenCalledTimes(23);
+    expect(register).toHaveBeenCalledTimes(22);
     expect(register.mock.calls[1][0]).toEqual(noopTracer);
     expect(register.mock.calls[2][0]).toEqual(fastifySensible);
     expect(register.mock.calls[3][0]).toEqual(ensureCorrelationId);
@@ -155,8 +155,7 @@ describe('ssrServer', () => {
     ]);
     expect(register.mock.calls[10][0]).toEqual(setAppVersionHeader);
     expect(register.mock.calls[11][0]).toEqual(forwardedHeaderParser);
-    expect(register.mock.calls[12][0]).toEqual(expect.any(Function));
-    expect(register.mock.calls[13]).toEqual([
+    expect(register.mock.calls[12]).toEqual([
       fastifyStatic,
       {
         root: path.join(__dirname, '../../build'),
@@ -164,12 +163,12 @@ describe('ssrServer', () => {
         maxAge: '182d',
       },
     ]);
-    expect(register.mock.calls[14][0]).toEqual(expect.any(Function)); // abstraction
-    expect(register.mock.calls[15][0]).toEqual(addCacheHeaders);
-    expect(register.mock.calls[16][0]).toEqual(csp);
-    expect(register.mock.calls[18][0]).toEqual(addCacheHeaders);
-    expect(register.mock.calls[19][0]).toEqual(csp);
-    expect(register.mock.calls[20]).toEqual([
+    expect(register.mock.calls[13][0]).toEqual(expect.any(Function)); // abstraction
+    expect(register.mock.calls[14][0]).toEqual(addCacheHeaders);
+    expect(register.mock.calls[15][0]).toEqual(csp);
+    expect(register.mock.calls[17][0]).toEqual(addCacheHeaders);
+    expect(register.mock.calls[18][0]).toEqual(csp);
+    expect(register.mock.calls[19]).toEqual([
       fastifyHelmet,
       {
         crossOriginEmbedderPolicy: false,
@@ -179,9 +178,8 @@ describe('ssrServer', () => {
         contentSecurityPolicy: false,
       },
     ]);
-    expect(register.mock.calls[20][0]).toEqual(fastifyHelmet);
-    expect(register.mock.calls[21][0]).toEqual(addFrameOptionsHeader);
-    expect(register.mock.calls[22][0]).toEqual(renderHtml);
+    expect(register.mock.calls[20][0]).toEqual(addFrameOptionsHeader);
+    expect(register.mock.calls[21][0]).toEqual(renderHtml);
 
     expect(setNotFoundHandler).toHaveBeenCalledTimes(1);
     expect(setErrorHandler).toHaveBeenCalledTimes(1);
@@ -201,7 +199,7 @@ describe('ssrServer', () => {
       disableRequestLogging: true,
     });
 
-    expect(register).toHaveBeenCalledTimes(23);
+    expect(register).toHaveBeenCalledTimes(22);
     expect(register.mock.calls[1][0]).toEqual(openTelemetryPlugin);
   });
 
