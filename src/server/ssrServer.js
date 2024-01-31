@@ -85,18 +85,15 @@ async function appPlugin(fastify) {
   });
   fastify.register(setAppVersionHeader);
   fastify.register(forwardedHeaderParser);
-  // Static routes
-  fastify.register((instance, _opts, done) => {
-    instance.register(fastifyStatic, {
-      root: path.join(__dirname, '../../build'),
-      prefix: '/_/static',
-      maxAge: '182d',
-    });
-    instance.get('/_/status', (_request, reply) => reply.status(200).send('OK'));
-    instance.get('/_/pwa/service-worker.js', serviceWorkerHandler);
 
-    done();
+  // Static routes
+  fastify.register(fastifyStatic, {
+    root: path.join(__dirname, '../../build'),
+    prefix: '/_/static',
+    maxAge: '182d',
   });
+  fastify.get('/_/status', (_request, reply) => reply.status(200).send('OK'));
+  fastify.get('/_/pwa/service-worker.js', serviceWorkerHandler);
 
   fastify.addContentTypeParser('application/csp-report', { parseAs: 'string' }, (req, body, doneParsing) => {
     doneParsing(null, body);
