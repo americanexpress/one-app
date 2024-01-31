@@ -20,7 +20,7 @@ const { argv } = require('yargs');
 const { spawn } = require('child_process');
 
 (function start() {
-  const flags = process.argv.slice(2);
+  const flags = process.argv.slice(process.argv.findIndex((arg) => arg.includes('scripts/start')) + 1);
   const nodeArgs = [
     '--dns-result-order', 'ipv4first',
     '--no-experimental-fetch',
@@ -30,10 +30,10 @@ const { spawn } = require('child_process');
     nodeArgs.push('--require=./lib/server/utils/tracer.js');
   }
 
-  const inspect = flags.indexOf('--inspect');
-  if (inspect !== -1) {
-    nodeArgs.push('--inspect', '--expose-gc');
-    flags.splice(inspect, 1);
+  const inspectIndex = flags.findIndex((flag) => flag.startsWith('--inspect'));
+  if (inspectIndex !== -1) {
+    nodeArgs.push(flags[inspectIndex], '--expose-gc');
+    flags.splice(inspectIndex, 1);
   }
 
   const commandArgs = [

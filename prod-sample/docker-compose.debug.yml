@@ -9,5 +9,5 @@ services:
     env_file: ./one-app/debug.env
     entrypoint:
       - node
-      - --inspect=0.0.0.0
       - scripts/start.js
+      - --inspect=0.0.0.0
