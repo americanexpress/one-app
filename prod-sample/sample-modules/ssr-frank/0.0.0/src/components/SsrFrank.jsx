@@ -18,7 +18,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import reducer, { FAKE_REQUEST, FAKE_SUCCESS } from '../duck';
 
-const SsrFrank = ({ moduleState }) => (
+const SsrFrank = ({ moduleState = {} }) => (
   <div>
     <h1 className="ssrFrank">SSR Frank!</h1>
     <p className="ssr-frank-loaded-data">{ JSON.stringify(moduleState, null, 2) }</p>

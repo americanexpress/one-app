@@ -10,7 +10,7 @@ exports[`reactRendering renderForStaticMarkup provides Helmet data of just the r
 
 exports[`reactRendering renderForStaticMarkup provides Helmet data of just the render 2`] = `"lang="en-GB" intended="render""`;
 
-exports[`reactRendering renderForString calls react-dom renderToString: <p>Hello</p> 1`] = `"<p data-reactroot="">Hello</p>"`;
+exports[`reactRendering renderForString calls react-dom renderToString: <p>Hello</p> 1`] = `"<p>Hello</p>"`;
 
 exports[`reactRendering renderForString does not use existing Helmet data for the render 1`] = `"<title data-react-helmet="true">Page Title of Intended Render</title>"`;
 
