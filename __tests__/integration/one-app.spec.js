@@ -818,8 +818,11 @@ describe('Tests that require Docker setup', () => {
             // not ideal but need to wait for app to poll;
             await waitFor(minPollTime);
             const loggedError = await requiredExternalsError;
-            const [, problemModule, problemModuleUrl, workingUrl] = revertErrorMatch
-              .exec(loggedError);
+            const [,
+              problemModule,
+              problemModuleUrl,
+              workingUrl,
+            ] = revertErrorMatch.exec(loggedError);
             const gitSha = await retrieveGitSha();
             await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
             expect(problemModule).toBe('cultured-frankie');
@@ -843,8 +846,11 @@ describe('Tests that require Docker setup', () => {
             // not ideal but need to wait for app to poll;
             await waitFor(minPollTime);
             const loggedError = await requiredExternalsError;
-            const [, problemModule, problemModuleUrl, ignoredModule] = revertErrorMatch
-              .exec(loggedError);
+            const [,
+              problemModule,
+              problemModuleUrl,
+              ignoredModule,
+            ] = revertErrorMatch.exec(loggedError);
             const gitSha = await retrieveGitSha();
             await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
             expect(problemModule).toBe(modName);
@@ -1335,48 +1341,20 @@ describe('Tests that require Docker setup', () => {
 
       expect(response.status).toBe(200);
       expect(response.headers.raw()).toEqual({
-        connection: [
-          'close',
-        ],
-        'content-length': [
-          '2',
-        ],
-        'content-type': [
-          'text/plain; charset=utf-8',
-        ],
-        date: [
-          expect.any(String),
-        ],
-        'one-app-version': [
-          expect.any(String),
-        ],
-        'referrer-policy': [
-          'same-origin',
-        ],
-        'strict-transport-security': [
-          'max-age=63072000; includeSubDomains',
-        ],
-        vary: [
-          'Accept-Encoding',
-        ],
-        'x-content-type-options': [
-          'nosniff',
-        ],
-        'x-dns-prefetch-control': [
-          'off',
-        ],
-        'x-download-options': [
-          'noopen',
-        ],
-        'x-frame-options': [
-          'DENY',
-        ],
-        'x-permitted-cross-domain-policies': [
-          'none',
-        ],
-        'x-xss-protection': [
-          '1; mode=block',
-        ],
+        connection: ['close'],
+        'content-length': ['2'],
+        'content-type': ['text/plain; charset=utf-8'],
+        date: [expect.any(String)],
+        'one-app-version': [expect.any(String)],
+        'referrer-policy': ['same-origin'],
+        'strict-transport-security': ['max-age=63072000; includeSubDomains'],
+        vary: ['Accept-Encoding'],
+        'x-content-type-options': ['nosniff'],
+        'x-dns-prefetch-control': ['off'],
+        'x-download-options': ['noopen'],
+        'x-frame-options': ['DENY'],
+        'x-permitted-cross-domain-policies': ['none'],
+        'x-xss-protection': ['1; mode=block'],
       });
     });
 
@@ -1392,42 +1370,18 @@ describe('Tests that require Docker setup', () => {
 
       expect(response.headers.raw()).toEqual({
         vary: ['Accept-Encoding'],
-        connection: [
-          'close',
-        ],
-        'content-security-policy': [
-          expect.any(String),
-        ],
-        date: [
-          expect.any(String),
-        ],
-        'one-app-version': [
-          expect.any(String),
-        ],
-        'referrer-policy': [
-          'same-origin',
-        ],
-        'strict-transport-security': [
-          'max-age=63072000; includeSubDomains',
-        ],
-        'x-content-type-options': [
-          'nosniff',
-        ],
-        'x-dns-prefetch-control': [
-          'off',
-        ],
-        'x-download-options': [
-          'noopen',
-        ],
-        'x-frame-options': [
-          'DENY',
-        ],
-        'x-permitted-cross-domain-policies': [
-          'none',
-        ],
-        'x-xss-protection': [
-          '1; mode=block',
-        ],
+        connection: ['close'],
+        'content-security-policy': [expect.any(String)],
+        date: [expect.any(String)],
+        'one-app-version': [expect.any(String)],
+        'referrer-policy': ['same-origin'],
+        'strict-transport-security': ['max-age=63072000; includeSubDomains'],
+        'x-content-type-options': ['nosniff'],
+        'x-dns-prefetch-control': ['off'],
+        'x-download-options': ['noopen'],
+        'x-frame-options': ['DENY'],
+        'x-permitted-cross-domain-policies': ['none'],
+        'x-xss-protection': ['1; mode=block'],
       });
       expect(response.status).toBe(204);
       expect(response.type).toBe(undefined); // not specified
@@ -1445,51 +1399,21 @@ describe('Tests that require Docker setup', () => {
       });
 
       expect(response.headers.raw()).toEqual({
-        connection: [
-          'close',
-        ],
-        'content-length': [
-          '22',
-        ],
-        'content-security-policy': [
-          expect.any(String),
-        ],
-        'content-type': [
-          'text/plain; charset=utf-8',
-        ],
-        date: [
-          expect.any(String),
-        ],
-        'one-app-version': [
-          expect.any(String),
-        ],
-        'referrer-policy': [
-          'same-origin',
-        ],
-        'strict-transport-security': [
-          'max-age=63072000; includeSubDomains',
-        ],
-        vary: [
-          'Accept-Encoding, accept-encoding',
-        ],
-        'x-content-type-options': [
-          'nosniff',
-        ],
-        'x-dns-prefetch-control': [
-          'off',
-        ],
-        'x-download-options': [
-          'noopen',
-        ],
-        'x-frame-options': [
-          'DENY',
-        ],
-        'x-permitted-cross-domain-policies': [
-          'none',
-        ],
-        'x-xss-protection': [
-          '1; mode=block',
-        ],
+        connection: ['close'],
+        'content-length': ['22'],
+        'content-security-policy': [expect.any(String)],
+        'content-type': ['text/plain; charset=utf-8'],
+        date: [expect.any(String)],
+        'one-app-version': [expect.any(String)],
+        'referrer-policy': ['same-origin'],
+        'strict-transport-security': ['max-age=63072000; includeSubDomains'],
+        vary: ['Accept-Encoding, accept-encoding'],
+        'x-content-type-options': ['nosniff'],
+        'x-dns-prefetch-control': ['off'],
+        'x-download-options': ['noopen'],
+        'x-frame-options': ['DENY'],
+        'x-permitted-cross-domain-policies': ['none'],
+        'x-xss-protection': ['1; mode=block'],
       });
       expect(response.status).toBe(415);
       expect(await response.text()).toBe('Unsupported Media Type');
@@ -1509,43 +1433,19 @@ describe('Tests that require Docker setup', () => {
       // expect(response.status).toBe(204);
       expect(await response.text()).toBe('');
       expect(response.headers.raw()).toEqual({
-        connection: [
-          'close',
-        ],
-        'content-security-policy': [
-          expect.any(String),
-        ],
-        date: [
-          expect.any(String),
-        ],
-        'one-app-version': [
-          expect.any(String),
-        ],
-        'referrer-policy': [
-          'same-origin',
-        ],
-        'strict-transport-security': [
-          'max-age=63072000; includeSubDomains',
-        ],
+        connection: ['close'],
+        'content-security-policy': [expect.any(String)],
+        date: [expect.any(String)],
+        'one-app-version': [expect.any(String)],
+        'referrer-policy': ['same-origin'],
+        'strict-transport-security': ['max-age=63072000; includeSubDomains'],
         vary: ['Accept-Encoding'],
-        'x-content-type-options': [
-          'nosniff',
-        ],
-        'x-dns-prefetch-control': [
-          'off',
-        ],
-        'x-download-options': [
-          'noopen',
-        ],
-        'x-frame-options': [
-          'DENY',
-        ],
-        'x-permitted-cross-domain-policies': [
-          'none',
-        ],
-        'x-xss-protection': [
-          '1; mode=block',
-        ],
+        'x-content-type-options': ['nosniff'],
+        'x-dns-prefetch-control': ['off'],
+        'x-download-options': ['noopen'],
+        'x-frame-options': ['DENY'],
+        'x-permitted-cross-domain-policies': ['none'],
+        'x-xss-protection': ['1; mode=block'],
       });
     });
 
@@ -1561,57 +1461,23 @@ describe('Tests that require Docker setup', () => {
       expect(response.status).toBe(404);
       expect(await response.text()).toBe('Not found');
       expect(response.headers.raw()).toEqual({
-        'cache-control': [
-          'no-store',
-        ],
-        connection: [
-          'close',
-        ],
-        'content-length': [
-          '9',
-        ],
-        'content-security-policy': [
-          expect.any(String),
-        ],
-        'content-type': [
-          'text/plain; charset=utf-8',
-        ],
-        date: [
-          expect.any(String),
-        ],
-        'one-app-version': [
-          expect.any(String),
-        ],
-        pragma: [
-          'no-cache',
-        ],
-        'referrer-policy': [
-          'no-referrer',
-        ],
-        'strict-transport-security': [
-          'max-age=63072000; includeSubDomains',
-        ],
-        vary: [
-          'Accept-Encoding, accept-encoding',
-        ],
-        'x-content-type-options': [
-          'nosniff',
-        ],
-        'x-dns-prefetch-control': [
-          'off',
-        ],
-        'x-download-options': [
-          'noopen',
-        ],
-        'x-frame-options': [
-          'SAMEORIGIN',
-        ],
-        'x-permitted-cross-domain-policies': [
-          'none',
-        ],
-        'x-xss-protection': [
-          '0',
-        ],
+        'cache-control': ['no-store'],
+        connection: ['close'],
+        'content-length': ['9'],
+        'content-security-policy': [expect.any(String)],
+        'content-type': ['text/plain; charset=utf-8'],
+        date: [expect.any(String)],
+        'one-app-version': [expect.any(String)],
+        pragma: ['no-cache'],
+        'referrer-policy': ['no-referrer'],
+        'strict-transport-security': ['max-age=63072000; includeSubDomains'],
+        vary: ['Accept-Encoding, accept-encoding'],
+        'x-content-type-options': ['nosniff'],
+        'x-dns-prefetch-control': ['off'],
+        'x-download-options': ['noopen'],
+        'x-frame-options': ['SAMEORIGIN'],
+        'x-permitted-cross-domain-policies': ['none'],
+        'x-xss-protection': ['0'],
       });
     });
   });
@@ -1659,6 +1525,94 @@ describe('Tests that can run against either local Docker setup or remote One App
 
         expect(headerText).toBe('Hello! One App is successfully rendering its Modules!');
         expect(consoleLogs).toEqual([]);
+      });
+
+      test('app traces requests', async () => {
+        const requestTraceRegex = /.+{"key":"http.target","value":{"stringValue":"\/healthy-frank\/ssr-frank"}}.+/;
+        const searchForRequerstLog = searchForNextLogMatch(requestTraceRegex);
+        const response = await fetch(`${appInstanceUrls.fetchUrl}/healthy-frank/ssr-frank`, {
+          ...defaultFetchOpts,
+          method: 'GET',
+        });
+        expect(response.status).toBe(200);
+        const match = await searchForRequerstLog;
+        const trace = JSON.parse(match);
+
+        const resourceAttributes = trace.resourceSpans[0].resource.attributes.reduce(
+          (acc, attribute) => ({
+            ...acc,
+            [attribute.key]: attribute.value.stringValue,
+          }),
+          {}
+        );
+
+        expect(resourceAttributes).toMatchInlineSnapshot(
+          {
+            'service.instance.id': expect.any(String),
+            'service.version': expect.any(String),
+            'telemetry.sdk.version': expect.any(String),
+          },
+          `
+          {
+            "baz": "qux",
+            "foo": "bar",
+            "service.instance.id": Any<String>,
+            "service.name": "prod-sample",
+            "service.namespace": "one-app",
+            "service.version": Any<String>,
+            "telemetry.sdk.language": "nodejs",
+            "telemetry.sdk.name": "opentelemetry",
+            "telemetry.sdk.version": Any<String>,
+          }
+        `
+        );
+
+        const { traceId, spanId: parentSpanId } = trace.resourceSpans[0].scopeSpans
+          .find((scopeSpan) => scopeSpan.scope.name === '@opentelemetry/instrumentation-http')
+          .spans.find(
+            (span) => span.attributes.find((attribute) => attribute.key === 'http.target').value
+              .stringValue === '/success'
+          );
+
+        const spans = trace.resourceSpans[0].scopeSpans
+          .find((scopeSpan) => scopeSpan.scope.name === '@autotelic/fastify-opentelemetry')
+          .spans.filter((span) => span.traceId === traceId);
+
+        expect(spans.map((span) => span.name)).toMatchInlineSnapshot(`
+          [
+            "addSecurityHeaders",
+            "addFrameOptionsHeader",
+            "createRequestStore",
+            "createRequestHtmlFragment -> createRoutes",
+            "createRequestHtmlFragment -> checkRoutes",
+            "createRequestHtmlFragment -> buildRenderProps",
+            "createRequestHtmlFragment -> loadModuleData",
+            "createRequestHtmlFragment -> renderToString",
+            "createRequestHtmlFragment",
+            "checkStateForStatusCode",
+            "checkStateForRedirect",
+            "conditionallyAllowCors",
+            "sendHtml",
+            "GET /*",
+          ]
+        `);
+
+        const createRequestHtmlFragmentSpanId = spans.find((span) => span.name === 'createRequestHtmlFragment').spanId;
+        const createRequestStoreChildSpans = spans.filter((span) => span.name.startsWith('createRequestHtmlFragment ->')
+        );
+        expect(createRequestStoreChildSpans.length).toBe(5);
+        expect(
+          createRequestStoreChildSpans.every(
+            (span) => span.parentSpanId === createRequestHtmlFragmentSpanId
+          )
+        ).toBe(true);
+        expect(spans.find((span) => span.name === 'sendHtml').parentSpanId).toBe(
+          spans.find((span) => span.name === 'GET /*').spanId
+        );
+        const otherSpans = spans.filter(
+          (span) => !span.name.startsWith('createRequestHtmlFragment ->') && span.name !== 'sendHtml'
+        );
+        expect(otherSpans.every((span) => span.parentSpanId === parentSpanId)).toBe(true);
       });
 
       test('app allows CORS POST requests for partials', async () => {
