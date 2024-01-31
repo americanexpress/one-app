@@ -1357,7 +1357,7 @@ describe('Tests that require Docker setup', () => {
           'max-age=63072000; includeSubDomains',
         ],
         vary: [
-          'Accept-Encoding, accept-encoding',
+          'Accept-Encoding',
         ],
         'x-content-type-options': [
           'nosniff',
