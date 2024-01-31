@@ -30,11 +30,11 @@ jest.mock('../../src/client/prerender', () => {
   return prerender;
 });
 
-jest.mock('react-dom', () => {
-  const reactDom = jest.requireActual('react-dom');
-  reactDom.hydrate = jest.fn();
-  reactDom.render = jest.fn();
-  return reactDom;
+jest.mock('react-dom/client', () => {
+  const reactDomClient = jest.requireActual('react-dom/client');
+  reactDomClient.createRoot = jest.fn(() => ({ render: jest.fn() }));
+  reactDomClient.hydrateRoot = jest.fn();
+  return reactDomClient;
 });
 
 beforeAll(() => {
@@ -110,7 +110,7 @@ describe('initClient', () => {
   it('should set up the global redux store and kick off rendering', async () => {
     expect.assertions(2);
     const promiseResolveSpy = jest.spyOn(Promise, 'resolve');
-    const { hydrate } = require('react-dom');
+    const { hydrateRoot } = require('react-dom/client');
 
     document.getElementById = jest.fn(() => ({ remove: jest.fn() }));
 
@@ -125,14 +125,14 @@ describe('initClient', () => {
 
     const initClient = require('../../src/client/initClient').default;
     await initClient();
-    expect(hydrate).toHaveBeenCalled();
+    expect(hydrateRoot).toHaveBeenCalled();
     expect(promiseResolveSpy).toHaveBeenCalled();
   });
 
-  it('should use ReactDOM.render if renderMode is "render"', async () => {
+  it('uses react-dom/client createRoot if renderMode is "render"', async () => {
     expect.assertions(2);
     const promiseResolveSpy = jest.spyOn(Promise, 'resolve');
-    const { render, hydrate } = require('react-dom');
+    const { createRoot, hydrateRoot } = require('react-dom/client');
 
     document.getElementById = jest.fn(() => ({ remove: jest.fn() }));
 
@@ -153,8 +153,8 @@ describe('initClient', () => {
 
     await initClient();
 
-    expect(render).toHaveBeenCalled();
-    expect(hydrate).not.toHaveBeenCalled();
+    expect(createRoot).toHaveBeenCalled();
+    expect(hydrateRoot).not.toHaveBeenCalled();
   });
 
   it('should load pwa script', async () => {

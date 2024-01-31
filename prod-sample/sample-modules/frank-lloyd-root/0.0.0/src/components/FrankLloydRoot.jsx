@@ -34,7 +34,7 @@ export function FrankLloydRoot({ children, config }) {
           { rel: 'icon', href: 'https://sample-cdn.frank/favicon.ico' },
         ]}
       />
-      <pre className="value-provided-from-config">{ config.get('someApiUrl') }</pre>
+      <pre suppressHydrationWarning={true} className="value-provided-from-config">{ config.get('someApiUrl') }</pre>
       { children }
     </React.Fragment>
   );
