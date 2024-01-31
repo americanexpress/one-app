@@ -10,6 +10,8 @@ service:
     logs:
       receivers: [otlp]
       exporters: [logging]
+    # Uncomment below to log traces for debugging.
+    # Trace IDs are still available on log records without uncommenting.
     # traces:
     #   receivers: [otlp]
     #   exporters: [logging]
