@@ -111,6 +111,7 @@ services:
     image: 'otel/opentelemetry-collector:0.91.0'
     volumes:
       - ./otel-collector/config.yaml:/collector-config.yaml
+      - ./otel-collector/tmp:/tmp
     command: ["--config=/collector-config.yaml"]
     ports:
       - "4317:4317"

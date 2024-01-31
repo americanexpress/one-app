@@ -5,13 +5,13 @@ receivers:
 exporters:      
   logging:
     verbosity: detailed
+  file:
+    path: /tmp/traces.jsonl
 service:
   pipelines:
     logs:
       receivers: [otlp]
       exporters: [logging]
-    # Uncomment below to log traces for debugging.
-    # Trace IDs are still available on log records without uncommenting.
-    # traces:
-    #   receivers: [otlp]
-    #   exporters: [logging]
+    traces:
+      receivers: [otlp]
+      exporters: [file]
