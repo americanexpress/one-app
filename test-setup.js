@@ -16,8 +16,14 @@
 
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
+import { TextEncoder, TextDecoder } from 'util';
 
 process.env.ONE_CONFIG_ENV = 'test';
 
 // Required for logger tests
 process.setMaxListeners(15);
+
+// Jest does not provide TextEncoder & TextDecoder on global.
+// This could be moved to amex-jest-preset-react
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
