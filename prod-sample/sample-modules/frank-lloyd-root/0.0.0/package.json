@@ -24,7 +24,7 @@
     "redux": "^4.1.1"
   },
   "devDependencies": {
-    "@americanexpress/one-app-bundler": "^6.21.1",
+    "@americanexpress/one-app-bundler": "^7.0.0-rc.6",
     "babel-preset-amex": "^4.0.0",
     "rimraf": "^3.0.2"
   }
