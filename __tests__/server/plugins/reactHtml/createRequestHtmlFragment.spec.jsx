@@ -76,7 +76,8 @@ const createTracer = () => {
 
   return {
     startSpan,
-    startActiveSpan: jest.fn(async (name, fn) => {
+    startActiveSpan: jest.fn(async (name, ...args) => {
+      const fn = args.length === 1 ? args[0] : args[1];
       const span = startSpan(name);
       return fn(span);
     }),
