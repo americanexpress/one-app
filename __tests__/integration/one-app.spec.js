@@ -978,13 +978,13 @@ describe('Tests that require Docker setup', () => {
     describe('module root configureRequestLog', () => {
       it('has included userId from cookies in request log', async () => {
         const requestLogRegex = /some-user-id-1234/;
-        const searchForRequerstLog = searchForNextLogMatch(requestLogRegex);
+        const searchForRequestLog = searchForNextLogMatch(requestLogRegex);
         await browser.setCookies({
           name: 'userId',
           value: 'some-user-id-1234',
         });
         await browser.url(`${appAtTestUrls.browserUrl}/success`);
-        await expect(searchForRequerstLog).resolves.toMatch(requestLogRegex);
+        await expect(searchForRequestLog).resolves.toMatch(requestLogRegex);
       });
 
       it('log gets updated when Root module gets updated', async () => {
@@ -999,14 +999,14 @@ describe('Tests that require Docker setup', () => {
         const waiting = waitFor(5000);
 
         const requestLogRegex = /abcdefg123456/;
-        const searchForRequerstLog = searchForNextLogMatch(requestLogRegex);
+        const searchForRequestLog = searchForNextLogMatch(requestLogRegex);
         await browser.setCookies({
           name: 'guuid',
           value: 'abcdefg123456',
         });
         await waiting;
         await browser.url(`${appAtTestUrls.browserUrl}/success`);
-        await expect(searchForRequerstLog).resolves.toMatch(requestLogRegex);
+        await expect(searchForRequestLog).resolves.toMatch(requestLogRegex);
       });
 
       afterAll(() => {
@@ -1529,14 +1529,14 @@ describe('Tests that can run against either local Docker setup or remote One App
 
       test('app traces requests', async () => {
         const requestTraceRegex = /.+{"key":"http.target","value":{"stringValue":"\/healthy-frank\/ssr-frank"}}.+/;
-        const searchForRequerstLog = searchForNextLogMatch(requestTraceRegex);
+        const searchForRequestLog = searchForNextLogMatch(requestTraceRegex);
         const target = '/healthy-frank/ssr-frank';
         const response = await fetch(`${appInstanceUrls.fetchUrl}${target}`, {
           ...defaultFetchOpts,
           method: 'GET',
         });
         expect(response.status).toBe(200);
-        const match = await searchForRequerstLog;
+        const match = await searchForRequestLog;
         const trace = JSON.parse(match);
 
         const resourceAttributes = trace.resourceSpans[0].resource.attributes.reduce(
@@ -1614,11 +1614,11 @@ describe('Tests that can run against either local Docker setup or remote One App
           ]
         `);
 
-        const createRequestHtmlFragmentSpanId = spans.find((span) => span.name === 'createRequestHtmlFragment').spanId;
-        const createRequestStoreChildSpans = spans.filter((span) => span.name.startsWith('createRequestHtmlFragment ->'));
-        expect(createRequestStoreChildSpans.length).toBe(5);
+        const createRequestHtmlFragmentSpanId = getSpanByName(spans, 'createRequestHtmlFragment').spanId;
+        const createRequestHtmlFragmentChildSpans = spans.filter((span) => span.name.startsWith('createRequestHtmlFragment ->'));
+        expect(createRequestHtmlFragmentChildSpans.length).toBe(5);
         expect(
-          createRequestStoreChildSpans.every(
+          createRequestHtmlFragmentChildSpans.every(
             (span) => span.parentSpanId === createRequestHtmlFragmentSpanId
           )
         ).toBe(true);
