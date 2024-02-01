@@ -16,6 +16,6 @@
 
 import Intl from 'lean-intl';
 
-if (!process.env.ONE_CONFIG_USE_NATIVE_POLYFILL) {
+if (process.env.ONE_CONFIG_USE_NATIVE_INTL !== 'true') {
   global.Intl = Intl;
 }

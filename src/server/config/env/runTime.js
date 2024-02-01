@@ -187,7 +187,7 @@ const runTime = [
     defaultValue: () => (process.env.NODE_ENV === 'development' ? argv.rootModuleName : undefined),
   },
   {
-    name: 'ONE_CONFIG_USE_NATIVE_POLYFILL',
+    name: 'ONE_CONFIG_USE_NATIVE_INTL',
     defaultValue: 'false',
     normalize: (input) => {
       if (input?.toLowerCase() === 'true') {

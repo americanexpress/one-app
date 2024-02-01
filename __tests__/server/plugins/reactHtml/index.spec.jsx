@@ -23,7 +23,7 @@ import reactHtml, {
   renderModuleScripts,
   renderExternalFallbacks,
   checkStateForRedirectAndStatusCode,
-  renderUseNativeIntlPolyfill,
+  renderEnvironmentVariables,
 } from '../../../../src/server/plugins/reactHtml';
 // _client is a method to control the mock
 // eslint-disable-next-line import/named
@@ -1266,14 +1266,18 @@ describe('reactHtml', () => {
 
   describe('renderUseNativePolyfill', () => {
     it('should not add the polyfill script if there is no environment variable', () => {
-      expect(renderUseNativeIntlPolyfill('')).toMatchInlineSnapshot('""');
+      expect(renderEnvironmentVariables('')).toMatchInlineSnapshot(`
+        "<script id="environment-variables" >
+                window.useNativeIntl = false
+               </script>"
+      `);
     });
 
     it('should add the polyfill script if there is the environment variable and it is true', () => {
-      process.env.ONE_CONFIG_USE_NATIVE_POLYFILL = 'true';
-      expect(renderUseNativeIntlPolyfill('')).toMatchInlineSnapshot(`
+      process.env.ONE_CONFIG_USE_NATIVE_INTL = 'true';
+      expect(renderEnvironmentVariables('')).toMatchInlineSnapshot(`
         "<script id="environment-variables" >
-                window.useNativePolyfill = 'true'
+                window.useNativeIntl = true
                </script>"
       `);
     });

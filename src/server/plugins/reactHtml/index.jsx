@@ -66,7 +66,7 @@ const legacyBrowserChunkAssets = getChunkAssets(readJsonFile('../../../.build-me
 
 function renderI18nScript(clientInitialState, appBundlesURLPrefix) {
   const i18nFile = getI18nFileFromState(clientInitialState);
-  if (!i18nFile) {
+  if (!i18nFile || process.env.ONE_CONFIG_USE_NATIVE_INTL === 'true') {
     return '';
   }
 
@@ -236,10 +236,10 @@ export function getHead({
   `;
 }
 
-export function renderUseNativeIntlPolyfill(nonce) {
-  return process.env.ONE_CONFIG_USE_NATIVE_POLYFILL === 'true' ? `<script id="environment-variables" ${nonce}>
-        window.useNativePolyfill = 'true'
-       </script>` : '';
+export function renderEnvironmentVariables(nonce) {
+  return `<script id="environment-variables" ${nonce}>
+        window.useNativeIntl = ${process.env.ONE_CONFIG_USE_NATIVE_INTL === 'true'}
+       </script>`;
 }
 
 export function getBody({
@@ -275,7 +275,7 @@ export function getBody({
         window.__render_mode__ = '${renderMode}';
         window.__HOLOCRON_EXTERNALS__ = ${jsonStringifyForScript(getRequiredExternalsRegistry())};
       </script>
-      ${renderUseNativeIntlPolyfill(nonce)}
+      ${renderEnvironmentVariables(nonce)}
       ${assets}
       ${renderI18nScript(clientInitialState, bundlePrefixForBrowser)}
       ${renderExternalFallbacks({
