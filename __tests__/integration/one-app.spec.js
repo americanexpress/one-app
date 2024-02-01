@@ -1530,7 +1530,8 @@ describe('Tests that can run against either local Docker setup or remote One App
       test('app traces requests', async () => {
         const requestTraceRegex = /.+{"key":"http.target","value":{"stringValue":"\/healthy-frank\/ssr-frank"}}.+/;
         const searchForRequerstLog = searchForNextLogMatch(requestTraceRegex);
-        const response = await fetch(`${appInstanceUrls.fetchUrl}/healthy-frank/ssr-frank`, {
+        const target = '/healthy-frank/ssr-frank';
+        const response = await fetch(`${appInstanceUrls.fetchUrl}${target}`, {
           ...defaultFetchOpts,
           method: 'GET',
         });
@@ -1567,16 +1568,32 @@ describe('Tests that can run against either local Docker setup or remote One App
         `
         );
 
-        const { traceId, spanId: parentSpanId } = trace.resourceSpans[0].scopeSpans
-          .find((scopeSpan) => scopeSpan.scope.name === '@opentelemetry/instrumentation-http')
-          .spans.find(
-            (span) => span.attributes.find((attribute) => attribute.key === 'http.target').value
-              .stringValue === '/success'
-          );
+        const getSpans = (scope, traceId) => {
+          const { spans } = trace.resourceSpans[0].scopeSpans
+            .find((scopeSpan) => scopeSpan.scope.name === scope);
+          if (!traceId) return spans;
+          return spans.filter((span) => span.traceId === traceId);
+        };
+        const getSpanByAttribute = (spans, { key, value }) => spans.find(
+          (span) => span.attributes.find((attribute) => attribute.key === key).value
+            .stringValue === value
+        );
+        const getSpanByName = (spans, name) => spans.find((span) => span.name === name);
 
-        const spans = trace.resourceSpans[0].scopeSpans
-          .find((scopeSpan) => scopeSpan.scope.name === '@autotelic/fastify-opentelemetry')
-          .spans.filter((span) => span.traceId === traceId);
+        const { traceId, spanId: parentSpanId } = getSpanByAttribute(getSpans('@opentelemetry/instrumentation-http'), { key: 'http.target', value: target });
+
+        const httpSpans = getSpans('@opentelemetry/instrumentation-http', traceId);
+        expect(httpSpans.length).toBe(2);
+        const dnsSpans = getSpans('@opentelemetry/instrumentation-dns', traceId);
+        expect(dnsSpans.length).toBe(1);
+        const spans = getSpans('@autotelic/fastify-opentelemetry', traceId);
+        expect(spans.length).toBe(14);
+
+        const dataFetchSpan = getSpanByAttribute(httpSpans, { key: 'http.url', value: 'https://fast.api.frank/posts' });
+        const loadModuleDataSpan = getSpanByName(spans, 'createRequestHtmlFragment -> loadModuleData');
+
+        expect(dnsSpans[0].parentSpanId).toBe(dataFetchSpan.spanId);
+        expect(dataFetchSpan.parentSpanId).toBe(loadModuleDataSpan.spanId);
 
         expect(spans.map((span) => span.name)).toMatchInlineSnapshot(`
           [
@@ -1598,17 +1615,14 @@ describe('Tests that can run against either local Docker setup or remote One App
         `);
 
         const createRequestHtmlFragmentSpanId = spans.find((span) => span.name === 'createRequestHtmlFragment').spanId;
-        const createRequestStoreChildSpans = spans.filter((span) => span.name.startsWith('createRequestHtmlFragment ->')
-        );
+        const createRequestStoreChildSpans = spans.filter((span) => span.name.startsWith('createRequestHtmlFragment ->'));
         expect(createRequestStoreChildSpans.length).toBe(5);
         expect(
           createRequestStoreChildSpans.every(
             (span) => span.parentSpanId === createRequestHtmlFragmentSpanId
           )
         ).toBe(true);
-        expect(spans.find((span) => span.name === 'sendHtml').parentSpanId).toBe(
-          spans.find((span) => span.name === 'GET /*').spanId
-        );
+        expect(getSpanByName(spans, 'sendHtml').parentSpanId).toBe(getSpanByName(spans, 'GET /*').spanId);
         const otherSpans = spans.filter(
           (span) => !span.name.startsWith('createRequestHtmlFragment ->') && span.name !== 'sendHtml'
         );

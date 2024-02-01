@@ -6,7 +6,7 @@ exporters:
   logging:
     verbosity: detailed
   file:
-    path: /tmp/traces.jsonl
+    path: ./traces.jsonl
 service:
   pipelines:
     logs:

@@ -28,6 +28,8 @@ const deepMergeObjects = require('../../../src/server/utils/deepMergeObjects');
 const prodSampleDir = path.resolve('./prod-sample/');
 const pathToDockerComposeTestFile = path.resolve(prodSampleDir, 'docker-compose.test.yml');
 
+let logWatcherDuplex;
+
 const setUpTestRunner = async ({
   oneAppLocalPortToUse,
   oneAppMetricsLocalPortToUse,
@@ -71,7 +73,7 @@ const setUpTestRunner = async ({
   const dockerComposeUpProcess = childProcess.spawn(`${dockerComposeUpCommand}`, { shell: true });
   const serverStartupTimeout = 90000;
 
-  const logWatcherDuplex = createLogWatcherDuplex();
+  logWatcherDuplex = createLogWatcherDuplex();
   // logWatcherDuplex enables the testing of logs without preventing logging to stdout and stderr
   dockerComposeUpProcess.stdout.pipe(logWatcherDuplex);
   dockerComposeUpProcess.stderr.pipe(logWatcherDuplex);
@@ -82,7 +84,8 @@ const setUpTestRunner = async ({
   const traceFilePath = path.resolve(prodSampleDir, 'otel-collector', 'tmp', 'traces.jsonl');
   await fs.mkdir(path.dirname(traceFilePath), { recursive: true });
   await fs.writeFile(traceFilePath, '');
-  const traceTail = childProcess.spawn('tail', ['-n', '10', '-f', traceFilePath]);
+  await fs.chmod(traceFilePath, 0o666);
+  const traceTail = childProcess.spawn('tail', ['-f', traceFilePath]);
 
   // tail has a line character limit before it splits the chunks, but we need
   // each trace in a single line for parsing
@@ -96,6 +99,7 @@ const setUpTestRunner = async ({
       currentTraceChunk = '';
     }
   });
+  logWatcherDuplex.on('close', () => traceTail.kill());
 
   try {
     await Promise.all([
@@ -136,6 +140,7 @@ const setUpTestRunner = async ({
 };
 
 const tearDownTestRunner = async ({ browser } = {}) => {
+  if (logWatcherDuplex) logWatcherDuplex.destroy();
   await fs.rm(pathToDockerComposeTestFile);
   if (browser) { await browser.deleteSession(); }
 

@@ -115,34 +115,38 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         const state = store.getState();
         buildRenderPropsSpan.end();
 
-        const loadModuleDataSpan = tracer.startSpan(`${parentSpan.name} -> loadModuleData`, { attributes: { phase: 6 } });
-        if (getRenderMethodName(state) === 'renderForStaticMarkup') {
-          await dispatch(composeModules(routeModules));
-        } else {
-          const { fallback, redirect } = await getModuleDataBreaker.fire({
-            dispatch,
-            modules: routeModules,
-          });
+        const returnEarly = await tracer.startActiveSpan(`${parentSpan.name} -> loadModuleData`, { attributes: { phase: 6 } }, async (loadModuleDataSpan) => {
+          if (getRenderMethodName(state) === 'renderForStaticMarkup') {
+            await dispatch(composeModules(routeModules));
+          } else {
+            const { fallback, redirect } = await getModuleDataBreaker.fire({
+              dispatch,
+              modules: routeModules,
+            });
 
-          if (redirect) {
-            if (!isRedirectUrlAllowed(redirect.url)) {
-              renderStaticErrorPage(request, reply);
-              throw new Error(`'${redirect.url}' is not an allowed redirect URL`);
+            if (redirect) {
+              if (!isRedirectUrlAllowed(redirect.url)) {
+                renderStaticErrorPage(request, reply);
+                throw new Error(`'${redirect.url}' is not an allowed redirect URL`);
+              }
+              const status = redirect.status || 302;
+              reply.redirect(status, redirect.url);
+              loadModuleDataSpan.end();
+              return true;
             }
-            const status = redirect.status || 302;
-            reply.redirect(status, redirect.url);
-            loadModuleDataSpan.end();
-            return;
-          }
 
-          if (fallback) {
-            request.appHtml = '';
-            request.helmetInfo = {};
-            loadModuleDataSpan.end();
-            return;
+            if (fallback) {
+              request.appHtml = '';
+              request.helmetInfo = {};
+              loadModuleDataSpan.end();
+              return true;
+            }
           }
-        }
-        loadModuleDataSpan.end();
+          loadModuleDataSpan.end();
+          return false;
+        });
+
+        if (returnEarly) return;
 
         const renderToStringSpan = tracer.startSpan(`${parentSpan.name} -> renderToString`, { attributes: { phase: 7 } });
         const renderMethod = getRenderMethodName(state) === 'renderForStaticMarkup'

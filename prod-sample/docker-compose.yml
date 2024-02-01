@@ -108,10 +108,10 @@ services:
     # sleep 5s to make sure set up is completed prior to opening up chrome
     entrypoint: bash -c '/opt/bin/entry_point.sh & sleep 5s && chromium --ignore-certificate-errors --no-first-run --autofill-server-url https://one-app:8443/success'
   otel-collector:
-    image: 'otel/opentelemetry-collector:0.91.0'
+    image: 'otel/opentelemetry-collector:0.93.0'
     volumes:
       - ./otel-collector/config.yaml:/collector-config.yaml
-      - ./otel-collector/tmp:/tmp
+      - ./otel-collector/tmp/traces.jsonl:/traces.jsonl
     command: ["--config=/collector-config.yaml"]
     ports:
       - "4317:4317"
