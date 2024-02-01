@@ -31,7 +31,10 @@ const noopTracer = (fastify, _opts, done) => {
         });
         return {
           startSpan: createNoopSpan,
-          startActiveSpan: (name, cb) => cb(createNoopSpan()),
+          startActiveSpan: (name, ...args) => {
+            const cb = args.length === 1 ? args[0] : args[1];
+            cb(createNoopSpan());
+          },
         };
       },
     };

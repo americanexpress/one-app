@@ -29,6 +29,9 @@ describe('noopTracer', () => {
       tracer.startActiveSpan('bar', (barSpan) => {
         const bazSpan = tracer.startSpan(`${barSpan.name} -> baz`, { attributes: { fizz: 'buzz' } });
         bazSpan.end();
+        tracer.startActiveSpan('qux', { attributes: { key: 'value' } }, (quxSpan) => {
+          quxSpan.end();
+        });
         barSpan.end();
       });
       return reply.code(200).send();
