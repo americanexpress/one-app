@@ -65,8 +65,12 @@ const legacyBrowserChunkAssets = getChunkAssets(readJsonFile('../../../.build-me
   .map((chunkAsset) => `legacy/${chunkAsset}`);
 
 function renderI18nScript(clientInitialState, appBundlesURLPrefix) {
+  if (process.env.ONE_CONFIG_USE_NATIVE_INTL === 'true') {
+    return '';
+  }
+
   const i18nFile = getI18nFileFromState(clientInitialState);
-  if (!i18nFile || process.env.ONE_CONFIG_USE_NATIVE_INTL === 'true') {
+  if (!i18nFile) {
     return '';
   }
 

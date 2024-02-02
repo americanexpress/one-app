@@ -284,6 +284,8 @@ describe('reactHtml', () => {
       cdnUrl: '/cdnUrl/',
       rootModuleName: 'test-root',
     }));
+
+    process.env.ONE_CONFIG_USE_NATIVE_INTL = 'false';
   });
 
   function removeInitialState(body) {
@@ -427,6 +429,15 @@ describe('reactHtml', () => {
         ),
       };
       sendHtml(request, reply);
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).not.toContain('src="/cdnUrl/app/1.2.3-rc.4-abc123/i18n/');
+    });
+
+    it('sends a rendered page without the locale data script tag when te ONE_CONFIG_USE_NATIVE_INTL environment variable is true', () => {
+      process.env.ONE_CONFIG_USE_NATIVE_INTL = 'true';
+      setFullMap();
+      sendHtml(request, reply);
+
       expect(reply.send).toHaveBeenCalledTimes(1);
       expect(reply.send.mock.calls[0][0]).not.toContain('src="/cdnUrl/app/1.2.3-rc.4-abc123/i18n/');
     });
