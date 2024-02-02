@@ -160,7 +160,7 @@
     "@rollup/plugin-replace": "^4.0.0",
     "amex-jest-preset": "^7.0.0",
     "babel-eslint": "^10.1.0",
-    "babel-preset-amex": "^4.0.0",
+    "babel-preset-amex": "^4.0.3",
     "chokidar": "^3.5.3",
     "concurrently": "^8.2.2",
     "conventional-changelog-cli": "^2.2.2",
