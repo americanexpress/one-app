@@ -4,7 +4,7 @@
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
-    "node": ">=16 <=18",
+    "node": ">=18 <=20",
     "npm": ">=8"
   },
   "scripts": {
@@ -13,9 +13,7 @@
     "clean:build": "rimraf dist lib build lastBuild.json stats.json",
     "clean:test": "rimraf test-results",
     "prebuild": "npm run clean:build",
-    "build:bundle": "if-node-version \">16\" && npm run build:bundle:gt-16  || npm run build:bundle:16",
-    "build:bundle:gt-16": "cross-env \"NODE_OPTIONS=--max-old-space-size=4096 --openssl-legacy-provider\" bundle-one-app",
-    "build:bundle:16": "cross-env NODE_OPTIONS=--max-old-space-size=4096 bundle-one-app",
+    "build:bundle": "cross-env \"NODE_OPTIONS=--max-old-space-size=4096 --openssl-legacy-provider\" bundle-one-app",
     "build:server": "cross-env BABEL_ENV=server babel src --out-dir lib --ignore \"**/__mocks__\"",
     "build:service-workers": "node scripts/build-service-workers.js",
     "build:artifacts:statics": "node scripts/build-static-assets-artifact.js",
@@ -178,7 +176,6 @@
     "https-proxy-agent": "^5.0.1",
     "husky": "^8.0.1",
     "if-env": "^1.0.4",
-    "if-node-version": "^1.1.1",
     "jest": "^29.6.4",
     "jest-circus": "^29.2.2",
     "jest-environment-jsdom": "^28.1.2",
