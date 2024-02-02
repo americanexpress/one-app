@@ -1275,8 +1275,8 @@ describe('reactHtml', () => {
     });
   });
 
-  describe('renderUseNativePolyfill', () => {
-    it('should not add the polyfill script if there is no environment variable', () => {
+  describe('renderEnvironmentVariables', () => {
+    it('should set useNativeIntl to false if the environment variable is not true', () => {
       expect(renderEnvironmentVariables('')).toMatchInlineSnapshot(`
         "<script id="environment-variables" >
                 window.useNativeIntl = false
@@ -1284,7 +1284,7 @@ describe('reactHtml', () => {
       `);
     });
 
-    it('should add the polyfill script if there is the environment variable and it is true', () => {
+    it('should set  useNativeIntl to true is the environment variable is true', () => {
       process.env.ONE_CONFIG_USE_NATIVE_INTL = 'true';
       expect(renderEnvironmentVariables('')).toMatchInlineSnapshot(`
         "<script id="environment-variables" >
