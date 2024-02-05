@@ -1,6 +1,12 @@
-feature: ['feature/*', 'feat/*']
-fix: ['fix/*', 'bug/*']
-chore: chore/*
-documentation: docs/*
-refactor: refactor/*
-test: test/*
+feature:
+- head-branch: ['feature/*', 'feat/*']
+fix:
+- head-branch: ['fix/*', 'bug/*']
+chore:
+- head-branch: chore/*
+documentation:
+- head-branch: docs/*
+refactor:
+- head-branch: refactor/*
+test:
+- head-branch: test/*
