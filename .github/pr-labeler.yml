@@ -3,10 +3,10 @@ feature:
 fix:
   - head-branch: ['fix/*', 'bug/*']
 chore:
-  - head-branch: chore/*
+  - head-branch: 'chore/*'
 documentation:
-  - head-branch: docs/*
+  - head-branch: 'docs/*'
 refactor:
-  - head-branch: refactor/*
+  - head-branch: 'refactor/*'
 test:
-  - head-branch: test/*
+  - head-branch: 'test/*'
