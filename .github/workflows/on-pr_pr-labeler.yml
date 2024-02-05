@@ -12,6 +12,7 @@ jobs:
           configuration-path: .github/pr-labeler.yml # optional, .github/pr-labeler.yml is the default value
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
       - uses: actions/labeler@v5
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
