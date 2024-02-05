@@ -24,6 +24,7 @@ import fastifyStatic from '@fastify/static';
 import fastifyHelmet from '@fastify/helmet';
 import fastifySensible from '@fastify/sensible';
 import fastifyMetrics from 'fastify-metrics';
+import client from 'prom-client';
 
 import ensureCorrelationId from '../../src/server/plugins/ensureCorrelationId';
 import setAppVersionHeader from '../../src/server/plugins/setAppVersionHeader';
@@ -130,7 +131,11 @@ describe('ssrServer', () => {
     expect(register.mock.calls[2][0]).toEqual(ensureCorrelationId);
     expect(register.mock.calls[3][0]).toEqual(fastifyCookie);
     expect(register.mock.calls[4][0]).toEqual(logging);
-    expect(register.mock.calls[5][0]).toEqual(fastifyMetrics);
+    expect(register.mock.calls[5]).toEqual([fastifyMetrics, {
+      defaultMetrics: { enabled: false },
+      endpoint: null,
+      promClient: client,
+    }]);
     expect(register.mock.calls[6]).toEqual([
       compress,
       {
