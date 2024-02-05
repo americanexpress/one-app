@@ -181,7 +181,7 @@
     "js-yaml": "^4.1.0",
     "lockfile-lint": "^4.3.7",
     "lodash.set": "^4.3.2",
-    "mkdirp": "^1.0.4",
+    "mkdirp": "^3.0.1",
     "node-mocks-http": "^1.10.1",
     "nodemon": "^3.0.1",
     "ora": "^5.4.0",
