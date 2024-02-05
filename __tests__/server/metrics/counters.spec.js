@@ -79,14 +79,14 @@ describe('counters', () => {
       createCounter({ name: 'yup', help: 'yup_help', labelNames: ['foo'] });
       const counter = register._metrics.yup;
       expect(counter.hashMap).toEqual({});
-      incrementCounter('yup', { foo: 'bar' });
+      incrementCounter('yup', { foo: 'bar' }, 2);
       expect(counter.hashMap).toMatchInlineSnapshot(`
         {
           "foo:bar,": {
             "labels": {
               "foo": "bar",
             },
-            "value": 1,
+            "value": 2,
           },
         }
       `);
