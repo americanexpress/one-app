@@ -33,7 +33,9 @@ jest.mock('@opentelemetry/instrumentation');
 jest.mock('@opentelemetry/instrumentation-http');
 jest.mock('@opentelemetry/instrumentation-pino');
 jest.mock('@opentelemetry/sdk-trace-node', () => {
-  const { NodeTracerProvider: ActualNodeTracerProvider } = jest.requireActual('@opentelemetry/sdk-trace-node');
+  const { NodeTracerProvider: ActualNodeTracerProvider } = jest.requireActual(
+    '@opentelemetry/sdk-trace-node'
+  );
   return {
     NodeTracerProvider: jest.fn(() => {
       const tracerProvider = new ActualNodeTracerProvider();
@@ -47,17 +49,17 @@ jest.mock('@opentelemetry/instrumentation-dns');
 jest.mock('@opentelemetry/sdk-trace-base');
 jest.mock('@opentelemetry/exporter-trace-otlp-grpc');
 
-jest.mock('../../../src/server/utils/getOtelResourceAttributes', () => () => ({ 'test-resource-attribute': 'test-resource-attribute-value' }));
+jest.mock('../../../src/server/utils/getOtelResourceAttributes', () => () => ({
+  'test-resource-attribute': 'test-resource-attribute-value',
+}));
 
 let processSignalListeners = {};
-jest.spyOn(process, 'on').mockImplementation((signal, cb) => { processSignalListeners[signal] = cb; });
+jest.spyOn(process, 'on').mockImplementation((signal, cb) => {
+  processSignalListeners[signal] = cb;
+});
 jest.spyOn(process, 'kill').mockImplementation((_pid, signal) => processSignalListeners[signal]());
 
-const setup = ({
-  logLevel = 'trace',
-  nodeEnv = 'production',
-  tracesEndpoint,
-}) => {
+const setup = ({ logLevel = 'trace', nodeEnv = 'production', tracesEndpoint }) => {
   process.env.NODE_ENV = nodeEnv;
   if (tracesEndpoint) {
     process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = tracesEndpoint;
@@ -83,10 +85,12 @@ describe('tracer', () => {
   });
 
   it('should export the tracer provider and batch processor', () => {
-    const { NodeTracerProvider: ActualNodeTracerProvider } = jest.requireActual('@opentelemetry/sdk-trace-node');
+    const { NodeTracerProvider: ActualNodeTracerProvider } = jest.requireActual(
+      '@opentelemetry/sdk-trace-node'
+    );
     expect(setup({})).toEqual({
       _tracerProvider: expect.any(ActualNodeTracerProvider),
-      _tracerProcessor: expect.any(BatchSpanProcessor),
+      _batchProcessor: expect.any(BatchSpanProcessor),
     });
   });
 
@@ -117,6 +121,63 @@ describe('tracer', () => {
       ],
     });
     expect(_tracerProvider.register).toHaveBeenCalledTimes(1);
+  });
+
+  it('should ignore DNS requests to itself', () => {
+    setup({});
+    expect(DnsInstrumentation.mock.calls[0][0]).toMatchInlineSnapshot(`
+      {
+        "ignoreHostnames": [
+          "0.0.0.0",
+          "localhost",
+        ],
+      }
+    `);
+  });
+
+  it('should not trace outgoing requests that do not have a parent span', () => {
+    setup({});
+    expect(HttpInstrumentation.mock.calls[0][0].requireParentforOutgoingSpans).toBe(true);
+  });
+
+  it('should ignore incoming requests for statics', () => {
+    setup({});
+    const { ignoreIncomingRequestHook } = HttpInstrumentation.mock.calls[0][0];
+    expect(
+      ignoreIncomingRequestHook({
+        url: '/_/static/app/mockVersion/app.js',
+        headers: { host: 'mock.host' },
+      })
+    ).toBe(true);
+    expect(ignoreIncomingRequestHook({ url: '/mock-route', headers: { host: 'mock.host' } })).toBe(
+      false
+    );
+  });
+
+  it('should ignore requests to the dev CDN', () => {
+    setup({});
+    const { ignoreIncomingRequestHook } = HttpInstrumentation.mock.calls[0][0];
+    expect(
+      ignoreIncomingRequestHook({ url: '/mock-route', headers: { host: 'localhost:3001' } })
+    ).toBe(true);
+    expect(
+      ignoreIncomingRequestHook({ url: '/mock-route', headers: { host: 'localhost:3000' } })
+    ).toBe(false);
+  });
+
+  it('should add request direction to HTTP requests', () => {
+    setup({});
+    const { startIncomingSpanHook, startOutgoingSpanHook } = HttpInstrumentation.mock.calls[0][0];
+    expect(startIncomingSpanHook()).toMatchInlineSnapshot(`
+      {
+        "direction": "in",
+      }
+    `);
+    expect(startOutgoingSpanHook()).toMatchInlineSnapshot(`
+      {
+        "direction": "out",
+      }
+    `);
   });
 
   it('should register a batch span processor with OTLP exporter when traces endpoint is set', () => {
@@ -152,7 +213,11 @@ describe('tracer', () => {
   });
 
   it('should register both batch and simple span processors when traces endpoint is set and log level is trace in development', () => {
-    const { _tracerProvider } = setup({ tracesEndpoint: 'http://localhost:4317', logLevel: 'trace', nodeEnv: 'development' });
+    const { _tracerProvider } = setup({
+      tracesEndpoint: 'http://localhost:4317',
+      logLevel: 'trace',
+      nodeEnv: 'development',
+    });
     expect(BatchSpanProcessor).toHaveBeenCalledTimes(1);
     expect(BatchSpanProcessor).toHaveBeenCalledWith(expect.any(OTLPTraceExporter));
     expect(SimpleSpanProcessor).toHaveBeenCalledTimes(1);
@@ -163,16 +228,16 @@ describe('tracer', () => {
   });
 
   it('should shutdown the batch span processor when a SIGINT signal is received', async () => {
-    const { _tracerProcessor } = setup({ tracesEndpoint: 'http://localhost:4317' });
+    const { _batchProcessor } = setup({ tracesEndpoint: 'http://localhost:4317' });
     expect(process.on).toHaveBeenCalledTimes(2);
     await process.kill(process.pid, 'SIGINT');
-    expect(_tracerProcessor.shutdown).toHaveBeenCalledTimes(1);
+    expect(_batchProcessor.shutdown).toHaveBeenCalledTimes(1);
   });
 
   it('should shutdown the batch span processor when a SIGTERM signal is received', async () => {
-    const { _tracerProcessor } = setup({ tracesEndpoint: 'http://localhost:4317' });
+    const { _batchProcessor } = setup({ tracesEndpoint: 'http://localhost:4317' });
     expect(process.on).toHaveBeenCalledTimes(2);
     await process.kill(process.pid, 'SIGTERM');
-    expect(_tracerProcessor.shutdown).toHaveBeenCalledTimes(1);
+    expect(_batchProcessor.shutdown).toHaveBeenCalledTimes(1);
   });
 });
