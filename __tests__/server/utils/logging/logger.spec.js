@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 /*
  * Copyright 2019 American Express Travel Related Services Company, Inc.
  *
@@ -13,6 +17,7 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+
 import { EventEmitter } from 'events';
 import deepmerge from 'deepmerge';
 import pino from 'pino';
@@ -24,35 +29,48 @@ import developmentStream from '../../../../src/server/utils/logging/config/devel
 import otelConfig, { createOtelTransport } from '../../../../src/server/utils/logging/config/otel';
 
 jest.spyOn(pino, 'pino');
+jest.spyOn(pino, 'multistream');
 
 jest.mock('yargs', () => ({
   argv: {
     logLevel: 'debug',
+    logFormat: 'machine',
   },
 }));
 
+let NODE_ENV = 'production';
+jest.replaceProperty(process, 'env', {
+  ...process.env,
+  get NODE_ENV() {
+    return NODE_ENV;
+  },
+  set NODE_ENV(nodeEnv) {
+    NODE_ENV = nodeEnv;
+    // Use defaults based on NODE_ENV from src/server/config/env/argv.js
+    argv.logFormat = nodeEnv === 'development' ? 'friendly' : 'machine';
+    argv.logLevel = nodeEnv === 'development' ? 'log' : 'info';
+  },
+});
+
 jest.mock('../../../../src/server/utils/logging/config/otel', () => {
+  const objectHash = require('object-hash');
   const original = jest.requireActual('../../../../src/server/utils/logging/config/otel');
-  const otelTransport = original.createOtelTransport();
+  const transports = {};
   return {
     default: original.otelConfig,
-    createOtelTransport: () => otelTransport,
+    createOtelTransport: jest.fn((opts) => {
+      const key = objectHash(opts);
+      transports[key] = transports[key] || original.createOtelTransport(opts);
+      return transports[key];
+    }),
   };
 });
 
 describe('logger', () => {
-  const originalNodeEnv = process.env.NODE_ENV;
-
   beforeEach(() => {
     delete process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT;
     process.env.NODE_ENV = 'production';
-    argv.logLevel = 'debug';
-    delete argv.logFormat;
     jest.clearAllMocks();
-  });
-
-  afterAll(() => {
-    process.env.NODE_ENV = originalNodeEnv;
   });
 
   it('exports a pino logger', () => {
@@ -61,8 +79,9 @@ describe('logger', () => {
   });
 
   it('uses the production formatter by default', () => {
-    delete process.env.NODE_ENV;
+    process.env.NODE_ENV = undefined;
     const logger = createLogger();
+    expect(logger).toBeInstanceOf(EventEmitter);
     expect(pino.pino).toHaveBeenCalledTimes(1);
     expect(pino.pino.mock.results[0].value).toBe(logger);
     expect(pino.pino).toHaveBeenCalledWith(deepmerge(baseConfig, productionConfig), undefined);
@@ -71,15 +90,17 @@ describe('logger', () => {
   it('uses a development formatter when NODE_ENV is development', () => {
     process.env.NODE_ENV = 'development';
     const logger = createLogger();
+    expect(logger).toBeInstanceOf(EventEmitter);
     expect(pino.pino).toHaveBeenCalledTimes(1);
     expect(pino.pino.mock.results[0].value).toBe(logger);
     expect(pino.pino).toHaveBeenCalledWith(baseConfig, developmentStream);
   });
 
   it('uses the production formatter when the log-format flag is set to machine', () => {
-    argv.logLevel = 'info';
+    process.env.NODE_ENV = 'development';
     argv.logFormat = 'machine';
     const logger = createLogger();
+    expect(logger).toBeInstanceOf(EventEmitter);
     expect(pino.pino).toHaveBeenCalledTimes(1);
     expect(pino.pino.mock.results[0].value).toBe(logger);
     expect(pino.pino).toHaveBeenCalledWith(deepmerge(baseConfig, productionConfig), undefined);
@@ -88,11 +109,51 @@ describe('logger', () => {
   it('uses the OpenTelemetry config when OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is set', () => {
     process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
     const logger = createLogger();
+    expect(logger).toBeInstanceOf(EventEmitter);
+    expect(createOtelTransport).toHaveBeenCalledTimes(1);
+    expect(createOtelTransport).toHaveBeenCalledWith({ grpc: true, console: false });
     expect(pino.pino).toHaveBeenCalledTimes(1);
     expect(pino.pino.mock.results[0].value).toBe(logger);
     expect(pino.pino).toHaveBeenCalledWith(
       deepmerge(baseConfig, otelConfig),
-      createOtelTransport()
+      createOtelTransport({ grpc: true, console: false })
+    );
+  });
+
+  it('uses a development formatter and OpenTelemetry config when OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is set & NODE_ENV is development', () => {
+    process.env.NODE_ENV = 'development';
+    process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
+    const logger = createLogger();
+    expect(logger).toBeInstanceOf(EventEmitter);
+    expect(createOtelTransport).toHaveBeenCalledTimes(1);
+    expect(createOtelTransport).toHaveBeenCalledWith({ grpc: true, console: false });
+    expect(pino.pino).toHaveBeenCalledTimes(1);
+    expect(pino.pino.mock.results[0].value).toBe(logger);
+    expect(pino.multistream).toHaveBeenCalledTimes(1);
+    expect(pino.multistream).toHaveBeenCalledWith([
+      createOtelTransport({ grpc: true, console: false }),
+      developmentStream,
+    ]);
+    expect(pino.pino).toHaveBeenCalledWith(
+      deepmerge(baseConfig, otelConfig),
+      pino.multistream.mock.results[0].value
+    );
+  });
+
+  it('uses a the OpenTelemetry console exporter when OTEL_EXPORTER_OTLP_LOGS_ENDPOINT is set, NODE_ENV is development & log-format is machine', () => {
+    process.env.NODE_ENV = 'development';
+    process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = 'http://0.0.0.0:4317/v1/logs';
+    argv.logFormat = 'machine';
+    const logger = createLogger();
+    expect(logger).toBeInstanceOf(EventEmitter);
+    expect(createOtelTransport).toHaveBeenCalledTimes(1);
+    expect(createOtelTransport).toHaveBeenCalledWith({ grpc: true, console: true });
+    expect(pino.pino).toHaveBeenCalledTimes(1);
+    expect(pino.pino.mock.results[0].value).toBe(logger);
+    expect(pino.multistream).not.toHaveBeenCalled();
+    expect(pino.pino).toHaveBeenCalledWith(
+      deepmerge(baseConfig, otelConfig),
+      createOtelTransport({ grpc: true, console: true })
     );
   });
 });
