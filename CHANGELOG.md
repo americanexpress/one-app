@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.9.3](https://github.com/americanexpress/one-app/compare/v6.9.2...v6.9.3) (2024-02-07)
+
+
+### Bug Fixes
+
+* **actions:** update pr labeler syntax ([#1252](https://github.com/americanexpress/one-app/issues/1252)) ([df5683c](https://github.com/americanexpress/one-app/commit/df5683c5a3a4cc8062c7d8790de78392458a232c))
+* **badges:** fix readme badges ([#1254](https://github.com/americanexpress/one-app/issues/1254)) ([1924cb9](https://github.com/americanexpress/one-app/commit/1924cb974bc64f8a902679a256cdad02c5ad3b18))
+
+
 ## [6.9.2](https://github.com/americanexpress/one-app/compare/v6.9.1...v6.9.2) (2024-01-23)
 
 
