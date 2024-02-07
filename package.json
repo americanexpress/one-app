@@ -85,7 +85,7 @@
     "@americanexpress/one-app-ducks": "^4.4.2",
     "@americanexpress/one-app-router": "^1.2.1",
     "@americanexpress/vitruvius": "^2.0.2",
-    "@autotelic/fastify-opentelemetry": "^0.18.0",
+    "@autotelic/fastify-opentelemetry": "^0.19.0",
     "@fastify/compress": "^6.4.0",
     "@fastify/cookie": "^9.1.0",
     "@fastify/cors": "^8.4.0",
