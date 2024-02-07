@@ -323,7 +323,7 @@ export function renderPartial({
 
 export const checkStateForRedirectAndStatusCode = (request, reply) => {
   const { tracer } = request.openTelemetry();
-  const checkStateForRedirectSpan = tracer.startSpan('checkStateForRedirect', { attributes: { phase: 9 } });
+  const checkStateForRedirectSpan = tracer.startSpan('checkStateForRedirect');
   const destination = request.store.getState().getIn(['redirection', 'destination']);
 
   if (destination) {
@@ -335,7 +335,7 @@ export const checkStateForRedirectAndStatusCode = (request, reply) => {
     }
     reply.redirect(302, destination);
   } else {
-    const checkStateForStatusCodeSpan = tracer.startSpan('checkStateForStatusCode', { attributes: { phase: 10 } });
+    const checkStateForStatusCodeSpan = tracer.startSpan('checkStateForStatusCode');
     const error = request.store.getState().get('error');
 
     if (error) {
@@ -358,7 +358,7 @@ export const checkStateForRedirectAndStatusCode = (request, reply) => {
  */
 export const sendHtml = (request, reply) => {
   const { tracer } = request.openTelemetry();
-  const span = tracer.startSpan('sendHtml', { attributes: { phase: 11 } });
+  const span = tracer.startSpan('sendHtml');
 
   try {
     const {

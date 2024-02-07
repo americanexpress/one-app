@@ -28,7 +28,7 @@ import { getCSP } from './csp';
 const addFrameOptionsHeader = (fastify, _opts, done) => {
   fastify.addHook('onRequest', async (request, reply) => {
     const { tracer } = request.openTelemetry();
-    const span = tracer.startSpan('addFrameOptionsHeader', { attributes: { phase: 1 } });
+    const span = tracer.startSpan('addFrameOptionsHeader');
     const referer = request.headers.Referer || request.headers.Referrer || '';
     const frameAncestorDomains = getCSP()['frame-ancestors'] || [];
     const trimmedReferrer = referer.replace('https://', '');

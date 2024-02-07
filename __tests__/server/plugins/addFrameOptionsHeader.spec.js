@@ -122,6 +122,6 @@ it('adds a tracer span', () => {
   addFrameOptionsHeader(fastify, null, done);
 
   expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-  expect(tracer.startSpan).toHaveBeenCalledWith('addFrameOptionsHeader', { attributes: { phase: 1 } });
+  expect(tracer.startSpan).toHaveBeenCalledWith('addFrameOptionsHeader');
   expect(span.end).toHaveBeenCalledTimes(1);
 });

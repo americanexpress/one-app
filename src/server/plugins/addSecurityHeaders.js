@@ -27,7 +27,7 @@ const addSecurityHeaders = (fastify, opts = {}, done) => {
 
   fastify.addHook('onRequest', async (request, reply) => {
     const { tracer } = request.openTelemetry();
-    const span = tracer.startSpan('addSecurityHeaders', { attributes: { phase: 12 } });
+    const span = tracer.startSpan('addSecurityHeaders');
     reply.header('vary', 'Accept-Encoding');
     reply.header('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
     reply.header('x-dns-prefetch-control', 'off');

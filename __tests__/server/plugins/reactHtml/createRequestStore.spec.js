@@ -159,14 +159,14 @@ describe('createRequestStore', () => {
     it('should create a span', () => {
       createRequestStore(request, reply, { reducers });
 
-      expect(tracer.startSpan).toHaveBeenCalledWith('createRequestStore', { attributes: { phase: 2 } });
+      expect(tracer.startSpan).toHaveBeenCalledWith('createRequestStore');
       expect(span.end).toHaveBeenCalled();
     });
 
     it('should still end the span if an error is thrown', () => {
       createRequestStore(request, reply, { reducers: null });
 
-      expect(tracer.startSpan).toHaveBeenCalledWith('createRequestStore', { attributes: { phase: 2 } });
+      expect(tracer.startSpan).toHaveBeenCalledWith('createRequestStore');
       expect(request.log.error).toHaveBeenCalled();
       expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
       expect(span.end).toHaveBeenCalled();

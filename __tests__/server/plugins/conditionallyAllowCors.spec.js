@@ -127,7 +127,7 @@ describe('conditionallyAllowCors', () => {
     await conditionallyAllowCors(fastify);
 
     expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-    expect(tracer.startSpan).toHaveBeenCalledWith('conditionallyAllowCors', { attributes: { phase: 8 } });
+    expect(tracer.startSpan).toHaveBeenCalledWith('conditionallyAllowCors');
     expect(span.end).toHaveBeenCalledTimes(1);
   });
 });

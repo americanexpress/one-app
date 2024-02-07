@@ -515,7 +515,7 @@ describe('reactHtml', () => {
     it('adds a tracer span', () => {
       sendHtml(request, reply);
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-      expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml', { attributes: { phase: 11 } });
+      expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml');
       expect(tracer.spans.sendHtml.end).toHaveBeenCalled();
     });
 
@@ -524,7 +524,7 @@ describe('reactHtml', () => {
       sendHtml(request, reply);
       expect(reply.code).toHaveBeenCalledWith(500);
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-      expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml', { attributes: { phase: 11 } });
+      expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml');
       expect(tracer.spans.sendHtml.end).toHaveBeenCalled();
     });
 
@@ -1186,8 +1186,8 @@ describe('reactHtml', () => {
       state = fromJS({ redirection: { destination: null } });
       checkStateForRedirectAndStatusCode(req, reply);
       expect(tracer.startSpan).toHaveBeenCalledTimes(2);
-      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForRedirect', { attributes: { phase: 9 } });
-      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForStatusCode', { attributes: { phase: 10 } });
+      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForRedirect');
+      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForStatusCode');
       expect(tracer.spans.checkStateForRedirect.end).toHaveBeenCalled();
       expect(tracer.spans.checkStateForStatusCode.end).toHaveBeenCalled();
     });
@@ -1196,8 +1196,8 @@ describe('reactHtml', () => {
       state = fromJS({ redirection: { destination: null }, error: { code: 500 } });
       checkStateForRedirectAndStatusCode(req, reply);
       expect(tracer.startSpan).toHaveBeenCalledTimes(2);
-      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForRedirect', { attributes: { phase: 9 } });
-      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForStatusCode', { attributes: { phase: 10 } });
+      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForRedirect');
+      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForStatusCode');
       expect(tracer.spans.checkStateForRedirect.end).toHaveBeenCalled();
       expect(tracer.spans.checkStateForStatusCode.end).toHaveBeenCalled();
     });
@@ -1206,7 +1206,7 @@ describe('reactHtml', () => {
       state = fromJS({ redirection: { destination } });
       checkStateForRedirectAndStatusCode(req, res);
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForRedirect', { attributes: { phase: 9 } });
+      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForRedirect');
       expect(tracer.spans.checkStateForRedirect.end).toHaveBeenCalled();
     });
   });

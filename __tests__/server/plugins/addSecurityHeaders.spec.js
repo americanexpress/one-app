@@ -181,7 +181,7 @@ describe('addSecurityHeaders', () => {
     addSecurityHeaders(fastify, {}, done);
 
     expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-    expect(tracer.startSpan).toHaveBeenCalledWith('addSecurityHeaders', { attributes: { phase: 12 } });
+    expect(tracer.startSpan).toHaveBeenCalledWith('addSecurityHeaders');
     expect(span.end).toHaveBeenCalledTimes(1);
   });
 });
