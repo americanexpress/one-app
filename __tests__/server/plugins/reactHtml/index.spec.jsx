@@ -173,6 +173,7 @@ describe('reactHtml', () => {
 
   let request;
   let reply;
+  const activeSpan = { attributes: { 'req.method': 'GET', 'req.url': '/foo' } };
   let tracer;
 
   const setFullMap = () => {
@@ -287,7 +288,7 @@ describe('reactHtml', () => {
       error: jest.fn(),
     };
     tracer = createTracer();
-    request.openTelemetry = () => ({ tracer });
+    request.openTelemetry = () => ({ tracer, activeSpan });
 
     reply = jest.fn();
     reply.status = jest.fn(() => reply);
@@ -515,7 +516,17 @@ describe('reactHtml', () => {
     it('adds a tracer span', () => {
       sendHtml(request, reply);
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-      expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml');
+      expect(tracer.startSpan.mock.calls[0]).toMatchInlineSnapshot(`
+        [
+          "sendHtml",
+          {
+            "attributes": {
+              "req.method": "GET",
+              "req.url": "/foo",
+            },
+          },
+        ]
+      `);
       expect(tracer.spans.sendHtml.end).toHaveBeenCalled();
     });
 
@@ -524,7 +535,17 @@ describe('reactHtml', () => {
       sendHtml(request, reply);
       expect(reply.code).toHaveBeenCalledWith(500);
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-      expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml');
+      expect(tracer.startSpan.mock.calls[0]).toMatchInlineSnapshot(`
+        [
+          "sendHtml",
+          {
+            "attributes": {
+              "req.method": "GET",
+              "req.url": "/foo",
+            },
+          },
+        ]
+      `);
       expect(tracer.spans.sendHtml.end).toHaveBeenCalled();
     });
 
@@ -1139,7 +1160,7 @@ describe('reactHtml', () => {
     const destination = 'http://example.com/';
     let state = fromJS({ redirection: { destination: null } });
     const req = { store: { getState: () => state }, headers: {} };
-    req.openTelemetry = () => ({ tracer });
+    req.openTelemetry = () => ({ tracer, activeSpan });
     const res = { redirect: jest.fn(), code: jest.fn() };
 
     beforeEach(() => {
@@ -1186,8 +1207,28 @@ describe('reactHtml', () => {
       state = fromJS({ redirection: { destination: null } });
       checkStateForRedirectAndStatusCode(req, reply);
       expect(tracer.startSpan).toHaveBeenCalledTimes(2);
-      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForRedirect');
-      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForStatusCode');
+      expect(tracer.startSpan.mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            "checkStateForRedirect",
+            {
+              "attributes": {
+                "req.method": "GET",
+                "req.url": "/foo",
+              },
+            },
+          ],
+          [
+            "checkStateForStatusCode",
+            {
+              "attributes": {
+                "req.method": "GET",
+                "req.url": "/foo",
+              },
+            },
+          ],
+        ]
+      `);
       expect(tracer.spans.checkStateForRedirect.end).toHaveBeenCalled();
       expect(tracer.spans.checkStateForStatusCode.end).toHaveBeenCalled();
     });
@@ -1196,8 +1237,28 @@ describe('reactHtml', () => {
       state = fromJS({ redirection: { destination: null }, error: { code: 500 } });
       checkStateForRedirectAndStatusCode(req, reply);
       expect(tracer.startSpan).toHaveBeenCalledTimes(2);
-      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForRedirect');
-      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForStatusCode');
+      expect(tracer.startSpan.mock.calls).toMatchInlineSnapshot(`
+        [
+          [
+            "checkStateForRedirect",
+            {
+              "attributes": {
+                "req.method": "GET",
+                "req.url": "/foo",
+              },
+            },
+          ],
+          [
+            "checkStateForStatusCode",
+            {
+              "attributes": {
+                "req.method": "GET",
+                "req.url": "/foo",
+              },
+            },
+          ],
+        ]
+      `);
       expect(tracer.spans.checkStateForRedirect.end).toHaveBeenCalled();
       expect(tracer.spans.checkStateForStatusCode.end).toHaveBeenCalled();
     });
@@ -1206,7 +1267,17 @@ describe('reactHtml', () => {
       state = fromJS({ redirection: { destination } });
       checkStateForRedirectAndStatusCode(req, res);
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForRedirect');
+      expect(tracer.startSpan.mock.calls[0]).toMatchInlineSnapshot(`
+        [
+          "checkStateForRedirect",
+          {
+            "attributes": {
+              "req.method": "GET",
+              "req.url": "/foo",
+            },
+          },
+        ]
+      `);
       expect(tracer.spans.checkStateForRedirect.end).toHaveBeenCalled();
     });
   });

@@ -49,7 +49,8 @@ holocron.getModuleMap.mockImplementation(() => fromJS({
       },
     },
   },
-}));
+})
+);
 
 setClientModuleMapCache(holocron.getModuleMap().toJS());
 
@@ -58,6 +59,7 @@ describe('createRequestStore', () => {
   let reply;
   let reducers;
   const span = { end: jest.fn() };
+  const activeSpan = { attributes: { 'req.method': 'GET', 'req.url': '/foo' } };
   const tracer = { startSpan: jest.fn(() => span) };
 
   beforeAll(() => {
@@ -73,7 +75,7 @@ describe('createRequestStore', () => {
     jest.clearAllMocks();
 
     request = {
-      openTelemetry: () => ({ tracer }),
+      openTelemetry: () => ({ tracer, activeSpan }),
       decorateRequest: jest.fn(),
       headers: {
         'correlation-id': 'abc123',
@@ -88,11 +90,10 @@ describe('createRequestStore', () => {
       raw: {},
     };
 
-    reducers = jest.fn(
-      (...args) => combineReducers({
-        appReducer: jest.fn((v) => v || true),
-        config: jest.fn((v) => v || true),
-      })(...args)
+    reducers = jest.fn((...args) => combineReducers({
+      appReducer: jest.fn((v) => v || true),
+      config: jest.fn((v) => v || true),
+    })(...args)
     );
     reducers.buildInitialState = jest.fn(() => fromJS({ appReducer: 'fizzy' }));
   });
@@ -136,8 +137,14 @@ describe('createRequestStore', () => {
       createRequestStore(request, reply, { reducers });
 
       expect(reducers.buildInitialState).toHaveBeenCalledTimes(1);
-      expect(reducers.buildInitialState.mock.calls[0][0]).toHaveProperty('req.body.some', 'form data');
-      expect(reducers.buildInitialState.mock.calls[0][0]).toHaveProperty('req.body.that', 'was posted');
+      expect(reducers.buildInitialState.mock.calls[0][0]).toHaveProperty(
+        'req.body.some',
+        'form data'
+      );
+      expect(reducers.buildInitialState.mock.calls[0][0]).toHaveProperty(
+        'req.body.that',
+        'was posted'
+      );
     });
 
     it('does not use the request body as the locals for initial state when useBodyForBuildingTheInitialState is not given', () => {
@@ -152,21 +159,43 @@ describe('createRequestStore', () => {
   it('should pass enhancedFetch into createHolocronStore', () => {
     createRequestStore(request, reply, { reducers });
 
-    expect(holocron.createHolocronStore.mock.calls[0][0]).toHaveProperty('extraThunkArguments.fetchClient');
+    expect(holocron.createHolocronStore.mock.calls[0][0]).toHaveProperty(
+      'extraThunkArguments.fetchClient'
+    );
   });
 
   describe('tracer', () => {
     it('should create a span', () => {
       createRequestStore(request, reply, { reducers });
-
-      expect(tracer.startSpan).toHaveBeenCalledWith('createRequestStore');
+      expect(tracer.startSpan).toHaveBeenCalledTimes(1);
+      expect(tracer.startSpan.mock.calls[0]).toMatchInlineSnapshot(`
+        [
+          "createRequestStore",
+          {
+            "attributes": {
+              "req.method": "GET",
+              "req.url": "/foo",
+            },
+          },
+        ]
+      `);
       expect(span.end).toHaveBeenCalled();
     });
 
     it('should still end the span if an error is thrown', () => {
       createRequestStore(request, reply, { reducers: null });
-
-      expect(tracer.startSpan).toHaveBeenCalledWith('createRequestStore');
+      expect(tracer.startSpan).toHaveBeenCalledTimes(1);
+      expect(tracer.startSpan.mock.calls[0]).toMatchInlineSnapshot(`
+        [
+          "createRequestStore",
+          {
+            "attributes": {
+              "req.method": "GET",
+              "req.url": "/foo",
+            },
+          },
+        ]
+      `);
       expect(request.log.error).toHaveBeenCalled();
       expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
       expect(span.end).toHaveBeenCalled();

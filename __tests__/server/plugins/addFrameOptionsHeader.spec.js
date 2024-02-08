@@ -19,7 +19,8 @@ import { updateCSP } from '../../../src/server/plugins/csp';
 
 const span = { end: jest.fn() };
 const tracer = { startSpan: jest.fn(() => span) };
-const openTelemetry = () => ({ tracer });
+const activeSpan = { attributes: { 'req.method': 'GET', 'req.url': '/foo' } };
+const openTelemetry = () => ({ tracer, activeSpan });
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -98,7 +99,10 @@ it('adds frame options header', () => {
   expect(fastify.addHook).toHaveBeenCalled();
   expect(done).toHaveBeenCalled();
   expect(reply.header).toHaveBeenCalledTimes(1);
-  expect(reply.header).toHaveBeenCalledWith('X-Frame-Options', 'ALLOW-FROM https://americanexpress.com/testing');
+  expect(reply.header).toHaveBeenCalledWith(
+    'X-Frame-Options',
+    'ALLOW-FROM https://americanexpress.com/testing'
+  );
 });
 
 it('adds a tracer span', () => {
@@ -122,6 +126,16 @@ it('adds a tracer span', () => {
   addFrameOptionsHeader(fastify, null, done);
 
   expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-  expect(tracer.startSpan).toHaveBeenCalledWith('addFrameOptionsHeader');
+  expect(tracer.startSpan.mock.calls[0]).toMatchInlineSnapshot(`
+    [
+      "addFrameOptionsHeader",
+      {
+        "attributes": {
+          "req.method": "GET",
+          "req.url": "/foo",
+        },
+      },
+    ]
+  `);
   expect(span.end).toHaveBeenCalledTimes(1);
 });

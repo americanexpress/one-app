@@ -1569,18 +1569,21 @@ describe('Tests that can run against either local Docker setup or remote One App
         );
 
         const getSpans = (scope, traceId) => {
-          const { spans } = trace.resourceSpans[0].scopeSpans
-            .find((scopeSpan) => scopeSpan.scope.name === scope);
+          const { spans } = trace.resourceSpans[0].scopeSpans.find(
+            (scopeSpan) => scopeSpan.scope.name === scope
+          );
           if (!traceId) return spans;
           return spans.filter((span) => span.traceId === traceId);
         };
         const getSpanByAttribute = (spans, { key, value }) => spans.find(
-          (span) => span.attributes.find((attribute) => attribute.key === key).value
-            .stringValue === value
+          (span) => span.attributes.find((attr) => attr.key === key).value.stringValue === value
         );
         const getSpanByName = (spans, name) => spans.find((span) => span.name === name);
 
-        const { traceId, spanId: parentSpanId } = getSpanByAttribute(getSpans('@opentelemetry/instrumentation-http'), { key: 'http.target', value: target });
+        const { traceId, spanId: parentSpanId } = getSpanByAttribute(
+          getSpans('@opentelemetry/instrumentation-http'),
+          { key: 'http.target', value: target }
+        );
 
         const httpSpans = getSpans('@opentelemetry/instrumentation-http', traceId);
         expect(httpSpans.length).toBe(2);
@@ -1589,40 +1592,61 @@ describe('Tests that can run against either local Docker setup or remote One App
         const spans = getSpans('@autotelic/fastify-opentelemetry', traceId);
         expect(spans.length).toBe(14);
 
-        const dataFetchSpan = getSpanByAttribute(httpSpans, { key: 'http.url', value: 'https://fast.api.frank/posts' });
-        const loadModuleDataSpan = getSpanByName(spans, 'createRequestHtmlFragment -> loadModuleData');
+        const dataFetchSpan = getSpanByAttribute(httpSpans, {
+          key: 'http.url',
+          value: 'https://fast.api.frank/posts',
+        });
+        const loadModuleDataSpan = getSpanByName(
+          spans,
+          'createRequestHtmlFragment -> loadModuleData'
+        );
 
         expect(dnsSpans[0].parentSpanId).toBe(dataFetchSpan.spanId);
         expect(dataFetchSpan.parentSpanId).toBe(loadModuleDataSpan.spanId);
 
-        expect(spans.map((span) => span.name)).toMatchInlineSnapshot(`
+        expect(
+          spans.map(
+            (span) => `${span.name}: ${JSON.stringify(
+              span.attributes.reduce(
+                (acc, attr) => ({ ...acc, [attr.key]: attr.value.stringValue }),
+                {}
+              )
+            )}`
+          )
+        ).toMatchInlineSnapshot(`
           [
-            "addSecurityHeaders",
-            "addFrameOptionsHeader",
-            "createRequestStore",
-            "createRequestHtmlFragment -> createRoutes",
-            "createRequestHtmlFragment -> checkRoutes",
-            "createRequestHtmlFragment -> buildRenderProps",
-            "createRequestHtmlFragment -> loadModuleData",
-            "createRequestHtmlFragment -> renderToString",
-            "createRequestHtmlFragment",
-            "checkStateForStatusCode",
-            "checkStateForRedirect",
-            "conditionallyAllowCors",
-            "sendHtml",
-            "GET /*",
+            "addSecurityHeaders: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "addFrameOptionsHeader: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "createRequestStore: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "createRequestHtmlFragment -> createRoutes: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "createRequestHtmlFragment -> checkRoutes: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "createRequestHtmlFragment -> buildRenderProps: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "createRequestHtmlFragment -> loadModuleData: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "createRequestHtmlFragment -> renderToString: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "createRequestHtmlFragment: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "checkStateForStatusCode: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "checkStateForRedirect: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "conditionallyAllowCors: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "sendHtml: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+            "GET /*: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
           ]
         `);
 
-        const createRequestHtmlFragmentSpanId = getSpanByName(spans, 'createRequestHtmlFragment').spanId;
-        const createRequestHtmlFragmentChildSpans = spans.filter((span) => span.name.startsWith('createRequestHtmlFragment ->'));
+        const createRequestHtmlFragmentSpanId = getSpanByName(
+          spans,
+          'createRequestHtmlFragment'
+        ).spanId;
+        const createRequestHtmlFragmentChildSpans = spans.filter((span) => span.name.startsWith('createRequestHtmlFragment ->')
+        );
         expect(createRequestHtmlFragmentChildSpans.length).toBe(5);
         expect(
           createRequestHtmlFragmentChildSpans.every(
             (span) => span.parentSpanId === createRequestHtmlFragmentSpanId
           )
         ).toBe(true);
-        expect(getSpanByName(spans, 'sendHtml').parentSpanId).toBe(getSpanByName(spans, 'GET /*').spanId);
+        expect(getSpanByName(spans, 'sendHtml').parentSpanId).toBe(
+          getSpanByName(spans, 'GET /*').spanId
+        );
         const otherSpans = spans.filter(
           (span) => !span.name.startsWith('createRequestHtmlFragment ->') && span.name !== 'sendHtml'
         );
