@@ -38,18 +38,21 @@ const tracerProvider = new NodeTracerProvider({
 });
 
 const devCdnPort = process.env.HTTP_ONE_APP_DEV_CDN_PORT || '3001';
+const traceAllRequests = process.env.ONE_TRACE_ALL_REQUESTS === 'true';
 
 registerInstrumentations({
   tracerProvider,
   instrumentations: [
     new HttpInstrumentation({
-      ignoreIncomingRequestHook: (request) => request.url.startsWith('/_/static') || request.headers.host.endsWith(`:${devCdnPort}`),
-      requireParentforOutgoingSpans: true,
+      ignoreIncomingRequestHook: !traceAllRequests
+        ? (request) => request.url.startsWith('/_/') || request.headers.host.endsWith(`:${devCdnPort}`)
+        : undefined,
+      requireParentforOutgoingSpans: !traceAllRequests,
       startIncomingSpanHook: () => ({ direction: 'in' }),
       startOutgoingSpanHook: () => ({ direction: 'out' }),
     }),
     new DnsInstrumentation({
-      ignoreHostnames: ['0.0.0.0', 'localhost'],
+      ignoreHostnames: !traceAllRequests ? ['0.0.0.0', 'localhost'] : undefined,
     }),
     new PinoInstrumentation(),
   ],

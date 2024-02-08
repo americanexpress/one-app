@@ -59,12 +59,22 @@ jest.spyOn(process, 'on').mockImplementation((signal, cb) => {
 });
 jest.spyOn(process, 'kill').mockImplementation((_pid, signal) => processSignalListeners[signal]());
 
-const setup = ({ logLevel = 'trace', nodeEnv = 'production', tracesEndpoint }) => {
+const setup = ({
+  logLevel = 'trace',
+  nodeEnv = 'production',
+  tracesEndpoint,
+  traceAllRequests = false,
+}) => {
   process.env.NODE_ENV = nodeEnv;
   if (tracesEndpoint) {
     process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = tracesEndpoint;
   } else {
     delete process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT;
+  }
+  if (traceAllRequests) {
+    process.env.ONE_TRACE_ALL_REQUESTS = 'true';
+  } else {
+    delete process.env.ONE_TRACE_ALL_REQUESTS;
   }
   jest.doMock('yargs', () => ({ argv: { logLevel } }));
   processSignalListeners = {};
@@ -135,12 +145,26 @@ describe('tracer', () => {
     `);
   });
 
+  it('should not ignore DNS requests to itself when tracing all requests', () => {
+    setup({ traceAllRequests: true });
+    expect(DnsInstrumentation.mock.calls[0][0]).toMatchInlineSnapshot(`
+      {
+        "ignoreHostnames": undefined,
+      }
+    `);
+  });
+
   it('should not trace outgoing requests that do not have a parent span', () => {
     setup({});
     expect(HttpInstrumentation.mock.calls[0][0].requireParentforOutgoingSpans).toBe(true);
   });
 
-  it('should ignore incoming requests for statics', () => {
+  it('should trace outgoing requests that do not have a parent span when tracing all requests', () => {
+    setup({ traceAllRequests: true });
+    expect(HttpInstrumentation.mock.calls[0][0].requireParentforOutgoingSpans).toBe(false);
+  });
+
+  it('should ignore incoming requests for internal routes', () => {
     setup({});
     const { ignoreIncomingRequestHook } = HttpInstrumentation.mock.calls[0][0];
     expect(
@@ -163,6 +187,12 @@ describe('tracer', () => {
     expect(
       ignoreIncomingRequestHook({ url: '/mock-route', headers: { host: 'localhost:3000' } })
     ).toBe(false);
+  });
+
+  it('should not ignore incoming requests for internal routes or the dev CDN  when tracing all requests', () => {
+    setup({ traceAllRequests: true });
+    const { ignoreIncomingRequestHook } = HttpInstrumentation.mock.calls[0][0];
+    expect(ignoreIncomingRequestHook).toBeUndefined();
   });
 
   it('should add request direction to HTTP requests', () => {
