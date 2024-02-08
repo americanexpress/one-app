@@ -15,6 +15,7 @@
  */
 
 import pino from 'pino';
+import ThreadStream from 'thread-stream';
 import otelConfig, {
   createOtelTransport,
 } from '../../../../../src/server/utils/logging/config/otel';
@@ -33,16 +34,11 @@ jest.mock('node:os', () => ({
 
 jest.spyOn(pino, 'transport');
 
+jest.spyOn(console, 'error').mockImplementation(() => {});
+
 describe('OpenTelemetry logging', () => {
-  const originalNodeEnv = process.env.NODE_ENV;
-
   beforeEach(() => {
-    process.env.NODE_ENV = 'production';
     jest.clearAllMocks();
-  });
-
-  afterAll(() => {
-    process.env.NODE_ENV = originalNodeEnv;
   });
 
   describe('config', () => {
@@ -101,6 +97,7 @@ describe('OpenTelemetry logging', () => {
     it('should include custom resource attributes', () => {
       process.env.OTEL_RESOURCE_ATTRIBUTES = 'service.custom.id=XXXXX;deployment.env=qa';
       const transport = createOtelTransport();
+      expect(transport).toBeInstanceOf(ThreadStream);
       expect(pino.transport).toHaveBeenCalledTimes(1);
       expect(pino.transport.mock.calls[0][0].options.resourceAttributes).toMatchInlineSnapshot(`
         {
@@ -121,6 +118,7 @@ describe('OpenTelemetry logging', () => {
       expect(() => {
         transport = createOtelTransport();
       }).not.toThrow();
+      expect(transport).toBeInstanceOf(ThreadStream);
       expect(pino.transport).toHaveBeenCalledTimes(1);
       expect(pino.transport.mock.calls[0][0]).toMatchInlineSnapshot(`
         {
@@ -148,9 +146,25 @@ describe('OpenTelemetry logging', () => {
     });
   });
 
-  it('should include the console exporter in development', () => {
-    process.env.NODE_ENV = 'development';
+  it('should include the grpc exporter and not the console exporter by default', () => {
     const transport = createOtelTransport();
+    expect(transport).toBeInstanceOf(ThreadStream);
+    expect(pino.transport).toHaveBeenCalledTimes(1);
+    expect(pino.transport.mock.calls[0][0].options.logRecordProcessorOptions)
+      .toMatchInlineSnapshot(`
+      {
+        "exporterOptions": {
+          "protocol": "grpc",
+        },
+        "recordProcessorType": "batch",
+      }
+    `);
+    expect(pino.transport.mock.results[0].value).toBe(transport);
+  });
+
+  it('should include the console exporter when console is true', () => {
+    const transport = createOtelTransport({ console: true });
+    expect(transport).toBeInstanceOf(ThreadStream);
     expect(pino.transport).toHaveBeenCalledTimes(1);
     expect(pino.transport.mock.calls[0][0].options.logRecordProcessorOptions)
       .toMatchInlineSnapshot(`
@@ -172,17 +186,17 @@ describe('OpenTelemetry logging', () => {
     expect(pino.transport.mock.results[0].value).toBe(transport);
   });
 
-  it('should not include the console exporter in production', () => {
-    process.env.NODE_ENV = 'production';
-    const transport = createOtelTransport();
+  it('should include the console exporter and not the grpc exporter when console is true and grpc is false', () => {
+    const transport = createOtelTransport({ grpc: false, console: true });
+    expect(transport).toBeInstanceOf(ThreadStream);
     expect(pino.transport).toHaveBeenCalledTimes(1);
     expect(pino.transport.mock.calls[0][0].options.logRecordProcessorOptions)
       .toMatchInlineSnapshot(`
       {
         "exporterOptions": {
-          "protocol": "grpc",
+          "protocol": "console",
         },
-        "recordProcessorType": "batch",
+        "recordProcessorType": "simple",
       }
     `);
     expect(pino.transport.mock.results[0].value).toBe(transport);
@@ -204,5 +218,15 @@ describe('OpenTelemetry logging', () => {
     `);
     expect(pino.transport.mock.results[0].value).toBe(transport);
     delete process.env.INTEGRATION_TEST;
+  });
+
+  it('should log an error and return undefined when attempting to create a transport with no exporter', () => {
+    const transport = createOtelTransport({ grpc: false });
+    expect(transport).toBe(undefined);
+    expect(pino.transport).not.toHaveBeenCalled();
+    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(console.error.mock.calls[0][0]).toMatchInlineSnapshot(
+      '"OTEL DISABLED: attempted to create OpenTelemetry transport without including a processor"'
+    );
   });
 });
