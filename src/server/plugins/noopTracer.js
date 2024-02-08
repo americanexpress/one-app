@@ -20,23 +20,35 @@ import fp from 'fastify-plugin';
  * Fastify Plugin that injects a noop tracer into the request object
  * @param {import('fastify').FastifyInstance} fastify Fastify instance
  */
+
 const noopTracer = (fastify, _opts, done) => {
+  const noopSpan = {
+    get addEvent() { return () => noopSpan; },
+    get end() { return () => {}; },
+    get isRecording() { return () => false; },
+    get recordException() { return () => {}; },
+    get setAttribute() { return () => noopSpan; },
+    get setAttributes() { return () => noopSpan; },
+    get setStatus() { return () => noopSpan; },
+    get spanContext() { return () => {}; },
+    get updateName() { return () => noopSpan; },
+  };
+
+  const tracer = {
+    startSpan() { return noopSpan; },
+    startActiveSpan: (...args) => {
+      const cb = args.pop();
+      cb(noopSpan);
+    },
+  };
+
   function openTelemetry() {
     return {
-      get tracer() {
-        const noop = () => { };
-        const createNoopSpan = () => ({
-          addAttribute: noop,
-          end: noop,
-        });
-        return {
-          startSpan: createNoopSpan,
-          startActiveSpan: (name, ...args) => {
-            const cb = args.length === 1 ? args[0] : args[1];
-            cb(createNoopSpan());
-          },
-        };
-      },
+      get activeSpan() { return noopSpan; },
+      get context() { return {}; },
+      get tracer() { return tracer; },
+      inject() {},
+      extract() { return {}; },
     };
   }
   fastify.decorateRequest('openTelemetry', openTelemetry);

@@ -15,35 +15,140 @@
  */
 
 import Fastify from 'fastify';
+import fastifyOpenTelemetry from '@autotelic/fastify-opentelemetry';
 import noopTracer from '../../../src/server/plugins/noopTracer';
 
 describe('noopTracer', () => {
-  it('should add openTelemetry noop functions to the request object', async () => {
+  const getTypes = (obj) => Object.entries(obj).reduce((acc, [key, val]) => ({
+    ...acc,
+    [key]: typeof val,
+  }), {});
+
+  let noopApi;
+  let actualApi;
+  let actualSpan;
+  let noopSpan;
+  let actualSpanProperties;
+
+  beforeAll(async () => {
     const fastify = Fastify();
-    await fastify.register(noopTracer);
-
-    fastify.get('/test-route', (request, reply) => {
-      const { tracer } = request.openTelemetry();
-      const fooSpan = tracer.startSpan('foo');
-      fooSpan.end();
-      tracer.startActiveSpan('bar', (barSpan) => {
-        const bazSpan = tracer.startSpan(`${barSpan.name} -> baz`, { attributes: { fizz: 'buzz' } });
-        bazSpan.end();
-        tracer.startActiveSpan('qux', { attributes: { key: 'value' } }, (quxSpan) => {
-          quxSpan.end();
-        });
-        barSpan.end();
+    fastify.register((instance, opts, done) => {
+      instance.register(noopTracer);
+      instance.get('/test-noop', async (request, reply) => {
+        noopApi = { ...request.openTelemetry() };
+        noopSpan = noopApi.tracer.startSpan('foo', { attributes: { bar: 'baz' } });
+        noopSpan.end();
+        return reply.send();
       });
-      return reply.code(200).send();
+      done();
     });
-
+    fastify.register(async (instance, opts, done) => {
+      instance.register(fastifyOpenTelemetry, { wrapRoutes: true });
+      instance.get('/test-actual', (request, reply) => {
+        actualApi = { ...request.openTelemetry() };
+        actualSpan = actualApi.tracer.startSpan('foo', { attributes: { bar: 'baz' } });
+        actualSpan.end();
+        return reply.send();
+      });
+      done();
+    });
     await fastify.ready();
 
-    const response = await fastify.inject({
-      method: 'GET',
-      url: '/test-route',
+    await fastify.inject({ method: 'GET', url: '/test-noop' });
+    await fastify.inject({ method: 'GET', url: '/test-actual' });
+
+    actualSpanProperties = Object.getOwnPropertyNames(Object.getPrototypeOf(actualSpan))
+      .filter((propertyName) => propertyName !== 'constructor')
+      .reduce((acc, property) => ({ ...acc, [property]: actualSpan[property] }), {});
+  });
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('should have API keys of the same type', () => {
+    expect(getTypes(actualApi)).toMatchInlineSnapshot(`
+      {
+        "activeSpan": "object",
+        "context": "object",
+        "extract": "function",
+        "inject": "function",
+        "tracer": "object",
+      }
+    `);
+    expect(getTypes(noopApi)).toEqual(getTypes(actualApi));
+  });
+
+  it('should return the same types from API methods', () => {
+    expect(typeof actualApi.inject()).toBe(typeof noopApi.inject());
+    expect(typeof actualApi.extract()).toBe(typeof noopApi.extract());
+
+    expect(actualApi.activeSpan.constructor).toBe(actualSpan.constructor);
+    expect(noopApi.activeSpan).toBe(noopSpan);
+
+    const actualStartActiveSpanCb = jest.fn();
+    expect(actualApi.tracer.startActiveSpan('span name', actualStartActiveSpanCb)).toBe(undefined);
+    expect(actualStartActiveSpanCb.mock.calls[0][0].constructor).toBe(actualSpan.constructor);
+    const noopStartActiveSpanCb = jest.fn();
+    expect(noopApi.tracer.startActiveSpan('span name', noopStartActiveSpanCb)).toBe(undefined);
+    expect(noopStartActiveSpanCb.mock.calls[0][0]).toBe(noopSpan);
+  });
+
+  it('should create a span with similar properties', () => {
+    expect(getTypes(actualSpanProperties)).toMatchInlineSnapshot(`
+      {
+        "addEvent": "function",
+        "end": "function",
+        "isRecording": "function",
+        "recordException": "function",
+        "setAttribute": "function",
+        "setAttributes": "function",
+        "setStatus": "function",
+        "spanContext": "function",
+        "updateName": "function",
+      }
+    `);
+    expect(getTypes(noopSpan)).toEqual(getTypes(actualSpanProperties));
+  });
+
+  it('should return the same types from span methods', () => {
+    const methodNames = Object.keys(actualSpanProperties).filter(
+      (property) => typeof actualSpan[property] === 'function' && property !== 'contructor'
+    );
+
+    methodNames.forEach((methodName) => {
+      jest.spyOn(actualSpan, methodName).mockName(`actualSpan.${methodName}`);
+      jest.spyOn(noopSpan, methodName).mockName(`noopSpan.${methodName}`);
     });
 
-    expect(response.statusCode).toEqual(200);
+    expect(actualSpan.addEvent('event name')).toBe(actualSpan);
+    expect(noopSpan.addEvent('event name')).toBe(noopSpan);
+
+    expect(actualSpan.setAttribute('key', 'value')).toBe(actualSpan);
+    expect(noopSpan.setAttribute('key', 'value')).toBe(noopSpan);
+
+    expect(actualSpan.setAttributes({ key: 'value', fizz: 'buzz' })).toBe(actualSpan);
+    expect(noopSpan.setAttributes({ key: 'value', fizz: 'buzz' })).toBe(noopSpan);
+
+    expect(actualSpan.setStatus(1)).toBe(actualSpan);
+    expect(noopSpan.setStatus(1)).toBe(noopSpan);
+
+    expect(actualSpan.updateName('updated name')).toBe(actualSpan);
+    expect(noopSpan.updateName('updated name')).toBe(noopSpan);
+
+    expect(actualSpan.end()).toBe(undefined);
+    expect(noopSpan.end()).toBe(undefined);
+
+    expect(actualSpan.recordException({ code: 1 })).toBe(undefined);
+    expect(noopSpan.recordException({ code: 1 })).toBe(undefined);
+
+    expect(typeof actualSpan.isRecording()).toBe('boolean');
+    expect(noopSpan.isRecording()).toBe(false);
+
+    expect(typeof actualSpan.spanContext()).toBe('object');
+    expect(noopSpan.spanContext()).toBe(undefined);
+
+    methodNames.forEach((methodName) => {
+      expect(actualSpan[methodName]).toHaveBeenCalled();
+      expect(noopSpan[methodName]).toHaveBeenCalled();
+    });
   });
 });
