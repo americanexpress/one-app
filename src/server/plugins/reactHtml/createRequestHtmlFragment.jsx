@@ -54,18 +54,18 @@ const getModuleDataBreaker = createCircuitBreaker(getModuleData);
  * @param {*} opts options
  */
 const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
-  const { tracer } = request.openTelemetry();
+  const { tracer, activeSpan } = request.openTelemetry();
 
   // eslint-disable-next-line complexity
-  return tracer.startActiveSpan('createRequestHtmlFragment', async (parentSpan) => {
+  return tracer.startActiveSpan('createRequestHtmlFragment', { attributes: activeSpan?.attributes }, async (parentSpan) => {
     try {
-      const createRoutesSpan = tracer.startSpan(`${parentSpan.name} -> createRoutes`, { attributes: { phase: 3 } });
+      const createRoutesSpan = tracer.startSpan(`${parentSpan.name} -> createRoutes`, { attributes: activeSpan?.attributes });
       const { store } = request;
       const { dispatch } = store;
       const routes = createRoutes(store);
       createRoutesSpan.end();
 
-      const checkRoutesSpan = tracer.startSpan(`${parentSpan.name} -> checkRoutes`, { attributes: { phase: 4 } });
+      const checkRoutesSpan = tracer.startSpan(`${parentSpan.name} -> checkRoutes`, { attributes: activeSpan?.attributes });
       const { redirectLocation, renderProps } = await matchPromise({
         routes,
         location: request.url,
@@ -88,7 +88,7 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         }
         checkRoutesSpan.end();
 
-        const buildRenderPropsSpan = tracer.startSpan(`${parentSpan.name} -> buildRenderProps`, { attributes: { phase: 5 } });
+        const buildRenderPropsSpan = tracer.startSpan(`${parentSpan.name} -> buildRenderProps`, { attributes: activeSpan?.attributes });
         const { httpStatus } = renderProps.routes.slice(-1)[0];
 
         if (httpStatus) {
@@ -115,7 +115,7 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         const state = store.getState();
         buildRenderPropsSpan.end();
 
-        const returnEarly = await tracer.startActiveSpan(`${parentSpan.name} -> loadModuleData`, { attributes: { phase: 6 } }, async (loadModuleDataSpan) => {
+        const returnEarly = await tracer.startActiveSpan(`${parentSpan.name} -> loadModuleData`, { attributes: activeSpan?.attributes }, async (loadModuleDataSpan) => {
           if (getRenderMethodName(state) === 'renderForStaticMarkup') {
             await dispatch(composeModules(routeModules));
           } else {
@@ -148,7 +148,7 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
 
         if (returnEarly) return;
 
-        const renderToStringSpan = tracer.startSpan(`${parentSpan.name} -> renderToString`, { attributes: { phase: 7 } });
+        const renderToStringSpan = tracer.startSpan(`${parentSpan.name} -> renderToString`, { attributes: activeSpan?.attributes });
         const renderMethod = getRenderMethodName(state) === 'renderForStaticMarkup'
           ? renderForStaticMarkup
           : renderForString;

@@ -19,6 +19,11 @@ import {
   Map, OrderedMap, List, Set, OrderedSet, Record,
 } from 'immutable';
 
+jest.spyOn(console, 'error').mockImplementation((...args) => {
+  if (args[0].type === 'not implemented') return;
+  require('node:console').error(...args);
+});
+
 describe('transit', () => {
   let { default: transit } = require('../../../src/universal/utils/transit');
   const { writeError } = require('../../../src/universal/utils/transit');

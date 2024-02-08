@@ -127,7 +127,8 @@ describe('createRequestHtmlFragment', () => {
     req.url = 'http://example.com/request';
     req.store = { dispatch, getState };
     tracer = createTracer();
-    req.openTelemetry = jest.fn(() => ({ tracer }));
+    const activeSpan = { attributes: { 'req.method': 'GET', 'req.url': '/foo' } };
+    req.openTelemetry = jest.fn(() => ({ tracer, activeSpan }));
 
     createRoutes = jest.fn(() => [{ path: '/', moduleName: 'root' }]);
 

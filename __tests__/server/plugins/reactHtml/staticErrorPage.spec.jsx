@@ -14,6 +14,7 @@
  * permissions and limitations under the License.
  */
 
+import util from 'node:util';
 import Fastify from 'fastify';
 import staticErrorPage, {
   setErrorPage,
@@ -29,10 +30,8 @@ jest.mock('@americanexpress/fetch-enhancers', () => ({
   ),
 }));
 
-jest.spyOn(console, 'info').mockImplementation(() => { });
-jest.spyOn(console, 'log').mockImplementation(() => { });
-jest.spyOn(console, 'error').mockImplementation(() => { });
-jest.spyOn(console, 'warn').mockImplementationOnce(() => { });
+jest.spyOn(console, 'error').mockImplementation(() => {});
+jest.spyOn(console, 'warn').mockImplementation(util.format);
 
 describe('staticErrorPage', () => {
   beforeEach(() => {
@@ -209,7 +208,7 @@ describe('staticErrorPage', () => {
     expect(global.fetch).toHaveBeenCalledTimes(1);
     expect(global.fetch).toHaveBeenCalledWith(errorPageUrl);
     expect(await data.timeout).toBe(6000);
-    expect(console.warn).toHaveBeenCalledWith('Failed to fetch custom error page with status:', statusCode);
+    expect(console.warn.mock.results[0].value).toBe('Failed to fetch custom error page with status: 500');
     expect(response.body).toContain('<!DOCTYPE html>');
     expect(response.body).toContain('<meta name="application-name" content="one-app">');
     expect(response.body).toContain('Sorry, we are unable to load this page at this time. Please try again later.');

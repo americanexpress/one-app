@@ -19,7 +19,8 @@ import addSecurityHeaders from '../../../src/server/plugins/addSecurityHeaders';
 describe('addSecurityHeaders', () => {
   const span = { end: jest.fn() };
   const tracer = { startSpan: jest.fn(() => span) };
-  const openTelemetry = () => ({ tracer });
+  const activeSpan = { attributes: { 'req.method': 'GET', 'req.url': '/foo' } };
+  const openTelemetry = () => ({ tracer, activeSpan });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -48,7 +49,10 @@ describe('addSecurityHeaders', () => {
     expect(done).toHaveBeenCalled();
     expect(reply.header).toHaveBeenCalledTimes(9);
     expect(reply.header).toHaveBeenCalledWith('vary', 'Accept-Encoding');
-    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+    expect(reply.header).toHaveBeenCalledWith(
+      'Strict-Transport-Security',
+      'max-age=63072000; includeSubDomains'
+    );
     expect(reply.header).toHaveBeenCalledWith('x-dns-prefetch-control', 'off');
     expect(reply.header).toHaveBeenCalledWith('x-download-options', 'noopen');
     expect(reply.header).toHaveBeenCalledWith('x-permitted-cross-domain-policies', 'none');
@@ -75,17 +79,22 @@ describe('addSecurityHeaders', () => {
     };
     const done = jest.fn();
 
-    addSecurityHeaders(fastify, {
-      matchGetRoutes: [
-        '/testing',
-      ],
-    }, done);
+    addSecurityHeaders(
+      fastify,
+      {
+        matchGetRoutes: ['/testing'],
+      },
+      done
+    );
 
     expect(fastify.addHook).toHaveBeenCalled();
     expect(done).toHaveBeenCalled();
     expect(reply.header).toHaveBeenCalledTimes(9);
     expect(reply.header).toHaveBeenCalledWith('vary', 'Accept-Encoding');
-    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+    expect(reply.header).toHaveBeenCalledWith(
+      'Strict-Transport-Security',
+      'max-age=63072000; includeSubDomains'
+    );
     expect(reply.header).toHaveBeenCalledWith('x-dns-prefetch-control', 'off');
     expect(reply.header).toHaveBeenCalledWith('x-download-options', 'noopen');
     expect(reply.header).toHaveBeenCalledWith('x-permitted-cross-domain-policies', 'none');
@@ -118,7 +127,10 @@ describe('addSecurityHeaders', () => {
     expect(done).toHaveBeenCalled();
     expect(reply.header).toHaveBeenCalledTimes(9);
     expect(reply.header).toHaveBeenCalledWith('vary', 'Accept-Encoding');
-    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+    expect(reply.header).toHaveBeenCalledWith(
+      'Strict-Transport-Security',
+      'max-age=63072000; includeSubDomains'
+    );
     expect(reply.header).toHaveBeenCalledWith('x-dns-prefetch-control', 'off');
     expect(reply.header).toHaveBeenCalledWith('x-download-options', 'noopen');
     expect(reply.header).toHaveBeenCalledWith('x-permitted-cross-domain-policies', 'none');
@@ -152,7 +164,10 @@ describe('addSecurityHeaders', () => {
     expect(done).toHaveBeenCalled();
     expect(reply.header).toHaveBeenCalledTimes(9);
     expect(reply.header).toHaveBeenCalledWith('vary', 'Accept-Encoding');
-    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+    expect(reply.header).toHaveBeenCalledWith(
+      'Strict-Transport-Security',
+      'max-age=63072000; includeSubDomains'
+    );
     expect(reply.header).toHaveBeenCalledWith('x-dns-prefetch-control', 'off');
     expect(reply.header).toHaveBeenCalledWith('x-download-options', 'noopen');
     expect(reply.header).toHaveBeenCalledWith('x-permitted-cross-domain-policies', 'none');
@@ -181,7 +196,17 @@ describe('addSecurityHeaders', () => {
     addSecurityHeaders(fastify, {}, done);
 
     expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-    expect(tracer.startSpan).toHaveBeenCalledWith('addSecurityHeaders', { attributes: { phase: 12 } });
+    expect(tracer.startSpan.mock.calls[0]).toMatchInlineSnapshot(`
+      [
+        "addSecurityHeaders",
+        {
+          "attributes": {
+            "req.method": "GET",
+            "req.url": "/foo",
+          },
+        },
+      ]
+    `);
     expect(span.end).toHaveBeenCalledTimes(1);
   });
 });

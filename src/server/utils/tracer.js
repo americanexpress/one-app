@@ -37,19 +37,31 @@ const tracerProvider = new NodeTracerProvider({
   resource: { attributes: getOtelResourceAttributes() },
 });
 
+const devCdnPort = process.env.HTTP_ONE_APP_DEV_CDN_PORT || '3001';
+const traceAllRequests = process.env.ONE_TRACE_ALL_REQUESTS === 'true';
+
 registerInstrumentations({
   tracerProvider,
   instrumentations: [
-    new HttpInstrumentation(),
-    new DnsInstrumentation(),
+    new HttpInstrumentation({
+      ignoreIncomingRequestHook: !traceAllRequests
+        ? (request) => request.url.startsWith('/_/') || request.headers.host.endsWith(`:${devCdnPort}`)
+        : undefined,
+      requireParentforOutgoingSpans: !traceAllRequests,
+      startIncomingSpanHook: () => ({ direction: 'in' }),
+      startOutgoingSpanHook: () => ({ direction: 'out' }),
+    }),
+    new DnsInstrumentation({
+      ignoreHostnames: !traceAllRequests ? ['0.0.0.0', 'localhost'] : undefined,
+    }),
     new PinoInstrumentation(),
   ],
 });
 
-const tracerProcessor = new BatchSpanProcessor(new OTLPTraceExporter());
+const batchProcessor = new BatchSpanProcessor(new OTLPTraceExporter());
 
 if (process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT) {
-  tracerProvider.addSpanProcessor(tracerProcessor);
+  tracerProvider.addSpanProcessor(batchProcessor);
 }
 
 if (process.env.NODE_ENV === 'development' && argv.logLevel === 'trace') {
@@ -58,10 +70,10 @@ if (process.env.NODE_ENV === 'development' && argv.logLevel === 'trace') {
 
 tracerProvider.register();
 
-['SIGINT', 'SIGTERM'].forEach((signalName) => process.on(signalName, () => tracerProcessor.shutdown()));
+['SIGINT', 'SIGTERM'].forEach((signalName) => process.on(signalName, () => batchProcessor.shutdown()));
 
 /* eslint-disable no-underscore-dangle -- exports are for testing only */
 // This file should not be imported during runtime, but rather loaded using --require
 export const _tracerProvider = tracerProvider;
-export const _tracerProcessor = tracerProcessor;
+export const _batchProcessor = batchProcessor;
 /* eslint-enable no-underscore-dangle */

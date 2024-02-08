@@ -25,17 +25,33 @@ import readJsonFile from '../../readJsonFile';
 
 const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
 
-export function createOtelTransport() {
-  let logRecordProcessorOptions = {
-    recordProcessorType: process.env.INTEGRATION_TEST === 'true' ? 'simple' : 'batch',
-    exporterOptions: { protocol: 'grpc' },
-  };
+export function createOtelTransport({
+  grpc: grpcExporter = true,
+  console: consoleExporter = false,
+} = {}) {
+  if (!grpcExporter && !consoleExporter) {
+    console.error('OTEL DISABLED: attempted to create OpenTelemetry transport without including a processor');
+    return undefined;
+  }
 
-  if (process.env.NODE_ENV === 'development') {
-    logRecordProcessorOptions = [logRecordProcessorOptions, {
+  let logRecordProcessorOptions = [];
+
+  if (grpcExporter) {
+    logRecordProcessorOptions.push({
+      recordProcessorType: process.env.INTEGRATION_TEST === 'true' ? 'simple' : 'batch',
+      exporterOptions: { protocol: 'grpc' },
+    });
+  }
+
+  if (consoleExporter) {
+    logRecordProcessorOptions.push({
       recordProcessorType: 'simple',
       exporterOptions: { protocol: 'console' },
-    }];
+    });
+  }
+
+  if (logRecordProcessorOptions.length === 1) {
+    [logRecordProcessorOptions] = logRecordProcessorOptions;
   }
 
   return pino.transport({
@@ -58,7 +74,7 @@ export default {
     err: serializeError,
   },
   formatters: {
-    level(label, number) {
+    level(_label, number) {
       return { level: number === 35 ? 30 : number };
     },
     log(entry) {
