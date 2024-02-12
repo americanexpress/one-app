@@ -4,8 +4,8 @@
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
-    "node": ">=16 <=18",
-    "npm": ">=8"
+    "node": ">=18 <=20",
+    "npm": ">=10"
   },
   "scripts": {
     "preinstall": "npx check-engines@1",
@@ -57,18 +57,7 @@
   "bugs": {
     "url": "https://github.com/americanexpress/one-app/issues"
   },
-  "contributors": [
-    "Andres Escobar <Andres.Escobar@aexp.com> (https://github.com/anescobar1991)",
-    "James Singleton <James.Singleton1@aexp.com> (https://github.com/JamesSingleton)",
-    "Jamie King  <Jamie.King@aexp.com> (https://github.com/10xLaCroixDrinker)",
-    "Jonathan Adshead <Jonathan.Adshead@aexp.com> (https://github.com/JAdshead)",
-    "Michael Tobia <Michael.M.Tobia@aexp.com> (https://github.com/Francois-Esquire)",
-    "Michael Tomcal <Michael.A.Tomcal@aexp.com> (https://github.com/mtomcal)",
-    "Stephanie Coates  <Stephanie.Coates1@aexp.com> (https://github.com/stephaniecoates)",
-    "Nelly Kiboi <Nelly.J.Kiboi@aexp.com> (https://github.com/nellyk)",
-    "Nickolas Oliver <nickolas.oliver@aexp.com> (https://github.com/PixnBits)",
-    "Ruben Casas <ruben.casas@aexp.com> (https://github.com/infoxicator)"
-  ],
+  "author": "Web Frameworks Engineering <oneappteam@aexp.com>",
   "license": "Apache-2.0",
   "keywords": [
     "spa",
