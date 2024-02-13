@@ -26,33 +26,31 @@ import baseConfig from './config/base';
 export function createLogger() {
   const useProductionConfig = !!(argv.logFormat === 'machine' || process.env.NODE_ENV !== 'development');
 
-  let pinoConfig = baseConfig;
-  const transportStreams = [];
+  const getPinoConfig = () => {
+    if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) return deepmerge(baseConfig, otelConfig);
+    if (useProductionConfig) return deepmerge(baseConfig, productionConfig);
+    return baseConfig;
+  };
 
-  if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
-    transportStreams.push(createOtelTransport({
-      grpc: true,
-      console: process.env.NODE_ENV === 'development' && argv.logFormat === 'machine',
-    }));
-    pinoConfig = deepmerge(baseConfig, otelConfig);
-  } else if (useProductionConfig) {
-    pinoConfig = deepmerge(baseConfig, productionConfig);
-  }
+  const getTransport = () => {
+    const transportStreams = [];
+    if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
+      transportStreams.push(createOtelTransport({
+        grpc: true,
+        console: process.env.NODE_ENV === 'development' && argv.logFormat === 'machine',
+      }));
+    }
+    if (!useProductionConfig) {
+      // eslint-disable-next-line global-require -- do not load development logger in production
+      transportStreams.push(require('./config/development').default);
+    }
 
-  if (!useProductionConfig) {
-    // eslint-disable-next-line global-require -- do not load development logger in production
-    transportStreams.push(require('./config/development').default);
-  }
+    if (transportStreams.length === 1) return transportStreams[0];
+    if (transportStreams.length > 1) return multistream(transportStreams);
+    return undefined;
+  };
 
-  let transport;
-
-  if (transportStreams.length === 1) {
-    [transport] = transportStreams;
-  } else if (transportStreams.length > 1) {
-    transport = multistream(transportStreams);
-  }
-
-  return pino(pinoConfig, transport);
+  return pino(getPinoConfig(), getTransport());
 }
 
 export default createLogger();
