@@ -14,15 +14,15 @@
  * permissions and limitations under the License.
  */
 
+/* eslint-disable no-underscore-dangle -- prom-client uses dangling underscore */
+
 describe('summaries', () => {
   let Summary;
+  let register;
 
   function load() {
     jest.resetModules();
-
-    jest.mock('prom-client');
-    ({ Summary } = require('prom-client'));
-
+    ({ Summary, register } = require('prom-client'));
     return require('../../../src/server/metrics/summaries');
   }
 
@@ -34,18 +34,19 @@ describe('summaries', () => {
 
     it('creates a summary with the options', () => {
       const { createSummary } = load();
-      createSummary({ name: 'yup' });
-      expect(Summary).toHaveBeenCalledTimes(1);
-      const summary = Summary.mock.instances[0];
+      expect(register._metrics).toEqual({});
+      createSummary({ name: 'yup', help: 'yup_help' });
+      const summary = register._metrics.yup;
       expect(summary).toBeInstanceOf(Summary);
     });
 
     it('does not create a new summary if one with the same name already exists', () => {
       const { createSummary } = load();
-      createSummary({ name: 'yup' });
-      expect(Summary).toHaveBeenCalledTimes(1);
-      createSummary({ name: 'yup' });
-      expect(Summary).toHaveBeenCalledTimes(1);
+      expect(register._metrics).toEqual({});
+      createSummary({ name: 'yup', help: 'yup_help' });
+      const summary = register._metrics.yup;
+      createSummary({ name: 'yup', help: 'yup_help' });
+      expect(register._metrics.yup).toBe(summary);
     });
   });
 
@@ -64,19 +65,25 @@ describe('summaries', () => {
 
     it('calls the startTimer method of the summary', () => {
       const { createSummary, startSummaryTimer } = load();
-      createSummary({ name: 'yup' });
-      const summary = Summary.mock.instances[0];
-      startSummaryTimer('yup');
-      expect(summary.startTimer).toHaveBeenCalledTimes(1);
+      createSummary({ name: 'yup', help: 'yup_help' });
+      const summary = register._metrics.yup;
+      expect(summary.hashMap[''].count).toBe(0);
+      expect(summary.hashMap[''].sum).toBe(0);
+      const endTimer = startSummaryTimer('yup');
+      endTimer();
+      expect(summary.hashMap[''].count).toBe(1);
+      expect(summary.hashMap[''].sum).toBeGreaterThan(0);
     });
 
     it('calls the startTimer method of the summary with the arguments', () => {
       const { createSummary, startSummaryTimer } = load();
-      createSummary({ name: 'yup' });
-      const summary = Summary.mock.instances[0];
-      startSummaryTimer('yup', 1, 'two', [null, null, null]);
-      expect(summary.startTimer).toHaveBeenCalledTimes(1);
-      expect(summary.startTimer).toHaveBeenCalledWith(1, 'two', [null, null, null]);
+      createSummary({ name: 'yup', help: 'yup_help', labelNames: ['foo'] });
+      const summary = register._metrics.yup;
+      expect(summary.hashMap).toEqual({});
+      const endTimer = startSummaryTimer('yup', { foo: 'bar' });
+      endTimer();
+      expect(summary.hashMap['foo:bar,'].count).toBe(1);
+      expect(summary.hashMap['foo:bar,'].sum).toBeGreaterThan(0);
     });
   });
 });

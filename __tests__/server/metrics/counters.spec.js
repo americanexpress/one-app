@@ -14,15 +14,15 @@
  * permissions and limitations under the License.
  */
 
+/* eslint-disable no-underscore-dangle -- prom-client uses dangling underscore */
+
 describe('counters', () => {
   let Counter;
+  let register;
 
   function load() {
     jest.resetModules();
-
-    jest.mock('prom-client');
-    ({ Counter } = require('prom-client'));
-
+    ({ Counter, register } = require('prom-client'));
     return require('../../../src/server/metrics/counters');
   }
 
@@ -34,18 +34,19 @@ describe('counters', () => {
 
     it('creates a counter with the options', () => {
       const { createCounter } = load();
-      createCounter({ name: 'yup' });
-      expect(Counter).toHaveBeenCalledTimes(1);
-      const counter = Counter.mock.instances[0];
+      expect(register._metrics).toEqual({});
+      createCounter({ name: 'yup', help: 'yup_help' });
+      const counter = register._metrics.yup;
       expect(counter).toBeInstanceOf(Counter);
     });
 
     it('does not create a new counter if one with the same name already exists', () => {
       const { createCounter } = load();
-      createCounter({ name: 'yup' });
-      expect(Counter).toHaveBeenCalledTimes(1);
-      createCounter({ name: 'yup' });
-      expect(Counter).toHaveBeenCalledTimes(1);
+      expect(register._metrics).toEqual({});
+      createCounter({ name: 'yup', help: 'yup_help' });
+      const counter = register._metrics.yup;
+      createCounter({ name: 'yup', help: 'yup_help' });
+      expect(register._metrics.yup).toBe(counter);
     });
   });
 
@@ -57,24 +58,38 @@ describe('counters', () => {
 
     it('throws an error if the counter does not exist', () => {
       const { incrementCounter } = load();
-      expect(() => incrementCounter('nope')).toThrowErrorMatchingSnapshot();
+      expect(() => incrementCounter('nope')).toThrowErrorMatchingInlineSnapshot(
+        '"unable to find counter nope, please create it first"'
+      );
     });
 
     it('calls the inc method of the counter', () => {
       const { createCounter, incrementCounter } = load();
-      createCounter({ name: 'yup' });
-      const counter = Counter.mock.instances[0];
+      createCounter({ name: 'yup', help: 'yup_help' });
+      const counter = register._metrics.yup;
+      expect(counter.hashMap[''].value).toBe(0);
       incrementCounter('yup');
-      expect(counter.inc).toHaveBeenCalledTimes(1);
+      expect(counter.hashMap[''].value).toBe(1);
+      incrementCounter('yup', 2);
+      expect(counter.hashMap[''].value).toBe(3);
     });
 
     it('calls the inc method of the counter with the arguments', () => {
       const { createCounter, incrementCounter } = load();
-      createCounter({ name: 'yup' });
-      const counter = Counter.mock.instances[0];
-      incrementCounter('yup', 1, 'two', [null, null, null]);
-      expect(counter.inc).toHaveBeenCalledTimes(1);
-      expect(counter.inc).toHaveBeenCalledWith(1, 'two', [null, null, null]);
+      createCounter({ name: 'yup', help: 'yup_help', labelNames: ['foo'] });
+      const counter = register._metrics.yup;
+      expect(counter.hashMap).toEqual({});
+      incrementCounter('yup', { foo: 'bar' }, 2);
+      expect(counter.hashMap).toMatchInlineSnapshot(`
+        {
+          "foo:bar,": {
+            "labels": {
+              "foo": "bar",
+            },
+            "value": 2,
+          },
+        }
+      `);
     });
   });
 });

@@ -29,6 +29,7 @@ import fastifyStatic from '@fastify/static';
 import fastifyHelmet from '@fastify/helmet';
 import fastifySensible from '@fastify/sensible';
 import fastifyMetrics from 'fastify-metrics';
+import client from 'prom-client';
 
 import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
@@ -46,28 +47,11 @@ import logger from './utils/logging/logger';
 const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
 
 /**
- * Creates a Fastify app with built-in routes and configuration
- * @param {import('fastify').FastifyHttp2Options} opts Fastify app options
- * @returns {import('fastify').FastifyInstance}
+ * Registers all the plugins and routes for the Fastify app
+ * @param {import('fastify').FastifyInstance} fastify Fastify instance
  */
 
-export async function createApp(opts = {}) {
-  const enablePostToModuleRoutes = process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true';
-  const fastify = Fastify({
-    logger,
-    disableRequestLogging: true,
-    frameworkErrors: function frameworkErrors(error, request, reply) {
-      const { method, url, headers } = request;
-      const correlationId = headers['correlation-id'];
-
-      request.log.error('Fastify internal error: method %s, url "%s", correlationId "%s"', method, url, correlationId, error);
-
-      return renderStaticErrorPage(request, reply);
-    },
-    bodyLimit: bytes(process.env.ONE_MAX_POST_REQUEST_PAYLOAD || '10mb'), // Note: this applies to all routes
-    ...opts,
-  });
-
+async function appPlugin(fastify) {
   fastify.register(fastifySensible);
   fastify.register(ensureCorrelationId);
   fastify.register(fastifyCookie);
@@ -75,6 +59,7 @@ export async function createApp(opts = {}) {
   fastify.register(fastifyMetrics, {
     defaultMetrics: { enabled: false },
     endpoint: null,
+    promClient: client,
   });
 
   fastify.register(compress, {
@@ -224,7 +209,7 @@ export async function createApp(opts = {}) {
       reply.sendHtml();
     });
 
-    if (enablePostToModuleRoutes) {
+    if (process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true') {
       instance.post('/*', (_request, reply) => {
         reply.sendHtml();
       });
@@ -244,8 +229,34 @@ export async function createApp(opts = {}) {
 
     request.log.error('Fastify application error: method %s, url "%s", correlationId "%s", headersSent: %s', method, url, correlationId, headersSent, error);
 
+    reply.code(500);
     return renderStaticErrorPage(request, reply);
   });
+}
+
+/**
+ * Creates a Fastify app with built-in routes and configuration
+ * @param {import('fastify').FastifyHttp2Options} opts Fastify app options
+ * @returns {import('fastify').FastifyInstance}
+ */
+
+export async function createApp(opts = {}) {
+  const fastify = Fastify({
+    logger,
+    disableRequestLogging: true,
+    frameworkErrors: function frameworkErrors(error, request, reply) {
+      const { method, url, headers } = request;
+      const correlationId = headers['correlation-id'];
+
+      request.log.error('Fastify internal error: method %s, url "%s", correlationId "%s"', method, url, correlationId, error);
+
+      return renderStaticErrorPage(request, reply);
+    },
+    bodyLimit: bytes(process.env.ONE_MAX_POST_REQUEST_PAYLOAD || '10mb'), // Note: this applies to all routes
+    ...opts,
+  });
+
+  fastify.register(appPlugin);
 
   await fastify.ready();
 

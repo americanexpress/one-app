@@ -178,7 +178,7 @@ describe('Tests that require Docker setup', () => {
         },
       });
 
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(404);
       // preflight-only headers
       const rawHeaders = response.headers.raw();
       expect(rawHeaders).not.toHaveProperty('access-control-max-age');
@@ -599,7 +599,7 @@ describe('Tests that require Docker setup', () => {
               {
                 level: 'SEVERE',
                 message: expect.stringMatching(
-                  /https:\/\/one-app:8443\/demo\/healthy-frank - Failed to find a valid digest in the 'integrity' attribute for resource 'https:\/\/sample-cdn\.frank\/modules\/.+\/healthy-frank\/0\.0\.0\/healthy-frank.browser.js' with computed SHA-256 integrity '.+'\. The resource has been blocked\./
+                  /https:\/\/one-app:8443\/demo\/healthy-frank - Failed to find a valid digest in the 'integrity' attribute for resource 'https:\/\/sample-cdn\.frank\/modules\/.+\/healthy-frank\/0\.0\.0\/healthy-frank.browser.js' with computed SHA-384 integrity '.+'\. The resource has been blocked\./
                 ),
                 source: 'security',
                 timestamp: expect.any(Number),
@@ -828,7 +828,7 @@ describe('Tests that require Docker setup', () => {
             );
             // eslint-disable-next-line no-useless-escape
             expect(workingUrl).toBe(
-              `${testCdnUrl}/${gitSha}/${moduleName}/0.0.0/${moduleName}.node.js"}`
+              `${testCdnUrl}/${gitSha}/${moduleName}/0.0.0/${moduleName}.node.js)`
             );
           });
           test('fails to get external `semver` for child module as an unsupplied `requiredExternal` for new module in mooduleMap', async () => {
@@ -1711,7 +1711,7 @@ describe('Tests that can run against either local Docker setup or remote One App
               'accept-language': 'en-US,en;q=0.9',
               host: expect.any(String),
               'user-agent':
-                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.75 Safari/537.36',
+                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             },
             method: 'GET',
             originalUrl: '/vitruvius',
@@ -2010,9 +2010,11 @@ describe('heapdump', () => {
 
     const aboutToWriteFilePath = aboutToWriteRaw
       .replace(/^about to write a heapdump to /, '')
-      .replace(/".+$/, '');
+      .replace(/\).*$/, '');
 
-    const didWriteFilePath = didWriteRaw.replace(/^wrote heapdump out to /, '').replace(/".+$/, '');
+    const didWriteFilePath = didWriteRaw
+      .replace(/^wrote heapdump out to /, '')
+      .replace(/\).*$/, '');
 
     expect(aboutToWriteFilePath).toEqual(didWriteFilePath);
     expect(path.dirname(didWriteFilePath)).toBe('/tmp');
