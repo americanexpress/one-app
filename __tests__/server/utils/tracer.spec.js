@@ -19,7 +19,6 @@ import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
 // eslint-disable-next-line no-unused-vars -- required for mocking
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { DnsInstrumentation } from '@opentelemetry/instrumentation-dns';
 import {
   BatchSpanProcessor,
   SimpleSpanProcessor,
@@ -32,6 +31,9 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 jest.mock('@opentelemetry/instrumentation');
 jest.mock('@opentelemetry/instrumentation-http');
 jest.mock('@opentelemetry/instrumentation-pino');
+jest.mock('@opentelemetry/sdk-trace-base');
+jest.mock('@opentelemetry/exporter-trace-otlp-grpc');
+
 jest.mock('@opentelemetry/sdk-trace-node', () => {
   const { NodeTracerProvider: ActualNodeTracerProvider } = jest.requireActual(
     '@opentelemetry/sdk-trace-node'
@@ -39,15 +41,12 @@ jest.mock('@opentelemetry/sdk-trace-node', () => {
   return {
     NodeTracerProvider: jest.fn(() => {
       const tracerProvider = new ActualNodeTracerProvider();
-      tracerProvider.register = jest.fn();
-      tracerProvider.addSpanProcessor = jest.fn();
+      jest.spyOn(tracerProvider, 'register');
+      jest.spyOn(tracerProvider, 'addSpanProcessor');
       return tracerProvider;
     }),
   };
 });
-jest.mock('@opentelemetry/instrumentation-dns');
-jest.mock('@opentelemetry/sdk-trace-base');
-jest.mock('@opentelemetry/exporter-trace-otlp-grpc');
 
 jest.mock('../../../src/server/utils/getOtelResourceAttributes', () => () => ({
   'test-resource-attribute': 'test-resource-attribute-value',
@@ -124,34 +123,9 @@ describe('tracer', () => {
     expect(registerInstrumentations).toHaveBeenCalledTimes(1);
     expect(registerInstrumentations).toHaveBeenCalledWith({
       tracerProvider: _tracerProvider,
-      instrumentations: [
-        expect.any(HttpInstrumentation),
-        expect.any(DnsInstrumentation),
-        expect.any(PinoInstrumentation),
-      ],
+      instrumentations: [expect.any(HttpInstrumentation), expect.any(PinoInstrumentation)],
     });
     expect(_tracerProvider.register).toHaveBeenCalledTimes(1);
-  });
-
-  it('should ignore DNS requests to itself', () => {
-    setup({});
-    expect(DnsInstrumentation.mock.calls[0][0]).toMatchInlineSnapshot(`
-      {
-        "ignoreHostnames": [
-          "0.0.0.0",
-          "localhost",
-        ],
-      }
-    `);
-  });
-
-  it('should not ignore DNS requests to itself when tracing all requests', () => {
-    setup({ traceAllRequests: true });
-    expect(DnsInstrumentation.mock.calls[0][0]).toMatchInlineSnapshot(`
-      {
-        "ignoreHostnames": undefined,
-      }
-    `);
   });
 
   it('should not trace outgoing requests that do not have a parent span', () => {
@@ -208,6 +182,36 @@ describe('tracer', () => {
         "direction": "out",
       }
     `);
+  });
+
+  it('should update span names for incoming and outgoing HTTP requests', () => {
+    setup({});
+    const startSpan = (spanName, { attributes }) => {
+      const span = { name: spanName, attributes };
+      span.updateName = (updatedName) => {
+        span.name = updatedName;
+      };
+      return span;
+    };
+    const { requestHook } = HttpInstrumentation.mock.calls[0][0];
+    const incomingSpan = startSpan('mock-incoming-span', {
+      attributes: {
+        direction: 'in',
+        'http.method': 'GET',
+        'http.target': '/mock-route',
+      },
+    });
+    requestHook(incomingSpan);
+    expect(incomingSpan.name).toMatchInlineSnapshot('"GET /mock-route"');
+    const outgoingSpan = startSpan('mock-outgoing-span', {
+      attributes: {
+        direction: 'out',
+        'http.method': 'POST',
+        'http.url': 'http://localhost/mock-route',
+      },
+    });
+    requestHook(outgoingSpan);
+    expect(outgoingSpan.name).toMatchInlineSnapshot('"POST http://localhost/mock-route"');
   });
 
   it('should register a batch span processor with OTLP exporter when traces endpoint is set', () => {

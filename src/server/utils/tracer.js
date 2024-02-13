@@ -18,7 +18,6 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { DnsInstrumentation } from '@opentelemetry/instrumentation-dns';
 import {
   BatchSpanProcessor,
   SimpleSpanProcessor,
@@ -48,11 +47,16 @@ registerInstrumentations({
         ? (request) => request.url.startsWith('/_/') || request.headers.host.endsWith(`:${devCdnPort}`)
         : undefined,
       requireParentforOutgoingSpans: !traceAllRequests,
+      requestHook(span) {
+        if (span?.attributes?.direction === 'in') {
+          span.updateName(`${span.attributes['http.method']} ${span.attributes['http.target']}`);
+        }
+        if (span?.attributes?.direction === 'out') {
+          span.updateName(`${span.attributes['http.method']} ${span.attributes['http.url']}`);
+        }
+      },
       startIncomingSpanHook: () => ({ direction: 'in' }),
       startOutgoingSpanHook: () => ({ direction: 'out' }),
-    }),
-    new DnsInstrumentation({
-      ignoreHostnames: !traceAllRequests ? ['0.0.0.0', 'localhost'] : undefined,
     }),
     new PinoInstrumentation(),
   ],
