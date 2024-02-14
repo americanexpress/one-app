@@ -40,11 +40,11 @@ function setGauge(name, ...args) {
   gauges[name].set(...args);
 }
 
-function resetGauge(name, ...args) {
+function resetGauge(name) {
   if (!gauges[name]) {
     throw new Error(`unable to find gauge ${name}, please create it first`);
   }
-  gauges[name].reset(...args);
+  gauges[name].reset();
 }
 
 export {
