@@ -115,7 +115,7 @@ export const oneAppDevCdnFactory = ({
     console.error('do not include one-app-dev-cdn in production');
   }
 
-  const oneAppDevCdn = Fastify({ logger, disableRequestLogging: false });
+  const oneAppDevCdn = Fastify({ logger, disableRequestLogging: true });
   oneAppDevCdn.register(compress, {
     global: false,
   });
