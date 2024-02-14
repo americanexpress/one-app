@@ -144,7 +144,6 @@
     "yargs": "^17.5.1"
   },
   "devDependencies": {
-    "@americanexpress/one-app-dev-cdn": "^3.3.2",
     "@americanexpress/one-app-dev-proxy": "^2.0.0",
     "@americanexpress/one-service-worker": "^1.0.4",
     "@babel/cli": "^7.19.3",
