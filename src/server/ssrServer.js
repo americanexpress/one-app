@@ -30,6 +30,7 @@ import fastifyStatic from '@fastify/static';
 import fastifyHelmet from '@fastify/helmet';
 import fastifySensible from '@fastify/sensible';
 import fastifyMetrics from 'fastify-metrics';
+import openTelemetry from '@opentelemetry/api';
 import openTelemetryPlugin from '@autotelic/fastify-opentelemetry';
 import client from 'prom-client';
 
@@ -56,7 +57,11 @@ const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
 
 async function appPlugin(fastify) {
   if (process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || argv.logLevel === 'trace') {
-    fastify.register(openTelemetryPlugin, { wrapRoutes: true });
+    fastify.register(openTelemetryPlugin);
+    fastify.addHook('onRequest', (request, reply, done) => {
+      const { context } = request.openTelemetry();
+      openTelemetry.context.with(context, done);
+    });
   } else {
     fastify.register(noopTracer);
   }

@@ -1597,7 +1597,7 @@ describe('Tests that can run against either local Docker setup or remote One App
           )}`
         );
 
-        const { traceId, spanId: parentSpanId } = getSpanByAttribute(
+        const { traceId } = getSpanByAttribute(
           getSpans('@opentelemetry/instrumentation-http'),
           { key: 'http.target', value: target }
         );
@@ -1607,10 +1607,9 @@ describe('Tests that can run against either local Docker setup or remote One App
         const spans = getSpans('@autotelic/fastify-opentelemetry', traceId);
         expect(spans.length).toBe(14);
 
-        const dataFetchSpan = getSpanByAttribute(httpSpans, {
-          key: 'http.url',
-          value: 'https://fast.api.frank/posts',
-        });
+        const { spanId: parentSpanId } = getSpanByName(spans, 'GET /*');
+
+        const dataFetchSpan = getSpanByAttribute(httpSpans, { key: 'direction', value: 'out' });
         const loadModuleDataSpan = getSpanByName(
           spans,
           'createRequestHtmlFragment -> loadModuleData'
@@ -1663,12 +1662,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             (span) => span.parentSpanId === createRequestHtmlFragmentSpanId
           )
         ).toBe(true);
-        expect(getSpanByName(spans, 'sendHtml').parentSpanId).toBe(
-          getSpanByName(spans, 'GET /*').spanId
-        );
-        const otherSpans = spans.filter(
-          (span) => !span.name.startsWith('createRequestHtmlFragment ->') && span.name !== 'sendHtml'
-        );
+        const otherSpans = spans.filter((span) => !span.name.startsWith('createRequestHtmlFragment ->') && span.name !== 'GET /*');
         expect(otherSpans.every((span) => span.parentSpanId === parentSpanId)).toBe(true);
       });
 

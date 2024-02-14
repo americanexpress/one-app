@@ -34,8 +34,8 @@ const createRequestStore = (
   request, reply,
   { reducers }
 ) => {
-  const { tracer, activeSpan } = request.openTelemetry();
-  const span = tracer.startSpan('createRequestStore', { attributes: activeSpan?.attributes });
+  const { tracer } = request.openTelemetry();
+  const span = tracer.startSpan('createRequestStore');
   try {
     const serverConfig = getServerStateConfig();
     const clientConfig = getClientStateConfig();

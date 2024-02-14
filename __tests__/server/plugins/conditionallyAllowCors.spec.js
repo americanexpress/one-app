@@ -138,17 +138,7 @@ describe('conditionallyAllowCors', () => {
     await conditionallyAllowCors(fastify);
 
     expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-    expect(tracer.startSpan.mock.calls[0]).toMatchInlineSnapshot(`
-      [
-        "conditionallyAllowCors",
-        {
-          "attributes": {
-            "req.method": "GET",
-            "req.url": "/foo",
-          },
-        },
-      ]
-    `);
+    expect(tracer.startSpan).toHaveBeenCalledWith('conditionallyAllowCors');
     expect(span.end).toHaveBeenCalledTimes(1);
   });
 });

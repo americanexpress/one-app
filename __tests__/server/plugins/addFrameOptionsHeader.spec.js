@@ -126,16 +126,6 @@ it('adds a tracer span', () => {
   addFrameOptionsHeader(fastify, null, done);
 
   expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-  expect(tracer.startSpan.mock.calls[0]).toMatchInlineSnapshot(`
-    [
-      "addFrameOptionsHeader",
-      {
-        "attributes": {
-          "req.method": "GET",
-          "req.url": "/foo",
-        },
-      },
-    ]
-  `);
+  expect(tracer.startSpan).toHaveBeenCalledWith('addFrameOptionsHeader');
   expect(span.end).toHaveBeenCalledTimes(1);
 });

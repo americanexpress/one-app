@@ -21,6 +21,11 @@ const { NODE_ENV } = process.env;
 
 jest.mock('pino');
 jest.mock('fastify-metrics', () => (_req, _opts, done) => done());
+jest.mock('yargs', () => ({
+  argv: {
+    logLevel: 'trace',
+  },
+}));
 
 describe('ssrServer route testing', () => {
   afterAll(() => {

@@ -24,7 +24,9 @@ import {
   ParentBasedSampler,
   TraceIdRatioBasedSampler,
   ConsoleSpanExporter,
+  NoopSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
+import { trace } from '@opentelemetry/api';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import { argv } from 'yargs';
 import getOtelResourceAttributes from './getOtelResourceAttributes';
@@ -61,6 +63,22 @@ registerInstrumentations({
     new PinoInstrumentation(),
   ],
 });
+
+class PropagateAttributesProcessor extends NoopSpanProcessor {
+  // This is better covered by integration tests
+  /* istanbul ignore next */
+  // eslint-disable-next-line class-methods-use-this -- required when creating a span processor
+  onStart(span, parentContext) {
+    if (span.instrumentationLibrary.name === '@autotelic/fastify-opentelemetry') {
+      const parentSpan = trace.getSpan(parentContext);
+      if (parentSpan.instrumentationLibrary.name === '@autotelic/fastify-opentelemetry' && parentSpan?.attributes) {
+        span.setAttributes(parentSpan.attributes);
+      }
+    }
+  }
+}
+
+tracerProvider.addSpanProcessor(new PropagateAttributesProcessor());
 
 const batchProcessor = new BatchSpanProcessor(new OTLPTraceExporter());
 

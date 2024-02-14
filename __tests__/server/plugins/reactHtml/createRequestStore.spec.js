@@ -168,34 +168,14 @@ describe('createRequestStore', () => {
     it('should create a span', () => {
       createRequestStore(request, reply, { reducers });
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-      expect(tracer.startSpan.mock.calls[0]).toMatchInlineSnapshot(`
-        [
-          "createRequestStore",
-          {
-            "attributes": {
-              "req.method": "GET",
-              "req.url": "/foo",
-            },
-          },
-        ]
-      `);
+      expect(tracer.startSpan).toHaveBeenCalledWith('createRequestStore');
       expect(span.end).toHaveBeenCalled();
     });
 
     it('should still end the span if an error is thrown', () => {
       createRequestStore(request, reply, { reducers: null });
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-      expect(tracer.startSpan.mock.calls[0]).toMatchInlineSnapshot(`
-        [
-          "createRequestStore",
-          {
-            "attributes": {
-              "req.method": "GET",
-              "req.url": "/foo",
-            },
-          },
-        ]
-      `);
+      expect(tracer.startSpan).toHaveBeenCalledWith('createRequestStore');
       expect(request.log.error).toHaveBeenCalled();
       expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
       expect(span.end).toHaveBeenCalled();
