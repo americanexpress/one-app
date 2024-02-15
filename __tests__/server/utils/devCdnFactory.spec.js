@@ -19,7 +19,7 @@ import fs from 'fs';
 import rimraf from 'rimraf';
 import path from 'path';
 import mkdirp from 'mkdirp';
-import ProxyAgent from 'proxy-agent';
+import { ProxyAgent } from 'proxy-agent';
 import oneAppDevCdn from '../../../src/server/utils/devCdnFactory';
 import {
   removeExistingEntryIfConflicting,
