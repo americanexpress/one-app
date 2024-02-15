@@ -29,6 +29,7 @@ import fastifyStatic from '@fastify/static';
 import fastifyHelmet from '@fastify/helmet';
 import fastifySensible from '@fastify/sensible';
 import fastifyMetrics from 'fastify-metrics';
+import client from 'prom-client';
 
 import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
@@ -58,6 +59,7 @@ async function appPlugin(fastify) {
   fastify.register(fastifyMetrics, {
     defaultMetrics: { enabled: false },
     endpoint: null,
+    promClient: client,
   });
 
   fastify.register(compress, {

@@ -14,15 +14,15 @@
  * permissions and limitations under the License.
  */
 
+/* eslint-disable no-underscore-dangle -- prom-client uses dangling underscore */
+
 describe('gauges', () => {
   let Gauge;
+  let register;
 
   function load() {
     jest.resetModules();
-
-    jest.mock('prom-client');
-    ({ Gauge } = require('prom-client'));
-
+    ({ Gauge, register } = require('prom-client'));
     return require('../../../src/server/metrics/gauges');
   }
 
@@ -34,18 +34,19 @@ describe('gauges', () => {
 
     it('creates a gauge with the options', () => {
       const { createGauge } = load();
-      createGauge({ name: 'yup' });
-      expect(Gauge).toHaveBeenCalledTimes(1);
-      const gauge = Gauge.mock.instances[0];
+      expect(register._metrics).toEqual({});
+      createGauge({ name: 'yup', help: 'yup_help' });
+      const gauge = register._metrics.yup;
       expect(gauge).toBeInstanceOf(Gauge);
     });
 
     it('does not create a new gauge if one with the same name already exists', () => {
       const { createGauge } = load();
-      createGauge({ name: 'yup' });
-      expect(Gauge).toHaveBeenCalledTimes(1);
-      createGauge({ name: 'yup' });
-      expect(Gauge).toHaveBeenCalledTimes(1);
+      expect(register._metrics).toEqual({});
+      createGauge({ name: 'yup', help: 'yup_help' });
+      const gauge = register._metrics.yup;
+      createGauge({ name: 'yup', help: 'yup_help' });
+      expect(register._metrics.yup).toBe(gauge);
     });
   });
 
@@ -57,24 +58,38 @@ describe('gauges', () => {
 
     it('throws an error if the gauge does not exist', () => {
       const { incrementGauge } = load();
-      expect(() => incrementGauge('nope')).toThrowErrorMatchingSnapshot();
+      expect(() => incrementGauge('nope')).toThrowErrorMatchingInlineSnapshot(
+        '"unable to find gauge nope, please create it first"'
+      );
     });
 
     it('calls the inc method of the gauge', () => {
       const { createGauge, incrementGauge } = load();
-      createGauge({ name: 'yup' });
-      const gauge = Gauge.mock.instances[0];
+      createGauge({ name: 'yup', help: 'yup_help' });
+      const gauge = register._metrics.yup;
+      expect(gauge.hashMap[''].value).toBe(0);
       incrementGauge('yup');
-      expect(gauge.inc).toHaveBeenCalledTimes(1);
+      expect(gauge.hashMap[''].value).toBe(1);
+      incrementGauge('yup', 2);
+      expect(gauge.hashMap[''].value).toBe(3);
     });
 
     it('calls the inc method of the gauge with the arguments', () => {
       const { createGauge, incrementGauge } = load();
-      createGauge({ name: 'yup' });
-      const gauge = Gauge.mock.instances[0];
-      incrementGauge('yup', 1, 'two', [null, null, null]);
-      expect(gauge.inc).toHaveBeenCalledTimes(1);
-      expect(gauge.inc).toHaveBeenCalledWith(1, 'two', [null, null, null]);
+      createGauge({ name: 'yup', help: 'yup_help', labelNames: ['foo'] });
+      const gauge = register._metrics.yup;
+      expect(gauge.hashMap).toEqual({});
+      incrementGauge('yup', { foo: 'bar' }, 2);
+      expect(gauge.hashMap).toMatchInlineSnapshot(`
+        {
+          "foo:bar,": {
+            "labels": {
+              "foo": "bar",
+            },
+            "value": 2,
+          },
+        }
+      `);
     });
   });
 
@@ -86,24 +101,36 @@ describe('gauges', () => {
 
     it('throws an error if the gauge does not exist', () => {
       const { setGauge } = load();
-      expect(() => setGauge('nope')).toThrowErrorMatchingSnapshot();
+      expect(() => setGauge('nope')).toThrowErrorMatchingInlineSnapshot(
+        '"unable to find gauge nope, please create it first"'
+      );
     });
 
     it('calls the set method of the gauge', () => {
       const { createGauge, setGauge } = load();
-      createGauge({ name: 'yup' });
-      const gauge = Gauge.mock.instances[0];
-      setGauge('yup');
-      expect(gauge.set).toHaveBeenCalledTimes(1);
+      createGauge({ name: 'yup', help: 'yup_help' });
+      const gauge = register._metrics.yup;
+      expect(gauge.hashMap[''].value).toBe(0);
+      setGauge('yup', 101);
+      expect(gauge.hashMap[''].value).toBe(101);
     });
 
     it('calls the set method of the gauge with the arguments', () => {
       const { createGauge, setGauge } = load();
-      createGauge({ name: 'yup' });
-      const gauge = Gauge.mock.instances[0];
-      setGauge('yup', 1, 'two', [null, null, null]);
-      expect(gauge.set).toHaveBeenCalledTimes(1);
-      expect(gauge.set).toHaveBeenCalledWith(1, 'two', [null, null, null]);
+      createGauge({ name: 'yup', help: 'yup_help', labelNames: ['foo'] });
+      const gauge = register._metrics.yup;
+      expect(gauge.hashMap).toEqual({});
+      setGauge('yup', { foo: 'bar' }, 101);
+      expect(gauge.hashMap).toMatchInlineSnapshot(`
+        {
+          "foo:bar,": {
+            "labels": {
+              "foo": "bar",
+            },
+            "value": 101,
+          },
+        }
+      `);
     });
   });
 
@@ -115,24 +142,19 @@ describe('gauges', () => {
 
     it('throws an error if the gauge does not exist', () => {
       const { resetGauge } = load();
-      expect(() => resetGauge('nope')).toThrowErrorMatchingSnapshot();
+      expect(() => resetGauge('nope')).toThrowErrorMatchingInlineSnapshot(
+        '"unable to find gauge nope, please create it first"'
+      );
     });
 
     it('calls the reset method of the gauge', () => {
-      const { createGauge, resetGauge } = load();
-      createGauge({ name: 'yup' });
-      const gauge = Gauge.mock.instances[0];
+      const { createGauge, resetGauge, setGauge } = load();
+      createGauge({ name: 'yup', help: 'yup_help' });
+      const gauge = register._metrics.yup;
+      setGauge('yup', 101);
+      expect(gauge.hashMap[''].value).toBe(101);
       resetGauge('yup');
-      expect(gauge.reset).toHaveBeenCalledTimes(1);
-    });
-
-    it('calls the reset method of the gauge with the arguments', () => {
-      const { createGauge, resetGauge } = load();
-      createGauge({ name: 'yup' });
-      const gauge = Gauge.mock.instances[0];
-      resetGauge('yup', 1, 'two', [null, null, null]);
-      expect(gauge.reset).toHaveBeenCalledTimes(1);
-      expect(gauge.reset).toHaveBeenCalledWith(1, 'two', [null, null, null]);
+      expect(gauge.hashMap[''].value).toBe(0);
     });
   });
 });
