@@ -39,7 +39,7 @@ jobs:
           git add .
           git commit -m "docs(changelog): update"
       - name: Create release pull request
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.PA_TOKEN }}
           commit-message: One App Prepare Release
