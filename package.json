@@ -128,7 +128,7 @@
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
     "react-redux": "^7.2.8",
-    "redux": "^4.2.0",
+    "redux": "^5.0.1",
     "redux-lifesaver": "^2.1.0",
     "regenerator-runtime": "^0.13.9",
     "reselect": "^4.1.6",
