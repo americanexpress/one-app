@@ -81,7 +81,7 @@
   "dependencies": {
     "@americanexpress/env-config-utils": "^2.0.4",
     "@americanexpress/fetch-enhancers": "^1.1.5",
-    "@americanexpress/one-app-bundler": "^6.21.1",
+    "@americanexpress/one-app-bundler": "^7.0.0",
     "@americanexpress/one-app-ducks": "^4.4.2",
     "@americanexpress/one-app-router": "^1.2.1",
     "@americanexpress/vitruvius": "^3.0.1",
