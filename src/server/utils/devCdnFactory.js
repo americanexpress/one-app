@@ -164,11 +164,11 @@ export const oneAppDevCdnFactory = ({
   // eslint-disable-next-line consistent-return
   oneAppDevCdn.get('*', async (req, reply) => {
     const incomingRequestPath = req.url.replace('/static', '');
-    if (matchPathToKnownRemoteModuleUrl(incomingRequestPath, remoteModuleBaseUrls)) {
-      const knownRemoteModuleBaseUrl = matchPathToKnownRemoteModuleUrl(
-        incomingRequestPath,
-        remoteModuleBaseUrls
-      );
+    const knownRemoteModuleBaseUrl = matchPathToKnownRemoteModuleUrl(
+      incomingRequestPath,
+      remoteModuleBaseUrls
+    );
+    if (knownRemoteModuleBaseUrl) {
       const remoteModuleBaseUrlOrigin = new URL(knownRemoteModuleBaseUrl).origin;
       if (cachedModuleFiles[incomingRequestPath]) {
         return reply
@@ -176,7 +176,8 @@ export const oneAppDevCdnFactory = ({
           .type('application/json')
           .send(cachedModuleFiles[incomingRequestPath]);
       }
-      const remoteModuleResponse = await fetch(`${remoteModuleBaseUrlOrigin}/${incomingRequestPath}`, {
+
+      const remoteModuleResponse = await fetch(`${remoteModuleBaseUrlOrigin}${incomingRequestPath}`, {
         headers: { connection: 'keep-alive' },
         agent: new ProxyAgent(),
       });
