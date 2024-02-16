@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.10.0](https://github.com/americanexpress/one-app/compare/v6.9.2...v6.10.0) (2024-02-16)
+
+
+### Bug Fixes
+
+* **devCdn:** removing extra / which created malformed url ([#1295](https://github.com/americanexpress/one-app/issues/1295)) ([dba1ac8](https://github.com/americanexpress/one-app/commit/dba1ac8e9c04b897b0fce6e95cb024d42d0c32e7))
+
+
+### Features
+
+* **proxyagent:** update proxy agent ([#1297](https://github.com/americanexpress/one-app/issues/1297)) ([4e6d8e8](https://github.com/americanexpress/one-app/commit/4e6d8e8a1dd685ded49811062b2b7e6ece1dce27))
+
+
 ## [6.9.2](https://github.com/americanexpress/one-app/compare/v6.9.1...v6.9.2) (2024-01-23)
 
 
