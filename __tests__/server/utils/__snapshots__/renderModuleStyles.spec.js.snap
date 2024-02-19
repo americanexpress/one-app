@@ -1,7 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renderModuleStyles should handle a mix of modules with and without SSR styles 1`] = `"<style class=\\"ssr-css\\">.test-module-b_class { color: red; }</style><style class=\\"ssr-css\\">.test-module-d_class { color: red; }</style>"`;
+exports[`renderModuleStyles should deduplicate aggregatedStyles that have the same digest hash 1`] = `"<style id=\\"shared_hash_deps\\" data-ssr=\\"true\\">.test-module-a_deps { color: blue; }</style><style id=\\"shared_hash_local\\" data-ssr=\\"true\\">.test-module-a_local { color: rebeccapurple; }</style><style id=\\"unique-hash_deps\\" data-ssr=\\"true\\">.test-module-c_deps { color: blue; }</style><style id=\\"unique-hash_local\\" data-ssr=\\"true\\">.test-module-c_local { color: rebeccapurple; }</style>"`;
+
+exports[`renderModuleStyles should handle a mix of modules with and without SSR styles 1`] = `"<style class=\\"ssr-css\\">.test-module-b_class { color: red; }</style><style class=\\"ssr-css\\">.test-module-d_class { color: red; }</style><style id=\\"test-module-e_deps\\" data-ssr=\\"true\\">.test-module-e_deps { color: blue; }</style><style id=\\"test-module-e_local\\" data-ssr=\\"true\\">.test-module-e_local { color: rebeccapurple; }</style>"`;
 
 exports[`renderModuleStyles should handle modules with SSR styles 1`] = `"<style class=\\"ssr-css\\">.test-module_class { color: red; }</style>"`;
 
-exports[`renderModuleStyles should not send empty styles 1`] = `"<style class=\\"ssr-css\\">.test-module-b_class { color: red; }</style>"`;
+exports[`renderModuleStyles should handle modules with aggregated SSR styles 1`] = `"<style id=\\"test-module_deps\\" data-ssr=\\"true\\">.test-module_deps { color: blue; }</style><style id=\\"test-module_local\\" data-ssr=\\"true\\">.test-module_local { color: rebeccapurple; }</style>"`;
+
+exports[`renderModuleStyles should not send empty styles 1`] = `"<style class=\\"ssr-css\\">.test-module-b_class { color: red; }</style><style id=\\"test-module-d_deps\\" data-ssr=\\"true\\">.test-module-d_deps { color: blue; }</style><style id=\\"test-module-d_local\\" data-ssr=\\"true\\">.test-module-d_local { color: rebeccapurple; }</style>"`;
