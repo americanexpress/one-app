@@ -41,7 +41,7 @@ export function initializeClientStore() {
 
 export function loadPrerenderScripts(initialState) {
   const locale = initialState && initialState.getIn(['intl', 'activeLocale']);
-  return locale ? getLocalePack(locale) : Promise.resolve();
+  return locale && !window?.useNativeIntl ? getLocalePack(locale) : Promise.resolve();
 }
 
 export function moveHelmetScripts() {
