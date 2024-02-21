@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "6.9.2",
+  "version": "6.10.0",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
@@ -144,7 +144,6 @@
     "yargs": "^17.5.1"
   },
   "devDependencies": {
-    "@americanexpress/one-app-dev-cdn": "^3.3.2",
     "@americanexpress/one-app-dev-proxy": "^2.0.0",
     "@americanexpress/one-service-worker": "^1.0.4",
     "@babel/cli": "^7.19.3",
@@ -189,7 +188,7 @@
     "parse-prometheus-text-format": "^1.1.1",
     "pino-pretty": "^10.3.1",
     "prettier": "^2.7.1",
-    "proxy-agent": "^5.0.0",
+    "proxy-agent": "^6.4.0",
     "react-test-renderer": "^17.0.2",
     "rimraf": "^3.0.2",
     "rollup": "^2.75.7",
