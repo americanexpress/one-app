@@ -9,24 +9,24 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@americanexpress/one-app-ducks": "^4.3.3",
-    "@emotion/core": "^10.1.1",
-    "content-security-policy-builder": "^2.1.0",
-    "holocron": "^1.2.0",
-    "holocron-module-route": "^1.1.4",
-    "immutable": "^4.0.0",
-    "ip": "^1.1.5",
-    "prop-types": "^15.5.9",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "@americanexpress/one-app-ducks": "^4.4.3",
+    "@emotion/core": "^10.3.1",
+    "content-security-policy-builder": "^2.1.1",
+    "holocron": "^1.10.2",
+    "holocron-module-route": "^1.10.0",
+    "immutable": "^4.3.5",
+    "ip": "^1.1.9",
+    "prop-types": "^15.8.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
     "react-immutable-proptypes": "^2.2.0",
-    "react-redux": "^7.2.4",
-    "redux": "^4.1.1"
+    "react-redux": "^9.1.0",
+    "redux": "^5.0.1"
   },
   "devDependencies": {
-    "@americanexpress/one-app-bundler": "^6.21.1",
-    "babel-preset-amex": "^4.0.0",
+    "@americanexpress/one-app-bundler": "^6.21.8",
+    "babel-preset-amex": "^4.0.3",
     "rimraf": "^3.0.2"
   },
   "one-amex": {
