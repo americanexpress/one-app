@@ -10,13 +10,13 @@
   },
   "dependencies": {
     "@emotion/core": "^10.3.1",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-redux": "^7.2.9"
+    "holocron": "^1.10.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@americanexpress/one-app-bundler": "^6.21.1",
-    "babel-preset-amex": "^4.0.0",
+    "@americanexpress/one-app-bundler": "^6.21.8",
+    "babel-preset-amex": "^4.0.3",
     "rimraf": "^3.0.2"
   },
   "one-amex": {
