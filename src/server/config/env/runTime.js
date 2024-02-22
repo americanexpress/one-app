@@ -14,12 +14,12 @@
  * permissions and limitations under the License.
  */
 
-const ip = require('ip').address();
 const { preprocessEnvVar } = require('@americanexpress/env-config-utils');
 const isFetchableUrlInNode = require('@americanexpress/env-config-utils/isFetchableUrlInNode');
 const isFetchableUrlInBrowser = require('@americanexpress/env-config-utils/isFetchableUrlInBrowser');
 const { argv } = require('yargs');
 const bytes = require('bytes');
+const ip = require('../../utils/getIP').getIp;
 
 const isPositiveIntegerIfDefined = (input) => {
   if (input === undefined) {
@@ -133,7 +133,7 @@ const runTime = [
   {
     name: 'HOLOCRON_MODULE_MAP_URL',
     defaultValue: () => (process.env.NODE_ENV === 'development'
-      ? `http://${ip}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}/static/module-map.json`
+      ? `http://${ip()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}/static/module-map.json`
       : undefined),
     validate: isFetchableUrlInNode,
   },

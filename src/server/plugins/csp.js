@@ -16,7 +16,7 @@
 
 import fp from 'fastify-plugin';
 import { v4 as uuidV4 } from 'uuid';
-import ip from 'ip';
+import { getIp } from '../utils/getIP';
 
 function parsePolicy(headerValue) {
   const policy = {};
@@ -71,7 +71,7 @@ const csp = (fastify, _opts, done) => {
     const scriptNonce = uuidV4();
     let updatedPolicy;
     if (process.env.NODE_ENV === 'development') {
-      const developmentAdditions = `${ip.address()}:* localhost:* ws://localhost:*`;
+      const developmentAdditions = `${getIp()}:* localhost:* ws://localhost:*`;
       let updatedScriptSrc;
       if (process.env.ONE_CSP_ALLOW_INLINE_SCRIPTS === 'true') {
         updatedScriptSrc = insertSource(policy, 'script-src', developmentAdditions);

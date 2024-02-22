@@ -21,9 +21,9 @@ import cors from '@fastify/cors';
 import compress from '@fastify/compress';
 import fastifyStatic from '@fastify/static';
 import Fastify from 'fastify';
-import ip from 'ip';
 import { ProxyAgent } from 'proxy-agent';
 import fetch from 'node-fetch';
+import { getIp } from './getIP';
 import logger from './logging/logger';
 
 import { getCachedModuleFiles, writeToCache, removeExistingEntryIfConflicting } from './cdnCache';
@@ -122,7 +122,7 @@ export const oneAppDevCdnFactory = ({
   oneAppDevCdn.register(cors, {
     origin: [
       `http://localhost:${appPort}`,
-      `http://${ip.address()}:${appPort}`,
+      `http://${getIp()}:${appPort}`,
       undefined,
     ],
   });
