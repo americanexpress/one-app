@@ -12,10 +12,10 @@
   "dependencies": {
     "@americanexpress/one-app-router": "^1.2.1",
     "holocron": "^1.10.2",
-    "holocron-module-route": "^1.10.2",
+    "holocron-module-route": "^1.10.0",
     "prop-types": "^15.8.1",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-redux": "^7.2.9",
     "semver": "7.6.0"
   },
