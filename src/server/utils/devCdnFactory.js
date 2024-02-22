@@ -22,7 +22,7 @@ import compress from '@fastify/compress';
 import fastifyStatic from '@fastify/static';
 import Fastify from 'fastify';
 import ip from 'ip';
-import ProxyAgent from 'proxy-agent';
+import { ProxyAgent } from 'proxy-agent';
 import fetch from 'node-fetch';
 import logger from './logging/logger';
 
