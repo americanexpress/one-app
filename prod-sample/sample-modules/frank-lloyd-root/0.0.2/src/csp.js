@@ -15,7 +15,7 @@
  */
 
 import contentSecurityPolicyBuilder from 'content-security-policy-builder';
-import { getIp } from '../../../../../src/server/utils/getIP';
+import { getIp } from './getIP';
 
 export default contentSecurityPolicyBuilder({
   directives: {
