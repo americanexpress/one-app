@@ -13,9 +13,8 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-
 jest.mock('fs', () => ({ existsSync: jest.fn() }));
-jest.mock('../../../src/server/utils/getIp', () => ({ getIp: jest.fn() }));
+jest.mock('../../../src/server/utils/getIP', () => ({ getIp: jest.fn() }));
 jest.mock('fake/path/.dev/endpoints/index.js', () => jest.fn(), { virtual: true });
 jest.mock('yargs', () => ({ argv: {} }));
 jest.mock('../../../src/server/utils/envVarAllowList', () => [
