@@ -39,10 +39,10 @@ describe('getIp', () => {
     });
     expect(getIp()).toBe('2.2.2.2');
   });
-  it('returns 0.0.0.0 if no addresses found', () => {
+  it('returns 127.0.0.1 if no addresses found', () => {
     spy.mockReturnValue({
       addresses: [],
     });
-    expect(getIp()).toBe('0.0.0.0');
+    expect(getIp()).toBe('127.0.0.1');
   });
 });
