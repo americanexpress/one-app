@@ -112,7 +112,7 @@
     "holocron": "^1.9.2",
     "holocron-module-route": "^1.7.0",
     "immutable": "^4.1.0",
-    "ip": "^1.1.8",
+    "ip": "^1.1.9",
     "joi": "^17.6.0",
     "lean-intl": "^4.2.2",
     "matcher": "^4.0.0",
