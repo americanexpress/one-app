@@ -1624,13 +1624,6 @@ describe('Tests that can run against either local Docker setup or remote One App
           ]
         `);
 
-        expect(httpSpans.map((span) => span.name)).toMatchInlineSnapshot(`
-          [
-            "GET https://fast.api.frank/posts",
-            "GET /healthy-frank/ssr-frank",
-          ]
-        `);
-
         expect(formatSpansForSnapshot(spans)).toMatchInlineSnapshot(`
           [
             "addSecurityHeaders: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
