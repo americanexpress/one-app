@@ -53,8 +53,8 @@ describe('cacheUtils', () => {
   let logSpy;
   let errorSpy;
   beforeEach(() => {
-    logSpy = jest.spyOn(console, 'log');
-    errorSpy = jest.spyOn(console, 'error');
+    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {

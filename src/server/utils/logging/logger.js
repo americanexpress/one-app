@@ -16,7 +16,7 @@
 
 import deepmerge from 'deepmerge';
 import { argv } from 'yargs';
-import { pino } from 'pino';
+import { pino, multistream } from 'pino';
 import productionConfig from './config/production';
 import otelConfig, {
   createOtelTransport,
@@ -26,24 +26,31 @@ import baseConfig from './config/base';
 export function createLogger() {
   const useProductionConfig = !!(argv.logFormat === 'machine' || process.env.NODE_ENV !== 'development');
 
-  let transport;
+  const getPinoConfig = () => {
+    if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) return deepmerge(baseConfig, otelConfig);
+    if (useProductionConfig) return deepmerge(baseConfig, productionConfig);
+    return baseConfig;
+  };
 
-  if (!useProductionConfig && !process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
-    // eslint-disable-next-line global-require -- do not load development logger in production
-    transport = require('./config/development').default;
-  } else if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
-    transport = createOtelTransport();
-  }
+  const getTransport = () => {
+    const transportStreams = [];
+    if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
+      transportStreams.push(createOtelTransport({
+        grpc: true,
+        console: process.env.NODE_ENV === 'development' && argv.logFormat === 'machine',
+      }));
+    }
+    if (!useProductionConfig) {
+      // eslint-disable-next-line global-require -- do not load development logger in production
+      transportStreams.push(require('./config/development').default);
+    }
 
-  return pino(
-    deepmerge(
-      baseConfig,
-      process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
-        ? otelConfig
-        : useProductionConfig && productionConfig
-    ),
-    transport
-  );
+    if (transportStreams.length === 1) return transportStreams[0];
+    if (transportStreams.length > 1) return multistream(transportStreams);
+    return undefined;
+  };
+
+  return pino(getPinoConfig(), getTransport());
 }
 
 export default createLogger();
