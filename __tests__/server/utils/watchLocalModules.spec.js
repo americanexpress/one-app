@@ -23,10 +23,10 @@ import {
   getModules,
   resetModuleRegistry,
 } from 'holocron/moduleRegistry';
-import { address } from 'ip';
 import watchLocalModules from '../../../src/server/utils/watchLocalModules';
+import { getIp } from '../../../src/server/utils/getIP';
 
-const ip = address();
+const ip = getIp();
 
 jest.mock('chokidar', () => {
   const listeners = {};
@@ -66,7 +66,7 @@ jest.mock('fs', () => {
     readFileSync: jest.fn(actual.readFileSync),
   };
 });
-jest.spyOn(console, 'error').mockImplementation(() => {});
+jest.spyOn(console, 'error').mockImplementation(() => { });
 
 describe('watchLocalModules', () => {
   beforeEach(() => jest.clearAllMocks());
