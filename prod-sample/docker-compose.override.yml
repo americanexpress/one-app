@@ -4,5 +4,5 @@ services:
   one-app:
     env_file: ./one-app/base.env
     entrypoint:
-      - node
-      - scripts/start.js
+      - sh
+      - scripts/start.sh

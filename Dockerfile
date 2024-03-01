@@ -44,7 +44,7 @@ EXPOSE 3005
 WORKDIR /opt/one-app
 RUN chown node:node /opt/one-app
 USER $USER
-CMD ["node", "scripts/start.js"]
+CMD ["sh", "scripts/start.sh"]
 COPY --from=builder --chown=node:node /opt/one-app/development ./
 
 # production image
@@ -59,5 +59,5 @@ EXPOSE 3000
 EXPOSE 3005
 WORKDIR /opt/one-app
 USER $USER
-CMD ["node", "scripts/start.js"]
+CMD ["sh", "scripts/start.sh"]
 COPY --from=builder --chown=node:node /opt/one-app/production ./

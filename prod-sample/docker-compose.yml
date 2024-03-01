@@ -32,8 +32,8 @@ services:
       - otel-collector
     env_file: ./one-app/base.env
     entrypoint:
-      - node
-      - scripts/start.js
+      - sh
+      - scripts/start.sh
   fast-api:
     build:
       context: ./api
