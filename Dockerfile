@@ -2,7 +2,7 @@
 # which includes build utils preinstalled (e.g. gcc, make, etc).
 # This will result in faster and reliable One App docker image
 # builds as we do not have to run apk installs for alpine.
-FROM node:18.17.1 as builder
+FROM node:21.6.2 as builder
 WORKDIR /opt/build
 RUN npm install -g npm@9.6.7 --registry=https://registry.npmjs.org
 COPY --chown=node:node ./ /opt/build
@@ -29,7 +29,7 @@ RUN NODE_ENV=production npm run build && \
 
 # development image
 # docker build . --target=development
-FROM node:18.17.1-alpine as development
+FROM node:21.6.2-alpine as development
 ARG USER
 ENV USER ${USER:-node}
 ENV NODE_ENV=development
@@ -47,7 +47,7 @@ COPY --from=builder --chown=node:node /opt/one-app/development ./
 
 # production image
 # last so that it's the default image artifact
-FROM node:18.17.1-alpine as production
+FROM node:21.6.2-alpine as production
 ARG USER
 ENV USER ${USER:-node}
 ENV NODE_ENV=production
