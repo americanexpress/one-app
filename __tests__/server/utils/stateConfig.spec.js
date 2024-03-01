@@ -13,9 +13,8 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-
 jest.mock('fs', () => ({ existsSync: jest.fn() }));
-jest.mock('ip', () => ({ address: jest.fn() }));
+jest.mock('../../../src/server/utils/getIP', () => ({ getIp: jest.fn() }));
 jest.mock('fake/path/.dev/endpoints/index.js', () => jest.fn(), { virtual: true });
 jest.mock('yargs', () => ({ argv: {} }));
 jest.mock('../../../src/server/utils/envVarAllowList', () => [
@@ -34,17 +33,17 @@ describe('stateConfig methods', () => {
   let restoreModuleStateConfig;
   let backupModuleStateConfig;
   let fs;
-  let ip;
+  let getIp;
   let yargs;
 
   const originalEnvVars = process.env;
 
   const reloadMocks = () => {
     fs = require('fs');
-    ip = require('ip');
+    getIp = require('../../../src/server/utils/getIP').getIp;
     yargs = require('yargs');
     jest.spyOn(process, 'cwd').mockImplementation(() => 'fake/path/');
-    ip.address.mockImplementation(() => '127.0.0.1');
+    getIp.mockImplementation(() => '127.0.0.1');
     yargs.argv = {};
     fs.existsSync.mockImplementation(() => false);
     process.env.ONE_CONFIG_ENV = 'qa';
