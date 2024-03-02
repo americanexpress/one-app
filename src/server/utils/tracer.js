@@ -28,6 +28,13 @@ import {
 } from '@opentelemetry/sdk-trace-base';
 import { trace } from '@opentelemetry/api';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
+import {
+  Resource,
+  detectResourcesSync,
+  hostDetectorSync,
+  osDetectorSync,
+  processDetector,
+} from '@opentelemetry/resources';
 import { argv } from 'yargs';
 import getOtelResourceAttributes from './getOtelResourceAttributes';
 
@@ -35,7 +42,13 @@ const tracerProvider = new NodeTracerProvider({
   sampler: new ParentBasedSampler({
     root: new TraceIdRatioBasedSampler(1),
   }),
-  resource: { attributes: getOtelResourceAttributes() },
+  resource: detectResourcesSync({
+    detectors: [
+      hostDetectorSync,
+      osDetectorSync,
+      processDetector,
+    ],
+  }).merge(new Resource(getOtelResourceAttributes())),
 });
 
 const devCdnPort = process.env.HTTP_ONE_APP_DEV_CDN_PORT || '3001';

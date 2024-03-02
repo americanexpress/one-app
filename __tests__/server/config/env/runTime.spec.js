@@ -540,11 +540,15 @@ describe('runTime', () => {
     });
   });
 
-  describe('OTEL_SERVICE_NAME', () => {
-    const otelServiceName = getEnvVarConfig('OTEL_SERVICE_NAME');
+  describe('OTEL_EXPORTER_OTLP_TRACES_ENDPOINT', () => {
+    const otelTraceCollectorUrl = getEnvVarConfig('OTEL_EXPORTER_OTLP_TRACES_ENDPOINT');
 
-    it('should have a default value of "One App"', () => {
-      expect(otelServiceName.defaultValue).toBe('One App');
+    it('ensures node can reach the URL', () => {
+      expect(otelTraceCollectorUrl.validate).toValidateURL();
+    });
+
+    it('is not required', () => {
+      expect(() => otelTraceCollectorUrl.validate()).not.toThrow();
     });
   });
 });

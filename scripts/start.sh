@@ -17,6 +17,10 @@
 flags="$@"
 nodeArgs='--dns-result-order ipv4first --no-experimental-fetch'
 
+if [ -n "$OTEL_RESOURCE_ATTRIBUTES" ]; then
+  export OTEL_RESOURCE_ATTRIBUTES=$(echo $OTEL_RESOURCE_ATTRIBUTES | sed "s/;/,/g")
+fi
+
 if [ -n "$OTEL_EXPORTER_OTLP_TRACES_ENDPOINT" ] || echo $flags | grep -q "\--log-level=trace"; then
   nodeArgs="$nodeArgs --require=./lib/server/utils/tracer.js"
 fi

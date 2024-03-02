@@ -1549,6 +1549,11 @@ describe('Tests that can run against either local Docker setup or remote One App
 
         expect(resourceAttributes).toMatchInlineSnapshot(
           {
+            'host.arch': expect.any(String),
+            'host.name': expect.any(String),
+            'os.type': expect.any(String),
+            'os.version': expect.any(String),
+            'process.runtime.version': expect.any(String),
             'service.instance.id': expect.any(String),
             'service.version': expect.any(String),
             'telemetry.sdk.version': expect.any(String),
@@ -1557,6 +1562,19 @@ describe('Tests that can run against either local Docker setup or remote One App
           {
             "baz": "qux",
             "foo": "bar",
+            "host.arch": Any<String>,
+            "host.name": Any<String>,
+            "os.type": Any<String>,
+            "os.version": Any<String>,
+            "process.command": "/opt/one-app/lib/server/index.js",
+            "process.command_args": undefined,
+            "process.executable.name": "node",
+            "process.executable.path": "/usr/local/bin/node",
+            "process.owner": "node",
+            "process.pid": undefined,
+            "process.runtime.description": "Node.js",
+            "process.runtime.name": "nodejs",
+            "process.runtime.version": Any<String>,
             "service.instance.id": Any<String>,
             "service.name": "prod-sample",
             "service.namespace": "one-app",
@@ -1597,10 +1615,10 @@ describe('Tests that can run against either local Docker setup or remote One App
           )}`
         );
 
-        const { traceId } = getSpanByAttribute(
-          getSpans('@opentelemetry/instrumentation-http'),
-          { key: 'http.target', value: target }
-        );
+        const { traceId } = getSpanByAttribute(getSpans('@opentelemetry/instrumentation-http'), {
+          key: 'http.target',
+          value: target,
+        });
 
         const httpSpans = getSpans('@opentelemetry/instrumentation-http', traceId);
         expect(httpSpans.length).toBe(2);
@@ -1655,7 +1673,9 @@ describe('Tests that can run against either local Docker setup or remote One App
             (span) => span.parentSpanId === createRequestHtmlFragmentSpanId
           )
         ).toBe(true);
-        const otherSpans = spans.filter((span) => !span.name.startsWith('createRequestHtmlFragment ->') && span.name !== 'GET /*');
+        const otherSpans = spans.filter(
+          (span) => !span.name.startsWith('createRequestHtmlFragment ->') && span.name !== 'GET /*'
+        );
         expect(otherSpans.every((span) => span.parentSpanId === parentSpanId)).toBe(true);
       });
 

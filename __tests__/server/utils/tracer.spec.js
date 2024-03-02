@@ -109,7 +109,11 @@ describe('tracer', () => {
     expect(NodeTracerProvider).toHaveBeenCalledTimes(1);
     expect(NodeTracerProvider).toHaveBeenCalledWith({
       sampler: expect.any(ParentBasedSampler),
-      resource: { attributes: { 'test-resource-attribute': 'test-resource-attribute-value' } },
+      resource: expect.objectContaining({
+        attributes: expect.objectContaining({
+          'test-resource-attribute': 'test-resource-attribute-value',
+        }),
+      }),
     });
     expect(ParentBasedSampler).toHaveBeenCalledTimes(1);
     expect(ParentBasedSampler).toHaveBeenCalledWith({

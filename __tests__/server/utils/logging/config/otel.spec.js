@@ -95,7 +95,7 @@ describe('OpenTelemetry logging', () => {
     process.env.OTEL_SERVICE_NAMESPACE = 'Mock Service Namespace';
 
     it('should include custom resource attributes', () => {
-      process.env.OTEL_RESOURCE_ATTRIBUTES = 'service.custom.id=XXXXX;deployment.env=qa';
+      process.env.OTEL_RESOURCE_ATTRIBUTES = 'service.custom.id=XXXXX,deployment.env=qa';
       const transport = createOtelTransport();
       expect(transport).toBeInstanceOf(ThreadStream);
       expect(pino.transport).toHaveBeenCalledTimes(1);
