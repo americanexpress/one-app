@@ -17,7 +17,7 @@
 flags="$@"
 nodeArgs='--dns-result-order ipv4first --no-experimental-fetch'
 
-if [ -n "$OTEL_EXPORTER_OTLP_TRACES_ENDPOINT" ] || [ "$1" = "--log-level=trace" ]; then
+if [ -n "$OTEL_EXPORTER_OTLP_TRACES_ENDPOINT" ] || echo $flags | grep -q "\--log-level=trace"; then
   nodeArgs="$nodeArgs --require=./lib/server/utils/tracer.js"
 fi
 
