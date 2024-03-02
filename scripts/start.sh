@@ -32,4 +32,4 @@ done
 commandArgs="$nodeArgs lib/server/index.js $flags"
 
 echo "node $commandArgs"
-node $commandArgs
+exec node $commandArgs
