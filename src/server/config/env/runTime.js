@@ -14,12 +14,12 @@
  * permissions and limitations under the License.
  */
 
-const ip = require('ip').address();
 const { preprocessEnvVar } = require('@americanexpress/env-config-utils');
 const isFetchableUrlInNode = require('@americanexpress/env-config-utils/isFetchableUrlInNode');
 const isFetchableUrlInBrowser = require('@americanexpress/env-config-utils/isFetchableUrlInBrowser');
 const { argv } = require('yargs');
 const bytes = require('bytes');
+const { getIp } = require('../../utils/getIP');
 
 const isPositiveIntegerIfDefined = (input) => {
   if (input === undefined) {
@@ -133,7 +133,7 @@ const runTime = [
   {
     name: 'HOLOCRON_MODULE_MAP_URL',
     defaultValue: () => (process.env.NODE_ENV === 'development'
-      ? `http://${ip}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}/static/module-map.json`
+      ? `http://${getIp()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT}/static/module-map.json`
       : undefined),
     validate: isFetchableUrlInNode,
   },
@@ -247,10 +247,14 @@ const runTime = [
     },
   },
   {
-    name: 'OTEL_SERVICE_NAME',
-    defaultValue: 'One App',
+    name: 'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT',
+    validate: (input) => {
+      if (!input) return;
+      // eslint-disable-next-line no-new -- intentionally using new for side effect of validation
+      new URL(input);
+    },
   },
 ];
 runTime.forEach(preprocessEnvVar);
-export { ip };
+export { getIp };
 export default runTime;

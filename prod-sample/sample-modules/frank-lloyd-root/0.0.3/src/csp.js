@@ -15,7 +15,7 @@
  */
 
 import contentSecurityPolicyBuilder from 'content-security-policy-builder';
-import ip from 'ip';
+import { getIp } from './getIP';
 
 export default contentSecurityPolicyBuilder({
   directives: {
@@ -29,7 +29,7 @@ export default contentSecurityPolicyBuilder({
     manifestSrc: [
       "'self'",
       'https://sample-cdn.frank',
-      `${ip.address()}:3001`,
+      `${getIp()}:3001`,
       'localhost:3001',
     ],
     scriptSrc: [
@@ -39,7 +39,7 @@ export default contentSecurityPolicyBuilder({
       // used for our sample app deployment in heroku
       'https://one-app-statics.surge.sh',
       // used for local development
-      `${ip.address()}:3001`,
+      `${getIp()}:3001`,
       // used for local development
       'localhost:3001',
     ],
@@ -60,7 +60,7 @@ export default contentSecurityPolicyBuilder({
       "'self'",
       '*.api.frank',
       // used for local development
-      `${ip.address()}:3001`,
+      `${getIp()}:3001`,
       // used for local development
       'localhost:3001',
       // used by integration tests running in docker where domain names are aliased

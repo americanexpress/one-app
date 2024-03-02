@@ -18,15 +18,23 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { DnsInstrumentation } from '@opentelemetry/instrumentation-dns';
 import {
   BatchSpanProcessor,
   SimpleSpanProcessor,
   ParentBasedSampler,
   TraceIdRatioBasedSampler,
   ConsoleSpanExporter,
+  NoopSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
+import { trace } from '@opentelemetry/api';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
+import {
+  Resource,
+  detectResourcesSync,
+  hostDetectorSync,
+  osDetectorSync,
+  processDetector,
+} from '@opentelemetry/resources';
 import { argv } from 'yargs';
 import getOtelResourceAttributes from './getOtelResourceAttributes';
 
@@ -34,7 +42,13 @@ const tracerProvider = new NodeTracerProvider({
   sampler: new ParentBasedSampler({
     root: new TraceIdRatioBasedSampler(1),
   }),
-  resource: { attributes: getOtelResourceAttributes() },
+  resource: detectResourcesSync({
+    detectors: [
+      hostDetectorSync,
+      osDetectorSync,
+      processDetector,
+    ],
+  }).merge(new Resource(getOtelResourceAttributes())),
 });
 
 const devCdnPort = process.env.HTTP_ONE_APP_DEV_CDN_PORT || '3001';
@@ -48,15 +62,36 @@ registerInstrumentations({
         ? (request) => request.url.startsWith('/_/') || request.headers.host.endsWith(`:${devCdnPort}`)
         : undefined,
       requireParentforOutgoingSpans: !traceAllRequests,
+      requestHook(span) {
+        if (span?.attributes?.direction === 'in') {
+          span.updateName(`${span.attributes['http.method']} ${span.attributes['http.target']}`);
+        }
+        if (span?.attributes?.direction === 'out') {
+          span.updateName(`${span.attributes['http.method']} ${span.attributes['http.url']}`);
+        }
+      },
       startIncomingSpanHook: () => ({ direction: 'in' }),
       startOutgoingSpanHook: () => ({ direction: 'out' }),
-    }),
-    new DnsInstrumentation({
-      ignoreHostnames: !traceAllRequests ? ['0.0.0.0', 'localhost'] : undefined,
     }),
     new PinoInstrumentation(),
   ],
 });
+
+class PropagateAttributesProcessor extends NoopSpanProcessor {
+  // This is better covered by integration tests
+  /* istanbul ignore next */
+  // eslint-disable-next-line class-methods-use-this -- required when creating a span processor
+  onStart(span, parentContext) {
+    if (span.instrumentationLibrary.name === '@autotelic/fastify-opentelemetry') {
+      const parentSpan = trace.getSpan(parentContext);
+      if (parentSpan.instrumentationLibrary.name === '@autotelic/fastify-opentelemetry' && parentSpan?.attributes) {
+        span.setAttributes(parentSpan.attributes);
+      }
+    }
+  }
+}
+
+tracerProvider.addSpanProcessor(new PropagateAttributesProcessor());
 
 const batchProcessor = new BatchSpanProcessor(new OTLPTraceExporter());
 

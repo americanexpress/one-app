@@ -16,24 +16,16 @@
 
 import os from 'node:os';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { envDetectorSync } from '@opentelemetry/resources';
 import readJsonFile from './readJsonFile';
 
 const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
 
 export default function getOtelResourceAttributes() {
-  const customResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES ? process.env.OTEL_RESOURCE_ATTRIBUTES.split(';').reduce((acc, curr) => {
-    const [key, value] = curr.split('=');
-    return {
-      ...acc,
-      [key]: value,
-    };
-  }, {}) : {};
-
   return {
-    [SemanticResourceAttributes.SERVICE_NAME]: process.env.OTEL_SERVICE_NAME,
     [SemanticResourceAttributes.SERVICE_NAMESPACE]: process.env.OTEL_SERVICE_NAMESPACE,
     [SemanticResourceAttributes.SERVICE_INSTANCE_ID]: os.hostname(),
     [SemanticResourceAttributes.SERVICE_VERSION]: version,
-    ...customResourceAttributes,
+    ...envDetectorSync.detect().attributes,
   };
 }

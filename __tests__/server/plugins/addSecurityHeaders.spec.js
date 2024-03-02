@@ -196,17 +196,7 @@ describe('addSecurityHeaders', () => {
     addSecurityHeaders(fastify, {}, done);
 
     expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-    expect(tracer.startSpan.mock.calls[0]).toMatchInlineSnapshot(`
-      [
-        "addSecurityHeaders",
-        {
-          "attributes": {
-            "req.method": "GET",
-            "req.url": "/foo",
-          },
-        },
-      ]
-    `);
+    expect(tracer.startSpan).toHaveBeenCalledWith('addSecurityHeaders');
     expect(span.end).toHaveBeenCalledTimes(1);
   });
 });

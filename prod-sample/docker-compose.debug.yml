@@ -8,6 +8,5 @@ services:
       - "9229:9229"
     env_file: ./one-app/debug.env
     entrypoint:
-      - node
-      - scripts/start.js
+      - scripts/start.sh
       - --inspect=0.0.0.0

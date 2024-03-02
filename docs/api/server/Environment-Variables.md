@@ -792,11 +792,6 @@ OTEL_SERVICE_NAME=String
 OTEL_SERVICE_NAME=MyApplication
 ```
 
-**Default Value**
-```bash
-OTEL_SERVICE_NAME="One App"
-```
-
 ## `OTEL_SERVICE_NAMESPACE`
 
 **Runs In**
@@ -831,7 +826,7 @@ OTEL_RESOURCE_ATTRIBUTES=String
 
 **Example**
 ```bash
-OTEL_RESOURCE_ATTRIBUTES="foo=bar;baz=qux"
+OTEL_RESOURCE_ATTRIBUTES="foo=bar,baz=qux"
 ```
 
 [☝️ Return To Top](#environment-variables)

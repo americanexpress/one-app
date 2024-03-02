@@ -1549,6 +1549,12 @@ describe('Tests that can run against either local Docker setup or remote One App
 
         expect(resourceAttributes).toMatchInlineSnapshot(
           {
+            'host.arch': expect.any(String),
+            'host.name': expect.any(String),
+            'os.type': expect.any(String),
+            'os.version': expect.any(String),
+            'process.owner': expect.any(String),
+            'process.runtime.version': expect.any(String),
             'service.instance.id': expect.any(String),
             'service.version': expect.any(String),
             'telemetry.sdk.version': expect.any(String),
@@ -1557,6 +1563,19 @@ describe('Tests that can run against either local Docker setup or remote One App
           {
             "baz": "qux",
             "foo": "bar",
+            "host.arch": Any<String>,
+            "host.name": Any<String>,
+            "os.type": Any<String>,
+            "os.version": Any<String>,
+            "process.command": "/opt/one-app/lib/server/index.js",
+            "process.command_args": undefined,
+            "process.executable.name": "node",
+            "process.executable.path": "/usr/local/bin/node",
+            "process.owner": Any<String>,
+            "process.pid": undefined,
+            "process.runtime.description": "Node.js",
+            "process.runtime.name": "nodejs",
+            "process.runtime.version": Any<String>,
             "service.instance.id": Any<String>,
             "service.name": "prod-sample",
             "service.namespace": "one-app",
@@ -1580,40 +1599,51 @@ describe('Tests that can run against either local Docker setup or remote One App
         );
         const getSpanByName = (spans, name) => spans.find((span) => span.name === name);
 
-        const { traceId, spanId: parentSpanId } = getSpanByAttribute(
-          getSpans('@opentelemetry/instrumentation-http'),
-          { key: 'http.target', value: target }
+        const formatSpansForSnapshot = (spans, includeAttributes = []) => spans.map(
+          (span) => `${span.name}: ${JSON.stringify(
+            span.attributes
+              .filter((attribute) => (includeAttributes.length === 0
+                ? true
+                : includeAttributes.includes(attribute.key))
+              )
+              .reduce(
+                (acc, attr) => ({
+                  ...acc,
+                  [attr.key]: attr.value.stringValue,
+                }),
+                {}
+              )
+          )}`
         );
+
+        const { traceId } = getSpanByAttribute(getSpans('@opentelemetry/instrumentation-http'), {
+          key: 'http.target',
+          value: target,
+        });
 
         const httpSpans = getSpans('@opentelemetry/instrumentation-http', traceId);
         expect(httpSpans.length).toBe(2);
-        const dnsSpans = getSpans('@opentelemetry/instrumentation-dns', traceId);
-        expect(dnsSpans.length).toBe(1);
         const spans = getSpans('@autotelic/fastify-opentelemetry', traceId);
         expect(spans.length).toBe(14);
 
-        const dataFetchSpan = getSpanByAttribute(httpSpans, {
-          key: 'http.url',
-          value: 'https://fast.api.frank/posts',
-        });
+        const { spanId: parentSpanId } = getSpanByName(spans, 'GET /*');
+
+        const dataFetchSpan = getSpanByAttribute(httpSpans, { key: 'direction', value: 'out' });
         const loadModuleDataSpan = getSpanByName(
           spans,
           'createRequestHtmlFragment -> loadModuleData'
         );
 
-        expect(dnsSpans[0].parentSpanId).toBe(dataFetchSpan.spanId);
         expect(dataFetchSpan.parentSpanId).toBe(loadModuleDataSpan.spanId);
 
-        expect(
-          spans.map(
-            (span) => `${span.name}: ${JSON.stringify(
-              span.attributes.reduce(
-                (acc, attr) => ({ ...acc, [attr.key]: attr.value.stringValue }),
-                {}
-              )
-            )}`
-          )
-        ).toMatchInlineSnapshot(`
+        expect(formatSpansForSnapshot(httpSpans, ['direction'])).toMatchInlineSnapshot(`
+          [
+            "GET https://fast.api.frank/posts: {"direction":"out"}",
+            "GET /healthy-frank/ssr-frank: {"direction":"in"}",
+          ]
+        `);
+
+        expect(formatSpansForSnapshot(spans)).toMatchInlineSnapshot(`
           [
             "addSecurityHeaders: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
             "addFrameOptionsHeader: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
@@ -1644,11 +1674,8 @@ describe('Tests that can run against either local Docker setup or remote One App
             (span) => span.parentSpanId === createRequestHtmlFragmentSpanId
           )
         ).toBe(true);
-        expect(getSpanByName(spans, 'sendHtml').parentSpanId).toBe(
-          getSpanByName(spans, 'GET /*').spanId
-        );
         const otherSpans = spans.filter(
-          (span) => !span.name.startsWith('createRequestHtmlFragment ->') && span.name !== 'sendHtml'
+          (span) => !span.name.startsWith('createRequestHtmlFragment ->') && span.name !== 'GET /*'
         );
         expect(otherSpans.every((span) => span.parentSpanId === parentSpanId)).toBe(true);
       });

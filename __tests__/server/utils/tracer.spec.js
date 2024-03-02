@@ -19,19 +19,22 @@ import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
 // eslint-disable-next-line no-unused-vars -- required for mocking
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
-import { DnsInstrumentation } from '@opentelemetry/instrumentation-dns';
 import {
   BatchSpanProcessor,
   SimpleSpanProcessor,
   ParentBasedSampler,
   TraceIdRatioBasedSampler,
   ConsoleSpanExporter,
+  NoopSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 
 jest.mock('@opentelemetry/instrumentation');
 jest.mock('@opentelemetry/instrumentation-http');
 jest.mock('@opentelemetry/instrumentation-pino');
+jest.mock('@opentelemetry/sdk-trace-base');
+jest.mock('@opentelemetry/exporter-trace-otlp-grpc');
+
 jest.mock('@opentelemetry/sdk-trace-node', () => {
   const { NodeTracerProvider: ActualNodeTracerProvider } = jest.requireActual(
     '@opentelemetry/sdk-trace-node'
@@ -39,15 +42,12 @@ jest.mock('@opentelemetry/sdk-trace-node', () => {
   return {
     NodeTracerProvider: jest.fn(() => {
       const tracerProvider = new ActualNodeTracerProvider();
-      tracerProvider.register = jest.fn();
-      tracerProvider.addSpanProcessor = jest.fn();
+      jest.spyOn(tracerProvider, 'register');
+      jest.spyOn(tracerProvider, 'addSpanProcessor');
       return tracerProvider;
     }),
   };
 });
-jest.mock('@opentelemetry/instrumentation-dns');
-jest.mock('@opentelemetry/sdk-trace-base');
-jest.mock('@opentelemetry/exporter-trace-otlp-grpc');
 
 jest.mock('../../../src/server/utils/getOtelResourceAttributes', () => () => ({
   'test-resource-attribute': 'test-resource-attribute-value',
@@ -109,7 +109,11 @@ describe('tracer', () => {
     expect(NodeTracerProvider).toHaveBeenCalledTimes(1);
     expect(NodeTracerProvider).toHaveBeenCalledWith({
       sampler: expect.any(ParentBasedSampler),
-      resource: { attributes: { 'test-resource-attribute': 'test-resource-attribute-value' } },
+      resource: expect.objectContaining({
+        attributes: expect.objectContaining({
+          'test-resource-attribute': 'test-resource-attribute-value',
+        }),
+      }),
     });
     expect(ParentBasedSampler).toHaveBeenCalledTimes(1);
     expect(ParentBasedSampler).toHaveBeenCalledWith({
@@ -124,34 +128,9 @@ describe('tracer', () => {
     expect(registerInstrumentations).toHaveBeenCalledTimes(1);
     expect(registerInstrumentations).toHaveBeenCalledWith({
       tracerProvider: _tracerProvider,
-      instrumentations: [
-        expect.any(HttpInstrumentation),
-        expect.any(DnsInstrumentation),
-        expect.any(PinoInstrumentation),
-      ],
+      instrumentations: [expect.any(HttpInstrumentation), expect.any(PinoInstrumentation)],
     });
     expect(_tracerProvider.register).toHaveBeenCalledTimes(1);
-  });
-
-  it('should ignore DNS requests to itself', () => {
-    setup({});
-    expect(DnsInstrumentation.mock.calls[0][0]).toMatchInlineSnapshot(`
-      {
-        "ignoreHostnames": [
-          "0.0.0.0",
-          "localhost",
-        ],
-      }
-    `);
-  });
-
-  it('should not ignore DNS requests to itself when tracing all requests', () => {
-    setup({ traceAllRequests: true });
-    expect(DnsInstrumentation.mock.calls[0][0]).toMatchInlineSnapshot(`
-      {
-        "ignoreHostnames": undefined,
-      }
-    `);
   });
 
   it('should not trace outgoing requests that do not have a parent span', () => {
@@ -210,12 +189,45 @@ describe('tracer', () => {
     `);
   });
 
+  it('should update span names for incoming and outgoing HTTP requests', () => {
+    setup({});
+    const startSpan = (spanName, { attributes }) => {
+      const span = { name: spanName, attributes };
+      span.updateName = (updatedName) => {
+        span.name = updatedName;
+      };
+      return span;
+    };
+    const { requestHook } = HttpInstrumentation.mock.calls[0][0];
+    const incomingSpan = startSpan('mock-incoming-span', {
+      attributes: {
+        direction: 'in',
+        'http.method': 'GET',
+        'http.target': '/mock-route',
+      },
+    });
+    requestHook(incomingSpan);
+    expect(incomingSpan.name).toMatchInlineSnapshot('"GET /mock-route"');
+    const outgoingSpan = startSpan('mock-outgoing-span', {
+      attributes: {
+        direction: 'out',
+        'http.method': 'POST',
+        'http.url': 'http://localhost/mock-route',
+      },
+    });
+    requestHook(outgoingSpan);
+    expect(outgoingSpan.name).toMatchInlineSnapshot('"POST http://localhost/mock-route"');
+  });
+
   it('should register a batch span processor with OTLP exporter when traces endpoint is set', () => {
     const { _tracerProvider } = setup({ tracesEndpoint: 'http://localhost:4317' });
     expect(BatchSpanProcessor).toHaveBeenCalledTimes(1);
     expect(BatchSpanProcessor).toHaveBeenCalledWith(expect.any(OTLPTraceExporter));
-    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledTimes(1);
-    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledWith(expect.any(BatchSpanProcessor));
+    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledTimes(2);
+    expect(_tracerProvider.addSpanProcessor)
+      .toHaveBeenNthCalledWith(1, expect.any(NoopSpanProcessor));
+    expect(_tracerProvider.addSpanProcessor)
+      .toHaveBeenNthCalledWith(2, expect.any(BatchSpanProcessor));
     expect(SimpleSpanProcessor).not.toHaveBeenCalled();
     expect(ConsoleSpanExporter).not.toHaveBeenCalled();
   });
@@ -224,22 +236,27 @@ describe('tracer', () => {
     const { _tracerProvider } = setup({ logLevel: 'trace', nodeEnv: 'development' });
     expect(SimpleSpanProcessor).toHaveBeenCalledTimes(1);
     expect(SimpleSpanProcessor).toHaveBeenCalledWith(expect.any(ConsoleSpanExporter));
-    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledTimes(1);
-    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledWith(expect.any(SimpleSpanProcessor));
+    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledTimes(2);
+    expect(_tracerProvider.addSpanProcessor)
+      .toHaveBeenNthCalledWith(1, expect.any(NoopSpanProcessor));
+    expect(_tracerProvider.addSpanProcessor)
+      .toHaveBeenNthCalledWith(2, expect.any(SimpleSpanProcessor));
   });
 
   it('should not register a simple span processor with console exporter when log level is not trace', () => {
     const { _tracerProvider } = setup({ nodeEnv: 'development', logLevel: 'info' });
     expect(SimpleSpanProcessor).not.toHaveBeenCalled();
     expect(ConsoleSpanExporter).not.toHaveBeenCalled();
-    expect(_tracerProvider.addSpanProcessor).not.toHaveBeenCalled();
+    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledTimes(1);
+    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledWith(expect.any(NoopSpanProcessor));
   });
 
   it('should not register a simple span processor with console exporter when not in development', () => {
     const { _tracerProvider } = setup({ nodeEnv: 'production', logLevel: 'trace' });
     expect(SimpleSpanProcessor).not.toHaveBeenCalled();
     expect(ConsoleSpanExporter).not.toHaveBeenCalled();
-    expect(_tracerProvider.addSpanProcessor).not.toHaveBeenCalled();
+    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledTimes(1);
+    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledWith(expect.any(NoopSpanProcessor));
   });
 
   it('should register both batch and simple span processors when traces endpoint is set and log level is trace in development', () => {
@@ -252,9 +269,13 @@ describe('tracer', () => {
     expect(BatchSpanProcessor).toHaveBeenCalledWith(expect.any(OTLPTraceExporter));
     expect(SimpleSpanProcessor).toHaveBeenCalledTimes(1);
     expect(SimpleSpanProcessor).toHaveBeenCalledWith(expect.any(ConsoleSpanExporter));
-    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledTimes(2);
-    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledWith(expect.any(BatchSpanProcessor));
-    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledWith(expect.any(SimpleSpanProcessor));
+    expect(_tracerProvider.addSpanProcessor).toHaveBeenCalledTimes(3);
+    expect(_tracerProvider.addSpanProcessor)
+      .toHaveBeenNthCalledWith(1, expect.any(NoopSpanProcessor));
+    expect(_tracerProvider.addSpanProcessor)
+      .toHaveBeenNthCalledWith(2, expect.any(BatchSpanProcessor));
+    expect(_tracerProvider.addSpanProcessor)
+      .toHaveBeenNthCalledWith(3, expect.any(SimpleSpanProcessor));
   });
 
   it('should shutdown the batch span processor when a SIGINT signal is received', async () => {

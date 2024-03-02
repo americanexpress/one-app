@@ -15,7 +15,7 @@
  */
 
 import contentSecurityPolicyBuilder from 'content-security-policy-builder';
-import ip from 'ip';
+import { getIp } from './getIP';
 
 export default contentSecurityPolicyBuilder({
   directives: {
@@ -30,7 +30,7 @@ export default contentSecurityPolicyBuilder({
       // used by integration tests running in docker where domain names are aliased
       'https://sample-cdn.frank',
       // used for local development
-      `${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
+      `${getIp()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
       // used for local development
       `localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
     ],
@@ -51,7 +51,7 @@ export default contentSecurityPolicyBuilder({
       // used for our sample app deployment in heroku
       '*.surge.sh',
       // used for local development
-      `${ip.address()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
+      `${getIp()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
       // used for local development
       `localhost:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`,
       // used by integration tests running in docker where domain names are aliased

@@ -18,7 +18,7 @@ import fs from 'fs';
 import rimraf from 'rimraf';
 import path from 'path';
 import mkdirp from 'mkdirp';
-import ProxyAgent from 'proxy-agent';
+import { ProxyAgent } from 'proxy-agent';
 import oneAppDevCdn from '../../../src/server/utils/devCdnFactory';
 import {
   removeExistingEntryIfConflicting,
@@ -526,18 +526,17 @@ describe('one-app-dev-cdn', () => {
   describe('modules', () => {
     it('gets remote modules', async () => {
       expect.assertions(5);
-
       const fcdn = setupTest({
         useLocalModules: false,
         appPort: 3000,
-        remoteModuleMapUrl: 'https://example.com/module-map.json',
+        remoteModuleMapUrl: 'https://example.com/static/module-map.json',
+        routePrefix: '/static',
       });
+
       fetch.mockReturnJsonOnce(defaultRemoteMap);
       fetch.mockReturnFileOnce('console.log("a");');
-
       const moduleMapResponse = await fcdn.inject()
-        .get('/module-map.json');
-
+        .get('/static/module-map.json');
       expect(moduleMapResponse.statusCode).toBe(200);
       expect(moduleMapResponse.headers['content-type']).toMatch(/^application\/json/);
       expect(
@@ -549,13 +548,13 @@ describe('one-app-dev-cdn', () => {
       expect(moduleResponse.body).toBe('console.log("a");');
       expect(fetch.mock.calls).toEqual([
         [
-          'https://example.com/module-map.json',
+          'https://example.com/static/module-map.json',
           {
             agent: expect.any(ProxyAgent),
           },
         ],
         [
-          'https://example.com//cdn/module-b/1.0.0/module-b.node.js',
+          'https://example.com/cdn/module-b/1.0.0/module-b.node.js',
           {
             agent: expect.any(ProxyAgent),
             headers: {
