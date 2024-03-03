@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app-statics",
-  "version": "6.11.0-tracing.0",
+  "version": "6.11.0-tracing.1",
   "description": "One App Static Assets",
   "main": "index.js",
   "scripts": {
