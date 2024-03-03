@@ -70,6 +70,7 @@ const createRequestStore = (
     request.store = store; // eslint-disable-line no-param-reassign
     request.clientModuleMapCache = getClientModuleMapCache();
   } catch (err) {
+    span.recordException(err);
     request.log.error('error creating store for request', err);
     renderStaticErrorPage(request, reply);
   } finally {

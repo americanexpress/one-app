@@ -58,7 +58,7 @@ describe('createRequestStore', () => {
   let request;
   let reply;
   let reducers;
-  const span = { end: jest.fn() };
+  const span = { end: jest.fn(), recordException: jest.fn() };
   const activeSpan = { attributes: { 'req.method': 'GET', 'req.url': '/foo' } };
   const tracer = { startSpan: jest.fn(() => span) };
 
@@ -101,6 +101,7 @@ describe('createRequestStore', () => {
   it('should add a store to the request object', () => {
     createRequestStore(request, reply, { reducers });
 
+    expect(span.recordException).not.toHaveBeenCalled();
     expect(request.log.error).not.toHaveBeenCalled();
     expect(request.store).toBeTruthy();
   });
@@ -114,6 +115,7 @@ describe('createRequestStore', () => {
   it('should send the static error page when there is an error', () => {
     createRequestStore(request, reply, { reducers: null });
 
+    expect(span.recordException).toHaveBeenCalled();
     expect(request.log.error).toHaveBeenCalled();
     expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
   });
@@ -176,6 +178,7 @@ describe('createRequestStore', () => {
       createRequestStore(request, reply, { reducers: null });
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
       expect(tracer.startSpan).toHaveBeenCalledWith('createRequestStore');
+      expect(span.recordException).toHaveBeenCalled();
       expect(request.log.error).toHaveBeenCalled();
       expect(renderStaticErrorPage).toHaveBeenCalledWith(request, reply);
       expect(span.end).toHaveBeenCalled();

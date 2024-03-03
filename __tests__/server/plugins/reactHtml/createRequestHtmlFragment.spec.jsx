@@ -63,6 +63,7 @@ const createTracer = () => {
     const span = {
       name,
       ended: false,
+      recordException: jest.fn(),
     };
     span.end = jest.fn(() => {
       if (span.ended) {
@@ -188,8 +189,8 @@ describe('createRequestHtmlFragment', () => {
     expect(typeof req.appHtml).toBe('string');
   });
 
-  it('does not generate HTML when no route is matched', async () => {
-    expect.assertions(4);
+  it('doe`s not generate HTML when no route is matched', async () => {
+    expect.assertions(5);
 
     matchPromise.mockImplementationOnce(() => ({
       redirectLocation: undefined,
@@ -203,6 +204,7 @@ describe('createRequestHtmlFragment', () => {
       'http://example.com/request',
       expect.any(Error)
     );
+    expect(tracer.spans.createRequestHtmlFragment.recordException).toHaveBeenCalled();
     expect(res.code).toHaveBeenCalledWith(404);
     expect(createRoutes).toHaveBeenCalledWith(req.store);
     expect(req.appHtml).toBe(undefined);
@@ -412,6 +414,7 @@ describe('createRequestHtmlFragment', () => {
     Object.values(tracer.spans).forEach((span) => {
       expect(span.end).toHaveBeenCalledTimes(1);
     });
+    expect(tracer.spans.createRequestHtmlFragment.recordException).not.toHaveBeenCalled();
   });
 
   it('should include tracer spans when the circuit breaker opens', async () => {

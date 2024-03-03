@@ -443,6 +443,7 @@ export const sendHtml = (request, reply) => {
 
     return reply.header('content-type', 'text/html; charset=utf-8').send(html);
   } catch (err) {
+    span.recordException(err);
     request.log.error('sendHtml had an error, sending static error page', err);
     return renderStaticErrorPage(request, reply);
   } finally {

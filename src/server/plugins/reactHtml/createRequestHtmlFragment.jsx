@@ -56,7 +56,6 @@ const getModuleDataBreaker = createCircuitBreaker(getModuleData);
 const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
   const { tracer } = request.openTelemetry();
 
-  // eslint-disable-next-line complexity
   return tracer.startActiveSpan('createRequestHtmlFragment', async (parentSpan) => {
     try {
       const createRoutesSpan = tracer.startSpan(`${parentSpan.name} -> createRoutes`);
@@ -80,42 +79,45 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
           reply.redirect(302, redirectLocation.pathname + redirectLocation.search);
         }
         checkRoutesSpan.end();
-      } else {
-        if (!renderProps) {
-          reply.code(404);
-          checkRoutesSpan.end();
-          throw new Error('unable to match routes');
-        }
+        return;
+      }
+
+      if (!renderProps) {
+        reply.code(404);
         checkRoutesSpan.end();
+        throw new Error('unable to match routes');
+      }
+      checkRoutesSpan.end();
 
-        const buildRenderPropsSpan = tracer.startSpan(`${parentSpan.name} -> buildRenderProps`);
-        const { httpStatus } = renderProps.routes.slice(-1)[0];
+      const buildRenderPropsSpan = tracer.startSpan(`${parentSpan.name} -> buildRenderProps`);
+      const { httpStatus } = renderProps.routes.slice(-1)[0];
 
-        if (httpStatus) {
-          reply.code(httpStatus);
-        }
+      if (httpStatus) {
+        reply.code(httpStatus);
+      }
 
-        const props = {
-          location: renderProps.location,
-          params: renderProps.params,
-          router: renderProps.router,
-          routes: renderProps.routes,
-        };
+      const props = {
+        location: renderProps.location,
+        params: renderProps.params,
+        router: renderProps.router,
+        routes: renderProps.routes,
+      };
 
-        const routeModules = renderProps.routes
-          .filter((route) => !!route.moduleName)
-          .map((route) => ({
-            name: route.moduleName,
-            props: {
-              ...props,
-              route,
-            },
-          }));
+      const routeModules = renderProps.routes
+        .filter((route) => !!route.moduleName)
+        .map((route) => ({
+          name: route.moduleName,
+          props: {
+            ...props,
+            route,
+          },
+        }));
 
-        const state = store.getState();
-        buildRenderPropsSpan.end();
+      const state = store.getState();
+      buildRenderPropsSpan.end();
 
-        const returnEarly = await tracer.startActiveSpan(`${parentSpan.name} -> loadModuleData`, async (loadModuleDataSpan) => {
+      const returnEarly = await tracer.startActiveSpan(`${parentSpan.name} -> loadModuleData`, async (loadModuleDataSpan) => {
+        try {
           if (getRenderMethodName(state) === 'renderForStaticMarkup') {
             await dispatch(composeModules(routeModules));
           } else {
@@ -131,46 +133,46 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
               }
               const status = redirect.status || 302;
               reply.redirect(status, redirect.url);
-              loadModuleDataSpan.end();
               return true;
             }
 
             if (fallback) {
               request.appHtml = '';
               request.helmetInfo = {};
-              loadModuleDataSpan.end();
               return true;
             }
           }
-          loadModuleDataSpan.end();
           return false;
-        });
+        } finally {
+          loadModuleDataSpan.end();
+        }
+      });
 
-        if (returnEarly) return;
+      if (returnEarly) return;
 
-        const renderToStringSpan = tracer.startSpan(`${parentSpan.name} -> renderToString`);
-        const renderMethod = getRenderMethodName(state) === 'renderForStaticMarkup'
-          ? renderForStaticMarkup
-          : renderForString;
+      const renderToStringSpan = tracer.startSpan(`${parentSpan.name} -> renderToString`);
+      const renderMethod = getRenderMethodName(state) === 'renderForStaticMarkup'
+        ? renderForStaticMarkup
+        : renderForString;
 
-        const finishRenderTimer = startSummaryTimer(
-          ssrMetrics.reactRendering,
-          { renderMethodName: getRenderMethodName(state) }
-        );
-        /* eslint-disable react/jsx-props-no-spreading */
-        const { renderedString, helmetInfo } = renderMethod(
-          <Provider store={store}>
-            <RouterContext {...renderProps} />
-          </Provider>
-        );
-        /* eslint-ensable react/jsx-props-no-spreading */
-        finishRenderTimer();
+      const finishRenderTimer = startSummaryTimer(
+        ssrMetrics.reactRendering,
+        { renderMethodName: getRenderMethodName(state) }
+      );
+      /* eslint-disable react/jsx-props-no-spreading */
+      const { renderedString, helmetInfo } = renderMethod(
+        <Provider store={store}>
+          <RouterContext {...renderProps} />
+        </Provider>
+      );
+      /* eslint-ensable react/jsx-props-no-spreading */
+      finishRenderTimer();
 
-        request.appHtml = renderedString;
-        request.helmetInfo = helmetInfo;
-        renderToStringSpan.end();
-      }
+      request.appHtml = renderedString;
+      request.helmetInfo = helmetInfo;
+      renderToStringSpan.end();
     } catch (err) {
+      parentSpan.recordException(err);
       request.log.error('error creating request HTML fragment for %s', request.url, err);
     } finally {
       parentSpan.end();

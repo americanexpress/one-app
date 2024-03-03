@@ -160,6 +160,7 @@ const createTracer = () => {
       const span = {
         name,
         end: jest.fn(),
+        recordException: jest.fn(),
       };
       spans[name] = span;
       return span;
@@ -517,6 +518,7 @@ describe('reactHtml', () => {
       sendHtml(request, reply);
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
       expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml');
+      expect(tracer.spans.sendHtml.recordException).not.toHaveBeenCalled();
       expect(tracer.spans.sendHtml.end).toHaveBeenCalled();
     });
 
@@ -526,6 +528,7 @@ describe('reactHtml', () => {
       expect(reply.code).toHaveBeenCalledWith(500);
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
       expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml');
+      expect(tracer.spans.sendHtml.recordException).toHaveBeenCalled();
       expect(tracer.spans.sendHtml.end).toHaveBeenCalled();
     });
 
