@@ -156,20 +156,22 @@ describe('tracer', () => {
       socket: { localPort: 3000 },
       path: '/mock-route',
     }))).toBe(false);
+    delete process.env.HTTP_PORT;
   });
 
-  it('should ignore requests to the dev CDN', () => {
-    process.env.HTTP_PORT = '3000';
+  it('should ignore requests to the metrics server', () => {
+    process.env.HTTPS_PORT = '8443';
     setup({});
     const { ignoreIncomingRequestHook } = HttpInstrumentation.mock.calls[0][0];
     expect(ignoreIncomingRequestHook(httpMocks.createRequest({
-      socket: { localPort: 3001 },
+      socket: { localPort: 3005 },
       path: '/mock-route',
     }))).toBe(true);
     expect(ignoreIncomingRequestHook(httpMocks.createRequest({
-      socket: { localPort: 3000 },
+      socket: { localPort: 8443 },
       path: '/mock-route',
     }))).toBe(false);
+    delete process.env.HTTPS_PORT;
   });
 
   it('should not ignore incoming requests for internal routes or the dev CDN  when tracing all requests', () => {

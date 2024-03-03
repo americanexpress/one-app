@@ -52,7 +52,7 @@ const tracerProvider = new NodeTracerProvider({
 });
 
 const traceAllRequests = process.env.ONE_TRACE_ALL_REQUESTS === 'true';
-const httpPort = Number.parseInt(process.env.HTTP_PORT, 10) || 3000;
+const httpPort = Number.parseInt(process.env.HTTPS_PORT || process.env.HTTP_PORT, 10) || 3000;
 
 registerInstrumentations({
   tracerProvider,
