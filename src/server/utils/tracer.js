@@ -51,15 +51,15 @@ const tracerProvider = new NodeTracerProvider({
   }).merge(new Resource(getOtelResourceAttributes())),
 });
 
-const devCdnPort = process.env.HTTP_ONE_APP_DEV_CDN_PORT || '3001';
 const traceAllRequests = process.env.ONE_TRACE_ALL_REQUESTS === 'true';
+const httpPort = Number.parseInt(process.env.HTTP_PORT, 10) || 3000;
 
 registerInstrumentations({
   tracerProvider,
   instrumentations: [
     new HttpInstrumentation({
       ignoreIncomingRequestHook: !traceAllRequests
-        ? (request) => request.url.startsWith('/_/') || request.headers.host.endsWith(`:${devCdnPort}`)
+        ? (request) => request.socket.localPort !== httpPort || request.url.startsWith('/_/')
         : undefined,
       requireParentforOutgoingSpans: !traceAllRequests,
       requestHook(span) {

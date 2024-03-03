@@ -77,18 +77,18 @@ describe('noopTracer', () => {
     expect(getTypes(noopApi)).toEqual(getTypes(actualApi));
   });
 
-  it('should return the same types from API methods', () => {
+  it('should return the same types from API methods', async () => {
     expect(typeof actualApi.inject()).toBe(typeof noopApi.inject());
     expect(typeof actualApi.extract()).toBe(typeof noopApi.extract());
 
     expect(actualApi.activeSpan.constructor).toBe(actualSpan.constructor);
     expect(noopApi.activeSpan).toBe(noopSpan);
 
-    const actualStartActiveSpanCb = jest.fn();
-    expect(actualApi.tracer.startActiveSpan('span name', actualStartActiveSpanCb)).toBe(undefined);
+    const actualStartActiveSpanCb = jest.fn(async () => 'result');
+    expect(await actualApi.tracer.startActiveSpan('span name', actualStartActiveSpanCb)).toBe('result');
     expect(actualStartActiveSpanCb.mock.calls[0][0].constructor).toBe(actualSpan.constructor);
-    const noopStartActiveSpanCb = jest.fn();
-    expect(noopApi.tracer.startActiveSpan('span name', noopStartActiveSpanCb)).toBe(undefined);
+    const noopStartActiveSpanCb = jest.fn(async () => 'result');
+    expect(await noopApi.tracer.startActiveSpan('span name', noopStartActiveSpanCb)).toBe('result');
     expect(noopStartActiveSpanCb.mock.calls[0][0]).toBe(noopSpan);
   });
 
