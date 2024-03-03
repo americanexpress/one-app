@@ -14,6 +14,7 @@
  * permissions and limitations under the License.
  */
 
+import httpMocks from 'node-mocks-http';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { PinoInstrumentation } from '@opentelemetry/instrumentation-pino';
@@ -144,28 +145,33 @@ describe('tracer', () => {
   });
 
   it('should ignore incoming requests for internal routes', () => {
+    process.env.HTTP_PORT = '3000';
     setup({});
     const { ignoreIncomingRequestHook } = HttpInstrumentation.mock.calls[0][0];
-    expect(
-      ignoreIncomingRequestHook({
-        url: '/_/static/app/mockVersion/app.js',
-        headers: { host: 'mock.host' },
-      })
-    ).toBe(true);
-    expect(ignoreIncomingRequestHook({ url: '/mock-route', headers: { host: 'mock.host' } })).toBe(
-      false
-    );
+    expect(ignoreIncomingRequestHook(httpMocks.createRequest({
+      socket: { localPort: 3000 },
+      path: '/_/static/app/mockVersion/app.js',
+    }))).toBe(true);
+    expect(ignoreIncomingRequestHook(httpMocks.createRequest({
+      socket: { localPort: 3000 },
+      path: '/mock-route',
+    }))).toBe(false);
+    delete process.env.HTTP_PORT;
   });
 
-  it('should ignore requests to the dev CDN', () => {
+  it('should ignore requests to the metrics server', () => {
+    process.env.HTTPS_PORT = '8443';
     setup({});
     const { ignoreIncomingRequestHook } = HttpInstrumentation.mock.calls[0][0];
-    expect(
-      ignoreIncomingRequestHook({ url: '/mock-route', headers: { host: 'localhost:3001' } })
-    ).toBe(true);
-    expect(
-      ignoreIncomingRequestHook({ url: '/mock-route', headers: { host: 'localhost:3000' } })
-    ).toBe(false);
+    expect(ignoreIncomingRequestHook(httpMocks.createRequest({
+      socket: { localPort: 3005 },
+      path: '/mock-route',
+    }))).toBe(true);
+    expect(ignoreIncomingRequestHook(httpMocks.createRequest({
+      socket: { localPort: 8443 },
+      path: '/mock-route',
+    }))).toBe(false);
+    delete process.env.HTTPS_PORT;
   });
 
   it('should not ignore incoming requests for internal routes or the dev CDN  when tracing all requests', () => {
