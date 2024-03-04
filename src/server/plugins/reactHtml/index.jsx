@@ -325,30 +325,30 @@ export const checkStateForRedirectAndStatusCode = (request, reply) => {
   const { tracer } = request.openTelemetry();
   const checkStateForRedirectSpan = tracer.startSpan('checkStateForRedirect');
   const destination = request.store.getState().getIn(['redirection', 'destination']);
-
-  if (destination) {
-    if (!isRedirectUrlAllowed(destination)) {
-      renderStaticErrorPage(request, reply);
-      console.error('\'%s\' is not an allowed redirect URL', destination);
-      checkStateForRedirectSpan.end();
-      return;
-    }
-    reply.redirect(302, destination);
-  } else {
-    const checkStateForStatusCodeSpan = tracer.startSpan('checkStateForStatusCode');
-    const error = request.store.getState().get('error');
-
-    if (error) {
-      const code = error.get('code');
-
-      if (code) {
-        reply.code(code);
+  try {
+    if (destination) {
+      if (!isRedirectUrlAllowed(destination)) {
+        renderStaticErrorPage(request, reply);
+        console.error('\'%s\' is not an allowed redirect URL', destination);
+        return;
       }
-    }
-    checkStateForStatusCodeSpan.end();
-  }
+      reply.redirect(302, destination);
+    } else {
+      const checkStateForStatusCodeSpan = tracer.startSpan('checkStateForStatusCode');
+      const error = request.store.getState().get('error');
 
-  checkStateForRedirectSpan.end();
+      if (error) {
+        const code = error.get('code');
+
+        if (code) {
+          reply.code(code);
+        }
+      }
+      checkStateForStatusCodeSpan.end();
+    }
+  } finally {
+    checkStateForRedirectSpan.end();
+  }
 };
 
 /**

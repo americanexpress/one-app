@@ -49,8 +49,7 @@ holocron.getModuleMap.mockImplementation(() => fromJS({
       },
     },
   },
-})
-);
+}));
 
 setClientModuleMapCache(holocron.getModuleMap().toJS());
 

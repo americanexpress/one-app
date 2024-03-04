@@ -189,7 +189,7 @@ describe('createRequestHtmlFragment', () => {
     expect(typeof req.appHtml).toBe('string');
   });
 
-  it('doe`s not generate HTML when no route is matched', async () => {
+  it('does not generate HTML when no route is matched', async () => {
     expect.assertions(5);
 
     matchPromise.mockImplementationOnce(() => ({
@@ -346,8 +346,7 @@ describe('createRequestHtmlFragment', () => {
       rendering: {
         renderPartialOnly: true,
       },
-    })
-    );
+    }));
 
     await requireCreateRequestHtmlFragment(req, res, { createRoutes });
 
@@ -365,8 +364,7 @@ describe('createRequestHtmlFragment', () => {
       rendering: {
         disableScripts: true,
       },
-    })
-    );
+    }));
 
     await requireCreateRequestHtmlFragment(req, res, { createRoutes });
 
@@ -385,8 +383,7 @@ describe('createRequestHtmlFragment', () => {
         renderTextOnly: true,
         renderTextOnlyOptions: { htmlTagReplacement: '', allowedHtmlTags: [] },
       },
-    })
-    );
+    }));
 
     await requireCreateRequestHtmlFragment(req, res, { createRoutes });
 
