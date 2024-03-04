@@ -65,8 +65,8 @@ expect.extend({
   },
 });
 
-jest.mock('ip', () => ({
-  address: () => 'localhost',
+jest.mock('../../../../src/server/utils/getIP', () => ({
+  getIp: () => 'localhost',
 }));
 
 jest.mock('yargs', () => ({ argv: { rootModuleName: 'my-module' } }));
