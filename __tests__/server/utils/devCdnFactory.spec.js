@@ -16,7 +16,7 @@
 import util from 'node:util';
 import fetch from 'node-fetch';
 import fs from 'fs';
-import rimraf from 'rimraf';
+import { rimrafSync } from 'rimraf';
 import path from 'path';
 import mkdirp from 'mkdirp';
 import { ProxyAgent } from 'proxy-agent';
@@ -695,8 +695,8 @@ describe('one-app-dev-cdn', () => {
   });
 
   afterEach(() => {
-    rimraf.sync(pathToCache);
-    rimraf.sync(pathToStubs);
+    rimrafSync(pathToCache);
+    rimrafSync(pathToStubs);
   });
 
   afterAll(() => {
