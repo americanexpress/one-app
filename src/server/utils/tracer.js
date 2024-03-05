@@ -63,10 +63,10 @@ registerInstrumentations({
         : undefined,
       requireParentforOutgoingSpans: !traceAllRequests,
       requestHook(span) {
-        if (span?.attributes?.direction === 'in') {
+        if (span.attributes?.direction === 'in') {
           span.updateName(`${span.attributes['http.method']} ${span.attributes['http.target']}`);
         }
-        if (span?.attributes?.direction === 'out') {
+        if (span.attributes?.direction === 'out') {
           span.updateName(`${span.attributes['http.method']} ${span.attributes['http.url']}`);
         }
       },
