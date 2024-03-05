@@ -15,7 +15,6 @@
  */
 
 import fp from 'fastify-plugin';
-import openTelemetry from '@opentelemetry/api';
 import openTelemetryPlugin from '@autotelic/fastify-opentelemetry';
 
 /**
@@ -23,11 +22,7 @@ import openTelemetryPlugin from '@autotelic/fastify-opentelemetry';
  * @param {import('fastify').FastifyInstance} fastify Fastify instance
  */
 const tracer = async (fastify) => {
-  fastify.register(openTelemetryPlugin);
-  fastify.addHook('onRequest', (request, reply, next) => {
-    const { context } = request.openTelemetry();
-    openTelemetry.context.with(context, next);
-  });
+  fastify.register(openTelemetryPlugin, { wrapRoutes: true });
   fastify.decorateRequest('tracingEnabled', true);
 };
 

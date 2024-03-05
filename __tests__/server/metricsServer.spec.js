@@ -22,8 +22,6 @@ describe('metricsServer', () => {
   jest.mock('../../src/server/metrics/intl-cache', () => ({
     cacheSizeCollector: 'cacheSizeCollector',
   }));
-  // jest.spyOn(console, 'log').mockImplementation(() => {});
-  // jest.spyOn(console, 'warn').mockImplementation(() => {});
 
   let client;
   let helmet;
