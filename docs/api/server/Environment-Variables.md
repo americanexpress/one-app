@@ -838,8 +838,9 @@ OTEL_RESOURCE_ATTRIBUTES="foo=bar,baz=qux"
 * ✅ Production
 * ✅ Development
 
-Additional OpenTelemetry resource attributes in [W3C Baggage format](https://w3c.github.io/baggage).
-See OTel Environment Variable Specification] & [OTel Resource SDK documentation] for more details.
+Requests made to one-app's internal routes (those starting with `/_/`), requests to any other port
+than `HTTPS_PORT` or `HTTP_PORT`, and outgoing requests not associated with an incoming request are
+not traced by default. Setting this to true will trace all requests.
 
 **Shape**
 ```bash
@@ -857,8 +858,7 @@ ONE_TRACE_ALL_REQUESTS=true
 * ✅ Production
 * ✅ Development
 
-Additional OpenTelemetry resource attributes in [W3C Baggage format](https://w3c.github.io/baggage).
-See OTel Environment Variable Specification] & [OTel Resource SDK documentation] for more details.
+When tracing is enabled, request logging is disabled by default. Setting this to true will re-enable it.
 
 **Shape**
 ```bash
