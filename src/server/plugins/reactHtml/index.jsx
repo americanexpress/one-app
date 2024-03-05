@@ -373,7 +373,11 @@ export const sendHtml = (request, reply) => {
     const userAgent = headers['user-agent'];
     const isLegacy = legacyUserAgent(userAgent);
 
-    request.log.info('sendHtml, have store? %s, have appHtml? %s', !!store, !!appHtml);
+    if (request.tracingEnabled) {
+      span.addEvent(`'sendHtml, have store? ${!!store}, have appHtml? ${!!appHtml}`);
+    } else {
+      request.log.info('sendHtml, have store? %s, have appHtml? %s', !!store, !!appHtml);
+    }
 
     if (appHtml && typeof appHtml !== 'string') {
       throw new Error(`appHtml was not a string, was ${typeof appHtml}`, appHtml);

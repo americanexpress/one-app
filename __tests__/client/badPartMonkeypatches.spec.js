@@ -24,6 +24,7 @@ const set = require('lodash.set');
 jest.useFakeTimers();
 jest.spyOn(global, 'setTimeout');
 jest.spyOn(global, 'setInterval');
+jest.spyOn(console, 'warn');
 
 describe('badPartMonkeypatches', () => {
   // eslint-disable-next-line no-console
@@ -112,8 +113,6 @@ describe('badPartMonkeypatches', () => {
 
   describe('implicit eval', () => {
     beforeEach(() => {
-      // eslint-disable-next-line no-console
-      console.warn = jest.fn(console.warn);
       applyMonkeypatches();
     });
 

@@ -3,5 +3,4 @@ version: '3'
 services:
   one-app:
     env_file: ./one-app/base.env
-    entrypoint:
-      - scripts/start.sh
+    entrypoint: scripts/start.sh

@@ -105,7 +105,10 @@ if (process.env.NODE_ENV === 'development' && argv.logLevel === 'trace') {
 
 tracerProvider.register();
 
-['SIGINT', 'SIGTERM'].forEach((signalName) => process.on(signalName, () => batchProcessor.shutdown()));
+['SIGINT', 'SIGTERM'].forEach((signalName) => process.on(signalName, async () => {
+  await batchProcessor.shutdown();
+  return tracerProvider.shutdown();
+}));
 
 /* eslint-disable no-underscore-dangle -- exports are for testing only */
 // This file should not be imported during runtime, but rather loaded using --require

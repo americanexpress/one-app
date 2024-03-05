@@ -30,15 +30,14 @@ import fastifyStatic from '@fastify/static';
 import fastifyHelmet from '@fastify/helmet';
 import fastifySensible from '@fastify/sensible';
 import fastifyMetrics from 'fastify-metrics';
-import openTelemetry from '@opentelemetry/api';
-import openTelemetryPlugin from '@autotelic/fastify-opentelemetry';
 import client from 'prom-client';
 
 import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
 import addSecurityHeadersPlugin from './plugins/addSecurityHeaders';
 import csp from './plugins/csp';
-import logging from './utils/logging/fastifyPlugin';
+import requestLogging from './plugins/requestLogging';
+import requestRaw from './plugins/requestRaw';
 import forwardedHeaderParser from './plugins/forwardedHeaderParser';
 import renderHtml from './plugins/reactHtml';
 import renderStaticErrorPage from './plugins/reactHtml/staticErrorPage';
@@ -46,6 +45,7 @@ import addFrameOptionsHeader from './plugins/addFrameOptionsHeader';
 import addCacheHeaders from './plugins/addCacheHeaders';
 import { getServerPWAConfig, serviceWorkerHandler, webManifestMiddleware } from './pwa';
 import logger from './utils/logging/logger';
+import tracer from './plugins/tracer';
 import noopTracer from './plugins/noopTracer';
 
 const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
@@ -57,18 +57,17 @@ const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
 
 async function appPlugin(fastify) {
   if (process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || argv.logLevel === 'trace') {
-    fastify.register(openTelemetryPlugin);
-    fastify.addHook('onRequest', (request, reply, done) => {
-      const { context } = request.openTelemetry();
-      openTelemetry.context.with(context, done);
-    });
+    fastify.register(tracer);
   } else {
     fastify.register(noopTracer);
   }
+  if (!process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || process.env.ONE_ENABLE_REQUEST_LOGGING_WHILE_TRACING === 'true') {
+    fastify.register(requestLogging, { spy: true });
+  }
+  fastify.register(requestRaw);
   fastify.register(fastifySensible);
   fastify.register(ensureCorrelationId);
   fastify.register(fastifyCookie);
-  fastify.register(logging);
   fastify.register(fastifyMetrics, {
     defaultMetrics: { enabled: false },
     endpoint: null,

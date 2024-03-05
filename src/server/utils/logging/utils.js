@@ -18,13 +18,6 @@ import { STATUS_CODES } from 'http';
 
 import chalk from 'chalk';
 
-const coloredLevels = {
-  error: chalk.red('error'),
-  warn: chalk.yellow('warn'),
-  log: chalk.blue('log'),
-  info: chalk.gray('info'),
-};
-
 function printStatusCode(obj) {
   const { request: { statusCode } } = obj;
 
@@ -95,7 +88,6 @@ function formatLogEntry(entry) {
 }
 
 export {
-  coloredLevels,
   printStatusCode,
   printStatusMessage,
   printDurationTime,

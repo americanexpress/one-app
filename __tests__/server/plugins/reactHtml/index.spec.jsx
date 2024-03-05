@@ -161,6 +161,7 @@ const createTracer = () => {
         name,
         end: jest.fn(),
         recordException: jest.fn(),
+        addEvent: jest.fn(),
       };
       spans[name] = span;
       return span;
@@ -174,7 +175,6 @@ describe('reactHtml', () => {
 
   let request;
   let reply;
-  const activeSpan = { attributes: { 'req.method': 'GET', 'req.url': '/foo' } };
   let tracer;
 
   const setFullMap = () => {
@@ -285,11 +285,11 @@ describe('reactHtml', () => {
     request.clientModuleMapCache = getClientModuleMapCache();
     request.appHtml = appHtml;
     request.log = {
-      info: jest.fn(),
-      error: jest.fn(),
+      info: jest.fn(util.format),
+      error: jest.fn(util.format),
     };
     tracer = createTracer();
-    request.openTelemetry = () => ({ tracer, activeSpan });
+    request.openTelemetry = () => ({ tracer });
 
     reply = jest.fn();
     reply.status = jest.fn(() => reply);
@@ -520,6 +520,26 @@ describe('reactHtml', () => {
       expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml');
       expect(tracer.spans.sendHtml.recordException).not.toHaveBeenCalled();
       expect(tracer.spans.sendHtml.end).toHaveBeenCalled();
+    });
+
+    it('adds a span event and does not log when tracing is enabled', () => {
+      request.tracingEnabled = true;
+      sendHtml(request, reply);
+      expect(tracer.spans.sendHtml.addEvent).toHaveBeenCalledTimes(1);
+      expect(tracer.spans.sendHtml.addEvent.mock.calls[0][0]).toMatchInlineSnapshot(
+        '"\'sendHtml, have store? true, have appHtml? true"'
+      );
+      expect(request.log.info).not.toHaveBeenCalled();
+    });
+
+    it('logs and does not add a span event when tracing is disabled', () => {
+      request.tracingEnabled = false;
+      sendHtml(request, reply);
+      expect(tracer.spans.sendHtml.addEvent).not.toHaveBeenCalled();
+      expect(request.log.info).toHaveBeenCalledTimes(1);
+      expect(request.log.info.mock.results[0].value).toMatchInlineSnapshot(
+        '"sendHtml, have store? true, have appHtml? true"'
+      );
     });
 
     it('ends the span even when there is an error', () => {
@@ -1143,7 +1163,7 @@ describe('reactHtml', () => {
     const destination = 'http://example.com/';
     let state = fromJS({ redirection: { destination: null } });
     const req = { store: { getState: () => state }, headers: {} };
-    req.openTelemetry = () => ({ tracer, activeSpan });
+    req.openTelemetry = () => ({ tracer });
     const res = { redirect: jest.fn(), code: jest.fn() };
 
     beforeEach(() => {

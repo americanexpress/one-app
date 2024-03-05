@@ -20,8 +20,7 @@ import fp from 'fastify-plugin';
  * Fastify Plugin that injects a noop tracer into the request object
  * @param {import('fastify').FastifyInstance} fastify Fastify instance
  */
-
-const noopTracer = (fastify, _opts, done) => {
+const noopTracer = async (fastify) => {
   const noopSpan = {
     get addEvent() { return () => noopSpan; },
     get end() { return () => {}; },
@@ -52,7 +51,7 @@ const noopTracer = (fastify, _opts, done) => {
     };
   }
   fastify.decorateRequest('openTelemetry', openTelemetry);
-  done();
+  fastify.decorateRequest('tracingEnabled', false);
 };
 
 export default fp(noopTracer, {

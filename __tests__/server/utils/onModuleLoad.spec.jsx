@@ -33,7 +33,7 @@ import {
   extendRestrictedAttributesAllowList,
   validateSafeRequestRestrictedAttributes,
 } from '../../../src/server/utils/safeRequest';
-import { setConfigureRequestLog } from '../../../src/server/utils/logging/fastifyPlugin';
+import { setConfigureRequestLog } from '../../../src/server/plugins/requestLogging';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
 import { getEventLoopDelayThreshold, getEventLoopDelayPercentile } from '../../../src/server/utils/createCircuitBreaker';
 import setupDnsCache from '../../../src/server/utils/setupDnsCache';
@@ -58,7 +58,7 @@ jest.mock('../../../src/server/utils/readJsonFile', () => () => ({
 jest.mock('../../../src/server/plugins/conditionallyAllowCors', () => ({
   setCorsOrigins: jest.fn(),
 }));
-jest.mock('../../../src/server/utils/logging/fastifyPlugin');
+jest.mock('../../../src/server/plugins/requestLogging');
 jest.mock('../../../src/server/utils/createSsrFetch');
 jest.mock('../../../src/server/utils/setupDnsCache');
 

@@ -22,6 +22,7 @@ import {
 } from '../utils';
 import getOtelResourceAttributes from '../../getOtelResourceAttributes';
 import readJsonFile from '../../readJsonFile';
+import pinoBaseConfig from './base';
 
 const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
 
@@ -44,6 +45,7 @@ export function createOtelTransport({
   }
 
   if (consoleExporter) {
+    if (process.stdout.isTTY && !process.env.NO_COLOR) process.env.FORCE_COLOR = '1';
     logRecordProcessorOptions.push({
       recordProcessorType: 'simple',
       exporterOptions: { protocol: 'console' },
@@ -57,7 +59,7 @@ export function createOtelTransport({
   return pino.transport({
     target: 'pino-opentelemetry-transport',
     options: {
-      messageKey: 'message',
+      messageKey: pinoBaseConfig.messageKey,
       loggerName: process.env.OTEL_SERVICE_NAME,
       serviceVersion: version,
       logRecordProcessorOptions,

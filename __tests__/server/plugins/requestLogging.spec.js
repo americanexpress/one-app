@@ -14,277 +14,200 @@
  * permissions and limitations under the License.
  */
 
+import url from 'node:url';
 import util from 'node:util';
-import fastifyPlugin, {
+import attachRequestSpies from '../../../src/server/utils/attachRequestSpies';
+import requestLogging, {
+  $ExternalRequestDuration,
   $RequestFullDuration,
   $RequestOverhead,
   $RouteHandler,
   $ResponseBuilder,
   setConfigureRequestLog,
-} from '../../../../src/server/utils/logging/fastifyPlugin';
+} from '../../../src/server/plugins/requestLogging';
 
 jest.mock('pino');
-jest.mock('../../../../src/server/utils/logging/logger');
+jest.mock('../../../src/server/utils/logging/logger');
+jest.mock('../../../src/server/utils/attachRequestSpies');
 
 jest.spyOn(console, 'error').mockImplementation(util.format);
 
-describe('fastifyPlugin', () => {
-  const { hrtime } = process;
+describe('requestLogging', () => {
+  jest.spyOn(process, 'hrtime').mockReturnValue([0, 1000]);
+  let fastify;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.hrtime = jest.fn(() => [0, 1000]);
-  });
-
-  afterEach(() => {
-    process.hrtime = hrtime;
-  });
-
-  it('adds the expected hooks and calls the done fn', () => {
-    const fastify = {
+    fastify = {
+      log: { info: jest.fn() },
       decorateRequest: jest.fn((name, fn) => {
         fastify[name] = fn;
       }),
-      addHook: jest.fn(),
+      addHook: jest.fn((name, fn) => {
+        fastify[name] = fn;
+      }),
     };
-    const done = jest.fn();
+  });
 
-    fastifyPlugin(fastify, null, done);
+  it('adds the expected hooks when spying is enabled', async () => {
+    await requestLogging(fastify, { spy: true });
 
     expect(fastify.addHook).toHaveBeenCalledTimes(5);
-    expect(fastify.addHook).toHaveBeenCalledWith('onRequest', expect.any(Function));
+    expect(fastify.addHook).toHaveBeenCalledWith('onReady', expect.any(Function));
     expect(fastify.addHook).toHaveBeenCalledWith('onRequest', expect.any(Function));
     expect(fastify.addHook).toHaveBeenCalledWith('preHandler', expect.any(Function));
     expect(fastify.addHook).toHaveBeenCalledWith('onSend', expect.any(Function));
     expect(fastify.addHook).toHaveBeenCalledWith('onResponse', expect.any(Function));
   });
 
+  it('does not add the onReady hook when spying is not enabled', async () => {
+    await requestLogging(fastify);
+
+    expect(fastify.addHook).toHaveBeenCalledTimes(4);
+    expect(fastify.addHook).not.toHaveBeenCalledWith('onReady', expect.any(Function));
+    expect(fastify.addHook).toHaveBeenCalledWith('onRequest', expect.any(Function));
+    expect(fastify.addHook).toHaveBeenCalledWith('preHandler', expect.any(Function));
+    expect(fastify.addHook).toHaveBeenCalledWith('onSend', expect.any(Function));
+    expect(fastify.addHook).toHaveBeenCalledWith('onResponse', expect.any(Function));
+  });
+
+  describe('onReady', () => {
+    it('spies on requests', async () => {
+      await requestLogging(fastify, { spy: true });
+      await fastify.onReady();
+      expect(attachRequestSpies).toHaveBeenCalledTimes(1);
+    });
+
+    describe('logging outgoing requests', () => {
+      function createExternalRequestAndParsedUrl() {
+        const externalRequestHeaders = {
+          'correlation-id': '123',
+          host: 'example.com',
+          referer: 'https://example.com/other-place',
+          'user-agent': 'Browser/8.0 (compatible; WXYZ 100.0; Doors LQ 81.4; Boat/1.0)',
+        };
+        const externalRequest = {
+          method: 'GET',
+          getHeader: jest.fn((name) => externalRequestHeaders[name]),
+          res: {
+            statusCode: 200,
+            statusMessage: 'OK',
+          },
+        };
+        const parsedUrl = url.parse('https://example.com/place');
+        return { externalRequest, parsedUrl, externalRequestHeaders };
+      }
+
+      it('starts a timer when the request starts', async () => {
+        const { externalRequest } = createExternalRequestAndParsedUrl();
+        await requestLogging(fastify, { spy: true });
+        await fastify.onReady();
+        expect(attachRequestSpies).toHaveBeenCalledTimes(1);
+        const outgoingRequestSpy = attachRequestSpies.mock.calls[0][0];
+        outgoingRequestSpy(externalRequest);
+        expect(externalRequest).toEqual(expect.objectContaining({
+          [$ExternalRequestDuration]: [0, 1000],
+        }));
+      });
+
+      it('is level info', async () => {
+        const { externalRequest, parsedUrl } = createExternalRequestAndParsedUrl();
+        await requestLogging(fastify, { spy: true });
+        await fastify.onReady();
+        expect(attachRequestSpies).toHaveBeenCalledTimes(1);
+        const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+        outgoingRequestEndSpy(externalRequest, parsedUrl);
+        expect(fastify.log.info).toHaveBeenCalledTimes(1);
+        expect(fastify.log.info.mock.calls[0]).toMatchSnapshot();
+      });
+
+      it('uses the correlation id header if present', async () => {
+        const {
+          externalRequest,
+          externalRequestHeaders,
+          parsedUrl,
+        } = createExternalRequestAndParsedUrl();
+        externalRequestHeaders['correlation-id'] = '1234';
+        await requestLogging(fastify, { spy: true });
+        await fastify.onReady();
+        expect(attachRequestSpies).toHaveBeenCalledTimes(1);
+        const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+        outgoingRequestEndSpy(externalRequest, parsedUrl);
+        expect(fastify.log.info).toHaveBeenCalledTimes(1);
+        const entry = fastify.log.info.mock.calls[0][0];
+        expect(entry.request.metaData).toHaveProperty('correlationId', '1234');
+      });
+
+      it('uses undefined for the correlation id header if not present', async () => {
+        // TODO: add holocron API to edit the request so we can add tracing/correlationId headers
+        const {
+          externalRequest,
+          externalRequestHeaders,
+          parsedUrl,
+        } = createExternalRequestAndParsedUrl();
+        delete externalRequestHeaders['correlation-id'];
+        await requestLogging(fastify, { spy: true });
+        await fastify.onReady();
+        expect(attachRequestSpies).toHaveBeenCalledTimes(1);
+        const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+        outgoingRequestEndSpy(externalRequest, parsedUrl);
+        const entry = fastify.log.info.mock.calls[0][0];
+        expect(entry.request.metaData).toHaveProperty('correlationId', undefined);
+      });
+
+      it('uses the status code if present', async () => {
+        const { externalRequest, parsedUrl } = createExternalRequestAndParsedUrl();
+        externalRequest.res.statusCode = 200;
+        await requestLogging(fastify, { spy: true });
+        await fastify.onReady();
+        expect(attachRequestSpies).toHaveBeenCalledTimes(1);
+        const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+        outgoingRequestEndSpy(externalRequest, parsedUrl);
+        const entry = fastify.log.info.mock.calls[0][0];
+        expect(entry.request).toHaveProperty('statusCode', 200);
+      });
+
+      it('uses null for the status code if not present', async () => {
+        const { externalRequest, parsedUrl } = createExternalRequestAndParsedUrl();
+        delete externalRequest.res.statusCode;
+        await requestLogging(fastify, { spy: true });
+        await fastify.onReady();
+        expect(attachRequestSpies).toHaveBeenCalledTimes(1);
+        const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+        outgoingRequestEndSpy(externalRequest, parsedUrl);
+        const entry = fastify.log.info.mock.calls[0][0];
+        expect(entry.request).toHaveProperty('statusCode', null);
+      });
+
+      it('uses the status text if present', async () => {
+        const { externalRequest, parsedUrl } = createExternalRequestAndParsedUrl();
+        externalRequest.res.statusMessage = 'OK';
+        await requestLogging(fastify, { spy: true });
+        await fastify.onReady();
+        expect(attachRequestSpies).toHaveBeenCalledTimes(1);
+        const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+        outgoingRequestEndSpy(externalRequest, parsedUrl);
+        const entry = fastify.log.info.mock.calls[0][0];
+        expect(entry.request).toHaveProperty('statusText', 'OK');
+      });
+
+      it('uses null for the status text if not present', async () => {
+        const { externalRequest, parsedUrl } = createExternalRequestAndParsedUrl();
+        delete externalRequest.res.statusMessage;
+        await requestLogging(fastify, { spy: true });
+        await fastify.onReady();
+        expect(attachRequestSpies).toHaveBeenCalledTimes(1);
+        const outgoingRequestEndSpy = attachRequestSpies.mock.calls[0][1];
+        outgoingRequestEndSpy(externalRequest, parsedUrl);
+        const entry = fastify.log.info.mock.calls[0][0];
+        expect(entry.request).toHaveProperty('statusText', null);
+      });
+    });
+  });
+
   describe('onRequest', () => {
-    it('mutates the raw request and reply to make it compatible with express-like objects', async () => {
-      const fastify = {
-        decorateRequest: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-        addHook: jest.fn((name, fn) => {
-          if (!fastify[name]) {
-            fastify[name] = fn;
-          }
-        }),
-      };
-
-      fastifyPlugin(fastify, null, jest.fn());
-
-      const request = {
-        raw: {
-          url: '/testing',
-        },
-        id: 123,
-        hostname: 'unit-testing',
-        ip: '127.0.0.1',
-        ips: [],
-        log: 'nothing',
-      };
-      const reply = {
-        raw: {},
-      };
-
-      await fastify.onRequest(request, reply);
-
-      expect(request).toEqual({
-        hostname: 'unit-testing',
-        id: 123,
-        ip: '127.0.0.1',
-        ips: [],
-        log: 'nothing',
-        raw: {
-          hostname: 'unit-testing',
-          id: 123,
-          ip: '127.0.0.1',
-          ips: [],
-          log: 'nothing',
-          originalUrl: '/testing',
-          url: '/testing',
-        },
-      });
-      expect(reply).toEqual({ raw: { log: 'nothing' } });
-    });
-
-    it('injects the body into raw', async () => {
-      const fastify = {
-        decorateRequest: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-        addHook: jest.fn((name, fn) => {
-          if (!fastify[name]) {
-            fastify[name] = fn;
-          }
-        }),
-      };
-
-      fastifyPlugin(fastify, null, jest.fn());
-
-      const request = {
-        raw: {
-          url: '/testing',
-        },
-        id: 123,
-        hostname: 'unit-testing',
-        ip: '127.0.0.1',
-        ips: [],
-        log: 'nothing',
-        body: {
-          testing: {
-            something: true,
-          },
-        },
-      };
-      const reply = {
-        raw: {},
-      };
-
-      await fastify.onRequest(request, reply);
-
-      expect(request).toEqual({
-        hostname: 'unit-testing',
-        id: 123,
-        ip: '127.0.0.1',
-        ips: [],
-        log: 'nothing',
-        body: {
-          testing: {
-            something: true,
-          },
-        },
-        raw: {
-          hostname: 'unit-testing',
-          id: 123,
-          ip: '127.0.0.1',
-          ips: [],
-          log: 'nothing',
-          originalUrl: '/testing',
-          url: '/testing',
-          body: {
-            testing: {
-              something: true,
-            },
-          },
-        },
-      });
-    });
-
-    it('injects the cookies into raw', async () => {
-      const fastify = {
-        decorateRequest: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-        addHook: jest.fn((name, fn) => {
-          if (!fastify[name]) {
-            fastify[name] = fn;
-          }
-        }),
-      };
-
-      fastifyPlugin(fastify, null, jest.fn());
-
-      const request = {
-        raw: {
-          url: '/testing',
-        },
-        id: 123,
-        hostname: 'unit-testing',
-        ip: '127.0.0.1',
-        ips: [],
-        log: 'nothing',
-        cookies: 'with milk',
-      };
-      const reply = {
-        raw: {},
-      };
-
-      await fastify.onRequest(request, reply);
-
-      expect(request).toEqual({
-        hostname: 'unit-testing',
-        id: 123,
-        ip: '127.0.0.1',
-        ips: [],
-        log: 'nothing',
-        cookies: 'with milk',
-        raw: {
-          hostname: 'unit-testing',
-          id: 123,
-          ip: '127.0.0.1',
-          ips: [],
-          log: 'nothing',
-          originalUrl: '/testing',
-          url: '/testing',
-          cookies: 'with milk',
-        },
-      });
-    });
-
-    it('injects the protocol into raw', async () => {
-      const fastify = {
-        decorateRequest: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-        addHook: jest.fn((name, fn) => {
-          if (!fastify[name]) {
-            fastify[name] = fn;
-          }
-        }),
-      };
-
-      fastifyPlugin(fastify, null, jest.fn());
-
-      const request = {
-        raw: {
-          url: '/testing',
-        },
-        id: 123,
-        hostname: 'unit-testing',
-        ip: '127.0.0.1',
-        ips: [],
-        log: 'nothing',
-        protocol: 'http',
-      };
-      const reply = {
-        raw: {},
-      };
-
-      await fastify.onRequest(request, reply);
-
-      expect(request).toEqual({
-        hostname: 'unit-testing',
-        id: 123,
-        ip: '127.0.0.1',
-        ips: [],
-        log: 'nothing',
-        protocol: 'http',
-        raw: {
-          hostname: 'unit-testing',
-          id: 123,
-          ip: '127.0.0.1',
-          ips: [],
-          log: 'nothing',
-          originalUrl: '/testing',
-          url: '/testing',
-        },
-      });
-      expect(request.raw.protocol).toBeDefined();
-    });
-
     it('starts Request Overhead and Request Full Duration timers', async () => {
-      const fastify = {
-        decorateRequest: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-        addHook: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-      };
-
-      fastifyPlugin(fastify, null, jest.fn());
+      await requestLogging(fastify);
 
       expect(process.hrtime).toHaveBeenCalledTimes(0);
 
@@ -302,16 +225,7 @@ describe('fastifyPlugin', () => {
 
   describe('preHandler', () => {
     it('ends Request Overhead timer and starts Route Handler timer', async () => {
-      const fastify = {
-        decorateRequest: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-        addHook: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-      };
-
-      fastifyPlugin(fastify, null, jest.fn());
+      await requestLogging(fastify);
 
       expect(process.hrtime).toHaveBeenCalledTimes(0);
 
@@ -329,17 +243,9 @@ describe('fastifyPlugin', () => {
 
   describe('onSend', () => {
     it('ends Route Handler timer and starts Response Builder timer with unmodified payload', async () => {
-      const fastify = {
-        decorateRequest: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-        addHook: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-      };
       const payload = { intact: true };
 
-      fastifyPlugin(fastify, null, jest.fn());
+      await requestLogging(fastify);
 
       expect(process.hrtime).toHaveBeenCalledTimes(0);
 
@@ -356,16 +262,7 @@ describe('fastifyPlugin', () => {
 
   describe('onResponse', () => {
     it('ends Response Builder timer and starts Request Full Duration timer', async () => {
-      const fastify = {
-        decorateRequest: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-        addHook: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-      };
-
-      fastifyPlugin(fastify, null, jest.fn());
+      await requestLogging(fastify);
 
       expect(process.hrtime).toHaveBeenCalledTimes(0);
 
@@ -395,16 +292,7 @@ describe('fastifyPlugin', () => {
       });
 
       it('no headers only fallbacks', async () => {
-        const fastify = {
-          decorateRequest: jest.fn((name, fn) => {
-            fastify[name] = fn;
-          }),
-          addHook: jest.fn((name, fn) => {
-            fastify[name] = fn;
-          }),
-        };
-
-        fastifyPlugin(fastify, null, jest.fn());
+        await requestLogging(fastify);
 
         expect(process.hrtime).toHaveBeenCalledTimes(0);
 
@@ -458,16 +346,7 @@ describe('fastifyPlugin', () => {
       });
 
       it('all headers and request keys present', async () => {
-        const fastify = {
-          decorateRequest: jest.fn((name, fn) => {
-            fastify[name] = fn;
-          }),
-          addHook: jest.fn((name, fn) => {
-            fastify[name] = fn;
-          }),
-        };
-
-        fastifyPlugin(fastify, null, jest.fn());
+        await requestLogging(fastify);
 
         expect(process.hrtime).toHaveBeenCalledTimes(0);
 
@@ -542,16 +421,7 @@ describe('fastifyPlugin', () => {
       });
 
       it('activeLocale in intl from store', async () => {
-        const fastify = {
-          decorateRequest: jest.fn((name, fn) => {
-            fastify[name] = fn;
-          }),
-          addHook: jest.fn((name, fn) => {
-            fastify[name] = fn;
-          }),
-        };
-
-        fastifyPlugin(fastify, null, jest.fn());
+        await requestLogging(fastify);
 
         expect(process.hrtime).toHaveBeenCalledTimes(0);
 
@@ -607,16 +477,7 @@ describe('fastifyPlugin', () => {
       });
 
       it('custom configureRequestLog', async () => {
-        const fastify = {
-          decorateRequest: jest.fn((name, fn) => {
-            fastify[name] = fn;
-          }),
-          addHook: jest.fn((name, fn) => {
-            fastify[name] = fn;
-          }),
-        };
-
-        fastifyPlugin(fastify, null, jest.fn());
+        await requestLogging(fastify);
 
         const mutateLog = jest.fn(() => 'log changed');
 
@@ -675,16 +536,7 @@ describe('fastifyPlugin', () => {
       });
 
       it('negative ttfb', async () => {
-        const fastify = {
-          decorateRequest: jest.fn((name, fn) => {
-            fastify[name] = fn;
-          }),
-          addHook: jest.fn((name, fn) => {
-            fastify[name] = fn;
-          }),
-        };
-
-        fastifyPlugin(fastify, null, jest.fn());
+        await requestLogging(fastify);
 
         const request = {
           headers: {},
@@ -743,18 +595,7 @@ describe('fastifyPlugin', () => {
         raw: {},
       };
 
-      const fastify = {
-        decorateRequest: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-        addHook: jest.fn((name, fn) => {
-          if (!fastify[name]) {
-            fastify[name] = fn;
-          }
-        }),
-      };
-
-      fastifyPlugin(fastify, null, jest.fn());
+      await requestLogging(fastify);
       const boomError = new Error('boom');
       setConfigureRequestLog(() => {
         throw boomError;
@@ -775,18 +616,7 @@ describe('fastifyPlugin', () => {
         raw: {},
       };
 
-      const fastify = {
-        decorateRequest: jest.fn((name, fn) => {
-          fastify[name] = fn;
-        }),
-        addHook: jest.fn((name, fn) => {
-          if (!fastify[name]) {
-            fastify[name] = fn;
-          }
-        }),
-      };
-
-      fastifyPlugin(fastify, null, jest.fn());
+      await requestLogging(fastify);
       setConfigureRequestLog(() => {
         throw new Error('shh');
       });

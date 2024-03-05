@@ -82,7 +82,7 @@ describe('server index', () => {
     });
     //
     jest.doMock('../../src/server/polyfill/intl');
-    jest.doMock('../../src/server/utils/logging/setup', () => {});
+    jest.doMock('../../src/server/utils/logging/monkeyPatchConsole', () => {});
 
     ssrServerListen = jest.fn(async () => {
       if (ssrServerError) {

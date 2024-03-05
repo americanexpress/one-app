@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`setup logging outgoing requests is level info 1`] = `
+exports[`requestLogging onReady logging outgoing requests is level info 1`] = `
 [
   {
     "request": {
@@ -16,7 +16,7 @@ exports[`setup logging outgoing requests is level info 1`] = `
       "statusCode": 200,
       "statusText": "OK",
       "timings": {
-        "duration": 12,
+        "duration": 0.001,
       },
     },
   },

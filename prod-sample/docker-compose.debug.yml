@@ -7,6 +7,4 @@ services:
       # node inspector
       - "9229:9229"
     env_file: ./one-app/debug.env
-    entrypoint:
-      - scripts/start.sh
-      - --inspect=0.0.0.0
+    entrypoint: scripts/start.sh --inspect=0.0.0.0

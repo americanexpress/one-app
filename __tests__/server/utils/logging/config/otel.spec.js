@@ -37,8 +37,19 @@ jest.spyOn(pino, 'transport');
 jest.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('OpenTelemetry logging', () => {
+  const { FORCE_COLOR, NO_COLOR } = process.env;
+  const { isTTY } = process.stdout;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    delete process.env.FORCE_COLOR;
+    delete process.env.NO_COLOR;
+  });
+
+  afterAll(() => {
+    process.env.FORCE_COLOR = FORCE_COLOR;
+    process.env.NO_COLOR = NO_COLOR;
+    process.stdout.isTTY = isTTY;
   });
 
   describe('config', () => {
@@ -200,6 +211,28 @@ describe('OpenTelemetry logging', () => {
       }
     `);
     expect(pino.transport.mock.results[0].value).toBe(transport);
+  });
+
+  it('should force color when using the console exporter if stdout is a TTY and NO_COLOR is not set', () => {
+    process.stdout.isTTY = true;
+    expect(process.env.FORCE_COLOR).toBeUndefined();
+    createOtelTransport({ grpc: false, console: true });
+    expect(process.env.FORCE_COLOR).toBe('1');
+  });
+
+  it('should not force color when using the console exporter if stdout is not a TTY', () => {
+    delete process.stdout.isTTY;
+    expect(process.env.FORCE_COLOR).toBeUndefined();
+    createOtelTransport({ grpc: false, console: true });
+    expect(process.env.FORCE_COLOR).toBeUndefined();
+  });
+
+  it('should not force color when using the console exporter if NO_COLOR is set', () => {
+    process.stdout.isTTY = true;
+    process.env.NO_COLOR = 'true';
+    expect(process.env.FORCE_COLOR).toBeUndefined();
+    createOtelTransport({ grpc: false, console: true });
+    expect(process.env.FORCE_COLOR).toBeUndefined();
   });
 
   it('should not batch logs in integration tests', () => {

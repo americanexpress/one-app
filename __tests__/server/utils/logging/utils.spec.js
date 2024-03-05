@@ -15,7 +15,6 @@
  */
 
 import {
-  coloredLevels,
   printStatusCode,
   printStatusMessage,
   printDurationTime,
@@ -24,13 +23,6 @@ import {
 jest.mock('chalk');
 
 describe('utils', () => {
-  describe('coloredLevels', () => {
-    it('has a red error', () => expect(coloredLevels.error).toMatchSnapshot());
-    it('has a yellow warn', () => expect(coloredLevels.warn).toMatchSnapshot());
-    it('has a blue log', () => expect(coloredLevels.log).toMatchSnapshot());
-    it('has a gray info', () => expect(coloredLevels.info).toMatchSnapshot());
-  });
-
   describe('printStatusCode', () => {
     it('prints a 200 status code as green', () => {
       expect(printStatusCode({ request: { statusCode: 200 } })).toMatchSnapshot();

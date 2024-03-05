@@ -15,8 +15,8 @@
  */
 
 import Fastify from 'fastify';
-import fastifyOpenTelemetry from '@autotelic/fastify-opentelemetry';
 import noopTracer from '../../../src/server/plugins/noopTracer';
+import tracer from '../../../src/server/plugins/tracer';
 
 describe('noopTracer', () => {
   const getTypes = (obj) => Object.entries(obj).reduce((acc, [key, val]) => ({
@@ -29,12 +29,14 @@ describe('noopTracer', () => {
   let actualSpan;
   let noopSpan;
   let actualSpanProperties;
+  let requestWithNoopTracer;
 
   beforeAll(async () => {
     const fastify = Fastify();
     fastify.register((instance, opts, done) => {
       instance.register(noopTracer);
       instance.get('/test-noop', async (request, reply) => {
+        requestWithNoopTracer = request;
         noopApi = { ...request.openTelemetry() };
         noopSpan = noopApi.tracer.startSpan('foo', { attributes: { bar: 'baz' } });
         noopSpan.end();
@@ -42,9 +44,9 @@ describe('noopTracer', () => {
       });
       done();
     });
-    fastify.register(async (instance, opts, done) => {
-      instance.register(fastifyOpenTelemetry, { wrapRoutes: true });
-      instance.get('/test-actual', (request, reply) => {
+    fastify.register((instance, opts, done) => {
+      instance.register(tracer);
+      instance.get('/test-actual', async (request, reply) => {
         actualApi = { ...request.openTelemetry() };
         actualSpan = actualApi.tracer.startSpan('foo', { attributes: { bar: 'baz' } });
         actualSpan.end();
@@ -150,5 +152,9 @@ describe('noopTracer', () => {
       expect(actualSpan[methodName]).toHaveBeenCalled();
       expect(noopSpan[methodName]).toHaveBeenCalled();
     });
+  });
+
+  it('should set request.tracingEnabled to false', () => {
+    expect(requestWithNoopTracer.tracingEnabled).toBe(false);
   });
 });

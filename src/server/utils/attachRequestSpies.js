@@ -19,7 +19,37 @@ import http from 'node:http';
 import url from 'node:url';
 import onFinished from 'on-finished';
 
-import attachSpy from './attachSpy';
+export function attachSpy(obj, methodName, spy) {
+  const origMethod = obj[methodName];
+
+  if (typeof origMethod !== 'function') {
+    throw new TypeError(`${methodName} is not a function`);
+  }
+
+  if (typeof spy !== 'function') {
+    throw new TypeError(`spy must be a function (was "${typeof spy}")`);
+  }
+
+  // we're monkeypatching, we need to reassign a property of the obj argument
+  // eslint-disable-next-line no-param-reassign -- see above comment
+  obj[methodName] = function spiedMethod(...args) {
+    let returnValue;
+    let originalCalled = false;
+    const callOriginal = () => {
+      originalCalled = true;
+      returnValue = origMethod.apply(obj, args);
+      return returnValue;
+    };
+
+    spy([...args], callOriginal);
+
+    if (!originalCalled) {
+      callOriginal();
+    }
+
+    return returnValue;
+  };
+}
 
 function buildUrlObject(options, defaultProtocol) {
   // TODO: url.parse is deprecated, use new URL() instead

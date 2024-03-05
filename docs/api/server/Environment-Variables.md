@@ -50,7 +50,9 @@ One App can be configured via Environment Variables:
   * [`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`](#otel_exporter_otlp_traces_endpoint)
   * [`OTEL_SERVICE_NAME`](#otel_service_name)
   * [`OTEL_SERVICE_NAMESPACE`](#otel_service_namespace)
-  * [`OTEL_RESOURCE_ATTRIBUTES`](#ote;_resource_attributes)
+  * [`OTEL_RESOURCE_ATTRIBUTES`](#otel_resource_attributes)
+  * [`ONE_TRACE_ALL_REQUESTS`](#one_trace_all_requests)
+  * [`ONE_ENABLE_REQUEST_LOGGING_WHILE_TRACING`](#one_enable_request_logging_while_tracing)
 
 <details>
   <summary>Alphabetical Contents</summary>
@@ -76,11 +78,13 @@ One App can be configured via Environment Variables:
   * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
   * [`ONE_CONFIG_ENV`](#one_config_env) ⚠️
   * [`ONE_ENABLE_POST_TO_MODULE_ROUTES`](#one_enable_post_to_module_routes)
+  * [`ONE_ENABLE_REQUEST_LOGGING_WHILE_TRACING`](#one_enable_request_logging_while_tracing)
   * [`ONE_MAP_POLLING_MAX`](#one_map_polling_max)
   * [`ONE_MAP_POLLING_MIN`](#one_map_polling_min)
   * [`ONE_MAX_POST_REQUEST_PAYLOAD`](#one_max_post_request_payload)
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
   * [`ONE_SERVICE_WORKER`](#one_service_worker)
+  * [`ONE_TRACE_ALL_REQUESTS`](#one_trace_all_requests)
   * [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`](#otel_exporter_otlp_logs_endpoint)
   * [`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`](#otel_exporter_otlp_traces_endpoint)
   * [`OTEL_RESOURCE_ATTRIBUTES`](#otel_resource_attributes)
@@ -749,7 +753,7 @@ OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=String
 
 **Example**
 ```bash
-OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://localhost:4318/v1/logs
+OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://localhost:4317/v1/logs
 ```
 
 ## `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`
@@ -769,9 +773,8 @@ OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=String
 
 **Example**
 ```bash
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4318/v1/traces
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4317/v1/traces
 ```
-
 
 ## `OTEL_SERVICE_NAME`
 
@@ -827,6 +830,44 @@ OTEL_RESOURCE_ATTRIBUTES=String
 **Example**
 ```bash
 OTEL_RESOURCE_ATTRIBUTES="foo=bar,baz=qux"
+```
+
+## `ONE_TRACE_ALL_REQUESTS`
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+Additional OpenTelemetry resource attributes in [W3C Baggage format](https://w3c.github.io/baggage).
+See OTel Environment Variable Specification] & [OTel Resource SDK documentation] for more details.
+
+**Shape**
+```bash
+ONE_TRACE_ALL_REQUESTS=Boolean
+```
+
+**Example**
+```bash
+ONE_TRACE_ALL_REQUESTS=true
+```
+
+## `ONE_ENABLE_REQUEST_LOGGING_WHILE_TRACING`
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+Additional OpenTelemetry resource attributes in [W3C Baggage format](https://w3c.github.io/baggage).
+See OTel Environment Variable Specification] & [OTel Resource SDK documentation] for more details.
+
+**Shape**
+```bash
+ONE_ENABLE_REQUEST_LOGGING_WHILE_TRACING=Boolean
+```
+
+**Example**
+```bash
+ONE_ENABLE_REQUEST_LOGGING_WHILE_TRACING=true
 ```
 
 [☝️ Return To Top](#environment-variables)
