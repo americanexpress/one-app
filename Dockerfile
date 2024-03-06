@@ -4,7 +4,7 @@
 # builds as we do not have to run apk installs for alpine.
 FROM node:20 as builder
 WORKDIR /opt/build
-RUN npm install -g npm@10--registry=https://registry.npmjs.org
+RUN npm install -g npm@10 --registry=https://registry.npmjs.org
 COPY --chown=node:node ./ /opt/build
 # npm ci does not run postinstall with root account
 RUN NODE_ENV=development npm ci --build-from-source

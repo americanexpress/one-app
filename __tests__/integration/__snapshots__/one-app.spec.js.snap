@@ -51,6 +51,8 @@ Array [
   "nodejs_active_handles_total",
   "nodejs_active_requests",
   "nodejs_active_requests_total",
+  "nodejs_active_resources",
+  "nodejs_active_resources_total",
   "nodejs_eventloop_lag_max_seconds",
   "nodejs_eventloop_lag_mean_seconds",
   "nodejs_eventloop_lag_min_seconds",
