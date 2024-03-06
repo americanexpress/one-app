@@ -16,10 +16,6 @@
 
 import os from 'node:os';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-// import { registerInstrumentations } from '@opentelemetry/instrumentation';
-// import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
-// import { FastifyInstrumentation } from '@opentelemetry/instrumentation-fastify';
-// import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import pino from 'pino';
 import flatten from 'flat';
 import {
@@ -30,21 +26,15 @@ import readJsonFile from '../../readJsonFile';
 
 const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
 
-// TODO: enable Fastify instrumentation once https://github.com/open-telemetry/opentelemetry-js-contrib/issues/1275
-// is resolved. Depends on https://github.com/fastify/fastify/pull/4470
+export function createOtelTransport({
+  grpc: grpcExporter = true,
+  console: consoleExporter = false,
+} = {}) {
+  if (!grpcExporter && !consoleExporter) {
+    console.error('OTEL DISABLED: attempted to create OpenTelemetry transport without including a processor');
+    return undefined;
+  }
 
-// if (process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT) {
-//   const provider = new NodeTracerProvider();
-//   provider.register();
-//   registerInstrumentations({
-//     instrumentations: [
-//       new HttpInstrumentation(),
-//       new FastifyInstrumentation(),
-//     ],
-//   });
-// }
-
-export function createOtelTransport() {
   const customResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES ? process.env.OTEL_RESOURCE_ATTRIBUTES.split(';').reduce((acc, curr) => {
     const [key, value] = curr.split('=');
     return {
@@ -53,16 +43,24 @@ export function createOtelTransport() {
     };
   }, {}) : {};
 
-  let logRecordProcessorOptions = {
-    recordProcessorType: 'batch',
-    exporterOptions: { protocol: 'grpc' },
-  };
+  let logRecordProcessorOptions = [];
 
-  if (process.env.NODE_ENV === 'development') {
-    logRecordProcessorOptions = [logRecordProcessorOptions, {
+  if (grpcExporter) {
+    logRecordProcessorOptions.push({
+      recordProcessorType: 'batch',
+      exporterOptions: { protocol: 'grpc' },
+    });
+  }
+
+  if (consoleExporter) {
+    logRecordProcessorOptions.push({
       recordProcessorType: 'simple',
       exporterOptions: { protocol: 'console' },
-    }];
+    });
+  }
+
+  if (logRecordProcessorOptions.length === 1) {
+    [logRecordProcessorOptions] = logRecordProcessorOptions;
   }
 
   return pino.transport({
@@ -91,7 +89,7 @@ export default {
     err: serializeError,
   },
   formatters: {
-    level(label, number) {
+    level(_label, number) {
       return { level: number === 35 ? 30 : number };
     },
     log(entry) {

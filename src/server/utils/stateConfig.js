@@ -17,8 +17,8 @@
 import fs from 'fs';
 import path from 'path';
 import url from 'url';
-import ip from 'ip';
 import { argv } from 'yargs';
+import { getIp } from './getIP';
 import envVarAllowList from './envVarAllowList';
 import snakeCaseToCamelCase from './snakeCaseToCamelCase';
 
@@ -79,7 +79,7 @@ if (process.env.NODE_ENV === 'development' && fs.existsSync(pathToDevEndpoints))
   Object.entries(devEndpoints).forEach(([configName, { devProxyPath }]) => {
     const value = url.format({
       protocol: 'http',
-      hostname: argv.useHost ? `${ip.address()}` : 'localhost',
+      hostname: argv.useHost ? `${getIp()}` : 'localhost',
       port: HTTP_ONE_APP_DEV_PROXY_SERVER_PORT,
       pathname: devProxyPath,
     });

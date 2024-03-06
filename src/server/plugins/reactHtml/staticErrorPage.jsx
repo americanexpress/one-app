@@ -16,7 +16,7 @@ export async function setErrorPage(fallbackUrl) {
 
     // Warn if status is not a 200 and return errorPage
     if (response.status !== 200) {
-      console.warn('Failed to fetch custom error page with status:', response.status);
+      console.warn('Failed to fetch custom error page with status: %s', response.status);
       return errorPage;
     }
     // Warn if the Content-Type is not text/html
