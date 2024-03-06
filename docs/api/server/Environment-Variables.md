@@ -37,7 +37,7 @@ One App can be configured via Environment Variables:
   * [`ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS`](#ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS)
   * [`ONE_CSP_ALLOW_INLINE_SCRIPTS`](#ONE_CSP_ALLOW_INLINE_SCRIPTS)
   * [`ONE_DANGEROUSLY_DISABLE_CSP`](#ONE_DANGEROUSLY_DISABLE_CSP)
-  * * [`ONE_CONFIG_USE_NATIVE_INTL`](#one_config_use_native_intl)
+  * [`ONE_CONFIG_USE_NATIVE_INTL`](#one_config_use_native_intl)
 * Server Settings
   * [`HOLOCRON_SERVER_MAX_MODULES_RETRY`](#holocron_server_max_modules_retry)
   * [`HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH`](#holocron_server_max_sim_modules_fetch)
