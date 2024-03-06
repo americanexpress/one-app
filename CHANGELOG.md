@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.11.0](https://github.com/americanexpress/one-app/compare/v6.10.0...v6.11.0) (2024-03-06)
+
+
+### Features
+
+* **logger:** use a pretty logger in locale development with OTel enabled ([#1292](https://github.com/americanexpress/one-app/issues/1292)) ([a810139](https://github.com/americanexpress/one-app/commit/a8101398eb9145ea94530550aa7c4d03d1e4aa3d))
+
+
 # [6.10.0](https://github.com/americanexpress/one-app/compare/v6.9.2...v6.10.0) (2024-02-16)
 
 
