@@ -27,11 +27,7 @@ import {
   NoopSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { trace } from '@opentelemetry/api';
-import {
-  CompositePropagator,
-  W3CBaggagePropagator,
-  W3CTraceContextPropagator,
-} from '@opentelemetry/core';
+import { W3CTraceContextPropagator } from '@opentelemetry/core';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import {
   Resource,
@@ -68,11 +64,13 @@ registerInstrumentations({
         : undefined,
       requireParentforOutgoingSpans: !traceAllRequests,
       requestHook(span) {
-        if (span.attributes?.direction === 'in') {
-          span.updateName(`${span.attributes['http.method']} ${span.attributes['http.target']}`);
-        }
-        if (span.attributes?.direction === 'out') {
-          span.updateName(`${span.attributes['http.method']} ${span.attributes['http.url']}`);
+        // eslint-disable-next-line default-case
+        switch (span.attributes?.direction) {
+          case 'in':
+            span.updateName(`${span.attributes['http.method']} ${span.attributes['http.target']}`);
+            break;
+          case 'out':
+            span.updateName(`${span.attributes['http.method']} ${span.attributes['http.url']}`);
         }
       },
       startIncomingSpanHook: () => ({ direction: 'in' }),
@@ -109,12 +107,7 @@ if (process.env.NODE_ENV === 'development' && argv.logLevel === 'trace') {
 }
 
 tracerProvider.register({
-  propagator: new CompositePropagator({
-    propagators: [
-      new W3CBaggagePropagator(),
-      new W3CTraceContextPropagator(),
-    ],
-  }),
+  propagator: new W3CTraceContextPropagator(),
 });
 
 ['SIGINT', 'SIGTERM'].forEach((signalName) => process.on(signalName, async () => {

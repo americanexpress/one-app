@@ -28,7 +28,7 @@ import {
   ConsoleSpanExporter,
   NoopSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
-import { CompositePropagator } from '@opentelemetry/core';
+import { W3CTraceContextPropagator } from '@opentelemetry/core';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 
 jest.mock('@opentelemetry/core');
@@ -135,7 +135,7 @@ describe('tracer', () => {
     });
     expect(_tracerProvider.register).toHaveBeenCalledTimes(1);
     expect(_tracerProvider.register).toHaveBeenCalledWith(expect.objectContaining({
-      propagator: expect.any(CompositePropagator),
+      propagator: expect.any(W3CTraceContextPropagator),
     }));
   });
 
