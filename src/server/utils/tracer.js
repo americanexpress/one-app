@@ -27,6 +27,11 @@ import {
   NoopSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { trace } from '@opentelemetry/api';
+import {
+  CompositePropagator,
+  W3CBaggagePropagator,
+  W3CTraceContextPropagator,
+} from '@opentelemetry/core';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import {
   Resource,
@@ -103,7 +108,14 @@ if (process.env.NODE_ENV === 'development' && argv.logLevel === 'trace') {
   tracerProvider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
 }
 
-tracerProvider.register();
+tracerProvider.register({
+  propagator: new CompositePropagator({
+    propagators: [
+      new W3CBaggagePropagator(),
+      new W3CTraceContextPropagator(),
+    ],
+  }),
+});
 
 ['SIGINT', 'SIGTERM'].forEach((signalName) => process.on(signalName, async () => {
   await batchProcessor.shutdown();

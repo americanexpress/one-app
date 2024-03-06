@@ -14,6 +14,7 @@
  * permissions and limitations under the License.
  */
 
+import * as openTelemetry from '@opentelemetry/api';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
@@ -26,6 +27,8 @@ registerInstrumentations({
   tracerProvider,
   instrumentations: [new HttpInstrumentation()],
 });
+
+jest.spyOn(openTelemetry, 'isValidTraceId');
 
 describe('tracer', () => {
   beforeAll(() => tracerProvider.register());
@@ -77,7 +80,37 @@ describe('tracer', () => {
     return fastify.close();
   });
 
-  it('should set request.tracingEnabled to false', async () => {
+  it('should add a traceid header to the response', async () => {
+    expect.assertions(3);
+    let traceId;
+    const fastify = Fastify();
+    fastify.register(tracer);
+    fastify.get('/test', async (request, reply) => {
+      ({ traceId } = request.openTelemetry().activeSpan.spanContext());
+      return reply.send('success');
+    });
+    await fastify.ready();
+    const response = await fastify.inject({ method: 'GET', url: '/test' });
+    expect(response.statusCode).toBe(200);
+    expect(traceId).not.toBeUndefined();
+    expect(response.headers.traceid).toBe(traceId);
+    return fastify.close();
+  });
+
+  it('should not add a traceid header to the response when there is no valid trace', async () => {
+    expect.assertions(2);
+    const fastify = Fastify();
+    fastify.register(tracer);
+    fastify.get('/test', async (_request, reply) => reply.send('success'));
+    await fastify.ready();
+    openTelemetry.isValidTraceId.mockReturnValueOnce(false);
+    const response = await fastify.inject({ method: 'GET', url: '/test' });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers.traceid).toBeUndefined();
+    return fastify.close();
+  });
+
+  it('should set request.tracingEnabled to true', async () => {
     expect.assertions(2);
     const fastify = Fastify();
     fastify.register(tracer);

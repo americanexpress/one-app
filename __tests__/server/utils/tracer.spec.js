@@ -28,8 +28,10 @@ import {
   ConsoleSpanExporter,
   NoopSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
+import { CompositePropagator } from '@opentelemetry/core';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 
+jest.mock('@opentelemetry/core');
 jest.mock('@opentelemetry/instrumentation');
 jest.mock('@opentelemetry/instrumentation-http');
 jest.mock('@opentelemetry/instrumentation-pino');
@@ -132,6 +134,9 @@ describe('tracer', () => {
       instrumentations: [expect.any(HttpInstrumentation), expect.any(PinoInstrumentation)],
     });
     expect(_tracerProvider.register).toHaveBeenCalledTimes(1);
+    expect(_tracerProvider.register).toHaveBeenCalledWith(expect.objectContaining({
+      propagator: expect.any(CompositePropagator),
+    }));
   });
 
   it('should not trace outgoing requests that do not have a parent span', () => {

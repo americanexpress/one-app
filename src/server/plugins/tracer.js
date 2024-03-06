@@ -15,6 +15,7 @@
  */
 
 import fp from 'fastify-plugin';
+import { isValidTraceId } from '@opentelemetry/api';
 import openTelemetryPlugin from '@autotelic/fastify-opentelemetry';
 
 /**
@@ -23,6 +24,10 @@ import openTelemetryPlugin from '@autotelic/fastify-opentelemetry';
  */
 const tracer = async (fastify) => {
   fastify.register(openTelemetryPlugin, { wrapRoutes: true });
+  fastify.addHook('onRequest', async (request, reply) => {
+    const { traceId } = request.openTelemetry().activeSpan.spanContext();
+    if (isValidTraceId(traceId)) reply.header('traceid', traceId);
+  });
   fastify.decorateRequest('tracingEnabled', true);
 };
 
