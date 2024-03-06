@@ -763,7 +763,7 @@ OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://localhost:4317/v1/logs
 * ✅ Development
 
 When set, One App will emit OpenTelemetry traces over GRPC to the configured endpoint.
-See the [OpenTlemetry documentation](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_traces_endpoint) for more information.
+See the [OpenTelemetry documentation](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_traces_endpoint) for more information.
 
 
 **Shape**
