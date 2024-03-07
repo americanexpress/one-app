@@ -36,7 +36,7 @@ export function initializeClientStore() {
     reducer, initialState, enhancer, extraThunkArguments: { fetchClient: enhancedFetch },
   });
 
-  return store;
+  return { store, serverState: initialState };
 }
 
 export function loadPrerenderScripts(initialState) {
