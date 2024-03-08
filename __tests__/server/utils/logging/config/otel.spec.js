@@ -65,18 +65,6 @@ describe('OpenTelemetry logging', () => {
       `);
     });
 
-    it('should coerce "log" level to "info" level', () => {
-      expect(otelConfig.formatters.level('log', 35)).toEqual({ level: 30 });
-    });
-
-    it('should not coerce other levels', () => {
-      expect(otelConfig.formatters.level('trace', 10)).toEqual({ level: 10 });
-      expect(otelConfig.formatters.level('debug', 20)).toEqual({ level: 20 });
-      expect(otelConfig.formatters.level('info', 30)).toEqual({ level: 30 });
-      expect(otelConfig.formatters.level('warn', 40)).toEqual({ level: 40 });
-      expect(otelConfig.formatters.level('error', 50)).toEqual({ level: 50 });
-    });
-
     it('should flatten log objects', () => {
       const logEntry = {
         foo: {
@@ -149,6 +137,9 @@ describe('OpenTelemetry logging', () => {
               "service.version": "X.X.X",
             },
             "serviceVersion": "X.X.X",
+            "severityNumberMap": {
+              "35": 10,
+            },
           },
           "target": "pino-opentelemetry-transport",
         }

@@ -16,6 +16,7 @@
 
 import pino from 'pino';
 import flatten from 'flat';
+import { SeverityNumber } from '@opentelemetry/api-logs';
 import {
   serializeError,
   formatLogEntry,
@@ -64,6 +65,9 @@ export function createOtelTransport({
       serviceVersion: version,
       logRecordProcessorOptions,
       resourceAttributes: getOtelResourceAttributes(),
+      severityNumberMap: {
+        [pinoBaseConfig.customLevels.log]: SeverityNumber.INFO2,
+      },
     },
   });
 }
@@ -76,9 +80,6 @@ export default {
     err: serializeError,
   },
   formatters: {
-    level(_label, number) {
-      return { level: number === 35 ? 30 : number };
-    },
     log(entry) {
       const formattedEntry = formatLogEntry(entry);
       return flatten(formattedEntry);
