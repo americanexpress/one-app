@@ -33,7 +33,7 @@ export default async function initClient() {
     setRequiredExternalsRegistry(global.__HOLOCRON_EXTERNALS__);
     moveHelmetScripts();
 
-    const store = initializeClientStore();
+    const { store, serverState } = initializeClientStore();
     const history = browserHistory;
     const routes = createRoutes(store);
 
@@ -64,7 +64,7 @@ export default async function initClient() {
     /* eslint-disable react/jsx-props-no-spreading */
     /* istanbul ignore next */
     const App = () => (
-      <Provider store={store}>
+      <Provider store={store} serverState={serverState}>
         <Router {...renderProps} />
       </Provider>
     );
