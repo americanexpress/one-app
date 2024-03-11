@@ -27,10 +27,10 @@ jest.mock('@americanexpress/one-app-router', () => ({
 }));
 jest.mock('../../src/universal/enhancers', () => jest.fn(() => 'enhancer'));
 jest.mock('../../src/universal/utils/transit', () => ({
-  fromJSON: jest.fn(() => 'initial state'),
+  fromJSON: jest.fn((state) => state),
 }));
 jest.mock('holocron', () => ({
-  createHolocronStore: jest.fn(),
+  createHolocronStore: jest.fn(() => 'holocron store'),
 }));
 jest.mock('../../src/universal/reducers', () => 'reducers');
 
@@ -52,6 +52,10 @@ jest.mock('@americanexpress/fetch-enhancers', () => ({
 jest.mock('../../src/client/service-worker', () => ({ initializeServiceWorker: jest.fn(() => Promise.resolve()) }));
 
 describe('initializeClientStore', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   beforeAll(() => {
     global.fetch = () => Promise.resolve({ data: 'data' });
   });
@@ -66,8 +70,8 @@ describe('initializeClientStore', () => {
   });
 
   it('should create the store with initial state if it exists', async () => {
-    // eslint-disable-next-line no-underscore-dangle -- private API
-    global.__INITIAL_STATE__ = fromJS({ some: 'state' });
+    // eslint-disable-next-line no-underscore-dangle
+    global.__INITIAL_STATE__ = { some: 'state' };
     initializeClientStore();
 
     const createEnhancer = require('../../src/universal/enhancers');
@@ -81,7 +85,7 @@ describe('initializeClientStore', () => {
     // eslint-disable-next-line no-underscore-dangle -- private API
     expect(transitFromJson).toHaveBeenCalledWith(global.__INITIAL_STATE__);
     expect(createHolocronStore).toHaveBeenCalledWith({
-      enhancer: 'enhancer', initialState: 'initial state', reducer: 'reducers', extraThunkArguments: { fetchClient },
+      enhancer: 'enhancer', initialState: { some: 'state' }, reducer: 'reducers', extraThunkArguments: { fetchClient },
     });
     expect(createEnhancer).toHaveBeenCalled();
   });
@@ -89,9 +93,6 @@ describe('initializeClientStore', () => {
   it('should create the store with no initial state if it is undefined', async () => {
     const createEnhancer = require('../../src/universal/enhancers');
     const transitFromJson = require('../../src/universal/utils/transit').fromJSON;
-    // need to call mockClear because jest.clearAllMocks() was removed
-    // TODO: switch to clearAllMocks when it is added back to jest https://github.com/facebook/jest/issues/2134
-    transitFromJson.mockClear();
     const { createHolocronStore } = require('holocron');
     initializeClientStore();
     const {
@@ -100,13 +101,25 @@ describe('initializeClientStore', () => {
     await expect(fetchClient()).resolves.toEqual({ data: 'data', timeout: 6000 });
     expect(transitFromJson).not.toHaveBeenCalled();
     expect(createHolocronStore).toHaveBeenCalledWith({
-      enhancer: 'enhancer', initialState: 'initial state', reducer: 'reducers', extraThunkArguments: { fetchClient },
+      enhancer: 'enhancer', initialState: undefined, reducer: 'reducers', extraThunkArguments: { fetchClient },
     });
     expect(createEnhancer).toHaveBeenCalled();
+  });
+
+  it('returns store and serverState', () => {
+    // eslint-disable-next-line no-underscore-dangle
+    global.__INITIAL_STATE__ = { some: 'state' };
+    const { store, serverState } = initializeClientStore();
+    expect(serverState).toEqual({ some: 'state' });
+    expect(store).toEqual('holocron store');
   });
 });
 
 describe('loadPrerenderScripts', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should load the correct locale pack', () => {
     const initialState = fromJS({ intl: { activeLocale: 'es-ES' } });
 
@@ -122,9 +135,6 @@ describe('loadPrerenderScripts', () => {
     .then((localePack) => {
       expect(localePack).toBeUndefined();
       const { getLocalePack } = require('@americanexpress/one-app-ducks');
-      // need to call clearMock because jest.clearAllMocks() was removed
-      // TODO: switch to clearAllMocks when it is added back to jest https://github.com/facebook/jest/issues/2134
-      getLocalePack.mockClear();
       expect(getLocalePack).not.toHaveBeenCalled();
     })
   );

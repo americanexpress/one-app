@@ -33,7 +33,7 @@ export default async function initClient() {
     /* eslint-enable no-underscore-dangle */
     moveHelmetScripts();
 
-    const store = initializeClientStore();
+    const { store, serverState } = initializeClientStore();
     const history = browserHistory;
     const routes = createRoutes(store);
 
@@ -64,7 +64,7 @@ export default async function initClient() {
     /* eslint-disable react/jsx-props-no-spreading -- props are unpredictable */
     /* istanbul ignore next */
     const App = () => (
-      <Provider store={store}>
+      <Provider store={store} serverState={serverState}>
         <Router {...renderProps} />
       </Provider>
     );

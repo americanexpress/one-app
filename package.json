@@ -120,8 +120,14 @@
     "fastify-metrics": "^11.0.0",
     "fastify-plugin": "^4.5.1",
     "flat": "^5.0.2",
+<<<<<<< HEAD
     "holocron": "^1.10.2",
     "holocron-module-route": "^1.10.2",
+=======
+    "helmet": "^7.1.0",
+    "holocron": "1.10.1",
+    "holocron-module-route": "^1.10.0",
+>>>>>>> 5e0ad1f6 (feat(initclient): use serverState for hydration (#1323))
     "immutable": "^4.3.5",
     "joi": "^17.12.2",
     "lean-intl": "^4.2.2",
