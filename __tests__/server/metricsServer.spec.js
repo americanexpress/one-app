@@ -14,8 +14,6 @@
  * permissions and limitations under the License.
  */
 
-const { beforeEach } = require('node:test');
-
 jest.mock('pino');
 
 describe('metricsServer', () => {

@@ -41,10 +41,7 @@ const UTILS = {
   configureRequestLog: passThrough,
 };
 
-function formatProtocol(parsedUrl) {
-  const { protocol } = parsedUrl;
-  return protocol.replace(/:$/, '');
-}
+const formatProtocol = ({ protocol }) => protocol.replace(/:$/, '');
 
 const getLocale = (req) => {
   // TODO: Verify if `store` is available
