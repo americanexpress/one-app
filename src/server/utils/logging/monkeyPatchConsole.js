@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2024 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import 'cross-fetch/polyfill';
+import logger from './logger';
 
-import './polyfill/intl';
-import './config/env/argv';
-import './utils/logging/monkeyPatchConsole';
-import './config/env/runTime';
-import './utils/heapdump';
+const logMethods = ['error', 'warn', 'log', 'info', 'debug', 'trace'];
+logMethods.forEach((methodName) => { console[methodName] = logger[methodName].bind(logger); });

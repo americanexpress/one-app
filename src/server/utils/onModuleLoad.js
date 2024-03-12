@@ -22,7 +22,7 @@ import { setStateConfig, getClientStateConfig, getServerStateConfig } from './st
 import { setCorsOrigins } from '../plugins/conditionallyAllowCors';
 import readJsonFile from './readJsonFile';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from './safeRequest';
-import { setConfigureRequestLog } from './logging/fastifyPlugin';
+import { setConfigureRequestLog } from '../plugins/requestLogging';
 import { setCreateSsrFetch } from './createSsrFetch';
 import { setEventLoopDelayThreshold, setEventLoopDelayPercentile } from './createCircuitBreaker';
 import setupDnsCache from './setupDnsCache';

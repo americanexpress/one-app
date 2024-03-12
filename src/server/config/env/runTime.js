@@ -247,8 +247,12 @@ const runTime = [
     },
   },
   {
-    name: 'OTEL_SERVICE_NAME',
-    defaultValue: 'One App',
+    name: 'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT',
+    validate: (input) => {
+      if (!input) return;
+      // eslint-disable-next-line no-new -- intentionally using new for side effect of validation
+      new URL(input);
+    },
   },
 ];
 runTime.forEach(preprocessEnvVar);

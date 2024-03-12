@@ -37,8 +37,19 @@ jest.spyOn(pino, 'transport');
 jest.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('OpenTelemetry logging', () => {
+  const { FORCE_COLOR, NO_COLOR } = process.env;
+  const { isTTY } = process.stdout;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    delete process.env.FORCE_COLOR;
+    delete process.env.NO_COLOR;
+  });
+
+  afterAll(() => {
+    process.env.FORCE_COLOR = FORCE_COLOR;
+    process.env.NO_COLOR = NO_COLOR;
+    process.stdout.isTTY = isTTY;
   });
 
   describe('config', () => {
@@ -52,18 +63,6 @@ describe('OpenTelemetry logging', () => {
           "schemaVersion": "1.0.0",
         }
       `);
-    });
-
-    it('should coerce "log" level to "info" level', () => {
-      expect(otelConfig.formatters.level('log', 35)).toEqual({ level: 30 });
-    });
-
-    it('should not coerce other levels', () => {
-      expect(otelConfig.formatters.level('trace', 10)).toEqual({ level: 10 });
-      expect(otelConfig.formatters.level('debug', 20)).toEqual({ level: 20 });
-      expect(otelConfig.formatters.level('info', 30)).toEqual({ level: 30 });
-      expect(otelConfig.formatters.level('warn', 40)).toEqual({ level: 40 });
-      expect(otelConfig.formatters.level('error', 50)).toEqual({ level: 50 });
     });
 
     it('should flatten log objects', () => {
@@ -95,7 +94,7 @@ describe('OpenTelemetry logging', () => {
     process.env.OTEL_SERVICE_NAMESPACE = 'Mock Service Namespace';
 
     it('should include custom resource attributes', () => {
-      process.env.OTEL_RESOURCE_ATTRIBUTES = 'service.custom.id=XXXXX;deployment.env=qa';
+      process.env.OTEL_RESOURCE_ATTRIBUTES = 'service.custom.id=XXXXX,deployment.env=qa';
       const transport = createOtelTransport();
       expect(transport).toBeInstanceOf(ThreadStream);
       expect(pino.transport).toHaveBeenCalledTimes(1);
@@ -138,6 +137,9 @@ describe('OpenTelemetry logging', () => {
               "service.version": "X.X.X",
             },
             "serviceVersion": "X.X.X",
+            "severityNumberMap": {
+              "35": 10,
+            },
           },
           "target": "pino-opentelemetry-transport",
         }
@@ -200,6 +202,46 @@ describe('OpenTelemetry logging', () => {
       }
     `);
     expect(pino.transport.mock.results[0].value).toBe(transport);
+  });
+
+  it('should force color when using the console exporter if stdout is a TTY and NO_COLOR is not set', () => {
+    process.stdout.isTTY = true;
+    expect(process.env.FORCE_COLOR).toBeUndefined();
+    createOtelTransport({ grpc: false, console: true });
+    expect(process.env.FORCE_COLOR).toBe('1');
+  });
+
+  it('should not force color when using the console exporter if stdout is not a TTY', () => {
+    delete process.stdout.isTTY;
+    expect(process.env.FORCE_COLOR).toBeUndefined();
+    createOtelTransport({ grpc: false, console: true });
+    expect(process.env.FORCE_COLOR).toBeUndefined();
+  });
+
+  it('should not force color when using the console exporter if NO_COLOR is set', () => {
+    process.stdout.isTTY = true;
+    process.env.NO_COLOR = 'true';
+    expect(process.env.FORCE_COLOR).toBeUndefined();
+    createOtelTransport({ grpc: false, console: true });
+    expect(process.env.FORCE_COLOR).toBeUndefined();
+  });
+
+  it('should not batch logs in integration tests', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.INTEGRATION_TEST = 'true';
+    const transport = createOtelTransport();
+    expect(pino.transport).toHaveBeenCalledTimes(1);
+    expect(pino.transport.mock.calls[0][0].options.logRecordProcessorOptions)
+      .toMatchInlineSnapshot(`
+      {
+        "exporterOptions": {
+          "protocol": "grpc",
+        },
+        "recordProcessorType": "simple",
+      }
+    `);
+    expect(pino.transport.mock.results[0].value).toBe(transport);
+    delete process.env.INTEGRATION_TEST;
   });
 
   it('should log an error and return undefined when attempting to create a transport with no exporter', () => {

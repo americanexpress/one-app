@@ -54,14 +54,48 @@ jest.mock('../../../../src/server/utils/createCircuitBreaker', () => {
 const renderForStringSpy = jest.spyOn(reactRendering, 'renderForString');
 const renderForStaticMarkupSpy = jest.spyOn(reactRendering, 'renderForStaticMarkup');
 
+const createTracer = () => {
+  const spans = {};
+  const startSpan = jest.fn((name) => {
+    if (spans[name]) {
+      throw new Error(`Span ${name} already exists`);
+    }
+    const span = {
+      name,
+      ended: false,
+      recordException: jest.fn(),
+    };
+    span.end = jest.fn(() => {
+      if (span.ended) {
+        throw new Error(`Span ${name} already ended`);
+      }
+      span.ended = true;
+    });
+    spans[name] = span;
+    return span;
+  });
+
+  return {
+    startSpan,
+    startActiveSpan: jest.fn(async (name, ...args) => {
+      const fn = args.length === 1 ? args[0] : args[1];
+      const span = startSpan(name);
+      return fn(span);
+    }),
+    spans,
+  };
+};
+
 describe('createRequestHtmlFragment', () => {
   let req;
   let res;
   let createRoutes;
+  let tracer;
   const dispatch = jest.fn((x) => x);
   const getState = jest.fn(() => fromJS({
     rendering: iMap({}),
-  }));
+  })
+  );
 
   beforeAll(() => {
     matchPromise.mockImplementation(({ routes, location }) => Promise.resolve({
@@ -75,7 +109,8 @@ describe('createRequestHtmlFragment', () => {
           hi: 'there?',
         },
       },
-    }));
+    })
+    );
   });
 
   beforeEach(() => {
@@ -92,6 +127,9 @@ describe('createRequestHtmlFragment', () => {
     res.code = jest.fn();
     req.url = 'http://example.com/request';
     req.store = { dispatch, getState };
+    tracer = createTracer();
+    const activeSpan = { attributes: { 'req.method': 'GET', 'req.url': '/foo' } };
+    req.openTelemetry = jest.fn(() => ({ tracer, activeSpan }));
 
     createRoutes = jest.fn(() => [{ path: '/', moduleName: 'root' }]);
 
@@ -100,9 +138,7 @@ describe('createRequestHtmlFragment', () => {
     req.log.error.mockClear();
   });
 
-  const requireCreateRequestHtmlFragment = (...args) => require(
-    '../../../../src/server/plugins/reactHtml/createRequestHtmlFragment'
-  ).default(...args);
+  const requireCreateRequestHtmlFragment = (...args) => require('../../../../src/server/plugins/reactHtml/createRequestHtmlFragment').default(...args);
 
   it('should preload data for matched route components', async () => {
     expect.assertions(4);
@@ -131,7 +167,8 @@ describe('createRequestHtmlFragment', () => {
 
     getState.mockImplementationOnce(() => fromJS({
       rendering: iMap({ disableScripts: true }),
-    }));
+    })
+    );
 
     await requireCreateRequestHtmlFragment(req, res, { createRoutes });
 
@@ -153,7 +190,7 @@ describe('createRequestHtmlFragment', () => {
   });
 
   it('does not generate HTML when no route is matched', async () => {
-    expect.assertions(4);
+    expect.assertions(5);
 
     matchPromise.mockImplementationOnce(() => ({
       redirectLocation: undefined,
@@ -162,7 +199,12 @@ describe('createRequestHtmlFragment', () => {
 
     await requireCreateRequestHtmlFragment(req, res, { createRoutes });
 
-    expect(req.log.error).toHaveBeenCalledWith('error creating request HTML fragment for %s', 'http://example.com/request', expect.any(Error));
+    expect(req.log.error).toHaveBeenCalledWith(
+      'error creating request HTML fragment for %s',
+      'http://example.com/request',
+      expect.any(Error)
+    );
+    expect(tracer.spans.createRequestHtmlFragment.recordException).toHaveBeenCalled();
     expect(res.code).toHaveBeenCalledWith(404);
     expect(createRoutes).toHaveBeenCalledWith(req.store);
     expect(req.appHtml).toBe(undefined);
@@ -205,12 +247,18 @@ describe('createRequestHtmlFragment', () => {
     expect.assertions(2);
 
     const createRoutesError = new Error('failed to create routes');
-    const brokenCreateRoutes = () => { throw createRoutesError; };
+    const brokenCreateRoutes = () => {
+      throw createRoutesError;
+    };
 
     await requireCreateRequestHtmlFragment(req, res, { createRoutes: brokenCreateRoutes });
 
     expect(req.log.error).toHaveBeenCalled();
-    expect(req.log.error.mock.calls[0]).toEqual(['error creating request HTML fragment for %s', 'http://example.com/request', createRoutesError]);
+    expect(req.log.error.mock.calls[0]).toEqual([
+      'error creating request HTML fragment for %s',
+      'http://example.com/request',
+      createRoutesError,
+    ]);
   });
 
   it('should use a circuit breaker', async () => {
@@ -267,7 +315,9 @@ describe('createRequestHtmlFragment', () => {
 
   it('should rethrow if the error does not contain a redirect', async () => {
     expect.assertions(4);
-    composeModules.mockImplementationOnce(() => { throw new Error('An error that does not redirect'); });
+    composeModules.mockImplementationOnce(() => {
+      throw new Error('An error that does not redirect');
+    });
     await requireCreateRequestHtmlFragment(req, res, { createRoutes });
     expect(res.redirect).not.toHaveBeenCalled();
     expect(getBreaker().fire).toHaveBeenCalled();
@@ -342,5 +392,69 @@ describe('createRequestHtmlFragment', () => {
     expect(renderForStringSpy).not.toHaveBeenCalled();
     expect(renderForStaticMarkupSpy).toHaveBeenCalled();
     expect(req.appHtml).toBe('hi');
+  });
+
+  it('should include tracer spans', async () => {
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
+    expect(tracer.startSpan).toHaveBeenCalledTimes(6);
+    expect(Object.keys(tracer.spans)).toMatchInlineSnapshot(`
+      [
+        "createRequestHtmlFragment",
+        "createRequestHtmlFragment -> createRoutes",
+        "createRequestHtmlFragment -> checkRoutes",
+        "createRequestHtmlFragment -> buildRenderProps",
+        "createRequestHtmlFragment -> loadModuleData",
+        "createRequestHtmlFragment -> renderToString",
+      ]
+    `);
+    Object.values(tracer.spans).forEach((span) => {
+      expect(span.end).toHaveBeenCalledTimes(1);
+    });
+    expect(tracer.spans.createRequestHtmlFragment.recordException).not.toHaveBeenCalled();
+  });
+
+  it('should include tracer spans when the circuit breaker opens', async () => {
+    const breaker = getBreaker();
+    breaker.fire.mockReturnValueOnce({ fallback: true });
+
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
+    expect(tracer.startSpan).toHaveBeenCalledTimes(5);
+    Object.values(tracer.spans).forEach((span) => {
+      expect(span.end).toHaveBeenCalledTimes(1);
+    });
+    expect(Object.keys(tracer.spans)).toMatchInlineSnapshot(`
+      [
+        "createRequestHtmlFragment",
+        "createRequestHtmlFragment -> createRoutes",
+        "createRequestHtmlFragment -> checkRoutes",
+        "createRequestHtmlFragment -> buildRenderProps",
+        "createRequestHtmlFragment -> loadModuleData",
+      ]
+    `);
+  });
+
+  it('should end the checkRoutes span when a redirect is encountered', async () => {
+    matchPromise.mockImplementationOnce(() => ({
+      redirectLocation: {
+        pathname: '/redirect',
+        search: '',
+      },
+    }));
+
+    await requireCreateRequestHtmlFragment(req, res, { createRoutes });
+
+    expect(tracer.startSpan).toHaveBeenCalledTimes(3);
+    Object.values(tracer.spans).forEach((span) => {
+      expect(span.end).toHaveBeenCalledTimes(1);
+    });
+    expect(Object.keys(tracer.spans)).toMatchInlineSnapshot(`
+      [
+        "createRequestHtmlFragment",
+        "createRequestHtmlFragment -> createRoutes",
+        "createRequestHtmlFragment -> checkRoutes",
+      ]
+    `);
   });
 });

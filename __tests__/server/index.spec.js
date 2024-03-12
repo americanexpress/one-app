@@ -23,11 +23,15 @@ import { Map as ImmutableMap } from 'immutable';
 
 jest.unmock('yargs');
 
+jest.spyOn(console, 'log').mockImplementation(util.format);
+jest.spyOn(console, 'error').mockImplementation((...args) => {
+  args.pop();
+  return util.format(...args);
+});
+jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
+jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
+
 describe('server index', () => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
-  jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
   const origFsExistsSync = fs.existsSync;
 
   let addServer;
@@ -78,7 +82,7 @@ describe('server index', () => {
     });
     //
     jest.doMock('../../src/server/polyfill/intl');
-    jest.doMock('../../src/server/utils/logging/setup', () => {});
+    jest.doMock('../../src/server/utils/logging/monkeyPatchConsole', () => {});
 
     ssrServerListen = jest.fn(async () => {
       if (ssrServerError) {
@@ -142,7 +146,6 @@ describe('server index', () => {
   describe('development', () => {
     beforeEach(() => {
       jest.resetModules();
-      jest.resetAllMocks();
       process.env.NODE_ENV = 'development';
       delete process.env.HTTP_ONE_APP_DEV_CDN_PORT;
     });
@@ -274,7 +277,6 @@ describe('server index', () => {
   describe('production', () => {
     beforeEach(() => {
       jest.resetModules();
-      jest.resetAllMocks();
       process.env.NODE_ENV = 'production';
     });
 
@@ -366,8 +368,9 @@ describe('server index', () => {
       await load({ ssrServerError: true });
 
       expect(console.error).toHaveBeenCalled();
-      console.error.mock.calls[0].pop();
-      expect(util.format(...console.error.mock.calls[0])).toMatchSnapshot();
+      expect(console.error.mock.results[0].value).toMatchInlineSnapshot(
+        '"Error encountered starting 🌎 One App server"'
+      );
     });
 
     it('does not log a notice directly to STDERR when not using OTel and listening on the server fails', async () => {
@@ -394,8 +397,9 @@ describe('server index', () => {
       await load({ metricsServerError: true });
 
       expect(console.error).toHaveBeenCalled();
-      console.error.mock.calls[0].pop();
-      expect(util.format(...console.error.mock.calls[0])).toMatchSnapshot();
+      expect(console.error.mock.results[0].value).toMatchInlineSnapshot(
+        '"Error encountered starting 📊 Metrics server"'
+      );
     });
 
     it('does not log a notice directly to STDERR when not using OTel and listening on the metrics server fails', async () => {
@@ -432,8 +436,8 @@ describe('server index', () => {
       await load();
 
       expect(console.log).toHaveBeenCalled();
-      expect(util.format(...console.log.mock.calls[1])).toMatch(
-        '🌎 One App server listening on port 3000'
+      expect(console.log.mock.results[1].value).toMatchInlineSnapshot(
+        '"🌎 One App server listening on port 3000"'
       );
     });
 
@@ -444,8 +448,8 @@ describe('server index', () => {
       await load();
 
       expect(console.log).toHaveBeenCalled();
-      expect(util.format(...console.log.mock.calls[0])).toMatch(
-        '📊 Metrics server listening on port 3005'
+      expect(console.log.mock.results[0].value).toMatchInlineSnapshot(
+        '"📊 Metrics server listening on port 3005"'
       );
     });
 

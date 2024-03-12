@@ -20,6 +20,7 @@
 
 import path from 'path';
 
+import { argv } from 'yargs';
 import bytes from 'bytes';
 import compress from '@fastify/compress';
 import Fastify from 'fastify';
@@ -35,7 +36,8 @@ import ensureCorrelationId from './plugins/ensureCorrelationId';
 import setAppVersionHeader from './plugins/setAppVersionHeader';
 import addSecurityHeadersPlugin from './plugins/addSecurityHeaders';
 import csp from './plugins/csp';
-import logging from './utils/logging/fastifyPlugin';
+import requestLogging from './plugins/requestLogging';
+import requestRaw from './plugins/requestRaw';
 import forwardedHeaderParser from './plugins/forwardedHeaderParser';
 import renderHtml from './plugins/reactHtml';
 import renderStaticErrorPage from './plugins/reactHtml/staticErrorPage';
@@ -43,6 +45,8 @@ import addFrameOptionsHeader from './plugins/addFrameOptionsHeader';
 import addCacheHeaders from './plugins/addCacheHeaders';
 import { getServerPWAConfig, serviceWorkerHandler, webManifestMiddleware } from './pwa';
 import logger from './utils/logging/logger';
+import tracer from './plugins/tracer';
+import noopTracer from './plugins/noopTracer';
 
 const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
 
@@ -52,10 +56,18 @@ const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
  */
 
 async function appPlugin(fastify) {
+  if (process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || argv.logLevel === 'trace') {
+    fastify.register(tracer);
+  } else {
+    fastify.register(noopTracer);
+  }
+  if (!process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || process.env.ONE_ENABLE_REQUEST_LOGGING_WHILE_TRACING === 'true') {
+    fastify.register(requestLogging, { spy: true });
+  }
+  fastify.register(requestRaw);
   fastify.register(fastifySensible);
   fastify.register(ensureCorrelationId);
   fastify.register(fastifyCookie);
-  fastify.register(logging);
   fastify.register(fastifyMetrics, {
     defaultMetrics: { enabled: false },
     endpoint: null,
@@ -79,18 +91,15 @@ async function appPlugin(fastify) {
   });
   fastify.register(setAppVersionHeader);
   fastify.register(forwardedHeaderParser);
-  // Static routes
-  fastify.register((instance, _opts, done) => {
-    instance.register(fastifyStatic, {
-      root: path.join(__dirname, '../../build'),
-      prefix: '/_/static',
-      maxAge: '182d',
-    });
-    instance.get('/_/status', (_request, reply) => reply.status(200).send('OK'));
-    instance.get('/_/pwa/service-worker.js', serviceWorkerHandler);
 
-    done();
+  // Static routes
+  fastify.register(fastifyStatic, {
+    root: path.join(__dirname, '../../build'),
+    prefix: '/_/static',
+    maxAge: '182d',
   });
+  fastify.get('/_/status', (_request, reply) => reply.status(200).send('OK'));
+  fastify.get('/_/pwa/service-worker.js', serviceWorkerHandler);
 
   fastify.addContentTypeParser('application/csp-report', { parseAs: 'string' }, (req, body, doneParsing) => {
     doneParsing(null, body);
@@ -119,13 +128,13 @@ async function appPlugin(fastify) {
           request.log.warn('CSP Violation: %s:%s:%s on page %s violated the %s policy via %s', sourceFile, lineNumber, columnNumber, documentUri, violatedDirective, blockedUri);
         }
 
-        reply.status(204).send();
+        return reply.status(204).send();
       });
     } else {
       instance.post('/_/report/security/csp-violation', (request, reply) => {
         const violation = request.body ? request.body : 'No data received!';
         request.log.warn('CSP Violation: %s', violation);
-        reply.status(204).send();
+        return reply.status(204).send();
       });
     }
 
@@ -197,31 +206,30 @@ async function appPlugin(fastify) {
     instance.register(addFrameOptionsHeader);
     instance.register(renderHtml);
 
-    instance.get('/_/pwa/shell', (_request, reply) => {
+    instance.get('/_/pwa/shell', async (_request, reply) => {
       if (getServerPWAConfig().serviceWorker) {
         reply.sendHtml();
       } else {
         reply.status(404).send('Not found');
       }
+      return reply;
     });
-
-    instance.get('/*', (_request, reply) => {
+    instance.get('/*', async (_request, reply) => {
       reply.sendHtml();
+      return reply;
     });
 
     if (process.env.ONE_ENABLE_POST_TO_MODULE_ROUTES === 'true') {
       instance.post('/*', (_request, reply) => {
         reply.sendHtml();
+        return reply;
       });
     }
 
     done();
   });
 
-  fastify.setNotFoundHandler(async (_request, reply) => {
-    reply.code(404).send('Not found');
-  });
-
+  fastify.setNotFoundHandler(async (_request, reply) => reply.code(404).send('Not found'));
   fastify.setErrorHandler(async (error, request, reply) => {
     const { method, url } = request;
     const correlationId = request.headers['correlation-id'];
@@ -230,7 +238,8 @@ async function appPlugin(fastify) {
     request.log.error('Fastify application error: method %s, url "%s", correlationId "%s", headersSent: %s', method, url, correlationId, headersSent, error);
 
     reply.code(500);
-    return renderStaticErrorPage(request, reply);
+    renderStaticErrorPage(request, reply);
+    return reply;
   });
 }
 
@@ -250,7 +259,8 @@ export async function createApp(opts = {}) {
 
       request.log.error('Fastify internal error: method %s, url "%s", correlationId "%s"', method, url, correlationId, error);
 
-      return renderStaticErrorPage(request, reply);
+      renderStaticErrorPage(request, reply);
+      return reply;
     },
     bodyLimit: bytes(process.env.ONE_MAX_POST_REQUEST_PAYLOAD || '10mb'), // Note: this applies to all routes
     ...opts,

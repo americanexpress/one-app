@@ -140,6 +140,10 @@ const doWork = async () => {
 
   // clear cdn of statics.
   await fs.emptyDir(nginxOriginStaticsAppDir);
+  const traceFilePath = path.resolve(sampleProdDir, 'otel-collector', 'tmp', 'traces.jsonl');
+  await fs.mkdir(path.dirname(traceFilePath), { recursive: true });
+  await fs.writeFile(traceFilePath, '');
+  await fs.chmod(traceFilePath, 0o666);
 
   await handleCertGeneration({
     skipApiImagesBuild,

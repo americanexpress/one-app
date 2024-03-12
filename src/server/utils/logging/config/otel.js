@@ -14,15 +14,16 @@
  * permissions and limitations under the License.
  */
 
-import os from 'node:os';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import pino from 'pino';
 import flatten from 'flat';
+import { SeverityNumber } from '@opentelemetry/api-logs';
 import {
   serializeError,
   formatLogEntry,
 } from '../utils';
+import getOtelResourceAttributes from '../../getOtelResourceAttributes';
 import readJsonFile from '../../readJsonFile';
+import pinoBaseConfig from './base';
 
 const { buildVersion: version } = readJsonFile('../../../.build-meta.json');
 
@@ -35,24 +36,17 @@ export function createOtelTransport({
     return undefined;
   }
 
-  const customResourceAttributes = process.env.OTEL_RESOURCE_ATTRIBUTES ? process.env.OTEL_RESOURCE_ATTRIBUTES.split(';').reduce((acc, curr) => {
-    const [key, value] = curr.split('=');
-    return {
-      ...acc,
-      [key]: value,
-    };
-  }, {}) : {};
-
   let logRecordProcessorOptions = [];
 
   if (grpcExporter) {
     logRecordProcessorOptions.push({
-      recordProcessorType: 'batch',
+      recordProcessorType: process.env.INTEGRATION_TEST === 'true' ? 'simple' : 'batch',
       exporterOptions: { protocol: 'grpc' },
     });
   }
 
   if (consoleExporter) {
+    if (process.stdout.isTTY && !process.env.NO_COLOR) process.env.FORCE_COLOR = '1';
     logRecordProcessorOptions.push({
       recordProcessorType: 'simple',
       exporterOptions: { protocol: 'console' },
@@ -66,16 +60,13 @@ export function createOtelTransport({
   return pino.transport({
     target: 'pino-opentelemetry-transport',
     options: {
-      messageKey: 'message',
+      messageKey: pinoBaseConfig.messageKey,
       loggerName: process.env.OTEL_SERVICE_NAME,
       serviceVersion: version,
       logRecordProcessorOptions,
-      resourceAttributes: {
-        [SemanticResourceAttributes.SERVICE_NAME]: process.env.OTEL_SERVICE_NAME,
-        [SemanticResourceAttributes.SERVICE_NAMESPACE]: process.env.OTEL_SERVICE_NAMESPACE,
-        [SemanticResourceAttributes.SERVICE_INSTANCE_ID]: os.hostname(),
-        [SemanticResourceAttributes.SERVICE_VERSION]: version,
-        ...customResourceAttributes,
+      resourceAttributes: getOtelResourceAttributes(),
+      severityNumberMap: {
+        [pinoBaseConfig.customLevels.log]: SeverityNumber.INFO2,
       },
     },
   });
@@ -89,9 +80,6 @@ export default {
     err: serializeError,
   },
   formatters: {
-    level(_label, number) {
-      return { level: number === 35 ? 30 : number };
-    },
     log(entry) {
       const formattedEntry = formatLogEntry(entry);
       return flatten(formattedEntry);

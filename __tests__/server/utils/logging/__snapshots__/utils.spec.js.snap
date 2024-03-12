@@ -1,13 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`utils coloredLevels has a blue log 1`] = `"<blue>log</blue>"`;
-
-exports[`utils coloredLevels has a gray info 1`] = `"<gray>info</gray>"`;
-
-exports[`utils coloredLevels has a red error 1`] = `"<red>error</red>"`;
-
-exports[`utils coloredLevels has a yellow warn 1`] = `"<yellow>warn</yellow>"`;
-
 exports[`utils printDurationTime prints acceptable times in yellow 1`] = `"<yellow>999</yellow>"`;
 
 exports[`utils printDurationTime prints good times in green 1`] = `"<green>99</green>"`;

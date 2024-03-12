@@ -17,7 +17,13 @@
 import addSecurityHeaders from '../../../src/server/plugins/addSecurityHeaders';
 
 describe('addSecurityHeaders', () => {
+  const span = { end: jest.fn() };
+  const tracer = { startSpan: jest.fn(() => span) };
+  const activeSpan = { attributes: { 'req.method': 'GET', 'req.url': '/foo' } };
+  const openTelemetry = () => ({ tracer, activeSpan });
+
   beforeEach(() => {
+    jest.clearAllMocks();
     delete process.env.ONE_REFERRER_POLICY_OVERRIDE;
   });
 
@@ -25,6 +31,7 @@ describe('addSecurityHeaders', () => {
     const request = {
       headers: {},
       method: 'GET',
+      openTelemetry,
     };
     const reply = {
       header: jest.fn(),
@@ -42,7 +49,10 @@ describe('addSecurityHeaders', () => {
     expect(done).toHaveBeenCalled();
     expect(reply.header).toHaveBeenCalledTimes(9);
     expect(reply.header).toHaveBeenCalledWith('vary', 'Accept-Encoding');
-    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+    expect(reply.header).toHaveBeenCalledWith(
+      'Strict-Transport-Security',
+      'max-age=63072000; includeSubDomains'
+    );
     expect(reply.header).toHaveBeenCalledWith('x-dns-prefetch-control', 'off');
     expect(reply.header).toHaveBeenCalledWith('x-download-options', 'noopen');
     expect(reply.header).toHaveBeenCalledWith('x-permitted-cross-domain-policies', 'none');
@@ -57,6 +67,7 @@ describe('addSecurityHeaders', () => {
       headers: {},
       method: 'GET',
       url: '/testing',
+      openTelemetry,
     };
     const reply = {
       header: jest.fn(),
@@ -68,17 +79,22 @@ describe('addSecurityHeaders', () => {
     };
     const done = jest.fn();
 
-    addSecurityHeaders(fastify, {
-      matchGetRoutes: [
-        '/testing',
-      ],
-    }, done);
+    addSecurityHeaders(
+      fastify,
+      {
+        matchGetRoutes: ['/testing'],
+      },
+      done
+    );
 
     expect(fastify.addHook).toHaveBeenCalled();
     expect(done).toHaveBeenCalled();
     expect(reply.header).toHaveBeenCalledTimes(9);
     expect(reply.header).toHaveBeenCalledWith('vary', 'Accept-Encoding');
-    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+    expect(reply.header).toHaveBeenCalledWith(
+      'Strict-Transport-Security',
+      'max-age=63072000; includeSubDomains'
+    );
     expect(reply.header).toHaveBeenCalledWith('x-dns-prefetch-control', 'off');
     expect(reply.header).toHaveBeenCalledWith('x-download-options', 'noopen');
     expect(reply.header).toHaveBeenCalledWith('x-permitted-cross-domain-policies', 'none');
@@ -93,6 +109,7 @@ describe('addSecurityHeaders', () => {
       headers: {},
       method: 'POST',
       url: '/testing',
+      openTelemetry,
     };
     const reply = {
       header: jest.fn(),
@@ -110,7 +127,10 @@ describe('addSecurityHeaders', () => {
     expect(done).toHaveBeenCalled();
     expect(reply.header).toHaveBeenCalledTimes(9);
     expect(reply.header).toHaveBeenCalledWith('vary', 'Accept-Encoding');
-    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+    expect(reply.header).toHaveBeenCalledWith(
+      'Strict-Transport-Security',
+      'max-age=63072000; includeSubDomains'
+    );
     expect(reply.header).toHaveBeenCalledWith('x-dns-prefetch-control', 'off');
     expect(reply.header).toHaveBeenCalledWith('x-download-options', 'noopen');
     expect(reply.header).toHaveBeenCalledWith('x-permitted-cross-domain-policies', 'none');
@@ -126,6 +146,7 @@ describe('addSecurityHeaders', () => {
     const request = {
       headers: {},
       method: 'GET',
+      openTelemetry,
     };
     const reply = {
       header: jest.fn(),
@@ -143,7 +164,10 @@ describe('addSecurityHeaders', () => {
     expect(done).toHaveBeenCalled();
     expect(reply.header).toHaveBeenCalledTimes(9);
     expect(reply.header).toHaveBeenCalledWith('vary', 'Accept-Encoding');
-    expect(reply.header).toHaveBeenCalledWith('Strict-Transport-Security', 'max-age=63072000; includeSubDomains');
+    expect(reply.header).toHaveBeenCalledWith(
+      'Strict-Transport-Security',
+      'max-age=63072000; includeSubDomains'
+    );
     expect(reply.header).toHaveBeenCalledWith('x-dns-prefetch-control', 'off');
     expect(reply.header).toHaveBeenCalledWith('x-download-options', 'noopen');
     expect(reply.header).toHaveBeenCalledWith('x-permitted-cross-domain-policies', 'none');
@@ -151,5 +175,28 @@ describe('addSecurityHeaders', () => {
     expect(reply.header).toHaveBeenCalledWith('X-Frame-Options', 'SAMEORIGIN');
     expect(reply.header).toHaveBeenCalledWith('X-XSS-Protection', '0');
     expect(reply.header).toHaveBeenCalledWith('Referrer-Policy', 'origin-when-cross-origin');
+  });
+
+  it('adds a tracer span', () => {
+    const request = {
+      headers: {},
+      method: 'GET',
+      openTelemetry,
+    };
+    const reply = {
+      header: jest.fn(),
+    };
+    const fastify = {
+      addHook: jest.fn(async (_hook, cb) => {
+        await cb(request, reply);
+      }),
+    };
+    const done = jest.fn();
+
+    addSecurityHeaders(fastify, {}, done);
+
+    expect(tracer.startSpan).toHaveBeenCalledTimes(1);
+    expect(tracer.startSpan).toHaveBeenCalledWith('addSecurityHeaders');
+    expect(span.end).toHaveBeenCalledTimes(1);
   });
 });

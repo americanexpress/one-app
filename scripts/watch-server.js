@@ -16,6 +16,7 @@
  * permissions and limitations under the License.
  */
 
+const { argv } = require('yargs');
 const { spawn } = require('child_process');
 const buildServiceWorkerScripts = require('./build-service-workers');
 
@@ -51,9 +52,21 @@ const buildServiceWorkerScripts = require('./build-service-workers');
     '--use-middleware',
   ].find((argName) => arg.startsWith(argName)));
 
+  const nodemonArgs = [
+    '--dns-result-order', 'ipv4first',
+    '--no-experimental-fetch',
+    '--signal', 'SIGTERM',
+    '--watch', 'src',
+    '--ext', 'js,jsx',
+  ];
+
+  if (process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || argv.logLevel === 'trace') {
+    nodemonArgs.push('--require=./lib/server/utils/tracer.js');
+  }
+
   const nodemon = spawn('nodemon', [
-    '--dns-result-order=ipv4first', '--no-experimental-fetch',
-    '--signal', 'SIGTERM', '--watch', 'src', '--ext', 'js,jsx', 'lib/server/index.js',
+    ...nodemonArgs,
+    'lib/server/index.js',
   ].concat(flags.length > 0 ? ['--', ...flags] : []), {
     stdio: 'inherit',
     killSignal: 'SIGINT',

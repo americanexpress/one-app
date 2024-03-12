@@ -322,25 +322,32 @@ export function renderPartial({
 }
 
 export const checkStateForRedirectAndStatusCode = (request, reply) => {
+  const { tracer } = request.openTelemetry();
+  const checkStateForRedirectSpan = tracer.startSpan('checkStateForRedirect');
   const destination = request.store.getState().getIn(['redirection', 'destination']);
-
-  if (destination) {
-    if (!isRedirectUrlAllowed(destination)) {
-      renderStaticErrorPage(request, reply);
-      console.error('\'%s\' is not an allowed redirect URL', destination);
-      return;
-    }
-    reply.redirect(302, destination);
-  } else {
-    const error = request.store.getState().get('error');
-
-    if (error) {
-      const code = error.get('code');
-
-      if (code) {
-        reply.code(code);
+  try {
+    if (destination) {
+      if (!isRedirectUrlAllowed(destination)) {
+        renderStaticErrorPage(request, reply);
+        console.error('\'%s\' is not an allowed redirect URL', destination);
+        return;
       }
+      reply.redirect(302, destination);
+    } else {
+      const checkStateForStatusCodeSpan = tracer.startSpan('checkStateForStatusCode');
+      const error = request.store.getState().get('error');
+
+      if (error) {
+        const code = error.get('code');
+
+        if (code) {
+          reply.code(code);
+        }
+      }
+      checkStateForStatusCodeSpan.end();
     }
+  } finally {
+    checkStateForRedirectSpan.end();
   }
 };
 
@@ -350,6 +357,9 @@ export const checkStateForRedirectAndStatusCode = (request, reply) => {
  * @param {import('fastify').FastifyReply} reply fastify reply object
  */
 export const sendHtml = (request, reply) => {
+  const { tracer } = request.openTelemetry();
+  const span = tracer.startSpan('sendHtml');
+
   try {
     const {
       appHtml,
@@ -363,7 +373,11 @@ export const sendHtml = (request, reply) => {
     const userAgent = headers['user-agent'];
     const isLegacy = legacyUserAgent(userAgent);
 
-    request.log.info('sendHtml, have store? %s, have appHtml? %s', !!store, !!appHtml);
+    if (request.tracingEnabled) {
+      span.addEvent(`'sendHtml, have store? ${!!store}, have appHtml? ${!!appHtml}`);
+    } else {
+      request.log.info('sendHtml, have store? %s, have appHtml? %s', !!store, !!appHtml);
+    }
 
     if (appHtml && typeof appHtml !== 'string') {
       throw new Error(`appHtml was not a string, was ${typeof appHtml}`, appHtml);
@@ -433,8 +447,11 @@ export const sendHtml = (request, reply) => {
 
     return reply.header('content-type', 'text/html; charset=utf-8').send(html);
   } catch (err) {
+    span.recordException(err);
     request.log.error('sendHtml had an error, sending static error page', err);
     return renderStaticErrorPage(request, reply);
+  } finally {
+    span.end();
   }
 };
 

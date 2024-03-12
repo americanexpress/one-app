@@ -26,8 +26,8 @@ describe('heapdump', () => {
 
   jest.spyOn(process, 'on').mockImplementation(() => {});
   jest.spyOn(Date, 'now').mockImplementation(() => 1525145998246);
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'warn').mockImplementation(util.format);
+  jest.spyOn(console, 'error').mockImplementation(util.format);
 
   function load({ mockWriteStreamError = null } = {}) {
     jest.resetModules();
@@ -105,7 +105,7 @@ describe('heapdump', () => {
     console.warn.mockClear();
     load();
     expect(console.warn).toHaveBeenCalledTimes(1);
-    expect(console.warn.mock.calls[0][0]).toMatchSnapshot();
+    expect(console.warn.mock.results[0].value).toMatchSnapshot();
   });
 
   describe('on SIGUSR2 signal', () => {
@@ -116,7 +116,7 @@ describe('heapdump', () => {
       console.warn.mockClear();
       process.on.mock.calls[0][1]();
       expect(console.warn).toHaveBeenCalledTimes(1);
-      expect(util.format(...console.warn.mock.calls[0])).toBe(`about to write a heapdump to /tmp/heapdump-${pid}-1525145998246.heapsnapshot`);
+      expect(console.warn.mock.results[0].value).toBe(`about to write a heapdump to /tmp/heapdump-${pid}-1525145998246.heapsnapshot`);
       await waitForStreamToFinish(fs.createWriteStream.mock.results[0].value);
       await sleep(20); // also wait for the callback to run
     });
@@ -195,7 +195,7 @@ describe('heapdump', () => {
         await sleep(20); // also wait for the callback to run
         expect(console.error).not.toHaveBeenCalled();
         expect(console.warn).toHaveBeenCalledTimes(1);
-        expect(util.format(...console.warn.mock.calls[0])).toBe(`wrote heapdump out to /tmp/heapdump-${pid}-1525145998246.heapsnapshot`);
+        expect(console.warn.mock.results[0].value).toBe(`wrote heapdump out to /tmp/heapdump-${pid}-1525145998246.heapsnapshot`);
       });
     });
   });

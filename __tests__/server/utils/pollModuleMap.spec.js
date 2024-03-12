@@ -21,9 +21,9 @@ jest.spyOn(global, 'setInterval');
 jest.spyOn(global, 'setImmediate');
 
 describe('pollModuleMap', () => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(util.format);
+  jest.spyOn(console, 'warn').mockImplementation(util.format);
+  jest.spyOn(console, 'error').mockImplementation(util.format);
   let loadModules;
   let loadModulesPromise;
   let incrementCounter;
@@ -250,7 +250,7 @@ describe('pollModuleMap', () => {
 
     expect(loadModules).toHaveBeenCalledTimes(1);
     expect(console.log).toHaveBeenCalledTimes(3);
-    expect(util.format(...console.log.mock.calls[2])).toMatchInlineSnapshot(`
+    expect(console.log.mock.results[2].value).toMatchInlineSnapshot(`
       "pollModuleMap: 1 modules loaded/updated:
       { 'module-name': 'module-data-here' }"
     `);
@@ -270,7 +270,7 @@ describe('pollModuleMap', () => {
     expect(loadModules).toHaveBeenCalledTimes(1);
 
     expect(console.log).toHaveBeenCalledTimes(3);
-    expect(util.format(...console.log.mock.calls[2])).toMatch(
+    expect(console.log.mock.results[2].value).toMatch(
       /^pollModuleMap: no updates, looking again in \d+s$/
     );
 
@@ -314,7 +314,7 @@ describe('pollModuleMap', () => {
     expect(loadModules).toHaveBeenCalledTimes(1);
 
     expect(console.warn).toHaveBeenCalledTimes(1);
-    expect(util.format(...console.warn.mock.calls[0])).toMatchInlineSnapshot(`
+    expect(console.warn.mock.results[0].value).toMatchInlineSnapshot(`
       "pollModuleMap: 1 modules rejected:
       [ 'bad-module: not compatible', [length]: 1 ]"
     `);
@@ -492,8 +492,8 @@ describe('pollModuleMap', () => {
       expect(setInterval).toHaveBeenCalledTimes(1);
       setInterval.mock.calls[0][0]();
       expect(console.log).toHaveBeenCalledTimes(2);
-      expect(util.format(...console.log.mock.calls[0])).toMatchSnapshot();
-      expect(util.format(...console.log.mock.calls[1])).toMatchSnapshot();
+      expect(console.log.mock.results[0].value).toMatchSnapshot();
+      expect(console.log.mock.results[1].value).toMatchSnapshot();
     });
 
     it('logs when polling is considered stopped', async () => {
@@ -510,8 +510,8 @@ describe('pollModuleMap', () => {
       expect(console.log).toHaveBeenCalledTimes(1);
       expect(console.log.mock.calls[0]).toMatchSnapshot();
       expect(console.warn).toHaveBeenCalledTimes(2);
-      expect(util.format(...console.warn.mock.calls[0])).toMatchSnapshot();
-      expect(util.format(...console.warn.mock.calls[1])).toMatchSnapshot();
+      expect(console.warn.mock.results[0].value).toMatchSnapshot();
+      expect(console.warn.mock.results[1].value).toMatchSnapshot();
     });
   });
 });

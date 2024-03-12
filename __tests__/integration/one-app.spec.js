@@ -818,8 +818,11 @@ describe('Tests that require Docker setup', () => {
             // not ideal but need to wait for app to poll;
             await waitFor(minPollTime);
             const loggedError = await requiredExternalsError;
-            const [, problemModule, problemModuleUrl, workingUrl] = revertErrorMatch
-              .exec(loggedError);
+            const [,
+              problemModule,
+              problemModuleUrl,
+              workingUrl,
+            ] = revertErrorMatch.exec(loggedError);
             const gitSha = await retrieveGitSha();
             await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
             expect(problemModule).toBe('cultured-frankie');
@@ -843,8 +846,11 @@ describe('Tests that require Docker setup', () => {
             // not ideal but need to wait for app to poll;
             await waitFor(minPollTime);
             const loggedError = await requiredExternalsError;
-            const [, problemModule, problemModuleUrl, ignoredModule] = revertErrorMatch
-              .exec(loggedError);
+            const [,
+              problemModule,
+              problemModuleUrl,
+              ignoredModule,
+            ] = revertErrorMatch.exec(loggedError);
             const gitSha = await retrieveGitSha();
             await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
             expect(problemModule).toBe(modName);
@@ -965,6 +971,7 @@ describe('Tests that require Docker setup', () => {
           },
         ],
         secretMessage: 'you are being watched',
+        traceparent: expect.any(String),
         loadedOnServer: true,
       });
     });
@@ -972,13 +979,13 @@ describe('Tests that require Docker setup', () => {
     describe('module root configureRequestLog', () => {
       it('has included userId from cookies in request log', async () => {
         const requestLogRegex = /some-user-id-1234/;
-        const searchForRequerstLog = searchForNextLogMatch(requestLogRegex);
+        const searchForRequestLog = searchForNextLogMatch(requestLogRegex);
         await browser.setCookies({
           name: 'userId',
           value: 'some-user-id-1234',
         });
         await browser.url(`${appAtTestUrls.browserUrl}/success`);
-        await expect(searchForRequerstLog).resolves.toMatch(requestLogRegex);
+        await expect(searchForRequestLog).resolves.toMatch(requestLogRegex);
       });
 
       it('log gets updated when Root module gets updated', async () => {
@@ -993,14 +1000,14 @@ describe('Tests that require Docker setup', () => {
         const waiting = waitFor(5000);
 
         const requestLogRegex = /abcdefg123456/;
-        const searchForRequerstLog = searchForNextLogMatch(requestLogRegex);
+        const searchForRequestLog = searchForNextLogMatch(requestLogRegex);
         await browser.setCookies({
           name: 'guuid',
           value: 'abcdefg123456',
         });
         await waiting;
         await browser.url(`${appAtTestUrls.browserUrl}/success`);
-        await expect(searchForRequerstLog).resolves.toMatch(requestLogRegex);
+        await expect(searchForRequestLog).resolves.toMatch(requestLogRegex);
       });
 
       afterAll(() => {
@@ -1303,6 +1310,167 @@ describe('Tests that require Docker setup', () => {
         });
       });
     });
+
+    test('app traces requests', async () => {
+      const requestTraceRegex = /.+{"key":"http.target","value":{"stringValue":"\/healthy-frank\/ssr-frank"}}.+/;
+      const searchForRequestLog = searchForNextLogMatch(requestTraceRegex);
+      const target = '/healthy-frank/ssr-frank';
+      const response = await fetch(`${appAtTestUrls.fetchUrl}${target}`, defaultFetchOptions);
+      expect(response.status).toBe(200);
+      const match = await searchForRequestLog;
+      const trace = JSON.parse(match);
+
+      const htmlData = await response.text();
+      const scriptContents = htmlData.match(
+        /<script id="initial-state" nonce=\S+>([^<]+)<\/script>/
+      )[1];
+      const initialState = scriptContents.match(/window\.__INITIAL_STATE__ = "([^<]+)";/)[1];
+      const state = transit.fromJSON(initialState.replace(/\\/g, ''));
+      const { traceparent } = state.getIn(['modules', 'ssr-frank', 'data']);
+
+      const resourceAttributes = trace.resourceSpans[0].resource.attributes.reduce(
+        (acc, attribute) => ({
+          ...acc,
+          [attribute.key]: attribute.value.stringValue,
+        }),
+        {}
+      );
+
+      expect(resourceAttributes).toMatchInlineSnapshot(
+        {
+          'host.arch': expect.any(String),
+          'host.name': expect.any(String),
+          'os.type': expect.any(String),
+          'os.version': expect.any(String),
+          'process.owner': expect.any(String),
+          'process.runtime.version': expect.any(String),
+          'service.instance.id': expect.any(String),
+          'service.version': expect.any(String),
+          'telemetry.sdk.version': expect.any(String),
+        },
+        `
+        {
+          "baz": "qux",
+          "foo": "bar",
+          "host.arch": Any<String>,
+          "host.name": Any<String>,
+          "os.type": Any<String>,
+          "os.version": Any<String>,
+          "process.command": "/opt/one-app/lib/server/index.js",
+          "process.command_args": undefined,
+          "process.executable.name": "node",
+          "process.executable.path": "/usr/local/bin/node",
+          "process.owner": Any<String>,
+          "process.pid": undefined,
+          "process.runtime.description": "Node.js",
+          "process.runtime.name": "nodejs",
+          "process.runtime.version": Any<String>,
+          "service.instance.id": Any<String>,
+          "service.name": "prod-sample",
+          "service.namespace": "one-app",
+          "service.version": Any<String>,
+          "telemetry.sdk.language": "nodejs",
+          "telemetry.sdk.name": "opentelemetry",
+          "telemetry.sdk.version": Any<String>,
+        }
+      `
+      );
+
+      const getSpans = (scope, traceId) => {
+        const { spans } = trace.resourceSpans[0].scopeSpans.find(
+          (scopeSpan) => scopeSpan.scope.name === scope
+        );
+        if (!traceId) return spans;
+        return spans.filter((span) => span.traceId === traceId);
+      };
+      const getSpanByAttribute = (spans, { key, value }) => spans.find(
+        (span) => span.attributes.find((attr) => attr.key === key).value.stringValue === value
+      );
+      const getSpanByName = (spans, name) => spans.find((span) => span.name === name);
+
+      const formatSpansForSnapshot = (spans, includeAttributes = []) => spans.map(
+        (span) => `${span.name}: ${JSON.stringify(
+          span.attributes
+            .filter((attribute) => (includeAttributes.length === 0
+              ? true
+              : includeAttributes.includes(attribute.key))
+            )
+            .reduce(
+              (acc, attr) => ({
+                ...acc,
+                [attr.key]: attr.value.stringValue,
+              }),
+              {}
+            )
+        )}`
+      );
+
+      const { traceId } = getSpanByAttribute(getSpans('@opentelemetry/instrumentation-http'), {
+        key: 'http.target',
+        value: target,
+      });
+
+      expect(response.headers.get('traceid')).toBe(traceId);
+      expect(traceparent).toEqual(expect.stringContaining(traceId));
+
+      const httpSpans = getSpans('@opentelemetry/instrumentation-http', traceId);
+      expect(httpSpans.length).toBe(2);
+      const spans = getSpans('@autotelic/fastify-opentelemetry', traceId);
+      expect(spans.length).toBe(14);
+
+      const { spanId: parentSpanId } = getSpanByName(spans, 'GET /*');
+
+      const dataFetchSpan = getSpanByAttribute(httpSpans, { key: 'direction', value: 'out' });
+      const loadModuleDataSpan = getSpanByName(
+        spans,
+        'createRequestHtmlFragment -> loadModuleData'
+      );
+
+      expect(dataFetchSpan.parentSpanId).toBe(loadModuleDataSpan.spanId);
+
+      expect(formatSpansForSnapshot(httpSpans, ['direction'])).toMatchInlineSnapshot(`
+        [
+          "GET https://fast.api.frank/posts: {"direction":"out"}",
+          "GET /healthy-frank/ssr-frank: {"direction":"in"}",
+        ]
+      `);
+
+      expect(formatSpansForSnapshot(spans)).toMatchInlineSnapshot(`
+        [
+          "addSecurityHeaders: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "addFrameOptionsHeader: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "createRequestStore: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "createRequestHtmlFragment -> createRoutes: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "createRequestHtmlFragment -> checkRoutes: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "createRequestHtmlFragment -> buildRenderProps: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "createRequestHtmlFragment -> loadModuleData: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "createRequestHtmlFragment -> renderToString: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "createRequestHtmlFragment: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "checkStateForStatusCode: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "checkStateForRedirect: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "conditionallyAllowCors: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "sendHtml: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "GET /*: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+        ]
+      `);
+
+      const createRequestHtmlFragmentSpanId = getSpanByName(
+        spans,
+        'createRequestHtmlFragment'
+      ).spanId;
+      const createRequestHtmlFragmentChildSpans = spans.filter((span) => span.name.startsWith('createRequestHtmlFragment ->')
+      );
+      expect(createRequestHtmlFragmentChildSpans.length).toBe(5);
+      expect(
+        createRequestHtmlFragmentChildSpans.every(
+          (span) => span.parentSpanId === createRequestHtmlFragmentSpanId
+        )
+      ).toBe(true);
+      const otherSpans = spans.filter(
+        (span) => !span.name.startsWith('createRequestHtmlFragment ->') && span.name !== 'GET /*'
+      );
+      expect(otherSpans.every((span) => span.parentSpanId === parentSpanId)).toBe(true);
+    });
   });
 
   describe('Routes confidence checks', () => {
@@ -1335,48 +1503,20 @@ describe('Tests that require Docker setup', () => {
 
       expect(response.status).toBe(200);
       expect(response.headers.raw()).toEqual({
-        connection: [
-          'close',
-        ],
-        'content-length': [
-          '2',
-        ],
-        'content-type': [
-          'text/plain; charset=utf-8',
-        ],
-        date: [
-          expect.any(String),
-        ],
-        'one-app-version': [
-          expect.any(String),
-        ],
-        'referrer-policy': [
-          'same-origin',
-        ],
-        'strict-transport-security': [
-          'max-age=63072000; includeSubDomains',
-        ],
-        vary: [
-          'Accept-Encoding, accept-encoding',
-        ],
-        'x-content-type-options': [
-          'nosniff',
-        ],
-        'x-dns-prefetch-control': [
-          'off',
-        ],
-        'x-download-options': [
-          'noopen',
-        ],
-        'x-frame-options': [
-          'DENY',
-        ],
-        'x-permitted-cross-domain-policies': [
-          'none',
-        ],
-        'x-xss-protection': [
-          '1; mode=block',
-        ],
+        connection: ['close'],
+        'content-length': ['2'],
+        'content-type': ['text/plain; charset=utf-8'],
+        date: [expect.any(String)],
+        'one-app-version': [expect.any(String)],
+        'referrer-policy': ['same-origin'],
+        'strict-transport-security': ['max-age=63072000; includeSubDomains'],
+        vary: ['Accept-Encoding'],
+        'x-content-type-options': ['nosniff'],
+        'x-dns-prefetch-control': ['off'],
+        'x-download-options': ['noopen'],
+        'x-frame-options': ['DENY'],
+        'x-permitted-cross-domain-policies': ['none'],
+        'x-xss-protection': ['1; mode=block'],
       });
     });
 
@@ -1392,42 +1532,18 @@ describe('Tests that require Docker setup', () => {
 
       expect(response.headers.raw()).toEqual({
         vary: ['Accept-Encoding'],
-        connection: [
-          'close',
-        ],
-        'content-security-policy': [
-          expect.any(String),
-        ],
-        date: [
-          expect.any(String),
-        ],
-        'one-app-version': [
-          expect.any(String),
-        ],
-        'referrer-policy': [
-          'same-origin',
-        ],
-        'strict-transport-security': [
-          'max-age=63072000; includeSubDomains',
-        ],
-        'x-content-type-options': [
-          'nosniff',
-        ],
-        'x-dns-prefetch-control': [
-          'off',
-        ],
-        'x-download-options': [
-          'noopen',
-        ],
-        'x-frame-options': [
-          'DENY',
-        ],
-        'x-permitted-cross-domain-policies': [
-          'none',
-        ],
-        'x-xss-protection': [
-          '1; mode=block',
-        ],
+        connection: ['close'],
+        'content-security-policy': [expect.any(String)],
+        date: [expect.any(String)],
+        'one-app-version': [expect.any(String)],
+        'referrer-policy': ['same-origin'],
+        'strict-transport-security': ['max-age=63072000; includeSubDomains'],
+        'x-content-type-options': ['nosniff'],
+        'x-dns-prefetch-control': ['off'],
+        'x-download-options': ['noopen'],
+        'x-frame-options': ['DENY'],
+        'x-permitted-cross-domain-policies': ['none'],
+        'x-xss-protection': ['1; mode=block'],
       });
       expect(response.status).toBe(204);
       expect(response.type).toBe(undefined); // not specified
@@ -1445,51 +1561,21 @@ describe('Tests that require Docker setup', () => {
       });
 
       expect(response.headers.raw()).toEqual({
-        connection: [
-          'close',
-        ],
-        'content-length': [
-          '22',
-        ],
-        'content-security-policy': [
-          expect.any(String),
-        ],
-        'content-type': [
-          'text/plain; charset=utf-8',
-        ],
-        date: [
-          expect.any(String),
-        ],
-        'one-app-version': [
-          expect.any(String),
-        ],
-        'referrer-policy': [
-          'same-origin',
-        ],
-        'strict-transport-security': [
-          'max-age=63072000; includeSubDomains',
-        ],
-        vary: [
-          'Accept-Encoding, accept-encoding',
-        ],
-        'x-content-type-options': [
-          'nosniff',
-        ],
-        'x-dns-prefetch-control': [
-          'off',
-        ],
-        'x-download-options': [
-          'noopen',
-        ],
-        'x-frame-options': [
-          'DENY',
-        ],
-        'x-permitted-cross-domain-policies': [
-          'none',
-        ],
-        'x-xss-protection': [
-          '1; mode=block',
-        ],
+        connection: ['close'],
+        'content-length': ['22'],
+        'content-security-policy': [expect.any(String)],
+        'content-type': ['text/plain; charset=utf-8'],
+        date: [expect.any(String)],
+        'one-app-version': [expect.any(String)],
+        'referrer-policy': ['same-origin'],
+        'strict-transport-security': ['max-age=63072000; includeSubDomains'],
+        vary: ['Accept-Encoding, accept-encoding'],
+        'x-content-type-options': ['nosniff'],
+        'x-dns-prefetch-control': ['off'],
+        'x-download-options': ['noopen'],
+        'x-frame-options': ['DENY'],
+        'x-permitted-cross-domain-policies': ['none'],
+        'x-xss-protection': ['1; mode=block'],
       });
       expect(response.status).toBe(415);
       expect(await response.text()).toBe('Unsupported Media Type');
@@ -1509,43 +1595,19 @@ describe('Tests that require Docker setup', () => {
       // expect(response.status).toBe(204);
       expect(await response.text()).toBe('');
       expect(response.headers.raw()).toEqual({
-        connection: [
-          'close',
-        ],
-        'content-security-policy': [
-          expect.any(String),
-        ],
-        date: [
-          expect.any(String),
-        ],
-        'one-app-version': [
-          expect.any(String),
-        ],
-        'referrer-policy': [
-          'same-origin',
-        ],
-        'strict-transport-security': [
-          'max-age=63072000; includeSubDomains',
-        ],
+        connection: ['close'],
+        'content-security-policy': [expect.any(String)],
+        date: [expect.any(String)],
+        'one-app-version': [expect.any(String)],
+        'referrer-policy': ['same-origin'],
+        'strict-transport-security': ['max-age=63072000; includeSubDomains'],
         vary: ['Accept-Encoding'],
-        'x-content-type-options': [
-          'nosniff',
-        ],
-        'x-dns-prefetch-control': [
-          'off',
-        ],
-        'x-download-options': [
-          'noopen',
-        ],
-        'x-frame-options': [
-          'DENY',
-        ],
-        'x-permitted-cross-domain-policies': [
-          'none',
-        ],
-        'x-xss-protection': [
-          '1; mode=block',
-        ],
+        'x-content-type-options': ['nosniff'],
+        'x-dns-prefetch-control': ['off'],
+        'x-download-options': ['noopen'],
+        'x-frame-options': ['DENY'],
+        'x-permitted-cross-domain-policies': ['none'],
+        'x-xss-protection': ['1; mode=block'],
       });
     });
 
@@ -1561,57 +1623,24 @@ describe('Tests that require Docker setup', () => {
       expect(response.status).toBe(404);
       expect(await response.text()).toBe('Not found');
       expect(response.headers.raw()).toEqual({
-        'cache-control': [
-          'no-store',
-        ],
-        connection: [
-          'close',
-        ],
-        'content-length': [
-          '9',
-        ],
-        'content-security-policy': [
-          expect.any(String),
-        ],
-        'content-type': [
-          'text/plain; charset=utf-8',
-        ],
-        date: [
-          expect.any(String),
-        ],
-        'one-app-version': [
-          expect.any(String),
-        ],
-        pragma: [
-          'no-cache',
-        ],
-        'referrer-policy': [
-          'no-referrer',
-        ],
-        'strict-transport-security': [
-          'max-age=63072000; includeSubDomains',
-        ],
-        vary: [
-          'Accept-Encoding, accept-encoding',
-        ],
-        'x-content-type-options': [
-          'nosniff',
-        ],
-        'x-dns-prefetch-control': [
-          'off',
-        ],
-        'x-download-options': [
-          'noopen',
-        ],
-        'x-frame-options': [
-          'SAMEORIGIN',
-        ],
-        'x-permitted-cross-domain-policies': [
-          'none',
-        ],
-        'x-xss-protection': [
-          '0',
-        ],
+        'cache-control': ['no-store'],
+        connection: ['close'],
+        'content-length': ['9'],
+        'content-security-policy': [expect.any(String)],
+        'content-type': ['text/plain; charset=utf-8'],
+        date: [expect.any(String)],
+        'one-app-version': [expect.any(String)],
+        pragma: ['no-cache'],
+        'referrer-policy': ['no-referrer'],
+        'strict-transport-security': ['max-age=63072000; includeSubDomains'],
+        traceid: [expect.any(String)],
+        vary: ['Accept-Encoding, accept-encoding'],
+        'x-content-type-options': ['nosniff'],
+        'x-dns-prefetch-control': ['off'],
+        'x-download-options': ['noopen'],
+        'x-frame-options': ['SAMEORIGIN'],
+        'x-permitted-cross-domain-policies': ['none'],
+        'x-xss-protection': ['0'],
       });
     });
   });
@@ -1791,6 +1820,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             data: {
               posts: [{ id: 1, title: 'json-server', author: 'typicode' }],
               secretMessage: null,
+              traceparent: null,
               loadedOnServer: false,
             },
           });
@@ -1814,6 +1844,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             data: {
               posts: [{ id: 1, title: 'json-server', author: 'typicode' }],
               secretMessage: null,
+              traceparent: null,
               loadedOnServer: false,
             },
           });
