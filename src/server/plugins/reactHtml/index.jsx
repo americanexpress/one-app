@@ -399,7 +399,8 @@ export const sendHtml = (request, reply) => {
     const allowedHtmlTags = clientInitialState.getIn(['rendering', 'renderTextOnlyOptions', 'allowedHtmlTags']);
 
     if (renderPartialOnly) {
-      return reply.header('content-type', 'text/html; charset=utf-8').send(renderPartial({ html: appHtml, store, disableStyles }));
+      reply.header('content-type', 'text/html; charset=utf-8');
+      return reply.send(renderPartial({ html: appHtml, store, disableStyles }));
     }
 
     if (renderTextOnly) {

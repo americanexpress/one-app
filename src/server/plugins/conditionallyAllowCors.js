@@ -17,17 +17,21 @@
 import fastifyCors from '@fastify/cors';
 
 const devOrigin = /localhost:\d{1,5}/;
-const corsOptions = {
-  origin: [],
-};
+let corsOrigins = [];
 
 export const setCorsOrigins = (newCorsOrigins = []) => {
-  corsOptions.origin = process.env.NODE_ENV === 'development'
+  corsOrigins = process.env.NODE_ENV === 'development'
     ? [...newCorsOrigins, devOrigin]
     : newCorsOrigins;
 };
 
 setCorsOrigins();
+
+const corsOriginsIncludes = (originHeader) => corsOrigins.some((originStringOrRegExp) => {
+  if (originHeader === originStringOrRegExp || originStringOrRegExp === '*') return true;
+  if (typeof originStringOrRegExp.test === 'function') return originStringOrRegExp.test(originHeader);
+  return false;
+});
 
 /**
  * Sets configurable cors when 'renderPartialOnly' is enabled
@@ -41,9 +45,9 @@ const conditionallyAllowCors = async (fastify) => {
       const span = tracer.startSpan('conditionallyAllowCors');
       const renderPartialOnly = req.store && req.store.getState().getIn(['rendering', 'renderPartialOnly']);
       // The HTML partials will have CORS enabled so they can be loaded client-side
-      const opts = renderPartialOnly ? corsOptions : { origin: false };
+      const origin = renderPartialOnly ? corsOriginsIncludes(req.headers.origin) : false;
       span.end();
-      callback(null, opts);
+      callback(null, { origin });
     },
   });
 };

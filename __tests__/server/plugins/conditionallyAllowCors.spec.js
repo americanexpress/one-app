@@ -68,7 +68,7 @@ describe('conditionallyAllowCors', () => {
       delegator: expect.any(Function),
     });
     expect(callback).toHaveBeenCalledTimes(1);
-    expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/] });
+    expect(callback).toHaveBeenCalledWith(null, { origin: true });
   });
 
   it('allows CORS for localhost in development', async () => {
@@ -85,9 +85,41 @@ describe('conditionallyAllowCors', () => {
 
     await conditionallyAllowCors(fastify);
 
-    expect(callback).toHaveBeenCalledWith(null, {
-      origin: [/\.example.com$/, /localhost:\d{1,5}/],
-    });
+    expect(callback).toHaveBeenCalledWith(null, { origin: true });
+  });
+
+  it('allows CORS for HTML partials when the origin is *', async () => {
+    delete process.env.NODE_ENV;
+    setup({ renderPartialOnly: true, origin: 'test.example.com' });
+    setCorsOrigins(['*']);
+
+    const callback = jest.fn();
+    const fastify = {
+      register: jest.fn((_plugin, { delegator }) => {
+        delegator(request, callback);
+      }),
+    };
+
+    await conditionallyAllowCors(fastify);
+
+    expect(callback).toHaveBeenCalledWith(null, { origin: true });
+  });
+
+  it('does not allow CORS for a non-matching origin', async () => {
+    delete process.env.NODE_ENV;
+    setup({ renderPartialOnly: true, origin: 'test.com' });
+    setCorsOrigins([/\.example.com$/, 'foo.bar']);
+
+    const callback = jest.fn();
+    const fastify = {
+      register: jest.fn((_plugin, { delegator }) => {
+        delegator(request, callback);
+      }),
+    };
+
+    await conditionallyAllowCors(fastify);
+
+    expect(callback).toHaveBeenCalledWith(null, { origin: false });
   });
 
   it('does not allow CORS for localhost in production', async () => {
@@ -103,9 +135,7 @@ describe('conditionallyAllowCors', () => {
 
     await conditionallyAllowCors(fastify);
 
-    expect(callback).toHaveBeenCalledWith(null, {
-      origin: [/\.example.com$/, /localhost:\d{1,5}/],
-    });
+    expect(callback).toHaveBeenCalledWith(null, { origin: false });
   });
 
   it('does not allow CORS non-partial requests', async () => {

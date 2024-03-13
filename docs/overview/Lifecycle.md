@@ -13,7 +13,7 @@
 [create-holocron-store]: https://github.com/americanexpress/holocron/tree/main/packages/holocron/docs/api#createholocronstore
 [render-module]: https://github.com/americanexpress/holocron/tree/main/packages/holocron/docs/api#rendermodule
 [react-helmet]: https://github.com/nfl/react-helmet
-[helmet]: https://github.com/helmetjs/helmet
+[@fastify/helmet]: https://github.com/fastify/fastify-helmet
 
 # One App Life Cycles
 
@@ -217,7 +217,7 @@ server-side rendered HTML document:
 > * `Content-Security-Policy`: set from `Module.appConfig.csp`
 > * `Cache-Control` & `Pragma`: preset caching by One App
 > * `One-App-Version`: current One App version used
-> * [`helmet`](helmet): security headers provided by `helmet`
+> * [`@fastify/helmet`](@fastify/helmet): security headers provided by `@fastify/helmet`
 
 ### Partials Rendering
 

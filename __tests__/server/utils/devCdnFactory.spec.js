@@ -17,7 +17,7 @@ import fetch from 'node-fetch';
 import fs from 'fs';
 import { rimrafSync } from 'rimraf';
 import path from 'path';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 import { ProxyAgent } from 'proxy-agent';
 import oneAppDevCdn from '../../../src/server/utils/devCdnFactory';
 import {
