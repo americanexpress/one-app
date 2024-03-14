@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 /* eslint-disable jest/no-disabled-tests */
 /*
  * Copyright 2019 American Express Travel Related Services Company, Inc.
@@ -76,11 +80,6 @@ describe('server index', () => {
     jest.doMock('cross-fetch');
 
     jest.doMock('../../src/server/utils/loadModules', () => jest.fn(() => Promise.resolve()));
-    jest.doMock('babel-polyfill', () => {
-      // jest includes babel-polyfill
-      // if included twice, babel-polyfill will complain that it should be only once
-    });
-    //
     jest.doMock('../../src/server/polyfill/intl');
     jest.doMock('../../src/server/utils/logging/monkeyPatchConsole', () => {});
 

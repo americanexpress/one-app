@@ -20,7 +20,7 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const mkdirp = require('mkdirp');
+const { mkdirp } = require('mkdirp');
 const { rimraf } = require('rimraf');
 
 const TEMP_STATIC_PATH = path.resolve(__dirname, '../.tmp-statics');

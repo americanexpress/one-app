@@ -18,7 +18,6 @@
 import fs from 'fs';
 import '../../src/server/devHolocronCDN';
 
-jest.mock('cors', () => jest.fn(() => (req, res, next) => next()));
 jest.mock('../../src/server/utils/devCdnFactory', () => jest.fn(() => (req, res, next) => next()));
 jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
 

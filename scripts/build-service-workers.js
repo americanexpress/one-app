@@ -33,7 +33,10 @@ async function buildServiceWorkerScripts({
 
   const plugins = [
     replace({
-      'process.env.ONE_APP_BUILD_VERSION': `"${buildVersion}"`,
+      preventAssignment: true,
+      values: {
+        'process.env.ONE_APP_BUILD_VERSION': `"${buildVersion}"`,
+      },
     }),
     resolve(),
     babel({
@@ -52,7 +55,7 @@ async function buildServiceWorkerScripts({
 
   if (minify) {
     // eslint-disable-next-line global-require
-    const { terser } = require('rollup-plugin-terser');
+    const terser = require('@rollup/plugin-terser');
     plugins.push(terser());
   }
 
@@ -85,7 +88,7 @@ async function buildServiceWorkerScripts({
     plugins,
   });
 
-  return build.write({ output });
+  return build.write(output);
 }
 
 if (require.main === module) {
