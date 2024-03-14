@@ -77,7 +77,7 @@
     "@autotelic/fastify-opentelemetry": "^0.20.0",
     "@fastify/compress": "^6.5.0",
     "@fastify/cookie": "^9.3.1",
-    "@fastify/cors": "^8.4.0",
+    "@fastify/cors": "^8.5.0",
     "@fastify/formbody": "^7.4.0",
     "@fastify/helmet": "^11.1.1",
     "@fastify/rate-limit": "^9.1.0",
