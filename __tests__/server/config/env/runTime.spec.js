@@ -13,6 +13,8 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+const mockTmp = require('mock-tmp');
+const { join } = require('node:path');
 
 expect.extend({
   toValidateURL(input) {
@@ -33,8 +35,11 @@ expect.extend({
     }
     return {
       pass: passNegativeCase && passPositiveCase,
-      message: () => `${this.utils.matcherHint('toValidateURL', undefined, '')
-      }\n\nExpected function to validate input is a fetchable URL in Node`,
+      message: () => `${this.utils.matcherHint(
+        'toValidateURL',
+        undefined,
+        ''
+      )}\n\nExpected function to validate input is a fetchable URL in Node`,
     };
   },
   toValidatePositiveInteger(input) {
@@ -59,8 +64,11 @@ expect.extend({
     }
     return {
       pass: passNegativeCase && passPositiveCase,
-      message: () => `${this.utils.matcherHint('toValidatePositiveInteger', undefined, '')
-      }\n\nExpected function to validate input is a positive integer`,
+      message: () => `${this.utils.matcherHint(
+        'toValidatePositiveInteger',
+        undefined,
+        ''
+      )}\n\nExpected function to validate input is a positive integer`,
     };
   },
 });
@@ -125,6 +133,7 @@ describe('runTime', () => {
     resetEnvVar('ONE_DANGEROUSLY_DISABLE_CSP', 'false');
     resetEnvVar('HTTP_ONE_APP_DEV_CDN_PORT');
     resetEnvVar('ONE_ENABLE_POST_TO_MODULE_ROUTES');
+    resetEnvVar('ONE_ENVIRONMENT_SECRETS_PATH');
     jest.resetModules();
     jest.resetAllMocks();
   });
@@ -549,6 +558,44 @@ describe('runTime', () => {
 
     it('is not required', () => {
       expect(() => otelTraceCollectorUrl.validate()).not.toThrow();
+    });
+  });
+  describe('ONE_ENVIRONMENT_SECRETS_PATH', () => {
+    afterEach(() => {
+      process.env.ONE_ENVIRONMENT_SECRETS_PATH = undefined;
+    });
+    it('should throw an error if the file does not exist', () => {
+      const secretsPath = getEnvVarConfig('ONE_ENVIRONMENT_SECRETS_PATH');
+      expect(() => secretsPath.validate('bad path')).toThrowErrorMatchingInlineSnapshot(
+        '"ONE_ENVIRONMENT_SECRETS_PATH - Could not read secrets file at bad path"'
+      );
+    });
+    it('should not throw an error if the file exists', () => {
+      const secretsPath = getEnvVarConfig('ONE_ENVIRONMENT_SECRETS_PATH');
+      const tmp = mockTmp({
+        '.env': 'A_GREAT_ENV_VAR=even-better-value',
+      });
+      expect(() => secretsPath.validate(join(tmp, '.env'))).not.toThrow();
+      mockTmp.reset();
+    });
+    it('should set screts defined in provided file', () => {
+      const tmp = mockTmp({
+        '.env': 'A_GREAT_ENV_VAR=even-better-value',
+      });
+      process.env.ONE_ENVIRONMENT_SECRETS_PATH = join(tmp, '.env');
+      require('../../../../src/server/config/env/runTime');
+      expect(process.env.A_GREAT_ENV_VAR).toBe('even-better-value');
+      mockTmp.reset();
+    });
+    it('should not set secret from file if its already set', () => {
+      const tmp = mockTmp({
+        '.env': 'A_GREAT_ENV_VAR=even-better-value',
+      });
+      process.env.A_GREAT_ENV_VAR = 'should-not-change';
+      process.env.ONE_ENVIRONMENT_SECRETS_PATH = join(tmp, '.env');
+      require('../../../../src/server/config/env/runTime');
+      expect(process.env.A_GREAT_ENV_VAR).toBe('should-not-change');
+      mockTmp.reset();
     });
   });
 });

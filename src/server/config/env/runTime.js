@@ -13,7 +13,8 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-
+const { readFileSync, existsSync } = require('node:fs');
+const dotenv = require('dotenv');
 const { preprocessEnvVar } = require('@americanexpress/env-config-utils');
 const isFetchableUrlInNode = require('@americanexpress/env-config-utils/isFetchableUrlInNode');
 const isFetchableUrlInBrowser = require('@americanexpress/env-config-utils/isFetchableUrlInBrowser');
@@ -33,6 +34,19 @@ const isPositiveIntegerIfDefined = (input) => {
   }
 
   throw new Error(`Expected ${input} to be a positive integer`);
+};
+
+const loadSecretsIntoEnv = (filePath) => {
+  const rawSecrets = readFileSync(
+    filePath,
+    { encoding: 'utf-8' }
+  );
+  const secrets = dotenv.parse(rawSecrets);
+  Object.entries(secrets).forEach(([key, value]) => {
+    if (!process.env[key]) {
+      process.env[key] = value;
+    }
+  });
 };
 
 // the set of env vars to validate and normalize
@@ -254,7 +268,20 @@ const runTime = [
       new URL(input);
     },
   },
+  {
+    name: 'ONE_ENVIRONMENT_SECRETS_PATH',
+    validate: (input) => {
+      if (input && !existsSync(input)) {
+        throw new Error(`ONE_ENVIRONMENT_SECRETS_PATH - Could not read secrets file at ${input}`);
+      }
+    },
+  },
 ];
 runTime.forEach(preprocessEnvVar);
-export { getIp };
+
+if (process.env.ONE_ENVIRONMENT_SECRETS_PATH) {
+  loadSecretsIntoEnv(process.env.ONE_ENVIRONMENT_SECRETS_PATH);
+}
+
+export { getIp, loadSecretsIntoEnv };
 export default runTime;
