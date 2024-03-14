@@ -809,7 +809,7 @@ describe('Tests that require Docker setup', () => {
           });
 
           test('fails to get external `react-intl` for child module as an unsupplied `requiredExternal` - Logs reverting message', async () => {
-            const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Reverting back to (?<workingModule>.*)/;
+            const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Reverting back to (?<workingModule>[^"]*)/;
             const requiredExternalsError = searchForNextLogMatch(revertErrorMatch);
             await addModuleToModuleMap({
               moduleName,
@@ -826,13 +826,8 @@ describe('Tests that require Docker setup', () => {
             const gitSha = await retrieveGitSha();
             await expect(requiredExternalsError).resolves.toMatch(revertErrorMatch);
             expect(problemModule).toBe('cultured-frankie');
-            expect(problemModuleUrl).toBe(
-              `${testCdnUrl}/${gitSha}/${moduleName}/${version}/${moduleName}.node.js`
-            );
-            // eslint-disable-next-line no-useless-escape
-            expect(workingUrl).toBe(
-              `${testCdnUrl}/${gitSha}/${moduleName}/0.0.0/${moduleName}.node.js)`
-            );
+            expect(problemModuleUrl).toBe(`${testCdnUrl}/${gitSha}/${moduleName}/${version}/${moduleName}.node.js`);
+            expect(workingUrl).toBe(`${testCdnUrl}/${gitSha}/${moduleName}/0.0.0/${moduleName}.node.js`);
           });
           test('fails to get external `semver` for child module as an unsupplied `requiredExternal` for new module in mooduleMap', async () => {
             const revertErrorMatch = /There was an error loading module (?<moduleName>.*) at (?<url>.*). Ignoring (?<ignoredModule>.*) until .*/;
@@ -2041,11 +2036,11 @@ describe('heapdump', () => {
 
     const aboutToWriteFilePath = aboutToWriteRaw
       .replace(/^about to write a heapdump to /, '')
-      .replace(/\).*$/, '');
+      .replace(/".+$/, '');
 
     const didWriteFilePath = didWriteRaw
       .replace(/^wrote heapdump out to /, '')
-      .replace(/\).*$/, '');
+      .replace(/".+$/, '');
 
     expect(aboutToWriteFilePath).toEqual(didWriteFilePath);
     expect(path.dirname(didWriteFilePath)).toBe('/tmp');

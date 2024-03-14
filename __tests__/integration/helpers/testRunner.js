@@ -78,28 +78,24 @@ const setUpTestRunner = async ({
   dockerComposeUpProcess.stdout.pipe(logWatcherDuplex);
   dockerComposeUpProcess.stderr.pipe(logWatcherDuplex);
 
+  await Promise.all(['traces.jsonl', 'logs.jsonl'].map(async (file) => {
+    const filePath = path.resolve(prodSampleDir, 'otel-collector', 'tmp', file);
+    const tail = childProcess.spawn('tail', ['-f', filePath]);
+    // tail has a line character limit before it splits the chunks, but we need
+    // each trace in a single line for parsing
+    let currentTailChunk = '';
+    tail.stdout.on('data', (chunk) => {
+      currentTailChunk += chunk;
+      if (currentTailChunk.endsWith('\n')) {
+        logWatcherDuplex.write(currentTailChunk);
+        currentTailChunk = '';
+      }
+    });
+    logWatcherDuplex.on('close', () => tail.kill());
+  }));
+
   // uncomment this line in order to view full logs for debugging
   // logWatcherDuplex.pipe(process.stdout);
-
-  const traceFilePath = path.resolve(prodSampleDir, 'otel-collector', 'tmp', 'traces.jsonl');
-  await fs.mkdir(path.dirname(traceFilePath), { recursive: true });
-  await fs.writeFile(traceFilePath, '');
-  await fs.chmod(traceFilePath, 0o666);
-  const traceTail = childProcess.spawn('tail', ['-f', traceFilePath]);
-
-  // tail has a line character limit before it splits the chunks, but we need
-  // each trace in a single line for parsing
-  let currentTraceChunk = '';
-  traceTail.stdout.on('data', (chunk) => {
-    currentTraceChunk += chunk;
-    if (currentTraceChunk.endsWith('\n')) {
-      logWatcherDuplex.write(currentTraceChunk);
-      // uncomment this line in order to view full traces for debugging
-      // process.stdout.write(currentTraceChunk);
-      currentTraceChunk = '';
-    }
-  });
-  logWatcherDuplex.on('close', () => traceTail.kill());
 
   try {
     await Promise.all([

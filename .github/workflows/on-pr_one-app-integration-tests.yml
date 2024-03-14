@@ -21,3 +21,11 @@ jobs:
         run: docker build -t one-app:at-test . --build-arg USER=root --build-arg VERSION=$(cat .nvmrc)
       - name: Run Integration Tests
         run: ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD=true npm run test:integration
+      - name: Archive log & trace files
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: logs-and-traces
+          path: prod-sample/otel-collector/tmp/*.jsonl
+          overwrite: true
+          retention-days: 5
