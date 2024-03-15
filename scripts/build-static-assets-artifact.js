@@ -17,8 +17,8 @@
  */
 
 const fs = require('node:fs/promises');
-const { spawn } = require('node:child_process');
 const path = require('node:path');
+const { promisifySpawn } = require('./utils');
 
 const TEMP_STATIC_PATH = path.resolve(__dirname, '../.tmp-statics');
 const FINAL_TAR_DIR = path.resolve(__dirname, '../');
@@ -28,28 +28,6 @@ if (!DOCKER_IMAGE_LABEL) {
   // should be the result from `docker build --build-arg HTTPS_PROXY=$HTTPS_PROXY .` or whatever
   // temporary tag was used for that build
   throw new Error('docker image label to copy built static files from is required');
-}
-
-function promisifySpawn(...args) {
-  return new Promise((res, rej) => {
-    const spawnedProcess = spawn(...args);
-    let stdout = '';
-    let stderr = '';
-    spawnedProcess.stdout.on('data', (d) => { stdout += d; });
-    spawnedProcess.stderr.on('data', (d) => { stderr += d; });
-    spawnedProcess.on('close', (code) => {
-      const data = {
-        code,
-        stdout: stdout.trim(),
-        stderr: stderr.trim(),
-      };
-      if (code !== 0) {
-        rej(data);
-      } else {
-        res(data);
-      }
-    });
-  });
 }
 
 function createContainer(imageLabel) {

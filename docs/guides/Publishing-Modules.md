@@ -45,7 +45,7 @@ There could be a case where two deployments running on different pipelines try t
 a "locking" mechanism as part of your CI to prevent the module map from being updated while another deployment is already in progress.
 
 ```javascript
-const fs = require('fs-extra');
+const fs = require('node:fs/promises');
 const fetch = require('node-fetch');
 const { name, version } = require('../package.json');
 
@@ -78,7 +78,7 @@ const updateModuleMap = async () => {
       },
     };
 
-    await fs.ensureDir(dir);
+    await fs.mkdir(dir, { recursive: true });
     // write the updated module map to a temporary folder
     // so it can be re-uploaded by the deploy action
     await fs.writeFile(

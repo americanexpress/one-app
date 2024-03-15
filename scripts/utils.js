@@ -14,9 +14,9 @@
  * permissions and limitations under the License.
  */
 
-const fs = require('fs-extra');
-const path = require('path');
-const { spawn, execSync } = require('child_process');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const { spawn, execSync } = require('node:child_process');
 
 const sampleProdDir = path.resolve('./prod-sample/');
 const sampleModulesDir = path.resolve(sampleProdDir, 'sample-modules');

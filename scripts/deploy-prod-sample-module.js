@@ -16,7 +16,7 @@
  * permissions and limitations under the License.
  */
 
-const fs = require('fs-extra');
+const fs = require('node:fs/promises');
 const path = require('path');
 const { argv } = require('yargs');
 
@@ -86,8 +86,7 @@ const deployModuleToProdSampleCDN = async (pathToModule, moduleName) => {
   // use one app git commit sha to namespace modules
   const gitSha = getGitSha();
   const pathToOriginModuleStatics = path.resolve(`${nginxOriginStaticsModulesDir}/${gitSha}/${moduleName}`);
-  await fs.ensureDir(pathToOriginModuleStatics);
-  await fs.copy(pathToModuleBuildDir, pathToOriginModuleStatics, { overwrite: true });
+  await fs.cp(pathToModuleBuildDir, pathToOriginModuleStatics, { recursive: true });
   return pathToOriginModuleStatics;
 };
 
@@ -111,7 +110,7 @@ const updateModuleMap = async ({ moduleName, moduleVersion, integrityDigests }) 
     },
   };
   moduleMap.modules[moduleName] = moduleBundles;
-  fs.writeFile(originModuleMapPath, JSON.stringify(moduleMap, null, 2));
+  return fs.writeFile(originModuleMapPath, JSON.stringify(moduleMap, null, 2));
 };
 
 const deployModule = async () => {
