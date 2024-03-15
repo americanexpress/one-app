@@ -13,11 +13,9 @@
  */
 
 import util from 'node:util';
+import fs from 'node:fs';
+import path from 'node:path';
 import fetch from 'node-fetch';
-import fs from 'fs';
-import { rimrafSync } from 'rimraf';
-import path from 'path';
-import { mkdirp } from 'mkdirp';
 import { ProxyAgent } from 'proxy-agent';
 import oneAppDevCdn from '../../../src/server/utils/devCdnFactory';
 import {
@@ -85,17 +83,17 @@ describe('one-app-dev-cdn', () => {
     }
 
     if (!allowCacheWrite) {
-      mkdirp(pathToCache, { mode: 444 });
+      fs.mkdirSync(pathToCache, { mode: 444, recursive: true });
     }
 
     const modulesDir = path.join(mockLocalDevPublicPath, 'modules');
 
-    mkdirp.sync(modulesDir);
+    fs.mkdirSync(modulesDir, { recursive: true });
     fs.writeFileSync(path.join(`${mockLocalDevPublicPath}/module-map.json`), moduleMapContent, { encoding: 'utf-8' });
     modules.forEach((module) => {
       const { moduleName, moduleVersion, bundleContent } = module;
       const pathToModuleBundle = path.join(modulesDir, moduleName, moduleVersion);
-      mkdirp.sync(pathToModuleBundle);
+      fs.mkdirSync(pathToModuleBundle, { recursive: true });
       fs.writeFileSync(path.join(pathToModuleBundle, `${moduleName}.browser.js`), bundleContent, { encoding: 'utf-8' });
     });
   };
@@ -697,8 +695,8 @@ describe('one-app-dev-cdn', () => {
   });
 
   afterEach(() => {
-    rimrafSync(pathToCache);
-    rimrafSync(pathToStubs);
+    fs.rmSync(pathToCache, { recursive: true, force: true });
+    fs.rmSync(pathToStubs, { recursive: true, force: true });
   });
 
   afterAll(() => {

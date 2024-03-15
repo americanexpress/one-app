@@ -16,13 +16,12 @@
  * permissions and limitations under the License.
  */
 
-const path = require('path');
-const fs = require('fs');
-const os = require('os');
-const assert = require('assert');
+const path = require('node:path');
+const fs = require('node:fs');
+const os = require('node:os');
+const assert = require('node:assert');
 
 const { argv } = require('yargs');
-const { rimrafSync } = require('rimraf');
 
 const PATH_TO_ENDPOINTS = path.resolve(process.cwd(), argv.path || argv._[0]);
 const DEV_DIR = path.join(process.cwd(), '.dev');
@@ -35,7 +34,7 @@ const addDevFolder = () => {
 };
 
 const removeExistingEndpointsFile = () => {
-  rimrafSync(ENDPOINTS_DIR);
+  fs.rmSync(ENDPOINTS_DIR, { recursive: true, force: true });
 };
 
 const symlinkEndpointsFile = () => {
