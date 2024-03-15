@@ -17,7 +17,7 @@
 const fetch = require('cross-fetch');
 const https = require('https');
 
-const waitFor = (ms) => new Promise((res) => setTimeout(res, ms));
+const waitFor = (ms) => new Promise((res) => { setTimeout(res, ms); });
 
 const waitUntilServerIsUp = async (url, timeoutInMs = 15000) => {
   let count = 0;
@@ -34,7 +34,7 @@ const waitUntilServerIsUp = async (url, timeoutInMs = 15000) => {
 
     count += 1;
     if (response && response.status && response.status === 200) {
-      return;
+      return undefined;
     }
 
     await waitFor(200);
@@ -44,7 +44,6 @@ const waitUntilServerIsUp = async (url, timeoutInMs = 15000) => {
       throw new Error(`${requestUrl} not resolving with a 200 status code within ${timeout}ms`);
     }
 
-    // eslint-disable-next-line consistent-return
     return makeRequest(requestUrl, timeout);
   };
 

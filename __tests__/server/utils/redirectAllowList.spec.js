@@ -37,7 +37,7 @@ describe('redirectAllowList', () => {
     it('should log an error if allow list is not an array', () => {
       const redirectAllowList = 'https://americanexpress.com';
       setRedirectAllowList(redirectAllowList);
-      expect(console.error).toBeCalledWith('redirectAllowList is not an array');
+      expect(console.error).toHaveBeenCalledWith('redirectAllowList is not an array');
     });
     it('should log an error if allow list contains insecure protocol (http)', () => {
       const redirectAllowList = ['http://americanexpress.com'];

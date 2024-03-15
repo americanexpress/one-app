@@ -19,7 +19,7 @@ import accepts from 'accepts';
 function pick(request, safeKeys) {
   return safeKeys.reduce((obj, safeKey) => {
     if (request && request[safeKey] !== undefined) {
-      // eslint-disable-next-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign -- that's what it's for
       obj[safeKey] = request[safeKey];
     }
     return obj;
@@ -82,6 +82,7 @@ const validateRequiredRestrictedPresent = (restrictedAttributeAdditions) => {
   });
 
   if (requiredRestrictedAttributesRemoved.length > 0) {
+    // eslint-disable-next-line unicorn/error-message -- erroneous violation
     throw new Error(requiredRestrictedAttributesRemoved.join('\n'));
   }
 };
@@ -114,6 +115,7 @@ export const validateSafeRequestRestrictedAttributes = (requiredAttributes, modu
       }
     });
   if (missingRequestItemsMessages.length > 0) {
+    // eslint-disable-next-line unicorn/error-message -- erroneous violation
     throw new Error(missingRequestItemsMessages.join('\n'));
   }
 

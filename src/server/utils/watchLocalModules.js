@@ -15,7 +15,7 @@
  */
 
 // This file is only used in development so importing devDeps is not an issue
-/* eslint "import/no-extraneous-dependencies": ["error", {"devDependencies": true}] */
+/* eslint "import/no-extraneous-dependencies": ["error", {"devDependencies": true}] -- see above */
 
 import fs from 'fs';
 import path from 'path';

@@ -79,7 +79,6 @@ jest.mock('@americanexpress/env-config-utils', () => {
 });
 
 describe('runTime', () => {
-  // eslint-disable-next-line no-console
   const origConsoleInfo = console.info;
   const origConsoleWarn = console.warn;
   const origEnvVarVals = {};
@@ -118,7 +117,6 @@ describe('runTime', () => {
   }
 
   beforeEach(() => {
-    // eslint-disable-next-line no-console
     console.info = jest.fn();
     console.warn = jest.fn();
     resetEnvVar('NODE_ENV');
@@ -130,7 +128,6 @@ describe('runTime', () => {
   });
 
   afterAll(() => {
-    // eslint-disable-next-line no-console
     console.info = origConsoleInfo;
     console.warn = origConsoleWarn;
     Object.keys(origEnvVarVals).forEach((name) => resetEnvVar(name, origEnvVarVals[name]));
@@ -165,7 +162,7 @@ describe('runTime', () => {
     const disableCspEnv = getEnvVarConfig('ONE_DANGEROUSLY_DISABLE_CSP');
 
     it('throws error if ONE_DANGEROUSLY_DISABLE_CSP is set to true and NODE_ENV is not development', () => {
-      expect(() => disableCspEnv.validate('true')).toThrowError(
+      expect(() => disableCspEnv.validate('true')).toThrow(
         'If you are trying to bypass CSP requirement, NODE_ENV must also be set to development.'
       );
     });
@@ -196,7 +193,7 @@ describe('runTime', () => {
 
     it('normalizes numeric input', () => {
       expect(httpPort.normalize('1337')).toEqual(1337);
-      expect(() => httpPort.normalize('r00t')).toThrowError(
+      expect(() => httpPort.normalize('r00t')).toThrow(
         'env var HTTP_PORT needs to be a valid integer, given "r00t"'
       );
       expect(httpPort.normalize('0002345')).toEqual(2345);
@@ -224,7 +221,7 @@ describe('runTime', () => {
 
     it('normalizes numeric input', () => {
       expect(devCdnPort.normalize('1337')).toEqual(1337);
-      expect(() => devCdnPort.normalize('r00t')).toThrowError(
+      expect(() => devCdnPort.normalize('r00t')).toThrow(
         'env var HTTP_ONE_APP_DEV_CDN_PORT needs to be a valid integer, given "r00t"'
       );
       expect(devCdnPort.normalize('0002345')).toEqual(2345);
@@ -284,7 +281,7 @@ describe('runTime', () => {
 
     it('normalizes numeric input', () => {
       expect(httpPort.normalize('1337')).toEqual(1337);
-      expect(() => httpPort.normalize('r00t')).toThrowError(
+      expect(() => httpPort.normalize('r00t')).toThrow(
         'env var HTTP_METRICS_PORT needs to be a valid integer, given "r00t"'
       );
       expect(httpPort.normalize('0002345')).toEqual(2345);

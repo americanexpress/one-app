@@ -25,7 +25,7 @@ import onModuleLoad, {
   validateCspIsPresent,
 } from '../../../src/server/utils/onModuleLoad';
 // This named export exists only on the mock
-// eslint-disable-next-line import/named
+
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from '../../../src/server/utils/stateConfig';
 import { setRedirectAllowList } from '../../../src/server/utils/redirectAllowList';
 import { setCorsOrigins } from '../../../src/server/plugins/conditionallyAllowCors';

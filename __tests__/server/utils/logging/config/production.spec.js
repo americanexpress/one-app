@@ -117,6 +117,7 @@ describe('production logger', () => {
   });
 
   it('should serialize an error with a missing message and stacktrace', () => {
+    // eslint-disable-next-line unicorn/error-message -- spec is for error missing message
     const error = new Error();
     delete error.stack;
     logger.error(error);

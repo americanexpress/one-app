@@ -14,8 +14,7 @@
  * permissions and limitations under the License.
  */
 
-// polyfill for the console, don't warn on console usage
-/* eslint-disable no-console */
+/* eslint-disable no-console -- polyfill for the console, don't warn on console usage */
 
 if (!global.console) {
   global.console = {};
@@ -49,3 +48,5 @@ function noop() {}
   .forEach((n) => {
     console[n] = console[n] || noop;
   });
+
+/* eslint-enable no-console */

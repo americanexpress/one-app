@@ -14,9 +14,10 @@
  * permissions and limitations under the License.
  */
 
-/* eslint-disable import/no-unresolved */
+/* eslint-disable import/no-unresolved -- performance scripts are not ran directly */
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+/* eslint-enable import/no-unresolved */
 
 export const options = {
   stages: [
@@ -30,7 +31,6 @@ export const options = {
   },
 };
 
-// eslint-disable-next-line no-undef
 const { TARGET_URL } = __ENV;
 
 export default function virtualUser() {

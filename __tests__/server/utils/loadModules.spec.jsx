@@ -23,7 +23,6 @@ import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/s
 import addBaseUrlToModuleMap from '../../../src/server/utils/addBaseUrlToModuleMap';
 
 // This named export exists only on the mock
-// eslint-disable-next-line import/named
 
 jest.mock('holocron');
 jest.mock(

@@ -2,7 +2,6 @@
  * @jest-environment node
  */
 
-/* eslint-disable jest/no-disabled-tests */
 /*
  * Copyright 2019 American Express Travel Related Services Company, Inc.
  *
@@ -130,7 +129,7 @@ describe('server index', () => {
     jest.doMock('../../src/server/utils/getHttpsConfig', () => () => 'https-config-mock');
 
     jest.doMock('lean-intl', () => ({
-      // eslint-disable-next-line no-underscore-dangle
+
       __addLocaleData: jest.fn(),
     }));
 
@@ -231,7 +230,7 @@ describe('server index', () => {
 
     it('initializes Intl with a locale', async () => {
       await load();
-      // eslint-disable-next-line no-underscore-dangle
+      // eslint-disable-next-line no-underscore-dangle -- lean-intl API
       expect(require('lean-intl').__addLocaleData.mock.calls[0][0]).toMatchObject({
         // contents dont have to exactly match just need to make sure that a locale object
         // is being added and not some random other thing
@@ -293,7 +292,7 @@ describe('server index', () => {
 
     it('initializes Intl with a locale', async () => {
       await load();
-      // eslint-disable-next-line no-underscore-dangle
+      // eslint-disable-next-line no-underscore-dangle -- lean-intl API
       expect(require('lean-intl').__addLocaleData.mock.calls[0][0]).toMatchObject({
         // contents dont have to exactly match just need to make sure that a locale object
         // is being added and not some random other thing

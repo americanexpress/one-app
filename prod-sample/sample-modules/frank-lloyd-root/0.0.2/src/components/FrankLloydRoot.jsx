@@ -53,7 +53,7 @@ FrankLloydRoot.propTypes = {
 };
 
 if (!global.BROWSER) {
-  // eslint-disable-next-line global-require
+  // eslint-disable-next-line global-require -- exclude from browser bundle
   FrankLloydRoot.appConfig = require('../config').default;
 }
 

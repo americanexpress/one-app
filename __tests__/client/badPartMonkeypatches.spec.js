@@ -14,8 +14,7 @@
  * permissions and limitations under the License.
  */
 
-// eval can be harmful, that's why we're disabling it
-/* eslint-disable no-eval, no-implied-eval */
+/* eslint-disable no-eval, no-implied-eval -- eval can be harmful, that's why we're disabling it */
 
 const getObjectValueAtPath = (obj, path, defaultValue) => {
   const result = path.split(/[.[\]]+?/)
@@ -46,7 +45,6 @@ jest.spyOn(global, 'setInterval');
 jest.spyOn(console, 'warn');
 
 describe('badPartMonkeypatches', () => {
-  // eslint-disable-next-line no-console
   global.execScript = (s) => console.info('execScript?', s);
   const originals = {};
   [
@@ -113,7 +111,7 @@ describe('badPartMonkeypatches', () => {
       applyMonkeypatches();
       // execScript is manually defined earlier
       expect(
-        () => execScript('alert(1)') // eslint-disable-line no-undef
+        () => execScript('alert(1)') // eslint-disable-line no-undef -- testing the bad parts
       )
         .toThrowErrorMatchingSnapshot();
     });
@@ -142,7 +140,7 @@ describe('badPartMonkeypatches', () => {
 
       it('should execute normally on non-string first argument', () => {
         setTimeout(
-          // eslint-disable-next-line no-console
+
           (a, b, c) => console.log(a, b, c),
           1e3,
           'A',
@@ -164,7 +162,7 @@ describe('badPartMonkeypatches', () => {
 
       it('should execute normally on non-string first argument', () => {
         setInterval(
-          // eslint-disable-next-line no-console
+
           (a, b, c) => console.log(a, b, c),
           1e3,
           'A',
@@ -181,3 +179,5 @@ describe('badPartMonkeypatches', () => {
     });
   });
 });
+
+/* eslint-enable no-eval, no-implied-eval */

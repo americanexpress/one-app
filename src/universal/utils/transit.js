@@ -16,7 +16,7 @@
 
 // This file needs conditional requires depending on whether it is executed in
 // the browser or on the server
-/* eslint-disable global-require */
+/* eslint-disable global-require -- see above */
 
 import instance, { handlers } from 'transit-immutable-js';
 import transit from 'transit-js';
@@ -40,6 +40,7 @@ const extraHandlers = [
     tag: 'error',
     class: Error,
     write: writeError,
+    // eslint-disable-next-line unicorn/error-message -- not applicable for deserialization
     read: (value) => Object.assign(new Error(), { stack: undefined }, value),
   },
   {
@@ -87,3 +88,5 @@ export default {
   toJSON: (data) => writer.write(data),
   fromJSON: (json) => reader.read(json),
 };
+
+/* eslint-enable global-require */

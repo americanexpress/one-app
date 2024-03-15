@@ -67,7 +67,7 @@ const createRequestStore = (
     });
 
     // use the store as a global for the request
-    request.store = store; // eslint-disable-line no-param-reassign
+    request.store = store;
     request.clientModuleMapCache = getClientModuleMapCache();
   } catch (err) {
     span.recordException(err);

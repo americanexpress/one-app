@@ -40,14 +40,14 @@ describe('enhancers', () => {
     afterEach(() => {
       process.env.NODE_ENV = undefined;
       global.BROWSER = undefined;
-      // eslint-disable-next-line no-underscore-dangle
+
       global.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = undefined;
     });
 
     it('should set up redux dev tools for development', () => {
       process.env.NODE_ENV = 'development';
       global.BROWSER = true;
-      // eslint-disable-next-line no-underscore-dangle
+
       window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn((x) => compose(x));
 
       const enhancer = createEnhancer();

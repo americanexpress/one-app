@@ -51,7 +51,7 @@ const symlinkEndpointsFile = () => {
 };
 
 const validateEndpointsFile = () => {
-  // eslint-disable-next-line global-require,import/no-dynamic-require
+  // eslint-disable-next-line global-require,import/no-dynamic-require -- needed for dynamic script
   const endpoints = require(PATH_TO_ENDPOINTS)();
   assert(typeof endpoints === 'object', '`endpoints` must be an Object');
   Object.values(endpoints).forEach(({ destination, devProxyPath }) => {

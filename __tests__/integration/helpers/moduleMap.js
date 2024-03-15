@@ -32,7 +32,7 @@ const retrieveGitSha = async () => {
 };
 
 const retrieveModuleIntegrityDigests = ({ moduleName, version }) => {
-  // eslint-disable-next-line import/no-dynamic-require, global-require
+  // eslint-disable-next-line import/no-dynamic-require -- required for test
   const integrityDigests = require(
     join(
       sampleModulesPath,

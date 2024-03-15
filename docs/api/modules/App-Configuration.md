@@ -52,7 +52,7 @@ if (!global.BROWSER) {
   // make sure to isolate your configuration since it may be
   // sensitive and should be guarded with `!global.BROWSER`
 
-  // eslint-disable-next-line global-require
+  // eslint-disable-next-line global-require -- do not include in browser bundle
   MyModule.appConfig = require('./appConfig').default;
 }
 

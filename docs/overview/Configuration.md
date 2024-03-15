@@ -149,7 +149,7 @@ export default function MyModule() {
 }
 
 if (!global.BROWSER) {
-  // eslint-disable-next-line global-require
+  // eslint-disable-next-line global-require -- don't include in browser bundle
   MyModule.appConfig = require('../appConfig.js');
 }
 ```

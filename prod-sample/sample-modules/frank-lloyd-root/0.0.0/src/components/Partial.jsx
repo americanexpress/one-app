@@ -61,7 +61,7 @@ Partial.propTypes = {
     query: PropTypes.shape({}).isRequired,
   }).isRequired,
   // Props for rendered module are indeterminate
-  // eslint-disable-next-line react/forbid-prop-types
+
   postProps: PropTypes.shape({}).isRequired,
 };
 

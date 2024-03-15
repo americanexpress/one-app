@@ -13,7 +13,7 @@
  */
 
 // This file is only used in development so imports should be devDeps unless used elsewhere
-/* eslint "import/no-extraneous-dependencies": ["error", {"devDependencies": true}] */
+/* eslint "import/no-extraneous-dependencies": ["error", {"devDependencies": true}] -- see above */
 
 import path from 'path';
 import fs from 'fs';
@@ -160,7 +160,6 @@ export const oneAppDevCdnFactory = ({
       .send(map);
   });
 
-  // eslint-disable-next-line consistent-return
   oneAppDevCdn.get('*', async (req, reply) => {
     const incomingRequestPath = req.url.replace('/static', '');
     const knownRemoteModuleBaseUrl = matchPathToKnownRemoteModuleUrl(
@@ -190,15 +189,9 @@ export const oneAppDevCdnFactory = ({
         cachedModuleFiles[incomingRequestPath] = responseText;
         writeToCache(cachedModuleFiles);
       }
-      reply
-        .code(status)
-        .type(type)
-        .send(responseText);
-    } else {
-      reply
-        .code(404)
-        .send('Not Found');
+      return reply.code(status).type(type).send(responseText);
     }
+    return reply.code(404).send('Not Found');
   });
 
   return oneAppDevCdn;

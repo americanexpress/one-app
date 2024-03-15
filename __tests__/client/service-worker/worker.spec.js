@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-/* eslint-disable no-restricted-globals */
+/* eslint-disable no-restricted-globals -- needed for service worker tests */
 
 import { on } from '@americanexpress/one-service-worker';
 
@@ -147,3 +147,5 @@ describe('service worker behavior', () => {
     expect(self.clients.claim).toHaveBeenCalledTimes(1);
   });
 });
+
+/* eslint-enable no-restricted-globals */

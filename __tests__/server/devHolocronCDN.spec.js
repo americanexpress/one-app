@@ -13,7 +13,6 @@
 * or implied. See the License for the specific language governing
 * permissions and limitations under the License.
 */
-/* eslint-disable global-require */
 
 import fs from 'fs';
 import '../../src/server/devHolocronCDN';

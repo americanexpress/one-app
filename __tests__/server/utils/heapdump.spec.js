@@ -16,7 +16,7 @@
 
 import util from 'node:util';
 
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+const sleep = (ms) => new Promise((res) => { setTimeout(res, ms); });
 
 describe('heapdump', () => {
   const { pid } = process;

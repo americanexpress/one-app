@@ -87,6 +87,7 @@ describe('transit', () => {
   });
 
   it('should convert Promises to null', () => {
+    // eslint-disable-next-line no-promise-executor-return -- needed for test
     const input = new Promise(() => 0);
     const output = transform(input);
     expect(output).toBe(null);

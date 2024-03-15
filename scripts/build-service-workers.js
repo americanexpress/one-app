@@ -21,9 +21,10 @@ const rollup = require('rollup');
 const replace = require('@rollup/plugin-replace');
 const resolve = require('@rollup/plugin-node-resolve').default;
 const babel = require('@rollup/plugin-babel').default;
+const terser = require('@rollup/plugin-terser');
+const { buildVersion } = require('../.build-meta.json');
 
 async function buildServiceWorkerScripts({
-  buildVersion,
   dev = false,
   watch = false,
   minify = true,
@@ -54,8 +55,6 @@ async function buildServiceWorkerScripts({
   ];
 
   if (minify) {
-    // eslint-disable-next-line global-require
-    const terser = require('@rollup/plugin-terser');
     plugins.push(terser());
   }
 
@@ -93,9 +92,7 @@ async function buildServiceWorkerScripts({
 
 if (require.main === module) {
   (async function buildWorkers({ dev }) {
-    // eslint-disable-next-line global-require
-    const { buildVersion } = require('../.build-meta.json');
-    await buildServiceWorkerScripts({ dev, buildVersion });
+    await buildServiceWorkerScripts({ dev });
   }({
     dev: process.env.NODE_ENV === 'development',
   }));

@@ -41,11 +41,11 @@ const originModuleMapPath = path.resolve(nginxOriginStaticsRootDir, 'module-map.
 
 const getPreBuiltModuleInfo = (pathToModule) => {
   const pkgPath = path.resolve(pathToModule, 'package.json');
-  // eslint-disable-next-line import/no-dynamic-require, global-require
+  // eslint-disable-next-line import/no-dynamic-require, global-require -- needed for dynamic script
   const { name: moduleName, version: moduleVersion } = require(pkgPath);
 
   const pathToBundleIntegrityManifest = path.resolve(`${pathToModule}/bundle.integrity.manifest.json`);
-  // eslint-disable-next-line global-require,import/no-dynamic-require
+  // eslint-disable-next-line global-require,import/no-dynamic-require -- needed for dynamic script
   const integrityDigests = require(pathToBundleIntegrityManifest);
 
   return { moduleName, moduleVersion, integrityDigests };
@@ -53,7 +53,7 @@ const getPreBuiltModuleInfo = (pathToModule) => {
 
 const buildModule = async (pathToModule) => {
   const pkgPath = path.resolve(pathToModule, 'package.json');
-  // eslint-disable-next-line import/no-dynamic-require, global-require
+  // eslint-disable-next-line import/no-dynamic-require, global-require -- needed for dynamic script
   const { name: moduleName, version: moduleVersion } = require(pkgPath);
 
   if (!skipInstall) {
@@ -73,7 +73,7 @@ const buildModule = async (pathToModule) => {
   });
 
   const pathToBundleIntegrityManifest = path.resolve(`${pathToModule}/bundle.integrity.manifest.json`);
-  // eslint-disable-next-line global-require,import/no-dynamic-require
+  // eslint-disable-next-line global-require,import/no-dynamic-require -- needed for dynamic script
   const integrityDigests = require(pathToBundleIntegrityManifest);
 
   return {
@@ -91,7 +91,7 @@ const deployModuleToProdSampleCDN = async (pathToModule, moduleName) => {
 };
 
 const updateModuleMap = async ({ moduleName, moduleVersion, integrityDigests }) => {
-  // eslint-disable-next-line global-require,import/no-dynamic-require
+  // eslint-disable-next-line global-require,import/no-dynamic-require -- needed for dynamic script
   const moduleMap = require(originModuleMapPath);
   console.log(`Updating module map for ${moduleName}@${moduleVersion}`);
   const gitSha = getGitSha();

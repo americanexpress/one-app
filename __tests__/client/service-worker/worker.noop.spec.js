@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-/* eslint-disable no-restricted-globals */
+/* eslint-disable no-restricted-globals -- needed for service worker tests */
 
 import EventTarget from 'service-worker-mock/models/EventTarget';
 import createServiceWorkerMocks from 'service-worker-mock';
@@ -64,3 +64,5 @@ describe('worker noop', () => {
     expect(self.skipWaiting).toHaveBeenCalledTimes(1);
   });
 });
+
+/* eslint-enable no-restricted-globals */

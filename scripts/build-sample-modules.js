@@ -43,7 +43,7 @@ const sanitizedEnvVars = sanitizeEnvVars();
 
 async function updateModuleVersion(directory, moduleVersion) {
   const packageJsonPath = path.resolve(directory, 'package.json');
-  // eslint-disable-next-line global-require, import/no-dynamic-require
+  // eslint-disable-next-line global-require, import/no-dynamic-require -- needed for dynamic script
   const packageJson = require(packageJsonPath);
   const updatedPackageJson = { ...packageJson, version: moduleVersion };
 
@@ -74,7 +74,7 @@ const buildModule = async (pathToModule) => {
   const pathToOriginModuleStatics = path.resolve(`${nginxOriginStaticsModulesDir}/${gitSha}/${moduleName}`);
   await fs.cp(pathToModuleBuildDir, pathToOriginModuleStatics, { recursive: true });
 
-  // eslint-disable-next-line global-require,import/no-dynamic-require
+  // eslint-disable-next-line global-require,import/no-dynamic-require -- needed for dynamic script
   const integrityDigests = require(pathToBundleIntegrityManifest);
 
   return {

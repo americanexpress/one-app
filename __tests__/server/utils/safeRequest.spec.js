@@ -155,14 +155,14 @@ describe('safeRequest', () => {
 
       expect(
         () => extendRestrictedAttributesAllowList({ headers: ['flavor', 'host'] })
-      ).toThrowError('Attempting to remove required restricted attributes cookies: applocale');
+      ).toThrow('Attempting to remove required restricted attributes cookies: applocale');
 
       expect(
         () => extendRestrictedAttributesAllowList({
           headers: ['flavor', 'host'],
           cookies: ['applocale'],
         })
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 

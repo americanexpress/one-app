@@ -74,7 +74,7 @@ const stateConfigFromDevEndpoints = {};
 
 if (process.env.NODE_ENV === 'development' && fs.existsSync(pathToDevEndpoints)) {
   const { HTTP_ONE_APP_DEV_PROXY_SERVER_PORT = 3002 } = process.env;
-  // eslint-disable-next-line global-require,import/no-dynamic-require
+  // eslint-disable-next-line global-require,import/no-dynamic-require -- dynamic loading
   const devEndpoints = require(pathToDevEndpoints)();
   Object.entries(devEndpoints).forEach(([configName, { devProxyPath }]) => {
     const value = url.format({
