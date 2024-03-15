@@ -29,6 +29,7 @@ One App can be configured via Environment Variables:
   * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
   * [`ONE_CLIENT_CDN_URL`](#one_client_cdn_url) ⚠️
   * [`ONE_CONFIG_ENV`](#one_config_env) ⚠️
+  * [`ONE_ENVIRONMENT_SECRETS_PATH`](#one_environment_secrets_path)
 * Running in Development
   * [`NODE_ENV`](#node_env) ⚠️
   * [`ONE_CLIENT_ROOT_MODULE_NAME`](#one_client_root_module_name) ⚠️
@@ -528,6 +529,36 @@ ONE_CONFIG_ENV=staging
 **Default Value**
 ```bash
 ONE_CONFIG_ENV=undefined
+```
+
+## ONE_ENVIRONMENT_SECRETS_PATH
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+An absolute path to a secrets file with the structure:
+
+```
+SECRET_NAME=secret_value
+ANOTHER_SECRET=another_secret_value
+```
+
+These secrets will be parsed on startup and set as environment variables.
+
+**Shape**
+```bash
+ONE_ENVIRONMENT_SECRETS_PATH=String
+```
+
+**Example**
+```bash
+ONE_ENVIRONMENT_SECRETS_PATH=/path/to/secrets.env
+```
+
+**Default Value**
+```bash
+ONE_ENVIRONMENT_SECRETS_PATH=undefined
 ```
 
 ## `ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS`
