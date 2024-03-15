@@ -17,9 +17,28 @@
 // eval can be harmful, that's why we're disabling it
 /* eslint-disable no-eval, no-implied-eval */
 
-import getObjectValueAtPath from '../../src/server/utils/getObjectValueAtPath';
+const getObjectValueAtPath = (obj, path, defaultValue) => {
+  const result = path.split(/[.[\]]+?/)
+    .filter(Boolean)
+    .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
+  return result === undefined || result === obj ? defaultValue : result;
+};
 
-const set = require('lodash.set');
+const defineProp = (obj, key, value) => Object.defineProperty(obj, key, {
+  configurable: true,
+  enumerable: true,
+  value,
+  writable: true,
+});
+
+const set = (obj, key, val) => {
+  if (key.includes('.')) {
+    const [a, b] = key.split('.');
+    defineProp(obj[a], b, val);
+  } else {
+    defineProp(obj, key, val);
+  }
+};
 
 jest.useFakeTimers();
 jest.spyOn(global, 'setTimeout');
