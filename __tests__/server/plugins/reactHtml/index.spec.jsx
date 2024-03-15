@@ -24,11 +24,7 @@ import reactHtml, {
   renderExternalFallbacks,
   checkStateForRedirectAndStatusCode,
 } from '../../../../src/server/plugins/reactHtml';
-// _client is a method to control the mock
-
 import { getClientStateConfig } from '../../../../src/server/utils/stateConfig';
-// _setVars is a method to control the mock
-
 import transit from '../../../../src/universal/utils/transit';
 import {
   setClientModuleMapCache,

@@ -140,7 +140,6 @@ describe('badPartMonkeypatches', () => {
 
       it('should execute normally on non-string first argument', () => {
         setTimeout(
-
           (a, b, c) => console.log(a, b, c),
           1e3,
           'A',
@@ -162,7 +161,6 @@ describe('badPartMonkeypatches', () => {
 
       it('should execute normally on non-string first argument', () => {
         setInterval(
-
           (a, b, c) => console.log(a, b, c),
           1e3,
           'A',

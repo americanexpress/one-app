@@ -16,7 +16,6 @@
 
 import { createStore, compose } from 'redux';
 import { MODULE_LOADED } from 'holocron/ducks/constants';
-
 import createEnhancer from '../../src/universal/enhancers';
 
 const mockMiddlewareSpy = jest.fn();
@@ -40,14 +39,12 @@ describe('enhancers', () => {
     afterEach(() => {
       process.env.NODE_ENV = undefined;
       global.BROWSER = undefined;
-
       global.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = undefined;
     });
 
     it('should set up redux dev tools for development', () => {
       process.env.NODE_ENV = 'development';
       global.BROWSER = true;
-
       window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn((x) => compose(x));
 
       const enhancer = createEnhancer();

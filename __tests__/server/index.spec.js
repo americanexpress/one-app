@@ -129,7 +129,6 @@ describe('server index', () => {
     jest.doMock('../../src/server/utils/getHttpsConfig', () => () => 'https-config-mock');
 
     jest.doMock('lean-intl', () => ({
-
       __addLocaleData: jest.fn(),
     }));
 

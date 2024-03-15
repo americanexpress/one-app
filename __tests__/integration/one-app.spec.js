@@ -89,7 +89,6 @@ describe('Tests that require Docker setup', () => {
       expect(problemModuleUrl).toBe(
         `${testCdnUrl}/${gitSha}/${moduleName}/${version}/${moduleName}.node.js`
       );
-
       expect(workingUrl).toBe(moduleName);
     });
     test('one-app remains healthy with a bad module at start', async () => {

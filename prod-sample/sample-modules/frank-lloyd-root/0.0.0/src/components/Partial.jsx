@@ -60,8 +60,6 @@ Partial.propTypes = {
   location: PropTypes.shape({
     query: PropTypes.shape({}).isRequired,
   }).isRequired,
-  // Props for rendered module are indeterminate
-
   postProps: PropTypes.shape({}).isRequired,
 };
 

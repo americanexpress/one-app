@@ -22,15 +22,10 @@ import { updateCSP } from '../../../src/server/plugins/csp';
 import { setClientModuleMapCache, getClientModuleMapCache } from '../../../src/server/utils/clientModuleMapCache';
 import addBaseUrlToModuleMap from '../../../src/server/utils/addBaseUrlToModuleMap';
 
-// This named export exists only on the mock
-
 jest.mock('holocron');
-jest.mock(
-  'holocron/server',
-  () => ({
-    updateModuleRegistry: jest.fn(),
-  })
-);
+jest.mock('holocron/server', () => ({
+  updateModuleRegistry: jest.fn(),
+}));
 jest.mock('../../../src/server/utils/stateConfig', () => ({
   getServerStateConfig: jest.fn(() => ({
     rootModuleName: 'some-root',

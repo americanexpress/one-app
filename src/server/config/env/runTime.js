@@ -64,8 +64,8 @@ const runTime = [
     normalize: (input) => {
       const parsed = Number.parseInt(input, 10);
       // make sure the parsed value is the same value as input
-      // input may be a string or a number, we don't want === in this case, just ==
-      if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq -- see above
+      // eslint-disable-next-line eqeqeq -- input may be a string or a number, we don't want === in this case, just ==
+      if (Number.isNaN(parsed) || parsed != input) {
         throw new Error(`env var HTTP_PORT needs to be a valid integer, given "${input}"`);
       } else {
         return parsed;
