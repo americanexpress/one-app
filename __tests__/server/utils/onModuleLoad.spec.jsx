@@ -17,7 +17,7 @@
 import util from 'node:util';
 import React from 'react';
 import { preprocessEnvVar } from '@americanexpress/env-config-utils';
-import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
+import { META_DATA_KEY } from '@americanexpress/one-app-server-bundler';
 import { clearModulesUsingExternals } from 'holocron';
 
 import onModuleLoad, {
