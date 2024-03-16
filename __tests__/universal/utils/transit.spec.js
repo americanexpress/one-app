@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import url from 'url';
+import url from 'node:url';
 import {
   Map, OrderedMap, List, Set, OrderedSet, Record,
 } from 'immutable';

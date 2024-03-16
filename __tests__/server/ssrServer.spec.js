@@ -15,7 +15,7 @@
  */
 
 import util from 'node:util';
-import path from 'path';
+import path from 'node:path';
 import compress from '@fastify/compress';
 import Fastify from 'fastify';
 import fastifyCookie from '@fastify/cookie';

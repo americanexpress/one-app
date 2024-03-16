@@ -14,9 +14,9 @@
  * permissions and limitations under the License.
  */
 
-import fs from 'fs';
-import path from 'path';
-import url from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import url from 'node:url';
 import { argv } from 'yargs';
 import { getIp } from './getIP';
 import envVarAllowList from './envVarAllowList';

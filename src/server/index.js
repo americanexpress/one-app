@@ -17,8 +17,8 @@
 /* eslint-disable global-require, import/no-dynamic-require -- needs to be dynamic */
 
 import util from 'node:util';
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import Intl from 'lean-intl';
 import enData from 'lean-intl/locale-data/json/en.json';
 

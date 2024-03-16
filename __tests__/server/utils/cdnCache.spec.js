@@ -12,7 +12,7 @@
  * under the License.
  */
 
-import fs, { promises as fsPromises } from 'fs';
+import fs, { promises as fsPromises } from 'node:fs';
 import chalk from 'chalk';
 import {
   getUserHomeDirectory,
@@ -27,19 +27,12 @@ import {
   oneAppModuleCachePath,
 } from '../../../src/server/utils/cdnCache';
 
-jest.mock('fs', () => {
-  const actualFsModule = jest.requireActual('fs');
-  const actualFsPromisesModule = jest.requireActual('fs/promises');
-  return {
-    ...actualFsModule,
-    existsSync: jest.spyOn(actualFsModule, 'existsSync'),
-    readFileSync: jest.spyOn(actualFsModule, 'readFileSync'),
-    ...actualFsPromisesModule,
-    stat: jest.spyOn(actualFsPromisesModule, 'stat'),
-    mkdir: jest.spyOn(actualFsPromisesModule, 'mkdir'),
-    writeFile: jest.spyOn(actualFsPromisesModule, 'writeFile'),
-  };
-});
+jest.spyOn(fs, 'existsSync');
+jest.spyOn(fs, 'readFileSync');
+jest.spyOn(fs, 'writeFile');
+jest.spyOn(fsPromises, 'stat');
+jest.spyOn(fsPromises, 'mkdir');
+jest.spyOn(fsPromises, 'writeFile');
 
 jest.mock('chalk', () => ({
   bold: {

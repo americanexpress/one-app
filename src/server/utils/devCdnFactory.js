@@ -15,8 +15,8 @@
 // This file is only used in development so imports should be devDeps unless used elsewhere
 /* eslint "import/no-extraneous-dependencies": ["error", {"devDependencies": true}] -- see above */
 
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import cors from '@fastify/cors';
 import compress from '@fastify/compress';
 import fastifyStatic from '@fastify/static';

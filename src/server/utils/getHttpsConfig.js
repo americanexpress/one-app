@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import fs from 'fs';
+import fs from 'node:fs';
 
 const getHttpsConfig = () => {
   if (!(process.env.HTTPS_PRIVATE_KEY_PATH && process.env.HTTPS_PUBLIC_CERT_CHAIN_PATH)) {

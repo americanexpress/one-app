@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import url from 'url';
+import url from 'node:url';
 import { browserHistory, matchPromise } from '@americanexpress/one-app-router';
 import { Map as iMap, fromJS } from 'immutable';
 import { composeModules } from 'holocron';

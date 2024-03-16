@@ -14,8 +14,8 @@
  * permissions and limitations under the License.
  */
 
+import path from 'node:path';
 import yargs, { argv } from 'yargs';
-import path from 'path';
 
 const rootModuleNameEnvVarValue = process.env.ONE_CLIENT_ROOT_MODULE_NAME;
 

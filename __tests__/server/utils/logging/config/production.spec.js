@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import { PassThrough } from 'stream';
+import { PassThrough } from 'node:stream';
 import deepmerge from 'deepmerge';
 import pino from 'pino';
 import baseConfig from '../../../../../src/server/utils/logging/config/base';

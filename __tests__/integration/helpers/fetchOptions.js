@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-const https = require('https');
+const https = require('node:https');
 const { ProxyAgent } = require('proxy-agent');
 
 const createFetchOptions = ({ targetRemoteAppInstance } = {}) => ({

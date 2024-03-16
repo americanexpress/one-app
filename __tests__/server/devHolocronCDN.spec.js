@@ -14,7 +14,7 @@
 * permissions and limitations under the License.
 */
 
-import fs from 'fs';
+import fs from 'node:fs';
 import '../../src/server/devHolocronCDN';
 
 jest.mock('../../src/server/utils/devCdnFactory', () => jest.fn(() => (req, res, next) => next()));

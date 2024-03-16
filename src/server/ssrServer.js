@@ -17,7 +17,7 @@
 // We need to conditionally require in this fault based on whether we are in a
 // development or production environment
 
-import path from 'path';
+import path from 'node:path';
 
 import { argv } from 'yargs';
 import bytes from 'bytes';

@@ -16,8 +16,8 @@
 
 // Headers are under a key with a dangling underscore
 
-import { promises as fs } from 'fs';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 import fetch from 'cross-fetch';
 import yargs, { argv } from 'yargs';

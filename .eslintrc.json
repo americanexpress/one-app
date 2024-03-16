@@ -12,6 +12,7 @@
     }
   },
   "rules": {
+    "unicorn/prefer-node-protocol": "error",
     "eslint-comments/require-description": [
       "error",
       {

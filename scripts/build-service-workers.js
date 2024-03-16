@@ -16,7 +16,7 @@
  * permissions and limitations under the License.
  */
 
-const path = require('path');
+const path = require('node:path');
 const rollup = require('rollup');
 const replace = require('@rollup/plugin-replace');
 const resolve = require('@rollup/plugin-node-resolve').default;

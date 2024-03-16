@@ -14,8 +14,8 @@
  * permissions and limitations under the License.
  */
 
+const https = require('node:https');
 const fetch = require('cross-fetch');
-const https = require('https');
 
 const waitFor = (ms) => new Promise((res) => { setTimeout(res, ms); });
 

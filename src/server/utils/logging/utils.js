@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import { STATUS_CODES } from 'http';
+import { STATUS_CODES } from 'node:http';
 
 import chalk from 'chalk';
 

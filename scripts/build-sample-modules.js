@@ -17,7 +17,7 @@
  */
 
 const { existsSync, promises: fs } = require('node:fs');
-const path = require('path');
+const path = require('node:path');
 const { argv } = require('yargs');
 
 const {

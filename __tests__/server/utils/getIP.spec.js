@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import os from 'os';
+import os from 'node:os';
 import { getIp } from '../../../src/server/utils/getIP';
 
 const spy = jest.spyOn(os, 'networkInterfaces');

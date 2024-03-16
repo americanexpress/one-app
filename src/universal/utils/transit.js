@@ -51,11 +51,11 @@ const extraHandlers = [
   },
   {
     tag: 'url',
-    class: global.BROWSER ? URL : require('url').Url,
+    class: global.BROWSER ? URL : require('node:url').Url,
     write: (value) => value.href,
     read: (value) => (global.BROWSER
       ? new URL(value, global.location.href)
-      : require('url').parse(value)
+      : require('node:url').parse(value)
     ),
   },
 ];

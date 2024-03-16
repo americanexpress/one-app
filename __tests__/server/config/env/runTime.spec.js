@@ -77,34 +77,17 @@ jest.mock('@americanexpress/env-config-utils', () => {
 
   return actualRuntimeConfigUtils;
 });
+jest.spyOn(console, 'info').mockImplementation(() => {});
+jest.spyOn(console, 'warn').mockImplementation(() => {});
 
 describe('runTime', () => {
-  const origConsoleInfo = console.info;
-  const origConsoleWarn = console.warn;
-  const origEnvVarVals = {};
-  [
-    'NODE_ENV',
-    'ONE_DANGEROUSLY_DISABLE_CSP',
-    'HTTP_PORT',
-    'HTTP_METRICS_PORT',
-    'HOLOCRON_MODULE_MAP_URL',
-    'HTTP_ONE_APP_DEV_CDN_PORT',
-    'HTTP_ONE_APP_DEV_PROXY_SERVER_PORT',
-    'HOLOCRON_SERVER_MAX_MODULES_RETRY',
-    'HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH',
-    'ONE_CLIENT_REPORTING_URL',
-    'ONE_CLIENT_CSP_REPORTING_URL',
-    'ONE_CLIENT_CDN_URL',
-    'ONE_CLIENT_LOCALE_FILENAME',
-    'ONE_CLIENT_ROOT_MODULE_NAME',
-    'ONE_ENABLE_POST_TO_MODULE_ROUTES',
-    'ONE_MAX_POST_REQUEST_PAYLOAD',
-  ].forEach((name) => {
-    origEnvVarVals[name] = process.env[name];
-  });
+  const originalEnv = process.env;
 
   function getEnvVarConfig(envVarName) {
-    const runTime = require('../../../../src/server/config/env/runTime').default;
+    let runTime;
+    jest.isolateModules(() => {
+      runTime = require('../../../../src/server/config/env/runTime').default;
+    });
     return runTime.filter(({ name }) => name === envVarName)[0];
   }
 
@@ -117,21 +100,15 @@ describe('runTime', () => {
   }
 
   beforeEach(() => {
-    console.info = jest.fn();
-    console.warn = jest.fn();
     resetEnvVar('NODE_ENV');
     resetEnvVar('ONE_DANGEROUSLY_DISABLE_CSP', 'false');
     resetEnvVar('HTTP_ONE_APP_DEV_CDN_PORT');
     resetEnvVar('ONE_ENABLE_POST_TO_MODULE_ROUTES');
-    jest.resetModules();
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   afterAll(() => {
-    console.info = origConsoleInfo;
-    console.warn = origConsoleWarn;
-    Object.keys(origEnvVarVals).forEach((name) => resetEnvVar(name, origEnvVarVals[name]));
-    jest.resetAllMocks();
+    process.env = originalEnv;
   });
 
   it('has a name on every entry', () => {

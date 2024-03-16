@@ -14,11 +14,10 @@
  * permissions and limitations under the License.
  */
 
-import fs from 'fs';
-
+import fs from 'node:fs';
 import readJsonFile from '../../../src/server/utils/readJsonFile';
 
-jest.mock('fs');
+jest.mock('node:fs');
 
 describe('readJsonFile', () => {
   it('is a function', () => {
