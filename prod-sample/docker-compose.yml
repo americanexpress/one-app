@@ -82,7 +82,7 @@ services:
         aliases:
           - extra-slow.api.frank
   nginx:
-    image: 'nginx:1.17.5-alpine'
+    image: 'nginx:1.25.4-alpine'
     volumes:
       - './nginx/default.conf:/etc/nginx/conf.d/default.conf'
       - './nginx/nginx-cert.pem:/etc/ssl/nginx-cert.pem'
@@ -94,7 +94,7 @@ services:
           - sample-cdn.frank
   selenium-chrome:
     # specify docker image sha to ensure consistency
-    image: seleniarm/standalone-chromium:120.0
+    image: seleniarm/standalone-chromium:121.0
     # https://github.com/SeleniumHQ/docker-selenium#running-the-images
     volumes:
       - /dev/shm:/dev/shm
