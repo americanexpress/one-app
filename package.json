@@ -104,6 +104,7 @@
     "create-shared-react-context": "^1.0.5",
     "cross-fetch": "^4.0.0",
     "deepmerge": "^4.3.1",
+    "dotenv": "^16.4.5",
     "fastify": "^4.25.2",
     "fastify-metrics": "^10.6.0",
     "fastify-plugin": "^4.5.1",

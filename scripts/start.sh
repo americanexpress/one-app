@@ -33,6 +33,11 @@ for flag in $flags; do
   fi
 done
 
+if [ -n "$ONE_ENVIRONMENT_SECRETS_PATH" ]; then
+  nodeArgs="$nodeArgs --require=dotenv/config"
+  flags="$flags dotenv_config_path=$ONE_ENVIRONMENT_SECRETS_PATH dotenv_config_debug=true"
+fi
+
 commandArgs="$nodeArgs lib/server/index.js $flags"
 
 echo "node $commandArgs"
