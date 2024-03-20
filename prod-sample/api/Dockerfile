@@ -1,4 +1,4 @@
-ARG VERSION=20
+ARG VERSION=lts
 
 FROM node:$VERSION as builder
 MAINTAINER One App Team
