@@ -64,7 +64,7 @@ registerInstrumentations({
         : undefined,
       requireParentforOutgoingSpans: !traceAllRequests,
       requestHook(span) {
-        // eslint-disable-next-line default-case
+        // eslint-disable-next-line default-case -- one of these two cases will always be hit
         switch (span.attributes?.direction) {
           case 'in':
             span.updateName(`${span.attributes['http.method']} ${span.attributes['http.target']}`);

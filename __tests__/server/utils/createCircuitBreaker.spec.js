@@ -31,20 +31,11 @@ const asyncFunctionThatMightFail = jest.fn(async () => ({ fallback: false }));
 const mockCircuitBreaker = createCircuitBreaker(asyncFunctionThatMightFail);
 
 const eventLoopDelayHistogram = getEventLoopDelayHistogram();
-const histogramPercentileSpy = jest.spyOn(eventLoopDelayHistogram, 'percentile');
+const histogramPercentileSpy = jest.spyOn(eventLoopDelayHistogram, 'percentile').mockImplementation(() => 0);
 const histogramResetSpy = jest.spyOn(eventLoopDelayHistogram, 'reset');
 
 jest.mock('holocron', () => ({
   getModule: jest.fn(() => true),
-}));
-
-jest.mock('perf_hooks', () => ({
-  ...jest.requireActual('perf_hooks'),
-  monitorEventLoopDelay: jest.fn(() => ({
-    enable: jest.fn(),
-    reset: jest.fn(),
-    percentile: jest.fn(() => 0),
-  })),
 }));
 
 describe('Circuit breaker', () => {

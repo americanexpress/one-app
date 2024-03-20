@@ -12,8 +12,8 @@
  * under the License.
  */
 
-import path from 'path';
-import fs, { promises as fsPromises } from 'fs';
+import path from 'node:path';
+import fs, { promises as fsPromises } from 'node:fs';
 import chalk from 'chalk';
 
 export const getUserHomeDirectory = () => process.env.HOME || process.env.USERPROFILE;

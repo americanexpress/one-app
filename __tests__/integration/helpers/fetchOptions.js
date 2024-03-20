@@ -14,8 +14,8 @@
  * permissions and limitations under the License.
  */
 
-const https = require('https');
-const HttpsProxyAgent = require('https-proxy-agent');
+const https = require('node:https');
+const { ProxyAgent } = require('proxy-agent');
 
 const createFetchOptions = ({ targetRemoteAppInstance } = {}) => ({
   ...!targetRemoteAppInstance && {
@@ -25,7 +25,7 @@ const createFetchOptions = ({ targetRemoteAppInstance } = {}) => ({
     }),
   },
   ...targetRemoteAppInstance && process.env.HTTPS_PROXY && {
-    agent: new HttpsProxyAgent(process.env.HTTPS_PROXY),
+    agent: new ProxyAgent(),
   },
 });
 

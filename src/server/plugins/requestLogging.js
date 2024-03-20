@@ -58,7 +58,7 @@ const hrtimeToMs = (value) => (value[0] * 1e3) + (value[1] * 1e-6);
 const startTimer = (obj, symbol) => {
   const time = process.hrtime();
 
-  // eslint-disable-next-line no-param-reassign
+  // eslint-disable-next-line no-param-reassign -- storing timer
   obj[symbol] = time;
 };
 
@@ -66,7 +66,7 @@ const endTimer = (obj, symbol) => {
   const result = process.hrtime(obj[symbol]);
   const ms = hrtimeToMs(result);
 
-  // eslint-disable-next-line no-param-reassign
+  // eslint-disable-next-line no-param-reassign -- storing duration
   obj[symbol] = ms;
 
   return ms;

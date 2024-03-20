@@ -16,13 +16,7 @@
 
 // usage: const cacheKeys = await browser.executeAsync(getCacheKeys);
 exports.getCacheKeys = function getCacheKeys(done) {
-  // eslint-disable-next-line prefer-arrow-callback
-  caches.keys().then(function filterKeys(cacheKeys) {
-    // eslint-disable-next-line prefer-arrow-callback
-    return cacheKeys.filter(function filterSWCache(key) {
-      return key.startsWith('__sw');
-    });
-  }).then(done);
+  caches.keys().then((cacheKeys) => cacheKeys.filter((key) => key.startsWith('__sw'))).then(done);
 };
 
 // usage: const cacheEntries = await browser.executeAsync(getCacheEntries, cacheKeys);

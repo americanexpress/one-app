@@ -13,18 +13,14 @@
  */
 
 import util from 'node:util';
-import fetch from 'node-fetch';
-import fs from 'fs';
-import { rimrafSync } from 'rimraf';
-import path from 'path';
-import mkdirp from 'mkdirp';
+import fs from 'node:fs';
+import path from 'node:path';
 import { ProxyAgent } from 'proxy-agent';
 import oneAppDevCdn from '../../../src/server/utils/devCdnFactory';
 import {
   removeExistingEntryIfConflicting,
 } from '../../../src/server/utils/cdnCache';
 
-jest.mock('node-fetch');
 jest.mock('pino');
 
 jest.mock('../../../src/server/utils/cdnCache', () => ({
@@ -34,6 +30,23 @@ jest.mock('../../../src/server/utils/cdnCache', () => ({
   writeToCache: jest.fn(() => ({})),
   removeExistingEntryIfConflicting: jest.fn((_, cachedModuleFiles) => cachedModuleFiles),
 }));
+
+global.fetch = jest.fn();
+
+fetch.mockReturnJsonOnce = (obj) => (obj instanceof Error
+  ? fetch.mockImplementationOnce(async () => { throw obj; })
+  : fetch.mockImplementationOnce(async () => ({
+    json: async () => obj,
+    text: async () => JSON.stringify(obj),
+    status: 200,
+  })));
+
+fetch.mockReturnFileOnce = (body, status = 200) => (body instanceof Error
+  ? fetch.mockImplementationOnce(async () => { throw body; })
+  : fetch.mockImplementationOnce(async () => ({
+    text: async () => body,
+    status,
+  })));
 
 const pathToStubs = path.join(__dirname, 'stubs');
 const pathToCache = path.join(__dirname, '..', '.cache');
@@ -85,17 +98,17 @@ describe('one-app-dev-cdn', () => {
     }
 
     if (!allowCacheWrite) {
-      mkdirp(pathToCache, { mode: 444 });
+      fs.mkdirSync(pathToCache, { mode: 444, recursive: true });
     }
 
     const modulesDir = path.join(mockLocalDevPublicPath, 'modules');
 
-    mkdirp.sync(modulesDir);
+    fs.mkdirSync(modulesDir, { recursive: true });
     fs.writeFileSync(path.join(`${mockLocalDevPublicPath}/module-map.json`), moduleMapContent, { encoding: 'utf-8' });
     modules.forEach((module) => {
       const { moduleName, moduleVersion, bundleContent } = module;
       const pathToModuleBundle = path.join(modulesDir, moduleName, moduleVersion);
-      mkdirp.sync(pathToModuleBundle);
+      fs.mkdirSync(pathToModuleBundle, { recursive: true });
       fs.writeFileSync(path.join(pathToModuleBundle, `${moduleName}.browser.js`), bundleContent, { encoding: 'utf-8' });
     });
   };
@@ -697,8 +710,8 @@ describe('one-app-dev-cdn', () => {
   });
 
   afterEach(() => {
-    rimrafSync(pathToCache);
-    rimrafSync(pathToStubs);
+    fs.rmSync(pathToCache, { recursive: true, force: true });
+    fs.rmSync(pathToStubs, { recursive: true, force: true });
   });
 
   afterAll(() => {

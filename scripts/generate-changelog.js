@@ -20,7 +20,7 @@
  * In order for this script to be successful, version must have
  * been bumped to latest during release process
  */
-const { spawnSync } = require('child_process');
+const { spawnSync } = require('node:child_process');
 const appVersion = require('../package.json').version;
 
 function runSpawn(...args) {

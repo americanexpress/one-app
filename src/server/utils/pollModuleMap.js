@@ -104,7 +104,7 @@ let startPollingMonitorIfNotAlready = () => {
     clearTimeout(lastPollTimeout);
     // make sure polling happens again
     // need the reference to use it, one needs to be defined first
-    setImmediate(pollModuleMap); // eslint-disable-line no-use-before-define
+    setImmediate(pollModuleMap); // eslint-disable-line no-use-before-define -- see above
     // log the restart
     console.warn('pollModuleMap: restarted polling');
     incrementCounter(holocronMetrics.moduleMapPollRestarted);

@@ -15,7 +15,7 @@
  */
 
 // Dangling underscores are part of the HTTP mocks API
-/* eslint-disable no-underscore-dangle */
+
 import httpMocks from 'node-mocks-http';
 import fastifyCors from '@fastify/cors';
 import { fromJS } from 'immutable';

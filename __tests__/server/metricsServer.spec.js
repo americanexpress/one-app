@@ -98,7 +98,7 @@ describe('metricsServer', () => {
         url: '/metrics',
       });
 
-      expect(client.register.metrics).toBeCalled();
+      expect(client.register.metrics).toHaveBeenCalled();
     });
 
     it('should be Content-Type of metrics', async () => {

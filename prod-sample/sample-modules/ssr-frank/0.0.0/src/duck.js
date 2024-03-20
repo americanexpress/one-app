@@ -31,7 +31,7 @@ function buildInitialState() {
   });
 }
 
-function reducer(state = buildInitialState(), action) {
+function reducer(state = buildInitialState(), action = {}) {
   switch (action.type) {
     case FAKE_REQUEST:
       return state

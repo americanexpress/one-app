@@ -13,8 +13,14 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-jest.mock('fs', () => ({ existsSync: jest.fn() }));
-jest.mock('../../../src/server/utils/getIP', () => ({ getIp: jest.fn() }));
+
+import fs from 'node:fs';
+import yargs from 'yargs';
+// eslint-disable-next-line import/no-unresolved, import/extensions -- path doesn't exist
+import devEndpoints from 'fake/path/.dev/endpoints/index.js';
+
+jest.mock('node:fs', () => ({ existsSync: jest.fn(() => false) }));
+jest.mock('../../../src/server/utils/getIP', () => ({ getIp: jest.fn(() => '127.0.0.1') }));
 jest.mock('fake/path/.dev/endpoints/index.js', () => jest.fn(), { virtual: true });
 jest.mock('yargs', () => ({ argv: {} }));
 jest.mock('../../../src/server/utils/envVarAllowList', () => [
@@ -24,29 +30,28 @@ jest.mock('../../../src/server/utils/envVarAllowList', () => [
   'ONE_CLIENT_SOME_OTHER_API_URL',
   'CLIENT_FAKE_SETTING',
 ]);
+jest.spyOn(process, 'cwd').mockImplementation(() => 'fake/path/');
 
 describe('stateConfig methods', () => {
+  const originalEnvVars = process.env;
   let setStateConfig;
   let getClientStateConfig;
   let getServerStateConfig;
-  let provideStateConfig;
   let restoreModuleStateConfig;
   let backupModuleStateConfig;
-  let fs;
-  let getIp;
-  let yargs;
+  let provideStateConfig;
 
-  const originalEnvVars = process.env;
+  const reloadStateConfig = () => jest.isolateModules(() => {
+    ({
+      setStateConfig,
+      getClientStateConfig,
+      getServerStateConfig,
+      restoreModuleStateConfig,
+      backupModuleStateConfig,
+    } = require('../../../src/server/utils/stateConfig'));
+  });
 
-  const reloadMocks = () => {
-    fs = require('fs');
-    getIp = require('../../../src/server/utils/getIP').getIp;
-    yargs = require('yargs');
-    jest.spyOn(process, 'cwd').mockImplementation(() => 'fake/path/');
-    getIp.mockImplementation(() => '127.0.0.1');
-    yargs.argv = {};
-    fs.existsSync.mockImplementation(() => false);
-    process.env.ONE_CONFIG_ENV = 'qa';
+  const resetProvideStateConfig = () => {
     provideStateConfig = {
       someApiUrl: {
         client: {
@@ -62,25 +67,20 @@ describe('stateConfig methods', () => {
       },
     };
   };
+
   describe('stateConfig', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
-      jest.resetModules();
-      reloadMocks();
+      jest.clearAllMocks();
+      yargs.argv = {};
+      process.env.ONE_CONFIG_ENV = 'qa';
+      resetProvideStateConfig();
     });
     afterEach(() => {
       process.env = originalEnvVars;
     });
     describe('with module config', () => {
       beforeEach(() => {
-        fs.existsSync.mockImplementation(() => false);
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-          restoreModuleStateConfig,
-          backupModuleStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
       });
       it('should backup and restore process module config', () => {
         setStateConfig(provideStateConfig);
@@ -90,28 +90,18 @@ describe('stateConfig methods', () => {
         expect(getServerStateConfig()).toMatchSnapshot();
       });
       it('should throw if ONE_CONFIG_ENV is not set on parsing client', () => {
-        jest.resetModules();
         delete process.env.ONE_CONFIG_ENV;
         delete provideStateConfig.someApiUrl.server;
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         const execute = () => {
           setStateConfig(provideStateConfig);
         };
         expect(execute).toThrowErrorMatchingSnapshot();
       });
       it('should throw if ONE_CONFIG_ENV is not set on parsing server', () => {
-        jest.resetModules();
         delete process.env.ONE_CONFIG_ENV;
         delete provideStateConfig.someApiUrl.client;
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         const execute = () => {
           setStateConfig(provideStateConfig);
         };
@@ -179,57 +169,42 @@ describe('stateConfig methods', () => {
     });
     describe('with dev endpoint config', () => {
       beforeEach(() => {
-        fs.existsSync.mockImplementation(() => true);
+        fs.existsSync.mockImplementationOnce(() => true);
       });
       it('should show dev endpoint supplied config', () => {
         process.env.NODE_ENV = 'development';
-        // eslint-disable-next-line unicorn/import-index, import/no-unresolved, import/extensions
-        require('fake/path/.dev/endpoints/index.js').mockImplementation(() => ({
+        devEndpoints.mockImplementationOnce(() => ({
           someOtherApiUrl: {
             devProxyPath: 'some-other-api',
             destination: 'https://intranet-origin-dev.example.com/some-other-api/v1',
           },
         }));
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         expect(getClientStateConfig()).toMatchSnapshot();
         expect(getServerStateConfig()).toMatchSnapshot();
       });
       it('dev endpoints should use ip instead of localhost when useHost is passed as arg', () => {
         process.env.NODE_ENV = 'development';
         yargs.argv = { useHost: true };
-        // eslint-disable-next-line unicorn/import-index, import/no-unresolved, import/extensions
-        require('fake/path/.dev/endpoints/index.js').mockImplementation(() => ({
+        devEndpoints.mockImplementationOnce(() => ({
           someOtherApiUrl: {
             devProxyPath: 'some-other-api',
             destination: 'https://intranet-origin-dev.example.com/some-other-api/v1',
           },
         }));
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         expect(getClientStateConfig()).toMatchSnapshot();
         expect(getServerStateConfig()).toMatchSnapshot();
       });
       it('dev endpoint should not have doubled slash in path', () => {
         process.env.NODE_ENV = 'development';
-        // eslint-disable-next-line unicorn/import-index, import/no-unresolved, import/extensions
-        require('fake/path/.dev/endpoints/index.js').mockImplementation(() => ({
+        devEndpoints.mockImplementationOnce(() => ({
           leadingSlashApiUrl: {
             devProxyPath: '/leading-slash-api',
             destination: 'https://intranet-origin-dev.example.com/some-other-api/v1',
           },
         }));
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         expect(getClientStateConfig().leadingSlashApiUrl).toEqual('http://localhost:3002/leading-slash-api');
       });
     });
@@ -238,11 +213,7 @@ describe('stateConfig methods', () => {
         process.env = {
           ONE_CLIENT_FAKE_SETTING: 'undefined',
         };
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         expect(getClientStateConfig()).toMatchSnapshot();
         expect(getServerStateConfig()).toMatchSnapshot();
       });
@@ -250,11 +221,7 @@ describe('stateConfig methods', () => {
         process.env = {
           ONE_CLIENT_FAKE_SETTING: 'client-fake-setting',
         };
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         expect(getClientStateConfig()).toMatchSnapshot();
         expect(getServerStateConfig()).toMatchSnapshot();
       });
@@ -263,11 +230,7 @@ describe('stateConfig methods', () => {
           ...process.env,
           ONE_FAKE_SETTING: 'server-fake-setting',
         };
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         expect(getClientStateConfig()).toMatchSnapshot();
         expect(getServerStateConfig()).toMatchSnapshot();
       });
@@ -277,11 +240,7 @@ describe('stateConfig methods', () => {
           ONE_FAKE_SETTING: 'server-fake-setting',
           ONE_CLIENT_FAKE_SETTING: 'client-fake-setting',
         };
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         expect(getClientStateConfig()).toMatchSnapshot();
         expect(getServerStateConfig()).toMatchSnapshot();
       });
@@ -292,11 +251,7 @@ describe('stateConfig methods', () => {
           ONE_FAKE_SETTING: 'server-fake-setting',
           ONE_CLIENT_ANOTHER_SETTING: 'another-fake-setting',
         };
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         expect(getClientStateConfig()).toMatchSnapshot();
         expect(getServerStateConfig()).toMatchSnapshot();
       });
@@ -305,20 +260,15 @@ describe('stateConfig methods', () => {
           ...process.env,
           CLIENT_FAKE_SETTING: 'client-fake-setting',
         };
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         expect(getClientStateConfig()).toMatchSnapshot();
         expect(getServerStateConfig()).toMatchSnapshot();
       });
     });
     describe('with priorities of', () => {
       it('should prioritize dev endpoint over env', () => {
-        fs.existsSync.mockImplementation(() => true);
-        // eslint-disable-next-line unicorn/import-index, import/no-unresolved, import/extensions
-        require('fake/path/.dev/endpoints/index.js').mockImplementation(() => ({
+        fs.existsSync.mockImplementationOnce(() => true);
+        devEndpoints.mockImplementationOnce(() => ({
           someOtherApiUrl: {
             devProxyPath: 'some-other-api',
             destination: 'https://intranet-origin-dev.example.com/some-other-api/v1',
@@ -332,11 +282,7 @@ describe('stateConfig methods', () => {
           ONE_FAKE_SETTING: 'server-fake-setting',
           ONE_CLIENT_ANOTHER_SETTING: 'another-fake-setting',
         };
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         expect(getClientStateConfig()).toMatchSnapshot();
         expect(getServerStateConfig()).toMatchSnapshot();
       });
@@ -363,11 +309,7 @@ describe('stateConfig methods', () => {
           ONE_FAKE_SETTING: 'server-fake-setting',
           ONE_CLIENT_ANOTHER_SETTING: 'another-fake-setting',
         };
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         const execute = () => setStateConfig(provideStateConfig);
         expect(execute).toThrowErrorMatchingSnapshot();
       });
@@ -394,11 +336,7 @@ describe('stateConfig methods', () => {
           ONE_FAKE_SETTING: 'server-fake-setting',
           ONE_CLIENT_ANOTHER_SETTING: 'another-fake-setting',
         };
-        ({
-          setStateConfig,
-          getClientStateConfig,
-          getServerStateConfig,
-        } = require('../../../src/server/utils/stateConfig'));
+        reloadStateConfig();
         const execute = () => setStateConfig(provideStateConfig);
         expect(execute).toThrowErrorMatchingSnapshot();
       });

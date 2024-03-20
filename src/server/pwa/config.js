@@ -14,8 +14,8 @@
  * permissions and limitations under the License.
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const defaultPWAConfig = {
   webManifest: false,
@@ -114,7 +114,7 @@ export function configurePWA(config = {}) {
   // feature flag will not allow pwa/service-worker to be configured
   // it will default to a disabled state regardless if `appConfig.pwa` was provided
   if (process.env.ONE_SERVICE_WORKER !== 'true') {
-    // eslint-disable-next-line no-param-reassign
+    // eslint-disable-next-line no-param-reassign -- see above
     config = null;
   }
 

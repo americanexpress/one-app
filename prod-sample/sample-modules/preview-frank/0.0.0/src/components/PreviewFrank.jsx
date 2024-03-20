@@ -48,7 +48,7 @@ PreviewFrank.propTypes = {
   params: PropTypes.shape({
     moduleName: PropTypes.string.isRequired,
   }).isRequired,
-  location: PropTypes.shape({ // eslint-disable-line react/no-unused-prop-types
+  location: PropTypes.shape({
     query: PropTypes.shape({
       props: PropTypes.string,
       locale: PropTypes.string,

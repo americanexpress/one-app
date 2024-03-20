@@ -16,8 +16,8 @@
  * permissions and limitations under the License.
  */
 
-const fs = require('fs-extra');
-const path = require('path');
+const fs = require('node:fs/promises');
+const path = require('node:path');
 const { argv } = require('yargs');
 
 const {
@@ -41,11 +41,11 @@ const originModuleMapPath = path.resolve(nginxOriginStaticsRootDir, 'module-map.
 
 const getPreBuiltModuleInfo = (pathToModule) => {
   const pkgPath = path.resolve(pathToModule, 'package.json');
-  // eslint-disable-next-line import/no-dynamic-require, global-require
+  // eslint-disable-next-line import/no-dynamic-require, global-require -- needed for dynamic script
   const { name: moduleName, version: moduleVersion } = require(pkgPath);
 
   const pathToBundleIntegrityManifest = path.resolve(`${pathToModule}/bundle.integrity.manifest.json`);
-  // eslint-disable-next-line global-require,import/no-dynamic-require
+  // eslint-disable-next-line global-require,import/no-dynamic-require -- needed for dynamic script
   const integrityDigests = require(pathToBundleIntegrityManifest);
 
   return { moduleName, moduleVersion, integrityDigests };
@@ -53,7 +53,7 @@ const getPreBuiltModuleInfo = (pathToModule) => {
 
 const buildModule = async (pathToModule) => {
   const pkgPath = path.resolve(pathToModule, 'package.json');
-  // eslint-disable-next-line import/no-dynamic-require, global-require
+  // eslint-disable-next-line import/no-dynamic-require, global-require -- needed for dynamic script
   const { name: moduleName, version: moduleVersion } = require(pkgPath);
 
   if (!skipInstall) {
@@ -73,7 +73,7 @@ const buildModule = async (pathToModule) => {
   });
 
   const pathToBundleIntegrityManifest = path.resolve(`${pathToModule}/bundle.integrity.manifest.json`);
-  // eslint-disable-next-line global-require,import/no-dynamic-require
+  // eslint-disable-next-line global-require,import/no-dynamic-require -- needed for dynamic script
   const integrityDigests = require(pathToBundleIntegrityManifest);
 
   return {
@@ -86,13 +86,12 @@ const deployModuleToProdSampleCDN = async (pathToModule, moduleName) => {
   // use one app git commit sha to namespace modules
   const gitSha = getGitSha();
   const pathToOriginModuleStatics = path.resolve(`${nginxOriginStaticsModulesDir}/${gitSha}/${moduleName}`);
-  await fs.ensureDir(pathToOriginModuleStatics);
-  await fs.copy(pathToModuleBuildDir, pathToOriginModuleStatics, { overwrite: true });
+  await fs.cp(pathToModuleBuildDir, pathToOriginModuleStatics, { recursive: true });
   return pathToOriginModuleStatics;
 };
 
 const updateModuleMap = async ({ moduleName, moduleVersion, integrityDigests }) => {
-  // eslint-disable-next-line global-require,import/no-dynamic-require
+  // eslint-disable-next-line global-require,import/no-dynamic-require -- needed for dynamic script
   const moduleMap = require(originModuleMapPath);
   console.log(`Updating module map for ${moduleName}@${moduleVersion}`);
   const gitSha = getGitSha();
@@ -111,7 +110,7 @@ const updateModuleMap = async ({ moduleName, moduleVersion, integrityDigests }) 
     },
   };
   moduleMap.modules[moduleName] = moduleBundles;
-  fs.writeFile(originModuleMapPath, JSON.stringify(moduleMap, null, 2));
+  return fs.writeFile(originModuleMapPath, JSON.stringify(moduleMap, null, 2));
 };
 
 const deployModule = async () => {

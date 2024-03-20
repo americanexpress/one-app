@@ -13,12 +13,10 @@
 * or implied. See the License for the specific language governing
 * permissions and limitations under the License.
 */
-/* eslint-disable global-require */
 
-import fs from 'fs';
+import fs from 'node:fs';
 import '../../src/server/devHolocronCDN';
 
-jest.mock('cors', () => jest.fn(() => (req, res, next) => next()));
 jest.mock('../../src/server/utils/devCdnFactory', () => jest.fn(() => (req, res, next) => next()));
 jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
 

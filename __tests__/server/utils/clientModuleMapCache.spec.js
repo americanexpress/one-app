@@ -63,16 +63,16 @@ describe('clientModuleMapCache', () => {
   });
 
   it('only includes values for a single bundle per module in each map', () => {
-    // conflicting eslint rules here
-    // eslint-disable-next-line max-len
-    cacheKeys.forEach((cacheKey) => Object.keys(moduleMapCache[cacheKey].modules).forEach((moduleName) => {
-      const module = moduleMapCache[cacheKey].modules[moduleName];
-      expect(Object.keys(module)).toEqual(['baseUrl', cacheKey]);
-      expect(module[cacheKey]).toEqual({
-        url: `https://example.com/cdn/${moduleName}/1.0.0/${moduleName}.${cacheKey === 'browser' ? 'browser' : 'legacy.browser'}.js`,
-        integrity: expect.any(String),
-      });
-    })
+    cacheKeys.forEach((cacheKey) => Object
+      .keys(moduleMapCache[cacheKey].modules)
+      .forEach((moduleName) => {
+        const module = moduleMapCache[cacheKey].modules[moduleName];
+        expect(Object.keys(module)).toEqual(['baseUrl', cacheKey]);
+        expect(module[cacheKey]).toEqual({
+          url: `https://example.com/cdn/${moduleName}/1.0.0/${moduleName}.${cacheKey === 'browser' ? 'browser' : 'legacy.browser'}.js`,
+          integrity: expect.any(String),
+        });
+      })
     );
   });
 });

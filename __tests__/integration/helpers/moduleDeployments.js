@@ -14,8 +14,8 @@
  * permissions and limitations under the License.
  */
 
-const { resolve } = require('path');
-const fs = require('fs-extra');
+const { resolve } = require('node:path');
+const fs = require('node:fs/promises');
 const { retrieveGitSha } = require('./moduleMap');
 
 const modulesLocation = resolve(__dirname, '../../../prod-sample/nginx/origin-statics/modules');
@@ -23,28 +23,30 @@ const modulesLocation = resolve(__dirname, '../../../prod-sample/nginx/origin-st
 const deployBrokenModule = async ({ moduleName, version }) => {
   const gitSha = await retrieveGitSha();
   const moduleBuildPath = resolve(modulesLocation, gitSha, moduleName, version);
-  fs.ensureDirSync(moduleBuildPath);
+  await fs.mkdir(moduleBuildPath, { recursive: true });
 
   const browserBuildPath = resolve(moduleBuildPath, `${moduleName}.browser.js`);
   const serverBuildPath = resolve(moduleBuildPath, `${moduleName}.node.js`);
   const legacyBrowserBuildPath = resolve(moduleBuildPath, `${moduleName}.legacy.browser.js`);
 
-  fs.writeFileSync(browserBuildPath, "throw new Error('bad things will happen');", { flag: 'wx' });
-  fs.writeFileSync(serverBuildPath, "throw new Error('bad things will happen');", { flag: 'wx' });
-  fs.writeFileSync(legacyBrowserBuildPath, "throw new Error('bad things will happen');", { flag: 'wx' });
+  return Promise.all([
+    fs.writeFile(browserBuildPath, "throw new Error('bad things will happen');", { flag: 'wx' }),
+    fs.writeFile(serverBuildPath, "throw new Error('bad things will happen');", { flag: 'wx' }),
+    fs.writeFile(legacyBrowserBuildPath, "throw new Error('bad things will happen');", { flag: 'wx' }),
+  ]);
 };
 
 const dropModuleVersion = async ({ moduleName, version }) => {
   const gitSha = await retrieveGitSha();
   const moduleBuildPath = resolve(modulesLocation, gitSha, moduleName, version);
-  fs.removeSync(moduleBuildPath);
+  return fs.rm(moduleBuildPath, { recursive: true, force: true });
 };
 
 const renameModule = async ({ moduleName, newModuleName }) => {
   const gitSha = await retrieveGitSha();
   const modulePath = resolve(modulesLocation, gitSha, moduleName);
   const newModulePath = resolve(modulesLocation, gitSha, newModuleName);
-  fs.renameSync(modulePath, newModulePath);
+  return fs.rename(modulePath, newModulePath);
 };
 
 module.exports = {

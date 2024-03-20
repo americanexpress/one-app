@@ -16,12 +16,9 @@
  * permissions and limitations under the License.
  */
 
-const { spawn } = require('child_process');
-const fs = require('fs');
-const path = require('path');
-
-const mkdirp = require('mkdirp');
-const { rimraf } = require('rimraf');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const { promisifySpawn } = require('./utils');
 
 const TEMP_STATIC_PATH = path.resolve(__dirname, '../.tmp-statics');
 const FINAL_TAR_DIR = path.resolve(__dirname, '../');
@@ -31,28 +28,6 @@ if (!DOCKER_IMAGE_LABEL) {
   // should be the result from `docker build --build-arg HTTPS_PROXY=$HTTPS_PROXY .` or whatever
   // temporary tag was used for that build
   throw new Error('docker image label to copy built static files from is required');
-}
-
-function promisifySpawn(...args) {
-  return new Promise((res, rej) => {
-    const spawnedProcess = spawn(...args);
-    let stdout = '';
-    let stderr = '';
-    spawnedProcess.stdout.on('data', (d) => { stdout += d; });
-    spawnedProcess.stderr.on('data', (d) => { stderr += d; });
-    spawnedProcess.on('close', (code) => {
-      const data = {
-        code,
-        stdout: stdout.trim(),
-        stderr: stderr.trim(),
-      };
-      if (code !== 0) {
-        rej(data);
-      } else {
-        res(data);
-      }
-    });
-  });
 }
 
 function createContainer(imageLabel) {
@@ -84,36 +59,31 @@ async function extractStaticAssets(imageLabel, targetPath) {
   }
 }
 
-function createTarArchive(copiedStaticPath) {
+async function createTarArchive(copiedStaticPath) {
   const copiedStaticAppPath = path.join(copiedStaticPath, 'app');
-  return new Promise((res, rej) => fs.readdir(
-    copiedStaticAppPath, (err, data) => (err ? rej(err) : res(data))
-  ))
-    .then((childPaths) => {
-      if (childPaths.length !== 1) {
-        throw new Error(`expected 1 child path, had ${childPaths.length} (${childPaths})`);
-      }
-      const [version] = childPaths;
-      const tgzFileName = `one-app_${version}_static-assets.tgz`;
-      return promisifySpawn(
-        'tar',
-        ['-zcvf', tgzFileName, version],
-        { cwd: copiedStaticAppPath }
-      )
-        .then(() => path.join(copiedStaticAppPath, tgzFileName));
-    });
+  const childPaths = await fs.readdir(copiedStaticAppPath);
+  if (childPaths.length !== 1) {
+    throw new Error(`expected 1 child path, had ${childPaths.length} (${childPaths})`);
+  }
+  const [version] = childPaths;
+  const tgzFileName = `one-app_${version}_static-assets.tgz`;
+  await promisifySpawn(
+    'tar',
+    ['-zcvf', tgzFileName, version],
+    { cwd: copiedStaticAppPath }
+  );
+  return path.join(copiedStaticAppPath, tgzFileName);
 }
 
-function moveTar(tarPath, finalTarDir) {
-  return new Promise((res, rej) => {
-    const finalTarPath = path.join(finalTarDir, path.basename(tarPath));
-    fs.rename(tarPath, finalTarPath, (err) => (err ? rej(err) : res(finalTarPath)));
-  });
+async function moveTar(tarPath, finalTarDir) {
+  const finalTarPath = path.join(finalTarDir, path.basename(tarPath));
+  await fs.rename(tarPath, finalTarPath);
+  return finalTarPath;
 }
 
 (async () => {
   try {
-    await mkdirp(TEMP_STATIC_PATH);
+    await fs.mkdir(TEMP_STATIC_PATH, { recursive: true });
     await extractStaticAssets(DOCKER_IMAGE_LABEL, TEMP_STATIC_PATH);
     const tmpTarPath = await createTarArchive(TEMP_STATIC_PATH);
     const finalTarPath = await moveTar(tmpTarPath, FINAL_TAR_DIR);
@@ -122,6 +92,6 @@ function moveTar(tarPath, finalTarDir) {
     console.error('unable to build static assets artifact,', err);
     process.exitCode = 1;
   } finally {
-    await rimraf(TEMP_STATIC_PATH, { disableGlob: true });
+    await fs.rm(TEMP_STATIC_PATH, { recursive: true, force: true });
   }
 })();

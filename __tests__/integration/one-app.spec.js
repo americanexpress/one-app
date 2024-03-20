@@ -15,9 +15,9 @@
  */
 
 // Headers are under a key with a dangling underscore
-/* eslint-disable no-underscore-dangle */
-import { promises as fs } from 'fs';
-import path from 'path';
+
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 import fetch from 'cross-fetch';
 import yargs, { argv } from 'yargs';
@@ -89,7 +89,6 @@ describe('Tests that require Docker setup', () => {
       expect(problemModuleUrl).toBe(
         `${testCdnUrl}/${gitSha}/${moduleName}/${version}/${moduleName}.node.js`
       );
-      // eslint-disable-next-line no-useless-escape
       expect(workingUrl).toBe(moduleName);
     });
     test('one-app remains healthy with a bad module at start', async () => {
@@ -1291,14 +1290,12 @@ describe('Tests that require Docker setup', () => {
 
           await browser.url(`${appAtTestUrls.browserUrl}/success`);
 
-          // eslint-disable-next-line prefer-arrow-callback
-          const result = await browser.executeAsync(function getRegistration(done) {
+          const result = await browser.executeAsync((done) => {
             navigator.serviceWorker.getRegistration().then(done);
           });
 
           expect(result).toBe(null);
 
-          // eslint-disable-next-line prefer-arrow-callback
           const cacheKeys = await browser.executeAsync(getCacheKeys);
 
           expect(cacheKeys).toEqual([]);
@@ -1648,8 +1645,6 @@ describe('Tests that can run against either local Docker setup or remote One App
   // urls are different bt what fetch uses and what selenium uses bc fetch runs from host and
   // selenium runs inside a docker container
   const appAtTestInstances = remoteOneAppEnvironment
-    // conflicting eslint rules make it so that on running `lint --fix` this rule always fails
-    // eslint-disable-next-line max-len
     ? remoteOneAppEnvironment.map((environmentUrl) => ({
       fetchUrl: environmentUrl,
       browserUrl: environmentUrl,
@@ -1735,7 +1730,7 @@ describe('Tests that can run against either local Docker setup or remote One App
               'accept-language': 'en-US,en;q=0.9',
               host: expect.any(String),
               'user-agent':
-                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
             },
             method: 'GET',
             originalUrl: '/vitruvius',
@@ -1941,13 +1936,11 @@ describe('Tests that can run against either local Docker setup or remote One App
             defaultFetchOpts
           );
           const body = await response.text();
-          expect(body).toMatch(new RegExp('<!DOCTYPE html>'));
-          expect(body).toMatch(new RegExp('<title>One App</title>'));
-          expect(body).toMatch(new RegExp('<meta name="application-name" content="one-app">'));
+          expect(body).toMatch(/<!DOCTYPE html>/);
+          expect(body).toMatch(/<title>One App<\/title>/);
+          expect(body).toMatch(/<meta name="application-name" content="one-app">/);
           expect(body).toMatch(
-            new RegExp(
-              '<h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error</h2>'
-            )
+            /<h2 style="display: flex; justify-content: center; padding: 40px 15px 0px;">Loading Error<\/h2>/
           );
         });
       });

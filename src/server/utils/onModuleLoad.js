@@ -15,7 +15,7 @@
  */
 
 import semver from 'semver';
-import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
+import { META_DATA_KEY } from '@americanexpress/one-app-server-bundler';
 import { clearModulesUsingExternals } from 'holocron';
 
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from './stateConfig';

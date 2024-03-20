@@ -15,7 +15,7 @@
  */
 
 import util from 'node:util';
-import path from 'path';
+import path from 'node:path';
 import compress from '@fastify/compress';
 import Fastify from 'fastify';
 import fastifyCookie from '@fastify/cookie';
@@ -39,7 +39,7 @@ import renderStaticErrorPage from '../../src/server/plugins/reactHtml/staticErro
 import addFrameOptionsHeader from '../../src/server/plugins/addFrameOptionsHeader';
 import addCacheHeaders from '../../src/server/plugins/addCacheHeaders';
 import {
-  // eslint-disable-next-line import/named
+  // eslint-disable-next-line import/named -- provided by mock
   _setConfig,
   serviceWorkerHandler,
   webManifestMiddleware,

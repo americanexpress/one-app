@@ -14,9 +14,9 @@
  * permissions and limitations under the License.
  */
 
-const fs = require('fs-extra');
-const path = require('path');
-const { spawn, execSync } = require('child_process');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const { spawn, execSync } = require('node:child_process');
 
 const sampleProdDir = path.resolve('./prod-sample/');
 const sampleModulesDir = path.resolve(sampleProdDir, 'sample-modules');
@@ -165,7 +165,7 @@ const basicBatchedTask = async (list, task, batchSize = 5) => {
   for (const currentBatch of batches) {
     // eslint-disable-next-line no-await-in-loop -- this is not for production
     const result = await task(currentBatch);
-    results = results.concat(result);
+    results = [...results, ...result];
   }
   return results;
 };

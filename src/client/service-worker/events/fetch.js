@@ -58,7 +58,7 @@ function createHolocronCachingMiddleware(holocronModuleMap) {
     if (matchingModule) {
       const meta = createResourceMetaData(
         event,
-        matchingModule.concat(clientCacheRevision)
+        [...matchingModule, clientCacheRevision]
       );
       context.set('cacheName', meta.cacheName);
       context.set('request', event.request.clone());

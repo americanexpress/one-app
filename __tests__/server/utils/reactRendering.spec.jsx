@@ -14,7 +14,6 @@
  * permissions and limitations under the License.
  */
 
-/* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
 import { renderToString, renderToStaticMarkup } from 'react-dom/server';
 import { Helmet } from 'react-helmet';

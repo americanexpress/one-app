@@ -16,7 +16,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import url, { Url } from 'url';
+import url, { Url } from 'node:url';
 import { RouterContext, matchPromise } from '@americanexpress/one-app-router';
 import { composeModules } from 'holocron';
 
@@ -159,13 +159,13 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         ssrMetrics.reactRendering,
         { renderMethodName: getRenderMethodName(state) }
       );
-      /* eslint-disable react/jsx-props-no-spreading */
+      /* eslint-disable react/jsx-props-no-spreading -- renderProps are unpredictable */
       const { renderedString, helmetInfo } = renderMethod(
         <Provider store={store}>
           <RouterContext {...renderProps} />
         </Provider>
       );
-      /* eslint-ensable react/jsx-props-no-spreading */
+      /* eslint-enable react/jsx-props-no-spreading */
       finishRenderTimer();
 
       request.appHtml = renderedString;

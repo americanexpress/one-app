@@ -84,7 +84,7 @@ describe('pollModuleMap', () => {
   });
 
   it('throws if a custom min is unparsable', () => {
-    expect(() => load({ min: 'not a number' })).toThrowError(
+    expect(() => load({ min: 'not a number' })).toThrow(
       'ONE_MAP_POLLING_MIN or ONE_MAP_POLLING_MAX misformatted'
     );
   });
@@ -95,13 +95,13 @@ describe('pollModuleMap', () => {
   });
 
   it('throws if a custom max is unparsable', () => {
-    expect(() => load({ max: 'not a number' })).toThrowError(
+    expect(() => load({ max: 'not a number' })).toThrow(
       'ONE_MAP_POLLING_MIN or ONE_MAP_POLLING_MAX misformatted'
     );
   });
 
   it('throws if a custom max is less than the min', () => {
-    expect(() => load({ min: 6, max: 5 })).toThrowError(
+    expect(() => load({ min: 6, max: 5 })).toThrow(
       /ONE_MAP_POLLING_MAX is less than ONE_MAP_POLLING_MIN/
     );
   });

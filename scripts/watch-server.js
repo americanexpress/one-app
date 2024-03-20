@@ -16,8 +16,8 @@
  * permissions and limitations under the License.
  */
 
+const { spawn } = require('node:child_process');
 const { argv } = require('yargs');
-const { spawn } = require('child_process');
 const buildServiceWorkerScripts = require('./build-service-workers');
 
 (async function dev() {
@@ -67,7 +67,8 @@ const buildServiceWorkerScripts = require('./build-service-workers');
   const nodemon = spawn('nodemon', [
     ...nodemonArgs,
     'lib/server/index.js',
-  ].concat(flags.length > 0 ? ['--', ...flags] : []), {
+    ...flags.length > 0 ? ['--', ...flags] : [],
+  ], {
     stdio: 'inherit',
     killSignal: 'SIGINT',
   });

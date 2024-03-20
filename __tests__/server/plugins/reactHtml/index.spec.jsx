@@ -24,11 +24,7 @@ import reactHtml, {
   renderExternalFallbacks,
   checkStateForRedirectAndStatusCode,
 } from '../../../../src/server/plugins/reactHtml';
-// _client is a method to control the mock
-// eslint-disable-next-line import/named
 import { getClientStateConfig } from '../../../../src/server/utils/stateConfig';
-// _setVars is a method to control the mock
-// eslint-disable-next-line import/named
 import transit from '../../../../src/universal/utils/transit';
 import {
   setClientModuleMapCache,
@@ -65,7 +61,7 @@ jest.mock('holocron', () => {
 jest.mock('@americanexpress/fetch-enhancers', () => ({
   createTimeoutFetch: jest.fn(
     (timeout) => (next) => (url) => next(url).then((reply) => {
-      // eslint-disable-next-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign -- required for test
       reply.timeout = timeout;
       return reply;
     })

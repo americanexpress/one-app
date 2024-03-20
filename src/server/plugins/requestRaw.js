@@ -31,7 +31,7 @@ const requestRaw = async (fastify) => {
     request.raw.ip = request.ip;
     request.raw.ips = request.ips;
     request.raw.log = request.log;
-    // eslint-disable-next-line no-param-reassign
+    // eslint-disable-next-line no-param-reassign -- for backward compatibility
     reply.raw.log = request.log;
 
     // backward compatibility for body-parser

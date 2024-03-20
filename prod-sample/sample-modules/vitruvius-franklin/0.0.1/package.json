@@ -5,12 +5,13 @@
   "scripts": {
     "prebuild": "npm run clean",
     "build": "bundle-module",
-    "clean": "rimraf build",
+    "rimraf": "node -e \"process.argv.slice(1).forEach(path => require('node:fs').rmSync(path, { recursive: true, force: true }));\" --",
+    "clean": "npm run rimraf build",
     "postinstall": "npm run build"
   },
   "dependencies": {
-    "holocron": "^1.10.0",
-    "immutable": "^4.1.0",
+    "holocron": "^1.10.2",
+    "immutable": "^4.3.5",
     "prop-types": "^15.8.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -18,8 +19,7 @@
     "redux": "^4.2.1"
   },
   "devDependencies": {
-    "@americanexpress/one-app-bundler": "^6.21.1",
-    "babel-preset-amex": "^4.0.0",
-    "rimraf": "^3.0.2"
+    "@americanexpress/one-app-bundler": "^6.21.8",
+    "babel-preset-amex": "^4.0.3"
   }
 }

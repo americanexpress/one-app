@@ -14,8 +14,8 @@
  * permissions and limitations under the License.
  */
 
+import path from 'node:path';
 import yargs, { argv } from 'yargs';
-import path from 'path';
 
 const rootModuleNameEnvVarValue = process.env.ONE_CLIENT_ROOT_MODULE_NAME;
 
@@ -43,7 +43,7 @@ if (process.env.NODE_ENV === 'development') {
   // only require a remote module map if there are no locally served modules
   let isLocalModuleMapEmpty = false;
   try {
-    // eslint-disable-next-line import/no-dynamic-require,global-require
+    // eslint-disable-next-line import/no-dynamic-require,global-require -- need to load dynamically
     const localModuleMap = require(path.join(process.cwd(), 'static', 'module-map.json'));
     if (Object.entries(localModuleMap).length === 0) {
       isLocalModuleMapEmpty = true;

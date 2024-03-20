@@ -17,15 +17,13 @@
 import util from 'node:util';
 import React from 'react';
 import { preprocessEnvVar } from '@americanexpress/env-config-utils';
-import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
+import { META_DATA_KEY } from '@americanexpress/one-app-server-bundler';
 import { clearModulesUsingExternals } from 'holocron';
 
 import onModuleLoad, {
   CONFIGURATION_KEY,
   validateCspIsPresent,
 } from '../../../src/server/utils/onModuleLoad';
-// This named export exists only on the mock
-// eslint-disable-next-line import/named
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from '../../../src/server/utils/stateConfig';
 import { setRedirectAllowList } from '../../../src/server/utils/redirectAllowList';
 import { setCorsOrigins } from '../../../src/server/plugins/conditionallyAllowCors';

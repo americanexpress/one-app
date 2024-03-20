@@ -14,9 +14,9 @@
  * permissions and limitations under the License.
  */
 
-const fs = require('fs');
-const https = require('https');
-const http = require('http');
+const fs = require('node:fs');
+const https = require('node:https');
+const http = require('node:http');
 const jsonServer = require('json-server');
 const pause = require('connect-pause');
 

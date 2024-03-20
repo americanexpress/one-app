@@ -27,10 +27,10 @@ import createRoutes from '../universal/routes';
 
 export default async function initClient() {
   try {
-    // eslint-disable-next-line no-underscore-dangle
+    /* eslint-disable no-underscore-dangle -- private API */
     setModuleMap(global.__CLIENT_HOLOCRON_MODULE_MAP__);
-    // eslint-disable-next-line no-underscore-dangle
     setRequiredExternalsRegistry(global.__HOLOCRON_EXTERNALS__);
+    /* eslint-enable no-underscore-dangle */
     moveHelmetScripts();
 
     const store = initializeClientStore();
@@ -61,7 +61,7 @@ export default async function initClient() {
       dispatch: store.dispatch,
     });
 
-    /* eslint-disable react/jsx-props-no-spreading */
+    /* eslint-disable react/jsx-props-no-spreading -- props are unpredictable */
     /* istanbul ignore next */
     const App = () => (
       <Provider store={store}>
@@ -79,11 +79,10 @@ export default async function initClient() {
     [...document.querySelectorAll('.ssr-css')]
       .forEach((style) => style.remove());
 
-    // eslint-disable-next-line no-underscore-dangle
+    // eslint-disable-next-line no-underscore-dangle -- private API
     delete global.__INITIAL_STATE__;
     document.querySelector('#initial-state').remove();
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error(error);
     // TODO add renderError
   }

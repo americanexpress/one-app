@@ -14,12 +14,30 @@
  * permissions and limitations under the License.
  */
 
-// eval can be harmful, that's why we're disabling it
-/* eslint-disable no-eval, no-implied-eval */
+/* eslint-disable no-eval, no-implied-eval -- eval can be harmful, that's why we're disabling it */
 
-import getObjectValueAtPath from '../../src/server/utils/getObjectValueAtPath';
+const getObjectValueAtPath = (obj, path, defaultValue) => {
+  const result = path.split(/[.[\]]+?/)
+    .filter(Boolean)
+    .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
+  return result === undefined || result === obj ? defaultValue : result;
+};
 
-const set = require('lodash.set');
+const defineProp = (obj, key, value) => Object.defineProperty(obj, key, {
+  configurable: true,
+  enumerable: true,
+  value,
+  writable: true,
+});
+
+const set = (obj, key, val) => {
+  if (key.includes('.')) {
+    const [a, b] = key.split('.');
+    defineProp(obj[a], b, val);
+  } else {
+    defineProp(obj, key, val);
+  }
+};
 
 jest.useFakeTimers();
 jest.spyOn(global, 'setTimeout');
@@ -27,7 +45,6 @@ jest.spyOn(global, 'setInterval');
 jest.spyOn(console, 'warn');
 
 describe('badPartMonkeypatches', () => {
-  // eslint-disable-next-line no-console
   global.execScript = (s) => console.info('execScript?', s);
   const originals = {};
   [
@@ -94,7 +111,7 @@ describe('badPartMonkeypatches', () => {
       applyMonkeypatches();
       // execScript is manually defined earlier
       expect(
-        () => execScript('alert(1)') // eslint-disable-line no-undef
+        () => execScript('alert(1)') // eslint-disable-line no-undef -- testing the bad parts
       )
         .toThrowErrorMatchingSnapshot();
     });
@@ -123,7 +140,6 @@ describe('badPartMonkeypatches', () => {
 
       it('should execute normally on non-string first argument', () => {
         setTimeout(
-          // eslint-disable-next-line no-console
           (a, b, c) => console.log(a, b, c),
           1e3,
           'A',
@@ -145,7 +161,6 @@ describe('badPartMonkeypatches', () => {
 
       it('should execute normally on non-string first argument', () => {
         setInterval(
-          // eslint-disable-next-line no-console
           (a, b, c) => console.log(a, b, c),
           1e3,
           'A',
@@ -162,3 +177,5 @@ describe('badPartMonkeypatches', () => {
     });
   });
 });
+
+/* eslint-enable no-eval, no-implied-eval */
