@@ -1,4 +1,4 @@
-ARG VERSION=20.8.1
+ARG VERSION=20.10.0
 # Use the pre-baked fat node image only in the builder
 # which includes build utils preinstalled (e.g. gcc, make, etc).
 # This will result in faster and reliable One App docker image
