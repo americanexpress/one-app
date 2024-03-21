@@ -1,4 +1,4 @@
-ARG VERSION=20.10.0
+ARG VERSION=20.11.0
 # Use the pre-baked fat node image only in the builder
 # which includes build utils preinstalled (e.g. gcc, make, etc).
 # This will result in faster and reliable One App docker image
@@ -44,7 +44,7 @@ EXPOSE 3005
 WORKDIR /opt/one-app
 RUN chown node:node /opt/one-app
 USER $USER
-CMD ["scripts/start.sh"]
+CMD ["node", "lib/server"]
 COPY --from=builder --chown=node:node /opt/one-app/development ./
 
 # production image
@@ -59,5 +59,5 @@ EXPOSE 3000
 EXPOSE 3005
 WORKDIR /opt/one-app
 USER $USER
-CMD ["scripts/start.sh"]
+CMD ["node", "--dns-result-order=ipv4first", "--no-experimental-fetch", "lib/server"]
 COPY --from=builder --chown=node:node /opt/one-app/production ./
