@@ -15,7 +15,7 @@
 # permissions and limitations under the License.
 
 flags="$@"
-nodeArgs='--dns-result-order ipv4first --no-experimental-fetch'
+nodeArgs='--dns-result-order ipv4first --no-experimental-fetch  --require=dotenv/config'
 
 if [ -n "$OTEL_RESOURCE_ATTRIBUTES" ]; then
   export OTEL_RESOURCE_ATTRIBUTES=$(echo $OTEL_RESOURCE_ATTRIBUTES | sed "s/;/,/g")
