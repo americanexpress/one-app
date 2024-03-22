@@ -98,7 +98,7 @@ One App can be configured via Environment Variables:
 
 ## `DOTENV_CONFIG_PATH`
 
-One App supports the usage of [Dotenv](https://github.com/motdotla/dotenv). This environment variable allows you to specify the path to the `.env` file that should be loaded. These values are loaded before the start of the One App server. See the documentation for Dotenv for advanced usage.
+One App supports the usage of [Dotenv](https://github.com/motdotla/dotenv). This environment variable allows you to specify the path to the `.env` file that should be loaded. These values are loaded before the start of the One App server. See the documentation for Dotenv for advanced usage. Dotenv will look for `.env` by default if this is not set.
 
 **Runs In**
 * ✅ Production
