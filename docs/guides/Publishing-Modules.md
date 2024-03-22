@@ -123,10 +123,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Use Node.js 20.x
+    - name: Use Node.js 16.x
       uses: actions/setup-node@v1
       with:
-        node-version: '20.x'
+        node-version: '16.x'
     - name: Cache NPM Dependencies
       uses: actions/cache@v1
       with:
