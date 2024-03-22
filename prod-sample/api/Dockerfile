@@ -1,5 +1,5 @@
-FROM node:20
-LABEL One App Team
+FROM node:16-alpine
+MAINTAINER One App Team
 
 WORKDIR /
 
