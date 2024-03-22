@@ -38,3 +38,4 @@ docker-compose.test.yml
 .DS_Store
 .idea
 .vscode
+.env

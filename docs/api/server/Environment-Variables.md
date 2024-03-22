@@ -9,6 +9,8 @@ One App can be configured via Environment Variables:
 ## 📖 Table of Contents
 
 **By Topic**
+* Dotenv
+  * [`DOTENV_CONFIG_PATH`](#dotenv_config_path)
 * Network & Protocol Settings
   * [`HTTPS_PORT`](#https_port)
   * [`HTTPS_PRIVATE_KEY_PASS_FILE_PATH`](#https_private_key_pass_file_path)
@@ -93,6 +95,24 @@ One App can be configured via Environment Variables:
 </details>
 
 > ⚠️ = Required
+
+## `DOTENV_CONFIG_PATH`
+
+One App supports the usage of [Dotenv](https://github.com/motdotla/dotenv). This environment variable allows you to specify the path to the `.env` file that should be loaded. These values are loaded before the start of the One App server. See the documentation for Dotenv for advanced usage. Dotenv will look for `.env` by default if this is not set.
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+**Shape**
+```bash
+DOTENV_CONFIG_PATH=String
+```
+
+**Example**
+```bash
+DOTENV_CONFIG_PATH=.env
+```
 
 ## `HOLOCRON_MODULE_MAP_URL`
 
