@@ -18,6 +18,8 @@ one*.tgz
 lib
 .webpack-stats*
 .build-meta.json
+.build-cache
+.build-stats
 bundle.integrity.manifest.json
 *.md
 test-setup.js
