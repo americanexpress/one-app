@@ -43,7 +43,7 @@
     "set-middleware": "set-middleware",
     "set-dev-endpoints": "node scripts/set-dev-endpoints.js",
     "postinstall": "npm run build",
-    "release:standard-version": "standard-version",
+    "release:standard-version": "standard-version -n",
     "release:changelog": "echo \"$(head -3 CHANGELOG.md)\n\n$(node_modules/.bin/conventional-changelog -p angular)\n\n$(tail -n +4 CHANGELOG.md)\" > CHANGELOG.md",
     "release": "npm run release:standard-version && npm run release:changelog",
     "prepare": "husky || true"
@@ -168,7 +168,7 @@
     "babel-preset-amex": "^4.0.3",
     "chokidar": "^3.6.0",
     "concurrently": "^8.2.2",
-    "conventional-changelog-cli": "^2.2.2",
+    "conventional-changelog-cli": "^4.1.0",
     "cross-env": "^7.0.3",
     "danger": "^11.3.1",
     "eslint": "^8.57.0",
