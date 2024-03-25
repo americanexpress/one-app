@@ -30,7 +30,7 @@ services:
       - extra-slow-api
       - nginx
     env_file: ./one-app/base.env
-    entrypoint: sh -c 'sleep 2s && node lib/server'
+    entrypoint: sh -c 'sleep 2s && node --require=dotenv/config lib/server'
   fast-api:
     build:
       context: ./api
