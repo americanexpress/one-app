@@ -14,19 +14,12 @@
  * permissions and limitations under the License.
  */
 
-import fs from 'fs';
 import path from 'path';
 import { fromJS } from 'immutable';
 import chokidar from 'chokidar';
 import loadModule from 'holocron/loadModule.node';
-import {
-  getModules,
-  resetModuleRegistry,
-} from 'holocron/moduleRegistry';
-import { address } from 'ip';
+import { getModules, resetModuleRegistry } from 'holocron/moduleRegistry';
 import watchLocalModules from '../../../src/server/utils/watchLocalModules';
-
-const ip = address();
 
 jest.mock('chokidar', () => {
   const listeners = {};
@@ -59,20 +52,19 @@ jest.mock('holocron/moduleRegistry', () => {
 });
 
 jest.mock('holocron/loadModule.node', () => jest.fn(() => Promise.resolve(() => null)));
-jest.mock('fs', () => {
-  const actual = jest.requireActual('fs');
-  return {
-    ...actual,
-    readFileSync: jest.fn(actual.readFileSync),
-  };
-});
+
 jest.spyOn(console, 'error').mockImplementation(() => {});
+jest.spyOn(console, 'warn').mockImplementation(() => {});
+jest.spyOn(console, 'log').mockImplementation(() => {});
 
 describe('watchLocalModules', () => {
-  beforeEach(() => jest.clearAllMocks());
   let origOneAppDevCDNPort;
   beforeAll(() => {
     origOneAppDevCDNPort = process.env.HTTP_ONE_APP_DEV_CDN_PORT;
+  });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    delete process.env.HTTP_ONE_APP_DEV_CDN_PORT;
   });
   afterAll(() => {
     process.env.HTTP_ONE_APP_DEV_CDN_PORT = origOneAppDevCDNPort;
@@ -80,7 +72,105 @@ describe('watchLocalModules', () => {
 
   it('should watch the modules directory', () => {
     watchLocalModules();
-    expect(chokidar.watch).toHaveBeenCalledWith(path.resolve(__dirname, '../../../static/modules'), { awaitWriteFinish: true });
+    expect(chokidar.watch).toHaveBeenCalledTimes(1);
+    expect(chokidar.watch.mock.calls[0][0]).toMatchInlineSnapshot('"*/*/*.node.js"');
+    // absolute path varies based on where the repository has been checked out
+    expect(chokidar.watch.mock.calls[0][1]).toHaveProperty('cwd');
+    const { cwd } = chokidar.watch.mock.calls[0][1];
+    delete chokidar.watch.mock.calls[0][1].cwd;
+    expect(path.relative(path.resolve(__dirname, '../../../'), cwd)).toMatchInlineSnapshot(
+      '"static/modules"'
+    );
+    // can now look at the rest
+    expect(chokidar.watch.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "awaitWriteFinish": true,
+      }
+    `);
+  });
+
+  it('should tell the user when a module build was updated', async () => {
+    const moduleName = 'some-module';
+    const moduleVersion = '1.0.1';
+    const moduleMapSample = {
+      modules: {
+        [moduleName]: {
+          baseUrl: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/`,
+          node: {
+            integrity: '133',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.node.js`,
+          },
+          browser: {
+            integrity: '234',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.browser.js`,
+          },
+          legacyBrowser: {
+            integrity: '134633',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.legacy.browser.js`,
+          },
+        },
+      },
+    };
+    const modulePath = `${moduleName}/${moduleVersion}/${moduleName}.node.js`;
+    const originalModule = () => null;
+    const updatedModule = () => null;
+    const modules = fromJS({ [moduleName]: originalModule });
+    const moduleMap = fromJS(moduleMapSample);
+    resetModuleRegistry(modules, moduleMap);
+    watchLocalModules();
+    const changeListener = chokidar.getListeners().change;
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
+    await changeListener(modulePath);
+    expect(console.log).toHaveBeenCalled();
+    expect(console.log.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "the Node.js bundle for some-module finished saving, attempting to load",
+      ]
+    `);
+  });
+
+  it('should tell the user when the updated module is loaded', async () => {
+    const moduleName = 'some-module';
+    const moduleVersion = '1.0.1';
+    const moduleMapSample = {
+      modules: {
+        [moduleName]: {
+          baseUrl: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/`,
+          node: {
+            integrity: '133',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.node.js`,
+          },
+          browser: {
+            integrity: '234',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.browser.js`,
+          },
+          legacyBrowser: {
+            integrity: '134633',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.legacy.browser.js`,
+          },
+        },
+      },
+    };
+    const modulePath = `${moduleName}/${moduleVersion}/${moduleName}.node.js`;
+    const originalModule = () => null;
+    const updatedModule = () => null;
+    const modules = fromJS({ [moduleName]: originalModule });
+    const moduleMap = fromJS(moduleMapSample);
+    resetModuleRegistry(modules, moduleMap);
+    watchLocalModules();
+    const changeListener = chokidar.getListeners().change;
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
+    await changeListener(modulePath);
+    expect(loadModule).toHaveBeenCalledTimes(1);
+    expect(getModules().get(moduleName)).toBe(updatedModule);
+    expect(console.log).toHaveBeenCalledTimes(2);
+    expect(console.log.mock.calls[1]).toMatchInlineSnapshot(`
+      Array [
+        "finished reloading some-module",
+      ]
+    `);
   });
 
   it('should update the module registry when a server bundle changes', async () => {
@@ -89,23 +179,23 @@ describe('watchLocalModules', () => {
     const moduleMapSample = {
       modules: {
         [moduleName]: {
+          baseUrl: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/`,
           node: {
             integrity: '133',
-            url: `https://example.com/cdn/${moduleName}/${moduleVersion}/${moduleName}-node.js`,
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.node.js`,
           },
           browser: {
             integrity: '234',
-            url: `https://example.com/cdn/${moduleName}/${moduleVersion}/${moduleName}-browser.js`,
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.browser.js`,
           },
           legacyBrowser: {
             integrity: '134633',
-            url: `https://example.com/cdn/${moduleName}/${moduleVersion}/${moduleName}-legacy.browser.js`,
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.legacy.browser.js`,
           },
         },
       },
     };
-    fs.readFileSync.mockImplementationOnce(() => JSON.stringify(moduleMapSample));
-    const modulePath = path.resolve(__dirname, `../../../static/modules/${moduleName}/${moduleVersion}/${moduleName}.node.js`);
+    const modulePath = `${moduleName}/${moduleVersion}/${moduleName}.node.js`;
     const originalModule = () => null;
     const updatedModule = () => null;
     const modules = fromJS({ [moduleName]: originalModule });
@@ -116,133 +206,116 @@ describe('watchLocalModules', () => {
     expect(getModules().get(moduleName)).toBe(originalModule);
     loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
     await changeListener(modulePath);
-    expect(loadModule).toHaveBeenCalledWith(
-      moduleName,
-      moduleMapSample.modules[moduleName],
+    expect(loadModule).toHaveBeenCalledTimes(1);
+    expect(loadModule.mock.calls[0][0]).toBe(moduleName);
+    expect(loadModule.mock.calls[0][1]).toMatchInlineSnapshot(`
+      Object {
+        "baseUrl": "http://localhost:3001/static/modules/some-module/1.0.1/",
+        "browser": Object {
+          "integrity": "234",
+          "url": "http://localhost:3001/static/modules/some-module/1.0.1/some-module.browser.js",
+        },
+        "legacyBrowser": Object {
+          "integrity": "134633",
+          "url": "http://localhost:3001/static/modules/some-module/1.0.1/some-module.legacy.browser.js",
+        },
+        "node": Object {
+          "integrity": "133",
+          "url": "http://localhost:3001/static/modules/some-module/1.0.1/some-module.node.js",
+        },
+      }
+    `);
+    expect(loadModule.mock.calls[0][2]).toBe(
       require('../../../src/server/utils/onModuleLoad').default
     );
     expect(getModules().get(moduleName)).toBe(updatedModule);
   });
 
-  it('handles a rejection properly', async () => {
+  it('should not change the module registry when a new module fails to load', async () => {
     const moduleName = 'some-module';
     const moduleVersion = '1.0.1';
     const moduleMapSample = {
       modules: {
         [moduleName]: {
+          baseUrl: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/`,
           node: {
             integrity: '133',
-            url: `https://example.com/cdn/${moduleName}/${moduleVersion}/${moduleName}-node.js`,
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.node.js`,
           },
           browser: {
             integrity: '234',
-            url: `https://example.com/cdn/${moduleName}/${moduleVersion}/${moduleName}-browser.js`,
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.browser.js`,
           },
           legacyBrowser: {
             integrity: '134633',
-            url: `https://example.com/cdn/${moduleName}/${moduleVersion}/${moduleName}-legacy.browser.js`,
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.legacy.browser.js`,
           },
         },
       },
     };
-    fs.readFileSync.mockImplementationOnce(() => JSON.stringify(moduleMapSample));
-    const modulePath = path.resolve(__dirname, `../../../static/modules/${moduleName}/${moduleVersion}/${moduleName}.node.js`);
+    const modulePath = `${moduleName}/${moduleVersion}/${moduleName}.node.js`;
     const originalModule = () => null;
-    const updatedModule = () => null;
     const modules = fromJS({ [moduleName]: originalModule });
     const moduleMap = fromJS(moduleMapSample);
     resetModuleRegistry(modules, moduleMap);
     watchLocalModules();
     const changeListener = chokidar.getListeners().change;
     expect(getModules().get(moduleName)).toBe(originalModule);
-    loadModule.mockReturnValueOnce(Promise.reject(updatedModule));
-    await changeListener(modulePath);
-    expect(loadModule).toHaveBeenCalledWith(
-      moduleName,
-      moduleMapSample.modules[moduleName],
-      require('../../../src/server/utils/onModuleLoad').default
-    );
+    loadModule.mockImplementationOnce(() => Promise.reject(new Error('sample-module startup error')));
+
+    // usually we'd expect the thrown error to propogate up but loadModule take it upon itself to
+    // log the error for the user, so watchLocalModules avoids logging the error another time, and
+    // avoids throwing the error as that would log the error a _third_ time
+    // so instead of rejecting here `await expect(changeListener(modulePath)).rejects.toThrow(...)`
+    // we look to the resolution
+    await expect(changeListener(modulePath)).resolves.toBe(undefined);
+
+    expect(loadModule).toHaveBeenCalledTimes(1);
     expect(getModules().get(moduleName)).toBe(originalModule);
-    expect(console.error).toHaveBeenCalledTimes(1);
-    expect(console.error).toHaveBeenCalledWith(updatedModule);
   });
 
-  it('should ignore when the regex doesn\'t match', async () => {
-    const changedPath = path.resolve(__dirname, '../../../static/modules/dont-match-me-bro.node.js');
+  it('should warn the user about what looks like a changed module that cannot be used', async () => {
+    const changedPath = 'dont-match-me.node.js';
     watchLocalModules();
     const changeListener = chokidar.getListeners().change;
     await changeListener(changedPath);
     expect(loadModule).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledTimes(1);
+    expect(console.warn.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "detected a change in module static resources at \\"dont-match-me.node.js\\" but unable to reload it in the running server",
+      ]
+    `);
   });
 
-  it('should ignore changes to all files but the server bundle', async () => {
+  it('should ignore changes to all bundles but the server bundle', async () => {
     const moduleName = 'some-module';
     const moduleVersion = '1.0.0';
-    const changedPath = path.resolve(__dirname, `../../../static/modules/${moduleName}/${moduleVersion}/assets/image.png`);
+    watchLocalModules();
+    const changeListener = chokidar.getListeners().change;
+    await changeListener(`${moduleName}/${moduleVersion}/${moduleName}.browser.js`);
+    expect(loadModule).not.toHaveBeenCalled();
+    await changeListener(`${moduleName}/${moduleVersion}/${moduleName}.legacy.browser.js`);
+    expect(loadModule).not.toHaveBeenCalled();
+  });
+
+  it('should ignore changes to server bundles that are not the module entrypoint', async () => {
+    const moduleName = 'some-module';
+    const moduleVersion = '1.0.0';
+    const changedPath = `${moduleName}/${moduleVersion}/vendors.node.js`;
     watchLocalModules();
     const changeListener = chokidar.getListeners().change;
     await changeListener(changedPath);
     expect(loadModule).not.toHaveBeenCalled();
   });
 
-  it('should replace [one-app-dev-cdn-url] with correct ip and port', async () => {
+  it('should ignore changes to files that are not JavaScript', async () => {
     const moduleName = 'some-module';
-    const moduleVersion = '1.0.1';
-    process.env.HTTP_ONE_APP_DEV_CDN_PORT = 3002;
-    const moduleMapSample = {
-      modules: {
-        [moduleName]: {
-          node: {
-            integrity: '133',
-            url: `[one-app-dev-cdn-url]/cdn/${moduleName}/${moduleVersion}/${moduleName}-node.js`,
-          },
-          browser: {
-            integrity: '234',
-            url: `[one-app-dev-cdn-url]/cdn/${moduleName}/${moduleVersion}/${moduleName}-browser.js`,
-          },
-          legacyBrowser: {
-            integrity: '134633',
-            url: `[one-app-dev-cdn-url]/cdn/${moduleName}/${moduleVersion}/${moduleName}-legacy.browser.js`,
-          },
-        },
-      },
-    };
-    const oneAppDevCdnAddress = `http://${ip}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`;
-    const updatedModuleMapSample = {
-      modules: {
-        [moduleName]: {
-          node: {
-            integrity: '133',
-            url: `${oneAppDevCdnAddress}/cdn/${moduleName}/${moduleVersion}/${moduleName}-node.js`,
-          },
-          browser: {
-            integrity: '234',
-            url: `${oneAppDevCdnAddress}/cdn/${moduleName}/${moduleVersion}/${moduleName}-browser.js`,
-          },
-          legacyBrowser: {
-            integrity: '134633',
-            url: `${oneAppDevCdnAddress}/cdn/${moduleName}/${moduleVersion}/${moduleName}-legacy.browser.js`,
-          },
-        },
-      },
-    };
-    fs.readFileSync.mockImplementationOnce(() => JSON.stringify(moduleMapSample));
-    const modulePath = path.resolve(__dirname, `../../../static/modules/${moduleName}/${moduleVersion}/${moduleName}.node.js`);
-    const originalModule = () => null;
-    const updatedModule = () => null;
-    const modules = fromJS({ [moduleName]: originalModule });
-    const moduleMap = fromJS(moduleMapSample);
-    resetModuleRegistry(modules, moduleMap);
+    const moduleVersion = '1.0.0';
+    const changedPath = `${moduleName}/${moduleVersion}/assets/image.png`;
     watchLocalModules();
     const changeListener = chokidar.getListeners().change;
-    expect(getModules().get(moduleName)).toBe(originalModule);
-    loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
-    await changeListener(modulePath);
-    expect(loadModule).toHaveBeenCalledWith(
-      moduleName,
-      updatedModuleMapSample.modules[moduleName],
-      require('../../../src/server/utils/onModuleLoad').default
-    );
-    expect(getModules().get(moduleName)).toBe(updatedModule);
+    await changeListener(changedPath);
+    expect(loadModule).not.toHaveBeenCalled();
   });
 });
