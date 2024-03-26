@@ -218,7 +218,7 @@ describe('one-app-dev-cdn', () => {
   });
 
   describe('module-map.json', () => {
-    it('uses the local map overriding the cdn url placeholder with the one-app-dev-cdn url', () => {
+    it('uses the local map overriding the CDN URL placeholder with the one-app-dev-cdn URL', () => {
       expect.assertions(3);
       const localMap = {
         key: 'not-used-in-development',
@@ -273,6 +273,59 @@ describe('one-app-dev-cdn', () => {
                   },
                   legacyBrowser: {
                     url: 'http://localhost:3001/module-a/1.0.0/module-a.legacy.browser.js',
+                  },
+                },
+              },
+            }
+          );
+        });
+    });
+
+    it.each([
+      ['node', 'node.js'],
+      ['browser', 'browser.js'],
+      ['legacyBrowser', 'legacy.browser.js'],
+    ])('replaces the CDN URL placeholder with the one-app-dev-cdn URL for bundle %s', (bundleName, urlSuffix) => {
+      expect.assertions(3);
+      const localMap = {
+        key: 'not-used-in-development',
+        modules: {
+          'module-a': {
+            [bundleName]: {
+              url: `[one-app-dev-cdn-url]/module-a/1.0.0/module-a.${urlSuffix}`,
+              integrity: '123',
+            },
+          },
+        },
+      };
+      const fcdn = setupTest({
+        useLocalModules: true,
+        appPort: 3000,
+        publicDirContentsSetting: {
+          moduleMapContent: JSON.stringify(localMap),
+          modules: [
+            {
+              moduleName: 'module-a',
+              moduleVersion: '1.0.0',
+              bundleContent: 'console.log("a");',
+            },
+          ],
+        },
+      });
+
+      return fcdn.inject()
+        .get('/module-map.json')
+        .headers({ Host: 'localhost:3001' })
+        .then((response) => {
+          expect(response.statusCode).toBe(200);
+          expect(response.headers['content-type']).toMatch(/^application\/json/);
+          const responseBody = JSON.parse(response.body);
+          expect(responseBody).toMatchSnapshot(
+            {
+              modules: {
+                'module-a': {
+                  [bundleName]: {
+                    url: `http://localhost:3001/module-a/1.0.0/module-a.${urlSuffix}`,
                   },
                 },
               },

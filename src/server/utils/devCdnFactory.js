@@ -33,9 +33,15 @@ const getLocalModuleMap = ({ pathToModuleMap, oneAppDevCdnAddress }) => {
   const moduleMap = JSON.parse(fs.readFileSync(pathToModuleMap, 'utf8').toString());
   Object.keys(moduleMap.modules).forEach((moduleName) => {
     const module = moduleMap.modules[moduleName];
-    module.browser.url = module.browser.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
-    module.legacyBrowser.url = module.legacyBrowser.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
-    module.node.url = module.node.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
+    Object
+      .values(module)
+      .filter((bundle) => Object.hasOwnProperty.call(bundle, 'url'))
+      .forEach((bundle) => {
+        /* eslint-disable-next-line no-param-reassign -- the in-memory copy is created here during
+        // the read from disk, so the replacement side-effect of this loop is local to the
+        // getLocalModuleMap function and not to any arguments */
+        bundle.url = bundle.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
+      });
   });
   return JSON.stringify(moduleMap, null, 2);
 };

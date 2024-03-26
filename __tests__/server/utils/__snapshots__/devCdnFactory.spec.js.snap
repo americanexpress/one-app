@@ -4,7 +4,49 @@ exports[`one-app-dev-cdn module-map.json extends the remote map with the local m
 
 exports[`one-app-dev-cdn module-map.json extends the remote map with the local map and uses host instead of localhost 1`] = `"{"key":"not-used-in-development","modules":{"module-b":{"node":{"url":"http://localhost:80/static/cdn/module-b/1.0.0/module-b.node.js","integrity":"123"},"browser":{"url":"http://localhost:80/static/cdn/module-b/1.0.0/module-b.browser.js","integrity":"234"},"legacyBrowser":{"url":"http://localhost:80/static/cdn/module-b/1.0.0/module-b.legacy.browser.js","integrity":"345"}},"module-a":{"node":{"url":"https://example.com/module-a/1.0.0/module-a.node.js","integrity":"123"},"browser":{"url":"https://example.com/module-a/1.0.0/module-a.browser.js","integrity":"234"},"legacyBrowser":{"url":"https://example.com/module-a/1.0.0/module-a.legacy.browser.js","integrity":"345"}}}}"`;
 
-exports[`one-app-dev-cdn module-map.json uses the local map overriding the cdn url placeholder with the one-app-dev-cdn url 1`] = `
+exports[`one-app-dev-cdn module-map.json replaces the CDN URL placeholder with the one-app-dev-cdn URL for bundle browser 1`] = `
+{
+  "key": "not-used-in-development",
+  "modules": {
+    "module-a": {
+      "browser": {
+        "integrity": "123",
+        "url": "http://localhost:3001/module-a/1.0.0/module-a.browser.js",
+      },
+    },
+  },
+}
+`;
+
+exports[`one-app-dev-cdn module-map.json replaces the CDN URL placeholder with the one-app-dev-cdn URL for bundle legacyBrowser 1`] = `
+{
+  "key": "not-used-in-development",
+  "modules": {
+    "module-a": {
+      "legacyBrowser": {
+        "integrity": "123",
+        "url": "http://localhost:3001/module-a/1.0.0/module-a.legacy.browser.js",
+      },
+    },
+  },
+}
+`;
+
+exports[`one-app-dev-cdn module-map.json replaces the CDN URL placeholder with the one-app-dev-cdn URL for bundle node 1`] = `
+{
+  "key": "not-used-in-development",
+  "modules": {
+    "module-a": {
+      "node": {
+        "integrity": "123",
+        "url": "http://localhost:3001/module-a/1.0.0/module-a.node.js",
+      },
+    },
+  },
+}
+`;
+
+exports[`one-app-dev-cdn module-map.json uses the local map overriding the CDN URL placeholder with the one-app-dev-cdn URL 1`] = `
 {
   "key": "not-used-in-development",
   "modules": {
