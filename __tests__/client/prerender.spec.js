@@ -128,6 +128,17 @@ describe('loadPrerenderScripts', () => {
       expect(getLocalePack).not.toHaveBeenCalled();
     })
   );
+
+  it('should still resolve if useNativeIntl is set to true but not call getLocalePack', async () => {
+    window.useNativeIntl = true;
+    const { getLocalePack } = require('@americanexpress/one-app-ducks');
+    const initialState = fromJS({ intl: { activeLocale: 'es-ES' } });
+    getLocalePack.mockClear();
+
+    await loadPrerenderScripts(initialState);
+
+    expect(getLocalePack).not.toHaveBeenCalled();
+  });
 });
 
 describe('moveHelmetScripts', () => {

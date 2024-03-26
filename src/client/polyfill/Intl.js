@@ -19,5 +19,7 @@
 
 import Intl from 'lean-intl';
 
-global.Intl = Intl;
-global.IntlPolyfill = Intl;
+if (!(window && window.useNativeIntl)) {
+  global.Intl = Intl;
+  global.IntlPolyfill = Intl;
+}
