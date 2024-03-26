@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [6.11.0](https://github.com/americanexpress/one-app/compare/v6.10.0...v6.11.0) (2024-03-26)
+
+
+### Bug Fixes
+
+* **serve-module:** dev cdn would fail to start when serving modules without a legacy bundle ([#1344](https://github.com/americanexpress/one-app/issues/1344)) ([4cd972f](https://github.com/americanexpress/one-app/commit/4cd972fda0069354a77f503fcee402af2f729c90))
+
+
+### Features
+
+* add dotenv support ([#1333](https://github.com/americanexpress/one-app/issues/1333)) ([3172251](https://github.com/americanexpress/one-app/commit/3172251033e3c9740441d395515f693dc6262434))
+* **conditionalIntl:** added env var for Itnl ([7b65266](https://github.com/americanexpress/one-app/commit/7b6526676eb16cb9ca647ec422129b5f8c7bcc54))
+* **logger:** use a pretty logger in locale development with OTel enabled ([#1292](https://github.com/americanexpress/one-app/issues/1292)) ([a810139](https://github.com/americanexpress/one-app/commit/a8101398eb9145ea94530550aa7c4d03d1e4aa3d))
+* **tracing:** add OpenTelemetry tracing ([#1214](https://github.com/americanexpress/one-app/issues/1214)) ([aad2538](https://github.com/americanexpress/one-app/commit/aad2538ef5bd814cb020facc5d9667e200a59f89))
+
+
+### Reverts
+
+* Revert "refactor: upgrade to node 20" (#1332) ([eb811e3](https://github.com/americanexpress/one-app/commit/eb811e349769540a74e66807386b33e934bf1eee)), closes [#1332](https://github.com/americanexpress/one-app/issues/1332)
+
+
 # [6.10.0](https://github.com/americanexpress/one-app/compare/v6.9.2...v6.10.0) (2024-02-16)
 
 
