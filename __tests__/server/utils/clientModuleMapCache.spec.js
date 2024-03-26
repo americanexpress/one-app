@@ -50,19 +50,62 @@ const moduleMap = {
 };
 
 describe('clientModuleMapCache', () => {
-  let moduleMapCache;
-  const cacheKeys = ['browser', 'legacyBrowser'];
-
-  beforeAll(() => {
+  it('creates a cache with separate entries for browser and legacyBrowser', () => {
     setClientModuleMapCache(moduleMap);
-    moduleMapCache = getClientModuleMapCache();
+    expect(Object.keys(getClientModuleMapCache())).toEqual(['browser', 'legacyBrowser']);
   });
 
-  it('creates a cache with separate entries for browser and legacyBrowser', () => {
-    expect(Object.keys(moduleMapCache)).toEqual(cacheKeys);
+  it('allows some bundles to not exist for some modules', () => {
+    setClientModuleMapCache({
+      modules: {
+        'module-a': {
+          node: {
+            url: 'https://example.com/cdn/module-a/1.0.0/module-a.node.js',
+            integrity: '234',
+          },
+          browser: {
+            url: 'https://example.com/cdn/module-a/1.0.0/module-a.browser.js',
+            integrity: '353',
+          },
+        },
+        'module-b': {
+          node: {
+            url: 'https://example.com/cdn/module-b/1.0.0/module-b.node.js',
+            integrity: '0322380',
+          },
+          legacyBrowser: {
+            url: 'https://example.com/cdn/module-b/1.0.0/module-b.legacy.browser.js',
+            integrity: 'flj23032',
+          },
+        },
+        'module-c': {
+          browser: {
+            url: 'https://example.com/cdn/module-a/1.0.0/module-a.browser.js',
+            integrity: '353',
+          },
+          legacyBrowser: {
+            url: 'https://example.com/cdn/module-a/1.0.0/module-a.legacy.browser.js',
+            integrity: '0087',
+          },
+        },
+      },
+    });
+    const moduleMapCache = getClientModuleMapCache();
+    expect(moduleMapCache).toHaveProperty('browser');
+    expect(moduleMapCache).toHaveProperty('browser.modules.module-a');
+    expect(moduleMapCache).not.toHaveProperty('browser.modules.module-b');
+    expect(moduleMapCache).toHaveProperty('browser.modules.module-c');
+    expect(moduleMapCache).toHaveProperty('legacyBrowser');
+    expect(moduleMapCache).not.toHaveProperty('legacyBrowser.modules.module-a');
+    expect(moduleMapCache).toHaveProperty('legacyBrowser.modules.module-b');
+    expect(moduleMapCache).toHaveProperty('legacyBrowser.modules.module-c');
   });
 
   it('only includes values for a single bundle per module in each map', () => {
+    setClientModuleMapCache(moduleMap);
+    const moduleMapCache = getClientModuleMapCache();
+
+    const cacheKeys = ['browser', 'legacyBrowser'];
     cacheKeys.forEach((cacheKey) => Object
       .keys(moduleMapCache[cacheKey].modules)
       .forEach((moduleName) => {

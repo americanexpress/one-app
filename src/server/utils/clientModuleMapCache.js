@@ -21,15 +21,19 @@ in ../server/middleware/sendHtml.js and reducing the html payload size */
 function filterBundles(moduleMap, moduleBundleType) {
   return {
     ...moduleMap,
-    modules: Object.entries(moduleMap.modules).reduce((acc, [moduleName, moduleBundles]) => (
-      {
+    modules: Object.entries(moduleMap.modules).reduce((acc, [moduleName, moduleBundles]) => {
+      if (!moduleBundles[moduleBundleType]) {
+        return acc;
+      }
+
+      return {
         ...acc,
         [moduleName]: {
           baseUrl: moduleBundles[moduleBundleType].url.replace(/[^/]+\.js$/i, ''),
           [moduleBundleType]: moduleBundles[moduleBundleType],
         },
-      }
-    ), {}),
+      };
+    }, {}),
   };
 }
 
