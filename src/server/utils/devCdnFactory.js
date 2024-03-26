@@ -78,15 +78,15 @@ const consumeRemoteRequest = async (remoteModuleMapUrl, hostAddress, remoteModul
       );
 
       // override remote module map to point all module URLs to one-app-dev-cdn
-      module.node.url = module.node.url.replace(
-        new URL(module.node.url).origin, oneAppDevStaticsAddress
-      );
-      module.legacyBrowser.url = module.legacyBrowser.url.replace(
-        new URL(module.legacyBrowser.url).origin, oneAppDevStaticsAddress
-      );
-      module.browser.url = module.browser.url.replace(
-        new URL(module.browser.url).origin, oneAppDevStaticsAddress
-      );
+      Object
+        .values(module)
+        .filter((bundle) => Object.hasOwnProperty.call(bundle, 'url'))
+        .forEach((bundle) => {
+          /* eslint-disable-next-line no-param-reassign -- the in-memory copy is created here during
+          // the read from network, so the replacement side-effect of this loop is local to the
+          // consumeRemoteRequest function and not to any arguments */
+          bundle.url = bundle.url.replace(new URL(bundle.url).origin, oneAppDevStaticsAddress);
+        });
       return module;
     });
     return remoteModuleMap;
