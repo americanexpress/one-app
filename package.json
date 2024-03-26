@@ -84,7 +84,7 @@
     "@americanexpress/fetch-enhancers": "^1.1.5",
     "@americanexpress/one-app-ducks": "^4.5.1",
     "@americanexpress/one-app-router": "^1.2.1",
-    "@americanexpress/one-app-server-bundler": "^1.0.2",
+    "@americanexpress/one-app-server-bundler": "^1.0.3",
     "@americanexpress/vitruvius": "^3.0.1",
     "@autotelic/fastify-opentelemetry": "^0.20.0",
     "@fastify/compress": "^7.0.0",
