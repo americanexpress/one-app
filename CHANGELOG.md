@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [5.24.0](https://github.com/americanexpress/one-app/compare/v5.23.2...v5.24.0) (2024-03-26)
+
+
+### Features
+
+* add dotenv support ([#1337](https://github.com/americanexpress/one-app/issues/1337)) ([8c99955](https://github.com/americanexpress/one-app/commit/8c999554fba8598d70259ad3a7d4464894042787))
+* **otel:** log notice to STDOUT when using OTel ([#1233](https://github.com/americanexpress/one-app/issues/1233)) ([35e7ac4](https://github.com/americanexpress/one-app/commit/35e7ac4c9ae4b1ea38ed445a74ebc47aa2870af3))
+* **style-loader:** aggregate stylesheets and dedupe if already loaded ([#1291](https://github.com/americanexpress/one-app/issues/1291)) ([e840a87](https://github.com/americanexpress/one-app/commit/e840a87ba9962fb1cfffb21d6e5ef69b127fd527)), closes [#1099](https://github.com/americanexpress/one-app/issues/1099)
+
+
+### Reverts
+
+* Revert "refactor(node): upgrade to node 20" (#1334) ([02474d7](https://github.com/americanexpress/one-app/commit/02474d7c03f354bbb7b8df181438b8056d65b4d8)), closes [#1334](https://github.com/americanexpress/one-app/issues/1334)
+
+
 ## [5.23.2](https://github.com/americanexpress/one-app/compare/v5.23.1...v5.23.2) (2023-11-16)
 
 
