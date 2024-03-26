@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import { monitorEventLoopDelay } from 'perf_hooks';
+import { monitorEventLoopDelay } from 'node:perf_hooks';
 import CircuitBreaker from 'opossum';
 import { getModule } from 'holocron';
 import { getServerStateConfig } from './stateConfig';

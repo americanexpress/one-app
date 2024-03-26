@@ -2,13 +2,18 @@ receivers:
   otlp:
     protocols:
       grpc:
-processors:
-  batch:
 exporters:      
-  logging:
-    verbosity: detailed
+  file/traces:
+    path: ./traces.jsonl
+    append: true
+  file/logs:
+    path: ./logs.jsonl
+    append: true
 service:
   pipelines:
     logs:
       receivers: [otlp]
-      exporters: [logging]
+      exporters: [file/logs]
+    traces:
+      receivers: [otlp]
+      exporters: [file/traces]

@@ -16,8 +16,8 @@
  * permissions and limitations under the License.
  */
 
-const fs = require('fs-extra');
-const path = require('path');
+const { existsSync, promises: fs } = require('node:fs');
+const path = require('node:path');
 const { argv } = require('yargs');
 
 const {
@@ -43,7 +43,7 @@ const sanitizedEnvVars = sanitizeEnvVars();
 
 async function updateModuleVersion(directory, moduleVersion) {
   const packageJsonPath = path.resolve(directory, 'package.json');
-  // eslint-disable-next-line global-require, import/no-dynamic-require
+  // eslint-disable-next-line global-require, import/no-dynamic-require -- needed for dynamic script
   const packageJson = require(packageJsonPath);
   const updatedPackageJson = { ...packageJson, version: moduleVersion };
 
@@ -72,10 +72,9 @@ const buildModule = async (pathToModule) => {
   const pathToModuleBuildDir = path.resolve(`${pathToModule}/build/`);
   const pathToBundleIntegrityManifest = path.join(`${pathToModule}/bundle.integrity.manifest.json`);
   const pathToOriginModuleStatics = path.resolve(`${nginxOriginStaticsModulesDir}/${gitSha}/${moduleName}`);
-  await fs.ensureDir(pathToOriginModuleStatics);
-  await fs.copy(pathToModuleBuildDir, pathToOriginModuleStatics, { overwrite: true });
+  await fs.cp(pathToModuleBuildDir, pathToOriginModuleStatics, { recursive: true });
 
-  // eslint-disable-next-line global-require,import/no-dynamic-require
+  // eslint-disable-next-line global-require,import/no-dynamic-require -- needed for dynamic script
   const integrityDigests = require(pathToBundleIntegrityManifest);
 
   return {
@@ -92,8 +91,8 @@ const buildAllSampleModules = async () => {
 };
 
 const doWork = async () => {
-  const sampleModulesAlreadyBuilt = fs.pathExistsSync(nginxOriginStaticsModulesDir)
-    && fs.pathExistsSync(pathToNginxOriginModuleMap);
+  const sampleModulesAlreadyBuilt = existsSync(nginxOriginStaticsModulesDir)
+    && existsSync(pathToNginxOriginModuleMap);
 
   if (userIntendsToSkipSampleModulesBuild && sampleModulesAlreadyBuilt) {
     console.warn(
@@ -112,8 +111,8 @@ const doWork = async () => {
   }
 
   await Promise.all([
-    fs.emptyDir(nginxOriginStaticsModulesDir),
-    fs.remove(pathToNginxOriginModuleMap),
+    fs.rm(nginxOriginStaticsModulesDir, { recursive: true, force: true }),
+    fs.rm(pathToNginxOriginModuleMap, { force: true }),
   ]);
 
   const sampleModulesMetadata = await buildAllSampleModules();
@@ -152,15 +151,15 @@ const doWork = async () => {
     pathToNginxOriginModuleMap, JSON.stringify(moduleMapContent, null, 2)
   );
 
-  await fs.copy(pathToAssets, nginxOriginStaticsRootDir);
+  await fs.cp(pathToAssets, nginxOriginStaticsRootDir, { recursive: true });
 
   if (archiveBuiltArtifacts) {
     const sampleModuleBundlesDirname = 'sample-module-bundles';
     const pathToBundles = path.join(process.cwd(), sampleModuleBundlesDirname);
-    await fs.emptyDir(pathToBundles);
+    await fs.rm(pathToBundles, { recursive: true, force: true });
     await Promise.all([
-      fs.move(nginxOriginStaticsModulesDir, path.join(pathToBundles, 'modules')),
-      fs.move(pathToNginxOriginModuleMap, path.join(pathToBundles, 'module-map.json')),
+      fs.rename(nginxOriginStaticsModulesDir, path.join(pathToBundles, 'modules')),
+      fs.rename(pathToNginxOriginModuleMap, path.join(pathToBundles, 'module-map.json')),
     ]);
 
     console.log(`✅ Bundled One App Sample Modules and Module Map created at ${pathToBundles}`);

@@ -14,8 +14,8 @@
  * permissions and limitations under the License.
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { fromJS } from 'immutable';
 import chokidar from 'chokidar';
 import loadModule from 'holocron/loadModule.node';
@@ -59,13 +59,7 @@ jest.mock('holocron/moduleRegistry', () => {
 });
 
 jest.mock('holocron/loadModule.node', () => jest.fn(() => Promise.resolve(() => null)));
-jest.mock('fs', () => {
-  const actual = jest.requireActual('fs');
-  return {
-    ...actual,
-    readFileSync: jest.fn(actual.readFileSync),
-  };
-});
+jest.spyOn(fs, 'readFileSync');
 jest.spyOn(console, 'error').mockImplementation(() => { });
 
 describe('watchLocalModules', () => {

@@ -38,6 +38,8 @@ jobs:
           npm run release
           git add .
           git commit -m "docs(changelog): update"
+        env:
+          HUSKY: 0
       - name: Create release pull request
         uses: peter-evans/create-pull-request@v6
         with:

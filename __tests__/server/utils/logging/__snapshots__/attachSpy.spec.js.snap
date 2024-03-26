@@ -1,5 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`attachSpy throws if the method name is not a function on the object 1`] = `"method is not a function"`;
-
-exports[`attachSpy throws if the spy is not a function 1`] = `"spy must be a function (was "string")"`;

@@ -31,7 +31,7 @@ services:
       - nginx
       - otel-collector
     env_file: ./one-app/base.env
-    entrypoint: sh -c 'sleep 2s && node lib/server'
+    entrypoint: scripts/start.sh
   fast-api:
     build:
       context: ./api
@@ -82,7 +82,7 @@ services:
         aliases:
           - extra-slow.api.frank
   nginx:
-    image: 'nginx:1.17.5-alpine'
+    image: 'nginx:1.25.4-alpine'
     volumes:
       - './nginx/default.conf:/etc/nginx/conf.d/default.conf'
       - './nginx/nginx-cert.pem:/etc/ssl/nginx-cert.pem'
@@ -94,7 +94,7 @@ services:
           - sample-cdn.frank
   selenium-chrome:
     # specify docker image sha to ensure consistency
-    image: seleniarm/standalone-chromium:120.0
+    image: seleniarm/standalone-chromium:121.0
     # https://github.com/SeleniumHQ/docker-selenium#running-the-images
     volumes:
       - /dev/shm:/dev/shm
@@ -106,9 +106,11 @@ services:
     # sleep 5s to make sure set up is completed prior to opening up chrome
     entrypoint: bash -c '/opt/bin/entry_point.sh & sleep 5s && chromium --ignore-certificate-errors --no-first-run --autofill-server-url https://one-app:8443/success'
   otel-collector:
-    image: 'otel/opentelemetry-collector:0.91.0'
+    image: 'otel/opentelemetry-collector-contrib-dev:9355dce6c04b89e76ef80e043709b5cc40c0de23'
     volumes:
       - ./otel-collector/config.yaml:/collector-config.yaml
+      - ./otel-collector/tmp/traces.jsonl:/traces.jsonl
+      - ./otel-collector/tmp/logs.jsonl:/logs.jsonl
     command: ["--config=/collector-config.yaml"]
     ports:
       - "4317:4317"

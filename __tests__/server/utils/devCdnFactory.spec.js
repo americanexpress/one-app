@@ -12,20 +12,15 @@
  * under the License.
  */
 
-/* eslint-disable no-console -- console used in tests */
 import util from 'node:util';
-import fetch from 'node-fetch';
-import fs from 'fs';
-import { rimrafSync } from 'rimraf';
-import path from 'path';
-import mkdirp from 'mkdirp';
+import fs from 'node:fs';
+import path from 'node:path';
 import { ProxyAgent } from 'proxy-agent';
 import oneAppDevCdn from '../../../src/server/utils/devCdnFactory';
 import {
   removeExistingEntryIfConflicting,
 } from '../../../src/server/utils/cdnCache';
 
-jest.mock('node-fetch');
 jest.mock('pino');
 
 jest.mock('../../../src/server/utils/cdnCache', () => ({
@@ -35,6 +30,23 @@ jest.mock('../../../src/server/utils/cdnCache', () => ({
   writeToCache: jest.fn(() => ({})),
   removeExistingEntryIfConflicting: jest.fn((_, cachedModuleFiles) => cachedModuleFiles),
 }));
+
+global.fetch = jest.fn();
+
+fetch.mockReturnJsonOnce = (obj) => (obj instanceof Error
+  ? fetch.mockImplementationOnce(async () => { throw obj; })
+  : fetch.mockImplementationOnce(async () => ({
+    json: async () => obj,
+    text: async () => JSON.stringify(obj),
+    status: 200,
+  })));
+
+fetch.mockReturnFileOnce = (body, status = 200) => (body instanceof Error
+  ? fetch.mockImplementationOnce(async () => { throw body; })
+  : fetch.mockImplementationOnce(async () => ({
+    text: async () => body,
+    status,
+  })));
 
 const pathToStubs = path.join(__dirname, 'stubs');
 const pathToCache = path.join(__dirname, '..', '.cache');
@@ -86,17 +98,17 @@ describe('one-app-dev-cdn', () => {
     }
 
     if (!allowCacheWrite) {
-      mkdirp(pathToCache, { mode: 444 });
+      fs.mkdirSync(pathToCache, { mode: 444, recursive: true });
     }
 
     const modulesDir = path.join(mockLocalDevPublicPath, 'modules');
 
-    mkdirp.sync(modulesDir);
+    fs.mkdirSync(modulesDir, { recursive: true });
     fs.writeFileSync(path.join(`${mockLocalDevPublicPath}/module-map.json`), moduleMapContent, { encoding: 'utf-8' });
     modules.forEach((module) => {
       const { moduleName, moduleVersion, bundleContent } = module;
       const pathToModuleBundle = path.join(modulesDir, moduleName, moduleVersion);
-      mkdirp.sync(pathToModuleBundle);
+      fs.mkdirSync(pathToModuleBundle, { recursive: true });
       fs.writeFileSync(path.join(pathToModuleBundle, `${moduleName}.browser.js`), bundleContent, { encoding: 'utf-8' });
     });
   };
@@ -135,6 +147,9 @@ describe('one-app-dev-cdn', () => {
     jest
       .resetAllMocks()
       .resetModules();
+    console.warn.mockImplementation(util.format);
+    console.log.mockImplementation(util.format);
+    console.error.mockImplementation(util.format);
     defaultRemoteMap = {
       key: '234234',
       modules: {
@@ -475,7 +490,7 @@ describe('one-app-dev-cdn', () => {
           expect(response.body).toEqual(JSON.stringify(defaultLocalMap));
           expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
           expect(console.warn).toHaveBeenCalledTimes(1);
-          expect(util.format(...console.warn.mock.calls[0])).toMatch(
+          expect(console.warn.mock.results[0].value).toMatch(
             /one-app-dev-cdn error loading module map from https:\/\/my-domain.com\/map\/module-map.json: Error: simulated timeout or some other network error!/
           );
         });
@@ -496,7 +511,7 @@ describe('one-app-dev-cdn', () => {
           expect(response.body).toEqual(JSON.stringify(defaultLocalMap));
           expect(fetch.mock.calls[0]).toContain(remoteModuleMapUrl);
           expect(console.warn).toHaveBeenCalledTimes(1);
-          expect(util.format(...console.warn.mock.calls[0])).toMatch(
+          expect(console.warn.mock.results[0].value).toMatch(
             /one-app-dev-cdn error loading module map from https:\/\/my-domain.com\/map\/module-map.json: TypeError: Cannot convert undefined or null to object/
           );
         });
@@ -695,13 +710,11 @@ describe('one-app-dev-cdn', () => {
   });
 
   afterEach(() => {
-    rimrafSync(pathToCache);
-    rimrafSync(pathToStubs);
+    fs.rmSync(pathToCache, { recursive: true, force: true });
+    fs.rmSync(pathToStubs, { recursive: true, force: true });
   });
 
   afterAll(() => {
     process.env.NODE_ENV = origNodeEnv;
   });
 });
-
-/* eslint-enable no-console -- because eslint-comments/disable-enable-pair */

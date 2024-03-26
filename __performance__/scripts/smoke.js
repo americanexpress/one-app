@@ -14,10 +14,10 @@
  * permissions and limitations under the License.
  */
 
-/* eslint-disable import/no-anonymous-default-export */
-/* eslint-disable import/no-unresolved */
+/* eslint-disable import/no-unresolved -- performance scripts are not ran directly */
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+/* eslint-enable import/no-unresolved */
 
 // This is a simple smoke test to ensure there is no major regression
 // to the one-app server.
@@ -32,7 +32,6 @@ export const options = {
   },
 };
 
-// eslint-disable-next-line no-undef
 const { TARGET_URL } = __ENV;
 
 export default function virtualUser() {

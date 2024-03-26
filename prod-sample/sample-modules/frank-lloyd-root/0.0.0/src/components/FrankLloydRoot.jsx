@@ -1,4 +1,3 @@
-/* eslint-disable global-require */
 /*
  * Copyright 2019 American Express Travel Related Services Company, Inc.
  *
@@ -55,7 +54,7 @@ FrankLloydRoot.propTypes = {
 };
 
 if (!global.BROWSER) {
-  // eslint-disable-next-line global-require
+  // eslint-disable-next-line global-require -- exclude from browser bundle
   FrankLloydRoot.appConfig = require('../config').default;
 }
 

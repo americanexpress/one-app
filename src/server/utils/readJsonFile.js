@@ -14,8 +14,8 @@
  * permissions and limitations under the License.
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 // `require` has a cache, avoid retaining the full file in memory
 const readJsonFile = (filePath) => JSON.parse(

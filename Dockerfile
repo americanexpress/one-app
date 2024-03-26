@@ -1,11 +1,11 @@
-ARG VERSION=20
+ARG VERSION=lts
 # Use the pre-baked fat node image only in the builder
 # which includes build utils preinstalled (e.g. gcc, make, etc).
 # This will result in faster and reliable One App docker image
 # builds as we do not have to run apk installs for alpine.
 FROM node:$VERSION as builder
 WORKDIR /opt/build
-RUN npm install -g npm@10.2.3 --registry=https://registry.npmjs.org
+RUN npm install -g npm@9.6.7 --registry=https://registry.npmjs.org
 COPY --chown=node:node ./ /opt/build
 # npm ci does not run postinstall with root account
 RUN NODE_ENV=development npm ci --build-from-source
@@ -22,6 +22,7 @@ RUN NODE_ENV=production npm run build && \
     chown node:node /opt/one-app/production && \
     mv /opt/build/LICENSE.txt /opt/one-app/production && \
     mv /opt/build/node_modules /opt/one-app/production && \
+    mv /opt/build/scripts /opt/one-app/production && \
     mv /opt/build/package.json /opt/one-app/production && \
     mv /opt/build/lib /opt/one-app/production && \
     mv /opt/build/build /opt/one-app/production && \
@@ -43,7 +44,7 @@ EXPOSE 3005
 WORKDIR /opt/one-app
 RUN chown node:node /opt/one-app
 USER $USER
-CMD ["node", "lib/server"]
+CMD ["scripts/start.sh"]
 COPY --from=builder --chown=node:node /opt/one-app/development ./
 
 # production image
@@ -58,5 +59,5 @@ EXPOSE 3000
 EXPOSE 3005
 WORKDIR /opt/one-app
 USER $USER
-CMD ["node", "--dns-result-order=ipv4first", "--no-experimental-fetch", "lib/server"]
+CMD ["scripts/start.sh"]
 COPY --from=builder --chown=node:node /opt/one-app/production ./

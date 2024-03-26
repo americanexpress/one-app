@@ -25,11 +25,7 @@ import reactHtml, {
   checkStateForRedirectAndStatusCode,
   renderEnvironmentVariables,
 } from '../../../../src/server/plugins/reactHtml';
-// _client is a method to control the mock
-// eslint-disable-next-line import/named
 import { getClientStateConfig } from '../../../../src/server/utils/stateConfig';
-// _setVars is a method to control the mock
-// eslint-disable-next-line import/named
 import transit from '../../../../src/universal/utils/transit';
 import {
   setClientModuleMapCache,
@@ -41,8 +37,8 @@ import createRequestHtmlFragmentHook from '../../../../src/server/plugins/reactH
 import conditionallyAllowCors from '../../../../src/server/plugins/conditionallyAllowCors';
 import { isRedirectUrlAllowed } from '../../../../src/server/utils/redirectAllowList';
 
-jest.spyOn(console, 'error').mockImplementation(() => 0);
-jest.spyOn(console, 'warn').mockImplementation(() => 0);
+jest.spyOn(console, 'error').mockImplementation(util.format);
+jest.spyOn(console, 'warn').mockImplementation(util.format);
 
 jest.mock('react-helmet');
 
@@ -52,7 +48,6 @@ jest.mock('../../../../src/server/utils/redirectAllowList', () => ({
 
 jest.mock('holocron', () => {
   const actualHolocron = jest.requireActual('holocron');
-
   return {
     ...actualHolocron,
     getModule: () => {
@@ -67,7 +62,7 @@ jest.mock('holocron', () => {
 jest.mock('@americanexpress/fetch-enhancers', () => ({
   createTimeoutFetch: jest.fn(
     (timeout) => (next) => (url) => next(url).then((reply) => {
-      // eslint-disable-next-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign -- required for test
       reply.timeout = timeout;
       return reply;
     })
@@ -152,11 +147,32 @@ jest.mock('../../../../src/server/plugins/conditionallyAllowCors');
 
 global.fetch = () => Promise.resolve({ data: 'data' });
 
+const createTracer = () => {
+  const spans = {};
+  return {
+    startSpan: jest.fn((name) => {
+      if (spans[name]) {
+        throw new Error(`Span ${name} already exists`);
+      }
+      const span = {
+        name,
+        end: jest.fn(),
+        recordException: jest.fn(),
+        addEvent: jest.fn(),
+      };
+      spans[name] = span;
+      return span;
+    }),
+    spans,
+  };
+};
+
 describe('reactHtml', () => {
   const appHtml = '<p>Why, hello!</p>';
 
   let request;
   let reply;
+  let tracer;
 
   const setFullMap = () => {
     setClientModuleMapCache({
@@ -266,9 +282,11 @@ describe('reactHtml', () => {
     request.clientModuleMapCache = getClientModuleMapCache();
     request.appHtml = appHtml;
     request.log = {
-      info: jest.fn(),
-      error: jest.fn(),
+      info: jest.fn(util.format),
+      error: jest.fn(util.format),
     };
+    tracer = createTracer();
+    request.openTelemetry = () => ({ tracer });
 
     reply = jest.fn();
     reply.status = jest.fn(() => reply);
@@ -502,6 +520,44 @@ describe('reactHtml', () => {
       sendHtml(request, reply);
       expect(reply.send).toHaveBeenCalledTimes(1);
       expect(/<script.*nonce="54321"/.test(reply.send.mock.calls[0][0])).toBe(true);
+    });
+
+    it('adds a tracer span', () => {
+      sendHtml(request, reply);
+      expect(tracer.startSpan).toHaveBeenCalledTimes(1);
+      expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml');
+      expect(tracer.spans.sendHtml.recordException).not.toHaveBeenCalled();
+      expect(tracer.spans.sendHtml.end).toHaveBeenCalled();
+    });
+
+    it('adds a span event and does not log when tracing is enabled', () => {
+      request.tracingEnabled = true;
+      sendHtml(request, reply);
+      expect(tracer.spans.sendHtml.addEvent).toHaveBeenCalledTimes(1);
+      expect(tracer.spans.sendHtml.addEvent.mock.calls[0][0]).toMatchInlineSnapshot(
+        '"\'sendHtml, have store? true, have appHtml? true"'
+      );
+      expect(request.log.info).not.toHaveBeenCalled();
+    });
+
+    it('logs and does not add a span event when tracing is disabled', () => {
+      request.tracingEnabled = false;
+      sendHtml(request, reply);
+      expect(tracer.spans.sendHtml.addEvent).not.toHaveBeenCalled();
+      expect(request.log.info).toHaveBeenCalledTimes(1);
+      expect(request.log.info.mock.results[0].value).toMatchInlineSnapshot(
+        '"sendHtml, have store? true, have appHtml? true"'
+      );
+    });
+
+    it('ends the span even when there is an error', () => {
+      request.appHtml = [1, 2, 3];
+      sendHtml(request, reply);
+      expect(reply.code).toHaveBeenCalledWith(500);
+      expect(tracer.startSpan).toHaveBeenCalledTimes(1);
+      expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml');
+      expect(tracer.spans.sendHtml.recordException).toHaveBeenCalled();
+      expect(tracer.spans.sendHtml.end).toHaveBeenCalled();
     });
 
     describe('render modes', () => {
@@ -1115,9 +1171,12 @@ describe('reactHtml', () => {
     const destination = 'http://example.com/';
     let state = fromJS({ redirection: { destination: null } });
     const req = { store: { getState: () => state }, headers: {} };
+    req.openTelemetry = () => ({ tracer });
     const res = { redirect: jest.fn(), code: jest.fn() };
 
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
 
     it('should redirect if there is a destination', () => {
       state = fromJS({ redirection: { destination } });
@@ -1150,9 +1209,37 @@ describe('reactHtml', () => {
       jest.spyOn(console, 'error');
       isRedirectUrlAllowed.mockImplementationOnce(() => false);
       checkStateForRedirectAndStatusCode(req, reply);
-      expect(util.format(...console.error.mock.calls[0])).toBe(
+      expect(console.error.mock.results[0].value).toBe(
         `'${destination}' is not an allowed redirect URL`
       );
+    });
+
+    it('should include tracer spans', () => {
+      state = fromJS({ redirection: { destination: null } });
+      checkStateForRedirectAndStatusCode(req, reply);
+      expect(tracer.startSpan).toHaveBeenCalledTimes(2);
+      expect(tracer.startSpan).toHaveBeenNthCalledWith(1, 'checkStateForRedirect');
+      expect(tracer.startSpan).toHaveBeenNthCalledWith(2, 'checkStateForStatusCode');
+      expect(tracer.spans.checkStateForRedirect.end).toHaveBeenCalled();
+      expect(tracer.spans.checkStateForStatusCode.end).toHaveBeenCalled();
+    });
+
+    it('should include tracer spans with error', () => {
+      state = fromJS({ redirection: { destination: null }, error: { code: 500 } });
+      checkStateForRedirectAndStatusCode(req, reply);
+      expect(tracer.startSpan).toHaveBeenCalledTimes(2);
+      expect(tracer.startSpan).toHaveBeenNthCalledWith(1, 'checkStateForRedirect');
+      expect(tracer.startSpan).toHaveBeenNthCalledWith(2, 'checkStateForStatusCode');
+      expect(tracer.spans.checkStateForRedirect.end).toHaveBeenCalled();
+      expect(tracer.spans.checkStateForStatusCode.end).toHaveBeenCalled();
+    });
+
+    it('should include tracer span with redirect', () => {
+      state = fromJS({ redirection: { destination } });
+      checkStateForRedirectAndStatusCode(req, res);
+      expect(tracer.startSpan).toHaveBeenCalledTimes(1);
+      expect(tracer.startSpan).toHaveBeenCalledWith('checkStateForRedirect');
+      expect(tracer.spans.checkStateForRedirect.end).toHaveBeenCalled();
     });
   });
 

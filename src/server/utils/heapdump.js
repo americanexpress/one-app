@@ -13,9 +13,9 @@
  * or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-import fs from 'fs';
-import v8 from 'v8';
-import { finished } from 'stream';
+import fs from 'node:fs';
+import v8 from 'node:v8';
+import { finished } from 'node:stream';
 import { promisify } from 'node:util';
 
 // Use `promisify(finished)` instead of importing from `stream/promises` for Node 12 compatibility

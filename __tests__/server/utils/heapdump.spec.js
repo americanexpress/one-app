@@ -15,72 +15,66 @@
  */
 
 import util from 'node:util';
+import fs from 'node:fs';
+import v8 from 'node:v8';
+import { Writable, Readable } from 'node:stream';
 
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+const sleep = (ms) => new Promise((res) => { setTimeout(res, ms); });
+
+jest.spyOn(process, 'on').mockImplementation(() => {});
+jest.spyOn(Date, 'now').mockImplementation(() => 1525145998246);
+jest.spyOn(console, 'warn').mockImplementation(util.format);
+jest.spyOn(console, 'error').mockImplementation(util.format);
+
+const mockHeapSnapshotContents = { lots: 'of keys', and: ['many', 'many', 'values'] };
+jest.spyOn(v8, 'getHeapSnapshot').mockImplementation(() => {
+  const heapSnapshot = Buffer.from(JSON.stringify(mockHeapSnapshotContents));
+  let pointer = 0;
+  const readable = new Readable({
+    highWaterMark: 20,
+    read(size) {
+      const start = pointer;
+      const end = pointer + size;
+      const chunk = heapSnapshot.slice(start, end);
+      this.push(chunk);
+      pointer = end;
+      if (pointer >= heapSnapshot.length) {
+        this.push(null);
+      }
+    },
+  });
+  return readable;
+});
+
+let mockWriteStreamError = null;
+jest.spyOn(fs, 'createWriteStream').mockImplementation(() => {
+  const mockChunksWritten = [];
+  let haveEmittedError = false;
+  const writeStream = new Writable({
+    write(chunk, encoding, callback) {
+      if (mockWriteStreamError) {
+        if (!haveEmittedError) {
+          haveEmittedError = true;
+          setImmediate(() => callback(mockWriteStreamError));
+        }
+        return;
+      }
+      mockChunksWritten.push([chunk, encoding]);
+      setImmediate(callback);
+    },
+  });
+  writeStream.mockChunksWritten = mockChunksWritten;
+  return writeStream;
+});
 
 describe('heapdump', () => {
   const { pid } = process;
-  const mockHeapSnapshotContents = { lots: 'of keys', and: ['many', 'many', 'values'] };
-  let v8;
-  let fs;
 
-  jest.spyOn(process, 'on').mockImplementation(() => {});
-  jest.spyOn(Date, 'now').mockImplementation(() => 1525145998246);
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-
-  function load({ mockWriteStreamError = null } = {}) {
-    jest.resetModules();
-
-    // TODO: do these _need_ to be mocked? or just spied on?
-    jest.mock('v8', () => ({
-      getHeapSnapshot: jest.fn(() => {
-        const { Readable } = jest.requireActual('stream');
-        const heapSnapshot = Buffer.from(JSON.stringify(mockHeapSnapshotContents));
-        let pointer = 0;
-        const readable = new Readable({
-          highWaterMark: 20,
-          read(size) {
-            const start = pointer;
-            const end = pointer + size;
-            const chunk = heapSnapshot.slice(start, end);
-            this.push(chunk);
-            pointer = end;
-            if (pointer >= heapSnapshot.length) {
-              this.push(null);
-            }
-          },
-        });
-        return readable;
-      }),
-    }));
-    v8 = require('v8');
-
-    jest.mock('fs', () => ({
-      createWriteStream: jest.fn(() => {
-        const { Writable } = jest.requireActual('stream');
-        const mockChunksWritten = [];
-        let haveEmittedError = false;
-        const writeStream = new Writable({
-          write(chunk, encoding, callback) {
-            if (mockWriteStreamError) {
-              if (!haveEmittedError) {
-                haveEmittedError = true;
-                setImmediate(() => callback(mockWriteStreamError));
-              }
-              return;
-            }
-            mockChunksWritten.push([chunk, encoding]);
-            setImmediate(callback);
-          },
-        });
-        writeStream.mockChunksWritten = mockChunksWritten;
-        return writeStream;
-      }),
-    }));
-    fs = require('fs');
-
-    return require('../../../src/server/utils/heapdump');
+  function load(error = null) {
+    mockWriteStreamError = error;
+    jest.isolateModules(() => {
+      require('../../../src/server/utils/heapdump');
+    });
   }
 
   function waitForStreamToFinish(stream) {
@@ -90,39 +84,41 @@ describe('heapdump', () => {
     });
   }
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('attaches to the SIGUSR2 signal', () => {
-    process.on.mockClear();
     load();
     expect(process.on).toHaveBeenCalledTimes(1);
-    expect(process.on.mock.calls[0][0]).toBe('SIGUSR2');
+    expect(process.on).toHaveBeenCalledWith('SIGUSR2', expect.any(Function));
   });
 
   it('warns if --report-on-signal is set, using SIGUSR2', () => {
-    process.execArgv = [
-      '--experimental-report',
-      '--report-on-signal',
-    ];
+    process.execArgv = ['--experimental-report', '--report-on-signal'];
     console.warn.mockClear();
     load();
     expect(console.warn).toHaveBeenCalledTimes(1);
-    expect(console.warn.mock.calls[0][0]).toMatchSnapshot();
+    expect(console.warn.mock.results[0].value).toMatchInlineSnapshot(
+      '"--report-on-signal listens for SIGUSR2 by default, be aware that SIGUSR2 also triggers heapdumps. Use --report-signal to avoid heapdump side-effects https://nodejs.org/api/report.html"'
+    );
   });
 
   describe('on SIGUSR2 signal', () => {
     it('warns about writing a heapdump', async () => {
-      process.on.mockClear();
       load();
       expect(process.on).toHaveBeenCalledTimes(1);
       console.warn.mockClear();
       process.on.mock.calls[0][1]();
       expect(console.warn).toHaveBeenCalledTimes(1);
-      expect(util.format(...console.warn.mock.calls[0])).toBe(`about to write a heapdump to /tmp/heapdump-${pid}-1525145998246.heapsnapshot`);
+      expect(console.warn.mock.results[0].value).toBe(
+        `about to write a heapdump to /tmp/heapdump-${pid}-1525145998246.heapsnapshot`
+      );
       await waitForStreamToFinish(fs.createWriteStream.mock.results[0].value);
       await sleep(20); // also wait for the callback to run
     });
 
     it('attempts to get a heap snapshot', async () => {
-      process.on.mockClear();
       load();
       expect(process.on).toHaveBeenCalledTimes(1);
       process.on.mock.calls[0][1]();
@@ -133,19 +129,19 @@ describe('heapdump', () => {
     });
 
     it('attempts to write a heapdump', async () => {
-      process.on.mockClear();
       load();
       expect(process.on).toHaveBeenCalledTimes(1);
       process.on.mock.calls[0][1]();
       await waitForStreamToFinish(fs.createWriteStream.mock.results[0].value);
       await sleep(20);
       expect(fs.createWriteStream).toHaveBeenCalledTimes(1);
-      expect(fs.createWriteStream).toHaveBeenCalledWith(`/tmp/heapdump-${pid}-1525145998246.heapsnapshot`);
+      expect(fs.createWriteStream).toHaveBeenCalledWith(
+        `/tmp/heapdump-${pid}-1525145998246.heapsnapshot`
+      );
     });
 
     it('writes the heapdump to the file', async () => {
       expect.assertions(2);
-      process.on.mockClear();
       load();
       expect(process.on).toHaveBeenCalledTimes(1);
       process.on.mock.calls[0][1]();
@@ -153,20 +149,15 @@ describe('heapdump', () => {
       await waitForStreamToFinish(sink);
       await sleep(20);
       expect(
-        JSON.parse(
-          sink.mockChunksWritten
-            .map(([chunk]) => chunk.toString('utf8'))
-            .join('')
-        )
+        JSON.parse(sink.mockChunksWritten.map(([chunk]) => chunk.toString('utf8')).join(''))
       ).toEqual(mockHeapSnapshotContents);
     });
 
     describe('writing the heapdump', () => {
       it('notifies about an error encountered at level error', async () => {
-        expect.assertions(5);
-        process.on.mockClear();
-        const mockWriteStreamError = new Error('sample test error');
-        load({ mockWriteStreamError });
+        expect.assertions(4);
+        const error = new Error('sample test error');
+        load(error);
         expect(process.on).toHaveBeenCalledTimes(1);
         process.on.mock.calls[0][1]();
         console.error.mockClear();
@@ -179,13 +170,11 @@ describe('heapdump', () => {
         await sleep(20); // also wait for the callback to run
         expect(console.warn).not.toHaveBeenCalled();
         expect(console.error).toHaveBeenCalledTimes(1);
-        expect(console.error.mock.calls[0][0]).toBe('unable to write heapdump');
-        expect(console.error.mock.calls[0][1]).toBe(mockWriteStreamError);
+        expect(console.error).toHaveBeenCalledWith('unable to write heapdump', error);
       });
 
       it('notifies about finishing at level warn', async () => {
         expect.assertions(4);
-        process.on.mockClear();
         load();
         expect(process.on).toHaveBeenCalledTimes(1);
         process.on.mock.calls[0][1]();
@@ -195,7 +184,9 @@ describe('heapdump', () => {
         await sleep(20); // also wait for the callback to run
         expect(console.error).not.toHaveBeenCalled();
         expect(console.warn).toHaveBeenCalledTimes(1);
-        expect(util.format(...console.warn.mock.calls[0])).toBe(`wrote heapdump out to /tmp/heapdump-${pid}-1525145998246.heapsnapshot`);
+        expect(console.warn.mock.results[0].value).toBe(
+          `wrote heapdump out to /tmp/heapdump-${pid}-1525145998246.heapsnapshot`
+        );
       });
     });
   });

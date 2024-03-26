@@ -20,13 +20,11 @@ describe('metricsServer', () => {
   jest.mock('../../src/server/metrics/intl-cache', () => ({
     cacheSizeCollector: 'cacheSizeCollector',
   }));
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
 
   let client;
   let helmet;
   let healthCheck;
-  let logging;
+  let requestLogging;
 
   async function load() {
     jest.resetModules();
@@ -39,12 +37,12 @@ describe('metricsServer', () => {
       },
     }));
     jest.mock('@fastify/helmet', () => jest.fn((_fastify, _opts, done) => done()));
-    jest.mock('../../src/server/utils/logging/fastifyPlugin', () => jest.fn((_fastify, _opts, done) => done()));
+    jest.mock('../../src/server/plugins/requestLogging', () => jest.fn((_fastify, _opts, done) => done()));
     jest.mock('../../src/server/plugins/healthCheck', () => jest.fn((_fastify, _opts, done) => done()));
 
     client = require('prom-client');
     helmet = require('@fastify/helmet');
-    logging = require('../../src/server/utils/logging/fastifyPlugin');
+    requestLogging = require('../../src/server/plugins/requestLogging');
     healthCheck = require('../../src/server/plugins/healthCheck');
 
     const fastify = await require('../../src/server/metricsServer').default();
@@ -52,10 +50,12 @@ describe('metricsServer', () => {
     return fastify;
   }
 
+  beforeEach(() => jest.clearAllMocks());
+
   it('registers the required plugins', async () => {
     await load();
 
-    expect(logging).toHaveBeenCalledTimes(1);
+    expect(requestLogging).toHaveBeenCalledTimes(1);
     expect(healthCheck).toHaveBeenCalledTimes(1);
     expect(helmet).toHaveBeenCalledTimes(1);
   });
@@ -98,7 +98,7 @@ describe('metricsServer', () => {
         url: '/metrics',
       });
 
-      expect(client.register.metrics).toBeCalled();
+      expect(client.register.metrics).toHaveBeenCalled();
     });
 
     it('should be Content-Type of metrics', async () => {
@@ -112,15 +112,13 @@ describe('metricsServer', () => {
     });
 
     it('should log the request', async () => {
-      logging.mockClear();
-
       const instance = await load();
       await instance.inject({
         method: 'GET',
         url: '/im-up',
       });
 
-      expect(logging).toHaveBeenCalledTimes(1);
+      expect(requestLogging).toHaveBeenCalledTimes(1);
     });
   });
 });

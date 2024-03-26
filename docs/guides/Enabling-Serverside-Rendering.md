@@ -28,7 +28,7 @@ YourModule.holocron = {
 ## Using Fetchye and `loadModuleData`
 
 ```jsx
-import React, { Fragment } from 'react';
+import React from 'react';
 import { ImmutableCache } from 'fetchye-immutable-cache';
 import { useFetchye, makeServerFetchye } from 'fetchye';
 
@@ -40,9 +40,9 @@ const BookList = () => {
   }
 
   return (
-    <Fragment>
+    <div>
       {/* Render data */}
-    </Fragment>
+    </div>
   );
 };
 

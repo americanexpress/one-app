@@ -64,8 +64,8 @@ const runTime = [
     normalize: (input) => {
       const parsed = Number.parseInt(input, 10);
       // make sure the parsed value is the same value as input
-      // input may be a string or a number, we don't want === in this case, just ==
-      if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
+      // eslint-disable-next-line eqeqeq -- input may be a string or a number, we don't want === in this case, just ==
+      if (Number.isNaN(parsed) || parsed != input) {
         throw new Error(`env var HTTP_PORT needs to be a valid integer, given "${input}"`);
       } else {
         return parsed;
@@ -82,8 +82,8 @@ const runTime = [
     normalize: (input) => {
       const parsed = Number.parseInt(input, 10);
       // make sure the parsed value is the same value as input
-      // input may be a string or a number, we don't want === in this case, just ==
-      if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
+      // eslint-disable-next-line eqeqeq -- input may be a string or a number, we don't want === in this case, just ==
+      if (Number.isNaN(parsed) || parsed != input) {
         throw new Error(`env var HTTP_METRICS_PORT needs to be a valid integer, given "${input}"`);
       } else {
         return parsed;
@@ -97,8 +97,8 @@ const runTime = [
       if (input) {
         const parsed = Number.parseInt(input, 10);
         // make sure the parsed value is the same value as input
-        // input may be a string or a number, we don't want === in this case, just ==
-        if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
+        // eslint-disable-next-line eqeqeq -- input may be a string or a number, we don't want === in this case, just ==
+        if (Number.isNaN(parsed) || parsed != input) {
           throw new Error(`env var HTTP_ONE_APP_DEV_CDN_PORT needs to be a valid integer, given "${input}"`);
         } else {
           return parsed;
@@ -116,8 +116,8 @@ const runTime = [
       if (input) {
         const parsed = Number.parseInt(input, 10);
         // make sure the parsed value is the same value as input
-        // input may be a string or a number, we don't want === in this case, just ==
-        if (Number.isNaN(parsed) || parsed != input) { // eslint-disable-line eqeqeq
+        // eslint-disable-next-line eqeqeq -- input may be a string or a number, we don't want === in this case, just ==
+        if (Number.isNaN(parsed) || parsed != input) {
           throw new Error(`env var HTTP_ONE_APP_DEV_PROXY_SERVER_PORT needs to be a valid integer, given "${input}"`);
         } else {
           return parsed;
@@ -257,8 +257,12 @@ const runTime = [
     },
   },
   {
-    name: 'OTEL_SERVICE_NAME',
-    defaultValue: 'One App',
+    name: 'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT',
+    validate: (input) => {
+      if (!input) return;
+      // eslint-disable-next-line no-new -- intentionally using new for side effect of validation
+      new URL(input);
+    },
   },
 ];
 runTime.forEach(preprocessEnvVar);

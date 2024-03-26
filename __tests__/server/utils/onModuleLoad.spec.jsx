@@ -17,15 +17,13 @@
 import util from 'node:util';
 import React from 'react';
 import { preprocessEnvVar } from '@americanexpress/env-config-utils';
-import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
+import { META_DATA_KEY } from '@americanexpress/one-app-server-bundler';
 import { clearModulesUsingExternals } from 'holocron';
 
 import onModuleLoad, {
   CONFIGURATION_KEY,
   validateCspIsPresent,
 } from '../../../src/server/utils/onModuleLoad';
-// This named export exists only on the mock
-// eslint-disable-next-line import/named
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from '../../../src/server/utils/stateConfig';
 import { setRedirectAllowList } from '../../../src/server/utils/redirectAllowList';
 import { setCorsOrigins } from '../../../src/server/plugins/conditionallyAllowCors';
@@ -33,7 +31,7 @@ import {
   extendRestrictedAttributesAllowList,
   validateSafeRequestRestrictedAttributes,
 } from '../../../src/server/utils/safeRequest';
-import { setConfigureRequestLog } from '../../../src/server/utils/logging/fastifyPlugin';
+import { setConfigureRequestLog } from '../../../src/server/plugins/requestLogging';
 import { setCreateSsrFetch } from '../../../src/server/utils/createSsrFetch';
 import { getEventLoopDelayThreshold, getEventLoopDelayPercentile } from '../../../src/server/utils/createCircuitBreaker';
 import setupDnsCache from '../../../src/server/utils/setupDnsCache';
@@ -58,7 +56,7 @@ jest.mock('../../../src/server/utils/readJsonFile', () => () => ({
 jest.mock('../../../src/server/plugins/conditionallyAllowCors', () => ({
   setCorsOrigins: jest.fn(),
 }));
-jest.mock('../../../src/server/utils/logging/fastifyPlugin');
+jest.mock('../../../src/server/plugins/requestLogging');
 jest.mock('../../../src/server/utils/createSsrFetch');
 jest.mock('../../../src/server/utils/setupDnsCache');
 
@@ -77,14 +75,14 @@ const RootModule = () => <h1>Hello, world</h1>;
 const csp = "default: 'none'";
 const missingCsp = undefined;
 describe('onModuleLoad', () => {
-  const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => null);
-  const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => null);
+  const consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(util.format);
+  const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(util.format);
 
   beforeEach(() => {
     process.env.ONE_DANGEROUSLY_ACCEPT_BREAKING_EXTERNALS = 'false';
     process.env.ONE_DANGEROUSLY_DISABLE_CSP = 'false';
     global.getTenantRootModule = () => RootModule;
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     getServerStateConfig.mockImplementation(() => ({
       rootModuleName: 'some-root',
     }));
@@ -364,7 +362,7 @@ describe('onModuleLoad', () => {
       moduleName: 'some-root',
     });
     expect(consoleInfoSpy).toHaveBeenCalledTimes(1);
-    expect(util.format(...consoleInfoSpy.mock.calls[0])).toBe('Loaded module some-root@1.0.15');
+    expect(consoleInfoSpy.mock.results[0].value).toBe('Loaded module some-root@1.0.15');
   });
 
   it('logs when other modules are loaded', () => {
@@ -373,7 +371,7 @@ describe('onModuleLoad', () => {
       moduleName: 'not-the-root-module',
     });
     expect(consoleInfoSpy).toHaveBeenCalledTimes(1);
-    expect(util.format(...consoleInfoSpy.mock.calls[0])).toBe('Loaded module not-the-root-module@1.0.16');
+    expect(consoleInfoSpy.mock.results[0].value).toBe('Loaded module not-the-root-module@1.0.16');
   });
 
   it('clears the modules using externals when loading the root module', () => {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2024 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,7 @@
  * permissions and limitations under the License.
  */
 
-const getObjectValueAtPath = (obj, path, defaultValue) => {
-  const result = path.split(/[.[\]]+?/)
-    .filter(Boolean)
-    .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
-  return result === undefined || result === obj ? defaultValue : result;
-};
+import logger from './logger';
 
-export default getObjectValueAtPath;
+const logMethods = ['error', 'warn', 'log', 'info', 'debug', 'trace'];
+logMethods.forEach((methodName) => { console[methodName] = logger[methodName].bind(logger); });

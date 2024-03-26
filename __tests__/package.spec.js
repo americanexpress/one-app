@@ -49,7 +49,7 @@ describe('package.json', () => {
           (orderedList, [packageName, versionRange]) => {
             // adding properties one at a time is less bad than rebuilding (via destructuring) a
             // new object every iteration of the loop
-            /* eslint-disable-next-line no-param-reassign */
+            /* eslint-disable-next-line no-param-reassign -- see above */
             orderedList[packageName] = versionRange;
             return orderedList;
           },

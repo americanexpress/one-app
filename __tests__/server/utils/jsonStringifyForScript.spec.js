@@ -14,8 +14,8 @@
  * permissions and limitations under the License.
  */
 
-/* eslint no-unused-expressions:0 no-eval:0 */
-// eval as we need to evaluate the JS the way the browser will as it parses to build the DOM
+// Eval as we need to evaluate the JS the way the browser will as it parses to build the DOM
+/* eslint-disable no-eval -- see above */
 import jsonStringifyForScript from '../../../src/server/utils/jsonStringifyForScript';
 
 describe('jsonStringifyForScript', () => {
@@ -143,3 +143,4 @@ describe('jsonStringifyForScript', () => {
     });
   });
 });
+/* eslint-enable no-eval */

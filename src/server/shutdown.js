@@ -29,7 +29,7 @@ function shutdown() {
 function shutdownForcibly() {
   console.error('shutting down, forcibly stopping node');
   // this is a forcible shutdown due to a babel-node bug of not forwarding the signal
-  // eslint-disable-next-line unicorn/no-process-exit
+  // eslint-disable-next-line unicorn/no-process-exit -- see above
   setImmediate(() => process.exit(1));
 }
 

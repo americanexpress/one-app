@@ -93,3 +93,5 @@ describe('counters', () => {
     });
   });
 });
+
+/* eslint-enable no-underscore-dangle */

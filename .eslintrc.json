@@ -1,8 +1,37 @@
 {
   "root": true,
   "extends": "amex",
-  "plugins": ["es"],
+  "plugins": [
+    "es"
+  ],
+  "parserOptions": {
+    "babelOptions": {
+      "presets": [
+        "@babel/preset-react"
+      ]
+    }
+  },
+  "rules": {
+    "unicorn/prefer-node-protocol": "error",
+    "eslint-comments/require-description": [
+      "error",
+      {
+        "ignore": [
+          "eslint-enable"
+        ]
+      }
+    ],
+    "default-param-last": 0
+  },
   "overrides": [
+    {
+      "files": [
+        "__performance__/**"
+      ],
+      "globals": {
+        "__ENV": true
+      }
+    },
     {
       "files": [
         "**/__mocks__/**"

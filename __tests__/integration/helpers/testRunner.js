@@ -14,10 +14,10 @@
  * permissions and limitations under the License.
  */
 
-const path = require('path');
-const childProcess = require('child_process');
+const path = require('node:path');
+const fs = require('node:fs/promises');
+const childProcess = require('node:child_process');
 const { remote } = require('webdriverio');
-const fs = require('fs-extra');
 const yaml = require('js-yaml');
 
 const { waitUntilServerIsUp } = require('./wait');
@@ -28,6 +28,8 @@ const deepMergeObjects = require('../../../src/server/utils/deepMergeObjects');
 const prodSampleDir = path.resolve('./prod-sample/');
 const pathToDockerComposeTestFile = path.resolve(prodSampleDir, 'docker-compose.test.yml');
 
+let logWatcherDuplex;
+
 const setUpTestRunner = async ({
   oneAppLocalPortToUse,
   oneAppMetricsLocalPortToUse,
@@ -36,7 +38,7 @@ const setUpTestRunner = async ({
   const pathToBaseDockerComposeFile = path.resolve(prodSampleDir, 'docker-compose.yml');
   const seleniumServerPort = getRandomPortNumber();
   // create docker compose file from base with changes needed for tests
-  const baseDockerComposeFileContents = yaml.load(fs.readFileSync(pathToBaseDockerComposeFile, 'utf8'));
+  const baseDockerComposeFileContents = yaml.load(await fs.readFile(pathToBaseDockerComposeFile, 'utf8'));
   const testDockerComposeFileContents = deepMergeObjects(
     baseDockerComposeFileContents,
     {
@@ -65,16 +67,32 @@ const setUpTestRunner = async ({
     delete testDockerComposeFileContents.services['selenium-chrome'].entrypoint;
   }
 
-  fs.writeFileSync(pathToDockerComposeTestFile, yaml.dump(testDockerComposeFileContents));
+  await fs.writeFile(pathToDockerComposeTestFile, yaml.dump(testDockerComposeFileContents));
 
   const dockerComposeUpCommand = `docker compose -f ${pathToDockerComposeTestFile} up --abort-on-container-exit --force-recreate`;
   const dockerComposeUpProcess = childProcess.spawn(`${dockerComposeUpCommand}`, { shell: true });
   const serverStartupTimeout = 90000;
 
-  const logWatcherDuplex = createLogWatcherDuplex();
+  logWatcherDuplex = createLogWatcherDuplex();
   // logWatcherDuplex enables the testing of logs without preventing logging to stdout and stderr
   dockerComposeUpProcess.stdout.pipe(logWatcherDuplex);
   dockerComposeUpProcess.stderr.pipe(logWatcherDuplex);
+
+  await Promise.all(['traces.jsonl', 'logs.jsonl'].map(async (file) => {
+    const filePath = path.resolve(prodSampleDir, 'otel-collector', 'tmp', file);
+    const tail = childProcess.spawn('tail', ['-f', filePath]);
+    // tail has a line character limit before it splits the chunks, but we need
+    // each trace in a single line for parsing
+    let currentTailChunk = '';
+    tail.stdout.on('data', (chunk) => {
+      currentTailChunk += chunk;
+      if (currentTailChunk.endsWith('\n')) {
+        logWatcherDuplex.write(currentTailChunk);
+        currentTailChunk = '';
+      }
+    });
+    logWatcherDuplex.on('close', () => tail.kill());
+  }));
 
   // uncomment this line in order to view full logs for debugging
   logWatcherDuplex.pipe(process.stdout);
@@ -118,7 +136,8 @@ const setUpTestRunner = async ({
 };
 
 const tearDownTestRunner = async ({ browser } = {}) => {
-  fs.removeSync(pathToDockerComposeTestFile);
+  if (logWatcherDuplex) logWatcherDuplex.destroy();
+  await fs.rm(pathToDockerComposeTestFile);
   if (browser) { await browser.deleteSession(); }
 
   const dockerComposeDownProcess = childProcess.spawnSync('docker-compose down', { shell: true, cwd: prodSampleDir });

@@ -77,36 +77,17 @@ jest.mock('@americanexpress/env-config-utils', () => {
 
   return actualRuntimeConfigUtils;
 });
+jest.spyOn(console, 'info').mockImplementation(() => {});
+jest.spyOn(console, 'warn').mockImplementation(() => {});
 
 describe('runTime', () => {
-  // eslint-disable-next-line no-console
-  const origConsoleInfo = console.info;
-  const origConsoleWarn = console.warn;
-  const origEnvVarVals = {};
-  [
-    'NODE_ENV',
-    'ONE_DANGEROUSLY_DISABLE_CSP',
-    'HTTP_PORT',
-    'HTTP_METRICS_PORT',
-    'HOLOCRON_MODULE_MAP_URL',
-    'HTTP_ONE_APP_DEV_CDN_PORT',
-    'HTTP_ONE_APP_DEV_PROXY_SERVER_PORT',
-    'HOLOCRON_SERVER_MAX_MODULES_RETRY',
-    'HOLOCRON_SERVER_MAX_SIM_MODULES_FETCH',
-    'ONE_CLIENT_REPORTING_URL',
-    'ONE_CLIENT_CSP_REPORTING_URL',
-    'ONE_CLIENT_CDN_URL',
-    'ONE_CLIENT_LOCALE_FILENAME',
-    'ONE_CLIENT_ROOT_MODULE_NAME',
-    'ONE_ENABLE_POST_TO_MODULE_ROUTES',
-    'ONE_MAX_POST_REQUEST_PAYLOAD',
-    'ONE_CONFIG_USE_NATIVE_INTL',
-  ].forEach((name) => {
-    origEnvVarVals[name] = process.env[name];
-  });
+  const originalEnv = process.env;
 
   function getEnvVarConfig(envVarName) {
-    const runTime = require('../../../../src/server/config/env/runTime').default;
+    let runTime;
+    jest.isolateModules(() => {
+      runTime = require('../../../../src/server/config/env/runTime').default;
+    });
     return runTime.filter(({ name }) => name === envVarName)[0];
   }
 
@@ -119,23 +100,15 @@ describe('runTime', () => {
   }
 
   beforeEach(() => {
-    // eslint-disable-next-line no-console
-    console.info = jest.fn();
-    console.warn = jest.fn();
     resetEnvVar('NODE_ENV');
     resetEnvVar('ONE_DANGEROUSLY_DISABLE_CSP', 'false');
     resetEnvVar('HTTP_ONE_APP_DEV_CDN_PORT');
     resetEnvVar('ONE_ENABLE_POST_TO_MODULE_ROUTES');
-    jest.resetModules();
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   afterAll(() => {
-    // eslint-disable-next-line no-console
-    console.info = origConsoleInfo;
-    console.warn = origConsoleWarn;
-    Object.keys(origEnvVarVals).forEach((name) => resetEnvVar(name, origEnvVarVals[name]));
-    jest.resetAllMocks();
+    process.env = originalEnv;
   });
 
   it('has a name on every entry', () => {
@@ -166,7 +139,7 @@ describe('runTime', () => {
     const disableCspEnv = getEnvVarConfig('ONE_DANGEROUSLY_DISABLE_CSP');
 
     it('throws error if ONE_DANGEROUSLY_DISABLE_CSP is set to true and NODE_ENV is not development', () => {
-      expect(() => disableCspEnv.validate('true')).toThrowError(
+      expect(() => disableCspEnv.validate('true')).toThrow(
         'If you are trying to bypass CSP requirement, NODE_ENV must also be set to development.'
       );
     });
@@ -197,7 +170,7 @@ describe('runTime', () => {
 
     it('normalizes numeric input', () => {
       expect(httpPort.normalize('1337')).toEqual(1337);
-      expect(() => httpPort.normalize('r00t')).toThrowError(
+      expect(() => httpPort.normalize('r00t')).toThrow(
         'env var HTTP_PORT needs to be a valid integer, given "r00t"'
       );
       expect(httpPort.normalize('0002345')).toEqual(2345);
@@ -225,7 +198,7 @@ describe('runTime', () => {
 
     it('normalizes numeric input', () => {
       expect(devCdnPort.normalize('1337')).toEqual(1337);
-      expect(() => devCdnPort.normalize('r00t')).toThrowError(
+      expect(() => devCdnPort.normalize('r00t')).toThrow(
         'env var HTTP_ONE_APP_DEV_CDN_PORT needs to be a valid integer, given "r00t"'
       );
       expect(devCdnPort.normalize('0002345')).toEqual(2345);
@@ -285,7 +258,7 @@ describe('runTime', () => {
 
     it('normalizes numeric input', () => {
       expect(httpPort.normalize('1337')).toEqual(1337);
-      expect(() => httpPort.normalize('r00t')).toThrowError(
+      expect(() => httpPort.normalize('r00t')).toThrow(
         'env var HTTP_METRICS_PORT needs to be a valid integer, given "r00t"'
       );
       expect(httpPort.normalize('0002345')).toEqual(2345);
@@ -541,11 +514,15 @@ describe('runTime', () => {
     });
   });
 
-  describe('OTEL_SERVICE_NAME', () => {
-    const otelServiceName = getEnvVarConfig('OTEL_SERVICE_NAME');
+  describe('OTEL_EXPORTER_OTLP_TRACES_ENDPOINT', () => {
+    const otelTraceCollectorUrl = getEnvVarConfig('OTEL_EXPORTER_OTLP_TRACES_ENDPOINT');
 
-    it('should have a default value of "One App"', () => {
-      expect(otelServiceName.defaultValue).toBe('One App');
+    it('ensures node can reach the URL', () => {
+      expect(otelTraceCollectorUrl.validate).toValidateURL();
+    });
+
+    it('is not required', () => {
+      expect(() => otelTraceCollectorUrl.validate()).not.toThrow();
     });
   });
 

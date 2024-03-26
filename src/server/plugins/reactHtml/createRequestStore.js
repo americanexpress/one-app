@@ -34,6 +34,8 @@ const createRequestStore = (
   request, reply,
   { reducers }
 ) => {
+  const { tracer } = request.openTelemetry();
+  const span = tracer.startSpan('createRequestStore');
   try {
     const serverConfig = getServerStateConfig();
     const clientConfig = getClientStateConfig();
@@ -65,11 +67,14 @@ const createRequestStore = (
     });
 
     // use the store as a global for the request
-    request.store = store; // eslint-disable-line no-param-reassign
+    request.store = store;
     request.clientModuleMapCache = getClientModuleMapCache();
   } catch (err) {
+    span.recordException(err);
     request.log.error('error creating store for request', err);
     renderStaticErrorPage(request, reply);
+  } finally {
+    span.end();
   }
 };
 

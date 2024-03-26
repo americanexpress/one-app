@@ -141,7 +141,6 @@ describe(`${createResourceMetaData.name}`, () => {
       },
     ],
   ])('extracts metadata from %s', (url, resourceInfo, result) => {
-    // eslint-disable-next-line no-param-reassign
     const meta = createResourceMetaData({ request: { url } }, resourceInfo);
     expect(meta).toEqual({ ...result, url });
   });

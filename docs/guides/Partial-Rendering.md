@@ -299,7 +299,8 @@ export default function EmailPartialsChildModule() {
 
   return (
     <dangerously-return-only-doctype
-      dangerouslySetInnerHTML={{ __html: html }} // eslint-disable-line react/no-danger
+      // eslint-disable-next-line react/no-danger -- tis the purpose of this example
+      dangerouslySetInnerHTML={{ __html: html }}
     />
   );
 }

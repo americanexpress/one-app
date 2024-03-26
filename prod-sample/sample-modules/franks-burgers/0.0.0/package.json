@@ -5,7 +5,8 @@
   "scripts": {
     "prebuild": "npm run clean",
     "build": "bundle-module",
-    "clean": "rimraf build",
+    "rimraf": "node -e \"process.argv.slice(1).forEach(path => require('node:fs').rmSync(path, { recursive: true, force: true }));\" --",
+    "clean": "npm run rimraf build",
     "prepare": "npm run build"
   },
   "dependencies": {
@@ -14,8 +15,7 @@
     "react-redux": "^7.2.9"
   },
   "devDependencies": {
-    "@americanexpress/one-app-bundler": "^6.21.1",
-    "babel-preset-amex": "^4.0.0",
-    "rimraf": "^3.0.2"
+    "@americanexpress/one-app-bundler": "^6.21.8",
+    "babel-preset-amex": "^4.0.3"
   }
 }

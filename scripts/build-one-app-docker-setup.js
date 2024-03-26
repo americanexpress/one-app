@@ -16,11 +16,10 @@
  * permissions and limitations under the License.
  */
 
+const { readFileSync, existsSync, promises: fs } = require('node:fs');
+const path = require('node:path');
+const { execSync } = require('node:child_process');
 const { extract } = require('tar');
-const fs = require('fs-extra');
-const path = require('path');
-
-const { execSync } = require('child_process');
 
 const {
   nginxOriginStaticsRootDir,
@@ -33,7 +32,7 @@ const nginxOriginStaticsAppDir = path.resolve(nginxOriginStaticsRootDir, 'app');
 
 const userIntendsToSkipOneAppImageBuild = process.env.ONE_DANGEROUSLY_SKIP_ONE_APP_IMAGE_BUILD;
 const userIntendsToSkipApiImagesBuild = process.env.ONE_DANGEROUSLY_SKIP_API_IMAGES_BUILD;
-const nodeVersion = fs.readFileSync('.nvmrc', { encoding: 'utf8' }).trim();
+const nodeVersion = readFileSync('.nvmrc', { encoding: 'utf8' }).trim();
 const sanitizedEnvVars = sanitizeEnvVars();
 
 const buildApiImages = async () => {
@@ -76,10 +75,12 @@ const generateCertsFor = async (container, commonName) => {
 const buildExtraCerts = async () => {
   console.log('🛠  Building extra-certs.pem');
   try {
-    const nginxCert = await fs.readFile(path.join(sampleProdDir, 'nginx', 'nginx-cert.pem'), 'utf8');
-    const apiCert = await fs.readFile(path.join(sampleProdDir, 'api', 'api-cert.pem'), 'utf8');
-    const appCert = await fs.readFile(path.join(sampleProdDir, 'one-app', 'one-app-cert.pem'), 'utf8');
-    await fs.writeFile(path.join(sampleProdDir, 'extra-certs.pem'), `${appCert}\n${apiCert}\n${nginxCert}`);
+    const extraCerts = await Promise.all([
+      fs.readFile(path.join(sampleProdDir, 'nginx', 'nginx-cert.pem'), 'utf8'),
+      fs.readFile(path.join(sampleProdDir, 'api', 'api-cert.pem'), 'utf8'),
+      fs.readFile(path.join(sampleProdDir, 'one-app', 'one-app-cert.pem'), 'utf8'),
+    ]);
+    await fs.writeFile(path.join(sampleProdDir, 'extra-certs.pem'), extraCerts.join('\n'));
   } catch (error) {
     console.log('🚨 extra-certs.pem could not be built\n');
     throw error;
@@ -90,10 +91,10 @@ const buildExtraCerts = async () => {
 const collectOneAppStaticFiles = async () => {
   console.log('🛠  Collecting One App static files from Docker image');
   try {
-    // clean up any existing static assets tarfiles
+    // clean up any existing static assets tar files
     const filesInDirectory = await fs.readdir(process.cwd());
     const oldStaticAssetsArchives = filesInDirectory.filter((fileName) => fileName.match(/^one-app_.+_static-assets\.tgz$/g));
-    oldStaticAssetsArchives.forEach(async (file) => fs.remove(file));
+    oldStaticAssetsArchives.forEach(async (file) => fs.rm(file));
 
     await promisifySpawn('node ./scripts/build-static-assets-artifact.js one-app:at-test', { shell: true, env: { ...sanitizedEnvVars } });
 
@@ -119,11 +120,11 @@ const handleCertGeneration = async ({ skipApiImagesBuild, skipOneAppImageBuild }
 
   await generateCertsFor('nginx', 'sample-cdn.frank');
 
-  const oneCertExists = fs.existsSync(path.join(sampleProdDir, 'one-app', 'one-app-cert.pem'));
+  const oneCertExists = existsSync(path.join(sampleProdDir, 'one-app', 'one-app-cert.pem'));
   if (!skipOneAppImageBuild || !oneCertExists) {
     await generateCertsFor('one-app', 'localhost');
   }
-  const apiCertExists = fs.existsSync(path.join(sampleProdDir, 'api', 'api-cert.pem'));
+  const apiCertExists = existsSync(path.join(sampleProdDir, 'api', 'api-cert.pem'));
   if (!skipApiImagesBuild || !apiCertExists) { await generateCertsFor('api', '*.api.frank'); }
 
   await buildExtraCerts();
@@ -139,7 +140,15 @@ const doWork = async () => {
   const skipApiImagesBuild = userIntendsToSkipApiImagesBuild && prodSampleApiImagesAlreadyBuilt();
 
   // clear cdn of statics.
-  await fs.emptyDir(nginxOriginStaticsAppDir);
+  await fs.rm(nginxOriginStaticsAppDir, { recursive: true, force: true });
+  await fs.mkdir(nginxOriginStaticsAppDir, { recursive: true });
+
+  await Promise.all(['traces.jsonl', 'logs.jsonl'].map(async (file) => {
+    const filePath = path.resolve(sampleProdDir, 'otel-collector', 'tmp', file);
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
+    await fs.writeFile(filePath, '');
+    await fs.chmod(filePath, 0o666);
+  }));
 
   await handleCertGeneration({
     skipApiImagesBuild,

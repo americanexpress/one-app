@@ -158,3 +158,5 @@ describe('gauges', () => {
     });
   });
 });
+
+/* eslint-enable no-underscore-dangle */

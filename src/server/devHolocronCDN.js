@@ -14,10 +14,11 @@
  * permissions and limitations under the License.
  */
 
-/* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true }] */
+/* eslint import/no-extraneous-dependencies: ["error", {"devDependencies": true }] --
+ * this file is only loaded in development */
 
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import { argv } from 'yargs';
 import oneAppDevCdn from './utils/devCdnFactory';
 

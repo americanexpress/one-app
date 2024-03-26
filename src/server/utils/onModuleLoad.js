@@ -15,14 +15,14 @@
  */
 
 import semver from 'semver';
-import { META_DATA_KEY } from '@americanexpress/one-app-bundler';
+import { META_DATA_KEY } from '@americanexpress/one-app-server-bundler';
 import { clearModulesUsingExternals } from 'holocron';
 
 import { setStateConfig, getClientStateConfig, getServerStateConfig } from './stateConfig';
 import { setCorsOrigins } from '../plugins/conditionallyAllowCors';
 import readJsonFile from './readJsonFile';
 import { extendRestrictedAttributesAllowList, validateSafeRequestRestrictedAttributes } from './safeRequest';
-import { setConfigureRequestLog } from './logging/fastifyPlugin';
+import { setConfigureRequestLog } from '../plugins/requestLogging';
 import { setCreateSsrFetch } from './createSsrFetch';
 import { setEventLoopDelayThreshold, setEventLoopDelayPercentile } from './createCircuitBreaker';
 import setupDnsCache from './setupDnsCache';

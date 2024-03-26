@@ -16,7 +16,7 @@
 
 import getHttpsConfig from '../../../src/server/utils/getHttpsConfig';
 
-jest.mock('fs');
+jest.mock('node:fs');
 
 const origEnvVarVals = {};
 [

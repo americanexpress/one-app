@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import url from 'url';
+import url from 'node:url';
 import {
   Map, OrderedMap, List, Set, OrderedSet, Record,
 } from 'immutable';
@@ -87,6 +87,7 @@ describe('transit', () => {
   });
 
   it('should convert Promises to null', () => {
+    // eslint-disable-next-line no-promise-executor-return -- needed for test
     const input = new Promise(() => 0);
     const output = transform(input);
     expect(output).toBe(null);

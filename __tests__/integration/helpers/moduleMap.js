@@ -14,10 +14,10 @@
  * permissions and limitations under the License.
  */
 
-const fs = require('fs-extra');
-const { resolve, join } = require('path');
+const fs = require('node:fs');
+const { resolve, join } = require('node:path');
 const util = require('node:util');
-const childProcess = require('child_process');
+const childProcess = require('node:child_process');
 
 const promisifiedExec = util.promisify(childProcess.exec);
 const moduleMapPath = resolve(__dirname, '../../../prod-sample/nginx/origin-statics/module-map.json');
@@ -32,7 +32,7 @@ const retrieveGitSha = async () => {
 };
 
 const retrieveModuleIntegrityDigests = ({ moduleName, version }) => {
-  // eslint-disable-next-line import/no-dynamic-require, global-require
+  // eslint-disable-next-line import/no-dynamic-require -- required for test
   const integrityDigests = require(
     join(
       sampleModulesPath,

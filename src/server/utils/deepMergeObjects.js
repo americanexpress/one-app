@@ -21,7 +21,7 @@ const merge = (sourceObj, mergeObj) => {
                   && !Array.isArray(sourceObj[key])) {
       merge(sourceObj[key], mergeObj[key]);
     } else {
-      // eslint-disable-next-line no-param-reassign
+      // eslint-disable-next-line no-param-reassign -- this is the purpose of the function
       sourceObj[key] = mergeObj[key];
     }
   });

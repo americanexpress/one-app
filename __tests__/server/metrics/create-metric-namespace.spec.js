@@ -28,7 +28,7 @@ describe('createMetricNamespace', () => {
   describe('namespace', () => {
     it('does not throw if not given units', () => {
       const ns = createMetricNamespace('corgi');
-      expect(() => ns('party')).not.toThrowError();
+      expect(() => ns('party')).not.toThrow();
     });
 
     it('throws if given more than two units', () => {

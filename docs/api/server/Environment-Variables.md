@@ -9,6 +9,8 @@ One App can be configured via Environment Variables:
 ## 📖 Table of Contents
 
 **By Topic**
+* Dotenv
+  * [`DOTENV_CONFIG_PATH`](#dotenv_config_path)
 * Network & Protocol Settings
   * [`HTTPS_PORT`](#https_port)
   * [`HTTPS_PRIVATE_KEY_PASS_FILE_PATH`](#https_private_key_pass_file_path)
@@ -48,10 +50,13 @@ One App can be configured via Environment Variables:
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
   * [`ONE_SERVICE_WORKER`](#one_service_worker)
 * OpenTelemetry
-  * [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`](#otel_log_collector_url)
+  * [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`](#otel_exporter_otlp_logs_endpoint)
+  * [`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`](#otel_exporter_otlp_traces_endpoint)
   * [`OTEL_SERVICE_NAME`](#otel_service_name)
   * [`OTEL_SERVICE_NAMESPACE`](#otel_service_namespace)
-  * [`OTEL_RESOURCE_ATTRIBUTES`](#ote;_resource_attributes)
+  * [`OTEL_RESOURCE_ATTRIBUTES`](#otel_resource_attributes)
+  * [`ONE_TRACE_ALL_REQUESTS`](#one_trace_all_requests)
+  * [`ONE_ENABLE_REQUEST_LOGGING_WHILE_TRACING`](#one_enable_request_logging_while_tracing)
 
 <details>
   <summary>Alphabetical Contents</summary>
@@ -78,18 +83,39 @@ One App can be configured via Environment Variables:
   * [`ONE_CONFIG_ENV`](#one_config_env) ⚠️
   * [`ONE_CONFIG_USE_NATIVE_INTL`](#one_config_use_native_intl)
   * [`ONE_ENABLE_POST_TO_MODULE_ROUTES`](#one_enable_post_to_module_routes)
+  * [`ONE_ENABLE_REQUEST_LOGGING_WHILE_TRACING`](#one_enable_request_logging_while_tracing)
   * [`ONE_MAP_POLLING_MAX`](#one_map_polling_max)
   * [`ONE_MAP_POLLING_MIN`](#one_map_polling_min)
   * [`ONE_MAX_POST_REQUEST_PAYLOAD`](#one_max_post_request_payload)
   * [`ONE_REFERRER_POLICY_OVERRIDE`](#one_referrer_policy_override)
   * [`ONE_SERVICE_WORKER`](#one_service_worker)
-  * [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`](#otel_log_collector_url)
+  * [`ONE_TRACE_ALL_REQUESTS`](#one_trace_all_requests)
+  * [`OTEL_EXPORTER_OTLP_LOGS_ENDPOINT`](#otel_exporter_otlp_logs_endpoint)
+  * [`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`](#otel_exporter_otlp_traces_endpoint)
   * [`OTEL_RESOURCE_ATTRIBUTES`](#otel_resource_attributes)
   * [`OTEL_SERVICE_NAME`](#otel_service_name)
   * [`OTEL_SERVICE_NAMESPACE`](#otel_service_namespace)
 </details>
 
 > ⚠️ = Required
+
+## `DOTENV_CONFIG_PATH`
+
+One App supports the usage of [Dotenv](https://github.com/motdotla/dotenv). This environment variable allows you to specify the path to the `.env` file that should be loaded. These values are loaded before the start of the One App server. See the documentation for Dotenv for advanced usage. Dotenv will look for `.env` by default if this is not set.
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+**Shape**
+```bash
+DOTENV_CONFIG_PATH=String
+```
+
+**Example**
+```bash
+DOTENV_CONFIG_PATH=.env
+```
 
 ## `HOLOCRON_MODULE_MAP_URL`
 
@@ -771,7 +797,27 @@ OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=String
 
 **Example**
 ```bash
-OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://localhost:4318/v1/logs
+OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://localhost:4317/v1/logs
+```
+
+## `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+When set, One App will emit OpenTelemetry traces over GRPC to the configured endpoint.
+See the [OpenTelemetry documentation](https://opentelemetry.io/docs/concepts/sdk-configuration/otlp-exporter-configuration/#otel_exporter_otlp_traces_endpoint) for more information.
+
+
+**Shape**
+```bash
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=String
+```
+
+**Example**
+```bash
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://localhost:4317/v1/traces
 ```
 
 ## `OTEL_SERVICE_NAME`
@@ -791,11 +837,6 @@ OTEL_SERVICE_NAME=String
 **Example**
 ```bash
 OTEL_SERVICE_NAME=MyApplication
-```
-
-**Default Value**
-```bash
-OTEL_SERVICE_NAME="One App"
 ```
 
 ## `OTEL_SERVICE_NAMESPACE`
@@ -832,7 +873,45 @@ OTEL_RESOURCE_ATTRIBUTES=String
 
 **Example**
 ```bash
-OTEL_RESOURCE_ATTRIBUTES="foo=bar;baz=qux"
+OTEL_RESOURCE_ATTRIBUTES="foo=bar,baz=qux"
+```
+
+## `ONE_TRACE_ALL_REQUESTS`
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+Requests made to one-app's internal routes (those starting with `/_/`), requests to any other port
+than `HTTPS_PORT` or `HTTP_PORT`, and outgoing requests not associated with an incoming request are
+not traced by default. Setting this to true will trace all requests.
+
+**Shape**
+```bash
+ONE_TRACE_ALL_REQUESTS=Boolean
+```
+
+**Example**
+```bash
+ONE_TRACE_ALL_REQUESTS=true
+```
+
+## `ONE_ENABLE_REQUEST_LOGGING_WHILE_TRACING`
+
+**Runs In**
+* ✅ Production
+* ✅ Development
+
+When tracing is enabled, request logging is disabled by default. Setting this to true will re-enable it.
+
+**Shape**
+```bash
+ONE_ENABLE_REQUEST_LOGGING_WHILE_TRACING=Boolean
+```
+
+**Example**
+```bash
+ONE_ENABLE_REQUEST_LOGGING_WHILE_TRACING=true
 ```
 
 [☝️ Return To Top](#environment-variables)

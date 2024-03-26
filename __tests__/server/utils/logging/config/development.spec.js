@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import { PassThrough } from 'stream';
+import { PassThrough } from 'node:stream';
 import pinoPretty from 'pino-pretty';
 import pino from 'pino';
 import { pinoPrettyOptions } from '../../../../../src/server/utils/logging/config/development';

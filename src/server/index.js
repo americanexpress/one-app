@@ -1,4 +1,3 @@
-/* eslint-disable global-require */
 /*
  * Copyright 2019 American Express Travel Related Services Company, Inc.
  *
@@ -15,9 +14,11 @@
  * permissions and limitations under the License.
  */
 
+/* eslint-disable global-require, import/no-dynamic-require -- needs to be dynamic */
+
 import util from 'node:util';
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 import Intl from 'lean-intl';
 import enData from 'lean-intl/locale-data/json/en.json';
 
@@ -35,7 +36,6 @@ const getRemotesFromDevEndpointsFile = () => {
   const pathToDevEndpoints = path.join(process.cwd(), '.dev', 'endpoints', 'index.js');
 
   return fs.existsSync(pathToDevEndpoints)
-    // eslint-disable-next-line global-require,import/no-dynamic-require
     ? Object.values(require(pathToDevEndpoints)()).reduce(
       (moduleRemotes, { destination, devProxyPath }) => ({
         ...moduleRemotes,
@@ -72,7 +72,7 @@ export const listen = async ({
 
 async function ssrServerStart() {
   // need to load _some_ locale so that react-intl does not prevent modules from loading
-  // eslint-disable-next-line no-underscore-dangle
+  // eslint-disable-next-line no-underscore-dangle -- lean-intl API
   Intl.__addLocaleData(enData);
 
   await loadModules();
@@ -120,7 +120,7 @@ async function devHolocronCDNStart() {
 async function oneAppDevProxyStart() {
   const { argv } = require('yargs');
   const oneAppDevProxyPort = process.env.HTTP_ONE_APP_DEV_PROXY_SERVER_PORT;
-  // eslint-disable-next-line import/no-extraneous-dependencies
+  // eslint-disable-next-line import/no-extraneous-dependencies -- this is only executed in development
   const oneAppDevProxy = require('@americanexpress/one-app-dev-proxy').default;
   const instance = oneAppDevProxy({
     useMiddleware: argv.m,
@@ -163,3 +163,5 @@ export default serverChain.catch((err) => {
   }
   shutdown();
 });
+
+/* eslint-enable global-require, import/no-dynamic-require */

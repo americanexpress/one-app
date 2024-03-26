@@ -302,7 +302,7 @@ export default function MyModule({ moduleState = {} }) {
 
 MyModule.holocron = {
   name: 'my-module',
-  reducer: (moduleState = fromJS({}), action) => {
+  reducer: (moduleState = fromJS({}), action = {}) => {
     if (action.type === 'my-action') return fromJS(action.data);
     return moduleState;
   },

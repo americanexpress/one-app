@@ -16,6 +16,7 @@
 
 import url from 'node:url';
 import fp from 'fastify-plugin';
+import attachRequestSpies from '../utils/attachRequestSpies';
 
 /*
 TIMERS
@@ -28,15 +29,19 @@ TIMERS
 Why symbols?
 It prevents conflicts with existing keys, native or from other plugins
 */
+export const $ExternalRequestDuration = Symbol('$ExternalRequestDuration');
 export const $RequestFullDuration = Symbol('$RequestFullDuration');
 export const $RequestOverhead = Symbol('$RequestOverhead');
 export const $RouteHandler = Symbol('$RouteHandler');
 export const $ResponseBuilder = Symbol('$ResponseBuilder');
 
 const passThrough = ({ log }) => log;
+
 const UTILS = {
   configureRequestLog: passThrough,
 };
+
+const formatProtocol = ({ protocol }) => protocol.replace(/:$/, '');
 
 const getLocale = (req) => {
   // TODO: Verify if `store` is available
@@ -53,7 +58,7 @@ const hrtimeToMs = (value) => (value[0] * 1e3) + (value[1] * 1e-6);
 const startTimer = (obj, symbol) => {
   const time = process.hrtime();
 
-  // eslint-disable-next-line no-param-reassign
+  // eslint-disable-next-line no-param-reassign -- storing timer
   obj[symbol] = time;
 };
 
@@ -61,7 +66,7 @@ const endTimer = (obj, symbol) => {
   const result = process.hrtime(obj[symbol]);
   const ms = hrtimeToMs(result);
 
-  // eslint-disable-next-line no-param-reassign
+  // eslint-disable-next-line no-param-reassign -- storing duration
   obj[symbol] = ms;
 
   return ms;
@@ -101,20 +106,6 @@ const logClientRequest = (request, reply) => {
       },
       metaData: buildMetaData(request, reply),
       timings: { // https://www.w3.org/TR/navigation-timing/
-        // navigationStart: 0,
-        // redirectStart: 0,
-        // redirectEnd: 0,
-        // fetchStart: 0,
-        // domainLookupStart: 10,
-        // domainLookupEnd: 20,
-        // connectStart: 30,
-        // secureConnectionStart: 40,
-        // connectEnd: 50,
-        // requestStart: 60,
-        // requestEnd: 70, // optional? not part of the W3C spec
-        // responseStart: 80,
-        // responseEnd: 90,
-        // FIXME: mimic the w3 timing names
         duration: Math.round(getTimer($RequestFullDuration)),
         ttfb: ttfb >= 0 ? Math.round(ttfb) : null,
         requestOverhead: Math.round(getTimer($RequestOverhead)),
@@ -139,7 +130,12 @@ export const setConfigureRequestLog = (newConfigureRequestLog = passThrough) => 
   UTILS.configureRequestLog = newConfigureRequestLog;
 };
 
-const fastifyPlugin = (fastify, _opts, done) => {
+/**
+ * Fastify Plugin to log requests
+ * @param {import('fastify').FastifyInstance} fastify Fastify instance
+ * @param {import('fastify').FastifyPluginOptions} opts plugin options
+ */
+const requestLogging = async (fastify, opts = {}) => {
   // decorators should be initialized per Fastify documentation
   // see https://www.fastify.io/docs/latest/Reference/Decorators/#decoratereplyname-value-dependencies
   fastify.decorateRequest($RequestOverhead, null);
@@ -147,35 +143,36 @@ const fastifyPlugin = (fastify, _opts, done) => {
   fastify.decorateRequest($RouteHandler, null);
   fastify.decorateRequest($ResponseBuilder, null);
 
-  // NOTE: this is needed for backward compatibility since
-  //       we were exposing the 'req' and 'res' from ExpressJS
-  //       to the App Config.
-  fastify.addHook('onRequest', async (request, reply) => {
-    request.raw.originalUrl = request.raw.url;
-    request.raw.id = request.id;
-    request.raw.hostname = request.hostname;
-    request.raw.ip = request.ip;
-    request.raw.ips = request.ips;
-    request.raw.log = request.log;
-    // eslint-disable-next-line no-param-reassign
-    reply.raw.log = request.log;
+  if (opts.spy === true) {
+    fastify.addHook('onReady', async () => {
+      function outgoingRequestSpy(externalRequest) {
+        startTimer(externalRequest, $ExternalRequestDuration);
+      }
 
-    // backward compatibility for body-parser
-    if (request.body) {
-      request.raw.body = request.body;
-    }
-    // backward compatibility for cookie-parser
-    if (request.cookies) {
-      request.raw.cookies = request.cookies;
-    }
-
-    // Make it lazy as it does a bit of work
-    Object.defineProperty(request.raw, 'protocol', {
-      get() {
-        return request.protocol;
-      },
+      function outgoingRequestEndSpy(externalRequest, parsedUrl) {
+        const { res } = externalRequest;
+        const duration = endTimer(externalRequest, $ExternalRequestDuration);
+        fastify.log.info({
+          request: {
+            direction: 'out',
+            protocol: formatProtocol(parsedUrl),
+            address: {
+              uri: parsedUrl.href,
+            },
+            metaData: {
+              method: externalRequest.method,
+              // null to explicitly signal no value, undefined if not expected for every request
+              correlationId: externalRequest.getHeader('correlation-id') || undefined,
+            },
+            timings: { duration },
+            statusCode: (res && res.statusCode) || null,
+            statusText: (res && res.statusMessage) || null,
+          },
+        });
+      }
+      attachRequestSpies(outgoingRequestSpy, outgoingRequestEndSpy);
     });
-  });
+  }
 
   fastify.addHook('onRequest', async (request) => {
     startTimer(request, $RequestOverhead);
@@ -210,11 +207,9 @@ const fastifyPlugin = (fastify, _opts, done) => {
       throw error;
     }
   });
-
-  done();
 };
 
-export default fp(fastifyPlugin, {
+export default fp(requestLogging, {
   fastify: '4.x',
-  name: 'logging',
+  name: 'requestLogging',
 });

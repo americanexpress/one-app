@@ -27,7 +27,7 @@ const BooksModule = () => {
           setData({ books, isLoading: false, fetchError: true });
         }
       } catch (e) {
-        // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console -- debugging
         console.error('Failed to fetch Books:', e);
         setData({ books, isLoading: false, fetchError: true });
       }

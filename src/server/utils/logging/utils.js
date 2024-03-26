@@ -14,16 +14,9 @@
  * permissions and limitations under the License.
  */
 
-import { STATUS_CODES } from 'http';
+import { STATUS_CODES } from 'node:http';
 
 import chalk from 'chalk';
-
-const coloredLevels = {
-  error: chalk.red('error'),
-  warn: chalk.yellow('warn'),
-  log: chalk.blue('log'),
-  info: chalk.gray('info'),
-};
 
 function printStatusCode(obj) {
   const { request: { statusCode } } = obj;
@@ -75,7 +68,8 @@ const serializeError = (err) => ({
 });
 
 function formatLogEntry(entry) {
-  /* eslint-disable no-param-reassign */
+  /* eslint-disable no-param-reassign -- keeping these changes on the same obj
+   * for efficiency as it a frequently called function */
   if (entry.error) {
     if (entry.error.name === 'ClientReportedError') {
       entry.device = {
@@ -91,11 +85,11 @@ function formatLogEntry(entry) {
       entry.metaData = entry.error.metaData;
     }
   }
+  /* eslint-enable no-param-reassign */
   return entry;
 }
 
 export {
-  coloredLevels,
   printStatusCode,
   printStatusMessage,
   printDurationTime,

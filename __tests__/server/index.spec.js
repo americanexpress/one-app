@@ -1,4 +1,7 @@
-/* eslint-disable jest/no-disabled-tests */
+/**
+ * @jest-environment node
+ */
+
 /*
  * Copyright 2019 American Express Travel Related Services Company, Inc.
  *
@@ -16,18 +19,22 @@
  */
 
 import util from 'node:util';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 import { Map as ImmutableMap } from 'immutable';
 
 jest.unmock('yargs');
 
+jest.spyOn(console, 'log').mockImplementation(util.format);
+jest.spyOn(console, 'error').mockImplementation((...args) => {
+  args.pop();
+  return util.format(...args);
+});
+jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
+jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
+
 describe('server index', () => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-  jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
-  jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
   const origFsExistsSync = fs.existsSync;
 
   let addServer;
@@ -72,13 +79,8 @@ describe('server index', () => {
     jest.doMock('cross-fetch');
 
     jest.doMock('../../src/server/utils/loadModules', () => jest.fn(() => Promise.resolve()));
-    jest.doMock('babel-polyfill', () => {
-      // jest includes babel-polyfill
-      // if included twice, babel-polyfill will complain that it should be only once
-    });
-    //
     jest.doMock('../../src/server/polyfill/intl');
-    jest.doMock('../../src/server/utils/logging/setup', () => {});
+    jest.doMock('../../src/server/utils/logging/monkeyPatchConsole', () => {});
 
     ssrServerListen = jest.fn(async () => {
       if (ssrServerError) {
@@ -127,7 +129,6 @@ describe('server index', () => {
     jest.doMock('../../src/server/utils/getHttpsConfig', () => () => 'https-config-mock');
 
     jest.doMock('lean-intl', () => ({
-      // eslint-disable-next-line no-underscore-dangle
       __addLocaleData: jest.fn(),
     }));
 
@@ -142,7 +143,6 @@ describe('server index', () => {
   describe('development', () => {
     beforeEach(() => {
       jest.resetModules();
-      jest.resetAllMocks();
       process.env.NODE_ENV = 'development';
       delete process.env.HTTP_ONE_APP_DEV_CDN_PORT;
     });
@@ -229,7 +229,7 @@ describe('server index', () => {
 
     it('initializes Intl with a locale', async () => {
       await load();
-      // eslint-disable-next-line no-underscore-dangle
+      // eslint-disable-next-line no-underscore-dangle -- lean-intl API
       expect(require('lean-intl').__addLocaleData.mock.calls[0][0]).toMatchObject({
         // contents dont have to exactly match just need to make sure that a locale object
         // is being added and not some random other thing
@@ -274,7 +274,6 @@ describe('server index', () => {
   describe('production', () => {
     beforeEach(() => {
       jest.resetModules();
-      jest.resetAllMocks();
       process.env.NODE_ENV = 'production';
     });
 
@@ -292,7 +291,7 @@ describe('server index', () => {
 
     it('initializes Intl with a locale', async () => {
       await load();
-      // eslint-disable-next-line no-underscore-dangle
+      // eslint-disable-next-line no-underscore-dangle -- lean-intl API
       expect(require('lean-intl').__addLocaleData.mock.calls[0][0]).toMatchObject({
         // contents dont have to exactly match just need to make sure that a locale object
         // is being added and not some random other thing
@@ -366,8 +365,9 @@ describe('server index', () => {
       await load({ ssrServerError: true });
 
       expect(console.error).toHaveBeenCalled();
-      console.error.mock.calls[0].pop();
-      expect(util.format(...console.error.mock.calls[0])).toMatchSnapshot();
+      expect(console.error.mock.results[0].value).toMatchInlineSnapshot(
+        '"Error encountered starting 🌎 One App server"'
+      );
     });
 
     it('does not log a notice directly to STDERR when not using OTel and listening on the server fails', async () => {
@@ -394,8 +394,9 @@ describe('server index', () => {
       await load({ metricsServerError: true });
 
       expect(console.error).toHaveBeenCalled();
-      console.error.mock.calls[0].pop();
-      expect(util.format(...console.error.mock.calls[0])).toMatchSnapshot();
+      expect(console.error.mock.results[0].value).toMatchInlineSnapshot(
+        '"Error encountered starting 📊 Metrics server"'
+      );
     });
 
     it('does not log a notice directly to STDERR when not using OTel and listening on the metrics server fails', async () => {
@@ -432,8 +433,8 @@ describe('server index', () => {
       await load();
 
       expect(console.log).toHaveBeenCalled();
-      expect(util.format(...console.log.mock.calls[1])).toMatch(
-        '🌎 One App server listening on port 3000'
+      expect(console.log.mock.results[1].value).toMatchInlineSnapshot(
+        '"🌎 One App server listening on port 3000"'
       );
     });
 
@@ -444,8 +445,8 @@ describe('server index', () => {
       await load();
 
       expect(console.log).toHaveBeenCalled();
-      expect(util.format(...console.log.mock.calls[0])).toMatch(
-        '📊 Metrics server listening on port 3005'
+      expect(console.log.mock.results[0].value).toMatchInlineSnapshot(
+        '"📊 Metrics server listening on port 3005"'
       );
     });
 

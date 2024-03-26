@@ -20,6 +20,6 @@ import 'cross-fetch/polyfill';
 
 import './polyfill/intl';
 import './config/env/argv';
-import './utils/logging/setup';
+import './utils/logging/monkeyPatchConsole';
 import './config/env/runTime';
 import './utils/heapdump';

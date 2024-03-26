@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-const { Duplex } = require('stream');
+const { Duplex } = require('node:stream');
 const { waitFor } = require('./wait');
 
 const timeOutPromise = (timeout, msg) => new Promise((_, rej) => {

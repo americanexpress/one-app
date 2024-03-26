@@ -87,3 +87,5 @@ describe('summaries', () => {
     });
   });
 });
+
+/* eslint-enable no-underscore-dangle */

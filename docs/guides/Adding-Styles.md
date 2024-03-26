@@ -100,11 +100,9 @@ import { Provider } from 'reakit';
 import * as system from 'reakit-system-bootstrap';
 
 const MyRootModule = ({ children }) => (
-  <Fragment>
-    <Provider unstable_system={system}>
-      { children }
-    </Provider>
-  </Fragment>
+  <Provider unstable_system={system}>
+    { children }
+  </Provider>
 );
 
 export default MyRootModule;

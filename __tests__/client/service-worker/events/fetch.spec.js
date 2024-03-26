@@ -33,7 +33,7 @@ beforeEach(() => {
 });
 
 function waitFor(asyncTarget, getTarget = () => asyncTarget.mock.calls) {
-  return Promise.all(getTarget().reduce((array, next) => array.concat(next), []));
+  return Promise.all(getTarget().reduce((array, next) => [...array, ...next], []));
 }
 
 function createFetchRequestResponse(url) {
@@ -58,7 +58,7 @@ function createFetchEvent(url = '/index.html') {
   return event;
 }
 
-function createFetchEventsChainForURLS(middleware, urls = [], initEvent) {
+function createFetchEventsChainForURLS(middleware, urls, initEvent) {
   return urls.reduce(async (lastPromises, url, index) => {
     const lastEvents = await lastPromises;
     const event = createFetchEvent(url);
@@ -67,7 +67,7 @@ function createFetchEventsChainForURLS(middleware, urls = [], initEvent) {
     }
     middleware(event);
     await event.waitForCompletion();
-    return Promise.resolve(lastEvents.concat(event));
+    return Promise.resolve([...lastEvents, event]);
   }, Promise.resolve([]));
 }
 
@@ -94,21 +94,20 @@ function createServiceWorkerEnvironment(target = global) {
     }
   );
   const { match: nativeMatch, matchAll } = target.Cache.prototype;
-  // eslint-disable-next-line no-param-reassign
+  /* eslint-disable no-param-reassign -- required for test */
   target.Cache.prototype.match = function matchCorrected(...args) {
     return nativeMatch.call(this, ...args).then((result) => (result && result.clone()) || null);
   };
-  // eslint-disable-next-line no-param-reassign
   target.Cache.prototype.matchAll = function matchAllCorrected(...args) {
     return matchAll
       .call(this, ...args)
       .then((results) => (results && results.map((result) => result.clone())) || []);
   };
-  // eslint-disable-next-line no-param-reassign
   target.fetch = jest.fn((url) => {
     const [, response] = createFetchRequestResponse(url);
     return Promise.resolve(response);
   });
+  /* eslint-enable no-param-reassign */
 }
 
 describe('createFetchMiddleware', () => {
@@ -163,7 +162,7 @@ describe('createFetchMiddleware', () => {
         '/_/pwa/shell',
         '/_/pwa/manifest.webmanifest',
       ], (event, index) => {
-        // eslint-disable-next-line no-param-reassign
+        // eslint-disable-next-line no-param-reassign -- needed for test
         if (index === 0) event.request.mode = 'navigate';
       });
 

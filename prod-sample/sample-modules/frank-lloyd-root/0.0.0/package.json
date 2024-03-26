@@ -5,17 +5,18 @@
   "scripts": {
     "prebuild": "npm run clean",
     "build": "bundle-module",
-    "clean": "rimraf build",
+    "rimraf": "node -e \"process.argv.slice(1).forEach(path => require('node:fs').rmSync(path, { recursive: true, force: true }));\" --",
+    "clean": "npm run rimraf build",
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@americanexpress/one-app-ducks": "^4.3.3",
-    "content-security-policy-builder": "^2.1.0",
-    "holocron": "^1.2.0",
-    "holocron-module-route": "^1.1.4",
-    "immutable": "^4.0.0-rc.14",
-    "ip": "^1.1.5",
-    "prop-types": "^15.5.9",
+    "@americanexpress/one-app-ducks": "^4.5.0",
+    "content-security-policy-builder": "^2.1.1",
+    "holocron": "^1.10.2",
+    "holocron-module-route": "^1.10.2",
+    "immutable": "^4.3.5",
+    "ip": "^2.0.1",
+    "prop-types": "^15.8.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
@@ -24,8 +25,7 @@
     "redux": "^4.2.1"
   },
   "devDependencies": {
-    "@americanexpress/one-app-bundler": "^6.21.1",
-    "babel-preset-amex": "^4.0.0",
-    "rimraf": "^3.0.2"
+    "@americanexpress/one-app-bundler": "^6.21.8",
+    "babel-preset-amex": "^4.0.3"
   }
 }

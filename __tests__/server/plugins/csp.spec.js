@@ -13,7 +13,6 @@
 * or implied. See the License for the specific language governing
 * permissions and limitations under the License.
 */
-/* eslint-disable global-require */
 
 import Fastify from 'fastify';
 import fastifyHelmet from '@fastify/helmet';
@@ -115,7 +114,7 @@ describe('csp', () => {
 
     expect(headers).toHaveProperty('content-security-policy');
     const cspString = headers['content-security-policy'];
-    // eslint-disable-next-line unicorn/better-regex
+    // eslint-disable-next-line unicorn/better-regex -- this is fine for this test
     const ipFound = cspString.match(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/);
     expect(ipFound).toBeNull();
     const localhostFound = cspString.match(/localhost/);

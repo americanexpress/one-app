@@ -18,7 +18,7 @@
  * permissions and limitations under the License.
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import deepmerge from 'deepmerge';
 import pino from 'pino';
 import { argv } from 'yargs';

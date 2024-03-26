@@ -20,8 +20,8 @@ describe('shutdown', () => {
   jest.spyOn(global, 'setTimeout').mockImplementation(() => {});
   jest.spyOn(global, 'setImmediate').mockImplementation(() => {});
   jest.spyOn(process, 'exit').mockImplementation(() => {});
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
+  jest.spyOn(console, 'log').mockImplementation(util.format);
+  jest.spyOn(console, 'error').mockImplementation(util.format);
 
   const signalNames = [
     'SIGINT',
@@ -115,8 +115,8 @@ describe('shutdown', () => {
         expect(console.error).not.toHaveBeenCalled();
         expect(setTimeout).toHaveBeenCalledTimes(1);
         setTimeout.mock.calls[0][0]();
-        expect(console.error).toHaveBeenCalled();
-        expect(console.error.mock.calls.map((args) => util.format(...args))).toMatchSnapshot();
+        expect(console.error).toHaveBeenCalledTimes(2);
+        expect(console.error.mock.results.map((result) => result.value)).toMatchSnapshot();
       });
 
       it('uses node unref to prevent the exit timeout from preventing exiting', () => {

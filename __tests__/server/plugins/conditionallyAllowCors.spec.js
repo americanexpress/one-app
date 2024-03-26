@@ -15,27 +15,35 @@
  */
 
 // Dangling underscores are part of the HTTP mocks API
-/* eslint-disable no-underscore-dangle */
+
 import httpMocks from 'node-mocks-http';
 import fastifyCors from '@fastify/cors';
 import { fromJS } from 'immutable';
-import conditionallyAllowCors, { setCorsOrigins } from '../../../src/server/plugins/conditionallyAllowCors';
+import conditionallyAllowCors, {
+  setCorsOrigins,
+} from '../../../src/server/plugins/conditionallyAllowCors';
 
 const { NODE_ENV } = process.env;
 let state = fromJS({ rendering: {} });
 let request;
+const span = { end: jest.fn() };
+const tracer = { startSpan: jest.fn(() => span) };
 
 const setup = ({ renderPartialOnly, origin }) => {
-  state = state.update('rendering', (rendering) => rendering.set('renderPartialOnly', renderPartialOnly));
+  state = state.update('rendering', (rendering) => rendering.set('renderPartialOnly', renderPartialOnly)
+  );
   request = httpMocks.createRequest({
     headers: {
       Origin: origin,
     },
   });
   request.store = { getState: () => state };
+  const activeSpan = { attributes: { 'req.method': 'GET', 'req.url': '/foo' } };
+  request.openTelemetry = () => ({ tracer, activeSpan });
 };
 
 describe('conditionallyAllowCors', () => {
+  beforeEach(() => jest.clearAllMocks());
   afterAll(() => {
     process.env.NODE_ENV = NODE_ENV;
   });
@@ -55,7 +63,10 @@ describe('conditionallyAllowCors', () => {
     await conditionallyAllowCors(fastify);
 
     expect(fastify.register).toHaveBeenCalledTimes(1);
-    expect(fastify.register).toHaveBeenCalledWith(fastifyCors, { hook: 'preHandler', delegator: expect.any(Function) });
+    expect(fastify.register).toHaveBeenCalledWith(fastifyCors, {
+      hook: 'preHandler',
+      delegator: expect.any(Function),
+    });
     expect(callback).toHaveBeenCalledTimes(1);
     expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/] });
   });
@@ -74,7 +85,9 @@ describe('conditionallyAllowCors', () => {
 
     await conditionallyAllowCors(fastify);
 
-    expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/, /localhost:\d{1,5}/] });
+    expect(callback).toHaveBeenCalledWith(null, {
+      origin: [/\.example.com$/, /localhost:\d{1,5}/],
+    });
   });
 
   it('does not allow CORS for localhost in production', async () => {
@@ -90,7 +103,9 @@ describe('conditionallyAllowCors', () => {
 
     await conditionallyAllowCors(fastify);
 
-    expect(callback).toHaveBeenCalledWith(null, { origin: [/\.example.com$/, /localhost:\d{1,5}/] });
+    expect(callback).toHaveBeenCalledWith(null, {
+      origin: [/\.example.com$/, /localhost:\d{1,5}/],
+    });
   });
 
   it('does not allow CORS non-partial requests', async () => {
@@ -106,5 +121,24 @@ describe('conditionallyAllowCors', () => {
     await conditionallyAllowCors(fastify);
 
     expect(callback).toHaveBeenCalledWith(null, { origin: false });
+  });
+
+  it('adds a tracer span', async () => {
+    delete process.env.NODE_ENV;
+    setup({ renderPartialOnly: true, origin: 'test.example.com' });
+    setCorsOrigins([/\.example.com$/]);
+
+    const callback = jest.fn();
+    const fastify = {
+      register: jest.fn((_plugin, { delegator }) => {
+        delegator(request, callback);
+      }),
+    };
+
+    await conditionallyAllowCors(fastify);
+
+    expect(tracer.startSpan).toHaveBeenCalledTimes(1);
+    expect(tracer.startSpan).toHaveBeenCalledWith('conditionallyAllowCors');
+    expect(span.end).toHaveBeenCalledTimes(1);
   });
 });
