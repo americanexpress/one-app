@@ -95,7 +95,7 @@ const setUpTestRunner = async ({
   }));
 
   // uncomment this line in order to view full logs for debugging
-  // logWatcherDuplex.pipe(process.stdout);
+  logWatcherDuplex.pipe(process.stdout);
 
   try {
     await Promise.all([

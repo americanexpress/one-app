@@ -525,4 +525,20 @@ describe('runTime', () => {
       expect(() => otelTraceCollectorUrl.validate()).not.toThrow();
     });
   });
+
+  describe('ONE_CONFIG_USE_NATIVE_INTL', () => {
+    const useNativeIntl = getEnvVarConfig('ONE_CONFIG_USE_NATIVE_INTL');
+
+    it('should have a default value of false', () => {
+      expect(useNativeIntl.defaultValue).toBe('false');
+    });
+
+    it('should normalise the value to false when not explicitly true', () => {
+      expect(useNativeIntl.normalize('Value')).toBe('false');
+      expect(useNativeIntl.normalize('VALUE')).toBe('false');
+      expect(useNativeIntl.normalize('true')).toBe('true');
+      expect(useNativeIntl.normalize('TRUE')).toBe('true');
+      expect(useNativeIntl.normalize('FALSE')).toBe('false');
+    });
+  });
 });

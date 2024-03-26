@@ -23,6 +23,7 @@ import reactHtml, {
   renderModuleScripts,
   renderExternalFallbacks,
   checkStateForRedirectAndStatusCode,
+  renderEnvironmentVariables,
 } from '../../../../src/server/plugins/reactHtml';
 import { getClientStateConfig } from '../../../../src/server/utils/stateConfig';
 import transit from '../../../../src/universal/utils/transit';
@@ -301,6 +302,8 @@ describe('reactHtml', () => {
       cdnUrl: '/cdnUrl/',
       rootModuleName: 'test-root',
     }));
+
+    process.env.ONE_CONFIG_USE_NATIVE_INTL = 'false';
   });
 
   function removeInitialState(body) {
@@ -444,6 +447,15 @@ describe('reactHtml', () => {
         ),
       };
       sendHtml(request, reply);
+      expect(reply.send).toHaveBeenCalledTimes(1);
+      expect(reply.send.mock.calls[0][0]).not.toContain('src="/cdnUrl/app/1.2.3-rc.4-abc123/i18n/');
+    });
+
+    it('sends a rendered page without the locale data script tag when te ONE_CONFIG_USE_NATIVE_INTL environment variable is true', () => {
+      process.env.ONE_CONFIG_USE_NATIVE_INTL = 'true';
+      setFullMap();
+      sendHtml(request, reply);
+
       expect(reply.send).toHaveBeenCalledTimes(1);
       expect(reply.send.mock.calls[0][0]).not.toContain('src="/cdnUrl/app/1.2.3-rc.4-abc123/i18n/');
     });
@@ -1347,6 +1359,25 @@ describe('reactHtml', () => {
       expect(reply.send).toHaveBeenCalledTimes(1);
       expect(reply.send.mock.calls[0][0]).toContain('<!DOCTYPE html>');
       expect(reply.send.mock.calls[0][0]).toContain('<title>One App</title>');
+    });
+  });
+
+  describe('renderEnvironmentVariables', () => {
+    it('should set useNativeIntl to false if the environment variable is not true', () => {
+      expect(renderEnvironmentVariables('')).toMatchInlineSnapshot(`
+        "<script id="environment-variables" >
+                window.useNativeIntl = false
+               </script>"
+      `);
+    });
+
+    it('should set  useNativeIntl to true is the environment variable is true', () => {
+      process.env.ONE_CONFIG_USE_NATIVE_INTL = 'true';
+      expect(renderEnvironmentVariables('')).toMatchInlineSnapshot(`
+        "<script id="environment-variables" >
+                window.useNativeIntl = true
+               </script>"
+      `);
     });
   });
 });

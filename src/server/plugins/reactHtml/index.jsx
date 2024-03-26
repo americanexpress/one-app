@@ -65,6 +65,10 @@ const legacyBrowserChunkAssets = getChunkAssets(readJsonFile('../../../.build-me
   .map((chunkAsset) => `legacy/${chunkAsset}`);
 
 function renderI18nScript(clientInitialState, appBundlesURLPrefix) {
+  if (process.env.ONE_CONFIG_USE_NATIVE_INTL === 'true') {
+    return '';
+  }
+
   const i18nFile = getI18nFileFromState(clientInitialState);
   if (!i18nFile) {
     return '';
@@ -236,6 +240,12 @@ export function getHead({
   `;
 }
 
+export function renderEnvironmentVariables(nonce) {
+  return `<script id="environment-variables" ${nonce}>
+        window.useNativeIntl = ${process.env.ONE_CONFIG_USE_NATIVE_INTL === 'true'}
+       </script>`;
+}
+
 export function getBody({
   isLegacy,
   helmetInfo,
@@ -253,13 +263,14 @@ export function getBody({
   const bundle = isLegacy ? 'legacyBrowser' : 'browser';
   const { bodyAttributes, script } = helmetInfo;
   const bundlePrefixForBrowser = isLegacy ? `${appBundlesURLPrefix}/legacy` : appBundlesURLPrefix;
+  const nonce = scriptNonce ? `nonce="${scriptNonce}"` : '';
   return `
     <body${(bodyAttributes && ` ${bodyAttributes.toString()}`) || ''}>
       <div id="root">${appHtml || ''}</div>
       ${disableScripts
     ? ''
     : `
-      <script id="initial-state" ${scriptNonce ? `nonce="${scriptNonce}"` : ''}>
+      <script id="initial-state" ${nonce}>
         window.__webpack_public_path__ = ${jsonStringifyForScript(`${appBundlesURLPrefix}/`)};
         window.__CLIENT_HOLOCRON_MODULE_MAP__ = ${jsonStringifyForScript(clientModuleMapCache[bundle])};
         window.__INITIAL_STATE__ = ${jsonStringifyForScript(serializeClientInitialState(clientInitialState, request))};
@@ -268,6 +279,7 @@ export function getBody({
         window.__render_mode__ = '${renderMode}';
         window.__HOLOCRON_EXTERNALS__ = ${jsonStringifyForScript(getRequiredExternalsRegistry())};
       </script>
+      ${renderEnvironmentVariables(nonce)}
       ${assets}
       ${renderI18nScript(clientInitialState, bundlePrefixForBrowser)}
       ${renderExternalFallbacks({
