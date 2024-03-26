@@ -71,7 +71,7 @@
     "@americanexpress/env-config-utils": "^2.0.4",
     "@americanexpress/fetch-enhancers": "^1.1.5",
     "@americanexpress/one-app-bundler": "^6.21.1",
-    "@americanexpress/one-app-ducks": "^4.5.0",
+    "@americanexpress/one-app-ducks": "^4.5.1",
     "@americanexpress/one-app-router": "^1.2.1",
     "@americanexpress/vitruvius": "^3.0.1",
     "@fastify/compress": "^6.4.0",
