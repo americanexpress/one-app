@@ -18,6 +18,8 @@ RUN NODE_ENV=development npm run build && \
 # prod build
 RUN NODE_ENV=production npm run build && \
     NODE_ENV=production npm prune && \
+    # https://github.com/sindresorhus/find-cache-dir
+    rm -Rf node_modules/.cache && \
     mkdir -p /opt/one-app/production && \
     chown node:node /opt/one-app/production && \
     mv /opt/build/LICENSE.txt /opt/one-app/production && \
