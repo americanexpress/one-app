@@ -95,7 +95,7 @@ describe('badPartMonkeypatches', () => {
       expect(() => document.close('alert(1)')).toThrowErrorMatchingSnapshot();
     });
     it('does not throw if document does not exist', () => {
-      jest.spyOn(global, 'document', 'get').mockReturnValue(undefined);
+      delete global.document;
       expect(typeof document).toEqual('undefined');
       expect(applyMonkeypatches).not.toThrow();
     });

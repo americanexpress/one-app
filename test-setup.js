@@ -16,7 +16,7 @@
 
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
-import { TextEncoder, TextDecoder } from 'util';
+import { TextEncoder, TextDecoder } from 'node:util';
 
 process.env.ONE_CONFIG_ENV = 'test';
 

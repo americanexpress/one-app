@@ -70,7 +70,7 @@ describe('initializeClientStore', () => {
   });
 
   it('should create the store with initial state if it exists', async () => {
-    // eslint-disable-next-line no-underscore-dangle
+    // eslint-disable-next-line no-underscore-dangle -- private API
     global.__INITIAL_STATE__ = { some: 'state' };
     initializeClientStore();
 
@@ -107,7 +107,7 @@ describe('initializeClientStore', () => {
   });
 
   it('returns store and serverState', () => {
-    // eslint-disable-next-line no-underscore-dangle
+    // eslint-disable-next-line no-underscore-dangle -- private API
     global.__INITIAL_STATE__ = { some: 'state' };
     const { store, serverState } = initializeClientStore();
     expect(serverState).toEqual({ some: 'state' });
