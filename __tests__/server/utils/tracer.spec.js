@@ -27,10 +27,18 @@ import {
   ConsoleSpanExporter,
   NoopSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
-import { W3CTraceContextPropagator } from '@opentelemetry/core';
+import {
+  CompositePropagator,
+  W3CTraceContextPropagator,
+} from '@opentelemetry/core';
+import {
+  B3Propagator,
+  B3InjectEncoding,
+} from '@opentelemetry/propagator-b3';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 
 jest.mock('@opentelemetry/core');
+jest.mock('@opentelemetry/propagator-b3');
 jest.mock('@opentelemetry/instrumentation');
 jest.mock('@opentelemetry/instrumentation-http');
 jest.mock('@opentelemetry/instrumentation-pino');
@@ -132,10 +140,26 @@ describe('tracer', () => {
       tracerProvider: _tracerProvider,
       instrumentations: [expect.any(HttpInstrumentation), expect.any(PinoInstrumentation)],
     });
+  });
+
+  it('should configure the propagator', () => {
+    const { _tracerProvider } = setup({});
     expect(_tracerProvider.register).toHaveBeenCalledTimes(1);
     expect(_tracerProvider.register).toHaveBeenCalledWith(expect.objectContaining({
-      propagator: expect.any(W3CTraceContextPropagator),
+      propagator: expect.any(CompositePropagator),
     }));
+    expect(CompositePropagator).toHaveBeenCalledTimes(1);
+    expect(CompositePropagator).toHaveBeenCalledWith({
+      propagators: [
+        expect.any(B3Propagator),
+        expect.any(W3CTraceContextPropagator),
+      ],
+    });
+    expect(W3CTraceContextPropagator).toHaveBeenCalledTimes(1);
+    expect(B3Propagator).toHaveBeenCalledTimes(1);
+    expect(B3Propagator).toHaveBeenCalledWith({
+      injectEncoding: B3InjectEncoding.MULTI_HEADER,
+    });
   });
 
   it('should not trace outgoing requests that do not have a parent span', () => {

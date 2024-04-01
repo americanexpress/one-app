@@ -33,15 +33,16 @@ const loadModuleData = async ({ store, fetchClient }) => {
   }
   store.dispatch({ type: FAKE_REQUEST });
   const fastRes = await fetchClient('https://fast.api.frank/posts');
-  const secretMessage = fastRes.headers.get('secret-message');
-  const traceparent = fastRes.headers.get('traceparent');
   const posts = await fastRes.json();
   store.dispatch({
     type: FAKE_SUCCESS,
     data: {
       posts,
-      secretMessage,
-      traceparent,
+      secretMessage: fastRes.headers.get('secret-message'),
+      traceparent: fastRes.headers.get('traceparent'),
+      xB3TraceId: fastRes.headers.get('x-b3-traceid'),
+      xB3TraceSpan: fastRes.headers.get('x-b3-spanid'),
+      xB3Sampled: fastRes.headers.get('x-b3-sampled'),
       loadedOnServer: !global.BROWSER,
     },
   });
