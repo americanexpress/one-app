@@ -94,8 +94,9 @@ const setUpTestRunner = async ({
     logWatcherDuplex.on('close', () => tail.kill());
   }));
 
-  // uncomment this line in order to view full logs for debugging
-  logWatcherDuplex.pipe(process.stdout);
+  if (process.env.RUNNER_DEBUG) {
+    logWatcherDuplex.pipe(process.stdout);
+  }
 
   try {
     await Promise.all([
