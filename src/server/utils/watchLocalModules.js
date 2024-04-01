@@ -32,8 +32,8 @@ import { promisify } from 'node:util';
 
 const glob = promisify(globSync);
 
-const CHANGE_WATCHER_INTERVAL = 3e3;
-const WRITING_FINISH_WATCHER_TIMEOUT = 1e3;
+const CHANGE_WATCHER_INTERVAL = 1000;
+const WRITING_FINISH_WATCHER_TIMEOUT = 400;
 
 // why our own code instead of something like https://www.npmjs.com/package/chokidar? 
 // we did, but saw misses, especially when using @americanexpress/one-app-runner
@@ -93,30 +93,61 @@ export default function watchLocalModules() {
   const staticsDirectoryPath = path.resolve(__dirname, '../../../static');
   const moduleDirectory = path.join(staticsDirectoryPath, 'modules');
 
-  async function writesFinishWatcher(holocronEntrypoint, previousStat) {
-    // checking if holocronEntrypoint has not been written to since last check
-    const currentStat = await fs.stat(path.join(moduleDirectory, holocronEntrypoint));
-
-    if (currentStat.mtimeMs !== previousStat.mtimeMs || currentStat.size !== previousStat.size) {
-      // need to check again later
-      setTimeout(writesFinishWatcher, WRITING_FINISH_WATCHER_TIMEOUT, holocronEntrypoint, currentStat).unref();
-      return;
+  // this may be an over-optimization in that it may be more overhead than it saves
+  const stating = new Map();
+  function stat(filePath) {
+    if (!stating.has(filePath)) {
+      stating.set(
+        filePath, 
+        fs.stat(filePath)
+          .then((fileStat) => {
+            stating.delete(filePath);
+            return fileStat;
+          })
+      );
     }
 
-    setImmediate(changeHandler, holocronEntrypoint);
+    return stating.get(filePath);
+  }
+
+  const checkForNoWrites = new Map();
+  let nextWriteCheck = null;
+  async function writesFinishWatcher() {
+    nextWriteCheck = null;
+
+    await Promise.allSettled(
+      [...checkForNoWrites.entries()].map(async ([holocronEntrypoint, previousStat]) => {
+        const currentStat = await stat(path.join(moduleDirectory, holocronEntrypoint));
+        if (currentStat.mtimeMs !== previousStat.mtimeMs || currentStat.size !== previousStat.size) {
+          // need to check again later
+          checkForNoWrites.set(holocronEntrypoint, currentStat);
+          return;
+        }
+
+        setImmediate(changeHandler, holocronEntrypoint);
+        checkForNoWrites.delete(holocronEntrypoint);
+      })
+    );
+
+    if (!nextWriteCheck && checkForNoWrites.size >= 1) {
+      nextWriteCheck = setTimeout(writesFinishWatcher, WRITING_FINISH_WATCHER_TIMEOUT).unref();
+    }
   }
 
   var previousStats;
   async function changeWatcher() {
     const holocronEntrypoints = (await glob('*/*/*.node.js', { cwd: moduleDirectory }))
-    .filter(p => { const parts = p.split('/'); return parts[0] === path.basename(parts[2], '.node.js') })
+    .filter(p => { 
+      const parts = p.split('/'); 
+      return parts[0] === path.basename(parts[2], '.node.js') 
+    })
     .sort();
     
     const currentStats = new Map();
     const statsToWait = [];
     holocronEntrypoints.forEach((holocronEntrypoint) => {
       statsToWait.push(
-        fs.stat(path.join(moduleDirectory, holocronEntrypoint))
+        stat(path.join(moduleDirectory, holocronEntrypoint))
           .then(stat => currentStats.set(holocronEntrypoint, stat))
       );
     });
@@ -128,16 +159,15 @@ export default function watchLocalModules() {
       return;
     }
 
-    const changes = [];
     for (const [holocronEntrypoint, currentStat] of currentStats.entries()) {
       if (!previousStats.has(holocronEntrypoint)) {
-        changes.push(holocronEntrypoint);
+        checkForNoWrites.set(holocronEntrypoint, currentStat);
         continue;
       }
-
+      
       const previousStat = previousStats.get(holocronEntrypoint);
       if (currentStat.mtimeMs !== previousStat.mtimeMs || currentStat.size !== previousStat.size) {
-        changes.push(holocronEntrypoint);
+        checkForNoWrites.set(holocronEntrypoint, currentStat);
         continue;
       }
 
@@ -146,16 +176,11 @@ export default function watchLocalModules() {
 
     previousStats = currentStats;
     setTimeout(changeWatcher, CHANGE_WATCHER_INTERVAL).unref();
-    if (changes.length === 0) {
-      return;
-    }
-    console.log('looper, changes', changes);
 
     // wait for writes to the file to stop
-    // TODO: can we do this without a loop/separate event loop entries? need to figure out the data storage
-    changes.forEach(holocronEntrypoint => {
-      setTimeout(writesFinishWatcher, WRITING_FINISH_WATCHER_TIMEOUT, holocronEntrypoint, currentStats.get(holocronEntrypoint)).unref();
-    });
+    if (!nextWriteCheck) {
+      nextWriteCheck = setTimeout(writesFinishWatcher, WRITING_FINISH_WATCHER_TIMEOUT).unref();
+    }
   }
 
   setImmediate(changeWatcher);
