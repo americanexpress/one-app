@@ -27,7 +27,14 @@ import {
   NoopSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { trace } from '@opentelemetry/api';
-import { W3CTraceContextPropagator } from '@opentelemetry/core';
+import {
+  CompositePropagator,
+  W3CTraceContextPropagator,
+} from '@opentelemetry/core';
+import {
+  B3Propagator,
+  B3InjectEncoding,
+} from '@opentelemetry/propagator-b3';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
 import {
   Resource,
@@ -107,7 +114,12 @@ if (process.env.NODE_ENV === 'development' && argv.logLevel === 'trace') {
 }
 
 tracerProvider.register({
-  propagator: new W3CTraceContextPropagator(),
+  propagator: new CompositePropagator({
+    propagators: [
+      new B3Propagator({ injectEncoding: B3InjectEncoding.MULTI_HEADER }),
+      new W3CTraceContextPropagator(),
+    ],
+  }),
 });
 
 ['SIGINT', 'SIGTERM'].forEach((signalName) => process.on(signalName, async () => {
