@@ -951,6 +951,7 @@ describe('Tests that require Docker setup', () => {
         ...defaultFetchOptions,
       });
       const htmlData = await response.text();
+      const traceId = response.headers.get('traceid');
       const scriptContents = htmlData.match(
         /<script id="initial-state" nonce=\S+>([^<]+)<\/script>/
       )[1];
@@ -965,7 +966,10 @@ describe('Tests that require Docker setup', () => {
           },
         ],
         secretMessage: 'you are being watched',
-        traceparent: expect.any(String),
+        traceparent: expect.stringContaining(traceId),
+        xB3TraceId: traceId,
+        xB3TraceSpan: expect.any(String),
+        xB3Sampled: expect.any(String),
         loadedOnServer: true,
       });
     });
@@ -1318,7 +1322,9 @@ describe('Tests that require Docker setup', () => {
       )[1];
       const initialState = scriptContents.match(/window\.__INITIAL_STATE__ = "([^<]+)";/)[1];
       const state = transit.fromJSON(initialState.replace(/\\/g, ''));
-      const { traceparent } = state.getIn(['modules', 'ssr-frank', 'data']);
+      const {
+        traceparent, xB3TraceId, xB3TraceSpan, xB3Sampled,
+      } = state.getIn(['modules', 'ssr-frank', 'data']);
 
       const resourceAttributes = trace.resourceSpans[0].resource.attributes.reduce(
         (acc, attribute) => ({
@@ -1403,8 +1409,8 @@ describe('Tests that require Docker setup', () => {
       });
 
       expect(response.headers.get('traceid')).toBe(traceId);
-      expect(traceparent).toEqual(expect.stringContaining(traceId));
-
+      expect(xB3TraceId).toBe(traceId);
+      expect(traceparent).toBe(`00-${xB3TraceId}-${xB3TraceSpan}-0${xB3Sampled}`);
       const httpSpans = getSpans('@opentelemetry/instrumentation-http', traceId);
       expect(httpSpans.length).toBe(2);
       const spans = getSpans('@autotelic/fastify-opentelemetry', traceId);
@@ -1811,6 +1817,9 @@ describe('Tests that can run against either local Docker setup or remote One App
               posts: [{ id: 1, title: 'json-server', author: 'typicode' }],
               secretMessage: null,
               traceparent: null,
+              xB3TraceId: null,
+              xB3TraceSpan: null,
+              xB3Sampled: null,
               loadedOnServer: false,
             },
           });
@@ -1835,6 +1844,9 @@ describe('Tests that can run against either local Docker setup or remote One App
               posts: [{ id: 1, title: 'json-server', author: 'typicode' }],
               secretMessage: null,
               traceparent: null,
+              xB3TraceId: null,
+              xB3TraceSpan: null,
+              xB3Sampled: null,
               loadedOnServer: false,
             },
           });
