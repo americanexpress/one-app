@@ -19,7 +19,6 @@
 
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import chokidar from 'chokidar';
 import globSync from 'glob';
 import loadModule from 'holocron/loadModule.node';
 import {
@@ -33,10 +32,21 @@ import { promisify } from 'node:util';
 
 const glob = promisify(globSync);
 
-async function changeHandler(changedPath) {
-  console.log('watcher Δ', changedPath);
-  if (!changedPath.endsWith('.node.js')) return;
+const CHANGE_WATCHER_INTERVAL = 3e3;
+const WRITING_FINISH_WATCHER_TIMEOUT = 1e3;
 
+// why our own code instead of something like https://www.npmjs.com/package/chokidar? 
+// we did, but saw misses, especially when using @americanexpress/one-app-runner
+// * occasional misses even on the native filesystem (e.g. macOS)
+// * https://forums.docker.com/t/file-system-watch-does-not-work-with-mounted-volumes/12038
+// * runner on macOS chokidar would see the first change but not subsequent changes, presumably due 
+//   to inode tracking and the way the build directories are destroyed and recreated
+// * using runner with --envVars.CHOKIDAR_USEPOLLING=true had no effect
+// for us the pattern of the files we want to check have a very consistent pattern and we don't need
+// to know the changes in the sometimes very many other files, so we can skip a lot of work from a
+// general solution
+
+async function changeHandler(changedPath) {
   // I had apprehension of this manual manipulation
   // but from what I can tell a file or directory with '/' in the name is not valid
   // Linux: https://stackoverflow.com/q/9847288
@@ -57,17 +67,12 @@ async function changeHandler(changedPath) {
     return;
   }
 
-  if (new URL(moduleMapEntry.getIn(['node', 'url'])).pathname !== `/static/modules/${changedPath}`) {
-    // not a Holocron module entry bundle (e.g. might be using webpack chunking)
-    // console.warn('not a Holocron entry!', changedPath);
-    return;
-  }
-
   console.log(`the Node.js bundle for ${moduleName} finished saving, attempting to load`);
 
   let newModule;
   try {
-    // FIXME: this leads to a race condition later in editing the module map
+    // FIXME: this leads to a race condition later
+    // (two modules changed at the same time, both editing different copies of the module map)
     newModule = addHigherOrderComponent(await loadModule(
       moduleName,
       moduleMapEntry.toJS(),
@@ -88,69 +93,70 @@ export default function watchLocalModules() {
   const staticsDirectoryPath = path.resolve(__dirname, '../../../static');
   const moduleDirectory = path.join(staticsDirectoryPath, 'modules');
 
-  // chokidar
-  //   .watch('*/*/*.node.js', {
-  //     awaitWriteFinish: true,
-  //     cwd: moduleDirectory,
-  //     depth: 3,
-  //     // usePolling: true,
-  //   })
-  //   .on('change', changeHandler);
+  async function writesFinishWatcher(holocronEntrypoint, previousStat) {
+    // checking if holocronEntrypoint has not been written to since last check
+    const currentStat = await fs.stat(path.join(moduleDirectory, holocronEntrypoint));
+
+    if (currentStat.mtimeMs !== previousStat.mtimeMs || currentStat.size !== previousStat.size) {
+      // need to check again later
+      setTimeout(writesFinishWatcher, WRITING_FINISH_WATCHER_TIMEOUT, holocronEntrypoint, currentStat).unref();
+      return;
+    }
+
+    setImmediate(changeHandler, holocronEntrypoint);
+  }
 
   var previousStats;
-  async function looper() {
-    console.time('glob');
+  async function changeWatcher() {
     const holocronEntrypoints = (await glob('*/*/*.node.js', { cwd: moduleDirectory }))
     .filter(p => { const parts = p.split('/'); return parts[0] === path.basename(parts[2], '.node.js') })
     .sort();
-    // .map(p => path.join(moduleDirectory, p));
-    console.timeEnd('glob');
     
     const currentStats = new Map();
     const statsToWait = [];
     holocronEntrypoints.forEach((holocronEntrypoint) => {
-      console.time(holocronEntrypoint);
-      // statsToWait.push(fs.stat(path.join(moduleDirectory, holocronEntrypoint)).then(stat => currentStats.set(holocronEntrypoint, stat)))
-      statsToWait.push(fs.stat(path.join(moduleDirectory, holocronEntrypoint)).then(stat => {
-        console.timeEnd(holocronEntrypoint);
-        currentStats.set(holocronEntrypoint, stat)
-      }))
+      statsToWait.push(
+        fs.stat(path.join(moduleDirectory, holocronEntrypoint))
+          .then(stat => currentStats.set(holocronEntrypoint, stat))
+      );
     });
     await Promise.allSettled(statsToWait);
 
     if (!previousStats) {
       previousStats = currentStats;
-      setTimeout(looper, 2e3);
+      setTimeout(changeWatcher, CHANGE_WATCHER_INTERVAL);
       return;
     }
 
     const changes = [];
     for (const [holocronEntrypoint, currentStat] of currentStats.entries()) {
       if (!previousStats.has(holocronEntrypoint)) {
-        // console.log('looper, new entry', holocronEntrypoint);
         changes.push(holocronEntrypoint);
         continue;
       }
+
       const previousStat = previousStats.get(holocronEntrypoint);
-      // console.log('looper, change?', holocronEntrypoint, `${currentStat.mtimeMs} !==? ${previousStat.mtimeMs} || ${currentStat.size} !==? ${previousStat.size}`);
       if (currentStat.mtimeMs !== previousStat.mtimeMs || currentStat.size !== previousStat.size) {
         changes.push(holocronEntrypoint);
         continue;
       }
+
       continue;
     }
 
     previousStats = currentStats;
-    setTimeout(looper, 3e3).unref();
+    setTimeout(changeWatcher, CHANGE_WATCHER_INTERVAL).unref();
     if (changes.length === 0) {
       return;
     }
     console.log('looper, changes', changes);
 
-    // FIXME: wait for the writer to finish editing the file first
-    for await (const holocronEntrypoint of changes) {
-      await changeHandler(holocronEntrypoint);
-    }
+    // wait for writes to the file to stop
+    // TODO: can we do this without a loop/separate event loop entries? need to figure out the data storage
+    changes.forEach(holocronEntrypoint => {
+      setTimeout(writesFinishWatcher, WRITING_FINISH_WATCHER_TIMEOUT, holocronEntrypoint, currentStats.get(holocronEntrypoint)).unref();
+    });
   }
-  setImmediate(looper);
+
+  setImmediate(changeWatcher);
 }
