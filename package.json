@@ -90,7 +90,7 @@
     "@opentelemetry/instrumentation": "^0.48.0",
     "@opentelemetry/instrumentation-express": "^0.35.0",
     "@opentelemetry/instrumentation-http": "^0.48.0",
-    "@opentelemetry/resources": "^1.21.0",
+    "@opentelemetry/resources": "^1.22.0",
     "@opentelemetry/sdk-logs": "^0.48.0",
     "@opentelemetry/sdk-trace-node": "^1.21.0",
     "@opentelemetry/semantic-conventions": "^1.21.0",
