@@ -112,7 +112,7 @@
     "bytes": "^3.1.2",
     "cacheable-lookup": "^6.1.0",
     "chalk": "^4.1.2",
-    "core-js": "^3.36.0",
+    "core-js": "^3.36.1",
     "create-shared-react-context": "^1.0.5",
     "cross-fetch": "^4.0.0",
     "deepmerge": "^4.3.1",
