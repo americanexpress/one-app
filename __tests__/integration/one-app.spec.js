@@ -1925,7 +1925,7 @@ describe('Tests that can run against either local Docker setup or remote One App
             );
             const body = await response.text();
             expect(body).toBe(
-              '<style class="ssr-css">.frank-lloyd-root__styles__stylish___2aiGw{color:orchid}</style><pre class="value-provided-from-config">https://intranet-origin-dev.example.com/some-api/v1</pre><span class="message">Hello!</span>'
+              '<style id="90ac7139df6563d22a4a856f04cacf522587d2ec6e66ddb89d06ff844b5bee7c" data-ssr="true">._stylish_1wkbg_1{color:orchid}</style><pre class="value-provided-from-config">https://intranet-origin-dev.example.com/some-api/v1</pre><span class="message">Hello!</span>'
             );
           });
         });

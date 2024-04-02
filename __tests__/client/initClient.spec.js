@@ -64,7 +64,6 @@ describe('initClient', () => {
 
   beforeEach(() => {
     global.fetch = jest.fn(() => Promise.resolve());
-    // eslint-disable-next-line no-underscore-dangle -- private API
     global.__CLIENT_HOLOCRON_MODULE_MAP__ = clientHolocronModuleMap;
     jest.resetModules();
     jest.clearAllMocks();
@@ -145,7 +144,6 @@ describe('initClient', () => {
     loadPrerenderScripts.mockReturnValueOnce(Promise.resolve());
     promiseResolveSpy.mockRestore();
 
-    // eslint-disable-next-line no-underscore-dangle -- private API
     global.__render_mode__ = 'render';
 
     const initClient = require('../../src/client/initClient').default;

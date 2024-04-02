@@ -14,7 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import { networkInterfaces } from 'os';
+import { networkInterfaces } from 'node:os';
 
 export const getIp = () => {
   const interfaces = networkInterfaces();

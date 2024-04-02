@@ -72,7 +72,6 @@ export const listen = async ({
 
 async function ssrServerStart() {
   // need to load _some_ locale so that react-intl does not prevent modules from loading
-  // eslint-disable-next-line no-underscore-dangle -- lean-intl API
   Intl.__addLocaleData(enData);
 
   await loadModules();

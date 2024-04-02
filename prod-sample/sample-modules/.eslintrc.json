@@ -1,9 +1,0 @@
-{
-  "extends": "amex",
-  "rules": {
-    "import/no-unresolved": "off",
-    "react/no-unknown-property": "off",
-    "you-dont-need-lodash-underscore/get": "off",
-    "unicorn/prefer-node-protocol": "off"
-  }
-}
