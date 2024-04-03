@@ -14,10 +14,8 @@
  * permissions and limitations under the License.
  */
 
-/* eslint-disable import/no-unresolved -- performance scripts are not ran directly */
 import http from 'k6/http';
 import { check, sleep } from 'k6';
-/* eslint-enable import/no-unresolved */
 
 // This is a simple smoke test to ensure there is no major regression
 // to the one-app server.

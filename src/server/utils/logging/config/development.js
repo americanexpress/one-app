@@ -14,7 +14,6 @@
  * permissions and limitations under the License.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies -- this is only loaded in development
 import pinoPretty from 'pino-pretty';
 import {
   printStatusCode,

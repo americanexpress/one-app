@@ -39,6 +39,9 @@ server.use((req, res, next) => {
   const secretMessage = req.headers['auth-token'] ? 'you are being watched' : 'unauthorised';
   res.append('secret-message', secretMessage);
   res.append('traceparent', req.headers.traceparent);
+  res.append('x-b3-traceid', req.headers['x-b3-traceid']);
+  res.append('x-b3-spanid', req.headers['x-b3-spanid']);
+  res.append('x-b3-sampled', req.headers['x-b3-sampled']);
   next();
 });
 server.use(router);

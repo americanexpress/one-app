@@ -14,13 +14,12 @@
  * permissions and limitations under the License.
  */
 
-// eslint-disable-next-line no-underscore-dangle -- webpack API
 if (global.__webpack_public_path__) {
   // https://github.com/webpack/webpack/issues/2776#issuecomment-233208623
   // have to make the assignment inside of the compiled code
   // webpack ignores the global variable
 
   // this var is defined by webpack
-  // eslint-disable-next-line no-undef, camelcase, no-underscore-dangle -- webpack API
+  // eslint-disable-next-line no-undef, camelcase -- webpack API
   __webpack_public_path__ = global.__webpack_public_path__;
 }

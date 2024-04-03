@@ -61,12 +61,10 @@ describe('initializeClientStore', () => {
   });
 
   afterEach(() => {
-    // eslint-disable-next-line no-underscore-dangle -- private API
     global.__INITIAL_STATE__ = undefined;
   });
 
   it('should create the store with initial state if it exists', async () => {
-    // eslint-disable-next-line no-underscore-dangle -- private API
     global.__INITIAL_STATE__ = fromJS({ some: 'state' });
     initializeClientStore();
 
@@ -78,7 +76,6 @@ describe('initializeClientStore', () => {
     } = createHolocronStore.mock.calls[0][0];
 
     await expect(fetchClient()).resolves.toEqual({ data: 'data', timeout: 6000 });
-    // eslint-disable-next-line no-underscore-dangle -- private API
     expect(transitFromJson).toHaveBeenCalledWith(global.__INITIAL_STATE__);
     expect(createHolocronStore).toHaveBeenCalledWith({
       enhancer: 'enhancer', initialState: 'initial state', reducer: 'reducers', extraThunkArguments: { fetchClient },

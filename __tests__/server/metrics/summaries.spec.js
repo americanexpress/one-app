@@ -14,8 +14,6 @@
  * permissions and limitations under the License.
  */
 
-/* eslint-disable no-underscore-dangle -- prom-client uses dangling underscore */
-
 describe('summaries', () => {
   let Summary;
   let register;
@@ -87,5 +85,3 @@ describe('summaries', () => {
     });
   });
 });
-
-/* eslint-enable no-underscore-dangle */
