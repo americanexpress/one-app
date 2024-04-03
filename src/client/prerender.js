@@ -29,10 +29,8 @@ export function initializeClientStore() {
   const enhancedFetch = compose(createTimeoutFetch(6e3))(fetch);
 
   const enhancer = createEnhancer();
-  /* eslint-disable no-underscore-dangle -- private API */
   const initialState = global.__INITIAL_STATE__ !== undefined
     ? transit.fromJSON(global.__INITIAL_STATE__) : undefined;
-  /* eslint-enable no-underscore-dangle */
   const store = createHolocronStore({
     reducer, initialState, enhancer, extraThunkArguments: { fetchClient: enhancedFetch },
   });
