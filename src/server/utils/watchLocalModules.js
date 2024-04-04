@@ -19,6 +19,7 @@
 
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import { promisify } from 'node:util';
 import globSync from 'glob';
 import loadModule from 'holocron/loadModule.node';
 import {
@@ -28,18 +29,17 @@ import {
   addHigherOrderComponent,
 } from 'holocron/moduleRegistry';
 import onModuleLoad from './onModuleLoad';
-import { promisify } from 'node:util';
 
 const glob = promisify(globSync);
 
 const CHANGE_WATCHER_INTERVAL = 1000;
 const WRITING_FINISH_WATCHER_TIMEOUT = 400;
 
-// why our own code instead of something like https://www.npmjs.com/package/chokidar? 
+// why our own code instead of something like https://www.npmjs.com/package/chokidar?
 // we did, but saw misses, especially when using @americanexpress/one-app-runner
 // * occasional misses even on the native filesystem (e.g. macOS)
 // * https://forums.docker.com/t/file-system-watch-does-not-work-with-mounted-volumes/12038
-// * runner on macOS chokidar would see the first change but not subsequent changes, presumably due 
+// * runner on macOS chokidar would see the first change but not subsequent changes, presumably due
 //   to inode tracking and the way the build directories are destroyed and recreated
 // * using runner with --envVars.CHOKIDAR_USEPOLLING=true had no effect
 // for us the pattern of the files we want to check have a very consistent pattern and we don't need
@@ -52,13 +52,7 @@ async function changeHandler(changedPath) {
   // Linux: https://stackoverflow.com/q/9847288
   // macOS: '/' from Finder is translated to ':'
   // Windows: https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
-  const parts = changedPath.split(path.sep);
-  if (parts.length < 3) {
-    console.warn(`detected a change in module static resources at "${changedPath}" but unable to reload it in the running server`);
-    return;
-  }
-
-  const [moduleName] = parts;
+  const [moduleName] = changedPath.split(path.sep);
   const moduleMap = getModuleMap();
   const moduleMapEntry = moduleMap.getIn(['modules', moduleName]);
 
@@ -98,7 +92,7 @@ export default function watchLocalModules() {
   function stat(filePath) {
     if (!stating.has(filePath)) {
       stating.set(
-        filePath, 
+        filePath,
         fs.stat(filePath)
           .then((fileStat) => {
             stating.delete(filePath);
@@ -134,28 +128,28 @@ export default function watchLocalModules() {
     }
   }
 
-  var previousStats;
+  let previousStats;
   async function changeWatcher() {
     const holocronEntrypoints = (await glob('*/*/*.node.js', { cwd: moduleDirectory }))
-    .filter(p => { 
-      const parts = p.split('/'); 
-      return parts[0] === path.basename(parts[2], '.node.js') 
-    })
-    .sort();
-    
+      .filter((p) => {
+        const parts = p.split('/');
+        return parts[0] === path.basename(parts[2], '.node.js');
+      })
+      .sort();
+
     const currentStats = new Map();
     const statsToWait = [];
     holocronEntrypoints.forEach((holocronEntrypoint) => {
       statsToWait.push(
         stat(path.join(moduleDirectory, holocronEntrypoint))
-          .then(stat => currentStats.set(holocronEntrypoint, stat))
+          .then((stat) => currentStats.set(holocronEntrypoint, stat))
       );
     });
     await Promise.allSettled(statsToWait);
 
     if (!previousStats) {
       previousStats = currentStats;
-      setTimeout(changeWatcher, CHANGE_WATCHER_INTERVAL);
+      setTimeout(changeWatcher, CHANGE_WATCHER_INTERVAL).unref();
       return;
     }
 
@@ -164,7 +158,7 @@ export default function watchLocalModules() {
         checkForNoWrites.set(holocronEntrypoint, currentStat);
         continue;
       }
-      
+
       const previousStat = previousStats.get(holocronEntrypoint);
       if (currentStat.mtimeMs !== previousStat.mtimeMs || currentStat.size !== previousStat.size) {
         checkForNoWrites.set(holocronEntrypoint, currentStat);
@@ -178,7 +172,7 @@ export default function watchLocalModules() {
     setTimeout(changeWatcher, CHANGE_WATCHER_INTERVAL).unref();
 
     // wait for writes to the file to stop
-    if (!nextWriteCheck) {
+    if (!nextWriteCheck && checkForNoWrites.size >= 1) {
       nextWriteCheck = setTimeout(writesFinishWatcher, WRITING_FINISH_WATCHER_TIMEOUT).unref();
     }
   }

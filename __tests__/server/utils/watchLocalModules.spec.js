@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 /*
  * Copyright 2019 American Express Travel Related Services Company, Inc.
  *
@@ -17,17 +21,13 @@
 import fs from 'fs';
 import path from 'path';
 import { fromJS } from 'immutable';
-import chokidar from 'chokidar';
 import loadModule from 'holocron/loadModule.node';
 import { getModules, resetModuleRegistry } from 'holocron/moduleRegistry';
 import watchLocalModules from '../../../src/server/utils/watchLocalModules';
 
-const setTimeoutNative = global.setTimeout;
-const sleep = (ms) => new Promise((resolve) => setTimeoutNative(resolve, ms));
-jest.useFakeTimers();
-
 jest.mock('fs', () => {
   const fs = jest.requireActual('fs');
+  const setImmediateNative = global.setImmediate;
 
   let mockedFilesystem;
   /* Map {
@@ -55,11 +55,10 @@ jest.mock('fs', () => {
 
   function getEntry(parts) {
     let current = mockedFilesystem;
-    for (let i = 0; i < parts.length; i++) {
+    for (const entryName of parts) {
       if (!current || !current.has('entries')) {
         return null;
       }
-      const entryName = parts[i];
       current = current.get('entries').get(entryName);
     }
 
@@ -111,8 +110,8 @@ jest.mock('fs', () => {
       for (let i = 0; i < parts.length; i++) {
         const nextEntry = parts[i];
         if (
-          parent.get('entries').has(nextEntry) &&
-          parent.get('entries').get(nextEntry).get('indicator') !== 'd'
+          parent.get('entries').has(nextEntry)
+          && parent.get('entries').get(nextEntry).get('indicator') !== 'd'
         ) {
           throw new Error(`parent is not a directory ${fsPath} (mkdir)`);
         }
@@ -227,28 +226,43 @@ jest.mock('fs', () => {
     const parts = dirPath.split('/').filter(Boolean);
     const dir = getEntry(parts);
     if (!dir) {
-      setImmediate(callback, new Error(`not in mock fs ${dirPath} (readdir)`));
+      setImmediateNative(callback, new Error(`not in mock fs ${dirPath} (readdir)`));
       return;
     }
     if (dir.get('indicator') !== 'd') {
-      setImmediate(callback, new Error(`not a mocked directory ${dirPath} (readdir)`));
+      setImmediateNative(callback, new Error(`not a mocked directory ${dirPath} (readdir)`));
       return;
     }
 
-    setImmediate(callback, null, [...dir.get('entries').keys()]);
-    return;
+    setImmediateNative(callback, null, [...dir.get('entries').keys()]);
   });
 
   jest.spyOn(fs.promises, 'stat').mockImplementation(
-    (fsPath) =>
-      new Promise((resolve, reject) => {
-        const entry = getEntry(fsPath.split('/').filter(Boolean));
-        if (!entry) {
-          return reject(new Error(`no entry for ${fsPath} (stat)`));
-        }
+    (fsPath) => new Promise((resolve, reject) => {
+      const entry = getEntry(fsPath.split('/').filter(Boolean));
+      if (!entry) {
+        return reject(new Error(`no entry for ${fsPath} (stat)`));
+      }
 
-        const statArgs = entry.get('stat');
-        const {
+      const statArgs = entry.get('stat');
+      const {
+        dev,
+        mode,
+        nlink,
+        uid,
+        gid,
+        rdev,
+        blksize,
+        ino,
+        size,
+        blocks,
+        atimeMs,
+        mtimeMs,
+        ctimeMs,
+        birthtimeMs,
+      } = statArgs;
+      return resolve(
+        new fs.Stats(
           dev,
           mode,
           nlink,
@@ -262,27 +276,10 @@ jest.mock('fs', () => {
           atimeMs,
           mtimeMs,
           ctimeMs,
-          birthtimeMs,
-        } = statArgs;
-        return resolve(
-          new fs.Stats(
-            dev,
-            mode,
-            nlink,
-            uid,
-            gid,
-            rdev,
-            blksize,
-            ino,
-            size,
-            blocks,
-            atimeMs,
-            mtimeMs,
-            ctimeMs,
-            birthtimeMs
-          )
-        );
-      })
+          birthtimeMs
+        )
+      );
+    })
   );
 
   fs.mock = mock;
@@ -311,12 +308,13 @@ jest.mock('holocron/moduleRegistry', () => {
 
 jest.mock('holocron/loadModule.node', () => jest.fn(() => Promise.resolve(() => null)));
 
-jest.spyOn(console, 'error').mockImplementation(() => {});
-jest.spyOn(console, 'warn').mockImplementation(() => {});
-jest.spyOn(console, 'log').mockImplementation(() => {});
+jest.spyOn(console, 'error')//.mockImplementation(() => {});
+jest.spyOn(console, 'warn')//.mockImplementation(() => {});
+jest.spyOn(console, 'log')//.mockImplementation(() => {});
 
 describe('watchLocalModules', () => {
   let origOneAppDevCDNPort;
+  const setTimeoutOriginal = global.setTimeout;
   beforeAll(() => {
     origOneAppDevCDNPort = process.env.HTTP_ONE_APP_DEV_CDN_PORT;
   });
@@ -324,16 +322,19 @@ describe('watchLocalModules', () => {
     jest.clearAllMocks();
     delete process.env.HTTP_ONE_APP_DEV_CDN_PORT;
     fs.mock.clear();
+    jest.spyOn(global, 'setTimeout').mockImplementation(() => ({ unref: jest.fn() }));
+    jest.spyOn(global, 'setImmediate').mockImplementation(() => ({ unref: jest.fn() }));
   });
   afterEach(() => {
-    jest.clearAllTimers();
+    setImmediate.mockClear();
+    setTimeout.mockClear();
   });
   afterAll(() => {
     process.env.HTTP_ONE_APP_DEV_CDN_PORT = origOneAppDevCDNPort;
   });
 
   it('should tell the user when a module build was updated', async () => {
-    expect.assertions(6);
+    expect.assertions(22);
     const moduleName = 'some-module';
     const moduleVersion = '1.0.1';
     const moduleMapSample = {
@@ -364,45 +365,70 @@ describe('watchLocalModules', () => {
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello");');
 
+    // initiate watching
     watchLocalModules();
 
-    expect(getModules().get(moduleName)).toBe(originalModule);
-    loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
-    jest.runOnlyPendingTimers();
-    await sleep(100);
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
     expect(console.log).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(30e3);
+    // run the first change poll
+    await setImmediate.mock.calls[0][0]();
+
+    expect(console.log).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+
+    // run the second change poll, which should not see any filesystem changes
+    await setTimeout.mock.calls[0][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    expect(console.log).not.toHaveBeenCalled();
+
     fs.mock
       .delete(path.resolve('static/modules', moduleName))
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello again");');
+    loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
 
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.advanceTimersByTime(100);
-    
-    expect(console.log).toHaveBeenCalledTimes(1);
+    // run the third change poll, which should see the filesystem changes
+    await setTimeout.mock.calls[1][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    // first the changeWatcher is queued to run again
+    // then the writesFinishWatcher is queued
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the writesFinishWatcher poll
+    await setTimeout.mock.calls[3][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the change handler
+    await setImmediate.mock.calls[1][0](setImmediate.mock.calls[1][1]);
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+
+    expect(loadModule).toHaveBeenCalledTimes(1);
+    expect(getModules().get(moduleName)).toBe(updatedModule);
+    expect(console.log).toHaveBeenCalledTimes(2);
     expect(console.log.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "the Node.js bundle for some-module finished saving, attempting to load",
       ]
     `);
-
-    await sleep(500);
-
-    expect(console.log).toHaveBeenCalledTimes(2);
-    expect(console.log.mock.calls[1]).toMatchInlineSnapshot(`
-      Array [
-        "finished reloading some-module",
-      ]
-    `);
   });
 
   it('should tell the user when the updated module is loaded', async () => {
-    expect.assertions(6);
+    expect.assertions(22);
     const moduleName = 'some-module';
     const moduleVersion = '1.0.1';
     const moduleMapSample = {
@@ -434,27 +460,57 @@ describe('watchLocalModules', () => {
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello");');
 
+    // initiate watching
     watchLocalModules();
 
-    expect(getModules().get(moduleName)).toBe(originalModule);
-    loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
-    jest.runOnlyPendingTimers();
-    await sleep(100);
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
     expect(console.log).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(30e3);
+    // run the first change poll
+    await setImmediate.mock.calls[0][0]();
+
+    expect(console.log).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+
+    // run the second change poll, which should not see any filesystem changes
+    await setTimeout.mock.calls[0][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    expect(console.log).not.toHaveBeenCalled();
+
     fs.mock
       .delete(path.resolve('static/modules', moduleName))
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello again");');
+    loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
 
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.advanceTimersByTime(100);
+    // run the third change poll, which should see the filesystem changes
+    await setTimeout.mock.calls[1][0]();
+    
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    // first the changeWatcher is queued to run again
+    // then the writesFinishWatcher is queued
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+    expect(console.log).not.toHaveBeenCalled();
 
-    await sleep(500);
+    // run the writesFinishWatcher poll
+    await setTimeout.mock.calls[3][0]();
+    
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+    
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the change handler
+    await setImmediate.mock.calls[1][0](setImmediate.mock.calls[1][1]);
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(4);
 
     expect(loadModule).toHaveBeenCalledTimes(1);
     expect(getModules().get(moduleName)).toBe(updatedModule);
@@ -467,7 +523,7 @@ describe('watchLocalModules', () => {
   });
 
   it('should update the module registry when a server bundle changes', async () => {
-    expect.assertions(7);
+    expect.assertions(23);
     const moduleName = 'some-module';
     const moduleVersion = '1.0.1';
     const moduleMapSample = {
@@ -499,27 +555,57 @@ describe('watchLocalModules', () => {
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello");');
 
+    // initiate watching
     watchLocalModules();
-    expect(getModules().get(moduleName)).toBe(originalModule);
-    loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
 
-    jest.runOnlyPendingTimers();
-    await sleep(100);
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
     expect(console.log).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(30e3);
+    // run the first change poll
+    await setImmediate.mock.calls[0][0]();
+
+    expect(console.log).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+
+    // run the second change poll, which should not see any filesystem changes
+    await setTimeout.mock.calls[0][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    expect(console.log).not.toHaveBeenCalled();
+
     fs.mock
       .delete(path.resolve('static/modules', moduleName))
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello again");');
+    loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
 
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.advanceTimersByTime(100);
+    // run the third change poll, which should see the filesystem changes
+    await setTimeout.mock.calls[1][0]();
 
-    await sleep(500);
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    // first the changeWatcher is queued to run again
+    // then the writesFinishWatcher is queued
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the writesFinishWatcher poll
+    await setTimeout.mock.calls[3][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the change handler
+    await setImmediate.mock.calls[1][0](setImmediate.mock.calls[1][1]);
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(4);
 
     expect(loadModule).toHaveBeenCalledTimes(1);
     expect(loadModule.mock.calls[0][0]).toBe(moduleName);
@@ -547,7 +633,7 @@ describe('watchLocalModules', () => {
   });
 
   it('should not change the module registry when a new module fails to load', async () => {
-    expect.assertions(4);
+    expect.assertions(20);
     const moduleName = 'some-module';
     const moduleVersion = '1.0.1';
     const moduleMapSample = {
@@ -578,36 +664,65 @@ describe('watchLocalModules', () => {
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello");');
 
-    watchLocalModules();
-    expect(getModules().get(moduleName)).toBe(originalModule);
-    loadModule.mockImplementationOnce(() =>
-      Promise.reject(new Error('sample-module startup error'))
-    );
 
-    jest.runOnlyPendingTimers();
-    await sleep(100);
+    // initiate watching
+    watchLocalModules();
+
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
     expect(console.log).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(30e3);
+    // run the first change poll
+    await setImmediate.mock.calls[0][0]();
+
+    expect(console.log).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+
+    // run the second change poll, which should not see any filesystem changes
+    await setTimeout.mock.calls[0][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    expect(console.log).not.toHaveBeenCalled();
+
     fs.mock
       .delete(path.resolve('static/modules', moduleName))
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello again");');
+    loadModule.mockImplementationOnce(() => Promise.reject(new Error('sample-module startup error')));
 
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.advanceTimersByTime(100);
+    // run the third change poll, which should see the filesystem changes
+    await setTimeout.mock.calls[1][0]();
 
-    await sleep(500);
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    // first the changeWatcher is queued to run again
+    // then the writesFinishWatcher is queued
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the writesFinishWatcher poll
+    await setTimeout.mock.calls[3][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the change handler
+    await setImmediate.mock.calls[1][0](setImmediate.mock.calls[1][1]);
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(4);
 
     expect(loadModule).toHaveBeenCalledTimes(1);
     expect(getModules().get(moduleName)).toBe(originalModule);
   });
 
   it('should wait if the file was written to since it was detected to have changed', async () => {
-    expect.assertions(5);
+    expect.assertions(20);
     const moduleName = 'some-module';
     const moduleVersion = '1.0.1';
     const moduleMapSample = {
@@ -638,51 +753,290 @@ describe('watchLocalModules', () => {
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello");');
 
+    // initiate watching
     watchLocalModules();
 
-    expect(getModules().get(moduleName)).toBe(originalModule);
-    loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
-    jest.runOnlyPendingTimers();
-    await sleep(100);
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
     expect(console.log).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(30e3);
+    // run the first change poll
+    await setImmediate.mock.calls[0][0]();
+
+    expect(console.log).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+
+    // run the second change poll, which should not see any filesystem changes
+    await setTimeout.mock.calls[0][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    expect(console.log).not.toHaveBeenCalled();
+
     fs.mock
       .delete(path.resolve('static/modules', moduleName))
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
-      .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("he')
-      
-    jest.advanceTimersByTime(300);
-    await sleep(5);
-    
-    expect(console.log).not.toHaveBeenCalled();
-    
+      .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("he');
+    loadModule.mockImplementation(() => Promise.reject(new Error('sample-module startup error')));
+
+    // run the third change poll, which should see the filesystem changes
+    await setTimeout.mock.calls[1][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    // first the changeWatcher is queued to run again
+    // then the writesFinishWatcher is queued
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+
     fs.mock.writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello again");');
+    loadModule.mockClear().mockReturnValue(Promise.resolve(updatedModule));
 
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.advanceTimersByTime(100);
+    // run the writesFinishWatcher poll after the writing finishes
+    await setTimeout.mock.calls[3][0]();
 
-    expect(console.log).toHaveBeenCalledTimes(1);
+    // writesFinishWatcher should need to run again
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(5);
+
+    expect(loadModule).not.toHaveBeenCalled();
+
+    // run the writesFinishWatcher poll again, checks for further writes
+    await setTimeout.mock.calls[4][0]();
+
+    // writesFinishWatcher should NOT need to run again
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(5);
+
+    // run the change handler
+    await setImmediate.mock.calls[1][0](setImmediate.mock.calls[1][1]);
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(5);
+    
+    expect(loadModule).toHaveBeenCalled();
+  });
+
+  it('should load a module that has since been built but was not on disk when the process started', async () => {
+    expect.assertions(22);
+    const moduleName = 'some-module';
+    const moduleVersion = '1.0.1';
+    const moduleMapSample = {
+      modules: {
+        [moduleName]: {
+          baseUrl: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/`,
+          node: {
+            integrity: '133',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.node.js`,
+          },
+          browser: {
+            integrity: '234',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.browser.js`,
+          },
+          legacyBrowser: {
+            integrity: '134633',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.legacy.browser.js`,
+          },
+        },
+      },
+    };
+    const originalModule = () => null;
+    const updatedModule = () => null;
+    const modules = fromJS({ [moduleName]: originalModule });
+    const moduleMap = fromJS(moduleMapSample);
+    resetModuleRegistry(modules, moduleMap);
+    fs.mock
+      .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true });
+
+    // initiate watching
+    watchLocalModules();
+
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the first change poll
+    await setImmediate.mock.calls[0][0]();
+
+    expect(console.log).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+
+    // run the second change poll, which should not see any filesystem changes
+    await setTimeout.mock.calls[0][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    expect(console.log).not.toHaveBeenCalled();
+
+    fs.mock
+      .delete(path.resolve('static/modules', moduleName))
+      .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
+      .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello again");');
+    loadModule.mockReturnValueOnce(Promise.resolve(updatedModule));
+
+    // run the third change poll, which should see the filesystem changes
+    await setTimeout.mock.calls[1][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    // first the changeWatcher is queued to run again
+    // then the writesFinishWatcher is queued
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the writesFinishWatcher poll
+    await setTimeout.mock.calls[3][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the change handler
+    await setImmediate.mock.calls[1][0](setImmediate.mock.calls[1][1]);
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+
+    expect(loadModule).toHaveBeenCalledTimes(1);
+    expect(getModules().get(moduleName)).toBe(updatedModule);
+    expect(console.log).toHaveBeenCalledTimes(2);
     expect(console.log.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "the Node.js bundle for some-module finished saving, attempting to load",
       ]
     `);
   });
-  
-  it.todo('should load a module that has since been built but was not on disk when the process started');
-  
-  it.todo('should ignore modules that are not in the module map');
-  
+
+  it('should ignore modules that are not in the module map', async () => {
+    expect.assertions(25);
+    const moduleName = 'some-module';
+    const moduleVersion = '1.0.1';
+    const moduleMapSample = {
+      modules: {
+        [moduleName]: {
+          baseUrl: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/`,
+          node: {
+            integrity: '133',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.node.js`,
+          },
+          browser: {
+            integrity: '234',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.browser.js`,
+          },
+          legacyBrowser: {
+            integrity: '134633',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.legacy.browser.js`,
+          },
+        },
+      },
+    };
+    const originalModule = () => null;
+    const updatedModule = () => null;
+    const modules = fromJS({ [moduleName]: originalModule });
+    const moduleMap = fromJS(moduleMapSample);
+    resetModuleRegistry(modules, moduleMap);
+    fs.mock
+      .mkdir(path.resolve('static/modules', 'other-module', '1.2.3'), { parents: true })
+      .writeFile(path.resolve('static/modules', 'other-module', '1.2.3', `${'other-module'}.node.js`), 'console.log("hello");');
+
+    loadModule.mockReturnValue(Promise.resolve(updatedModule));
+
+    // initiate watching
+    watchLocalModules();
+
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the first change poll
+    await setImmediate.mock.calls[0][0]();
+
+    expect(console.log).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+
+    // run the second change poll, which should not see any filesystem changes
+    await setTimeout.mock.calls[0][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    expect(console.log).not.toHaveBeenCalled();
+
+    fs.mock
+      .delete(path.resolve('static/modules', moduleName))
+      .mkdir(path.resolve('static/modules', 'other-module', '1.2.3'), { parents: true })
+      .writeFile(path.resolve('static/modules', 'other-module', '1.2.3', `${'other-module'}.node.js`), 'console.log("hello");');
+
+    // run the third change poll, which should see the filesystem changes
+    await setTimeout.mock.calls[1][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    // first the changeWatcher is queued to run again
+    // then the writesFinishWatcher is queued
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+
+    // run the writesFinishWatcher poll after the writing finishes
+    await setTimeout.mock.calls[3][0]();
+
+    // writesFinishWatcher should need to run again
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+
+    // run the change handler
+    await setImmediate.mock.calls[1][0](setImmediate.mock.calls[1][1]);
+
+    expect(loadModule).not.toHaveBeenCalled();
+    expect(console.warn).toHaveBeenCalledTimes(1);
+    expect(console.warn.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "module \\"other-module\\" not in the module map, make sure to serve-module first",
+      ]
+    `);
+
+    // make sure this doesn't block modules in the module map from being reloaded
+    fs.mock
+      .delete(path.resolve('static/modules', moduleName))
+      .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
+      .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello again");');
+
+    // run the changeWatcher poll
+    await setTimeout.mock.calls[2][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    // first the changeWatcher is queued to run again
+    // then the writesFinishWatcher is queued
+    expect(setTimeout).toHaveBeenCalledTimes(6);
+
+    expect(loadModule).not.toHaveBeenCalled();
+
+    // run the writesFinishWatcher poll
+    await setTimeout.mock.calls[5][0]();
+
+    // writesFinishWatcher should NOT need to run again
+    expect(setImmediate).toHaveBeenCalledTimes(3);
+    expect(setTimeout).toHaveBeenCalledTimes(6);
+
+    // run the change handler
+    await setImmediate.mock.calls[2][0](setImmediate.mock.calls[2][1]);
+
+    expect(setImmediate).toHaveBeenCalledTimes(3);
+    expect(setTimeout).toHaveBeenCalledTimes(6);
+
+    expect(loadModule).toHaveBeenCalled();
+  });
+
   // instance when the CHANGE_WATCHER_INTERVAL and WRITING_FINISH_WATCHER_TIMEOUT lined up
   // we need to avoid scheduling the write watcher like a tree (many branches, eventually eating all CPU and memory)
   it.todo('should schedule watching for writes only once when both watchers have run');
 
   it('should ignore changes to all bundles but the server bundle', async () => {
-    expect.assertions(3);
+    expect.assertions(22);
     const moduleName = 'some-module';
     const moduleVersion = '1.0.0';
     const moduleMapSample = {
@@ -715,42 +1069,73 @@ describe('watchLocalModules', () => {
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.browser.js`), 'console.log("hello Browser");')
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.legacy.browser.js`), 'console.log("hello previous spec Browser");');
 
+    // initiate watching
     watchLocalModules();
-    
-    jest.runOnlyPendingTimers();
-    await sleep(100);
+
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
     expect(console.log).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(30e3);
+    // run the first change poll
+    await setImmediate.mock.calls[0][0]();
+
+    expect(console.log).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+
+    // run the second change poll, which should not see any filesystem changes
+    await setTimeout.mock.calls[0][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    expect(console.log).not.toHaveBeenCalled();
+
     fs.mock
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.browser.js`), 'console.log("hello again Browser");')
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.legacy.browser.js`), 'console.log("hello again previous spec Browser");');
-
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.advanceTimersByTime(100);
-
-    await sleep(500);
+    loadModule.mockImplementation(() => Promise.reject(new Error('sample-module startup error')));
+    
+    // run the third change poll, which should see but ignore the filesystem changes
+    await setTimeout.mock.calls[1][0]();
+    
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(3);
 
     expect(loadModule).not.toHaveBeenCalled();
+      
+    fs.mock.writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello Node.js");');
+    loadModule.mockClear().mockReturnValue(Promise.resolve(updatedModule));
 
-    fs.mock.writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello Node.js");')
+    // run the fourth change poll, which should see the filesystem changes
+    await setTimeout.mock.calls[2][0]();
 
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.advanceTimersByTime(100);
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    // first the changeWatcher is queued to run again
+    // then the writesFinishWatcher is queued
+    expect(setTimeout).toHaveBeenCalledTimes(5);
+    expect(console.log).not.toHaveBeenCalled();
 
-    await sleep(500);
+    // run the writesFinishWatcher poll
+    await setTimeout.mock.calls[4][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(5);
+
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the change handler
+    await setImmediate.mock.calls[1][0](setImmediate.mock.calls[1][1]);
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(5);
 
     expect(loadModule).toHaveBeenCalled();
   });
 
   it('should ignore changes to server bundles that are not the module entrypoint', async () => {
-    expect.assertions(3);
+    expect.assertions(22);
     const moduleName = 'some-module';
     const moduleVersion = '1.0.0';
     const moduleMapSample = {
@@ -781,43 +1166,74 @@ describe('watchLocalModules', () => {
     fs.mock
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello");')
-      .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `vendors.node.js`), 'console.log("hi");');
-      
+      .writeFile(path.resolve('static/modules', moduleName, moduleVersion, 'vendors.node.js'), 'console.log("hi");');
+
+
+    // initiate watching
     watchLocalModules();
-    
-    jest.runOnlyPendingTimers();
-    await sleep(100);
+
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
     expect(console.log).not.toHaveBeenCalled();
-    
-    jest.advanceTimersByTime(30e3);
-    fs.mock.writeFile(path.resolve('static/modules', moduleName, moduleVersion, `vendors.node.js`), 'console.log("hi there");');
 
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.advanceTimersByTime(100);
+    // run the first change poll
+    await setImmediate.mock.calls[0][0]();
 
-    await sleep(500);
+    expect(console.log).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+
+    // run the second change poll, which should not see any filesystem changes
+    await setTimeout.mock.calls[0][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    expect(console.log).not.toHaveBeenCalled();
+
+    fs.mock.writeFile(path.resolve('static/modules', moduleName, moduleVersion, 'vendors.node.js'), 'console.log("hi there");');
+    loadModule.mockImplementation(() => Promise.reject(new Error('sample-module startup error')));
+
+    // run the third change poll, which should see but ignore the filesystem changes
+    await setTimeout.mock.calls[1][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(3);
+
     expect(loadModule).not.toHaveBeenCalled();
 
-    
-    fs.mock
-      .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello again");');
+    fs.mock.writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello Node.js");');
+    loadModule.mockClear().mockReturnValue(Promise.resolve(updatedModule));
 
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.advanceTimersByTime(100);
+    // run the fourth change poll, which should see the filesystem changes
+    await setTimeout.mock.calls[2][0]();
 
-    await sleep(500);
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    // first the changeWatcher is queued to run again
+    // then the writesFinishWatcher is queued
+    expect(setTimeout).toHaveBeenCalledTimes(5);
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the writesFinishWatcher poll
+    await setTimeout.mock.calls[4][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(5);
+
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the change handler
+    await setImmediate.mock.calls[1][0](setImmediate.mock.calls[1][1]);
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(5);
 
     expect(loadModule).toHaveBeenCalled();
   });
 
   it('should ignore changes to files that are not JavaScript', async () => {
-    expect.assertions(3);
+    expect.assertions(22);
     const moduleName = 'some-module';
     const moduleVersion = '1.0.0';
     const moduleMapSample = {
@@ -849,37 +1265,69 @@ describe('watchLocalModules', () => {
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello");')
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion, 'assets'), { parents: true })
-      .writeFile(path.resolve('static/modules', moduleName, moduleVersion, 'assets', `image.png`), 'binary stuff');
+      .writeFile(path.resolve('static/modules', moduleName, moduleVersion, 'assets', 'image.png'), 'binary stuff');
 
+
+
+    // initiate watching
     watchLocalModules();
 
-    jest.runOnlyPendingTimers();
-    await sleep(100);
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
     expect(console.log).not.toHaveBeenCalled();
 
-    jest.advanceTimersByTime(30e3);
-    fs.mock.writeFile(path.resolve('static/modules', moduleName, moduleVersion, 'assets', `image.png`), 'other binary stuff');
+    // run the first change poll
+    await setImmediate.mock.calls[0][0]();
 
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.advanceTimersByTime(100);
+    expect(console.log).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(1);
 
-    await sleep(500);
+    // run the second change poll, which should not see any filesystem changes
+    await setTimeout.mock.calls[0][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    expect(console.log).not.toHaveBeenCalled();
+
+    fs.mock.writeFile(path.resolve('static/modules', moduleName, moduleVersion, 'assets', 'image.png'), 'other binary stuff');
+    loadModule.mockImplementation(() => Promise.reject(new Error('sample-module startup error')));
+
+    // run the third change poll, which should see but ignore the filesystem changes
+    await setTimeout.mock.calls[1][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(3);
+
     expect(loadModule).not.toHaveBeenCalled();
 
+    fs.mock.writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello Node.js");');
+    loadModule.mockClear().mockReturnValue(Promise.resolve(updatedModule));
 
-    fs.mock
-      .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello again");');
+    // run the fourth change poll, which should see the filesystem changes
+    await setTimeout.mock.calls[2][0]();
 
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.runOnlyPendingTimers();
-    await sleep(5);
-    jest.advanceTimersByTime(100);
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    // first the changeWatcher is queued to run again
+    // then the writesFinishWatcher is queued
+    expect(setTimeout).toHaveBeenCalledTimes(5);
+    expect(console.log).not.toHaveBeenCalled();
 
-    await sleep(500);
+    // run the writesFinishWatcher poll
+    await setTimeout.mock.calls[4][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(5);
+
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the change handler
+    await setImmediate.mock.calls[1][0](setImmediate.mock.calls[1][1]);
+
+    expect(setImmediate).toHaveBeenCalledTimes(2);
+    expect(setTimeout).toHaveBeenCalledTimes(5);
 
     expect(loadModule).toHaveBeenCalled();
   });
