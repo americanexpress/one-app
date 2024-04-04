@@ -14,13 +14,9 @@
  * permissions and limitations under the License.
  */
 
-// This file is only used in development so importing devDeps is not an issue
-/* eslint "import/no-extraneous-dependencies": ["error", {"devDependencies": true}] */
-
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { promisify } from 'node:util';
-import globSync from 'glob';
+import { glob } from 'glob';
 import loadModule from 'holocron/loadModule.node';
 import {
   getModules,
@@ -29,8 +25,6 @@ import {
   addHigherOrderComponent,
 } from 'holocron/moduleRegistry';
 import onModuleLoad from './onModuleLoad';
-
-const glob = promisify(globSync);
 
 const CHANGE_WATCHER_INTERVAL = 1000;
 const WRITING_FINISH_WATCHER_TIMEOUT = 400;
@@ -89,7 +83,7 @@ export default function watchLocalModules() {
 
   // this may be an over-optimization in that it may be more overhead than it saves
   const stating = new Map();
-  function stat(filePath) {
+  function dedupedStat(filePath) {
     if (!stating.has(filePath)) {
       stating.set(
         filePath,
@@ -111,8 +105,11 @@ export default function watchLocalModules() {
 
     await Promise.allSettled(
       [...checkForNoWrites.entries()].map(async ([holocronEntrypoint, previousStat]) => {
-        const currentStat = await stat(path.join(moduleDirectory, holocronEntrypoint));
-        if (currentStat.mtimeMs !== previousStat.mtimeMs || currentStat.size !== previousStat.size) {
+        const currentStat = await dedupedStat(path.join(moduleDirectory, holocronEntrypoint));
+        if (
+          currentStat.mtimeMs !== previousStat.mtimeMs
+          || currentStat.size !== previousStat.size
+        ) {
           // need to check again later
           checkForNoWrites.set(holocronEntrypoint, currentStat);
           return;
@@ -123,7 +120,7 @@ export default function watchLocalModules() {
       })
     );
 
-    if (!nextWriteCheck && checkForNoWrites.size >= 1) {
+    if (!nextWriteCheck && checkForNoWrites.size > 0) {
       nextWriteCheck = setTimeout(writesFinishWatcher, WRITING_FINISH_WATCHER_TIMEOUT).unref();
     }
   }
@@ -141,7 +138,7 @@ export default function watchLocalModules() {
     const statsToWait = [];
     holocronEntrypoints.forEach((holocronEntrypoint) => {
       statsToWait.push(
-        stat(path.join(moduleDirectory, holocronEntrypoint))
+        dedupedStat(path.join(moduleDirectory, holocronEntrypoint))
           .then((stat) => currentStats.set(holocronEntrypoint, stat))
       );
     });
@@ -153,26 +150,23 @@ export default function watchLocalModules() {
       return;
     }
 
-    for (const [holocronEntrypoint, currentStat] of currentStats.entries()) {
+    [...currentStats.entries()].forEach(([holocronEntrypoint, currentStat]) => {
       if (!previousStats.has(holocronEntrypoint)) {
         checkForNoWrites.set(holocronEntrypoint, currentStat);
-        continue;
+        return;
       }
 
       const previousStat = previousStats.get(holocronEntrypoint);
       if (currentStat.mtimeMs !== previousStat.mtimeMs || currentStat.size !== previousStat.size) {
         checkForNoWrites.set(holocronEntrypoint, currentStat);
-        continue;
       }
-
-      continue;
-    }
+    });
 
     previousStats = currentStats;
     setTimeout(changeWatcher, CHANGE_WATCHER_INTERVAL).unref();
 
     // wait for writes to the file to stop
-    if (!nextWriteCheck && checkForNoWrites.size >= 1) {
+    if (!nextWriteCheck && checkForNoWrites.size > 0) {
       nextWriteCheck = setTimeout(writesFinishWatcher, WRITING_FINISH_WATCHER_TIMEOUT).unref();
     }
   }

@@ -18,15 +18,15 @@
  * permissions and limitations under the License.
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { fromJS } from 'immutable';
 import loadModule from 'holocron/loadModule.node';
 import { getModules, resetModuleRegistry } from 'holocron/moduleRegistry';
 import watchLocalModules from '../../../src/server/utils/watchLocalModules';
 
 jest.mock('fs', () => {
-  const fs = jest.requireActual('fs');
+  const fsActual = jest.requireActual('fs');
   const setImmediateNative = global.setImmediate;
 
   let mockedFilesystem;
@@ -54,18 +54,19 @@ jest.mock('fs', () => {
   } */
 
   function getEntry(parts) {
-    let current = mockedFilesystem;
-    for (const entryName of parts) {
-      if (!current || !current.has('entries')) {
+    return parts.reduce((parentEntry, entryName) => {
+      if (!parentEntry || !parentEntry.has('entries')) {
         return null;
       }
-      current = current.get('entries').get(entryName);
-    }
-
-    return current;
+      return parentEntry.get('entries').get(entryName);
+    }, mockedFilesystem);
   }
 
   let inodeCount = 0;
+  function getNewInode() {
+    inodeCount += 1;
+    return inodeCount;
+  }
   const mock = {
     clear() {
       const createdMillis = Date.now() + Math.floor(Math.random() * 1e4) / 1e4;
@@ -81,7 +82,7 @@ jest.mock('fs', () => {
             gid: 512,
             rdev: 0,
             blksize: 4096,
-            ino: ++inodeCount,
+            ino: getNewInode(),
             size: 128,
             blocks: 0,
             atimeMs: Date.now() + Math.floor(Math.random() * 1e4) / 1e4,
@@ -107,7 +108,7 @@ jest.mock('fs', () => {
       let parent = mockedFilesystem;
       const parts = fsPath.split('/').filter(Boolean);
 
-      for (let i = 0; i < parts.length; i++) {
+      for (let i = 0; i < parts.length; i += 1) {
         const nextEntry = parts[i];
         if (
           parent.get('entries').has(nextEntry)
@@ -133,7 +134,7 @@ jest.mock('fs', () => {
                   gid: 512,
                   rdev: 0,
                   blksize: 4096,
-                  ino: ++inodeCount,
+                  ino: getNewInode(),
                   size: 128,
                   blocks: 0,
                   atimeMs: Date.now() + 0.3254,
@@ -181,7 +182,7 @@ jest.mock('fs', () => {
                 gid: 512,
                 rdev: 0,
                 blksize: 4096,
-                ino: ++inodeCount,
+                ino: getNewInode(),
                 size: contents.length,
                 blocks: contents.length / 512,
                 atimeMs: Date.now() + Math.floor(Math.random() * 1e4) / 1e4,
@@ -200,7 +201,7 @@ jest.mock('fs', () => {
     print() {
       function traverser(parentPath, entry) {
         let printout = '';
-        for (const [childName, childNode] of entry.get('entries').entries()) {
+        [...entry.get('entries').entries()].forEach(([childName, childNode]) => {
           const childPath = `${parentPath}/${childName}`;
           if (!childNode) {
             throw new Error(`no child for ${childName}??`);
@@ -210,7 +211,7 @@ jest.mock('fs', () => {
           if (indicator === 'd') {
             printout += traverser(childPath, childNode);
           }
-        }
+        });
         return printout;
       }
 
@@ -222,7 +223,26 @@ jest.mock('fs', () => {
 
   mock.clear();
 
-  jest.spyOn(fs, 'readdir').mockImplementation((dirPath, callback) => {
+  // https://github.com/isaacs/path-scurry/blob/main/src/index.ts#L88-L100
+  // https://github.com/isaacs/path-scurry/blob/v1.10.2/src/index.ts#L268-L270
+  function indicatorToDirentType(indicator) {
+    switch (indicator) {
+      case 'd':
+        return fsActual.constants.UV_DIRENT_DIR;
+      case 'f':
+        return fsActual.constants.UV_DIRENT_FILE;
+      default:
+        return fsActual.constants.UV_DIRENT_UNKNOWN;
+    }
+  }
+
+  jest.spyOn(fsActual, 'readdir').mockImplementation((dirPath, options, callback) => {
+    if (!callback) {
+      /* eslint-disable no-param-reassign -- fs.readdir sets `options` as an optional argument */
+      callback = options;
+      options = {};
+      /* eslint-enable no-param-reassign */
+    }
     const parts = dirPath.split('/').filter(Boolean);
     const dir = getEntry(parts);
     if (!dir) {
@@ -234,57 +254,112 @@ jest.mock('fs', () => {
       return;
     }
 
-    setImmediateNative(callback, null, [...dir.get('entries').keys()]);
+    let directoryEntries = dir.get('entries');
+    if (options.withFileTypes) {
+      directoryEntries = [...directoryEntries.entries()].map(([name, attributes]) => new fsActual.Dirent(name, indicatorToDirentType(attributes.get('indicator')), [dirPath, name].join('/')));
+    } else {
+      directoryEntries = [...directoryEntries.keys()];
+    }
+    setImmediateNative(callback, null, directoryEntries);
   });
 
-  jest.spyOn(fs.promises, 'stat').mockImplementation(
+  jest.spyOn(fsActual.promises, 'readdir').mockImplementation((dirPath, options = {}) => new Promise((resolve, reject) => {
+    const parts = dirPath.split('/').filter(Boolean);
+    const dir = getEntry(parts);
+    if (!dir) {
+      reject(new Error(`not in mock fs ${dirPath} (readdir)`));
+      return;
+    }
+    if (dir.get('indicator') !== 'd') {
+      reject(new Error(`not a mocked directory ${dirPath} (readdir)`));
+      return;
+    }
+
+    let directoryEntries = dir.get('entries');
+    if (options.withFileTypes) {
+      directoryEntries = [...directoryEntries.entries()].map(([name, attributes]) => new fsActual.Dirent(name, indicatorToDirentType(attributes.get('indicator')), [dirPath, name].join('/')));
+    } else {
+      directoryEntries = [...directoryEntries.keys()];
+    }
+    resolve(directoryEntries);
+  }));
+
+  jest.spyOn(fsActual, 'readdirSync').mockImplementation((dirPath, options = {}) => {
+    const parts = dirPath.split('/').filter(Boolean);
+    const dir = getEntry(parts);
+    if (!dir) {
+      throw new Error(`not in mock fs ${dirPath} (readdir)`);
+    }
+    if (dir.get('indicator') !== 'd') {
+      throw new Error(`not a mocked directory ${dirPath} (readdir)`);
+    }
+
+    let directoryEntries = dir.get('entries');
+    if (options.withFileTypes) {
+      directoryEntries = [...directoryEntries.entries()].map(([name, attributes]) => new fsActual.Dirent(name, indicatorToDirentType(attributes.get('indicator')), [dirPath, name].join('/')));
+    } else {
+      directoryEntries = [...directoryEntries.keys()];
+    }
+    return directoryEntries;
+  });
+
+  function statKeyArgsToPositional({
+    dev,
+    mode,
+    nlink,
+    uid,
+    gid,
+    rdev,
+    blksize,
+    ino,
+    size,
+    blocks,
+    atimeMs,
+    mtimeMs,
+    ctimeMs,
+    birthtimeMs,
+  }) {
+    return [
+      dev,
+      mode,
+      nlink,
+      uid,
+      gid,
+      rdev,
+      blksize,
+      ino,
+      size,
+      blocks,
+      atimeMs,
+      mtimeMs,
+      ctimeMs,
+      birthtimeMs,
+    ];
+  }
+
+  jest.spyOn(fsActual.promises, 'stat').mockImplementation(
     (fsPath) => new Promise((resolve, reject) => {
       const entry = getEntry(fsPath.split('/').filter(Boolean));
       if (!entry) {
-        return reject(new Error(`no entry for ${fsPath} (stat)`));
+        reject(new Error(`no entry for ${fsPath} (stat)`));
+      } else {
+        resolve(new fsActual.Stats(...statKeyArgsToPositional(entry.get('stat'))));
       }
-
-      const statArgs = entry.get('stat');
-      const {
-        dev,
-        mode,
-        nlink,
-        uid,
-        gid,
-        rdev,
-        blksize,
-        ino,
-        size,
-        blocks,
-        atimeMs,
-        mtimeMs,
-        ctimeMs,
-        birthtimeMs,
-      } = statArgs;
-      return resolve(
-        new fs.Stats(
-          dev,
-          mode,
-          nlink,
-          uid,
-          gid,
-          rdev,
-          blksize,
-          ino,
-          size,
-          blocks,
-          atimeMs,
-          mtimeMs,
-          ctimeMs,
-          birthtimeMs
-        )
-      );
     })
   );
 
-  fs.mock = mock;
+  jest.spyOn(fsActual.promises, 'lstat').mockImplementation((fsPath) => new Promise((resolve, reject) => {
+    const entry = getEntry(fsPath.split('/').filter(Boolean));
+    if (!entry) {
+      reject(new Error(`no entry for ${fsPath} (stat)`));
+    } else {
+      resolve(new fsActual.Stats(...statKeyArgsToPositional(entry.get('stat'))));
+    }
+  }));
 
-  return fs;
+  fsActual.mock = mock;
+
+  return fsActual;
 });
 
 jest.mock('holocron/moduleRegistry', () => {
@@ -314,7 +389,6 @@ jest.spyOn(console, 'log').mockImplementation(() => {});
 
 describe('watchLocalModules', () => {
   let origOneAppDevCDNPort;
-  const setTimeoutOriginal = global.setTimeout;
   beforeAll(() => {
     origOneAppDevCDNPort = process.env.HTTP_ONE_APP_DEV_CDN_PORT;
   });
@@ -421,7 +495,7 @@ describe('watchLocalModules', () => {
     expect(getModules().get(moduleName)).toBe(updatedModule);
     expect(console.log).toHaveBeenCalledTimes(2);
     expect(console.log.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
+      [
         "the Node.js bundle for some-module finished saving, attempting to load",
       ]
     `);
@@ -450,7 +524,6 @@ describe('watchLocalModules', () => {
         },
       },
     };
-    const modulePath = `${moduleName}/${moduleVersion}/${moduleName}.node.js`;
     const originalModule = () => null;
     const updatedModule = () => null;
     const modules = fromJS({ [moduleName]: originalModule });
@@ -491,7 +564,7 @@ describe('watchLocalModules', () => {
 
     // run the third change poll, which should see the filesystem changes
     await setTimeout.mock.calls[1][0]();
-    
+
     expect(setImmediate).toHaveBeenCalledTimes(1);
     // first the changeWatcher is queued to run again
     // then the writesFinishWatcher is queued
@@ -500,10 +573,10 @@ describe('watchLocalModules', () => {
 
     // run the writesFinishWatcher poll
     await setTimeout.mock.calls[3][0]();
-    
+
     expect(setImmediate).toHaveBeenCalledTimes(2);
     expect(setTimeout).toHaveBeenCalledTimes(4);
-    
+
     expect(console.log).not.toHaveBeenCalled();
 
     // run the change handler
@@ -516,7 +589,7 @@ describe('watchLocalModules', () => {
     expect(getModules().get(moduleName)).toBe(updatedModule);
     expect(console.log).toHaveBeenCalledTimes(2);
     expect(console.log.mock.calls[1]).toMatchInlineSnapshot(`
-      Array [
+      [
         "finished reloading some-module",
       ]
     `);
@@ -545,7 +618,6 @@ describe('watchLocalModules', () => {
         },
       },
     };
-    const modulePath = `${moduleName}/${moduleVersion}/${moduleName}.node.js`;
     const originalModule = () => null;
     const updatedModule = () => null;
     const modules = fromJS({ [moduleName]: originalModule });
@@ -610,17 +682,17 @@ describe('watchLocalModules', () => {
     expect(loadModule).toHaveBeenCalledTimes(1);
     expect(loadModule.mock.calls[0][0]).toBe(moduleName);
     expect(loadModule.mock.calls[0][1]).toMatchInlineSnapshot(`
-      Object {
+      {
         "baseUrl": "http://localhost:3001/static/modules/some-module/1.0.1/",
-        "browser": Object {
+        "browser": {
           "integrity": "234",
           "url": "http://localhost:3001/static/modules/some-module/1.0.1/some-module.browser.js",
         },
-        "legacyBrowser": Object {
+        "legacyBrowser": {
           "integrity": "134633",
           "url": "http://localhost:3001/static/modules/some-module/1.0.1/some-module.legacy.browser.js",
         },
-        "node": Object {
+        "node": {
           "integrity": "133",
           "url": "http://localhost:3001/static/modules/some-module/1.0.1/some-module.node.js",
         },
@@ -655,7 +727,6 @@ describe('watchLocalModules', () => {
         },
       },
     };
-    const modulePath = `${moduleName}/${moduleVersion}/${moduleName}.node.js`;
     const originalModule = () => null;
     const modules = fromJS({ [moduleName]: originalModule });
     const moduleMap = fromJS(moduleMapSample);
@@ -663,7 +734,6 @@ describe('watchLocalModules', () => {
     fs.mock
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello");');
-
 
     // initiate watching
     watchLocalModules();
@@ -814,7 +884,7 @@ describe('watchLocalModules', () => {
 
     expect(setImmediate).toHaveBeenCalledTimes(2);
     expect(setTimeout).toHaveBeenCalledTimes(5);
-    
+
     expect(loadModule).toHaveBeenCalled();
   });
 
@@ -905,7 +975,7 @@ describe('watchLocalModules', () => {
     expect(getModules().get(moduleName)).toBe(updatedModule);
     expect(console.log).toHaveBeenCalledTimes(2);
     expect(console.log.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
+      [
         "the Node.js bundle for some-module finished saving, attempting to load",
       ]
     `);
@@ -994,8 +1064,8 @@ describe('watchLocalModules', () => {
     expect(loadModule).not.toHaveBeenCalled();
     expect(console.warn).toHaveBeenCalledTimes(1);
     expect(console.warn.mock.calls[0]).toMatchInlineSnapshot(`
-      Array [
-        "module \\"other-module\\" not in the module map, make sure to serve-module first",
+      [
+        "module "other-module" not in the module map, make sure to serve-module first",
       ]
     `);
 
@@ -1032,7 +1102,8 @@ describe('watchLocalModules', () => {
   });
 
   // instance when the CHANGE_WATCHER_INTERVAL and WRITING_FINISH_WATCHER_TIMEOUT lined up
-  // we need to avoid scheduling the write watcher like a tree (many branches, eventually eating all CPU and memory)
+  // we need to avoid scheduling the write watcher like a tree (many branches, eventually eating
+  // all CPU and memory)
   it('should schedule watching for writes only once when both watchers have run', async () => {
     expect.assertions(13);
     const moduleName = 'some-module';
@@ -1057,7 +1128,6 @@ describe('watchLocalModules', () => {
       },
     };
     const originalModule = () => null;
-    const updatedModule = () => null;
     const modules = fromJS({ [moduleName]: originalModule });
     const moduleMap = fromJS(moduleMapSample);
     resetModuleRegistry(modules, moduleMap);
@@ -1102,7 +1172,8 @@ describe('watchLocalModules', () => {
     // then the writesFinishWatcher is queued
     expect(setTimeout).toHaveBeenCalledTimes(4);
 
-    // there may be times that their intervals coincide, we don't want writesFinishWatcher to be scheduled twice
+    // there may be times that their intervals coincide
+    // we don't want writesFinishWatcher to be scheduled twice
     await Promise.all([
       setTimeout.mock.calls[2][0](),
       setTimeout.mock.calls[3][0](),
@@ -1172,15 +1243,15 @@ describe('watchLocalModules', () => {
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.browser.js`), 'console.log("hello again Browser");')
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.legacy.browser.js`), 'console.log("hello again previous spec Browser");');
     loadModule.mockImplementation(() => Promise.reject(new Error('sample-module startup error')));
-    
+
     // run the third change poll, which should see but ignore the filesystem changes
     await setTimeout.mock.calls[1][0]();
-    
+
     expect(setImmediate).toHaveBeenCalledTimes(1);
     expect(setTimeout).toHaveBeenCalledTimes(3);
 
     expect(loadModule).not.toHaveBeenCalled();
-      
+
     fs.mock.writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello Node.js");');
     loadModule.mockClear().mockReturnValue(Promise.resolve(updatedModule));
 
@@ -1233,7 +1304,6 @@ describe('watchLocalModules', () => {
         },
       },
     };
-    const modulePath = `${moduleName}/${moduleVersion}/${moduleName}.node.js`;
     const originalModule = () => null;
     const updatedModule = () => null;
     const modules = fromJS({ [moduleName]: originalModule });
@@ -1243,7 +1313,6 @@ describe('watchLocalModules', () => {
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello");')
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, 'vendors.node.js'), 'console.log("hi");');
-
 
     // initiate watching
     watchLocalModules();
@@ -1331,7 +1400,6 @@ describe('watchLocalModules', () => {
         },
       },
     };
-    const modulePath = `${moduleName}/${moduleVersion}/${moduleName}.node.js`;
     const originalModule = () => null;
     const updatedModule = () => null;
     const modules = fromJS({ [moduleName]: originalModule });
@@ -1342,8 +1410,6 @@ describe('watchLocalModules', () => {
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello");')
       .mkdir(path.resolve('static/modules', moduleName, moduleVersion, 'assets'), { parents: true })
       .writeFile(path.resolve('static/modules', moduleName, moduleVersion, 'assets', 'image.png'), 'binary stuff');
-
-
 
     // initiate watching
     watchLocalModules();
