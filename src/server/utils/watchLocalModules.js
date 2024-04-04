@@ -14,8 +14,10 @@
  * permissions and limitations under the License.
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
+// This file is only used in development so importing devDeps is not an issue
+/* eslint "import/no-extraneous-dependencies": ["error", {"devDependencies": true}] */
+
+import path from 'path';
 import chokidar from 'chokidar';
 import loadModule from 'holocron/loadModule.node';
 import {
@@ -24,42 +26,57 @@ import {
   resetModuleRegistry,
   addHigherOrderComponent,
 } from 'holocron/moduleRegistry';
-import { getIp } from './getIP';
 import onModuleLoad from './onModuleLoad';
 
 export default function watchLocalModules() {
   const staticsDirectoryPath = path.resolve(__dirname, '../../../static');
-  const moduleDirectory = path.resolve(staticsDirectoryPath, 'modules');
-  const moduleMapPath = path.resolve(staticsDirectoryPath, 'module-map.json');
-  const watcher = chokidar.watch(moduleDirectory, { awaitWriteFinish: true });
+  const moduleDirectory = path.join(staticsDirectoryPath, 'modules');
 
-  watcher.on('change', async (changedPath) => {
-    try {
+  chokidar
+    .watch('*/*/*.node.js', {
+      awaitWriteFinish: true,
+      cwd: moduleDirectory,
+    })
+    .on('change', async (changedPath) => {
       if (!changedPath.endsWith('.node.js')) return;
 
-      const match = changedPath.slice(moduleDirectory.length).match(/\/([^/]+)\/([^/]+)/);
-      if (!match) return;
-      const [, moduleNameChangeDetectedIn] = match;
+      // I had apprehension of this manual manipulation
+      // but from what I can tell a file or directory with '/' in the name is not valid
+      // Linux: https://stackoverflow.com/q/9847288
+      // macOS: '/' from Finder is translated to ':'
+      // Windows: https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
+      const parts = changedPath.split(path.sep);
+      if (parts.length < 3) {
+        console.warn(`detected a change in module static resources at "${changedPath}" but unable to reload it in the running server`);
+        return;
+      }
 
-      const moduleMap = JSON.parse(fs.readFileSync(moduleMapPath, 'utf8'));
+      const [moduleName] = parts;
+      const moduleMap = getModuleMap();
+      const moduleMapEntry = moduleMap.getIn(['modules', moduleName]);
 
-      const moduleData = moduleMap.modules[moduleNameChangeDetectedIn];
-      const oneAppDevCdnAddress = `http://${getIp()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`;
+      if (new URL(moduleMapEntry.getIn(['node', 'url'])).pathname !== `/static/modules/${changedPath}`) {
+        // not a Holocron module entry bundle (e.g. might be using webpack chunking)
+        return;
+      }
 
-      moduleData.browser.url = moduleData.browser.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
-      moduleData.legacyBrowser.url = moduleData.legacyBrowser.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
-      moduleData.node.url = moduleData.node.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
+      console.log(`the Node.js bundle for ${moduleName} finished saving, attempting to load`);
 
-      const module = addHigherOrderComponent(await loadModule(
-        moduleNameChangeDetectedIn,
-        moduleData,
-        onModuleLoad
-      ));
+      let newModule;
+      try {
+        newModule = addHigherOrderComponent(await loadModule(
+          moduleName,
+          moduleMapEntry.toJS(),
+          onModuleLoad
+        ));
+      } catch (error) {
+        // loadModule already logs the error and then re-throws
+        // logging again just adds noise for the developer
+        return;
+      }
 
-      const modules = getModules().set(moduleNameChangeDetectedIn, module);
-      resetModuleRegistry(modules, getModuleMap());
-    } catch (error) {
-      console.error(error);
-    }
-  });
+      const newModules = getModules().set(moduleName, newModule);
+      resetModuleRegistry(newModules, moduleMap);
+      console.log(`finished reloading ${moduleName}`);
+    });
 }
