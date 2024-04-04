@@ -308,9 +308,9 @@ jest.mock('holocron/moduleRegistry', () => {
 
 jest.mock('holocron/loadModule.node', () => jest.fn(() => Promise.resolve(() => null)));
 
-jest.spyOn(console, 'error')//.mockImplementation(() => {});
-jest.spyOn(console, 'warn')//.mockImplementation(() => {});
-jest.spyOn(console, 'log')//.mockImplementation(() => {});
+jest.spyOn(console, 'error').mockImplementation(() => {});
+jest.spyOn(console, 'warn').mockImplementation(() => {});
+jest.spyOn(console, 'log').mockImplementation(() => {});
 
 describe('watchLocalModules', () => {
   let origOneAppDevCDNPort;
@@ -1033,7 +1033,83 @@ describe('watchLocalModules', () => {
 
   // instance when the CHANGE_WATCHER_INTERVAL and WRITING_FINISH_WATCHER_TIMEOUT lined up
   // we need to avoid scheduling the write watcher like a tree (many branches, eventually eating all CPU and memory)
-  it.todo('should schedule watching for writes only once when both watchers have run');
+  it('should schedule watching for writes only once when both watchers have run', async () => {
+    expect.assertions(13);
+    const moduleName = 'some-module';
+    const moduleVersion = '1.0.1';
+    const moduleMapSample = {
+      modules: {
+        [moduleName]: {
+          baseUrl: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/`,
+          node: {
+            integrity: '133',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.node.js`,
+          },
+          browser: {
+            integrity: '234',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.browser.js`,
+          },
+          legacyBrowser: {
+            integrity: '134633',
+            url: `http://localhost:3001/static/modules/${moduleName}/${moduleVersion}/${moduleName}.legacy.browser.js`,
+          },
+        },
+      },
+    };
+    const originalModule = () => null;
+    const updatedModule = () => null;
+    const modules = fromJS({ [moduleName]: originalModule });
+    const moduleMap = fromJS(moduleMapSample);
+    resetModuleRegistry(modules, moduleMap);
+    fs.mock
+      .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
+      .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello");');
+
+    // initiate watching
+    watchLocalModules();
+
+    expect(setTimeout).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(console.log).not.toHaveBeenCalled();
+
+    // run the first change poll
+    await setImmediate.mock.calls[0][0]();
+
+    expect(console.log).not.toHaveBeenCalled();
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(1);
+
+    // run the second change poll, which should not see any filesystem changes
+    await setTimeout.mock.calls[0][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    expect(setTimeout).toHaveBeenCalledTimes(2);
+
+    expect(getModules().get(moduleName)).toBe(originalModule);
+    expect(console.log).not.toHaveBeenCalled();
+
+    fs.mock
+      .delete(path.resolve('static/modules', moduleName))
+      .mkdir(path.resolve('static/modules', moduleName, moduleVersion), { parents: true })
+      .writeFile(path.resolve('static/modules', moduleName, moduleVersion, `${moduleName}.node.js`), 'console.log("hello again");');
+    loadModule.mockImplementation(() => Promise.reject(new Error('sample-module startup error')));
+
+    // run the third change poll, which should see the filesystem changes
+    await setTimeout.mock.calls[1][0]();
+
+    expect(setImmediate).toHaveBeenCalledTimes(1);
+    // first the changeWatcher is queued to run again
+    // then the writesFinishWatcher is queued
+    expect(setTimeout).toHaveBeenCalledTimes(4);
+
+    // there may be times that their intervals coincide, we don't want writesFinishWatcher to be scheduled twice
+    await Promise.all([
+      setTimeout.mock.calls[2][0](),
+      setTimeout.mock.calls[3][0](),
+    ]);
+
+    expect(setTimeout).toHaveBeenCalledTimes(5);
+  });
 
   it('should ignore changes to all bundles but the server bundle', async () => {
     expect.assertions(22);
