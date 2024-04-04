@@ -87,23 +87,6 @@ export default function watchLocalModules() {
   const staticsDirectoryPath = path.resolve(__dirname, '../../../static');
   const moduleDirectory = path.join(staticsDirectoryPath, 'modules');
 
-  // this may be an over-optimization in that it may be more overhead than it saves
-  const stating = new Map();
-  function dedupedStat(filePath) {
-    if (!stating.has(filePath)) {
-      stating.set(
-        filePath,
-        fs.stat(filePath)
-          .then((fileStat) => {
-            stating.delete(filePath);
-            return fileStat;
-          })
-      );
-    }
-
-    return stating.get(filePath);
-  }
-
   const checkForNoWrites = new Map();
   let nextWriteCheck = null;
   async function writesFinishWatcher() {
@@ -111,7 +94,7 @@ export default function watchLocalModules() {
 
     await Promise.allSettled(
       [...checkForNoWrites.entries()].map(async ([holocronEntrypoint, previousStat]) => {
-        const currentStat = await dedupedStat(path.join(moduleDirectory, holocronEntrypoint));
+        const currentStat = await fs.stat(path.join(moduleDirectory, holocronEntrypoint));
         if (
           currentStat.mtimeMs !== previousStat.mtimeMs
           || currentStat.size !== previousStat.size
@@ -144,7 +127,7 @@ export default function watchLocalModules() {
     const statsToWait = [];
     holocronEntrypoints.forEach((holocronEntrypoint) => {
       statsToWait.push(
-        dedupedStat(path.join(moduleDirectory, holocronEntrypoint))
+        fs.stat(path.join(moduleDirectory, holocronEntrypoint))
           .then((stat) => currentStats.set(holocronEntrypoint, stat))
       );
     });
