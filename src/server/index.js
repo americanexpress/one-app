@@ -57,7 +57,10 @@ export const listen = async ({
       port,
     });
 
-    console.log('%s listening on port %d', context, port);
+    console.info('%s listening on port %d', context, port);
+    if (context === '🌎 One App server') {
+      console.log('🚀 One App Server is running on http://localhost:%d 🚀', port);
+    }
 
     addServer(instance);
 
@@ -133,7 +136,7 @@ async function oneAppDevProxyStart() {
       if (err) {
         rej(err);
       } else {
-        console.log('👖 one-app-dev-proxy server listening on port %d', oneAppDevProxyPort);
+        console.info('👖 one-app-dev-proxy server listening on port %d', oneAppDevProxyPort);
         res();
       }
     }));

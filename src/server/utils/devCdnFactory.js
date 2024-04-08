@@ -102,9 +102,9 @@ export const oneAppDevCdnFactory = ({
   if (!appPort) { throw new Error('appPort is a required param'); }
 
   if (remoteModuleMapUrl) {
-    console.log('one-app-dev-cdn loading module map from %s', remoteModuleMapUrl);
+    console.info('one-app-dev-cdn loading module map from %s', remoteModuleMapUrl);
   } else {
-    console.log('one-app-dev-cdn only using locally served modules');
+    console.info('one-app-dev-cdn only using locally served modules');
   }
 
   if (process.env.NODE_ENV === 'production') {

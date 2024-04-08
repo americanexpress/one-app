@@ -31,6 +31,7 @@ jest.spyOn(console, 'error').mockImplementation((...args) => {
   args.pop();
   return util.format(...args);
 });
+jest.spyOn(console, 'info').mockImplementation(util.format);
 jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
 jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
 
@@ -64,7 +65,8 @@ describe('server index', () => {
     jest.doMock('@americanexpress/one-app-dev-proxy', () => ({
       default: jest.fn(() => ({
         listen: jest.fn((port, cb) => {
-          setTimeout(() => (oneAppDevProxyError ? cb(new Error('test error')) : cb(null, { port }))
+          // eslint-disable-next-line no-confusing-arrow -- needed for jest
+          setTimeout(() => oneAppDevProxyError ? cb(new Error('test error')) : cb(null, { port })
           );
           return { close: 'one-app-dev-proxy' };
         }),
@@ -431,8 +433,9 @@ describe('server index', () => {
       await load();
 
       expect(console.log).toHaveBeenCalled();
-      expect(console.log.mock.results[1].value).toMatchInlineSnapshot(
-        '"🌎 One App server listening on port 3000"'
+
+      expect(console.log.mock.results[0].value).toMatchInlineSnapshot(
+        '"🚀 One App Server is running on http://localhost:3000 🚀"'
       );
     });
 
@@ -442,8 +445,8 @@ describe('server index', () => {
 
       await load();
 
-      expect(console.log).toHaveBeenCalled();
-      expect(console.log.mock.results[0].value).toMatchInlineSnapshot(
+      expect(console.info).toHaveBeenCalled();
+      expect(console.info.mock.results[0].value).toMatchInlineSnapshot(
         '"📊 Metrics server listening on port 3005"'
       );
     });
