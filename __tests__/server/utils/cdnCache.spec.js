@@ -45,9 +45,14 @@ jest.mock('chalk', () => ({
 describe('cacheUtils', () => {
   let logSpy;
   let errorSpy;
+  let infoSpy;
+  let warnSpy;
+
   beforeEach(() => {
     logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -76,6 +81,19 @@ describe('cacheUtils', () => {
       expect(chalk.bold.greenBright).toHaveBeenCalledWith('5.00', 'MB');
     });
 
+    it('showCacheInfo should log warning if cache file size is more than 10MB', async () => {
+      const mockStats = {
+        size: 1024 * 1024 * 11, // 11 MB
+      };
+      fsPromises.stat.mockResolvedValue(mockStats);
+
+      await showCacheInfo();
+
+      expect(fsPromises.stat).toHaveBeenCalledWith(oneAppModuleCachePath);
+      expect(chalk.bold.redBright).toHaveBeenCalledTimes(1);
+      expect(warnSpy).toHaveBeenCalledWith('🚨🚨🚨: Cache file size is more than 10MB. 🚨🚨🚨');
+    });
+
     it('showCacheInfo should handle error', async () => {
       const expectedError = new Error('File not found');
       fsPromises.stat.mockRejectedValue(expectedError);
@@ -95,8 +113,8 @@ describe('cacheUtils', () => {
 
       await showCacheInfo();
 
-      expect(logSpy).toHaveBeenCalledWith('To clear the cache, please delete this file:');
-      expect(logSpy).toHaveBeenCalledWith('    ~/.one-app/.one-app-module-cache');
+      expect(infoSpy).toHaveBeenCalledWith('To clear the cache, please delete this file:');
+      expect(infoSpy).toHaveBeenCalledWith('    ~/.one-app/.one-app-module-cache');
     });
   });
 

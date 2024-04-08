@@ -24,6 +24,8 @@ describe('pollModuleMap', () => {
   jest.spyOn(console, 'log').mockImplementation(util.format);
   jest.spyOn(console, 'warn').mockImplementation(util.format);
   jest.spyOn(console, 'error').mockImplementation(util.format);
+  jest.spyOn(console, 'info').mockImplementation(util.format);
+
   let loadModules;
   let loadModulesPromise;
   let incrementCounter;
@@ -110,7 +112,7 @@ describe('pollModuleMap', () => {
     const { default: pollModuleMap } = load();
     await pollModuleMap();
 
-    expect(console.log).toHaveBeenCalledWith('pollModuleMap: polling...');
+    expect(console.info).toHaveBeenCalledWith('pollModuleMap: polling...');
     expect(loadModules).toHaveBeenCalledTimes(1);
     expect(incrementCounter).toHaveBeenCalledTimes(1);
     expect(incrementCounter).toHaveBeenCalledWith(holocronMetrics.moduleMapPoll);
@@ -141,9 +143,9 @@ describe('pollModuleMap', () => {
     expect(setTimeout.mock.calls[0][0]).toBe(pollModuleMap);
   });
 
-  it('schedules a new polling despite console.log throwing on a later poll', async () => {
+  it('schedules a new polling despite console.info throwing on a later poll', async () => {
     const { default: pollModuleMap, MIN_POLL_TIME } = load();
-    console.log
+    console.info
       // monitor setup
       .mockImplementationOnce(() => {
         /* noop a few times */
@@ -249,8 +251,8 @@ describe('pollModuleMap', () => {
     await pollModuleMap();
 
     expect(loadModules).toHaveBeenCalledTimes(1);
-    expect(console.log).toHaveBeenCalledTimes(3);
-    expect(console.log.mock.results[2].value).toMatchInlineSnapshot(`
+    expect(console.info).toHaveBeenCalledTimes(3);
+    expect(console.info.mock.results[2].value).toMatchInlineSnapshot(`
       "pollModuleMap: 1 modules loaded/updated:
       { 'module-name': 'module-data-here' }"
     `);
@@ -269,8 +271,8 @@ describe('pollModuleMap', () => {
     await pollModuleMap();
     expect(loadModules).toHaveBeenCalledTimes(1);
 
-    expect(console.log).toHaveBeenCalledTimes(3);
-    expect(console.log.mock.results[2].value).toMatch(
+    expect(console.info).toHaveBeenCalledTimes(3);
+    expect(console.info.mock.results[2].value).toMatch(
       /^pollModuleMap: no updates, looking again in \d+s$/
     );
 
@@ -488,12 +490,12 @@ describe('pollModuleMap', () => {
       await pollModuleMap();
 
       Date.now.mockImplementationOnce(() => 7e3);
-      console.log.mockClear();
+      console.info.mockClear();
       expect(setInterval).toHaveBeenCalledTimes(1);
       setInterval.mock.calls[0][0]();
-      expect(console.log).toHaveBeenCalledTimes(2);
-      expect(console.log.mock.results[0].value).toMatchSnapshot();
-      expect(console.log.mock.results[1].value).toMatchSnapshot();
+      expect(console.info).toHaveBeenCalledTimes(2);
+      expect(console.info.mock.results[0].value).toMatchSnapshot();
+      expect(console.info.mock.results[1].value).toMatchSnapshot();
     });
 
     it('logs when polling is considered stopped', async () => {
@@ -504,11 +506,11 @@ describe('pollModuleMap', () => {
       await pollModuleMap();
 
       Date.now.mockImplementationOnce(() => 16e3);
-      console.log.mockClear();
+      console.info.mockClear();
       expect(setInterval).toHaveBeenCalledTimes(1);
       setInterval.mock.calls[0][0]();
-      expect(console.log).toHaveBeenCalledTimes(1);
-      expect(console.log.mock.calls[0]).toMatchSnapshot();
+      expect(console.info).toHaveBeenCalledTimes(1);
+      expect(console.info.mock.calls[0]).toMatchSnapshot();
       expect(console.warn).toHaveBeenCalledTimes(2);
       expect(console.warn.mock.results[0].value).toMatchSnapshot();
       expect(console.warn.mock.results[1].value).toMatchSnapshot();

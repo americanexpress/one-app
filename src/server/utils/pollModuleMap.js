@@ -86,14 +86,14 @@ function recordPollingForMonitor() {
 
 let startPollingMonitorIfNotAlready = () => {
   const pollingMonitorTimeInterval = MAX_POLL_TIME * 1.1;
-  console.log('pollModuleMap: setting up polling monitor to run every %ds', pollingMonitorTimeInterval / 1e3);
+  console.info('pollModuleMap: setting up polling monitor to run every %ds', pollingMonitorTimeInterval / 1e3);
 
   function pollingMonitor() {
-    console.log('pollModuleMap: running polling monitor');
+    console.info('pollModuleMap: running polling monitor');
     const monitorRunningAt = Date.now();
     const lastPollingTimeAgo = monitorRunningAt - lastPollingRecordedAt;
     if (lastPollingTimeAgo <= MAX_POLL_TIME) {
-      console.log('pollModuleMap: polling is working as expected. Last poll: %dms ago, Max poll: %dms.', lastPollingTimeAgo, MAX_POLL_TIME);
+      console.info('pollModuleMap: polling is working as expected. Last poll: %dms ago, Max poll: %dms.', lastPollingTimeAgo, MAX_POLL_TIME);
       return;
     }
 
@@ -126,7 +126,7 @@ async function pollModuleMap() {
   recordPollingForMonitor();
   startPollingMonitorIfNotAlready();
   try {
-    console.log('pollModuleMap: polling...');
+    console.info('pollModuleMap: polling...');
     incrementCounter(holocronMetrics.moduleMapPoll);
 
     const { loadedModules = {}, rejectedModules = {} } = await loadModules();
@@ -140,7 +140,7 @@ async function pollModuleMap() {
     moduleMapHealthy = !numberOfModulesRejected;
 
     if (numberOfModulesLoaded) {
-      console.log('pollModuleMap: %d modules loaded/updated:\n%o', numberOfModulesLoaded, loadedModules);
+      console.info('pollModuleMap: %d modules loaded/updated:\n%o', numberOfModulesLoaded, loadedModules);
       incrementCounter(holocronMetrics.moduleMapUpdated);
     }
 
@@ -156,7 +156,7 @@ async function pollModuleMap() {
       resetPollTime();
     } else {
       incrementPollTime();
-      console.log('pollModuleMap: no updates, looking again in %ds', Math.round(currentPollTime / 1e3));
+      console.info('pollModuleMap: no updates, looking again in %ds', Math.round(currentPollTime / 1e3));
     }
   } catch (pollingError) {
     try {
