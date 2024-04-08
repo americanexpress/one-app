@@ -14,9 +14,6 @@
  * permissions and limitations under the License.
  */
 
-// This file is only used in development so importing devDeps is not an issue
-/* eslint "import/no-extraneous-dependencies": ["error", {"devDependencies": true}] -- see above */
-
 import fs from 'node:fs';
 import path from 'node:path';
 import chokidar from 'chokidar';

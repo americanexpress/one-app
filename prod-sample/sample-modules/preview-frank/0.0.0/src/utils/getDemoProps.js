@@ -14,9 +14,7 @@
  * permissions and limitations under the License.
  */
 
-import get from 'lodash.get';
-
 export default function getDemoProps(props) {
-  const demoProps = get(props.location, 'query.props', '{}');
+  const demoProps = props.location?.query?.props || '{}';
   return { location: props.location, ...JSON.parse(demoProps) };
 }

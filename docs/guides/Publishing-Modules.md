@@ -85,13 +85,11 @@ const updateModuleMap = async () => {
       './module_map/module-map.json', JSON.stringify(moduleMapContent, null, 2)
     );
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error(error);
   }
 };
 
 updateModuleMap().catch((err) => {
-  // eslint-disable-next-line no-console
   console.log(err);
 });
 ```

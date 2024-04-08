@@ -16,7 +16,6 @@
 
 import { updateLocale } from '@americanexpress/one-app-ducks';
 import { composeModules } from 'holocron';
-import get from 'lodash.get';
 
 import getDemoProps from './utils/getDemoProps';
 
@@ -26,7 +25,7 @@ export default null;
 export function loadModuleData({ store: { dispatch }, ownProps: props }) {
   const { location, params } = props;
   const demoProps = getDemoProps(props);
-  const locale = get(location, 'query.locale');
+  const locale = location?.query?.locale;
 
   const promises = [
     dispatch(composeModules([{ name: params.moduleName, props: demoProps }])),
