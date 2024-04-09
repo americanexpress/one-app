@@ -65,8 +65,7 @@ describe('server index', () => {
     jest.doMock('@americanexpress/one-app-dev-proxy', () => ({
       default: jest.fn(() => ({
         listen: jest.fn((port, cb) => {
-          // eslint-disable-next-line no-confusing-arrow -- needed for jest
-          setTimeout(() => oneAppDevProxyError ? cb(new Error('test error')) : cb(null, { port })
+          setTimeout(() => (oneAppDevProxyError ? cb(new Error('test error')) : cb(null, { port }))
           );
           return { close: 'one-app-dev-proxy' };
         }),
