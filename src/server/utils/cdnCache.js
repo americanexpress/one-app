@@ -26,17 +26,13 @@ export const oneAppModuleCachePath = path.join(oneAppDirectoryPath, cacheFileNam
 export const showCacheInfo = async () => {
   try {
     const stats = await fsPromises.stat(oneAppModuleCachePath);
-    if (stats.size > 1024 * 1024 * 10) {
-      console.warn(chalk.bold.redBright('🚨🚨🚨: Cache file size is more than 10MB. 🚨🚨🚨'));
-    }
-    const fileSizeOnMB = stats.size / (1024 * 1024); // bytes to mb
-    const message = `File size of ${cacheFileName}: ${chalk.bold.greenBright(fileSizeOnMB.toFixed(2), 'MB')}`;
-    const separator = '*'.repeat(message.length);
+    const fileSizeInMB = stats.size / (1024 * 1024); // bytes to mb
+    const separator = '*'.repeat(50);
     console.info(chalk.bold.cyanBright(separator));
     console.info(chalk.bold.cyanBright('CACHE INFORMATION'));
-    console.info(message);
+    console.info('File size of %s: %s', cacheFileName, chalk.bold.greenBright(fileSizeInMB.toFixed(2), 'MB'));
     console.info('To clear the cache, please delete this file:');
-    console.info(`    ${chalk.bold.cyanBright(path.join('~', oneAppDirectoryName, cacheFileName))}`);
+    console.info('    %s', chalk.bold.redBright(path.join('~', oneAppDirectoryName, cacheFileName)));
     console.info(chalk.bold.cyanBright(separator));
   } catch (error) {
     console.error('There was error checking file stat', error);
