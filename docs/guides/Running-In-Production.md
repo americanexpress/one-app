@@ -140,7 +140,7 @@ You can build the One App [Docker](https://www.docker.com/) image and run it in 
 ```bash
 git clone https://github.com/americanexpress/one-app.git
 cd one-app
-docker build .
+docker build . --build-arg VERSION=$(cat .nvmrc)
 ```
 
 Or you can build from source which creates your server side assets at `./lib` and your client
