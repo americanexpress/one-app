@@ -21,6 +21,7 @@ export default {
   level: argv.logLevel,
   customLevels: {
     log: 35,
+    dev: 36,
   },
   dedupe: true,
   errorKey: 'error',

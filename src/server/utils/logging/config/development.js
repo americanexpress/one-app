@@ -29,6 +29,7 @@ export const pinoPrettyOptions = {
     debug: 20,
     info: 30,
     log: 35,
+    dev: 36,
     warn: 40,
     error: 50,
     fatal: 60,

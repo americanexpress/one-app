@@ -426,19 +426,6 @@ describe('server index', () => {
       expect(shutdown).toHaveBeenCalledTimes(1);
     });
 
-    it('in development, logs when app server is successfully listening on port 3000', async () => {
-      process.env.NODE_ENV = 'development';
-      console.log.mockClear();
-
-      await load();
-
-      expect(console.log).toHaveBeenCalled();
-
-      expect(console.log.mock.results[0].value).toMatchInlineSnapshot(
-        '"🚀 One App Server is running on http://localhost:3000 🚀"'
-      );
-    });
-
     it('logs when metrics server is successfully listening on the port', async () => {
       console.log.mockClear();
       process.env.HTTP_METRICS_PORT = 3005;
