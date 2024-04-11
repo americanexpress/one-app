@@ -57,11 +57,11 @@ async function changeHandler(changedPath) {
   const moduleMapEntry = moduleMap.getIn(['modules', moduleName]);
 
   if (!moduleMapEntry) {
-    console.warn(`module "${moduleName}" not in the module map, make sure to serve-module first`);
+    console.warn('module "%s" not in the module map, make sure to serve-module first', moduleName);
     return;
   }
 
-  console.log(`the Node.js bundle for ${moduleName} finished saving, attempting to load`);
+  console.info('the Node.js bundle for %s finished saving, attempting to load', moduleName);
 
   let newModule;
   try {
@@ -80,7 +80,7 @@ async function changeHandler(changedPath) {
 
   const newModules = getModules().set(moduleName, newModule);
   resetModuleRegistry(newModules, moduleMap);
-  console.log(`finished reloading ${moduleName}`);
+  console.info('finished reloading %s', moduleName);
 }
 
 export default function watchLocalModules() {
