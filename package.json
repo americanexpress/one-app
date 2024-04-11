@@ -197,6 +197,9 @@
     "thread-stream": "^2.4.1",
     "webdriverio": "^7.36.0"
   },
+  "overrides": {
+    "chokidar": "$chokidar"
+  },
   "standard-version": {
     "bumpFiles": [
       "package.json",
