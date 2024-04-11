@@ -58,7 +58,7 @@ export const listen = async ({
     });
 
     console.info('%s listening on port %d', context, port);
-    if (context === '🌎 One App server') {
+    if (process.env.NODE_ENV === 'development' && context === '🌎 One App server') {
       console.log('🚀 One App Server is running on http://localhost:%d 🚀', port);
     }
 

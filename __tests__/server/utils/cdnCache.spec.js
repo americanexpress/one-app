@@ -13,7 +13,6 @@
  */
 
 import fs, { promises as fsPromises } from 'node:fs';
-import chalk from 'chalk';
 import {
   getUserHomeDirectory,
   showCacheInfo,
@@ -75,8 +74,6 @@ describe('cacheUtils', () => {
       await showCacheInfo();
 
       expect(fsPromises.stat).toHaveBeenCalledWith(oneAppModuleCachePath);
-      expect(chalk.bold.cyanBright).toHaveBeenCalledTimes(3);
-      expect(chalk.bold.greenBright).toHaveBeenCalledWith('5.00', 'MB');
     });
 
     it('showCacheInfo should handle error', async () => {
@@ -98,8 +95,7 @@ describe('cacheUtils', () => {
 
       await showCacheInfo();
 
-      expect(infoSpy).toHaveBeenCalledWith('To clear the cache, please delete this file:');
-      expect(infoSpy).toHaveBeenCalledWith('    %s', '~/.one-app/.one-app-module-cache');
+      expect(infoSpy).toHaveBeenCalledWith('Local module cache size is %sMB. To clear the cache, delete %s', '5.00', '~/.one-app/.one-app-module-cache');
     });
   });
 

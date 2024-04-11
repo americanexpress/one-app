@@ -14,7 +14,6 @@
 
 import path from 'node:path';
 import fs, { promises as fsPromises } from 'node:fs';
-import chalk from 'chalk';
 
 export const getUserHomeDirectory = () => process.env.HOME || process.env.USERPROFILE;
 export const cacheFileName = '.one-app-module-cache';
@@ -27,13 +26,8 @@ export const showCacheInfo = async () => {
   try {
     const stats = await fsPromises.stat(oneAppModuleCachePath);
     const fileSizeInMB = stats.size / (1024 * 1024); // bytes to mb
-    const separator = '*'.repeat(50);
-    console.info(chalk.bold.cyanBright(separator));
-    console.info(chalk.bold.cyanBright('CACHE INFORMATION'));
-    console.info('File size of %s: %s', cacheFileName, chalk.bold.greenBright(fileSizeInMB.toFixed(2), 'MB'));
-    console.info('To clear the cache, please delete this file:');
-    console.info('    %s', chalk.bold.redBright(path.join('~', oneAppDirectoryName, cacheFileName)));
-    console.info(chalk.bold.cyanBright(separator));
+    const cachePath = path.join('~', oneAppDirectoryName, cacheFileName);
+    console.info('Local module cache size is %sMB. To clear the cache, delete %s', fileSizeInMB.toFixed(2), cachePath);
   } catch (error) {
     console.error('There was error checking file stat', error);
   }

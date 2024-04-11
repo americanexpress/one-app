@@ -426,7 +426,8 @@ describe('server index', () => {
       expect(shutdown).toHaveBeenCalledTimes(1);
     });
 
-    it('logs when server is successfully listening on the port', async () => {
+    it('in development, logs when app server is successfully listening on port 3000', async () => {
+      process.env.NODE_ENV = 'development';
       console.log.mockClear();
 
       await load();
