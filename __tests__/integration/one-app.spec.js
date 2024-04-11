@@ -951,7 +951,7 @@ describe('Tests that require Docker setup', () => {
         ...defaultFetchOptions,
       });
       const htmlData = await response.text();
-      const traceId = response.headers.get('traceid');
+      const traceId = response.headers.get('x-b3-traceid');
       const scriptContents = htmlData.match(
         /<script id="initial-state" nonce=\S+>([^<]+)<\/script>/
       )[1];
@@ -1388,7 +1388,7 @@ describe('Tests that require Docker setup', () => {
 
       const formatSpansForSnapshot = (spans, includeAttributes = []) => spans.map(
         (span) => `${span.name}: ${JSON.stringify(
-          span.attributes
+          span.attributes && span.attributes
             .filter((attribute) => (includeAttributes.length === 0
               ? true
               : includeAttributes.includes(attribute.key))
@@ -1396,7 +1396,7 @@ describe('Tests that require Docker setup', () => {
             .reduce(
               (acc, attr) => ({
                 ...acc,
-                [attr.key]: attr.value.stringValue,
+                [attr.key]: attr.value.stringValue || attr.value.boolValue,
               }),
               {}
             )
@@ -1408,7 +1408,7 @@ describe('Tests that require Docker setup', () => {
         value: target,
       });
 
-      expect(response.headers.get('traceid')).toBe(traceId);
+      expect(response.headers.get('x-b3-traceid')).toBe(traceId);
       expect(xB3TraceId).toBe(traceId);
       expect(traceparent).toBe(`00-${xB3TraceId}-${xB3TraceSpan}-0${xB3Sampled}`);
       const httpSpans = getSpans('@opentelemetry/instrumentation-http', traceId);
@@ -1447,7 +1447,7 @@ describe('Tests that require Docker setup', () => {
           "checkStateForStatusCode: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
           "checkStateForRedirect: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
           "conditionallyAllowCors: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
-          "sendHtml: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
+          "sendHtml: {"haveStore":true,"haveAppHtml":true,"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
           "GET /*: {"req.method":"GET","req.url":"/healthy-frank/ssr-frank"}",
         ]
       `);
@@ -1631,7 +1631,10 @@ describe('Tests that require Docker setup', () => {
         pragma: ['no-cache'],
         'referrer-policy': ['no-referrer'],
         'strict-transport-security': ['max-age=63072000; includeSubDomains'],
-        traceid: [expect.any(String)],
+        traceparent: [`00-${response.headers.get('x-b3-traceid')}-${response.headers.get('x-b3-spanid')}-0${response.headers.get('x-b3-sampled')}`],
+        'x-b3-sampled': [expect.any(String)],
+        'x-b3-spanid': [expect.any(String)],
+        'x-b3-traceid': [expect.any(String)],
         vary: ['Accept-Encoding'],
         'x-content-type-options': ['nosniff'],
         'x-dns-prefetch-control': ['off'],

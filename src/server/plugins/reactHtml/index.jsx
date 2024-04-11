@@ -370,7 +370,7 @@ export const checkStateForRedirectAndStatusCode = (request, reply) => {
  */
 export const sendHtml = (request, reply) => {
   const { tracer } = request.openTelemetry();
-  const span = tracer.startSpan('sendHtml');
+  const span = tracer.startSpan('sendHtml', { attributes: { haveStore: !!request.store, haveAppHtml: !!request.appHtml } });
 
   try {
     const {
@@ -385,9 +385,7 @@ export const sendHtml = (request, reply) => {
     const userAgent = headers['user-agent'];
     const isLegacy = legacyUserAgent(userAgent);
 
-    if (request.tracingEnabled) {
-      span.addEvent(`'sendHtml, have store? ${!!store}, have appHtml? ${!!appHtml}`);
-    } else {
+    if (request.tracingDisabled) {
       request.log.info('sendHtml, have store? %s, have appHtml? %s', !!store, !!appHtml);
     }
 
@@ -499,18 +497,19 @@ const reactHtml = (fastify, _opts, done) => {
   fastify.decorateRequest('store', null);
   fastify.decorateRequest('clientModuleMapCache', null);
 
+  // eslint-disable-next-line consistent-return -- only returning here when calling reply.send
   fastify.addHook('preHandler', async (request, reply) => {
     if (['json', 'js', 'css', 'map'].some((ext) => request.url.endsWith(ext))) {
-      reply.code(404).type('text/plain; charset=utf-8').send('Not found');
-    } else {
-      createRequestStoreHook(request, reply, oneApp);
+      return reply.code(404).type('text/plain; charset=utf-8').send('Not found');
+    }
 
-      if (getServerPWAConfig().serviceWorker && request.url === '/_/pwa/shell') {
-        await appShell(request);
-      } else {
-        await createRequestHtmlFragmentHook(request, reply, oneApp);
-        checkStateForRedirectAndStatusCode(request, reply);
-      }
+    createRequestStoreHook(request, reply, oneApp);
+
+    if (getServerPWAConfig().serviceWorker && request.url === '/_/pwa/shell') {
+      await appShell(request);
+    } else {
+      await createRequestHtmlFragmentHook(request, reply, oneApp);
+      checkStateForRedirectAndStatusCode(request, reply);
     }
   });
 
