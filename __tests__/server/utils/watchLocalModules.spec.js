@@ -422,7 +422,8 @@ describe('watchLocalModules', () => {
     expect(console.info).toHaveBeenCalledTimes(2);
     expect(console.info.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "the Node.js bundle for some-module finished saving, attempting to load",
+        "the Node.js bundle for %s finished saving, attempting to load",
+        "some-module",
       ]
     `);
   });
@@ -516,7 +517,8 @@ describe('watchLocalModules', () => {
     expect(console.info).toHaveBeenCalledTimes(2);
     expect(console.info.mock.calls[1]).toMatchInlineSnapshot(`
       Array [
-        "finished reloading some-module",
+        "finished reloading %s",
+        "some-module",
       ]
     `);
   });
@@ -902,7 +904,8 @@ describe('watchLocalModules', () => {
     expect(console.info).toHaveBeenCalledTimes(2);
     expect(console.info.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "the Node.js bundle for some-module finished saving, attempting to load",
+        "the Node.js bundle for %s finished saving, attempting to load",
+        "some-module",
       ]
     `);
   });
@@ -991,7 +994,8 @@ describe('watchLocalModules', () => {
     expect(console.warn).toHaveBeenCalledTimes(1);
     expect(console.warn.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "module \\"other-module\\" not in the module map, make sure to serve-module first",
+        "module \\"%s\\" not in the module map, make sure to serve-module first",
+        "other-module",
       ]
     `);
 
