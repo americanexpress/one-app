@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [5.24.2](https://github.com/americanexpress/one-app/compare/v5.24.1...v5.24.2) (2024-04-11)
+
+
+### Bug Fixes
+
+* **node:** update to 18.20.1 ([#1374](https://github.com/americanexpress/one-app/issues/1374)) ([d1f0d4d](https://github.com/americanexpress/one-app/commit/d1f0d4d006e9a78c1f47add8fb523f3255952941))
+
+
 ## [5.24.1](https://github.com/americanexpress/one-app/compare/v5.24.0...v5.24.1) (2024-03-28)
 
 
