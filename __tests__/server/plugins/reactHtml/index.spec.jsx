@@ -158,7 +158,6 @@ const createTracer = () => {
         name,
         end: jest.fn(),
         recordException: jest.fn(),
-        addEvent: jest.fn(),
       };
       spans[name] = span;
       return span;
@@ -525,25 +524,15 @@ describe('reactHtml', () => {
     it('adds a tracer span', () => {
       sendHtml(request, reply);
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-      expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml');
+      expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml', { attributes: { haveStore: true, haveAppHtml: true } });
       expect(tracer.spans.sendHtml.recordException).not.toHaveBeenCalled();
       expect(tracer.spans.sendHtml.end).toHaveBeenCalled();
-    });
-
-    it('adds a span event and does not log when tracing is enabled', () => {
-      request.tracingEnabled = true;
-      sendHtml(request, reply);
-      expect(tracer.spans.sendHtml.addEvent).toHaveBeenCalledTimes(1);
-      expect(tracer.spans.sendHtml.addEvent.mock.calls[0][0]).toMatchInlineSnapshot(
-        '"\'sendHtml, have store? true, have appHtml? true"'
-      );
       expect(request.log.info).not.toHaveBeenCalled();
     });
 
-    it('logs and does not add a span event when tracing is disabled', () => {
-      request.tracingEnabled = false;
+    it('logs when tracing is disabled', () => {
+      request.tracingDisabled = true;
       sendHtml(request, reply);
-      expect(tracer.spans.sendHtml.addEvent).not.toHaveBeenCalled();
       expect(request.log.info).toHaveBeenCalledTimes(1);
       expect(request.log.info.mock.results[0].value).toMatchInlineSnapshot(
         '"sendHtml, have store? true, have appHtml? true"'
@@ -555,7 +544,7 @@ describe('reactHtml', () => {
       sendHtml(request, reply);
       expect(reply.code).toHaveBeenCalledWith(500);
       expect(tracer.startSpan).toHaveBeenCalledTimes(1);
-      expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml');
+      expect(tracer.startSpan).toHaveBeenCalledWith('sendHtml', { attributes: { haveStore: true, haveAppHtml: true } });
       expect(tracer.spans.sendHtml.recordException).toHaveBeenCalled();
       expect(tracer.spans.sendHtml.end).toHaveBeenCalled();
     });
