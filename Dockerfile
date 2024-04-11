@@ -57,6 +57,9 @@ ENV NODE_ENV=production
 # see src/server/config/env/runtime.js
 EXPOSE 3000
 EXPOSE 3005
+USER root
+RUN rm -Rf /usr/local/lib/node_modules /opt/yarn-* && \
+    rm /usr/local/bin/corepack /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/yarn /usr/local/bin/yarnpkg
 WORKDIR /opt/one-app
 USER $USER
 CMD ["scripts/start.sh"]
