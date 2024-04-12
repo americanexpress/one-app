@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.12.1](https://github.com/americanexpress/one-app/compare/v6.12.0...v6.12.1) (2024-04-12)
+
+
+### Reverts
+
+* Revert "fix(node): update to 18.20.1 (#1369)" (#1383) ([25bcebc](https://github.com/americanexpress/one-app/commit/25bcebc1b8d67929443426c8155a8cb244d03c27)), closes [#1369](https://github.com/americanexpress/one-app/issues/1369) [#1383](https://github.com/americanexpress/one-app/issues/1383)
+
+
 # [6.12.0](https://github.com/americanexpress/one-app/compare/v6.11.0...v6.12.0) (2024-04-11)
 
 
