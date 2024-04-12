@@ -1,11 +1,11 @@
 {
   "name": "@americanexpress/one-app",
-  "version": "6.12.1",
+  "version": "6.13.0-node-20-11-0.0",
   "description": "One Amex SPA technology stack.",
   "main": "index.js",
   "engines": {
-    "node": ">=18 <=20",
-    "npm": ">=8"
+    "node": ">=18 <=20.11.0",
+    "npm": ">=9"
   },
   "scripts": {
     "preinstall": "npx check-engines@1",
