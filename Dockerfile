@@ -30,6 +30,9 @@ RUN NODE_ENV=production npm run build && \
 # development image
 # docker build . --target=development
 FROM node:18.20.1-alpine as development
+# https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md#handling-kernel-signals
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
 ARG USER
 ENV USER ${USER:-node}
 ENV NODE_ENV=development
@@ -48,6 +51,9 @@ COPY --from=builder --chown=node:node /opt/one-app/development ./
 # production image
 # last so that it's the default image artifact
 FROM node:18.20.1-alpine as production
+# https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md#handling-kernel-signals
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
 ARG USER
 ENV USER ${USER:-node}
 ENV NODE_ENV=production
