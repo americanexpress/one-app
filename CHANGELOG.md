@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.12.1](https://github.com/americanexpress/one-app/compare/v6.12.0...v6.12.1) (2024-04-12)
+
+
+### Reverts
+
+* Revert "fix(node): update to 18.20.1 (#1369)" (#1383) ([25bcebc](https://github.com/americanexpress/one-app/commit/25bcebc1b8d67929443426c8155a8cb244d03c27)), closes [#1369](https://github.com/americanexpress/one-app/issues/1369) [#1383](https://github.com/americanexpress/one-app/issues/1383)
+
+
+# [6.12.0](https://github.com/americanexpress/one-app/compare/v6.11.0...v6.12.0) (2024-04-11)
+
+
+### Bug Fixes
+
+* **node:** update to 18.20.1 ([#1369](https://github.com/americanexpress/one-app/issues/1369)) ([484a6b4](https://github.com/americanexpress/one-app/commit/484a6b488e975128315730727be29c50e9adf4c2))
+
+
+### Features
+
+* **tracing:** include B3 propagator ([#1352](https://github.com/americanexpress/one-app/issues/1352)) ([6b6cd4b](https://github.com/americanexpress/one-app/commit/6b6cd4b60881a3e74363ac8a6b9c86b1331f68b1))
+
+
 # [6.11.0](https://github.com/americanexpress/one-app/compare/v6.10.0...v6.11.0) (2024-03-26)
 
 

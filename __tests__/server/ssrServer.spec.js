@@ -23,6 +23,7 @@ import fastifyFormbody from '@fastify/formbody';
 import fastifyStatic from '@fastify/static';
 import fastifyHelmet from '@fastify/helmet';
 import fastifySensible from '@fastify/sensible';
+import fastifyOpenTelemetry from '@autotelic/fastify-opentelemetry';
 import fastifyMetrics from 'fastify-metrics';
 import client from 'prom-client';
 
@@ -44,7 +45,6 @@ import {
   serviceWorkerHandler,
   webManifestMiddleware,
 } from '../../src/server/pwa';
-import tracer from '../../src/server/plugins/tracer';
 import noopTracer from '../../src/server/plugins/noopTracer';
 
 import ssrServer from '../../src/server/ssrServer';
@@ -58,6 +58,7 @@ jest.mock('@fastify/formbody');
 jest.mock('@fastify/static');
 jest.mock('@fastify/helmet');
 jest.mock('@fastify/sensible');
+jest.mock('@autotelic/fastify-opentelemetry');
 jest.mock('fastify-metrics');
 jest.mock('pino');
 
@@ -67,7 +68,6 @@ jest.mock('../../src/server/plugins/addSecurityHeaders');
 jest.mock('../../src/server/plugins/csp');
 jest.mock('../../src/server/utils/logging/logger');
 jest.mock('../../src/server/plugins/noopTracer');
-jest.mock('../../src/server/plugins/tracer');
 jest.mock('../../src/server/plugins/requestLogging');
 jest.mock('../../src/server/plugins/requestRaw');
 jest.mock('../../src/server/plugins/forwardedHeaderParser');
@@ -136,60 +136,48 @@ describe('ssrServer', () => {
     });
 
     expect(register).toHaveBeenCalledTimes(23);
-    expect(register.mock.calls[1][0]).toEqual(noopTracer);
-    expect(register.mock.calls[2]).toEqual([requestLogging, { spy: true }]);
-    expect(register.mock.calls[3][0]).toEqual(requestRaw);
-    expect(register.mock.calls[4][0]).toEqual(fastifySensible);
-    expect(register.mock.calls[5][0]).toEqual(ensureCorrelationId);
-    expect(register.mock.calls[6][0]).toEqual(fastifyCookie);
-    expect(register.mock.calls[7]).toEqual([fastifyMetrics, {
+    expect(register).toHaveBeenNthCalledWith(2, noopTracer);
+    expect(register).toHaveBeenNthCalledWith(3, requestLogging, { spy: true });
+    expect(register).toHaveBeenNthCalledWith(4, requestRaw);
+    expect(register).toHaveBeenNthCalledWith(5, fastifySensible);
+    expect(register).toHaveBeenNthCalledWith(6, ensureCorrelationId);
+    expect(register).toHaveBeenNthCalledWith(7, fastifyCookie);
+    expect(register).toHaveBeenNthCalledWith(8, fastifyMetrics, {
       defaultMetrics: { enabled: false },
       endpoint: null,
       promClient: client,
-    }]);
-    expect(register.mock.calls[8]).toEqual([
-      compress,
-      {
-        zlibOptions: {
-          level: 1,
-        },
-        encodings: ['gzip'],
+    });
+    expect(register).toHaveBeenNthCalledWith(9, compress, {
+      zlibOptions: {
+        level: 1,
       },
-    ]);
-    expect(register.mock.calls[9][0]).toEqual(fastifyFormbody);
-    expect(register.mock.calls[10]).toEqual([
-      addSecurityHeadersPlugin,
-      {
-        matchGetRoutes: ['/_/status', '/_/pwa/service-worker.js', '/_/pwa/manifest.webmanifest'],
-      },
-    ]);
-    expect(register.mock.calls[11][0]).toEqual(setAppVersionHeader);
-    expect(register.mock.calls[12][0]).toEqual(forwardedHeaderParser);
-    expect(register.mock.calls[13]).toEqual([
-      fastifyStatic,
-      {
-        root: path.join(__dirname, '../../build'),
-        prefix: '/_/static',
-        maxAge: '182d',
-      },
-    ]);
-    expect(register.mock.calls[14][0]).toEqual(expect.any(Function)); // abstraction
-    expect(register.mock.calls[15][0]).toEqual(addCacheHeaders);
-    expect(register.mock.calls[16][0]).toEqual(csp);
-    expect(register.mock.calls[18][0]).toEqual(addCacheHeaders);
-    expect(register.mock.calls[19][0]).toEqual(csp);
-    expect(register.mock.calls[20]).toEqual([
-      fastifyHelmet,
-      {
-        crossOriginEmbedderPolicy: false,
-        crossOriginOpenerPolicy: false,
-        crossOriginResourcePolicy: false,
-        originAgentCluster: false,
-        contentSecurityPolicy: false,
-      },
-    ]);
-    expect(register.mock.calls[21][0]).toEqual(addFrameOptionsHeader);
-    expect(register.mock.calls[22][0]).toEqual(renderHtml);
+      encodings: ['gzip'],
+    });
+    expect(register).toHaveBeenNthCalledWith(10, fastifyFormbody);
+    expect(register).toHaveBeenNthCalledWith(11, addSecurityHeadersPlugin, {
+      matchGetRoutes: ['/_/status', '/_/pwa/service-worker.js', '/_/pwa/manifest.webmanifest'],
+    });
+    expect(register).toHaveBeenNthCalledWith(12, setAppVersionHeader);
+    expect(register).toHaveBeenNthCalledWith(13, forwardedHeaderParser);
+    expect(register).toHaveBeenNthCalledWith(14, fastifyStatic, {
+      root: path.join(__dirname, '../../build'),
+      prefix: '/_/static',
+      maxAge: '182d',
+    });
+    expect(register).toHaveBeenNthCalledWith(15, expect.any(Function)); // abstraction
+    expect(register).toHaveBeenNthCalledWith(16, addCacheHeaders);
+    expect(register).toHaveBeenNthCalledWith(17, csp);
+    expect(register).toHaveBeenNthCalledWith(19, addCacheHeaders);
+    expect(register).toHaveBeenNthCalledWith(20, csp);
+    expect(register).toHaveBeenNthCalledWith(21, fastifyHelmet, {
+      crossOriginEmbedderPolicy: false,
+      crossOriginOpenerPolicy: false,
+      crossOriginResourcePolicy: false,
+      originAgentCluster: false,
+      contentSecurityPolicy: false,
+    });
+    expect(register).toHaveBeenNthCalledWith(22, addFrameOptionsHeader);
+    expect(register).toHaveBeenNthCalledWith(23, renderHtml);
 
     expect(setNotFoundHandler).toHaveBeenCalledTimes(1);
     expect(setErrorHandler).toHaveBeenCalledTimes(1);
@@ -210,7 +198,10 @@ describe('ssrServer', () => {
     });
 
     expect(register).toHaveBeenCalledTimes(22);
-    expect(register.mock.calls[1][0]).toEqual(tracer);
+    expect(register).toHaveBeenNthCalledWith(2, fastifyOpenTelemetry, {
+      wrapRoutes: true,
+      propagateToReply: true,
+    });
     expect(register).not.toHaveBeenCalledWith(requestLogging, { spy: true });
   });
 
@@ -221,7 +212,7 @@ describe('ssrServer', () => {
     const error = new Error('testing');
     delete error.stack;
     const request = {
-      log: { error: jest.fn() },
+      log: { error: jest.fn(util.format) },
       method: 'get',
       url: 'example.com',
       headers: {},
@@ -230,7 +221,7 @@ describe('ssrServer', () => {
 
     frameworkErrors(error, request, reply);
 
-    expect(util.format(...request.log.error.mock.calls[0])).toMatchInlineSnapshot(
+    expect(request.log.error.mock.results[0].value).toMatchInlineSnapshot(
       '"Fastify internal error: method get, url "example.com", correlationId "undefined" [Error: testing]"'
     );
     expect(renderStaticErrorPage).toHaveBeenCalled();
@@ -259,8 +250,7 @@ describe('ssrServer', () => {
         send: jest.fn(() => reply),
       };
 
-      expect(get.mock.calls[1][0]).toEqual('/_/pwa/service-worker.js');
-      expect(get.mock.calls[1][1]).toEqual(serviceWorkerHandler);
+      expect(get).toHaveBeenNthCalledWith(2, '/_/pwa/service-worker.js', serviceWorkerHandler);
     });
   });
 
@@ -273,8 +263,7 @@ describe('ssrServer', () => {
         send: jest.fn(() => reply),
       };
 
-      expect(get.mock.calls[2][0]).toEqual('/_/pwa/manifest.webmanifest');
-      expect(get.mock.calls[2][1]).toEqual(webManifestMiddleware);
+      expect(get).toHaveBeenNthCalledWith(3, '/_/pwa/manifest.webmanifest', webManifestMiddleware);
     });
 
     describe('DEVELOPMENT', () => {
@@ -572,13 +561,14 @@ describe('ssrServer', () => {
 
         expect(post.mock.calls[1][0]).toEqual('/_/report/errors');
         expect(request.log.warn).not.toHaveBeenCalled();
-        expect(request.log.error.mock.calls.length).toBe(1);
-        expect(request.log.error.mock.calls[0][0] instanceof Error).toBe(true);
-        expect(request.log.error.mock.calls[0][0].name).toBe('ClientReportedError');
-        expect(request.log.error.mock.calls[0][0].stack).toBe('stack');
-        expect(request.log.error.mock.calls[0][0].userAgent).toBe('userAgent');
-        expect(request.log.error.mock.calls[0][0].uri).toBe('href');
-        expect(request.log.error.mock.calls[0][0].metaData).toEqual({
+        expect(request.log.error).toHaveBeenCalledTimes(1);
+        const loggedError = request.log.error.mock.calls[0][0];
+        expect(loggedError instanceof Error).toBe(true);
+        expect(loggedError.name).toBe('ClientReportedError');
+        expect(loggedError.stack).toBe('stack');
+        expect(loggedError.userAgent).toBe('userAgent');
+        expect(loggedError.uri).toBe('href');
+        expect(loggedError.metaData).toEqual({
           correlationId: 'correlationId',
           testing: true,
         });
