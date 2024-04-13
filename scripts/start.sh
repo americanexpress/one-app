@@ -35,5 +35,5 @@ done
 
 commandArgs="$nodeArgs lib/server/index.js $flags"
 
-echo "node $commandArgs"
-exec node $commandArgs
+echo "/sbin/tini -- node $commandArgs"
+exec /sbin/tini -- node $commandArgs
