@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 American Express Travel Related Services Company, Inc.
+ * Copyright 2024 American Express Travel Related Services Company, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
  * permissions and limitations under the License.
  */
 
-function buildTag(name) {
-  const tag = (txt) => `<${name}>${txt}</${name}>`;
-  tag.bgRed = (txt) => tag(buildTag('bgRed')(txt));
-  return tag;
+const fs = require('node:fs/promises');
+const path = require('node:path');
+
+async function updateTarget(targetHost) {
+  await fs.writeFile(path.resolve(__dirname, '..', '..', 'prometheus', 'targets.json'), `${JSON.stringify([
+    {
+      targets: [targetHost],
+      labels: {
+        group: 'one-app-metrics',
+      },
+    },
+  ], null, 2)}\n`);
 }
 
-module.exports = {
-  dim: buildTag('dim'),
-  black: buildTag('black'),
-  blue: buildTag('blue'),
-  gray: buildTag('gray'),
-  green: buildTag('green'),
-  red: buildTag('red'),
-  yellow: buildTag('yellow'),
-};
+module.exports = updateTarget;

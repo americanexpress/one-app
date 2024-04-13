@@ -13,7 +13,6 @@
  */
 
 import fs, { promises as fsPromises } from 'node:fs';
-import chalk from 'chalk';
 import {
   getUserHomeDirectory,
   showCacheInfo,
@@ -33,26 +32,13 @@ jest.spyOn(fs, 'writeFile');
 jest.spyOn(fsPromises, 'stat');
 jest.spyOn(fsPromises, 'mkdir');
 jest.spyOn(fsPromises, 'writeFile');
+jest.spyOn(console, 'log').mockImplementation(() => {});
+jest.spyOn(console, 'error').mockImplementation(() => {});
 
-jest.mock('chalk', () => ({
-  bold: {
-    cyanBright: jest.fn((text) => text),
-    greenBright: jest.fn((text) => text),
-    redBright: jest.fn((text) => text),
-  },
-}));
+jest.mock('colorette');
 
 describe('cacheUtils', () => {
-  let logSpy;
-  let errorSpy;
   beforeEach(() => {
-    logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    logSpy.mockRestore();
-    errorSpy.mockRestore();
     jest.clearAllMocks();
   });
 
@@ -72,8 +58,7 @@ describe('cacheUtils', () => {
       await showCacheInfo();
 
       expect(fsPromises.stat).toHaveBeenCalledWith(oneAppModuleCachePath);
-      expect(chalk.bold.cyanBright).toHaveBeenCalledTimes(4);
-      expect(chalk.bold.greenBright).toHaveBeenCalledWith('5.00', 'MB');
+      expect(console.log).toHaveBeenCalledWith('File size of .one-app-module-cache: <bold><greenBright>5.00MB</greenBright></bold>');
     });
 
     it('showCacheInfo should handle error', async () => {
@@ -83,8 +68,8 @@ describe('cacheUtils', () => {
       await showCacheInfo();
 
       expect(fsPromises.stat).toHaveBeenCalledWith(oneAppModuleCachePath);
-      expect(logSpy).not.toHaveBeenCalled();
-      expect(errorSpy).toHaveBeenCalledWith('There was error checking file stat', expectedError);
+      expect(console.log).not.toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalledWith('There was error checking file stat', expectedError);
     });
 
     it('showCacheInfo should show file to delete', async () => {
@@ -95,8 +80,10 @@ describe('cacheUtils', () => {
 
       await showCacheInfo();
 
-      expect(logSpy).toHaveBeenCalledWith('To clear the cache, please delete this file:');
-      expect(logSpy).toHaveBeenCalledWith('    ~/.one-app/.one-app-module-cache');
+      expect(console.log).toHaveBeenCalledWith('To clear the cache, please delete this file:');
+      expect(console.log).toHaveBeenCalledWith(
+        '    <bold><cyanBright>~/.one-app/.one-app-module-cache</cyanBright></bold>'
+      );
     });
   });
 
@@ -107,14 +94,13 @@ describe('cacheUtils', () => {
       await setupCacheFile();
 
       expect(fsPromises.mkdir).toHaveBeenCalledWith(oneAppDirectoryPath, { recursive: true });
-      expect(logSpy).toHaveBeenCalledWith(`Successfully created ${oneAppDirectoryPath}`);
-      expect(logSpy).toHaveBeenCalledWith(`Creating ${cacheFileName}`);
-      expect(fsPromises.writeFile).toHaveBeenCalledWith(
-        oneAppModuleCachePath,
-        JSON.stringify({})
+      expect(console.log).toHaveBeenCalledWith(`Successfully created ${oneAppDirectoryPath}`);
+      expect(console.log).toHaveBeenCalledWith(`Creating ${cacheFileName}`);
+      expect(fsPromises.writeFile).toHaveBeenCalledWith(oneAppModuleCachePath, JSON.stringify({}));
+      expect(console.log).toHaveBeenCalledWith(
+        `${cacheFileName} created successfully on ${oneAppModuleCachePath}`
       );
-      expect(logSpy).toHaveBeenCalledWith(`${cacheFileName} created successfully on ${oneAppModuleCachePath}`);
-      expect(errorSpy).not.toHaveBeenCalled();
+      expect(console.error).not.toHaveBeenCalled();
     });
 
     it('setupCacheFile should handle error when creating cache file', async () => {
@@ -123,7 +109,9 @@ describe('cacheUtils', () => {
       fsPromises.writeFile.mockRejectedValueOnce(expectedError);
       await setupCacheFile();
       expect(fsPromises.mkdir).toHaveBeenCalledWith(oneAppDirectoryPath, { recursive: true });
-      expect(errorSpy).toHaveBeenCalledWith(`Error creating ${cacheFileName} on ${oneAppModuleCachePath}, \n${expectedError}`);
+      expect(console.error).toHaveBeenCalledWith(
+        `Error creating ${cacheFileName} on ${oneAppModuleCachePath}, \n${expectedError}`
+      );
     });
 
     it('setupCacheFile should handle error when creating cache directory', async () => {
@@ -132,7 +120,9 @@ describe('cacheUtils', () => {
 
       await setupCacheFile();
       expect(fsPromises.mkdir).toHaveBeenCalledWith(oneAppDirectoryPath, { recursive: true });
-      expect(errorSpy).toHaveBeenCalledWith(`There was error creating ${oneAppDirectoryName} directory`);
+      expect(console.error).toHaveBeenCalledWith(
+        `There was error creating ${oneAppDirectoryName} directory`
+      );
     });
   });
 
@@ -167,7 +157,7 @@ describe('cacheUtils', () => {
       } catch (err) {
         error = err;
       }
-      expect(errorSpy).toHaveBeenCalledWith('Could not parse JSON content', error);
+      expect(console.error).toHaveBeenCalledWith('Could not parse JSON content', error);
       expect(result).toEqual({});
     });
 
@@ -213,7 +203,7 @@ describe('cacheUtils', () => {
       jest.runAllTimers();
 
       expect(fs.writeFile).toHaveBeenCalled();
-      expect(logSpy).toHaveBeenCalledWith(`There was an error updating content \n ${error}`);
+      expect(console.log).toHaveBeenCalledWith(`There was an error updating content \n ${error}`);
     });
   });
 
@@ -233,7 +223,7 @@ describe('cacheUtils', () => {
         '/path/to/moduleB/1.2.3/file.js': 'data',
       });
 
-      expect(logSpy).not.toHaveBeenCalled();
+      expect(console.log).not.toHaveBeenCalled();
     });
 
     it('returns cachedModules unchanged if no module matches', () => {
@@ -247,7 +237,7 @@ describe('cacheUtils', () => {
       const result = removeExistingEntryIfConflicting(url, cachedModules);
 
       expect(result).toEqual(cachedModules);
-      expect(logSpy).not.toHaveBeenCalled();
+      expect(console.log).not.toHaveBeenCalled();
     });
   });
 });

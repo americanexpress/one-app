@@ -16,6 +16,7 @@
 
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import createSummaryHandler from './utils/createSummaryHandler.js';
 
 // This is a simple smoke test to ensure there is no major regression
 // to the one-app server.
@@ -38,3 +39,5 @@ export default function virtualUser() {
   check(response, { 'status is 200': (resp) => resp.status === 200 });
   sleep(1);
 }
+
+export const handleSummary = createSummaryHandler('smoke', options);

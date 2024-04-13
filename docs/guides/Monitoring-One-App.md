@@ -21,24 +21,23 @@ One App makes the following metrics available:
 - Garbage collection
 - Eventloop lag
 
-
 ## Grafana
 
 If you wish to use [Grafana](https://grafana.com/grafana/) the [one-app-classic](../../__performance__/grafana/dashboards/one-app-classic.json)
 dashboard can provide you with a good starting point.
 
-## Monitoring Locally
+## Monitoring Locally
 
 It possible to run Prometheus and Grafana against a locally running build of one-app.
 While not an ideal performance indicator you could use it to gauge the impact your module might have.
 
 Run the following inside of One App to start the performance monitoring locally:
 
-`npm run monitor:performance`
+`npm run perf -- monitor`
 
-> There is not an option to run performance monitoring with `one-app-runner`.
+> There is not an option to run performance monitoring with `one-app-runner`,
+> though instances of `one-app-runner` can be monitored with the `--target` option.
 
 More details for running performance monitoring can be found in the [performance readme](../../__performance__/README.md)/
 
-
-[☝️ Return To Top](#adding-styles)
+[☝️ Return To Top](#monitoring-one-app)
