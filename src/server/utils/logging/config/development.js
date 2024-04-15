@@ -34,7 +34,7 @@ export const pinoPrettyOptions = {
     error: 50,
     fatal: 60,
   },
-  customColors: 'trace:white,debug:green,info:gray,log:blue,warn:yellow,error:red,fatal:bgRed',
+  customColors: 'trace:white,debug:green,info:gray,log:blue,dev:green,warn:yellow,error:red,fatal:bgRed',
   messageFormat(log, messageKey) {
     if (log.request) {
       if (log.request.direction === 'out') {
