@@ -51,7 +51,7 @@ const noopTracer = async (fastify) => {
     };
   }
   fastify.decorateRequest('openTelemetry', openTelemetry);
-  fastify.decorateRequest('tracingEnabled', false);
+  fastify.decorateRequest('tracingDisabled', true);
 };
 
 export default fp(noopTracer, {

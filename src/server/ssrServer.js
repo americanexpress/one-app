@@ -28,6 +28,7 @@ import fastifyFormbody from '@fastify/formbody';
 import fastifyStatic from '@fastify/static';
 import fastifyHelmet from '@fastify/helmet';
 import fastifySensible from '@fastify/sensible';
+import fastifyOpenTelemetry from '@autotelic/fastify-opentelemetry';
 import fastifyMetrics from 'fastify-metrics';
 import client from 'prom-client';
 
@@ -44,7 +45,6 @@ import addFrameOptionsHeader from './plugins/addFrameOptionsHeader';
 import addCacheHeaders from './plugins/addCacheHeaders';
 import { getServerPWAConfig, serviceWorkerHandler, webManifestMiddleware } from './pwa';
 import logger from './utils/logging/logger';
-import tracer from './plugins/tracer';
 import noopTracer from './plugins/noopTracer';
 
 const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
@@ -56,7 +56,7 @@ const nodeEnvIsDevelopment = () => process.env.NODE_ENV === 'development';
 
 async function appPlugin(fastify) {
   if (process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || argv.logLevel === 'trace') {
-    fastify.register(tracer);
+    fastify.register(fastifyOpenTelemetry, { wrapRoutes: true, propagateToReply: true });
   } else {
     fastify.register(noopTracer);
   }
