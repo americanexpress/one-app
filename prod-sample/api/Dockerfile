@@ -1,4 +1,4 @@
-ARG VERSION=20.11.0
+ARG VERSION=20.10.0
 
 FROM node:$VERSION as builder
 MAINTAINER One App Team
