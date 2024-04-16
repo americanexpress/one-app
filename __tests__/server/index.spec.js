@@ -426,6 +426,18 @@ describe('server index', () => {
       expect(shutdown).toHaveBeenCalledTimes(1);
     });
 
+    // it('logs when server is successfully listening on the port', async () => {
+    //   console.log.mockClear();
+
+    //   await load();
+
+    //   expect(console.log).toHaveBeenCalled();
+
+    //   expect(console.log.mock.results[0].value).toMatchInlineSnapshot(
+    //     '"🚀 One App Server is running on http://localhost:3000 🚀"'
+    //   );
+    // });
+
     it('logs when metrics server is successfully listening on the port', async () => {
       console.log.mockClear();
       process.env.HTTP_METRICS_PORT = 3005;
