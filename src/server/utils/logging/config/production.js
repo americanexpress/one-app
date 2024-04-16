@@ -46,7 +46,6 @@ export default {
         warn: 'warning',
         log: 'notice',
         info: 'info',
-        dev: 'dev',
       };
       return { level: nodeLevelToSchemaLevel[label] || label };
     },
