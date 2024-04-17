@@ -17,7 +17,8 @@
 const { Table } = require('console-table-printer');
 const { bold } = require('colorette');
 const options = require('../util/options');
-const math = require('../util/math');
+const processors = require('../util/math');
+const tests = require('../util/tests');
 
 const metrics = {
   ...require('../k6/metrics'),
@@ -53,10 +54,18 @@ module.exports.handler = async function explain(argv) {
     return;
   }
 
+  function joinDesc(description, i) {
+    if (Array.isArray(description)) {
+      if (i < Object.keys(argv.data).length - 1) description.push('');
+      return description.join(` ${'\u00A0'.repeat(60)} `);
+    }
+    return description;
+  }
+
   const headers = ['Label', argv.primaryLabel, 'Description'];
   const rows = Object.entries(argv.data)
     .filter(([metric]) => (argv.defaults ? options.metrics.default.includes(metric) : true))
-    .map(([metric, { label, description }]) => [label, metric, description]);
+    .map(([metric, { label, description }], i) => [label, metric, joinDesc(description, i)]);
 
   const consoleTable = new Table({
     columns: [
@@ -69,6 +78,7 @@ module.exports.handler = async function explain(argv) {
         name: argv.primaryLabel,
         alignment: 'left',
         color: 'none',
+        minLen: argv.primaryLabel.length,
         maxLen: Math.min(30, Math.max(...rows.map((row) => row[1].length))),
       },
       {
@@ -102,17 +112,22 @@ module.exports.builder = (yargs) => yargs
   .options('label', {
     description: 'look up metric by label',
     type: 'string',
-    conflicts: ['metric', 'defaults', 'processors'],
+    conflicts: ['metric', 'defaults', 'processors', 'tests'],
   })
   .option('defaults', {
     description: 'list the default metrics',
     type: 'boolean',
-    conflicts: ['label', 'processors', 'metric'],
+    conflicts: ['label', 'processors', 'metric', 'tests'],
   })
   .option('processors', {
     description: 'explain the data processors',
     type: 'boolean',
-    conflicts: ['metric', 'label', 'defaults'],
+    conflicts: ['metric', 'label', 'defaults', 'tests'],
+  })
+  .option('tests', {
+    description: 'explain the tests',
+    type: 'boolean',
+    conflicts: ['metric', 'label', 'defaults', 'processors'],
   })
   .check((argv) => {
     /* eslint-disable no-param-reassign -- yargs API */
@@ -127,8 +142,11 @@ module.exports.builder = (yargs) => yargs
       }
     }
     if (argv.processors) {
-      argv.data = math;
+      argv.data = processors;
       argv.primaryLabel = 'Processor';
+    } else if (argv.tests) {
+      argv.data = tests;
+      argv.primaryLabel = 'Test Type';
     } else {
       argv.data = metrics;
       argv.primaryLabel = 'Metric';

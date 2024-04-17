@@ -22,6 +22,7 @@ const getResultDir = require('../util/getResultDir');
 const k6run = require('../k6/run');
 const k6parse = require('../k6/parse');
 const fetchPromMetrics = require('../prometheus/fetchMetrics');
+const tests = require('../util/tests');
 
 module.exports.command = 'test';
 
@@ -52,7 +53,7 @@ module.exports.builder = (yargs) => yargs
     description: 'Type of performance test to run',
     type: 'string',
     demandOption: true,
-    choices: ['load', 'smoke', 'soak', 'spike', 'stress'],
+    choices: Object.keys(tests),
   })
   .option('target', {
     description: 'URL of the target service',
