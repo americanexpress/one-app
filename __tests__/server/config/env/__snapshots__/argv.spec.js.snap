@@ -71,7 +71,7 @@ exports[`argv config has development options and defaults 6`] = `
       "debug",
       "trace",
     ],
-    "default": "log",
+    "default": "dev",
     "describe": "Lowest level of log entries to show",
     "type": "string",
   },

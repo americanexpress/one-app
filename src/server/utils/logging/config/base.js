@@ -21,7 +21,7 @@ export default {
   level: argv.logLevel,
   customLevels: {
     log: 35,
-    dev: process.env.NODE_ENV === 'development' ? 36 : 0,
+    dev: process.env.NODE_ENV === 'development' ? 33 : 0,
   },
   dedupe: true,
   errorKey: 'error',
