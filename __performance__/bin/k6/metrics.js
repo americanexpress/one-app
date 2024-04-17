@@ -20,7 +20,7 @@ const metrics = {
   http_reqs: {
     label: 'HTTP Requests',
     format: float,
-    description: 'How many total HTTP requests k6 generated',
+    description: 'total HTTP requests k6 generated',
   },
   http_req_duration: {
     label: 'Request Duration',

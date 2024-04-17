@@ -27,7 +27,7 @@ module.exports.command = 'test';
 
 module.exports.describe = 'Run a performance test';
 
-module.exports.handler = async function runTest(argv) {
+module.exports.handler = async function test(argv) {
   const testId = generateTestId(argv);
 
   try {

@@ -14,21 +14,26 @@
  * permissions and limitations under the License.
  */
 
+const { nth } = require('./format');
+
 function sum(data) {
   return data.reduce((acc, value) => acc + value, 0);
 }
 sum.label = 'Total';
+sum.description = 'sum total of all data points in the set';
 
 function mean(data) {
   return sum(data) / data.length;
 }
 mean.label = 'Average';
+mean.description = 'arithmetic mean of the data set';
 
 function median(data) {
   const sorted = data.sort((a, b) => a - b);
   return (sorted[Math.floor((data.length - 1) / 2)] + sorted[Math.ceil((data.length - 1) / 2)]) / 2;
 }
 median.label = 'Median';
+median.description = 'middle value (or midpoint) after all data points have been arranged in value order';
 
 function mode(data) {
   const frequencyMap = {};
@@ -44,26 +49,32 @@ function mode(data) {
   return result;
 }
 mode.label = 'Mode';
+mode.description = 'the value that appears the most frequently in the data set';
 
 function min(data) {
   return Math.min(...data);
 }
 min.label = 'Min';
+min.description = 'smallest value in the data set';
 
 function max(data) {
   return Math.max(...data);
 }
 max.label = 'Max';
+max.description = 'largest value in the data set';
 
-function percentile(p) {
-  return (data) => data.sort((a, b) => a - b)[Math.floor(data.length * (p / 100)) - 1];
+function createPercentile(p) {
+  function percentile(data) {
+    return data.sort((a, b) => a - b)[Math.floor(data.length * (p / 100)) - 1];
+  }
+  percentile.label = `${nth(p)} Percentile`;
+  percentile.description = `the value below which ${p}% of the data set falls`;
+  return percentile;
 }
 
-const p95 = percentile(95);
-p95.label = '95th Percentile';
+const p95 = createPercentile(95);
 
-const p90 = percentile(90);
-p90.label = '90th Percentile';
+const p90 = createPercentile(90);
 
 module.exports = {
   sum,
@@ -72,7 +83,6 @@ module.exports = {
   mode,
   min,
   max,
-  percentile,
   p95,
   p90,
 };

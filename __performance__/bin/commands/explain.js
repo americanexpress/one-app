@@ -17,6 +17,7 @@
 const { Table } = require('console-table-printer');
 const { bold } = require('colorette');
 const options = require('../util/options');
+const math = require('../util/math');
 
 const metrics = {
   ...require('../k6/metrics'),
@@ -27,7 +28,7 @@ module.exports.command = 'explain [metric]';
 
 module.exports.describe = 'Print descriptions of metrics';
 
-module.exports.handler = async function summarize(argv) {
+module.exports.handler = async function explain(argv) {
   if (argv.metric) {
     const rows = [
       [`${bold('Label:')} ${metrics[argv.metric].label}`],
@@ -52,8 +53,8 @@ module.exports.handler = async function summarize(argv) {
     return;
   }
 
-  const headers = ['Label', 'Metric', 'Description'];
-  const rows = Object.entries(metrics)
+  const headers = ['Label', argv.primaryLabel, 'Description'];
+  const rows = Object.entries(argv.data)
     .filter(([metric]) => (argv.defaults ? options.metrics.default.includes(metric) : true))
     .map(([metric, { label, description }]) => [label, metric, description]);
 
@@ -65,10 +66,10 @@ module.exports.handler = async function summarize(argv) {
         color: 'none',
       },
       {
-        name: 'Metric',
+        name: argv.primaryLabel,
         alignment: 'left',
         color: 'none',
-        maxLen: 30,
+        maxLen: Math.min(30, Math.max(...rows.map((row) => row[1].length))),
       },
       {
         name: 'Description',
@@ -101,23 +102,37 @@ module.exports.builder = (yargs) => yargs
   .options('label', {
     description: 'look up metric by label',
     type: 'string',
-    conflicts: ['metric'],
+    conflicts: ['metric', 'defaults', 'processors'],
   })
   .option('defaults', {
     description: 'list the default metrics',
     type: 'boolean',
+    conflicts: ['label', 'processors', 'metric'],
+  })
+  .option('processors', {
+    description: 'explain the data processors',
+    type: 'boolean',
+    conflicts: ['metric', 'label', 'defaults'],
   })
   .check((argv) => {
+    /* eslint-disable no-param-reassign -- yargs API */
     if (argv.label) {
       const metric = Object.keys(metrics).find(
         (key) => metrics[key].label.toLowerCase() === argv.label.toLowerCase()
       );
       if (metric) {
-        // eslint-disable-next-line no-param-reassign -- yargs API
         argv.metric = metric;
       } else {
         console.warn(bold(`Warning: Unable to find metric with label "${argv.label}". Listing all metrics.\n`));
       }
     }
+    if (argv.processors) {
+      argv.data = math;
+      argv.primaryLabel = 'Processor';
+    } else {
+      argv.data = metrics;
+      argv.primaryLabel = 'Metric';
+    }
     return true;
+    /* eslint-enable no-param-reassign -- yargs API */
   });

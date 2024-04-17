@@ -30,6 +30,23 @@ function colors(supportMarkdown = true) {
   };
 }
 
+function nth(n) {
+  switch (true) {
+    case n % 100 === 11:
+    case n % 100 === 12:
+    case n % 100 === 13:
+      return `${n}th`;
+    case n % 10 === 1:
+      return `${n}st`;
+    case n % 10 === 2:
+      return `${n}nd`;
+    case n % 10 === 3:
+      return `${n}rd`;
+    default:
+      return `${n}th`;
+  }
+}
+
 function float(n, precision = 3) {
   return Number(n.toFixed(precision)).toString();
 }
@@ -103,6 +120,7 @@ function timeDiff(start, end, prefix) {
 }
 
 module.exports = {
+  nth,
   colors,
   diff,
   float,
