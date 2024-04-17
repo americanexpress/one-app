@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [6.12.2](https://github.com/americanexpress/one-app/compare/v6.12.1...v6.12.2) (2024-04-17)
+
+
+### Bug Fixes
+
+* **dependencies:** override chokidar 2 with 3 ([#1381](https://github.com/americanexpress/one-app/issues/1381)) ([489d987](https://github.com/americanexpress/one-app/commit/489d9870be5f5b601c90c67acb2bc566cdc89810))
+
+
 ## [6.12.1](https://github.com/americanexpress/one-app/compare/v6.12.0...v6.12.1) (2024-04-12)
 
 
