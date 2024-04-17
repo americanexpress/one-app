@@ -84,8 +84,7 @@ yargs
     describe: 'Lowest level of log entries to show',
     type: 'string',
     choices: ['error', 'warn', 'log', 'dev', 'info', 'debug', 'trace'],
-    default: 'log',
-    // process.env.NODE_ENV === 'development' ? 'log' : 'info',
+    default: process.env.NODE_ENV === 'development' ? 'log' : 'info',
   });
 
 if (argv.rootModuleName && rootModuleNameEnvVarValue) {
