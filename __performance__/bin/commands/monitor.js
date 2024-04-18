@@ -19,6 +19,7 @@ const { spawn } = require('node:child_process');
 const path = require('node:path');
 const fetch = require('cross-fetch');
 const { red, bold } = require('colorette');
+const { ProxyAgent } = require('proxy-agent');
 const updateTarget = require('../prometheus/updateTarget');
 const { saveProcess, killProcess, getLogFile } = require('../util/bgProcess');
 
@@ -43,7 +44,9 @@ module.exports.handler = async function monitor(argv) {
   }
 
   try {
-    await fetch(`http://${argv.target.fetch}/im-up`);
+    await fetch(`http://${argv.target.fetch}/im-up`, {
+      agent: new ProxyAgent(),
+    });
   } catch (error) {
     console.error(`${red('Error: Target metrics service is not available. Is it running?')}\nRun ${bold('npm run start:prod-sample')} to start the prod sample image.`);
     process.exit(1);
