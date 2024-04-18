@@ -16,8 +16,9 @@ jobs:
         with:
           node-version-file: .nvmrc
       - name: npm install
-        run: NODE_ENV=development npm ci
+        run: npm ci
         env:
+          NODE_ENV: development
           HUSKY: 0
       - name: Build docker image
         run: docker build -t one-app:at-test . --build-arg USER=root --build-arg VERSION=$(cat .nvmrc)
