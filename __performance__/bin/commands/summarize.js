@@ -14,14 +14,12 @@
  * permissions and limitations under the License.
  */
 
-const fs = require('node:fs/promises');
-const path = require('node:path');
 const coerceTestId = require('../util/coerceTestId');
-const math = require('../util/math');
 const pick = require('../util/pick');
 const generateTable = require('../util/metricsTable');
 const banner = require('../util/banner');
 const options = require('../util/options');
+const readResults = require('../util/readResults');
 
 module.exports.command = 'summarize <results>';
 module.exports.aliases = ['summary'];
@@ -29,27 +27,13 @@ module.exports.aliases = ['summary'];
 module.exports.describe = 'Summarize performance test results';
 
 module.exports.handler = async function summarize(argv) {
-  const data = {
-    ...JSON.parse(await fs.readFile(path.join(argv.results.dir, 'metrics-k6.json'))),
-    ...JSON.parse(await fs.readFile(path.join(argv.results.dir, 'metrics-prom.json'))),
-  };
+  const { results } = argv;
 
-  console.log(banner([{
-    label: argv.results.id,
-    data,
-    meta: JSON.parse(await fs.readFile(path.join(argv.results.dir, 'k6-summary.json'))).meta,
-  }], argv.markdown));
-
-  const headers = argv.p.map((processor) => math[processor].label);
-  const processors = argv.p.map((processor) => math[processor]);
+  console.log(banner([results], argv.markdown));
 
   const table = generateTable({
-    headers,
-    processors,
-    data: pick(data, argv.metrics),
-    markdown: argv.markdown,
-    description: argv.description,
-    raw: argv.raw,
+    ...argv,
+    data: pick(results.data, argv.metrics),
   });
 
   console.log(`\n${table}`);
@@ -69,4 +53,8 @@ module.exports.builder = (yargs) => yargs
     default: ['min', 'mean', 'max', 'p95'],
   })
   .options('raw', options.raw)
-  .option('metrics', options.metrics);
+  .option('metrics', options.metrics)
+  .check(async (argv) => {
+    Object.assign(argv.results, await readResults(argv.results.dir));
+    return true;
+  });

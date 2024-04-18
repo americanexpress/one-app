@@ -14,13 +14,10 @@
  * permissions and limitations under the License.
  */
 
-const fs = require('node:fs');
-const path = require('node:path');
 const { diffJson } = require('diff');
 const {
   green, red, dim, underline,
 } = require('colorette');
-const math = require('../util/math');
 const pick = require('../util/pick');
 const generateTable = require('../util/metricsTable');
 const coerceTestId = require('../util/coerceTestId');
@@ -28,10 +25,11 @@ const {
   diffProcessor,
   pValueProcessor,
   variantProcessor,
-} = require('../util/processors');
+} = require('../util/internalProcessors');
 const banner = require('../util/banner');
 const { colors } = require('../util/format');
 const options = require('../util/options');
+const readResults = require('../util/readResults');
 
 module.exports.command = 'compare';
 
@@ -39,27 +37,16 @@ module.exports.describe = 'Compare two performance test results';
 
 module.exports.handler = async function compare(argv) {
   const { italic } = colors();
-  const cData = {
-    ...JSON.parse(await fs.promises.readFile(path.join(argv.control.dir, 'metrics-k6.json'))),
-    ...JSON.parse(await fs.promises.readFile(path.join(argv.control.dir, 'metrics-prom.json'))),
-  };
-  const vData = {
-    ...JSON.parse(await fs.promises.readFile(path.join(argv.variant.dir, 'metrics-k6.json'))),
-    ...JSON.parse(await fs.promises.readFile(path.join(argv.variant.dir, 'metrics-prom.json'))),
-  };
+  const { control, variant } = argv;
 
   console.log(banner([
     {
-      label: `${argv.controlLabel} (${argv.cls})`,
-      id: argv.control.id,
-      data: cData,
-      meta: JSON.parse(await fs.promises.readFile(path.join(argv.control.dir, 'k6-summary.json'))).meta,
+      ...control,
+      label: `${control.label} (${argv.cls})`,
     },
     {
-      label: `${argv.variantLabel} (${argv.vls})`,
-      id: argv.variant.id,
-      data: vData,
-      meta: JSON.parse(await fs.promises.readFile(path.join(argv.variant.dir, 'k6-summary.json'))).meta,
+      ...variant,
+      label: `${variant.label} (${argv.vls})`,
     },
   ], argv.markdown));
 
@@ -68,27 +55,25 @@ module.exports.handler = async function compare(argv) {
 
   for (const processor of argv.processors) {
     processors.push(
-      math[processor],
-      variantProcessor(math[processor], vData),
-      diffProcessor(math[processor], vData)
+      processor,
+      variantProcessor(processor, variant.data),
+      diffProcessor(processor, variant.data)
     );
     headers.push(
-      `${math[processor].label} (${argv.cls})`,
-      `${math[processor].label} (${argv.vls})`,
-      `${math[processor].label} (diff)`
+      `${processor.label} (${argv.cls})`,
+      `${processor.label} (${argv.vls})`,
+      `${processor.label} (diff)`
     );
   }
 
-  processors.push(pValueProcessor(vData, argv.alpha));
+  processors.push(pValueProcessor(variant.data, argv.alpha));
   headers.push(`${italic('p')}-value`);
 
   const table = generateTable({
+    ...argv,
     headers,
     processors,
-    data: pick(cData, argv.metrics),
-    markdown: argv.markdown,
-    description: argv.description,
-    raw: argv.raw,
+    data: pick(control.data, argv.metrics),
   });
 
   console.log(`\n${table}`);
@@ -150,25 +135,33 @@ module.exports.builder = (yargs) => yargs
     default: 'v',
     hidden: true,
   })
-  .check((argv) => {
+  .check(async (argv) => {
     if (argv.control.id === argv.variant.id) {
       throw new Error(red(`Bad option: ${underline('control')} and ${underline('variant')} test IDs must be unique`));
     }
 
-    const controlMeta = JSON.parse(fs.readFileSync(path.join(argv.control.dir, 'k6-summary.json'), 'utf8')).meta;
-    const variantMeta = JSON.parse(fs.readFileSync(path.join(argv.variant.dir, 'k6-summary.json'), 'utf8')).meta;
+    const [control, variant] = await Promise.all([
+      readResults(argv.control.dir),
+      readResults(argv.variant.dir),
+    ]);
 
-    if (controlMeta.type !== variantMeta.type) {
-      throw new Error(`${red(`Bad option: ${underline('control')} and ${underline('variant')} test types must match.`)}\n  Control: ${controlMeta.type}\n  Variant: ${variantMeta.type}`);
+    if (control.meta.type !== variant.meta.type) {
+      throw new Error(`${red(`Bad option: ${underline('control')} and ${underline('variant')} test types must match.`)}\n  Control: ${control.meta.type}\n  Variant: ${variant.meta.type}`);
     }
-    if (controlMeta.hash !== variantMeta.hash) {
-      const optionsDiff = diffJson(controlMeta.options, variantMeta.options);
+    if (control.meta.hash !== variant.meta.hash) {
+      const optionsDiff = diffJson(control.meta.options, variant.meta.options);
       const printDiff = optionsDiff.map((part) => (part.added ? green(`+ ${part.value}`)
         // eslint-disable-next-line unicorn/no-nested-ternary -- conflicting rules
         : part.removed ? red(`- ${part.value}`) : dim(part.value)));
 
       throw new Error(`${red(`Bad option: ${underline('control')} and ${underline('variant')} test options must match`)}\n  ${printDiff.join('')}`);
     }
+
+    control.label = argv.controlLabel;
+    variant.label = argv.variantLabel;
+    Object.assign(argv.control, control);
+    Object.assign(argv.variant, variant);
+
     return true;
   })
   .showHidden('show-hidden', 'Show hidden options');

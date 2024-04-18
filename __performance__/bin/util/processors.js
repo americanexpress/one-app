@@ -14,32 +14,82 @@
  * permissions and limitations under the License.
  */
 
-const ttest = require('ttest');
-const { diff, pValue } = require('./format');
+const { nth } = require('./format');
 
-function diffProcessor(processor, variantData) {
-  return (metric, c, format) => {
-    const v = processor(variantData[metric]);
-    return diff(processor(c), v, format);
-  };
+function sum(data) {
+  return data.reduce((acc, value) => acc + value, 0);
+}
+sum.label = 'Total';
+sum.description = 'sum total of all data points in the set';
+sum.toJSON = () => sum.name;
+
+function mean(data) {
+  return sum(data) / data.length;
+}
+mean.label = 'Average';
+mean.description = 'arithmetic mean of the data set';
+mean.toJSON = () => mean.name;
+
+function median(data) {
+  const sorted = data.sort((a, b) => a - b);
+  return (sorted[Math.floor((data.length - 1) / 2)] + sorted[Math.ceil((data.length - 1) / 2)]) / 2;
+}
+median.label = 'Median';
+median.description = 'middle value (or midpoint) after all data points have been arranged in value order';
+median.toJSON = () => median.name;
+
+function mode(data) {
+  const frequencyMap = {};
+  let maxFreq = 0;
+  let result;
+  for (const item of data) {
+    frequencyMap[item] = ++frequencyMap[item] || 1;
+    if (frequencyMap[item] > maxFreq) {
+      maxFreq = frequencyMap[item];
+      result = item;
+    }
+  }
+  return result;
+}
+mode.label = 'Mode';
+mode.description = 'the value that appears the most frequently in the data set';
+mode.toJSON = () => mode.name;
+
+function min(data) {
+  return Math.min(...data);
+}
+min.label = 'Min';
+min.description = 'smallest value in the data set';
+min.toJSON = () => min.name;
+
+function max(data) {
+  return Math.max(...data);
+}
+max.label = 'Max';
+max.description = 'largest value in the data set';
+max.toJSON = () => max.name;
+
+function createPercentile(p) {
+  function percentile(data) {
+    return data.sort((a, b) => a - b)[Math.floor(data.length * (p / 100)) - 1];
+  }
+  percentile.label = `${nth(p)} Percentile`;
+  percentile.description = `the value below which ${p}% of the data set falls`;
+  percentile.toJSON = () => `p${p}`;
+  return percentile;
 }
 
-function pValueProcessor(variantData, alpha = 0.05) {
-  return (metric, c) => {
-    const v = variantData[metric];
-    const result = ttest(c, v, { alpha, varEqual: false });
-    const p = result.pValue();
-    if (Number.isNaN(p)) return '';
-    return pValue(p, alpha);
-  };
-}
+const p95 = createPercentile(95);
 
-function variantProcessor(processor, variantData) {
-  return (metric, _, format) => format(processor(variantData[metric]));
-}
+const p90 = createPercentile(90);
 
 module.exports = {
-  diffProcessor,
-  pValueProcessor,
-  variantProcessor,
+  sum,
+  mean,
+  median,
+  mode,
+  min,
+  max,
+  p95,
+  p90,
 };

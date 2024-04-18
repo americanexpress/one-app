@@ -15,6 +15,7 @@
  */
 
 const { red, underline, bold } = require('colorette');
+const processors = require('./processors');
 
 const metrics = {
   ...require('../k6/metrics'),
@@ -33,7 +34,8 @@ module.exports.processors = {
   description: 'processors to run on each column of data',
   type: 'array',
   default: ['mean', 'max'],
-  choices: ['sum', 'mean', 'median', 'mode', 'min', 'max', 'p95', 'p90'],
+  choices: Object.values(processors),
+  coerce: (arg) => arg.map((processor) => processors[processor]),
 };
 
 module.exports.raw = {

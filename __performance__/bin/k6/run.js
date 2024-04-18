@@ -19,16 +19,16 @@ const path = require('node:path');
 
 function k6run({
   testId,
-  type,
+  test,
   target,
   k6args = [],
 }) {
   const perfDir = path.resolve(__dirname, '..', '..');
-  const commonK6CmdArgs = [`/scripts/${type}.js`, '--out', `json=/results/${testId}/k6-out.json`, '--out', 'influxdb=http://influxdb:8086/k6', '--summary-export', `/results/${testId}/k6-summary.json`, ...k6args];
+  const commonK6CmdArgs = [test.script, '--out', `json=/results/${testId}/k6-out.json`, '--out', 'influxdb=http://influxdb:8086/k6', '--summary-export', `/results/${testId}/k6-summary.json`, ...k6args];
   const k6CmdOpts = { cwd: perfDir, stdio: 'inherit' };
 
   if (target) {
-    spawnSync('docker', ['compose', 'run', '-e', `${['spike', 'stress'].includes(type) ? 'TARGET_BASE_URL' : 'TARGET_URL'}=${target}`, 'k6', 'run', ...commonK6CmdArgs], k6CmdOpts);
+    spawnSync('docker', ['compose', 'run', '-e', `${test.target}=${target}`, 'k6', 'run', ...commonK6CmdArgs], k6CmdOpts);
   } else {
     spawnSync('docker', ['compose', '-f', 'docker-compose.yml', '-f', 'docker-compose.prod-sample.yml', 'run', 'k6', 'run', '--insecure-skip-tls-verify', ...commonK6CmdArgs], k6CmdOpts);
   }

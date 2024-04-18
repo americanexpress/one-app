@@ -19,7 +19,7 @@ const { Table } = require('console-table-printer');
 const {
   testType, time, timeDiff, colors,
 } = require('./format');
-const { sum } = require('./math');
+const { sum } = require('./processors');
 
 const metrics = {
   ...require('../k6/metrics'),
@@ -41,22 +41,22 @@ function banner(colData, markdown = false) {
     colData.map(({ data }) => labelledMetric('http_req_failed', data, sum)),
   ];
 
-  if (colData.some(({ id }) => !!id)) rows.push(colData.map(({ id }) => id));
+  if (colData.some(({ id, label }) => label && id)) rows.push(colData.map(({ id }) => id));
 
   if (markdown) {
     return table([
-      colData.map(({ label }) => label),
+      colData.map(({ label, id }) => label || id),
       ...rows,
     ]);
   }
 
   const consoleTable = new Table({
-    columns: colData.map(({ label }) => ({ name: label, alignment: 'left', color: 'none' })),
+    columns: colData.map(({ label, id }) => ({ name: label || id, alignment: 'left', color: 'none' })),
     colorMap: { none: '' },
   });
 
   consoleTable.addRows(rows.map((row) => row.reduce((acc, curr, i) => ({
-    ...acc, [colData[i].label]: curr,
+    ...acc, [colData[i].label || colData[i].id]: curr,
   }), {})));
 
   return consoleTable.render();

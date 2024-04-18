@@ -29,6 +29,7 @@ function generateMetricsTable({
   description = false,
   raw = false,
 }) {
+  const defaultHeaders = processors.map((p) => p.label);
   const rows = Object.keys(data).map((metric) => [
     metrics[metric].label,
     description && (metrics[metric].description || ' '),
@@ -40,7 +41,11 @@ function generateMetricsTable({
     }),
   ].filter(Boolean));
 
-  const tableHeaders = ['Metric', description && 'Description', ...headers].filter(Boolean);
+  const tableHeaders = [
+    'Metric',
+    description && 'Description',
+    ...headers || defaultHeaders,
+  ].filter(Boolean);
 
   if (markdown) {
     return table([
@@ -55,7 +60,7 @@ function generateMetricsTable({
       description && {
         name: 'Description', alignment: 'left', maxLen: 40, color: 'none',
       },
-      ...headers.map((name) => ({ name, alignment: 'left', color: 'none' })),
+      ...(headers || defaultHeaders).map((name) => ({ name, alignment: 'left', color: 'none' })),
     ].filter(Boolean),
     colorMap: { none: '' },
   });

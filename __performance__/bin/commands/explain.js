@@ -17,8 +17,8 @@
 const { Table } = require('console-table-printer');
 const { bold } = require('colorette');
 const options = require('../util/options');
-const processors = require('../util/math');
-const tests = require('../util/tests');
+const processors = require('../util/processors');
+const tests = require('../k6/tests');
 
 const metrics = {
   ...require('../k6/metrics'),

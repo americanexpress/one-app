@@ -22,7 +22,7 @@ const getResultDir = require('../util/getResultDir');
 const k6run = require('../k6/run');
 const k6parse = require('../k6/parse');
 const fetchPromMetrics = require('../prometheus/fetchMetrics');
-const tests = require('../util/tests');
+const tests = require('../k6/tests');
 
 module.exports.command = 'test';
 
@@ -49,6 +49,8 @@ module.exports.handler = async function test(argv) {
 };
 
 module.exports.builder = (yargs) => yargs
+  .usage(`npm run perf -- test --type=<type>\n\n${module.exports.describe}\n`)
+  .usage(`Run ${bold('npm run perf -- explain --tests')} for details on the available test types.`)
   .option('type', {
     description: 'Type of performance test to run',
     type: 'string',
@@ -70,10 +72,12 @@ module.exports.builder = (yargs) => yargs
     coerce: (arg) => (arg ? arg.split(' ').filter(Boolean) : []),
   })
   .check((argv) => {
-    if (argv.target && ['spike', 'stress'].includes(argv.type)) {
+    // eslint-disable-next-line no-param-reassign -- yargs API
+    argv.test = tests[argv.type];
+    if (argv.target && argv.test.target === 'TARGET_BASE_URL') {
       const parsedUrl = new URL(argv.target);
       if (parsedUrl.pathname !== '/') {
-        throw new Error(`Bad option: ${underline('target')} must not include a path for spike and stress tests.\n  These tests execute against a variety of predefined paths based on the structure of the prod-sample.`);
+        throw new Error(`Bad option: ${underline('target')} must not include a path for ${argv.type} tests.\n  These tests execute against a variety of predefined paths based on the structure of the prod-sample.`);
       }
     }
     return true;
