@@ -38,7 +38,6 @@ const resetStreamData = () => {
 const pinoPrettyStream = pinoPretty({
   ...pinoPrettyOptions,
   destination: mockStream,
-  colorize: false,
 });
 const logger = pino(baseConfig, pinoPrettyStream);
 
@@ -48,36 +47,27 @@ describe('development logger', () => {
 
   it('should not include pid, hostname or time', () => {
     logger.log('this is a test');
-    expect(streamData).toMatchInlineSnapshot(`
-      "LOG: this is a test
-      "
-    `);
+    expect(streamData.trim()).toMatchInlineSnapshot(
+      '"<blue>LOG</blue>: <cyan>this is a test</cyan>"'
+    );
   });
 
   it('should set different colors for each level', () => {
-    const loggerWithColor = pino(
-      baseConfig,
-      pinoPretty({
-        ...pinoPrettyOptions,
-        destination: mockStream,
-      })
-    );
-    loggerWithColor.trace();
-    loggerWithColor.debug();
-    loggerWithColor.info();
-    loggerWithColor.log();
-    loggerWithColor.warn();
-    loggerWithColor.error();
-    loggerWithColor.fatal();
-    expect(streamData).toMatchInlineSnapshot(`
-      "[37mTRACE[39m: 
-      [32mDEBUG[39m: 
-      [90mINFO[39m: 
-      [34mLOG[39m: 
-      [33mWARN[39m: 
-      [31mERROR[39m: 
-      [41mFATAL[49m: 
-      "
+    logger.trace();
+    logger.debug();
+    logger.info();
+    logger.log();
+    logger.warn();
+    logger.error();
+    logger.fatal();
+    expect(streamData.trim()).toMatchInlineSnapshot(`
+      "<white>TRACE</white>: <cyan></cyan>
+      <green>DEBUG</green>: <cyan></cyan>
+      <gray>INFO</gray>: <cyan></cyan>
+      <blue>LOG</blue>: <cyan></cyan>
+      <yellow>WARN</yellow>: <cyan></cyan>
+      <red>ERROR</red>: <cyan></cyan>
+      <bgRed>FATAL</bgRed>: <cyan></cyan>"
     `);
   });
 
@@ -107,10 +97,9 @@ describe('development logger', () => {
       },
     };
     logger.info(entry);
-    expect(streamData).toMatchInlineSnapshot(`
-      "INFO: 🌍 ➡ 💻 <green>200</green> OK GET https://example.com/resource 12/13ms
-      "
-    `);
+    expect(streamData.trim()).toMatchInlineSnapshot(
+      '"<gray>INFO</gray>: <cyan>🌍 ➡ 💻 <green>200</green> OK GET https://example.com/resource 12/13ms</cyan>"'
+    );
   });
 
   it('pretty-prints an outgoing request', () => {
@@ -134,10 +123,9 @@ describe('development logger', () => {
       },
     };
     logger.info(entry);
-    expect(streamData).toMatchInlineSnapshot(`
-      "INFO: 💻 ➡ 🗄️ <green>200</green> OK GET https://example.com/resource <green>13</green>ms
-      "
-    `);
+    expect(streamData.trim()).toMatchInlineSnapshot(
+      '"<gray>INFO</gray>: <cyan>💻 ➡ 🗄️ <green>200</green> OK GET https://example.com/resource <green>13</green>ms</cyan>"'
+    );
   });
 
   describe('logMethod hook', () => {
@@ -146,38 +134,35 @@ describe('development logger', () => {
 
     it('should take an error from the end of a log call and put it in the error key', () => {
       logger.error('This is a %s', 'test', mockError);
-      expect(streamData).toMatchInlineSnapshot(`
-        "ERROR: This is a test
+      expect(streamData.trim()).toMatchInlineSnapshot(`
+        "<red>ERROR</red>: <cyan>This is a test</cyan>
             error: {
               "type": "Error",
               "message": "mockError",
               "stack":
                   
-            }
-        "
+            }"
       `);
     });
 
     it('should take an error from the beginning of a log call and put it in the error key', () => {
       logger.warn(mockError, 'This is another %s', 'test');
-      expect(streamData).toMatchInlineSnapshot(`
-        "WARN: This is another test
+      expect(streamData.trim()).toMatchInlineSnapshot(`
+        "<yellow>WARN</yellow>: <cyan>This is another test</cyan>
             error: {
               "type": "Error",
               "message": "mockError",
               "stack":
                   
-            }
-        "
+            }"
       `);
     });
 
     it('should not change log calls that do not begin or end with errors', () => {
       logger.info('This is a third %s', 'test');
-      expect(streamData).toMatchInlineSnapshot(`
-        "INFO: This is a third test
-        "
-      `);
+      expect(streamData.trim()).toMatchInlineSnapshot(
+        '"<gray>INFO</gray>: <cyan>This is a third test</cyan>"'
+      );
     });
   });
 });

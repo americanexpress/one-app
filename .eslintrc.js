@@ -48,13 +48,14 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['__performance__/**'],
+      files: ['__performance__/scripts/**'],
       globals: {
         __ENV: true,
       },
       rules: {
         // These scripts are not run directly, and the k6 package is a placeholder
         'import/no-unresolved': ['error', { ignore: ['k6'] }],
+        'import/extensions': ['error', 'ignorePackages', { js: 'always' }],
       },
     },
     {
@@ -126,6 +127,7 @@ module.exports = {
       files: [
         'scripts/**',
         'one-app-statics/**',
+        '__performance__/bin/**',
       ],
       rules: {
         // these scripts should be used only during development
@@ -134,6 +136,10 @@ module.exports = {
         'no-console': 'off',
         'global-require': 'off',
         'import/no-dynamic-require': 'off',
+        'unicorn/no-process-exit': 'off',
+        'no-await-in-loop': 'off',
+        'no-restricted-syntax': 'off',
+        'no-plusplus': 'off',
       },
     },
     {
