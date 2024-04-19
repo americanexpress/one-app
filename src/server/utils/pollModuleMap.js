@@ -24,6 +24,7 @@ import {
 
   holocron as holocronMetrics,
 } from '../metrics';
+import logger from './logging/logger';
 
 let moduleMapHealthy = null;
 export const getModuleMapHealth = () => moduleMapHealthy;
@@ -126,7 +127,7 @@ async function pollModuleMap() {
   recordPollingForMonitor();
   startPollingMonitorIfNotAlready();
   try {
-    console.log('pollModuleMap: polling...');
+    logger.log('pollModuleMap: polling...');
     incrementCounter(holocronMetrics.moduleMapPoll);
 
     const { loadedModules = {}, rejectedModules = {} } = await loadModules();

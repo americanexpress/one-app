@@ -18,8 +18,9 @@ import util from 'node:util';
 import { argv } from 'yargs';
 
 export default {
-  level: argv.logLevel,
+  level: argv.logLevel || 'info',
   customLevels: {
+    dev: 34,
     log: 35,
   },
   dedupe: true,

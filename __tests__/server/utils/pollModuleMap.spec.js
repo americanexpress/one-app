@@ -14,6 +14,7 @@
  * permissions and limitations under the License.
  */
 import util from 'node:util';
+import logger from '../../../src/server/utils/logging/logger';
 
 jest.useFakeTimers();
 jest.spyOn(global, 'setTimeout');
@@ -22,6 +23,7 @@ jest.spyOn(global, 'setImmediate');
 
 describe('pollModuleMap', () => {
   jest.spyOn(console, 'log').mockImplementation(util.format);
+  jest.spyOn(logger, 'log').mockImplementation(util.format);
   jest.spyOn(console, 'warn').mockImplementation(util.format);
   jest.spyOn(console, 'error').mockImplementation(util.format);
   let loadModules;
@@ -110,7 +112,7 @@ describe('pollModuleMap', () => {
     const { default: pollModuleMap } = load();
     await pollModuleMap();
 
-    expect(console.log).toHaveBeenCalledWith('pollModuleMap: polling...');
+    expect(logger.log).toHaveBeenCalledWith('pollModuleMap: polling...');
     expect(loadModules).toHaveBeenCalledTimes(1);
     expect(incrementCounter).toHaveBeenCalledTimes(1);
     expect(incrementCounter).toHaveBeenCalledWith(holocronMetrics.moduleMapPoll);

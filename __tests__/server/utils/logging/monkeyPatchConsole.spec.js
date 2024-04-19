@@ -14,6 +14,8 @@
  * permissions and limitations under the License.
  */
 
+const { default: logger } = require('../../../../src/server/utils/logging/logger');
+
 jest.mock('yargs', () => ({
   argv: {
     logLevel: 'trace',
@@ -21,6 +23,8 @@ jest.mock('yargs', () => ({
 }));
 
 describe('monkeyPatchConsole', () => {
+  jest.spyOn(logger, 'log').mockImplementation(() => {});
+
   const logMethods = ['error', 'warn', 'log', 'info', 'debug', 'trace'];
   const originalConsole = logMethods.reduce((acc, curr) => ({
     ...acc,
@@ -42,5 +46,11 @@ describe('monkeyPatchConsole', () => {
       expect(console[method].name).toBe('bound hookWrappedLog');
       expect(console[method]).not.toBe(originalConsole[method]);
     });
+  });
+
+  it('allows to use logger methods and not console', () => {
+    logger.log('testing');
+
+    expect(logger.log).toHaveBeenCalledTimes(1);
   });
 });
