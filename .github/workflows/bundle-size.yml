@@ -14,7 +14,8 @@ jobs:
         env:
           NODE_ENV: development
         with:
-          build-script: "build:bundle"
+          build-script: "build:bundle:prod"
+          clean-script: "clean:build"
           pattern: "./build/**/*.js"
           strip-hash: \d+\.\d+\.\d+[-\S+]*\/
-          exclude: "{./build/**/i18n/*.js,./build/**/legacy/**,./build/**/tmp/**,**/*.map,**/node_modules/**}"
+          exclude: "{./build/**/i18n/*.js,./build/**/legacy/**,./build/**/tmp/**,**/node_modules/**}"
