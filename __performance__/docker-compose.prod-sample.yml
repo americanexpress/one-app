@@ -11,5 +11,5 @@ services:
     networks:
       - prod-sample_one-app-at-test-network
     environment:
-      - TARGET_URL=https://one-app:8443/success
+      - TARGET_URL=https://one-app:8443/healthy-frank/ssr-frank
       - TARGET_BASE_URL=https://one-app:8443

@@ -23,6 +23,7 @@ bundle.integrity.manifest.json
 test-results
 .jest-cache
 .clinic
+__performance__/results
 
 # sample prod setup
 prod-sample/nginx/origin-statics
