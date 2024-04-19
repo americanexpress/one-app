@@ -25,6 +25,7 @@ import {
   oneAppDirectoryPath,
   oneAppModuleCachePath,
 } from '../../../src/server/utils/cdnCache';
+import logger from '../../../src/server/utils/logging/logger';
 
 jest.spyOn(fs, 'existsSync');
 jest.spyOn(fs, 'readFileSync');
@@ -41,15 +42,18 @@ jest.mock('chalk', () => ({
   },
 }));
 
+// jest.mock('yargs', () => ({ argv: { logLevel: 'trace' } }));
+
 describe('cacheUtils', () => {
   let logSpy;
   let errorSpy;
-  let infoSpy;
-
+  // let infoSpy;
+  let devSpy;
   beforeEach(() => {
     logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    // infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+    devSpy = jest.spyOn(logger, 'dev').mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -95,7 +99,7 @@ describe('cacheUtils', () => {
 
       await showCacheInfo();
 
-      expect(infoSpy).toHaveBeenCalledWith('Local module cache size is %sMB. To clear the cache, delete %s', '5.00', '~/.one-app/.one-app-module-cache');
+      expect(devSpy).toHaveBeenCalledWith('Local module cache size is %sMB. To clear the cache, delete %s', '5.00', '~/.one-app/.one-app-module-cache');
     });
   });
 

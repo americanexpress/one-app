@@ -72,7 +72,7 @@ exports[`argv config has development options and defaults 6`] = `
       "trace",
     ],
     "default": "dev",
-    "describe": "Lowest level of log entries to show",
+    "describe": "Highest level of log entries to show",
     "type": "string",
   },
 ]
@@ -119,7 +119,7 @@ exports[`argv config has production options and defaults 2`] = `
       "trace",
     ],
     "default": "info",
-    "describe": "Lowest level of log entries to show",
+    "describe": "Highest level of log entries to show",
     "type": "string",
   },
 ]

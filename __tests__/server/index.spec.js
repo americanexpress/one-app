@@ -23,8 +23,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { Map as ImmutableMap } from 'immutable';
+import logger from '../../src/server/utils/logging/logger';
+// import logger from '../../src/server/utils/logging/logger';
 
 jest.unmock('yargs');
+
+// jest.mock('yargs', () => ({ argv: { logLevel: 'trace' } }));
+// jest.mock('yargs', () => ({
+//   argv: {
+//     logLevel: 'trace',
+//   },
+// }));
 
 jest.spyOn(console, 'log').mockImplementation(util.format);
 jest.spyOn(console, 'error').mockImplementation((...args) => {
@@ -34,6 +43,8 @@ jest.spyOn(console, 'error').mockImplementation((...args) => {
 jest.spyOn(console, 'info').mockImplementation(util.format);
 jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
 jest.spyOn(process.stderr, 'write').mockImplementation(() => {});
+
+const loggerDev = jest.spyOn(logger, 'dev').mockImplementation(() => {}); // const devSpy = 
 
 describe('server index', () => {
   const origFsExistsSync = fs.existsSync;
@@ -82,6 +93,8 @@ describe('server index', () => {
     jest.doMock('../../src/server/utils/loadModules', () => jest.fn(() => Promise.resolve()));
     jest.doMock('../../src/server/polyfill/intl');
     jest.doMock('../../src/server/utils/logging/monkeyPatchConsole', () => {});
+
+    // jest.doMock(logger, 'dev', () => jest.fn());
 
     ssrServerListen = jest.fn(async () => {
       if (ssrServerError) {
@@ -331,6 +344,7 @@ describe('server index', () => {
   });
 
   describe('ssrServerStart', () => {
+    // jest.spyOn(console, 'warn').mockImplementation(util.format);
     beforeEach(() => {
       process.env.NODE_ENV = 'production';
       delete process.env.ONE_CLIENT_ROOT_MODULE_NAME;
@@ -431,9 +445,10 @@ describe('server index', () => {
 
     //   await load();
 
-    //   expect(console.log).toHaveBeenCalled();
+    //   // expect(console.log).toHaveBeenCalled(); // TODO AG
+    //   // logger.dev.mockClear();
 
-    //   expect(console.log.mock.results[0].value).toMatchInlineSnapshot(
+    //   expect(logger.dev).toHaveBeenCalledWith(
     //     '"🚀 One App Server is running on http://localhost:3000 🚀"'
     //   );
     // });

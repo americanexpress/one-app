@@ -18,7 +18,7 @@ import util from 'node:util';
 import { argv } from 'yargs';
 
 export default {
-  level: argv.logLevel,
+  level: argv.logLevel || 'info',
   customLevels: {
     log: 35,
     dev: process.env.NODE_ENV === 'development' ? 33 : 0,
