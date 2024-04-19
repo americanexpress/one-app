@@ -29,9 +29,14 @@ RUN NODE_ENV=production npm run build && \
     mv /opt/build/bundle.integrity.manifest.json /opt/one-app/production && \
     mv /opt/build/.build-meta.json /opt/one-app/production
 
+# https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md#handling-kernel-signals
+FROM node:$VERSION-alpine as node-tini
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
+
 # development image
 # docker build . --target=development
-FROM node:$VERSION-alpine as development
+FROM node-tini as development
 ARG USER
 ENV USER ${USER:-node}
 ENV NODE_ENV=development
@@ -49,7 +54,7 @@ COPY --from=builder --chown=node:node /opt/one-app/development ./
 
 # production image
 # last so that it's the default image artifact
-FROM node:$VERSION-alpine as production
+FROM node-tini as production
 ARG USER
 ENV USER ${USER:-node}
 ENV NODE_ENV=production
