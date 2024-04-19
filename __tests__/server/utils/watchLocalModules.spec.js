@@ -25,6 +25,7 @@ import {
 } from 'holocron/moduleRegistry';
 import watchLocalModules from '../../../src/server/utils/watchLocalModules';
 import { getIp } from '../../../src/server/utils/getIP';
+import addBaseUrlToModuleMap from '../../../src/server/utils/addBaseUrlToModuleMap';
 
 const ip = getIp();
 
@@ -112,7 +113,7 @@ describe('watchLocalModules', () => {
     await changeListener(modulePath);
     expect(loadModule).toHaveBeenCalledWith(
       moduleName,
-      moduleMapSample.modules[moduleName],
+      addBaseUrlToModuleMap(moduleMapSample).modules[moduleName],
       require('../../../src/server/utils/onModuleLoad').default
     );
     expect(getModules().get(moduleName)).toBe(updatedModule);
@@ -153,7 +154,7 @@ describe('watchLocalModules', () => {
     await changeListener(modulePath);
     expect(loadModule).toHaveBeenCalledWith(
       moduleName,
-      moduleMapSample.modules[moduleName],
+      addBaseUrlToModuleMap(moduleMapSample).modules[moduleName],
       require('../../../src/server/utils/onModuleLoad').default
     );
     expect(getModules().get(moduleName)).toBe(originalModule);
@@ -234,7 +235,7 @@ describe('watchLocalModules', () => {
     await changeListener(modulePath);
     expect(loadModule).toHaveBeenCalledWith(
       moduleName,
-      updatedModuleMapSample.modules[moduleName],
+      addBaseUrlToModuleMap(updatedModuleMapSample).modules[moduleName],
       require('../../../src/server/utils/onModuleLoad').default
     );
     expect(getModules().get(moduleName)).toBe(updatedModule);
