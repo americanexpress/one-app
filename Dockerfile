@@ -5,7 +5,7 @@ ARG VERSION=lts
 # builds as we do not have to run apk installs for alpine.
 FROM node:$VERSION as builder
 WORKDIR /opt/build
-RUN npm install -g npm@9.6.7 --registry=https://registry.npmjs.org
+RUN npm install -g npm@9.9.3 --registry=https://registry.npmjs.org
 COPY --chown=node:node ./ /opt/build
 # npm ci does not run postinstall with root account
 RUN NODE_ENV=development npm ci --build-from-source
