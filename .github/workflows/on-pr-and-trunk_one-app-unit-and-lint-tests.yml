@@ -30,9 +30,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - name: npm install
-        run: NODE_ENV=development npm ci
+        run: npm ci
         env:
+          NODE_ENV: development
           HUSKY: 0
+      - name: npm run build
+        run: npm run build
+        env:
+          NODE_ENV: production
       - name: npm unit test
         run:  npm run test:unit
       - name: npm lint test

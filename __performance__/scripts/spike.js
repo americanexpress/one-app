@@ -16,6 +16,7 @@
 
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import createSummaryHandler from './utils/createSummaryHandler.js';
 
 export const options = {
   stages: [
@@ -62,3 +63,5 @@ export default function virtualUser() {
 
   sleep(1);
 }
+
+export const handleSummary = createSummaryHandler('spike', options);

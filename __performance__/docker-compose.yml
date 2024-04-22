@@ -6,7 +6,7 @@ services:
 
   # receives k6 metrics
   influxdb:
-    image: influxdb:1.8
+    image: influxdb:1.8.10
     networks:
       - one-app-performance
     ports:
@@ -16,7 +16,7 @@ services:
 
   # receives one-app internals metrics
   prometheus:
-    image: prom/prometheus:v2.50.1
+    image: prom/prometheus:v2.51.2
     networks:
       - one-app-performance
     volumes:
@@ -26,7 +26,7 @@ services:
 
   # graphing of metrics
   grafana:
-    image: grafana/grafana:10.0.12
+    image: grafana/grafana:10.4.2
     networks:
       - one-app-performance
     ports:
@@ -43,12 +43,13 @@ services:
 
   # runs performance scripts
   k6:
-    image: grafana/k6:0.49.0
+    image: grafana/k6:0.50.0
     networks:
       - one-app-performance
     ports:
       - "6565:6565"
     volumes:
       - ./scripts:/scripts
+      - ./results:/results
     environment:
       - K6_OUT=influxdb=http://influxdb:8086/k6

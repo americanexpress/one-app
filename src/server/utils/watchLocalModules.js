@@ -26,6 +26,7 @@ import {
 } from 'holocron/moduleRegistry';
 import { getIp } from './getIP';
 import onModuleLoad from './onModuleLoad';
+import addBaseUrlToModuleMap from './addBaseUrlToModuleMap';
 
 export default function watchLocalModules() {
   const staticsDirectoryPath = path.resolve(__dirname, '../../../static');
@@ -43,12 +44,13 @@ export default function watchLocalModules() {
 
       const moduleMap = JSON.parse(fs.readFileSync(moduleMapPath, 'utf8'));
 
-      const moduleData = moduleMap.modules[moduleNameChangeDetectedIn];
+      const moduleData = addBaseUrlToModuleMap(moduleMap).modules[moduleNameChangeDetectedIn];
       const oneAppDevCdnAddress = `http://${getIp()}:${process.env.HTTP_ONE_APP_DEV_CDN_PORT || 3001}`;
 
       moduleData.browser.url = moduleData.browser.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
       moduleData.legacyBrowser.url = moduleData.legacyBrowser.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
       moduleData.node.url = moduleData.node.url.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
+      moduleData.baseUrl = moduleData.baseUrl.replace('[one-app-dev-cdn-url]', oneAppDevCdnAddress);
 
       const module = addHigherOrderComponent(await loadModule(
         moduleNameChangeDetectedIn,

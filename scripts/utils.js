@@ -161,9 +161,7 @@ const basicBatchedTask = async (list, task, batchSize = 5) => {
     return batches;
   }, []);
   let results = [];
-  // eslint-disable-next-line no-restricted-syntax -- this is not for production
   for (const currentBatch of batches) {
-    // eslint-disable-next-line no-await-in-loop -- this is not for production
     const result = await task(currentBatch);
     results = [...results, ...result];
   }

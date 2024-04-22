@@ -14,7 +14,7 @@
 
 import path from 'node:path';
 import fs, { promises as fsPromises } from 'node:fs';
-import chalk from 'chalk';
+import { bold, greenBright, cyanBright } from 'colorette';
 
 export const getUserHomeDirectory = () => process.env.HOME || process.env.USERPROFILE;
 export const cacheFileName = '.one-app-module-cache';
@@ -27,14 +27,14 @@ export const showCacheInfo = async () => {
   try {
     const stats = await fsPromises.stat(oneAppModuleCachePath);
     const fileSizeOnMB = stats.size / (1024 * 1024); // bytes to mb
-    const message = `File size of ${cacheFileName}: ${chalk.bold.greenBright(fileSizeOnMB.toFixed(2), 'MB')}`;
+    const message = `File size of ${cacheFileName}: ${bold(greenBright(`${fileSizeOnMB.toFixed(2)}MB`))}`;
     const separator = '*'.repeat(message.length);
-    console.log(chalk.bold.cyanBright(separator));
-    console.log(chalk.bold.cyanBright('CACHE INFORMATION'));
+    console.log(bold(cyanBright(separator)));
+    console.log(bold(cyanBright('CACHE INFORMATION')));
     console.log(message);
     console.log('To clear the cache, please delete this file:');
-    console.log(`    ${chalk.bold.cyanBright(path.join('~', oneAppDirectoryName, cacheFileName))}`);
-    console.log(chalk.bold.cyanBright(separator));
+    console.log(`    ${bold(cyanBright(path.join('~', oneAppDirectoryName, cacheFileName)))}`);
+    console.log(bold(cyanBright(separator)));
   } catch (error) {
     console.error('There was error checking file stat', error);
   }
