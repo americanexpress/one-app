@@ -34,13 +34,15 @@ jest.spyOn(fsPromises, 'mkdir');
 jest.spyOn(fsPromises, 'writeFile');
 jest.spyOn(console, 'log').mockImplementation(() => {});
 jest.spyOn(console, 'error').mockImplementation(() => {});
-// jest.spyOn(console, 'dev').mockImplementation(() => {});
+
+let consoleDevSpy;
 
 jest.mock('colorette');
 
 describe('cacheUtils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // need this for now because we're not importing monkeypatch in tests
     console.dev = jest.fn();
   });
 
@@ -74,6 +76,7 @@ describe('cacheUtils', () => {
     });
 
     it('showCacheInfo should show file to delete', async () => {
+      consoleDevSpy = jest.spyOn(console, 'dev').mockImplementation(() => {});
       const mockStats = {
         size: 1024 * 1024 * 5, // 5 MB
       };

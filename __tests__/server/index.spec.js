@@ -331,7 +331,6 @@ describe('server index', () => {
   });
 
   describe('ssrServerStart', () => {
-    // jest.spyOn(console, 'warn').mockImplementation(util.format);
     beforeEach(() => {
       process.env.NODE_ENV = 'production';
       delete process.env.ONE_CLIENT_ROOT_MODULE_NAME;
@@ -426,19 +425,6 @@ describe('server index', () => {
 
       expect(shutdown).toHaveBeenCalledTimes(1);
     });
-
-    // it('logs when server is successfully listening on the port', async () => {
-    //   console.log.mockClear();
-
-    //   await load();
-
-    //   // expect(console.log).toHaveBeenCalled(); // TODO AG
-    //   // logger.dev.mockClear();
-
-    //   expect(logger.dev).toHaveBeenCalledWith(
-    //     '"🚀 One App Server is running on http://localhost:3000 🚀"'
-    //   );
-    // });
 
     it('logs when metrics server is successfully listening on the port', async () => {
       console.log.mockClear();

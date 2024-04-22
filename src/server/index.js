@@ -23,7 +23,6 @@ import Intl from 'lean-intl';
 import enData from 'lean-intl/locale-data/json/en.json';
 
 import './init';
-import logger from './utils/logging/logger';
 // Allow env config to run before importing holocron. (x2)
 import ssrServer from './ssrServer';
 import metricsServer from './metricsServer';
@@ -60,7 +59,7 @@ export const listen = async ({
 
     console.info('%s listening on port %d', context, port);
     if (process.env.NODE_ENV === 'development' && context === '🌎 One App server') {
-      logger.dev('🚀 One App Server is running on http://localhost:%d 🚀', port);
+      console.dev('🚀 One App Server is running on http://localhost:%d 🚀', port);
     }
 
     addServer(instance);
