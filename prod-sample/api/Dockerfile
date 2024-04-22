@@ -1,6 +1,6 @@
 ARG VERSION=lts
 
-FROM node:$VERSION-alpine as builder
+FROM node:$VERSION-alpine3.18 as builder
 MAINTAINER One App Team
 
 WORKDIR /

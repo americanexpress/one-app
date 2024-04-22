@@ -3,7 +3,7 @@ ARG VERSION=lts
 # which includes build utils preinstalled (e.g. gcc, make, etc).
 # This will result in faster and reliable One App docker image
 # builds as we do not have to run apk installs for alpine.
-FROM node:$VERSION-alpine as builder
+FROM node:$VERSION-alpine3.18 as builder
 WORKDIR /opt/build
 RUN npm install -g npm@9.9.3 --registry=https://registry.npmjs.org
 COPY --chown=node:node ./ /opt/build
@@ -30,7 +30,7 @@ RUN NODE_ENV=production npm run build && \
     mv /opt/build/.build-meta.json /opt/one-app/production
 
 # https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md#handling-kernel-signals
-FROM node:$VERSION-alpine as node-tini
+FROM node:$VERSION-alpine3.18 as node-tini
 RUN apk add --no-cache tini
 ENTRYPOINT ["/sbin/tini", "--"]
 
