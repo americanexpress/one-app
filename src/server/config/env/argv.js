@@ -81,7 +81,7 @@ yargs
     default: process.env.NODE_ENV === 'development' ? 'friendly' : 'machine',
   })
   .option('log-level', {
-    describe: 'Highest level of log entries to show',
+    describe: 'Lowest level of log entries to show',
     type: 'string',
     choices: ['error', 'warn', 'log', 'dev', 'info', 'debug', 'trace'],
     default: process.env.NODE_ENV === 'development' ? 'dev' : 'info',
