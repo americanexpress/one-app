@@ -14,23 +14,15 @@
  * permissions and limitations under the License.
  */
 import util from 'node:util';
-import logger from '../../../src/server/utils/logging/logger';
 
 jest.useFakeTimers();
 jest.spyOn(global, 'setTimeout');
 jest.spyOn(global, 'setInterval');
 jest.spyOn(global, 'setImmediate');
 
-// jest.mock('yargs', () => ({ argv: { logLevel: 'trace' } }));
-
-// jest.mock('yargs', () => ({ argv: { logLevel: 'trace' } }));
-
 describe('pollModuleMap', () => {
-  // jest.spyOn(console, 'log').mockImplementation(util.format);
-
-  jest.spyOn(logger, 'log').mockImplementation(util.format);
-  jest.spyOn(logger, 'warn').mockImplementation(() => {}); // jest.spyOn(logger, 'dev').mockImplementation(() => {});
-  // jest.spyOn(console, 'warn').mockImplementation(util.format);
+  jest.spyOn(console, 'log').mockImplementation(util.format);
+  jest.spyOn(console, 'warn').mockImplementation(util.format);
   jest.spyOn(console, 'error').mockImplementation(util.format);
   jest.spyOn(console, 'info').mockImplementation(util.format);
 
@@ -136,7 +128,7 @@ describe('pollModuleMap', () => {
 
   it('schedules a new polling despite console.log throwing on the initial check', async () => {
     const { default: pollModuleMap } = load();
-    logger.log
+    console.log
       // monitor setup
       .mockImplementationOnce(() => {
         /* noop a few times */

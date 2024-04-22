@@ -24,7 +24,6 @@ import {
 
   holocron as holocronMetrics,
 } from '../metrics';
-import logger from './logging/logger';
 
 let moduleMapHealthy = null;
 export const getModuleMapHealth = () => moduleMapHealthy;
@@ -98,7 +97,7 @@ let startPollingMonitorIfNotAlready = () => {
       return;
     }
 
-    logger.warn('pollModuleMap: polling has unexpectedly stopped. Last poll: %dms ago, Max poll: %dms.', lastPollingTimeAgo, MAX_POLL_TIME);
+    console.warn('pollModuleMap: polling has unexpectedly stopped. Last poll: %dms ago, Max poll: %dms.', lastPollingTimeAgo, MAX_POLL_TIME);
 
     // something really unusual happened, re-start polling
     // ensure that the last timeout has actually stopped
@@ -107,7 +106,7 @@ let startPollingMonitorIfNotAlready = () => {
     // need the reference to use it, one needs to be defined first
     setImmediate(pollModuleMap); // eslint-disable-line no-use-before-define -- see above
     // log the restart
-    logger.warn('pollModuleMap: restarted polling');
+    console.warn('pollModuleMap: restarted polling');
     incrementCounter(holocronMetrics.moduleMapPollRestarted);
     // try to reset the next scheduled polling time to the minimum
     // should work, but if it doesn't we still want polling to occur
@@ -147,7 +146,7 @@ async function pollModuleMap() {
 
     if (numberOfModulesRejected) {
       const rejectedModuleMessages = Object.entries(rejectedModules).map(([moduleName, { reasonForRejection }]) => `${moduleName}: ${reasonForRejection}`);
-      logger.warn('pollModuleMap: %d modules rejected:\n%o', numberOfModulesRejected, rejectedModuleMessages);
+      console.warn('pollModuleMap: %d modules rejected:\n%o', numberOfModulesRejected, rejectedModuleMessages);
       incrementGauge(holocronMetrics.moduleMapPollConsecutiveErrors);
     } else {
       resetGauge(holocronMetrics.moduleMapPollConsecutiveErrors);
