@@ -15,50 +15,51 @@
  */
 
 import { STATUS_CODES } from 'node:http';
-
-import chalk from 'chalk';
+import {
+  black, bgRed, green, blue, yellow, red,
+} from 'colorette';
 
 function printStatusCode(obj) {
   const { request: { statusCode } } = obj;
 
   if (statusCode === null) {
-    return chalk.black.bgRed(statusCode);
+    return black(bgRed(statusCode));
   }
 
   if (statusCode < 300) {
     // 100s, 200s
-    return chalk.green(statusCode);
+    return green(statusCode);
   }
   if (statusCode < 400) {
     // 300s
-    return chalk.blue(statusCode);
+    return blue(statusCode);
   }
   if (statusCode < 500) {
     // 400s
-    return chalk.yellow(statusCode);
+    return yellow(statusCode);
   }
   // 500s
-  return chalk.red(statusCode);
+  return red(statusCode);
 }
 
 function printStatusMessage(obj) {
   const { request: { statusText, statusCode } } = obj;
 
-  return statusText || STATUS_CODES[statusCode] || chalk.black.bgRed('Timed Out?');
+  return statusText || STATUS_CODES[statusCode] || black(bgRed('Timed Out?'));
 }
 
 function printDurationTime(obj) {
   const { request: { timings: { duration } } } = obj;
   if (duration < 100) {
-    return chalk.green(duration);
+    return green(duration);
   }
   if (duration < 1e3) {
-    return chalk.yellow(duration);
+    return yellow(duration);
   }
   if (duration < 6e3) {
-    return chalk.red(duration);
+    return red(duration);
   }
-  return chalk.black.bgRed(duration);
+  return black(bgRed(duration));
 }
 
 const serializeError = (err) => ({

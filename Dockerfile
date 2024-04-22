@@ -5,7 +5,7 @@ ARG VERSION=lts
 # builds as we do not have to run apk installs for alpine.
 FROM node:$VERSION as builder
 WORKDIR /opt/build
-RUN npm install -g npm@9.6.7 --registry=https://registry.npmjs.org
+RUN npm install -g npm@9.9.3 --registry=https://registry.npmjs.org
 COPY --chown=node:node ./ /opt/build
 # npm ci does not run postinstall with root account
 RUN NODE_ENV=development npm ci --build-from-source
@@ -29,9 +29,14 @@ RUN NODE_ENV=production npm run build && \
     mv /opt/build/bundle.integrity.manifest.json /opt/one-app/production && \
     mv /opt/build/.build-meta.json /opt/one-app/production
 
+# https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md#handling-kernel-signals
+FROM node:$VERSION-alpine as node-tini
+RUN apk add --no-cache tini
+ENTRYPOINT ["/sbin/tini", "--"]
+
 # development image
 # docker build . --target=development
-FROM node:$VERSION-alpine as development
+FROM node-tini as development
 ARG USER
 ENV USER ${USER:-node}
 ENV NODE_ENV=development
@@ -49,7 +54,7 @@ COPY --from=builder --chown=node:node /opt/one-app/development ./
 
 # production image
 # last so that it's the default image artifact
-FROM node:$VERSION-alpine as production
+FROM node-tini as production
 ARG USER
 ENV USER ${USER:-node}
 ENV NODE_ENV=production

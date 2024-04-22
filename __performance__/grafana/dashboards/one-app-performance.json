@@ -3325,7 +3325,7 @@
           "refId": "A"
         },
         {
-          "expr": "rate(process_cpu_system_seconds_total[$granularity])",
+          "expr": "rate(process_cpu_system_seconds_total[$granularity])*100",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -3334,7 +3334,7 @@
           "refId": "B"
         },
         {
-          "expr": "rate(process_cpu_user_seconds_total[$granularity])",
+          "expr": "rate(process_cpu_user_seconds_total[$granularity])*100",
           "format": "time_series",
           "hide": false,
           "interval": "",

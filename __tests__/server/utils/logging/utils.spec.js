@@ -20,7 +20,7 @@ import {
   printDurationTime,
 } from '../../../../src/server/utils/logging/utils';
 
-jest.mock('chalk');
+jest.mock('colorette');
 
 describe('utils', () => {
   describe('printStatusCode', () => {
