@@ -16,5 +16,5 @@
 
 import logger from './logger';
 
-const logMethods = ['error', 'warn', 'log', 'info', 'debug', 'trace'];
+const logMethods = ['error', 'warn', 'log', 'dev', 'info', 'debug', 'trace'];
 logMethods.forEach((methodName) => { console[methodName] = logger[methodName].bind(logger); });
