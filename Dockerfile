@@ -1,9 +1,9 @@
-ARG VERSION=20.10.0
+ARG VERSION=lts
 # Use the pre-baked fat node image only in the builder
 # which includes build utils preinstalled (e.g. gcc, make, etc).
 # This will result in faster and reliable One App docker image
 # builds as we do not have to run apk installs for alpine.
-FROM node:$VERSION as builder
+FROM node:$VERSION-alpine as builder
 WORKDIR /opt/build
 RUN npm install -g npm@9.9.3 --registry=https://registry.npmjs.org
 COPY --chown=node:node ./ /opt/build
