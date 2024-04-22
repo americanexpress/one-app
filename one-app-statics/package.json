@@ -1,6 +1,6 @@
 {
   "name": "@americanexpress/one-app-statics",
-  "version": "6.13.0-node-20-10-0.2",
+  "version": "6.13.0-node-20-10-0.3",
   "description": "One App Static Assets",
   "main": "index.js",
   "scripts": {
