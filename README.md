@@ -2,12 +2,13 @@
 [react]: http://reactjs.org/
 
 <h1 align="center">
+  
+  [One App is now InnerSource](https://github.com/americanexpress/one-app/issues/1393)
+
+  <hr/>
+  
   <img src='https://github.com/americanexpress/one-app/raw/main/one-app.png' alt="One App - One Amex" width='50%'/>
 </h1>
-
-![One App Docker Release](https://github.com/americanexpress/one-app/actions/workflows/release-step-4_automatic_docker-prod-build-and-publish.yml/badge.svg)
-![One App Integration Tests](https://github.com/americanexpress/one-app/actions/workflows/on-pr_one-app-integration-tests.yml/badge.svg)
-![One App Unit and Lint Tests](https://github.com/americanexpress/one-app/actions/workflows/on-pr-and-trunk_one-app-unit-and-lint-tests.yml/badge.svg)
 
 One App is a fresh take on web application development. It consists of a
 [Node.js](https://nodejs.org) server that serves up a single page app built using [React] components
