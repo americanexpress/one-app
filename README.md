@@ -22,12 +22,6 @@ experiences to your users.
 > While American Express has been using One App in production since 2016, this open source iteration
 > of the framework is in a soft launch state. There will be a full documentation site forthcoming.
 
-## 👩‍💻 Hiring 👨‍💻
-
-Want to get paid for your contributions to `one-app`?
-
-> Send your resume to oneamex.careers@aexp.com
-
 ## 📖 Table of Contents
 
 - [Features](#-features)
